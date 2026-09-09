@@ -1,8 +1,7 @@
 import type {
-  SchemaComponent,
-  SchemaCourseConfig,
-  SchemaScheduleConfig,
-} from "@/api/schedule-assistant/types.ts";
+  TimetableViewConfig as SchemaScheduleConfig,
+  TimetableViewComponent as SchemaComponent,
+} from "./timetableViewTypes.ts";
 import {
   CourseComponentAccordionItem,
   CourseComponentDetailsFields,
@@ -13,9 +12,8 @@ import {
   SeriesScheduleItemsList,
 } from "@/components/schedule-assistant/courses/CourseComponentDetailsView.tsx";
 import {
-  useInstructorsQuery,
+  useConfig,
   usePatchCourseMutation,
-  useSemesterSettings,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { ComponentEditModal } from "@/components/schedule-assistant/settings/courses/ComponentEditModal.tsx";
 import { useEffect, useState, type ReactNode } from "react";
@@ -201,7 +199,6 @@ function resolveMeetingSchedule(meeting: Meeting): ReactNode {
 
 function CourseComponentsAccordion({
   config,
-  course,
   courseIdx,
   components,
   currentComponentIdx,
@@ -209,9 +206,10 @@ function CourseComponentsAccordion({
   allMeetings,
   instructorLabelById,
   onNavigateToMeeting,
+  canEdit,
 }: {
+  canEdit: boolean;
   config: SchemaScheduleConfig;
-  course: SchemaCourseConfig | null;
   courseIdx: number | null;
   components: SchemaComponent[];
   currentComponentIdx: number | null;
@@ -222,13 +220,6 @@ function CourseComponentsAccordion({
 }) {
   const [openIdx, setOpenIdx] = useState<number | null>(currentComponentIdx);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const { term } = useSemesterSettings();
-  const { data: instructors = [] } = useInstructorsQuery();
-  const courseName = String(course?.name || "").trim();
-  const { patchCourse } = usePatchCourseMutation(courseName || undefined);
-  const editingComponent =
-    editIndex === null ? null : (components[editIndex] ?? null);
-
   useEffect(() => {
     setOpenIdx(currentComponentIdx);
   }, [currentMeeting.instance_id, currentComponentIdx]);
@@ -244,7 +235,9 @@ function CourseComponentsAccordion({
             String(sibling.tag || "").trim() || `Компонент ${idx + 1}`;
           const open = openIdx === idx;
           const isCurrent = idx === currentComponentIdx;
-          const hint = formatComponentProgressHint(config, sibling);
+          const hint = canEdit
+            ? formatComponentProgressHint(config, sibling)
+            : undefined;
           const seriesNavItems = listComponentSeriesNavItemsForRef(
             config,
             allMeetings,
@@ -271,14 +264,16 @@ function CourseComponentsAccordion({
               open={open}
               onToggle={() => setOpenIdx(open ? null : idx)}
               afterTag={
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs btn-square"
-                  title="Редактировать"
-                  onClick={() => setEditIndex(idx)}
-                >
-                  <span className="icon-[material-symbols--edit-outline-rounded] text-base" />
-                </button>
+                canEdit ? (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-xs btn-square"
+                    title="Редактировать"
+                    onClick={() => setEditIndex(idx)}
+                  >
+                    <span className="icon-[material-symbols--edit-outline-rounded] text-base" />
+                  </button>
+                ) : undefined
               }
             >
               <CourseComponentDetailsFields
@@ -287,6 +282,7 @@ function CourseComponentsAccordion({
                 instructorLabelById={instructorLabelById}
                 assignedInstructors={assigned}
                 showAudienceAlways
+                showPlanningDetails={canEdit}
                 seriesItems={seriesNavItems}
                 onNavigateToMeeting={onNavigateToMeeting}
                 compact
@@ -295,26 +291,50 @@ function CourseComponentsAccordion({
           );
         })}
       </CourseComponentsAccordionList>
-      <ComponentEditModal
-        open={editIndex !== null && !!editingComponent}
-        onOpenChange={(open) => {
-          if (!open) setEditIndex(null);
-        }}
-        config={config}
-        courseIndex={courseIdx}
-        componentIndex={editIndex}
-        component={editingComponent}
-        tagOptions={(term?.course_component_tags ?? []).filter(Boolean)}
-        instructors={instructors}
-        courseInstructors={course?.instructors}
-        onSave={(component) => {
-          if (editIndex === null) return;
-          const next = [...components];
-          next[editIndex] = component;
-          patchCourse({ components: next });
-        }}
-      />
+      {canEdit && editIndex !== null ? (
+        <EditableCourseComponent
+          courseIndex={courseIdx}
+          componentIndex={editIndex}
+          onClose={() => setEditIndex(null)}
+        />
+      ) : null}
     </>
+  );
+}
+
+function EditableCourseComponent({
+  courseIndex,
+  componentIndex,
+  onClose,
+}: {
+  courseIndex: number;
+  componentIndex: number;
+  onClose: () => void;
+}) {
+  const { config } = useConfig();
+  const course = config?.courses?.[courseIndex];
+  const component = course?.components[componentIndex];
+  const { patchCourse } = usePatchCourseMutation(course?.name);
+  if (!config || !course || !component) return null;
+  return (
+    <ComponentEditModal
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      config={config}
+      courseIndex={courseIndex}
+      componentIndex={componentIndex}
+      component={component}
+      tagOptions={(config.term.course_component_tags ?? []).filter(Boolean)}
+      instructors={config.instructors ?? []}
+      courseInstructors={course.instructors}
+      onSave={(nextComponent) => {
+        const components = [...course.components];
+        components[componentIndex] = nextComponent;
+        patchCourse({ components });
+      }}
+    />
   );
 }
 
@@ -324,12 +344,14 @@ export function MeetingDetailPanel({
   allMeetings,
   onNavigateToMeeting,
   onEdit,
+  onSelectInstructor,
 }: {
   meeting: Meeting;
   config: SchemaScheduleConfig;
   allMeetings: Meeting[];
   onNavigateToMeeting: (meeting: Meeting) => void;
   onEdit?: () => void;
+  onSelectInstructor?: (instructorId: string) => void;
 }) {
   const instructorLabelById = buildInstructorLabelById(config);
   const { course } = resolveCourseAndComponent(config, meeting);
@@ -424,7 +446,27 @@ export function MeetingDetailPanel({
           }
           right={
             <MeetingMetadataField kind="instructor" title="Преподаватели">
-              {instructors}
+              {onSelectInstructor ? (
+                <span className="inline-flex flex-wrap gap-x-2">
+                  {(Array.isArray(meeting.instructors)
+                    ? meeting.instructors
+                    : [meeting.instructors]
+                  )
+                    .filter(Boolean)
+                    .map((id) => (
+                      <button
+                        key={id}
+                        type="button"
+                        className="hover:text-primary text-left underline decoration-dotted underline-offset-2"
+                        onClick={() => onSelectInstructor(id)}
+                      >
+                        {resolveInstructorLabel(id, instructorLabelById)}
+                      </button>
+                    ))}
+                </span>
+              ) : (
+                instructors
+              )}
             </MeetingMetadataField>
           }
         />
@@ -470,6 +512,13 @@ export function MeetingDetailPanel({
         ) : null}
       </div>
 
+      {meeting.notes?.trim() ? (
+        <>
+          <DetailSection title="Заметка" />
+          <p className="wrap-anywhere whitespace-pre-wrap">{meeting.notes}</p>
+        </>
+      ) : null}
+
       <DetailSection title="Предмет" />
       <DetailField label="Название" truncate>
         {courseTitle}
@@ -482,7 +531,17 @@ export function MeetingDetailPanel({
           <span className="flex flex-col gap-0.5">
             {staff.map((entry) => (
               <span key={`${entry.id}:${entry.role}`}>
-                {resolveInstructorLabel(entry.id, instructorLabelById)}
+                {onSelectInstructor ? (
+                  <button
+                    type="button"
+                    className="hover:text-primary text-left underline decoration-dotted underline-offset-2"
+                    onClick={() => onSelectInstructor(entry.id)}
+                  >
+                    {resolveInstructorLabel(entry.id, instructorLabelById)}
+                  </button>
+                ) : (
+                  resolveInstructorLabel(entry.id, instructorLabelById)
+                )}
                 <span className="text-base-content/55"> · {entry.role}</span>
               </span>
             ))}
@@ -492,8 +551,8 @@ export function MeetingDetailPanel({
         )}
       </DetailField>
       <CourseComponentsAccordion
+        canEdit={!!onEdit}
         config={config}
-        course={course}
         courseIdx={meetingRef?.courseIdx ?? null}
         components={siblings}
         currentComponentIdx={meetingRef?.componentIdx ?? null}

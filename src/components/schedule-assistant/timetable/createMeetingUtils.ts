@@ -78,6 +78,7 @@ export type CourseComponentCreateOption = {
 };
 
 export type CreateMeetingDraft = {
+  notes?: string;
   courseIdx: number;
   componentIdx: number;
   audience: string[];
@@ -413,6 +414,7 @@ function findOrCreateSessionSeries(
 
   if (!component.sessions) component.sessions = [];
   const created: SchemaComponentSessionSeries = {
+    notes: "",
     audience: seriesAudienceForCreate(component, audience, config, sectionCode),
     weekly_pattern: [],
     dates_pattern: [],
@@ -826,44 +828,53 @@ export function applyCreateMeetingToCourse(
     course.section_code,
   );
 
+  if (draft.notes !== undefined) series.notes = draft.notes;
+
   if (draft.placement === "dates_pattern") {
     const items = (draft.occurrences ?? []).filter((occurrence) =>
       String(occurrence.date || "").trim(),
     );
     if (!items.length) return null;
-    series.dates_pattern = items.map((occurrence) => ({
-      date: occurrence.date,
-      start_time: normalizeTimeToApi(occurrence.start_time),
-      end_time: normalizeTimeToApi(
-        occurrence.end_time ||
-          resolveEndTimeForStart(config, occurrence.start_time, audience),
-      ),
-      room: String(occurrence.room || "").trim() || null,
-      instructor: occurrence.instructor ?? null,
-    }));
+    series.dates_pattern = [
+      ...(series.dates_pattern ?? []),
+      ...items.map((occurrence) => ({
+        date: occurrence.date,
+        start_time: normalizeTimeToApi(occurrence.start_time),
+        end_time: normalizeTimeToApi(
+          occurrence.end_time ||
+            resolveEndTimeForStart(config, occurrence.start_time, audience),
+        ),
+        room: String(occurrence.room || "").trim() || null,
+        instructor: occurrence.instructor ?? null,
+        notes: occurrence.notes ?? null,
+      })),
+    ];
     return nextCourse;
   }
 
   const slots = draft.weeklySlots ?? [];
   if (!slots.length) return null;
-  series.weekly_pattern = slots.map((slot) => ({
-    weekday: slot.weekday,
-    start_time: normalizeTimeToApi(slot.start_time),
-    end_time: normalizeTimeToApi(
-      slot.end_time ||
-        resolveEndTimeForStart(config, slot.start_time, audience),
-    ),
-    room: String(slot.room || "").trim() || null,
-    instructor: slot.instructor ?? null,
-    alternation: slot.alternation
-      ? {
-          anchor_week: weekStartForDate(
-            slot.alternation.anchor_week,
-            config.term.starting_day ?? Weekday.MONDAY,
-          ),
-        }
-      : null,
-    edits: slot.edits ?? null,
-  }));
+  series.weekly_pattern = [
+    ...(series.weekly_pattern ?? []),
+    ...slots.map((slot) => ({
+      weekday: slot.weekday,
+      start_time: normalizeTimeToApi(slot.start_time),
+      end_time: normalizeTimeToApi(
+        slot.end_time ||
+          resolveEndTimeForStart(config, slot.start_time, audience),
+      ),
+      room: String(slot.room || "").trim() || null,
+      instructor: slot.instructor ?? null,
+      alternation: slot.alternation
+        ? {
+            anchor_week: weekStartForDate(
+              slot.alternation.anchor_week,
+              config.term.starting_day ?? Weekday.MONDAY,
+            ),
+          }
+        : null,
+      edits: slot.edits ?? null,
+    })),
+  ];
   return nextCourse;
 }

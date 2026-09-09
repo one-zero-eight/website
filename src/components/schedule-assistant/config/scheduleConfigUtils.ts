@@ -9,7 +9,10 @@ import type {
 } from "@/api/schedule-assistant/types.ts";
 
 export function getScheduleSections(
-  config: SchemaScheduleConfig | null | undefined,
+  config:
+    | { term?: Pick<SchemaTermConfig, "sections"> | null }
+    | null
+    | undefined,
 ): SchemaSectionConfig[] {
   return config?.term?.sections ?? [];
 }

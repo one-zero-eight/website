@@ -1,5 +1,5 @@
+import type { TimetableViewConfig as SchemaScheduleConfig } from "./timetableViewTypes.ts";
 import type {
-  SchemaScheduleConfig,
   SchemaSectionProgram,
   SchemaTermTimeSlot,
 } from "@/api/schedule-assistant/types.ts";

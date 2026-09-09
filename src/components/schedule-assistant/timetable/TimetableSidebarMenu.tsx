@@ -1,4 +1,4 @@
-import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import type { TimetableViewConfig as SchemaScheduleConfig } from "./timetableViewTypes.ts";
 import { cn } from "@/lib/ui/cn";
 import {
   autoUpdate,
@@ -88,7 +88,7 @@ function TimetableEventSearch({
       cache.set(entry, base);
       return base;
     };
-  }, [entries, config, instructorLabels]);
+  }, [config, instructorLabels]);
   const visibleResults = useMemo(
     () =>
       visibleSeries.flatMap((result) => {

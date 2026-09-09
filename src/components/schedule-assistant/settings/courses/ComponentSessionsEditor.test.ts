@@ -46,6 +46,7 @@ const config = {
 } as unknown as SchemaScheduleConfig;
 const weekly: SchemaComponentSessionSeries = {
   audience: [],
+  notes: "",
   weekly_pattern: [
     {
       weekday: Weekday.TUESDAY,
@@ -123,6 +124,7 @@ describe("course settings schedule conversion", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const initial: SchemaComponentSessionSeries = {
       audience: [],
+      notes: "",
       dates_pattern: [
         { date: "2026-09-15", start_time: "09:00:00", end_time: "10:30:00" },
       ],

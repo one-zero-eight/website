@@ -1,7 +1,7 @@
 import type {
-  SchemaComponent,
-  SchemaScheduleConfig,
-} from "@/api/schedule-assistant/types.ts";
+  TimetableViewComponent as SchemaComponent,
+  TimetableViewConfig as SchemaScheduleConfig,
+} from "@/components/schedule-assistant/timetable/timetableViewTypes.ts";
 import {
   AudienceTreeInfoIcon,
   GroupHierarchyInfoIcon,
@@ -602,7 +602,9 @@ export function CourseComponentDetailsFields({
   seriesItems,
   onNavigateToMeeting,
   compact,
+  showPlanningDetails = true,
 }: {
+  showPlanningDetails?: boolean;
   config: SchemaScheduleConfig;
   component: SchemaComponent;
   instructorLabelById: Record<string, string>;
@@ -616,12 +618,16 @@ export function CourseComponentDetailsFields({
   const placement = countComponentPlacement(config, component);
   const targetLabel = formatComponentTarget(component);
   const placedLabel = formatComponentPlaced(placement);
+  const instructorPool =
+    "instructor_pool" in component && Array.isArray(component.instructor_pool)
+      ? component.instructor_pool
+      : [];
   const showPool = shouldShowInstructorPool(
-    component.instructor_pool,
+    instructorPool,
     assignedInstructors ?? [],
   );
   const poolEntries = showPool
-    ? formatInstructorPoolEntries(component.instructor_pool ?? [], (id) =>
+    ? formatInstructorPoolEntries(instructorPool, (id) =>
         resolveInstructorLabel(id, instructorLabelById),
       )
     : [];
@@ -636,22 +642,22 @@ export function CourseComponentDetailsFields({
 
   return (
     <>
-      {goalParts.length ? (
+      {showPlanningDetails && goalParts.length ? (
         <DetailField label="Цель" compact={compact}>
           {goalParts.join(" · ")}
         </DetailField>
       ) : null}
-      {component.per_group ? (
+      {showPlanningDetails && component.per_group ? (
         <DetailField label="Режим" compact={compact}>
           <span className="badge badge-ghost badge-sm">по группам</span>
         </DetailField>
       ) : null}
-      {component.expected_enrollment != null ? (
+      {showPlanningDetails && component.expected_enrollment != null ? (
         <DetailField label="Набор" compact={compact}>
           {component.expected_enrollment}
         </DetailField>
       ) : null}
-      {poolEntries.length ? (
+      {showPlanningDetails && poolEntries.length ? (
         <DetailField label="Кто может вести" compact={compact}>
           <span className="inline-flex flex-col gap-0.5">
             {poolEntries.map((entry) => (

@@ -10,12 +10,28 @@ export type SelectionStore = {
   subscribe: (cb: () => void) => () => void;
   getSelection: () => Selection;
   setSelection: (next: Selection) => void;
+  isPersonalGroup: (groupId: string) => boolean;
+  setPersonalGroups: (groups: readonly string[]) => void;
 };
 
 export function createSelectionStore(): SelectionStore {
   let selection: Selection = null;
+  let personalGroups = new Set<string>();
   const listeners = new Set<() => void>();
   return {
+    isPersonalGroup(groupId) {
+      return personalGroups.has(groupId);
+    },
+    setPersonalGroups(groups) {
+      const next = new Set(groups);
+      if (
+        next.size === personalGroups.size &&
+        [...next].every((group) => personalGroups.has(group))
+      )
+        return;
+      personalGroups = next;
+      listeners.forEach((listener) => listener());
+    },
     subscribe(cb) {
       listeners.add(cb);
       return () => listeners.delete(cb);
@@ -56,6 +72,33 @@ export function useSelectionStore(): SelectionStore {
 export function useSelectionSnapshot(): Selection {
   const store = useSelectionStore();
   return useSyncExternalStore(store.subscribe, store.getSelection, () => null);
+}
+
+export function usePersonalGroup(groupId: string): boolean {
+  const store = useSelectionStore();
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.isPersonalGroup(groupId),
+    () => false,
+  );
+}
+
+/** Selection bits 1/2 and personal-group bit 4 are independent. */
+export function meetingHighlightBits(
+  store: SelectionStore,
+  meeting: Meeting,
+): number {
+  const personal = meeting.groups.some((group) => store.isPersonalGroup(group))
+    ? 4
+    : 0;
+  const selection = store.getSelection();
+  if (selection?.type !== "meeting") return personal;
+  const selected = selection.value === meetingSelectionKey(meeting) ? 1 : 0;
+  if (selection.course !== (meeting.course || "—")) return personal | selected;
+  const focusTag = String(selection.focusTag || "").trim();
+  const related =
+    !focusTag || String(meeting.tag || "").trim() === focusTag ? 2 : 0;
+  return personal | selected | related;
 }
 
 export function useProgramSelected(yearLabel: string): boolean {
@@ -105,21 +148,9 @@ export function useResourceHeaderSelected(
 
 export function useMeetingHighlightBits(m: Meeting): number {
   const store = useSelectionStore();
-  const courseTitle = String(m.course || "").trim() || "—";
-  const key = meetingSelectionKey(m);
-  const course = m.course || courseTitle;
-  const tag = String(m.tag || "").trim();
   return useSyncExternalStore(
     store.subscribe,
-    () => {
-      const sel = store.getSelection();
-      if (sel?.type !== "meeting") return 0;
-      const selected = sel.value === key ? 1 : 0;
-      if (sel.course !== course) return selected;
-      const focusTag = String(sel.focusTag || "").trim();
-      const related = !focusTag || tag === focusTag ? 2 : 0;
-      return selected | related;
-    },
+    () => meetingHighlightBits(store, m),
     () => 0,
   );
 }

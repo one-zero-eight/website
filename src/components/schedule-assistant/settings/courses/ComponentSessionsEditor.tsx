@@ -54,6 +54,7 @@ import {
 
 function emptySeries(): SchemaComponentSessionSeries {
   return {
+    notes: "",
     audience: [],
     weekly_pattern: [],
     dates_pattern: null,
@@ -531,6 +532,8 @@ export function ComponentSessionsEditor({
             )}
           >
             <SessionSeriesEditor
+              notes={series.notes}
+              onNotesChange={(notes) => updateSeries(seriesIndex, { notes })}
               config={config}
               meetings={meetings}
               meetingIndex={meetingIndex}

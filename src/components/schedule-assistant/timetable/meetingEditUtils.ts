@@ -190,7 +190,11 @@ export function isMeetingAudienceOverridden(
   return !audienceTokensEquivalent(config, explicit, component.audience || []);
 }
 
-function studentGroupNameByCode(config: SchemaScheduleConfig) {
+type AudienceLabelConfig = {
+  students_groups?: { code: string; name?: string | null }[];
+};
+
+function studentGroupNameByCode(config: AudienceLabelConfig) {
   return new Map(
     (config.students_groups ?? []).map((group) => [
       String(group.code || "").trim(),
@@ -200,7 +204,7 @@ function studentGroupNameByCode(config: SchemaScheduleConfig) {
 }
 
 export function formatAudienceTokenLabel(
-  config: SchemaScheduleConfig,
+  config: AudienceLabelConfig,
   token: string,
 ) {
   const trimmed = String(token || "").trim();
@@ -220,7 +224,7 @@ export function formatAudienceTokensCompact(tokens: string[]) {
 }
 
 export function formatAudienceTokensLabel(
-  config: SchemaScheduleConfig,
+  config: AudienceLabelConfig,
   tokens: string[],
 ) {
   if (!tokens.length) return "—";
@@ -669,6 +673,7 @@ export function applySeriesScheduleToCourse(
   config: SchemaScheduleConfig,
   update: {
     audience?: string[];
+    notes?: string;
     dates_pattern?: SchemaSessionOccurrence[] | null;
     weeklyPattern?: SchemaWeeklyPatternSlot[] | null;
   },
@@ -689,6 +694,8 @@ export function applySeriesScheduleToCourse(
     );
   }
 
+  if (update.notes !== undefined) series.notes = update.notes;
+
   if (update.dates_pattern !== undefined) {
     series.dates_pattern = (update.dates_pattern ?? []).map((occurrence) => ({
       date: String(occurrence.date || "").trim(),
@@ -699,6 +706,7 @@ export function applySeriesScheduleToCourse(
       ),
       room: String(occurrence.room || "").trim() || null,
       instructor: occurrence.instructor ?? null,
+      notes: occurrence.notes ?? null,
     }));
   }
 
@@ -855,7 +863,8 @@ function weeklyEditHasOnlyCancel(edit: SchemaWeeklyPatternSlotEdit) {
     !edit.date &&
     !edit.start_time &&
     !edit.room &&
-    (edit.instructor === undefined || edit.instructor === null)
+    (edit.instructor === undefined || edit.instructor === null) &&
+    edit.notes == null
   );
 }
 

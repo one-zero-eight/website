@@ -7,7 +7,7 @@ import type {
 } from "@/api/schedule-assistant/types.ts";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
 import { termWeekdayKeyToWeekday } from "@/components/schedule-assistant/settings/weekdays.ts";
-import { dayKey } from "./timetableViewerModel.ts";
+import { dayKey, findEditForMeetingDate } from "./timetableViewerModel.ts";
 
 import {
   applySeriesScheduleToCourse,
@@ -45,6 +45,8 @@ export type EditableSessionEvent = {
   end_time: string;
   room: string | null;
   instructor: string | null;
+  /** Null inherits the series; an empty string explicitly hides its notes. */
+  notes: string | null;
   cancelled: boolean;
   weeklyBase?: Pick<
     EditableSessionEvent,
@@ -58,6 +60,7 @@ export type EditableSessionEventPatch = {
   end_time?: string;
   room?: string | null;
   instructor?: string | null;
+  notes?: string | null;
   cancelled?: boolean;
 };
 
@@ -152,6 +155,9 @@ export function expandWeeklySlotsToEvents({
         end_time: toApiTime(resolved.end),
         room: String(resolved.room || "").trim() || null,
         instructor: normalizeInstructor(resolved.instructors),
+        notes:
+          findEditForMeetingDate(patternDate, slot.edits, startingDay)?.notes ??
+          null,
         cancelled: Boolean(resolved.cancelled),
       });
     }
@@ -181,6 +187,7 @@ export function expandOccurrencesToEvents(
       end_time: toApiTime(occurrence.end_time),
       room: String(occurrence.room || "").trim() || null,
       instructor: normalizeInstructor(occurrence.instructor),
+      notes: occurrence.notes ?? null,
       cancelled: false,
     };
   });
@@ -198,17 +205,19 @@ export function eventsToOccurrences(
       end_time: event.end_time,
       room: event.room,
       instructor: event.instructor,
+      notes: event.notes,
     }));
 }
 
 /** A proposed weekly conversion; callers must confirm if expansion changes the schedule. */
 export function eventsToWeeklySlots(
   events: EditableSessionEvent[],
+  startingDay: Weekday = Weekday.MONDAY,
 ): SchemaWeeklyPatternSlot[] {
   const slots = new Map<string, SchemaWeeklyPatternSlot>();
   for (const event of events) {
     if (event.cancelled || !event.date) continue;
-    const slot: SchemaWeeklyPatternSlot = {
+    const base: SchemaWeeklyPatternSlot = {
       weekday: termWeekdayKeyToWeekday(dayKey(event.date)),
       start_time: event.start_time,
       end_time: event.end_time,
@@ -216,7 +225,19 @@ export function eventsToWeeklySlots(
       instructor: event.instructor,
       edits: null,
     };
-    slots.set(JSON.stringify(slot), slot);
+    const key = JSON.stringify(base);
+    const slot = slots.get(key) ?? base;
+    if (event.notes !== null) {
+      slot.edits = [
+        ...(slot.edits ?? []),
+        {
+          select_week: weekStartForDate(event.date, startingDay),
+          notes: event.notes,
+          cancel: false,
+        },
+      ];
+    }
+    slots.set(key, slot);
   }
   return [...slots.values()];
 }
@@ -258,6 +279,7 @@ export function createOccurrenceEvent(
     end_time: defaults?.end_time ?? "10:30:00",
     room: defaults?.room ?? null,
     instructor: defaults?.instructor ?? null,
+    notes: defaults?.notes ?? null,
     cancelled: false,
   };
 }
@@ -285,6 +307,7 @@ export function patchEditableEvents(
       ...(patch.instructor !== undefined
         ? { instructor: normalizeInstructor(patch.instructor) }
         : null),
+      ...(patch.notes !== undefined ? { notes: patch.notes } : null),
       ...(patch.cancelled !== undefined
         ? { cancelled: Boolean(patch.cancelled) }
         : null),
@@ -297,7 +320,7 @@ function weeklyEditIsNoOp(
   patternDate: string,
   event: EditableSessionEvent,
 ): boolean {
-  if (event.cancelled) return false;
+  if (event.cancelled || event.notes !== null) return false;
   if (event.date !== patternDate) return false;
   if (!timesEqual(event.start_time, slot.start_time)) return false;
   if (!timesEqual(event.end_time, slot.end_time)) return false;
@@ -317,8 +340,12 @@ function buildWeeklyEditFromEvent(
   if (weeklyEditIsNoOp(slot, patternDate, event)) return null;
 
   const edit: SchemaWeeklyPatternSlotEdit = {
+    ...(event.cancelled
+      ? findEditForMeetingDate(patternDate, slot.edits, startingDay)
+      : null),
     select_week: selectWeek,
     cancel: Boolean(event.cancelled),
+    notes: event.notes,
   };
   if (event.cancelled) return edit;
 
@@ -414,6 +441,7 @@ export function serializeOccurrenceEvents(
       end_time: toApiTime(event.end_time),
       room: event.room,
       instructor: event.instructor,
+      notes: event.notes,
     }));
 }
 
@@ -447,6 +475,7 @@ export function eventsEqual(
     if (!timesEqual(left.end_time, right.end_time)) return false;
     if (!roomsEqual(left.room, right.room)) return false;
     if (!instructorsEqual(left.instructor, right.instructor)) return false;
+    if (left.notes !== right.notes) return false;
     if (Boolean(left.cancelled) !== Boolean(right.cancelled)) return false;
   }
   return true;
@@ -457,11 +486,13 @@ export function editableEventsToDraftMeetings({
   meeting,
   meetingRef,
   audienceTokens,
+  seriesNotes = "",
 }: {
   events: EditableSessionEvent[];
   meeting: Meeting;
   meetingRef: MeetingRef;
   audienceTokens: string[];
+  seriesNotes?: string;
 }): Meeting[] {
   return events
     .filter((event) => !event.cancelled)
@@ -478,6 +509,7 @@ export function editableEventsToDraftMeetings({
         end: toUiTime(event.end_time) || undefined,
         room: String(event.room || "").trim(),
         instructors: event.instructor || "",
+        notes: event.notes ?? seriesNotes,
         instructor_pool: meeting.instructor_pool || [],
         section: meeting.section,
         pattern_date:
@@ -506,6 +538,7 @@ export function applyEditableEventsToCourse({
   meetingRef,
   config,
   audience,
+  notes,
   placement,
   weeklySlots,
   events,
@@ -514,6 +547,7 @@ export function applyEditableEventsToCourse({
   meetingRef: MeetingRef;
   config: SchemaScheduleConfig;
   audience?: string[];
+  notes?: string;
   placement: "weekly" | "dates_pattern";
   weeklySlots: SchemaWeeklyPatternSlot[];
   events: EditableSessionEvent[];
@@ -521,6 +555,7 @@ export function applyEditableEventsToCourse({
   if (placement === "weekly") {
     return applySeriesScheduleToCourse(course, meetingRef, config, {
       audience,
+      notes,
       weeklyPattern: serializeWeeklyEventsToSlots({
         originalSlots: weeklySlots,
         events,
@@ -532,6 +567,7 @@ export function applyEditableEventsToCourse({
 
   return applySeriesScheduleToCourse(course, meetingRef, config, {
     audience,
+    notes,
     dates_pattern: serializeOccurrenceEvents(events),
     weeklyPattern: null,
   });

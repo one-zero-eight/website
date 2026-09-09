@@ -1,8 +1,10 @@
 import type {
-  SchemaComponent,
+  TimetableViewConfig as SchemaScheduleConfig,
+  TimetableViewCourse as SchemaCourseConfig,
+  TimetableViewComponent as SchemaComponent,
+} from "./timetableViewTypes.ts";
+import type {
   SchemaComponentSessionSeries,
-  SchemaCourseConfig,
-  SchemaScheduleConfig,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";

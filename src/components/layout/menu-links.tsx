@@ -139,6 +139,14 @@ export const items: ItemType[] = [
   // On-site services:
   {
     type: "local",
+    title: "Timetable",
+    to: "/timetable",
+    icon: (
+      <span className="icon-[material-symbols--calendar-view-week-outline-rounded]" />
+    ),
+  },
+  {
+    type: "local",
     title: "Events",
     to: "/events",
     icon: <span className="icon-[material-symbols--campaign-rounded]" />,

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as TvRouteImport } from "./routes/tv";
+import { Route as TimetableRouteImport } from "./routes/timetable";
 import { Route as ScheduleAssistantRouteRouteImport } from "./routes/schedule-assistant/route";
 import { Route as With_menuRouteRouteImport } from "./routes/_with_menu/route";
 import { Route as IndexRouteImport } from "./routes/index";
@@ -105,6 +106,11 @@ import { Route as GuardGoogleFilesSlugJoinRouteImport } from "./routes/guard.goo
 const TvRoute = TvRouteImport.update({
   id: "/tv",
   path: "/tv",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const TimetableRoute = TimetableRouteImport.update({
+  id: "/timetable",
+  path: "/timetable",
   getParentRoute: () => rootRouteImport,
 } as any);
 const ScheduleAssistantRouteRoute = ScheduleAssistantRouteRouteImport.update({
@@ -603,6 +609,7 @@ const GuardGoogleFilesSlugJoinRoute =
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/schedule-assistant": typeof ScheduleAssistantRouteRouteWithChildren;
+  "/timetable": typeof TimetableRoute;
   "/tv": typeof TvRoute;
   "/schedule-assistant/for-instructors": typeof ScheduleAssistantForInstructorsRouteRouteWithChildren;
   "/42": typeof With_menu42Route;
@@ -695,6 +702,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/timetable": typeof TimetableRoute;
   "/tv": typeof TvRoute;
   "/42": typeof With_menu42Route;
   "/about": typeof With_menuAboutRoute;
@@ -788,6 +796,7 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/_with_menu": typeof With_menuRouteRouteWithChildren;
   "/schedule-assistant": typeof ScheduleAssistantRouteRouteWithChildren;
+  "/timetable": typeof TimetableRoute;
   "/tv": typeof TvRoute;
   "/schedule-assistant/for-instructors": typeof ScheduleAssistantForInstructorsRouteRouteWithChildren;
   "/_with_menu/42": typeof With_menu42Route;
@@ -883,6 +892,7 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/schedule-assistant"
+    | "/timetable"
     | "/tv"
     | "/schedule-assistant/for-instructors"
     | "/42"
@@ -975,6 +985,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
+    | "/timetable"
     | "/tv"
     | "/42"
     | "/about"
@@ -1067,6 +1078,7 @@ export interface FileRouteTypes {
     | "/"
     | "/_with_menu"
     | "/schedule-assistant"
+    | "/timetable"
     | "/tv"
     | "/schedule-assistant/for-instructors"
     | "/_with_menu/42"
@@ -1162,6 +1174,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   With_menuRouteRoute: typeof With_menuRouteRouteWithChildren;
   ScheduleAssistantRouteRoute: typeof ScheduleAssistantRouteRouteWithChildren;
+  TimetableRoute: typeof TimetableRoute;
   TvRoute: typeof TvRoute;
   FormsSubmitRoute: typeof FormsSubmitRoute;
   RoomsRoomRoute: typeof RoomsRoomRoute;
@@ -1175,6 +1188,13 @@ declare module "@tanstack/react-router" {
       path: "/tv";
       fullPath: "/tv";
       preLoaderRoute: typeof TvRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/timetable": {
+      id: "/timetable";
+      path: "/timetable";
+      fullPath: "/timetable";
+      preLoaderRoute: typeof TimetableRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/schedule-assistant": {
@@ -2042,6 +2062,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   With_menuRouteRoute: With_menuRouteRouteWithChildren,
   ScheduleAssistantRouteRoute: ScheduleAssistantRouteRouteWithChildren,
+  TimetableRoute: TimetableRoute,
   TvRoute: TvRoute,
   FormsSubmitRoute: FormsSubmitRoute,
   RoomsRoomRoute: RoomsRoomRoute,

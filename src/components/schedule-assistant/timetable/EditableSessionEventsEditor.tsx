@@ -31,6 +31,7 @@ import {
 } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { SessionEventCard } from "@/components/schedule-assistant/timetable/SessionEventCard.tsx";
 import { cn } from "@/lib/ui/cn";
+import { SessionNotesOverrideField } from "./SessionSeriesEditor.tsx";
 import {
   memo,
   startTransition,
@@ -53,7 +54,8 @@ function isBulkFieldPatch(patch: EditableSessionEventPatch) {
     patch.start_time !== undefined ||
     patch.end_time !== undefined ||
     patch.room !== undefined ||
-    patch.instructor !== undefined
+    patch.instructor !== undefined ||
+    patch.notes !== undefined
   );
 }
 
@@ -152,6 +154,7 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
   meetings,
   meetingIndex,
   audienceTokens,
+  seriesNotes,
   courseInstructors,
   instructorPool,
   meetingRef,
@@ -171,6 +174,7 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
   meetings: Meeting[];
   meetingIndex: MeetingPickerIndex | null;
   audienceTokens: string[];
+  seriesNotes?: string;
   courseInstructors?: SchemaCourseConfig["instructors"];
   instructorPool?: unknown[] | null;
   meetingRef: MeetingRef | null;
@@ -349,6 +353,14 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
           />
         </FieldMark>
       </div>
+      <div className="sm:col-span-2">
+        <SessionNotesOverrideField
+          notes={event.notes}
+          seriesNotes={seriesNotes ?? ""}
+          disabled={cancelled}
+          onChange={(notes) => onChange(event.key, { notes })}
+        />
+      </div>
       {cancelled ? (
         <div className="text-error/80 text-xs sm:col-span-2">
           {event.source.kind === "weekly" ? "Отменено" : "Удалено"}
@@ -365,6 +377,7 @@ function ConcreteEventRow({
   meetings,
   meetingIndex,
   audienceTokens,
+  seriesNotes,
   courseInstructors,
   instructorPool,
   meetingRef,
@@ -383,6 +396,7 @@ function ConcreteEventRow({
   meetings: Meeting[];
   meetingIndex: MeetingPickerIndex | null;
   audienceTokens: string[];
+  seriesNotes?: string;
   courseInstructors?: SchemaCourseConfig["instructors"];
   instructorPool?: unknown[] | null;
   meetingRef: MeetingRef | null;
@@ -412,6 +426,7 @@ function ConcreteEventRow({
             meetings={meetings}
             meetingIndex={meetingIndex}
             audienceTokens={audienceTokens}
+            seriesNotes={seriesNotes}
             courseInstructors={courseInstructors}
             instructorPool={instructorPool}
             meetingRef={meetingRef}
@@ -435,6 +450,7 @@ export function EditableSessionEventsEditor({
   onEventsChange,
   originalEvents,
   audienceTokens,
+  seriesNotes,
   courseInstructors,
   instructorPool,
   meetingRef,
@@ -449,6 +465,7 @@ export function EditableSessionEventsEditor({
   onEventsChange: (next: EditableSessionEvent[]) => void;
   originalEvents: EditableSessionEvent[];
   audienceTokens: string[];
+  seriesNotes?: string;
   courseInstructors?: SchemaCourseConfig["instructors"];
   instructorPool?: unknown[] | null;
   meetingRef: MeetingRef | null;
@@ -629,6 +646,7 @@ export function EditableSessionEventsEditor({
             meetings={meetings}
             meetingIndex={meetingIndex}
             audienceTokens={audienceTokens}
+            seriesNotes={seriesNotes}
             courseInstructors={courseInstructors}
             instructorPool={instructorPool}
             meetingRef={meetingRef}

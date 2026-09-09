@@ -48,7 +48,7 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
     course: string,
     focusTag?: string,
   ) => void;
-  onOpenMeetingEdit: (meeting: Meeting) => void;
+  onOpenMeetingEdit?: (meeting: Meeting) => void;
   disableSelect?: boolean;
 }) {
   const courseTitle = String(meeting.course || "").trim() || "—";
@@ -68,6 +68,7 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
       className={cn(
         "meeting block w-full min-w-0 truncate rounded border px-1 py-px text-left text-[0.6875rem] leading-tight text-[#1a2332]",
         disableSelect && "pointer-events-none",
+        (bits & 4) !== 0 && "!border-l-4 !border-l-emerald-600",
         isSelected &&
           "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2)] outline-2 outline-[#1d3f70]",
         !isSelected &&
@@ -79,11 +80,15 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
         if (disableSelect) return;
         onSelectMeeting(key, meeting.course || courseTitle, meeting.tag);
       }}
-      onDoubleClick={(event) => {
-        event.stopPropagation();
-        if (disableSelect || !canEdit) return;
-        onOpenMeetingEdit(meeting);
-      }}
+      onDoubleClick={
+        onOpenMeetingEdit
+          ? (event) => {
+              event.stopPropagation();
+              if (disableSelect || !canEdit) return;
+              onOpenMeetingEdit(meeting);
+            }
+          : undefined
+      }
       title={meetingCalendarCellLabel(meeting, null)}
     >
       {meeting.off_grid ? (
@@ -95,6 +100,11 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
       <span className="font-semibold">{mainLabel}</span>
       {groupsLabel ? (
         <span className="font-normal text-[#4f5c6d]"> ({groupsLabel})</span>
+      ) : null}
+      {meeting.notes ? (
+        <span className="ml-1 font-normal text-[#4f5c6d]">
+          · Заметка: {meeting.notes}
+        </span>
       ) : null}
     </button>
   );
@@ -214,7 +224,7 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
-  openMeetingEdit: (meeting: Meeting) => void;
+  openMeetingEdit?: (meeting: Meeting) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
   placeTarget: UnarrangedLessonItem | null;
@@ -371,7 +381,7 @@ function CalendarStackedTable({
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
-  openMeetingEdit: (meeting: Meeting) => void;
+  openMeetingEdit?: (meeting: Meeting) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
   placeTarget: UnarrangedLessonItem | null;
@@ -434,7 +444,7 @@ export const TimetableCalendarTable = memo(function TimetableCalendarTable({
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
-  openMeetingEdit: (meeting: Meeting) => void;
+  openMeetingEdit?: (meeting: Meeting) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
   placeTarget?: UnarrangedLessonItem | null;

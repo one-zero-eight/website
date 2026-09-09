@@ -1,4 +1,4 @@
-import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import type { TimetableViewConfig as SchemaScheduleConfig } from "./timetableViewTypes.ts";
 import { listAudienceInlineItems } from "./meetingAudienceSummary.ts";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {

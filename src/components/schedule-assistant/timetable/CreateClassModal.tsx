@@ -80,8 +80,18 @@ function occurrencesChanged(
   original: SchemaSessionOccurrence[],
 ) {
   return (
-    JSON.stringify(current.map(normalizeOccurrence)) !==
-    JSON.stringify(original.map(normalizeOccurrence))
+    JSON.stringify(
+      current.map((occurrence) => ({
+        ...normalizeOccurrence(occurrence),
+        notes: occurrence.notes ?? null,
+      })),
+    ) !==
+    JSON.stringify(
+      original.map((occurrence) => ({
+        ...normalizeOccurrence(occurrence),
+        notes: occurrence.notes ?? null,
+      })),
+    )
   );
 }
 
@@ -195,6 +205,7 @@ export function CreateClassModal({
 
   const [courseComponentKey, setCourseComponentKey] = useState("");
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
+  const [notes, setNotes] = useState("");
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
   const [placement, setPlacement] = useState<CreatePlacement>(() =>
     layoutMode === "calendar" ? "dates_pattern" : "weekly",
@@ -300,6 +311,7 @@ export function CreateClassModal({
     component: NonNullable<typeof selectedComponent>,
     audience: string[],
     sectionCode: string,
+    preserveNotes = false,
   ) {
     if (!cellContext) return;
     const seededWeekly = seedWeeklyFromCell(config, cellContext, audience);
@@ -328,11 +340,15 @@ export function CreateClassModal({
     const matchedIdx =
       matched != null ? (component.sessions || []).indexOf(matched) : -1;
 
+    if (!preserveNotes) setNotes(matched?.notes ?? "");
+    const addedOccurrences = preserveNotes
+      ? occurrences.slice(seriesBaselineOccurrences)
+      : [];
     setWeeklySlots([...foreignWeekly, ...dedicatedWeekly, seededWeekly]);
     setOccurrences([
       ...foreignOccurrences,
       ...dedicatedOccurrences,
-      seededOccurrence,
+      ...(addedOccurrences.length ? addedOccurrences : [seededOccurrence]),
     ]);
     setOriginalWeeklySlots([...foreignWeekly, ...dedicatedWeekly]);
     setOriginalOccurrences([...foreignOccurrences, ...dedicatedOccurrences]);
@@ -413,6 +429,7 @@ export function CreateClassModal({
     } else {
       setWeeklySlots([seedWeeklyFromCell(config, cellContext, audience)]);
       setOccurrences([seedOccurrenceFromCell(config, cellContext, audience)]);
+      setNotes("");
       setOriginalWeeklySlots([]);
       setOriginalOccurrences([]);
       setSeriesBaselineWeekly(0);
@@ -440,6 +457,7 @@ export function CreateClassModal({
       setAudienceValue([]);
       setWeeklySlots([]);
       setOccurrences([]);
+      setNotes("");
       setOriginalWeeklySlots([]);
       setOriginalOccurrences([]);
       setSeriesBaselineWeekly(0);
@@ -470,7 +488,12 @@ export function CreateClassModal({
   function handleAudienceSave(tokens: string[]) {
     setAudienceValue(tokens);
     if (selectedComponent && selectedCourse) {
-      seedSeriesDraft(selectedComponent, tokens, selectedCourse.section_code);
+      seedSeriesDraft(
+        selectedComponent,
+        tokens,
+        selectedCourse.section_code,
+        true,
+      );
     }
   }
 
@@ -478,7 +501,12 @@ export function CreateClassModal({
     const audience = group ? [group] : [];
     setAudienceValue(audience);
     if (selectedComponent && selectedCourse) {
-      seedSeriesDraft(selectedComponent, audience, selectedCourse.section_code);
+      seedSeriesDraft(
+        selectedComponent,
+        audience,
+        selectedCourse.section_code,
+        true,
+      );
     }
   }
 
@@ -786,6 +814,7 @@ export function CreateClassModal({
       courseIdx: parsedComponent.courseIdx,
       componentIdx: parsedComponent.componentIdx,
       audience: audienceValue,
+      notes,
       placement,
       weeklySlots: placement === "weekly" ? activeWeeklySlots : undefined,
       occurrences:
@@ -924,6 +953,8 @@ export function CreateClassModal({
           onWeeklySlotsChange={setWeeklySlots}
           occurrences={occurrences}
           onOccurrencesChange={setOccurrences}
+          notes={notes}
+          onNotesChange={setNotes}
           audienceTokens={audienceValue}
           courseInstructors={selectedCourse?.instructors}
           instructorPool={selectedComponent?.instructor_pool}

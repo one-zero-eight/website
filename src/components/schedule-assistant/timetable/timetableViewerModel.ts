@@ -1,7 +1,9 @@
 /** Port of schedule-assistant-viewer.html script (same behavior). */
 import type {
-  SchemaCourseConfig,
-  SchemaScheduleConfig,
+  TimetableViewConfig as SchemaScheduleConfig,
+  TimetableViewCourse as SchemaCourseConfig,
+} from "./timetableViewTypes.ts";
+import type {
   SchemaWeeklyPatternSlot,
   SchemaWeeklyPatternSlotEdit,
 } from "@/api/schedule-assistant/types.ts";
@@ -122,6 +124,8 @@ export type Meeting = {
   course: string;
   /** Short English display name from course config. */
   course_short_name?: string;
+  /** Effective series note after the date-specific override. */
+  notes?: string;
   tag: string;
   groups: string[];
   date: string;
@@ -131,7 +135,7 @@ export type Meeting = {
   room: string;
   instructors: string | string[];
   /** Copied from component; used in detail panel. */
-  instructor_pool: unknown[];
+  instructor_pool?: unknown[];
   /** Course section_code. */
   section: string;
   /** Canonical weekly-pattern date before edit.date override. */
@@ -367,6 +371,7 @@ export function resolveWeeklyMeetingFields(
   slot: SchemaWeeklyPatternSlot,
   date: string,
   config: SchemaScheduleConfig,
+  seriesNotes = "",
 ) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
   const edit = findEditForMeetingDate(date, slot.edits, startingDay);
@@ -377,6 +382,7 @@ export function resolveWeeklyMeetingFields(
       end: String(slot.end_time).slice(0, 5),
       room: slot.room ?? "",
       instructors: slot.instructor ?? "",
+      notes: edit.notes ?? seriesNotes,
       cancelled: true,
     };
   }
@@ -403,6 +409,7 @@ export function resolveWeeklyMeetingFields(
     end: resolvedEnd,
     room: resolvedRoom || "",
     instructors: resolvedInstructor,
+    notes: edit?.notes ?? seriesNotes,
     cancelled: false,
   };
 }
@@ -596,7 +603,7 @@ export function signatureMeeting(m: Meeting) {
     typeof m.instructors === "string" ? [m.instructors] : m.instructors
   ).join("|");
   const groups = (m.groups || []).slice().sort().join("|");
-  return `${m.course}|${m.tag}|${m.date}|${m.start}|${groups}|${inst}|${m.room || "-"}`;
+  return `${m.course}|${m.tag}|${m.date}|${m.start}|${groups}|${inst}|${m.room || "-"}|${JSON.stringify(m.notes ?? "")}`;
 }
 
 export type MergedRow = { sign: string; sample: Meeting; count: number };
@@ -861,7 +868,10 @@ export function buildMeetingsForCourse(
             : undefined,
           room: occurrence.room ?? "",
           instructors: occurrence.instructor ?? "",
-          instructor_pool: component.instructor_pool,
+          notes: occurrence.notes ?? series.notes ?? "",
+          ...("instructor_pool" in component
+            ? { instructor_pool: component.instructor_pool as unknown[] }
+            : {}),
           section,
         });
       }
@@ -872,7 +882,12 @@ export function buildMeetingsForCourse(
       for (const [slotIdx, slot] of pattern.entries()) {
         const dates = activeWeeklySlotDates(config, slot, audienceTokens);
         for (const date of dates) {
-          const resolved = resolveWeeklyMeetingFields(slot, date, config);
+          const resolved = resolveWeeklyMeetingFields(
+            slot,
+            date,
+            config,
+            series.notes ?? "",
+          );
           if (resolved.cancelled) {
             flat.push({
               instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
@@ -884,7 +899,10 @@ export function buildMeetingsForCourse(
               end: resolved.end,
               room: resolved.room,
               instructors: resolved.instructors,
-              instructor_pool: component.instructor_pool,
+              notes: resolved.notes,
+              ...("instructor_pool" in component
+                ? { instructor_pool: component.instructor_pool as unknown[] }
+                : {}),
               section,
               pattern_date: date,
               alternation: slot.alternation,
@@ -908,7 +926,10 @@ export function buildMeetingsForCourse(
             end: resolved.end,
             room: resolved.room,
             instructors: resolved.instructors,
-            instructor_pool: component.instructor_pool,
+            notes: resolved.notes,
+            ...("instructor_pool" in component
+              ? { instructor_pool: component.instructor_pool as unknown[] }
+              : {}),
             section,
             pattern_date: date,
             alternation: slot.alternation,

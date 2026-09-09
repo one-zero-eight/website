@@ -1,10 +1,16 @@
 import {
   Weekday,
   type SchemaScheduleConfig,
+  type SchemaCourseConfig,
+  type SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
 import { describe, expect, it } from "vitest";
 
 import {
+  applyEditableEventsToCourse,
+  eventsEqual,
+  eventsToOccurrences,
+  eventsToWeeklySlots,
   expandOccurrencesToEvents,
   expandWeeklySlotsToEvents,
   patchEditableEvents,
@@ -12,6 +18,7 @@ import {
   serializeWeeklyEventsToSlots,
 } from "./editableSessionEvents.ts";
 import { countWeeklyPatternSlotOccurrences } from "./timetableViewerModel.ts";
+import { restoreMeetingInCourse } from "./meetingEditUtils.ts";
 
 function testConfig(): SchemaScheduleConfig {
   return {
@@ -29,11 +36,184 @@ function testConfig(): SchemaScheduleConfig {
       time_slots: [{ start_time: "09:00:00", end_time: "10:30:00" }],
       sections: [],
     },
-    rooms: { rooms: [] },
-    instructors: { instructors: [] },
-    courses: { courses: [] },
-  } as unknown as SchemaScheduleConfig;
+    rooms: [],
+    instructors: [],
+    courses: [],
+  };
 }
+
+describe("session notes", () => {
+  const slot: SchemaWeeklyPatternSlot = {
+    weekday: Weekday.MONDAY,
+    start_time: "09:00:00",
+    end_time: "10:30:00",
+    edits: [
+      { select_week: "2026-09-07", notes: "Bring a laptop", cancel: false },
+      { select_week: "2026-09-14", notes: "", cancel: false },
+    ],
+  };
+  const ref = {
+    kind: "wp",
+    courseIdx: 0,
+    componentIdx: 0,
+    seriesIdx: 0,
+    slotIdx: 0,
+    date: "2026-09-07",
+  } as const;
+  function courseWithNotes(weeklySlot = slot): SchemaCourseConfig {
+    return {
+      name: "Math",
+      section_code: "core",
+      components: [
+        {
+          tag: "lec",
+          instructor_pool: [],
+          audience: [],
+          per_group: false,
+          sessions: [
+            {
+              audience: [],
+              notes: "Series notes",
+              weekly_pattern: [weeklySlot],
+            },
+          ],
+        },
+      ],
+    };
+  }
+  function expand(weeklySlots = [slot]) {
+    return expandWeeklySlotsToEvents({
+      config: testConfig(),
+      weeklySlots,
+      audienceTokens: [],
+    });
+  }
+
+  it("keeps raw null, empty and explicit overrides through unrelated changes", () => {
+    const events = expand();
+    expect(events.map((event) => event.notes)).toEqual([
+      "Bring a laptop",
+      "",
+      null,
+      null,
+    ]);
+    const patched = patchEditableEvents(
+      events,
+      events.map((event) => event.key),
+      { room: "104", start_time: "11:00" },
+    );
+    const slots = serializeWeeklyEventsToSlots({
+      originalSlots: [slot],
+      events: patched,
+      config: testConfig(),
+    });
+    expect(expand(slots).map((event) => event.notes)).toEqual(
+      events.map((event) => event.notes),
+    );
+  });
+
+  it("detects notes-only changes, preserves whitespace and resets inheritance", () => {
+    const events = expand();
+    const updated = patchEditableEvents(events, [events[2].key], {
+      notes: "  Agenda\nhttps://example.com  ",
+    });
+    expect(eventsEqual(events, updated)).toBe(false);
+    expect(updated[2].notes).toBe("  Agenda\nhttps://example.com  ");
+    const reset = patchEditableEvents(
+      updated,
+      [events[0].key, events[1].key, events[2].key],
+      { notes: null },
+    );
+    expect(
+      serializeWeeklyEventsToSlots({
+        originalSlots: [slot],
+        events: reset,
+        config: testConfig(),
+      })[0].edits,
+    ).toBeNull();
+  });
+
+  it("preserves override states through weekly and date conversions", () => {
+    const events = expand();
+    const dates = expandOccurrencesToEvents(eventsToOccurrences(events));
+    expect(
+      serializeOccurrenceEvents(dates).map((event) => event.notes),
+    ).toEqual(["Bring a laptop", "", null, null]);
+    const weekly = eventsToWeeklySlots(dates, Weekday.SUNDAY);
+    expect(weekly).toHaveLength(1);
+    expect(weekly[0].edits?.map((edit) => edit.select_week)).toEqual([
+      "2026-09-06",
+      "2026-09-13",
+    ]);
+    const config = testConfig();
+    config.term.starting_day = Weekday.SUNDAY;
+    expect(
+      expandWeeklySlotsToEvents({
+        config,
+        weeklySlots: weekly,
+        audienceTokens: [],
+      }).map((event) => event.notes),
+    ).toEqual(["Bring a laptop", "", null, null]);
+  });
+
+  it("saves series-only edits without flattening per-date inheritance", () => {
+    const events = expand();
+    for (const placement of ["weekly", "dates_pattern"] as const) {
+      const next = applyEditableEventsToCourse({
+        course: courseWithNotes(),
+        meetingRef: ref,
+        config: testConfig(),
+        notes: "Updated series",
+        placement,
+        weeklySlots: [slot],
+        events:
+          placement === "weekly"
+            ? events
+            : expandOccurrencesToEvents(eventsToOccurrences(events)),
+      });
+      const series = next?.components[0].sessions?.[0];
+      expect(series?.notes).toBe("Updated series");
+      const savedEvents =
+        placement === "weekly"
+          ? expand(series?.weekly_pattern ?? [])
+          : expandOccurrencesToEvents(series?.dates_pattern ?? []);
+      expect(savedEvents.map((event) => event.notes)).toEqual([
+        "Bring a laptop",
+        "",
+        null,
+        null,
+      ]);
+    }
+  });
+
+  it.each(["Bring a laptop", ""])(
+    "retains %j notes when cancelling and restoring",
+    (notes) => {
+      const original = {
+        ...slot,
+        edits: [{ select_week: "2026-09-07", cancel: false, notes }],
+      };
+      const events = expand([original]);
+      const cancelled = patchEditableEvents(events, [events[0].key], {
+        cancelled: true,
+      });
+      const saved = serializeWeeklyEventsToSlots({
+        originalSlots: [original],
+        events: cancelled,
+        config: testConfig(),
+      });
+      const restored = restoreMeetingInCourse(
+        courseWithNotes(saved[0]),
+        ref,
+        testConfig(),
+      );
+      const edit =
+        restored?.components[0].sessions?.[0].weekly_pattern?.[0].edits?.[0];
+      expect(edit?.notes).toBe(notes);
+      expect(edit?.cancel).toBe(false);
+    },
+  );
+});
 
 describe("editableSessionEvents", () => {
   it("retains weekly base values independently of saved and draft overrides", () => {

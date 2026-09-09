@@ -1,7 +1,5 @@
-import type {
-  SchemaScheduleConfig,
-  SchemaSectionProgram,
-} from "@/api/schedule-assistant/types.ts";
+import type { TimetableViewConfig as SchemaScheduleConfig } from "@/components/schedule-assistant/timetable/timetableViewTypes.ts";
+import type { SchemaSectionProgram } from "@/api/schedule-assistant/types.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 

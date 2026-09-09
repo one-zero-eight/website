@@ -28,6 +28,81 @@ import type { Meeting, MeetingOverrideField } from "./timetableViewerModel.ts";
 
 export type SessionPlacement = "weekly" | "dates_pattern";
 
+export function SeriesNotesField({
+  notes,
+  onChange,
+  disabled,
+}: {
+  notes: string;
+  onChange: (notes: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-sm font-medium">Заметки серии</span>
+      <textarea
+        className="textarea textarea-bordered w-full"
+        rows={3}
+        value={notes}
+        disabled={disabled}
+        placeholder="Для всех занятий серии"
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </label>
+  );
+}
+
+export function SessionNotesOverrideField({
+  notes,
+  seriesNotes,
+  onChange,
+  disabled,
+}: {
+  notes: string | null;
+  seriesNotes: string;
+  onChange: (notes: string | null) => void;
+  disabled?: boolean;
+}) {
+  const inherited = notes === null;
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <label className="flex flex-col gap-1">
+        <span className="text-sm font-medium">Заметки занятия</span>
+        <textarea
+          className={cn(
+            "textarea textarea-bordered w-full",
+            !inherited && "border-primary/50",
+          )}
+          rows={2}
+          value={notes ?? seriesNotes}
+          disabled={disabled}
+          placeholder="Заметки для этой даты"
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </label>
+      <div className="flex flex-wrap items-center justify-between gap-1 text-xs">
+        <span className="text-base-content/60">
+          {inherited
+            ? "Из заметок серии"
+            : notes === ""
+              ? "Заметки серии скрыты"
+              : "Только для этой даты"}
+        </span>
+        {!inherited ? (
+          <button
+            type="button"
+            className="text-primary cursor-pointer hover:underline"
+            disabled={disabled}
+            onClick={() => onChange(null)}
+          >
+            Использовать заметки серии
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export function SessionPlacementToggle({
   placement,
   onChange,
@@ -78,6 +153,8 @@ export function SessionSeriesEditor({
   onWeeklySlotsChange,
   occurrences,
   onOccurrencesChange,
+  notes = "",
+  onNotesChange,
   audienceTokens,
   courseInstructors,
   instructorPool,
@@ -116,6 +193,8 @@ export function SessionSeriesEditor({
   onWeeklySlotsChange: (slots: SchemaWeeklyPatternSlot[]) => void;
   occurrences: SchemaSessionOccurrence[];
   onOccurrencesChange: (occurrences: SchemaSessionOccurrence[]) => void;
+  notes?: string;
+  onNotesChange?: (notes: string) => void;
   audienceTokens: string[];
   courseInstructors?: SchemaCourseConfig["instructors"];
   instructorPool?: unknown[] | null;
@@ -264,6 +343,24 @@ export function SessionSeriesEditor({
                   }}
                   onRemove={() => handleRemoveOccurrence(index)}
                 />
+                {!locked ? (
+                  <div className="px-3 pb-3">
+                    <SessionNotesOverrideField
+                      notes={occurrence.notes ?? null}
+                      seriesNotes={notes}
+                      disabled={disabled || deleted}
+                      onChange={(value) =>
+                        onOccurrencesChange(
+                          occurrences.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? { ...item, notes: value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
           );
@@ -365,6 +462,13 @@ export function SessionSeriesEditor({
 
   return (
     <div className="flex flex-col gap-2">
+      {onNotesChange ? (
+        <SeriesNotesField
+          notes={notes}
+          onChange={onNotesChange}
+          disabled={disabled}
+        />
+      ) : null}
       {beforePlacement ? (
         <>
           <div className="flex flex-wrap items-center justify-between gap-2">
