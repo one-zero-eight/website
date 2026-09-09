@@ -401,6 +401,8 @@ export const MapViewer = memo(function MapViewer({
       centeredForLocationRef.current = false;
       return;
     }
+    // Keep the map framed on a searched/linked room instead of jumping to GPS.
+    if (highlightAreas.length) return;
     if (!userLocation.visible || centeredForLocationRef.current) return;
     if (!containerRef.current || !imageRef.current) return;
 
@@ -414,7 +416,7 @@ export const MapViewer = memo(function MapViewer({
     options.current.offsetY = rect.height / 2 - pix.py * zoom;
     updateImage();
     centeredForLocationRef.current = true;
-  }, [userLocation]);
+  }, [userLocation, highlightAreas]);
 
   const svgDiv = useMemo(
     () =>

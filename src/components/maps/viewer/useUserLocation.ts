@@ -18,7 +18,9 @@ export type UserLocationStatus =
 
 /**
  * Watches the device's GPS position via the Geolocation API. Inert until
- * `start()` is called, so we only prompt for permission on an explicit action.
+ * `start()` is called. The interactive maps page (`MapView`) auto-starts it on
+ * load so location is on by default; embedded previews leave it opt-in and only
+ * `start()` on an explicit action.
  */
 export function useUserLocation() {
   const [position, setPosition] = useState<UserGeoPosition | null>(null);

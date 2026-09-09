@@ -14,6 +14,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { MapViewer } from "./MapViewer.tsx";
@@ -51,12 +52,26 @@ export function MapView({
     stop: stopLocating,
   } = useUserLocation();
 
+  // Remembers an explicit "turn location off" tap so the auto-start effect below
+  // doesn't immediately switch it back on. Reset for the session only (no persistence).
+  const userDisabledLocationRef = useRef(false);
+
   // Stop watching if the new scene doesn't support the location dot; otherwise keep tracking across floor changes
   useEffect(() => {
     if (!geoTransform) {
       stopLocating();
     }
   }, [geoTransform, stopLocating]);
+
+  // Location is on by default on the interactive maps page: start tracking as soon
+  // as the current scene is georeferenced, unless the user has turned it off.
+  // Embedded previews (`disablePopup`) stay opt-in and never prompt for permission.
+  useEffect(() => {
+    if (disablePopup) return;
+    if (!geoTransform) return;
+    if (userDisabledLocationRef.current) return;
+    startLocating();
+  }, [disablePopup, geoTransform, startLocating]);
 
   // Surface permission / availability problems
   useEffect(() => {
@@ -199,11 +214,18 @@ export function MapView({
                     locationStatus === "active" && "text-primary",
                   )}
                   aria-label="Show my location"
-                  onClick={() =>
-                    locationStatus === "active" || locationStatus === "locating"
-                      ? stopLocating()
-                      : startLocating()
-                  }
+                  onClick={() => {
+                    if (
+                      locationStatus === "active" ||
+                      locationStatus === "locating"
+                    ) {
+                      userDisabledLocationRef.current = true;
+                      stopLocating();
+                    } else {
+                      userDisabledLocationRef.current = false;
+                      startLocating();
+                    }
+                  }}
                 >
                   {locationStatus === "locating" ? (
                     <span className="loading loading-spinner loading-sm" />
