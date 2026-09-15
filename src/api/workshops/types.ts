@@ -2709,6 +2709,7 @@ export interface operations {
       query?: {
         from?: string | null;
         to?: string | null;
+        club?: string | null;
       };
       header?: never;
       path?: never;
