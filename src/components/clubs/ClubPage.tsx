@@ -1,9 +1,17 @@
 import { $clubs } from "@/api/clubs";
-import { getDescriptionImageUrl } from "@/api/clubs/links.ts";
+import {
+  extractClubSlugFromUrl,
+  getDescriptionImageUrl,
+} from "@/api/clubs/links.ts";
+import { $workshops } from "@/api/workshops";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
+import { EventSummaryCard } from "@/components/events/shared/EventSummaryCard.tsx";
+import { getEventImageUrl } from "@/components/events/utils/links.ts";
 import { Link } from "@tanstack/react-router";
+import moment from "moment";
+import { useMemo } from "react";
 import { cn } from "@/lib/ui/cn";
 import {
   getClubTypeLabel,
@@ -29,6 +37,29 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
       params: { path: { slug: clubSlug } },
     },
   );
+
+  const eventsRange = useMemo(
+    () => ({
+      from: moment().toISOString(),
+      to: moment().add(3, "months").toISOString(),
+    }),
+    [],
+  );
+  const { data: events, isPending: eventsPending } = $workshops.useQuery(
+    "get",
+    "/events/",
+    { params: { query: eventsRange } },
+  );
+  const clubEvents = (events ?? [])
+    .filter((event) =>
+      event.data.hosts.some(
+        (host) => extractClubSlugFromUrl(host.link) === clubSlug,
+      ),
+    )
+    .sort(
+      (a, b) =>
+        moment(a.data.starts_at).valueOf() - moment(b.data.starts_at).valueOf(),
+    );
 
   if (clubPending) {
     return (
@@ -119,9 +150,31 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                 <span className="icon-[mdi--calendar] size-6" />
                 Upcoming Events
               </h2>
-              <div className="space-y-4">
+              {eventsPending ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="skeleton h-48 rounded-2xl" />
+                  <div className="skeleton h-48 rounded-2xl" />
+                </div>
+              ) : clubEvents.length === 0 ? (
                 <p className="text-base-content/50 italic">No events yet.</p>
-              </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {clubEvents.map((event) => (
+                    <EventSummaryCard
+                      key={event.id}
+                      href={`/events/p/${event.id}`}
+                      imageUrl={
+                        event.data.image_id ? getEventImageUrl(event.id) : null
+                      }
+                      name={event.data.name}
+                      publicHosts={event.data.hosts}
+                      startsAt={event.data.starts_at}
+                      location={event.data.location}
+                      compact
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
