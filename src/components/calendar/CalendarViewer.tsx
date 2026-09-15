@@ -165,12 +165,23 @@ export function CalendarViewer({
   );
   const [currentDate, setCurrentDate] = useState(new Date());
 
+  const scrollToday = () => {
+    const date = new Date().toISOString();
+    const [dateStr, _] = date.split("T");
+    const dayEl = document.querySelector(`[data-date="${dateStr}"]`);
+
+    if (dayEl) {
+      dayEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   useEffect(() => {
     if (!availableViewIds.includes(calendarView)) {
       setCalendarView(fallbackInitialView);
       return;
     }
     setStoredCalendarView(calendarView);
+    scrollToday();
   }, [
     availableViewIds,
     calendarView,
