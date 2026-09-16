@@ -32,7 +32,6 @@ export function UserLocationMarker({
           fillOpacity={0.12}
           strokeOpacity={0.3}
           strokeWidth={2}
-          vectorEffect="non-scaling-stroke"
           style={{ transition: "r 0.6s ease-out" }}
         />
       )}
@@ -61,7 +60,9 @@ export function UserLocationMarker({
           />
         </circle>
 
-        {/* Solid dot with a light outline for contrast on any background */}
+        {/* Solid dot with a light outline for contrast on any background.
+            Already inside the counter-scaled group above, so its stroke
+            stays a constant screen width without needing vector-effect. */}
         <circle
           cx={0}
           cy={0}
@@ -69,7 +70,6 @@ export function UserLocationMarker({
           className="fill-base-100"
           stroke="white"
           strokeWidth={3}
-          vectorEffect="non-scaling-stroke"
         />
         <circle cx={0} cy={0} r={22} className="fill-primary" />
 
