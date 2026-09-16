@@ -16,6 +16,31 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://innohassle.ru/admin</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/admin/academic-calendars</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/admin/predefined</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/admin/rooms</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/admin/users</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://innohassle.ru/calendar</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -51,17 +76,12 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://innohassle.ru/events/approval</loc>
+    <loc>https://innohassle.ru/events/drafts</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://innohassle.ru/events/archive</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://innohassle.ru/events/calendar</loc>
+    <loc>https://innohassle.ru/events/submissions</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -181,7 +201,37 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://innohassle.ru/start</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://innohassle.ru/student-affairs</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/tabletennis</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/tabletennis/events</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/tabletennis/matches</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/tabletennis/players</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/tabletennis/tournaments</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

@@ -17,7 +17,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { MapViewer } from "./MapViewer.tsx";
+import { MapViewer, type MapViewerHandle } from "./MapViewer.tsx";
 
 export function MapView({
   scene,
@@ -32,6 +32,8 @@ export function MapView({
   const [fullscreen, setFullscreen] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const switchFullscreen = useCallback(() => setFullscreen((v) => !v), []);
+  const mapViewerRef = useRef<MapViewerHandle>(null);
+  const [bearing, setBearing] = useState(0);
 
   const geoRef = useMemo(
     () => getSceneGeoReference(scene.geo_reference),
@@ -177,11 +179,13 @@ export function MapView({
     <FullscreenMode enable={fullscreen}>
       <div className="relative h-full w-full overflow-hidden">
         <MapViewer
+          ref={mapViewerRef}
           scene={scene}
           highlightAreas={highlightAreas}
           disablePopup={disablePopup}
           userLocation={userLocation}
           debugControlPoints={debugControlPoints}
+          onBearingChange={setBearing}
         />
         {!disablePopup && (
           <>
@@ -206,6 +210,19 @@ export function MapView({
               </div>
             )}
             <div className="absolute right-2 bottom-2 flex flex-col gap-2">
+              {Math.abs(bearing) > 0.5 && (
+                <button
+                  type="button"
+                  className="bg-base-300/50 hover:bg-base-300/75 flex h-fit justify-center rounded-xl px-2 py-2"
+                  aria-label="Reset north"
+                  onClick={() => mapViewerRef.current?.resetBearing()}
+                >
+                  <span
+                    className="icon-[material-symbols--navigation] text-primary text-2xl"
+                    style={{ transform: `rotate(${-bearing}deg)` }}
+                  />
+                </button>
+              )}
               {geoTransform && (
                 <button
                   type="button"

@@ -77,8 +77,12 @@ export function UserLocationMarker({
           <path
             d="M 0 -62 L -16 -30 L 16 -30 Z"
             className="fill-primary"
-            transform={`rotate(${heading})`}
-            style={{ transition: "transform 0.6s ease-out" }}
+            style={{
+              // Counter-rotate against the map's own rotation so the arrow keeps
+              // pointing the correct real-world direction regardless of bearing.
+              transform: `rotate(calc(${heading}deg - 1deg * var(--map-bearing, 0)))`,
+              transition: "transform 0.6s ease-out",
+            }}
           />
         )}
       </g>
