@@ -73,15 +73,19 @@ export type URLType =
       excludeEnglish?: boolean;
     };
 
+const DEFAULT_VIEWS_IDS = defaultViews.map(({ id }) => id);
+const DEFAULT_CUSTOM_VIEWS: CalendarCustomView[] = [];
+const DEFAULT_EXTRA_EVENTS: EventInput[] = [];
+
 export function CalendarViewer({
   urls,
-  extraEvents = [],
+  extraEvents = DEFAULT_EXTRA_EVENTS,
   initialView = "listMonth",
   viewStorageId = "",
   isFullPage = false,
   EventPopover = CalendarEventPopover,
-  views = defaultViews.map(({ id }) => id),
-  customViews = [],
+  views = DEFAULT_VIEWS_IDS,
+  customViews = DEFAULT_CUSTOM_VIEWS,
   onEventSourceSuccess,
   isHidden,
 }: {
@@ -166,14 +170,26 @@ export function CalendarViewer({
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const scrollToday = () => {
-    const date = new Date().toISOString();
-    const [dateStr, _] = date.split("T");
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+
+    const paddedMonth = String(month).padStart(2, "0");
+    const paddedDay = String(day).padStart(2, "0");
+    const dateStr = `${year}-${paddedMonth}-${paddedDay}`;
     const dayEl = document.querySelector(`[data-date="${dateStr}"]`);
 
     if (dayEl) {
       dayEl.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+
+  useEffect(() => {
+    if (!isLoading) {
+      scrollToday();
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     if (!availableViewIds.includes(calendarView)) {
