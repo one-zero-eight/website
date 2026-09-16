@@ -197,16 +197,15 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     "/clubs/by-slug/{slug}",
     {
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: $clubs.queryOptions("get", "/clubs/by-slug/{slug}", {
-            params: { path: { slug: clubSlug } },
-          }).queryKey,
-        });
-        queryClient.invalidateQueries({
-          queryKey: $clubs.queryOptions("get", "/clubs/by-slug/{slug}", {
-            params: { path: { slug } },
-          }).queryKey,
-        });
+        // Let the destination page refetch after navigation to avoid canceled requests.
+        for (const affectedSlug of new Set([clubSlug, slug])) {
+          queryClient.invalidateQueries({
+            queryKey: $clubs.queryOptions("get", "/clubs/by-slug/{slug}", {
+              params: { path: { slug: affectedSlug } },
+            }).queryKey,
+            refetchType: "none",
+          });
+        }
         queryClient.invalidateQueries({
           queryKey: $clubs.queryOptions("get", "/clubs/").queryKey,
         });
