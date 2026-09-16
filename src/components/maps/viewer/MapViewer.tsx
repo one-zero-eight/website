@@ -78,29 +78,6 @@ export const MapViewer = memo(
       bearing: 0,
     });
 
-    // Cached container/image size, so the per-frame updateImage() below never
-    // has to call getBoundingClientRect()/clientWidth/clientHeight itself —
-    // those force a synchronous layout flush, and doing that on every single
-    // mousemove/touchmove during a drag is expensive (measurably worse on
-    // Firefox than Chrome for a DOM this size). Refreshed by a ResizeObserver,
-    // not on every frame — pan/zoom/rotate never change these sizes.
-    const layoutRef = useRef({
-      containerWidth: 0,
-      containerHeight: 0,
-      imageWidth: 0,
-      imageHeight: 0,
-    });
-    const measureLayout = () => {
-      if (!containerRef.current || !imageRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      layoutRef.current = {
-        containerWidth: rect.width,
-        containerHeight: rect.height,
-        imageWidth: imageRef.current.clientWidth,
-        imageHeight: imageRef.current.clientHeight,
-      };
-    };
-
     // Notify the parent about bearing changes at most once per animation frame,
     // so gesture handlers can keep mutating the ref every event without
     // forcing a React re-render on every mousemove/touchmove.
@@ -141,19 +118,20 @@ export const MapViewer = memo(
     const [popupElement, setPopupElement] = useState<Element | null>(null);
 
     const updateImage = () => {
-      if (!imageRef.current || !transformRef.current) return;
-      const { containerWidth, containerHeight } = layoutRef.current;
-      const imageWidth = layoutRef.current.imageWidth * options.current.zoom;
-      const imageHeight = layoutRef.current.imageHeight * options.current.zoom;
+      if (!containerRef.current || !imageRef.current || !transformRef.current)
+        return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const imageWidth = imageRef.current.clientWidth * options.current.zoom;
+      const imageHeight = imageRef.current.clientHeight * options.current.zoom;
 
       options.current.offsetX = Math.max(
-        Math.min(options.current.offsetX, containerWidth * 0.8),
-        -containerWidth * 0.8 - imageWidth + containerWidth,
+        Math.min(options.current.offsetX, rect.width * 0.8),
+        -rect.width * 0.8 - imageWidth + rect.width,
       );
 
       options.current.offsetY = Math.max(
-        Math.min(options.current.offsetY, containerHeight * 0.8),
-        -containerHeight * 0.8 - imageHeight + containerHeight,
+        Math.min(options.current.offsetY, rect.height * 0.8),
+        -rect.height * 0.8 - imageHeight + rect.height,
       );
 
       transformRef.current.style.transformOrigin = "left top";
@@ -181,33 +159,6 @@ export const MapViewer = memo(
         overlaySvgRef.current.style.transform = rotateTransform;
       }
     };
-
-    // Keep the cached layout measurements fresh: on mount/scene change (once
-    // the image div actually has content) and on any subsequent resize
-    // (window resize, sidebar/fullscreen toggle, orientation change) — never
-    // on a per-frame basis, since pan/zoom/rotate don't change these sizes.
-    useEffect(() => {
-      if (!containerRef.current || !imageRef.current) return;
-      measureLayout();
-      updateImage();
-
-      // Hint the browser to promote the floor-plan SVG to its own compositor
-      // layer, so rotating/panning it recomposites a cached raster instead of
-      // repainting the whole (large) vector content on every frame. Set once
-      // here rather than in updateImage(), since it never needs to change.
-      const svgRoot = imageRef.current.firstElementChild as SVGElement | null;
-      if (svgRoot) {
-        svgRoot.style.willChange = "transform";
-      }
-
-      const observer = new ResizeObserver(() => {
-        measureLayout();
-        updateImage();
-      });
-      observer.observe(containerRef.current);
-      observer.observe(imageRef.current);
-      return () => observer.disconnect();
-    }, [mapSvgData]);
 
     useEffect(() => {
       // Update on every rerender to match the latest state
@@ -299,15 +250,6 @@ export const MapViewer = memo(
         const startOffsetX = options.current.offsetX;
         const startOffsetY = options.current.offsetY;
         const onTouchMove = (e: TouchEvent) => {
-          // A second finger landed without the first lifting (e.g. starting a
-          // pinch/twist): hand off to the two-finger handler instead of both
-          // fighting over options.current every frame.
-          if (e.touches.length !== 1) {
-            window.removeEventListener("touchmove", onTouchMove);
-            window.removeEventListener("touchend", onTouchEnd);
-            window.removeEventListener("touchcancel", onTouchEnd);
-            return;
-          }
           options.current.offsetX =
             startOffsetX + e.touches[0].clientX - startX;
           options.current.offsetY =
@@ -317,11 +259,9 @@ export const MapViewer = memo(
         const onTouchEnd = () => {
           window.removeEventListener("touchmove", onTouchMove);
           window.removeEventListener("touchend", onTouchEnd);
-          window.removeEventListener("touchcancel", onTouchEnd);
         };
         window.addEventListener("touchmove", onTouchMove);
         window.addEventListener("touchend", onTouchEnd);
-        window.addEventListener("touchcancel", onTouchEnd);
       },
       containerRef as React.RefObject<HTMLDivElement>,
       { passive: false }, // Prevent page scrolling
@@ -387,11 +327,9 @@ export const MapViewer = memo(
         const onTouchEnd = () => {
           window.removeEventListener("touchmove", onTouchMove);
           window.removeEventListener("touchend", onTouchEnd);
-          window.removeEventListener("touchcancel", onTouchEnd);
         };
         window.addEventListener("touchmove", onTouchMove);
         window.addEventListener("touchend", onTouchEnd);
-        window.addEventListener("touchcancel", onTouchEnd);
       },
       containerRef as React.RefObject<HTMLDivElement>,
       { passive: false }, // Prevent page scrolling
@@ -483,8 +421,8 @@ export const MapViewer = memo(
 
         const onTouchEnd = (e2: TouchEvent) => {
           window.removeEventListener("touchend", onTouchEnd);
-          window.removeEventListener("touchcancel", onTouchCancel);
           if (e2.touches.length !== 0) return;
+          console.log(e2.changedTouches);
 
           // If the coordinates almost did not change, assume it is a click
           if (
@@ -506,12 +444,7 @@ export const MapViewer = memo(
             setPopupIsOpen(false);
           }
         };
-        const onTouchCancel = () => {
-          window.removeEventListener("touchend", onTouchEnd);
-          window.removeEventListener("touchcancel", onTouchCancel);
-        };
         window.addEventListener("touchend", onTouchEnd);
-        window.addEventListener("touchcancel", onTouchCancel);
       },
       containerRef as React.RefObject<HTMLDivElement>,
     );
@@ -641,7 +574,7 @@ export const MapViewer = memo(
     return (
       <div
         ref={containerRef}
-        className="bg-base-100 dark:bg-base-content flex h-full max-h-full w-full cursor-grab touch-none overflow-hidden"
+        className="bg-base-100 dark:bg-base-content flex h-full max-h-full w-full cursor-grab overflow-hidden"
       >
         <style type="text/css">
           {highlightAreas?.length
@@ -675,17 +608,14 @@ export const MapViewer = memo(
         }
         `}
         </style>
-        <div
-          ref={transformRef}
-          className="relative h-full w-full will-change-transform"
-        >
+        <div ref={transformRef} className="relative h-full w-full">
           {svgDiv}
           {(userLocation || debugControlPoints?.length) && (
             <svg
               ref={overlaySvgRef}
               viewBox={MAP_VIEWBOX_STRING}
               preserveAspectRatio="xMidYMid meet"
-              className="pointer-events-none absolute inset-0 h-full w-full overflow-visible will-change-transform"
+              className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
             >
               {debugControlPoints && debugControlPoints.length > 0 && (
                 <GeoControlPointMarkers points={debugControlPoints} />
