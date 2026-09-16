@@ -1,39 +1,34 @@
 import { cn } from "@/lib/ui/cn";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import {
+  bucketSeries,
+  monotonePath,
+  parseDate,
+  type Bucket,
+  type RatingPoint,
+  type SeriesPoint,
+} from "./rating-series";
 
-export function parseDate(dateStr: string): Date {
-  if (dateStr.includes("T")) {
-    return new Date(dateStr);
-  }
-  if (dateStr.includes("-")) {
-    return new Date(dateStr + "T00:00:00Z");
-  }
-  const [day, month, year] = dateStr.split(".").map(Number);
-  return new Date(year > 1000 ? year : 2000 + year, month - 1, day);
-}
+export { parseDate, type RatingPoint };
 
 function padDate(n: number): string {
   return String(n).padStart(2, "0");
 }
 
-function formatDateLabel(dateStr: string): string {
-  const d = parseDate(dateStr);
+function formatLabel(time: number, bucket: Bucket): string {
+  const d = new Date(time);
+  if (bucket === "month")
+    return `${padDate(d.getMonth() + 1)}.${d.getFullYear()}`;
   return `${padDate(d.getDate())}.${padDate(d.getMonth() + 1)}`;
 }
 
-function downsampleData(data: RatingPoint[], maxPoints: number): RatingPoint[] {
-  if (data.length <= maxPoints) return data;
-  const step = (data.length - 1) / (maxPoints - 1);
-  return Array.from(
-    { length: maxPoints },
-    (_, i) => data[Math.round(step * i)]!,
-  );
+function formatTooltip(point: SeriesPoint): string {
+  const d = new Date(point.time);
+  const day = `${padDate(d.getDate())}.${padDate(d.getMonth() + 1)}.${d.getFullYear()}`;
+  if (point.bucket === "week") return `Week of ${day}`;
+  if (point.bucket === "month") return formatLabel(point.time, "month");
+  return day;
 }
-
-export type RatingPoint = {
-  date: string;
-  score: number;
-};
 
 function ChoosePeriod({
   period,
@@ -65,13 +60,8 @@ function ChoosePeriod({
   );
 }
 
-function RatingChart({ data }: { data: RatingPoint[] }) {
-  const [hoveredPoint, setHoveredPoint] = useState<{
-    x: number;
-    y: number;
-    date: string;
-    score: number;
-  } | null>(null);
+function RatingChart({ series }: { series: SeriesPoint[] }) {
+  const [hovered, setHovered] = useState<number | null>(null);
 
   const pad = { top: 20, right: 20, bottom: 30, left: 50 };
   const w = 600,
@@ -79,41 +69,67 @@ function RatingChart({ data }: { data: RatingPoint[] }) {
   const cw = w - pad.left - pad.right;
   const ch = h - pad.top - pad.bottom;
 
-  const sorted = [...data].sort(
-    (a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime(),
-  );
-  if (sorted.length === 0) return null;
-
-  const minScore = Math.min(...sorted.map((d) => d.score)) - 20;
-  const maxScore = Math.max(...sorted.map((d) => d.score)) + 20;
+  const minScore = Math.min(...series.map((d) => d.score)) - 20;
+  const maxScore = Math.max(...series.map((d) => d.score)) + 20;
   const scoreRange = maxScore - minScore || 1;
 
-  const dates = sorted.map((d) => parseDate(d.date).getTime());
-  const minDate = dates[0]!;
-  const maxDate = dates[dates.length - 1]!;
-  const dateRange = maxDate - minDate || 1;
+  const minTime = series[0]!.time;
+  const maxTime = series[series.length - 1]!.time;
+  const timeRange = maxTime - minTime;
+
+  const points = series.map((d) => ({
+    x:
+      timeRange === 0
+        ? pad.left + cw / 2
+        : pad.left + ((d.time - minTime) / timeRange) * cw,
+    y: pad.top + ch - ((d.score - minScore) / scoreRange) * ch,
+  }));
 
   const gridCount = 5;
-  const xLabels: number[] = [];
-  for (let i = 0; i <= gridCount; i++) {
-    const t = i / gridCount;
-    const idx = Math.round((sorted.length - 1) * t);
-    xLabels.push(idx);
-  }
+  const labelCount = Math.min(series.length, 5);
+  const labelIdx = Array.from({ length: labelCount }, (_, i) =>
+    labelCount === 1
+      ? 0
+      : Math.round(((series.length - 1) * i) / (labelCount - 1)),
+  );
 
-  const points = sorted.map((d) => ({
-    x: pad.left + ((parseDate(d.date).getTime() - minDate) / dateRange) * cw,
-    y: pad.top + ch - ((d.score - minScore) / scoreRange) * ch,
-    date: d.date,
-    score: d.score,
-  }));
+  const line = monotonePath(points);
+  const area =
+    points.length > 1
+      ? `${line} L${points[points.length - 1]!.x},${pad.top + ch} L${points[0]!.x},${pad.top + ch} Z`
+      : "";
+
+  const hoveredPoint = hovered === null ? null : points[hovered];
+  const hoveredData = hovered === null ? null : series[hovered];
+
+  function pickNearest(clientX: number, rect: DOMRect) {
+    const x = ((clientX - rect.left) / rect.width) * w;
+    let best = 0;
+    points.forEach((p, i) => {
+      if (Math.abs(p.x - x) < Math.abs(points[best]!.x - x)) best = i;
+    });
+    setHovered(best);
+  }
 
   return (
     <div className="relative">
       <svg
         viewBox={`0 0 ${w} ${h}`}
-        className="text-base-content h-auto w-full"
+        className="text-base-content h-auto w-full touch-pan-y"
+        onPointerMove={(e) =>
+          pickNearest(e.clientX, e.currentTarget.getBoundingClientRect())
+        }
+        onPointerDown={(e) =>
+          pickNearest(e.clientX, e.currentTarget.getBoundingClientRect())
+        }
+        onPointerLeave={() => setHovered(null)}
       >
+        <defs>
+          <linearGradient id="rating-area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#712BB2" stopOpacity={0.35} />
+            <stop offset="100%" stopColor="#712BB2" stopOpacity={0} />
+          </linearGradient>
+        </defs>
         {Array.from({ length: gridCount + 1 }, (_, i) => {
           const y = pad.top + (ch / gridCount) * i;
           const score = maxScore - (scoreRange / gridCount) * i;
@@ -125,6 +141,7 @@ function RatingChart({ data }: { data: RatingPoint[] }) {
                 x2={w - pad.right}
                 y2={y}
                 stroke="#712BB2"
+                strokeOpacity={0.35}
                 strokeWidth={0.5}
               />
               <text
@@ -139,64 +156,64 @@ function RatingChart({ data }: { data: RatingPoint[] }) {
             </g>
           );
         })}
-        {xLabels.map((idx, i) => {
-          const x = pad.left + (cw / gridCount) * i;
-          return (
-            <g key={`v-${i}`}>
-              <line
-                x1={x}
-                y1={pad.top}
-                x2={x}
-                y2={h - pad.bottom}
-                stroke="#712BB2"
-                strokeWidth={0.5}
-              />
-              <text
-                x={x}
-                y={h - pad.bottom + 16}
-                fill="currentColor"
-                fontSize={10}
-                textAnchor="middle"
-              >
-                {formatDateLabel(sorted[idx]!.date)}
-              </text>
-            </g>
-          );
-        })}
-        <polyline
-          points={points.map((p) => `${p.x},${p.y}`).join(" ")}
+        {labelIdx.map((idx, i) => (
+          <text
+            key={`x-${i}`}
+            x={points[idx]!.x}
+            y={h - pad.bottom + 16}
+            fill="currentColor"
+            fontSize={10}
+            textAnchor="middle"
+          >
+            {formatLabel(series[idx]!.time, series[idx]!.bucket)}
+          </text>
+        ))}
+        {area && <path d={area} fill="url(#rating-area)" />}
+        <path
+          d={line}
           fill="none"
           stroke="#712BB2"
-          strokeWidth={2}
+          strokeWidth={2.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
-        {points.map((p, i) => (
-          <circle
-            key={i}
-            cx={p.x}
-            cy={p.y}
-            r={4}
-            fill="white"
+        {series.length <= 40 &&
+          points.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={hovered === i ? 5 : 3}
+              fill="white"
+              stroke="#712BB2"
+              strokeWidth={2}
+            />
+          ))}
+        {hoveredPoint && (
+          <line
+            x1={hoveredPoint.x}
+            y1={pad.top}
+            x2={hoveredPoint.x}
+            y2={pad.top + ch}
             stroke="#712BB2"
-            strokeWidth={2}
-            className="cursor-pointer"
-            onMouseEnter={() => setHoveredPoint(p)}
-            onMouseLeave={() => setHoveredPoint(null)}
+            strokeOpacity={0.5}
+            strokeDasharray="3 3"
           />
-        ))}
+        )}
       </svg>
-      {hoveredPoint && (
+      {hoveredPoint && hoveredData && (
         <div
-          className="bg-base-100 pointer-events-none absolute rounded-lg px-3 py-2 text-sm shadow-lg"
+          className="bg-base-100 pointer-events-none absolute rounded-lg px-3 py-2 text-sm whitespace-nowrap shadow-lg"
           style={{
-            left: (hoveredPoint.x / w) * 100 + "%",
+            left: `${Math.min(85, Math.max(15, (hoveredPoint.x / w) * 100))}%`,
             top: (hoveredPoint.y / h) * 100 + "%",
             transform: "translate(-50%, calc(-100% - 10px))",
           }}
         >
           <p className="text-base-content font-semibold">
-            {formatDateLabel(hoveredPoint.date)}
+            {formatTooltip(hoveredData)}
           </p>
-          <p className="text-base-content/70">Rating: {hoveredPoint.score}</p>
+          <p className="text-base-content/70">Rating: {hoveredData.score}</p>
         </div>
       )}
     </div>
@@ -206,11 +223,23 @@ function RatingChart({ data }: { data: RatingPoint[] }) {
 export function ScoreTable({ data = [] }: { data?: RatingPoint[] }) {
   const [period, setPeriod] = useState<"month" | "year" | "all">("all");
 
-  const sorted = [...data].sort(
-    (a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime(),
-  );
+  const series = useMemo(() => {
+    const sorted = [...data].sort(
+      (a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime(),
+    );
+    if (sorted.length === 0) return null;
+    const now = parseDate(sorted[sorted.length - 1]!.date);
+    let filtered = sorted;
+    if (period !== "all") {
+      const cutoff = new Date(now);
+      if (period === "month") cutoff.setMonth(cutoff.getMonth() - 1);
+      else cutoff.setFullYear(cutoff.getFullYear() - 1);
+      filtered = sorted.filter((d) => parseDate(d.date) >= cutoff);
+    }
+    return bucketSeries(filtered);
+  }, [data, period]);
 
-  if (sorted.length === 0) {
+  if (series === null) {
     return (
       <div className="bg-base-200 rounded-lg px-10 py-7">
         <h3 className="text-base-content text-xl font-light md:text-2xl">
@@ -221,37 +250,20 @@ export function ScoreTable({ data = [] }: { data?: RatingPoint[] }) {
     );
   }
 
-  const now = parseDate(sorted[sorted.length - 1]!.date);
-
-  let filteredData: RatingPoint[];
-  if (period === "month") {
-    const cutoff = new Date(now);
-    cutoff.setMonth(cutoff.getMonth() - 1);
-    filteredData = sorted.filter((d) => parseDate(d.date) >= cutoff);
-  } else if (period === "year") {
-    const cutoff = new Date(now);
-    cutoff.setFullYear(cutoff.getFullYear() - 1);
-    filteredData = sorted.filter((d) => parseDate(d.date) >= cutoff);
-  } else {
-    filteredData = sorted;
-  }
-
-  const displayData = downsampleData(filteredData, 20);
-
   return (
-    <div className="bg-base-200 rounded-lg px-10 py-7">
+    <div className="bg-base-200 rounded-lg px-6 py-7 md:px-10">
       <div className="flex flex-col gap-4 pb-7 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-base-content text-xl font-light md:text-2xl">
           Score Timeline
         </h3>
         <ChoosePeriod period={period} onChange={setPeriod} />
       </div>
-      {displayData.length === 0 ? (
+      {series.length === 0 ? (
         <p className="text-base-content/50 mt-4 text-center text-sm">
           No data for the selected period
         </p>
       ) : (
-        <RatingChart data={displayData} />
+        <RatingChart series={series} />
       )}
     </div>
   );

@@ -6,6 +6,7 @@ import {
 import { SignInButton } from "@/components/common/SignInButton";
 import { Registration } from "./Registration";
 import { ScoreTable, type RatingPoint } from "./DrawTable";
+import { rankByRating } from "./ranking";
 
 type SchemaPlayer = tabletennisTypes.SchemaPlayer;
 
@@ -101,7 +102,7 @@ function ProfileInfo({
   score: number;
   totalGames: number;
   winGames: number;
-  place: number;
+  place: number | null;
 }) {
   return (
     <PlateTemplate>
@@ -123,13 +124,33 @@ function ProfileInfo({
           }
         />
         <Line />
-        <InfoPlate discription="Place" info={String(place)} />
+        <InfoPlate
+          discription="Place"
+          info={place === null ? "—" : String(place)}
+        />
       </div>
     </PlateTemplate>
   );
 }
 
+function usePlace(player: SchemaPlayer): number | null {
+  const { data } = $tabletennis.useQuery("get", "/players");
+  if (!data) return null;
+  const { players } = data as unknown as {
+    players: (SchemaPlayer & { is_active: boolean })[];
+  };
+  // same place as in the players top: counted among active players (plus yourself)
+  const pool = players.filter(
+    (p) => p.is_active || p.innohassle_id === player.innohassle_id,
+  );
+  const me = rankByRating(pool).find(
+    (r) => r.player.innohassle_id === player.innohassle_id,
+  );
+  return me?.place ?? null;
+}
+
 function InfoTiles({ player }: { player: SchemaPlayer }) {
+  const place = usePlace(player);
   const totalGames = player.wins + player.losses;
   const ratingsData: RatingPoint[] = Object.entries(player.ratings ?? {}).map(
     ([date, score]) => ({ date, score }),
@@ -143,7 +164,7 @@ function InfoTiles({ player }: { player: SchemaPlayer }) {
           score={player.rating}
           totalGames={totalGames}
           winGames={player.wins}
-          place={1}
+          place={place}
         />
       </div>
       <div className="mb-4">
