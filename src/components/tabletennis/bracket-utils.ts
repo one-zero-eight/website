@@ -1,4 +1,4 @@
-export type Player = { name: string; id: string };
+export type Player = { name: string; id: string; rating?: number };
 
 export type GameData = {
   game_id: string;
@@ -21,378 +21,633 @@ export type GameData = {
   };
 };
 
-export type Bracket = "winners" | "consolation" | "placement";
+export type Groups = Record<string, string[]>;
 
-export type MatchSlot = {
-  id: string;
-  game_id?: string;
-  round: number;
-  bracket: Bracket;
-  player1_id: string | null;
-  player2_id: string | null;
-  score_player1: number;
-  score_player2: number;
-  completed: boolean;
-  placeLabel?: string | null;
-  rankStart: number;
-  rankEnd: number;
-};
+export function pairKey(a: string, b: string) {
+  return a < b ? `${a}|${b}` : `${b}|${a}`;
+}
 
-export type PlayerStats = {
+export function ordinal(n: number): string {
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+  if (n % 10 === 1) return `${n}st`;
+  if (n % 10 === 2) return `${n}nd`;
+  if (n % 10 === 3) return `${n}rd`;
+  return `${n}th`;
+}
+
+/** Compares two {place: playerId} standings regardless of key order */
+export function topsEqual(
+  a: Record<string, string>,
+  b: Record<string, string>,
+): boolean {
+  const ka = Object.keys(a);
+  if (ka.length !== Object.keys(b).length) return false;
+  return ka.every((k) => b[k] === a[k]);
+}
+
+export function standingsToTop(
+  places: { place: number; id: string }[],
+): Record<string, string> {
+  return Object.fromEntries(places.map((p) => [String(p.place), p.id]));
+}
+
+export function groupName(index: number): string {
+  return String.fromCharCode(65 + index);
+}
+
+// ── groups ────────────────────────────────────────────────────
+
+/** Snake distribution by rating: A B C C B A A B C ... */
+export function snakeGroups(players: Player[], groupCount: number): Groups {
+  const count = Math.max(1, Math.min(groupCount, players.length));
+  const groups: Groups = {};
+  for (let i = 0; i < count; i++) groups[groupName(i)] = [];
+  const sorted = [...players].sort(
+    (a, b) => (b.rating ?? 0) - (a.rating ?? 0) || a.name.localeCompare(b.name),
+  );
+  sorted.forEach((p, i) => {
+    const cycle = Math.floor(i / count);
+    const pos = i % count;
+    const idx = cycle % 2 === 0 ? pos : count - 1 - pos;
+    groups[groupName(idx)]!.push(p.id);
+  });
+  return groups;
+}
+
+export type GroupStanding = {
   id: string;
-  name: string;
-  wins: number;
+  group: string;
+  place: number;
   played: number;
+  wins: number;
+  losses: number;
+  setsWon: number;
+  setsLost: number;
+  /** ITTF: 2 points for a win, 1 point for a loss */
+  points: number;
 };
 
-export function computeStats(
-  players: Player[],
-  games: GameData[],
-): PlayerStats[] {
-  const wins = new Map<string, number>();
-  const played = new Map<string, number>();
-  for (const p of players) {
-    wins.set(p.id, 0);
-    played.set(p.id, 0);
-  }
+type FinishedGame = { p1: string; p2: string; s1: number; s2: number };
+
+function finishedGames(games: GameData[]): FinishedGame[] {
+  return games
+    .filter((g) => g.finished)
+    .map((g) => ({
+      p1: g.player1.innohassle_id,
+      p2: g.player2.innohassle_id,
+      s1: g.player1.score,
+      s2: g.player2.score,
+    }));
+}
+
+function tally(ids: string[], games: FinishedGame[]) {
+  const inSet = new Set(ids);
+  const stats = new Map(
+    ids.map((id) => [
+      id,
+      { played: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, points: 0 },
+    ]),
+  );
   for (const g of games) {
-    const p1 = g.player1.innohassle_id;
-    const p2 = g.player2.innohassle_id;
-    const s1 = g.player1.score;
-    const s2 = g.player2.score;
-    const finished = g.finished || s1 > 0 || s2 > 0;
-    if (!finished) continue;
-    played.set(p1, (played.get(p1) ?? 0) + 1);
-    played.set(p2, (played.get(p2) ?? 0) + 1);
-    if (s1 > s2) wins.set(p1, (wins.get(p1) ?? 0) + 1);
-    else if (s2 > s1) wins.set(p2, (wins.get(p2) ?? 0) + 1);
+    if (!inSet.has(g.p1) || !inSet.has(g.p2)) continue;
+    const a = stats.get(g.p1)!;
+    const b = stats.get(g.p2)!;
+    a.played++;
+    b.played++;
+    a.setsWon += g.s1;
+    a.setsLost += g.s2;
+    b.setsWon += g.s2;
+    b.setsLost += g.s1;
+    if (g.s1 > g.s2) {
+      a.wins++;
+      a.points += 2;
+      b.losses++;
+      b.points += 1;
+    } else {
+      b.wins++;
+      b.points += 2;
+      a.losses++;
+      a.points += 1;
+    }
   }
-  return players
+  return stats;
+}
+
+function setRatio(won: number, lost: number) {
+  if (lost === 0) return won === 0 ? 0 : Infinity;
+  return won / lost;
+}
+
+/**
+ * Orders players of one group by ITTF rules: points; ties are broken by
+ * points in games between the tied players, then set ratio in those games,
+ * then overall set ratio.
+ */
+export function groupStandings(
+  group: string,
+  ids: string[],
+  games: GameData[],
+  names: Map<string, string> = new Map(),
+): GroupStanding[] {
+  const fin = finishedGames(games);
+  const overall = tally(ids, fin);
+
+  const byPoints = new Map<number, string[]>();
+  for (const id of ids) {
+    const pts = overall.get(id)!.points;
+    if (!byPoints.has(pts)) byPoints.set(pts, []);
+    byPoints.get(pts)!.push(id);
+  }
+
+  const ordered: string[] = [];
+  for (const pts of [...byPoints.keys()].sort((a, b) => b - a)) {
+    const tied = byPoints.get(pts)!;
+    if (tied.length === 1) {
+      ordered.push(tied[0]!);
+      continue;
+    }
+    const mini = tally(tied, fin);
+    tied.sort((a, b) => {
+      const ma = mini.get(a)!;
+      const mb = mini.get(b)!;
+      const oa = overall.get(a)!;
+      const ob = overall.get(b)!;
+      return (
+        mb.points - ma.points ||
+        setRatio(mb.setsWon, mb.setsLost) - setRatio(ma.setsWon, ma.setsLost) ||
+        setRatio(ob.setsWon, ob.setsLost) - setRatio(oa.setsWon, oa.setsLost) ||
+        ob.setsWon - ob.setsLost - (oa.setsWon - oa.setsLost) ||
+        (names.get(a) ?? a).localeCompare(names.get(b) ?? b)
+      );
+    });
+    // Infinity - Infinity is NaN; fall back to name order for those pairs
+    ordered.push(...tied);
+  }
+
+  return ordered.map((id, i) => ({
+    id,
+    group,
+    place: i + 1,
+    ...overall.get(id)!,
+  }));
+}
+
+export function groupGamesTotal(size: number) {
+  return (size * (size - 1)) / 2;
+}
+
+// ── seeding ───────────────────────────────────────────────────
+
+export type SeedEntry = {
+  id: string;
+  seed: number;
+  group: string | null;
+  groupPlace: number | null;
+  points: number;
+  played: number;
+  setsWon: number;
+  setsLost: number;
+};
+
+export type MatchSuggestion = {
+  group: string;
+  p1: string;
+  p2: string;
+  /** games of this group that have not been started yet */
+  remaining: number;
+};
+
+/**
+ * Suggests which group games to start next: the groups with the most games still
+ * to start go first, and inside a group the pair of free players who have played
+ * the fewest games and have been waiting the longest. At most one per group.
+ */
+export function suggestNextMatches(
+  groups: Groups,
+  games: GameData[],
+  limit = 3,
+): MatchSuggestion[] {
+  const busy = new Set<string>();
+  const played = new Map<string, number>();
+  const lastSeen = new Map<string, number>();
+  const started = new Set<string>();
+
+  games.forEach((g, index) => {
+    const a = g.player1.innohassle_id;
+    const b = g.player2.innohassle_id;
+    started.add(pairKey(a, b));
+    lastSeen.set(a, index);
+    lastSeen.set(b, index);
+    if (g.finished) {
+      played.set(a, (played.get(a) ?? 0) + 1);
+      played.set(b, (played.get(b) ?? 0) + 1);
+    } else {
+      busy.add(a);
+      busy.add(b);
+    }
+  });
+
+  const candidates = Object.entries(groups)
+    .map(([group, members]) => {
+      const pairs: [string, string][] = [];
+      for (let i = 0; i < members.length; i++) {
+        for (let j = i + 1; j < members.length; j++) {
+          if (!started.has(pairKey(members[i]!, members[j]!))) {
+            pairs.push([members[i]!, members[j]!]);
+          }
+        }
+      }
+      return { group, pairs };
+    })
+    .filter((c) => c.pairs.length > 0)
+    .sort(
+      (a, b) =>
+        b.pairs.length - a.pairs.length || a.group.localeCompare(b.group),
+    );
+
+  const cost = ([a, b]: [string, string]) => ({
+    played: (played.get(a) ?? 0) + (played.get(b) ?? 0),
+    recent: Math.max(lastSeen.get(a) ?? -1, lastSeen.get(b) ?? -1),
+  });
+
+  const result: MatchSuggestion[] = [];
+  for (const { group, pairs } of candidates) {
+    if (result.length >= limit) break;
+    const free = pairs
+      .filter(([a, b]) => !busy.has(a) && !busy.has(b))
+      .sort((x, y) => {
+        const cx = cost(x);
+        const cy = cost(y);
+        return cx.played - cy.played || cx.recent - cy.recent;
+      });
+    const best = free[0];
+    if (!best) continue;
+    busy.add(best[0]);
+    busy.add(best[1]);
+    result.push({ group, p1: best[0], p2: best[1], remaining: pairs.length });
+  }
+  return result;
+}
+
+/**
+ * Everyone goes to qualification. Seeds: all group winners first, then all
+ * second places, and so on. Inside one tier the better record goes first.
+ * Then first-round opponents from the same group are swapped apart where possible.
+ */
+export function buildSeeding(
+  players: Player[],
+  groups: Groups,
+  games: GameData[],
+): SeedEntry[] {
+  const names = new Map(players.map((p) => [p.id, p.name]));
+  const groupEntries = Object.entries(groups).filter(([, m]) => m.length > 0);
+  const effective: [string | null, string[]][] =
+    groupEntries.length > 0 ? groupEntries : [[null, players.map((p) => p.id)]];
+
+  const standings = effective.flatMap(([name, ids]) =>
+    groupStandings(name ?? "", ids, games, names).map((s) => ({
+      ...s,
+      group: name,
+    })),
+  );
+
+  const grouped = new Set(standings.map((s) => s.id));
+  const leftovers = players
+    .filter((p) => !grouped.has(p.id))
     .map((p) => ({
       id: p.id,
-      name: p.name,
-      wins: wins.get(p.id) ?? 0,
-      played: played.get(p.id) ?? 0,
-    }))
-    .sort((a, b) => {
-      const rateA = a.played > 0 ? a.wins / a.played : 0;
-      const rateB = b.played > 0 ? b.wins / b.played : 0;
-      if (rateB !== rateA) return rateB - rateA;
-      if (b.wins !== a.wins) return b.wins - a.wins;
-      if (b.played !== a.played) return b.played - a.played;
-      return a.name.localeCompare(b.name);
-    });
-}
+      group: null,
+      place: Infinity,
+      points: 0,
+      played: 0,
+      setsWon: 0,
+      setsLost: 0,
+    }));
 
-export function getWinner(
-  scores: [number, number],
-  p1: string,
-  p2: string,
-): { winner: string; loser: string } {
-  return scores[0] > scores[1]
-    ? { winner: p1, loser: p2 }
-    : { winner: p2, loser: p1 };
-}
-
-function placeToOrdinal(place: number): string {
-  if (place === 1) return "1st";
-  if (place === 2) return "2nd";
-  if (place === 3) return "3rd";
-  return `${place}th`;
-}
-
-function ordinalPlace(label: string): number {
-  const s = label.replace(/\D/g, "");
-  return s ? Number(s) : 0;
-}
-
-export function buildBracketMatches(seeded: Player[]) {
-  const N = seeded.length;
-  const newMatches: MatchSlot[] = [];
-  const newScores: Record<string, [number, number]> = {};
-  const numMatches = Math.floor(N / 2);
-  for (let i = 0; i < numMatches; i++) {
-    const j = N - 1 - i;
-    const id = `r1_m${i}`;
-    newMatches.push({
-      id,
-      round: 1,
-      bracket: "winners",
-      player1_id: seeded[i]!.id,
-      player2_id: seeded[j]!.id,
-      score_player1: 0,
-      score_player2: 0,
-      completed: false,
-      rankStart: 1,
-      rankEnd: N,
-    });
-    newScores[id] = [0, 0];
-  }
-  if (N % 2 === 1) {
-    const byeIdx = numMatches;
-    const id = `r1_bye`;
-    newMatches.push({
-      id,
-      round: 1,
-      bracket: "winners",
-      player1_id: seeded[byeIdx]!.id,
-      player2_id: null,
-      score_player1: 0,
-      score_player2: 0,
-      completed: true,
-      rankStart: 1,
-      rankEnd: N,
-    });
-    newScores[id] = [0, 0];
-  }
-  return { matches: newMatches, scores: newScores };
-}
-
-export function tryAdvance(
-  currentMatches: MatchSlot[],
-  currentScores: Record<string, [number, number]>,
-): { matches: MatchSlot[]; scores: Record<string, [number, number]> } | null {
-  const allRounds = [...new Set(currentMatches.map((m) => m.round))].sort(
-    (a, b) => a - b,
-  );
-  let maxCompleteRound = -1;
-  for (const round of allRounds) {
-    const ms = currentMatches.filter(
-      (m) => m.round === round && m.bracket !== "placement",
-    );
-    if (ms.length > 0 && ms.every((m) => m.completed)) {
-      maxCompleteRound = round;
-    } else break;
-  }
-  if (maxCompleteRound < 0) return null;
-
-  const nextRound = maxCompleteRound + 1;
-  if (currentMatches.some((m) => m.round === nextRound)) return null;
-
-  const roundMatches = currentMatches.filter(
-    (m) => m.round === maxCompleteRound && m.bracket !== "placement",
+  const perGame = (v: number, played: number) => (played ? v / played : 0);
+  const ordered = [...standings, ...leftovers].sort(
+    (a, b) =>
+      a.place - b.place ||
+      perGame(b.points, b.played) - perGame(a.points, a.played) ||
+      perGame(b.setsWon - b.setsLost, b.played) -
+        perGame(a.setsWon - a.setsLost, a.played) ||
+      (names.get(a.id) ?? a.id).localeCompare(names.get(b.id) ?? b.id),
   );
 
-  const groups = new Map<number, MatchSlot[]>();
-  for (const m of roundMatches) {
-    const key = m.rankStart;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(m);
+  const seeds: SeedEntry[] = ordered.map((s, i) => ({
+    id: s.id,
+    seed: i + 1,
+    group: s.group,
+    groupPlace: Number.isFinite(s.place) ? s.place : null,
+    points: s.points,
+    played: s.played,
+    setsWon: s.setsWon,
+    setsLost: s.setsLost,
+  }));
+
+  return separateSameGroup(seeds);
+}
+
+function separateSameGroup(seeds: SeedEntry[]): SeedEntry[] {
+  const n = seeds.length;
+  if (n < 3) return seeds;
+  const order = seedOrder(bracketSize(n));
+  const list = [...seeds];
+  // first-round opponent of seed s (1-based) is order[pos ^ 1]
+  const posOf = new Map(order.map((s, pos) => [s, pos]));
+  const opponent = (seed: number) => order[posOf.get(seed)! ^ 1]!;
+  const conflict = (seed: number) => {
+    const opp = opponent(seed);
+    if (opp > n) return false;
+    const a = list[seed - 1]!;
+    const b = list[opp - 1]!;
+    return a.group !== null && a.group === b.group;
+  };
+
+  for (let seed = n; seed >= 1; seed--) {
+    if (!conflict(seed)) continue;
+    const me = list[seed - 1]!;
+    // swap with another seed of the same group place so the tier stays fair
+    for (let other = n; other >= 1; other--) {
+      if (other === seed) continue;
+      const cand = list[other - 1]!;
+      if (cand.groupPlace !== me.groupPlace) continue;
+      if (other === opponent(seed)) continue;
+      [list[seed - 1], list[other - 1]] = [cand, me];
+      if (!conflict(seed) && !conflict(other)) break;
+      [list[seed - 1], list[other - 1]] = [me, cand];
+    }
+  }
+  return list.map((s, i) => ({ ...s, seed: i + 1 }));
+}
+
+// ── bracket ──────────────────────────────────────────────────
+
+export function bracketSize(n: number) {
+  let s = 1;
+  while (s < n) s *= 2;
+  return Math.max(2, s);
+}
+
+/** Standard seed positions: 1 v 8, 4 v 5, 2 v 7, 3 v 6 */
+export function seedOrder(size: number): number[] {
+  let order = [1];
+  while (order.length < size) {
+    const len = order.length * 2;
+    order = order.flatMap((s) => [s, len + 1 - s]);
+  }
+  return order;
+}
+
+export type Source =
+  | { kind: "seed"; seed: number }
+  | { kind: "winner" | "loser"; matchId: string };
+
+export type Side =
+  | { kind: "player"; id: string }
+  | { kind: "bye" }
+  | { kind: "tbd" };
+
+export type MatchStatus = "waiting" | "ready" | "done" | "bye";
+
+export type BracketMatch = {
+  id: string;
+  sectionId: string;
+  round: number;
+  index: number;
+  sources: [Source, Source];
+  side1: Side;
+  side2: Side;
+  status: MatchStatus;
+  score1: number;
+  score2: number;
+  game_id?: string;
+  winner: Side;
+  loser: Side;
+};
+
+export type BracketSection = {
+  id: string;
+  /** best place decided in this section */
+  placeFrom: number;
+  /** worst place decided in this section */
+  placeTo: number;
+  rounds: number;
+  matchIds: string[][];
+};
+
+export type Placement = { rawPlace: number; source: Source };
+
+export type BracketStructure = {
+  size: number;
+  sections: BracketSection[];
+  matches: Omit<
+    BracketMatch,
+    "side1" | "side2" | "status" | "score1" | "score2" | "winner" | "loser"
+  >[];
+  placements: Placement[];
+};
+
+/**
+ * Full placement bracket: every player gets a place. Winners continue in the
+ * section, losers of each round form a new section for the lower places.
+ */
+export function buildStructure(playerCount: number): BracketStructure {
+  const size = bracketSize(playerCount);
+  const sections: BracketSection[] = [];
+  const matches: BracketStructure["matches"] = [];
+  const placements: Placement[] = [];
+
+  function build(entrants: Source[], placeFrom: number) {
+    if (entrants.length === 1) {
+      placements.push({ rawPlace: placeFrom, source: entrants[0]! });
+      return;
+    }
+    const id = `s${placeFrom}`;
+    const section: BracketSection = {
+      id,
+      placeFrom,
+      placeTo: placeFrom + entrants.length - 1,
+      rounds: Math.log2(entrants.length),
+      matchIds: [],
+    };
+    sections.push(section);
+
+    const pendingLosers: [Source[], number][] = [];
+    let current = entrants;
+    let round = 0;
+    while (current.length > 1) {
+      const winners: Source[] = [];
+      const losers: Source[] = [];
+      const ids: string[] = [];
+      for (let i = 0; i < current.length; i += 2) {
+        const matchId = `${id}_r${round}_m${i / 2}`;
+        matches.push({
+          id: matchId,
+          sectionId: id,
+          round,
+          index: i / 2,
+          sources: [current[i]!, current[i + 1]!],
+        });
+        ids.push(matchId);
+        winners.push({ kind: "winner", matchId });
+        losers.push({ kind: "loser", matchId });
+      }
+      section.matchIds.push(ids);
+      pendingLosers.push([losers, placeFrom + winners.length]);
+      current = winners;
+      round++;
+    }
+    placements.push({ rawPlace: placeFrom, source: current[0]! });
+
+    // later rounds decide better places, build them first so tabs go top-down
+    for (const [losers, from] of pendingLosers.reverse()) {
+      build(losers, from);
+    }
   }
 
-  const newMatches: MatchSlot[] = [];
-  const newScores: Record<string, [number, number]> = {};
-  let idx = currentMatches.length;
+  build(
+    seedOrder(size).map((seed) => ({ kind: "seed", seed })),
+    1,
+  );
 
-  for (const [, groupMatches] of groups) {
-    const rStart = groupMatches[0]!.rankStart;
-    const rEnd = groupMatches[0]!.rankEnd;
-    const N = rEnd - rStart + 1;
-    const numUpper = Math.ceil(N / 2);
-    const midRank = rStart + numUpper - 1;
+  sections.sort((a, b) => a.placeFrom - b.placeFrom);
+  placements.sort((a, b) => a.rawPlace - b.rawPlace);
+  return { size, sections, matches, placements };
+}
 
-    const winners: string[] = [];
-    const losers: string[] = [];
-    for (const m of groupMatches) {
-      if (!m.player2_id) {
-        winners.push(m.player1_id!);
+export type ResolvedBracket = {
+  sections: BracketSection[];
+  matches: Map<string, BracketMatch>;
+  /** players with their final place, compressed to 1..N (byes removed) */
+  places: { place: number; id: string }[];
+  complete: boolean;
+};
+
+export function resolveBracket(
+  seeding: string[],
+  games: GameData[],
+): ResolvedBracket {
+  const n = seeding.length;
+  const structure = buildStructure(n);
+  const resolved = new Map<string, BracketMatch>();
+
+  const gamesByPair = new Map<string, GameData[]>();
+  for (const g of games) {
+    const key = pairKey(g.player1.innohassle_id, g.player2.innohassle_id);
+    if (!gamesByPair.has(key)) gamesByPair.set(key, []);
+    gamesByPair.get(key)!.push(g);
+  }
+
+  function side(src: Source): Side {
+    if (src.kind === "seed") {
+      return src.seed <= n
+        ? { kind: "player", id: seeding[src.seed - 1]! }
+        : { kind: "bye" };
+    }
+    const m = resolved.get(src.matchId)!;
+    return src.kind === "winner" ? m.winner : m.loser;
+  }
+
+  for (const base of structure.matches) {
+    const side1 = side(base.sources[0]);
+    const side2 = side(base.sources[1]);
+    const match: BracketMatch = {
+      ...base,
+      side1,
+      side2,
+      status: "waiting",
+      score1: 0,
+      score2: 0,
+      winner: { kind: "tbd" },
+      loser: { kind: "tbd" },
+    };
+
+    if (side1.kind === "bye" || side2.kind === "bye") {
+      match.status = "bye";
+      if (side1.kind === "bye" && side2.kind === "bye") {
+        match.winner = { kind: "bye" };
+        match.loser = { kind: "bye" };
       } else {
-        const sc = currentScores[m.id] ?? [m.score_player1, m.score_player2];
-        const { winner, loser } = getWinner(sc, m.player1_id!, m.player2_id!);
-        winners.push(winner);
-        losers.push(loser);
+        match.winner = side1.kind === "bye" ? side2 : side1;
+        match.loser = { kind: "bye" };
+      }
+    } else if (side1.kind === "player" && side2.kind === "player") {
+      const candidates = gamesByPair.get(pairKey(side1.id, side2.id)) ?? [];
+      const finished = candidates.find((g) => g.finished);
+      const open = candidates.find((g) => !g.finished);
+      if (finished) {
+        const swapped = finished.player1.innohassle_id !== side1.id;
+        match.score1 = swapped
+          ? finished.player2.score
+          : finished.player1.score;
+        match.score2 = swapped
+          ? finished.player1.score
+          : finished.player2.score;
+        match.game_id = finished.game_id;
+        match.status = "done";
+        const firstWon = match.score1 > match.score2;
+        match.winner = firstWon ? side1 : side2;
+        match.loser = firstWon ? side2 : side1;
+      } else {
+        match.status = "ready";
+        match.game_id = open?.game_id;
       }
     }
 
-    if (winners.length > 1) {
-      const wN = winners.length;
-      const wMatches = Math.floor(wN / 2);
-      for (let i = 0; i < wMatches; i++) {
-        const j = wN - 1 - i;
-        idx++;
-        const id = `r${nextRound}_w${idx}`;
-        newMatches.push({
-          id,
-          round: nextRound,
-          bracket: "winners",
-          player1_id: winners[i]!,
-          player2_id: winners[j]!,
-          score_player1: 0,
-          score_player2: 0,
-          completed: false,
-          rankStart: rStart,
-          rankEnd: midRank,
-        });
-        newScores[id] = [0, 0];
-      }
-      if (wN % 2 === 1) {
-        const byeIdx = wMatches;
-        idx++;
-        const id = `r${nextRound}_wbye${idx}`;
-        newMatches.push({
-          id,
-          round: nextRound,
-          bracket: "winners",
-          player1_id: winners[byeIdx]!,
-          player2_id: null,
-          score_player1: 0,
-          score_player2: 0,
-          completed: true,
-          rankStart: rStart,
-          rankEnd: midRank,
-        });
-        newScores[id] = [0, 0];
-      }
-    } else if (winners.length === 1) {
-      const place = Math.floor((rStart + midRank) / 2);
-      idx++;
-      const id = `placement_${place}`;
-      newMatches.push({
-        id,
-        round: nextRound,
-        bracket: "placement",
-        player1_id: winners[0]!,
-        player2_id: null,
-        score_player1: 0,
-        score_player2: 0,
-        completed: true,
-        placeLabel: `${placeToOrdinal(place)} place`,
-        rankStart: rStart,
-        rankEnd: midRank,
-      });
-      newScores[id] = [0, 0];
-    }
-
-    if (losers.length > 1) {
-      const lN = losers.length;
-      const lMatches = Math.floor(lN / 2);
-      for (let i = 0; i < lMatches; i++) {
-        const j = lN - 1 - i;
-        idx++;
-        const id = `r${nextRound}_l${idx}`;
-        newMatches.push({
-          id,
-          round: nextRound,
-          bracket: "consolation",
-          player1_id: losers[i]!,
-          player2_id: losers[j]!,
-          score_player1: 0,
-          score_player2: 0,
-          completed: false,
-          rankStart: midRank + 1,
-          rankEnd: rEnd,
-        });
-        newScores[id] = [0, 0];
-      }
-      if (lN % 2 === 1) {
-        const byeIdx = lMatches;
-        idx++;
-        const id = `r${nextRound}_lbye${idx}`;
-        newMatches.push({
-          id,
-          round: nextRound,
-          bracket: "consolation",
-          player1_id: losers[byeIdx]!,
-          player2_id: null,
-          score_player1: 0,
-          score_player2: 0,
-          completed: true,
-          rankStart: midRank + 1,
-          rankEnd: rEnd,
-        });
-        newScores[id] = [0, 0];
-      }
-    } else if (losers.length === 1) {
-      const place = Math.floor((midRank + 1 + rEnd) / 2);
-      idx++;
-      const id = `placement_${place}`;
-      newMatches.push({
-        id,
-        round: nextRound,
-        bracket: "placement",
-        player1_id: losers[0]!,
-        player2_id: null,
-        score_player1: 0,
-        score_player2: 0,
-        completed: true,
-        placeLabel: `${placeToOrdinal(place)} place`,
-        rankStart: midRank + 1,
-        rankEnd: rEnd,
-      });
-      newScores[id] = [0, 0];
-    }
+    resolved.set(match.id, match);
   }
 
-  if (newMatches.length === 0) return null;
+  const raw = structure.placements.map((p) => ({
+    rawPlace: p.rawPlace,
+    side: side(p.source),
+  }));
+  const players = raw.filter(
+    (r): r is { rawPlace: number; side: { kind: "player"; id: string } } =>
+      r.side.kind === "player",
+  );
+  const byeRawPlaces = raw
+    .filter((r) => r.side.kind === "bye")
+    .map((r) => r.rawPlace);
+  const places = players.map((r) => ({
+    id: r.side.id,
+    place: r.rawPlace - byeRawPlaces.filter((b) => b < r.rawPlace).length,
+  }));
 
   return {
-    matches: [...currentMatches, ...newMatches],
-    scores: { ...currentScores, ...newScores },
+    sections: structure.sections,
+    matches: resolved,
+    places,
+    complete: places.length === n,
   };
 }
 
-export function reconstructBracket(
-  seeded: Player[],
-  games: GameData[],
-): { matches: MatchSlot[]; scores: Record<string, [number, number]> } {
-  const { matches: initialMatches, scores: initialScores } =
-    buildBracketMatches(seeded);
-
-  let currentMatches = initialMatches;
-  let currentScores = initialScores;
-
-  const sortedGames = [...games].sort((a, b) =>
-    a.game_id.localeCompare(b.game_id),
-  );
-
-  for (const game of sortedGames) {
-    const p1 = game.player1.innohassle_id;
-    const p2 = game.player2.innohassle_id;
-    const finished =
-      game.finished || game.player1.score > 0 || game.player2.score > 0;
-    if (!finished) continue;
-
-    const match = currentMatches.find(
-      (m) =>
-        !m.completed &&
-        m.bracket !== "placement" &&
-        ((m.player1_id === p1 && m.player2_id === p2) ||
-          (m.player1_id === p2 && m.player2_id === p1)),
-    );
-    if (!match) continue;
-
-    const swapped = match.player1_id !== p1;
-
-    const updated = currentMatches.map((m) =>
-      m.id === match.id
-        ? {
-            ...m,
-            game_id: game.game_id,
-            score_player1: swapped ? game.player2.score : game.player1.score,
-            score_player2: swapped ? game.player1.score : game.player2.score,
-            completed: true,
-          }
-        : m,
-    );
-
-    const newScores = {
-      ...currentScores,
-      [match.id]: swapped
-        ? ([game.player2.score, game.player1.score] as [number, number])
-        : ([game.player1.score, game.player2.score] as [number, number]),
-    };
-
-    currentMatches = updated;
-    currentScores = newScores;
-
-    const advanced = tryAdvance(updated, newScores);
-    if (advanced) {
-      currentMatches = advanced.matches;
-      currentScores = advanced.scores;
-    }
-  }
-
-  return { matches: currentMatches, scores: currentScores };
+/** Sections that contain at least one real (non-bye) match, labelled with real places */
+export function visibleSections(bracket: ResolvedBracket, playerCount: number) {
+  return bracket.sections
+    .filter((s) =>
+      s.matchIds.flat().some((id) => bracket.matches.get(id)!.status !== "bye"),
+    )
+    .map((s) => ({
+      ...s,
+      labelFrom: Math.min(s.placeFrom, playerCount),
+      labelTo: Math.min(s.placeTo, playerCount),
+    }));
 }
 
-export { ordinalPlace };
+export function roundLabel(
+  section: BracketSection,
+  round: number,
+  hasByes = false,
+): string {
+  const left = section.rounds - round;
+  // a first round padded with byes is not a real 1/8 or 1/4
+  if (round === 0 && hasByes && left > 1) return "Round 1";
+  if (left === 1) {
+    return section.placeFrom === 1
+      ? "Final"
+      : `${ordinal(section.placeFrom)} place`;
+  }
+  return `1/${2 ** (left - 1)}`;
+}

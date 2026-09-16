@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/ui/cn";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
 import {
@@ -9,6 +10,13 @@ import { useToast } from "@/components/toast";
 import { Modal } from "@/components/common/Modal.tsx";
 import { ValidationMatches } from "./ValidationMatches";
 import { QualificationMatches } from "./QualificationMatches";
+import { resolveBracket, standingsToTop, topsEqual } from "./bracket-utils";
+import { Pager } from "./Pager";
+import { pageSlice } from "./ranking";
+import { formatDay } from "./format";
+
+/** places shown for a completed tournament before "Show all" */
+const TOP_PLACES_PREVIEW = 3;
 
 type SchemaPlayer = tabletennisTypes.SchemaPlayer;
 
@@ -23,6 +31,10 @@ type TourData = {
     total_count: number;
   };
   qual_top?: Record<string, string>;
+  val_top?: Record<string, string>;
+  groups?: Record<string, string[]>;
+  groups_locked?: boolean;
+  qual_seeding?: string[];
 };
 
 type GamePlayer = {
@@ -65,14 +77,22 @@ function getPlacementData(tour: TourData):
   }
 
   return Object.entries(qualTop)
+    .sort(([a], [b]) => Number(a) - Number(b))
     .map(([place, playerId]) => ({
       playerId,
       placeLabel: ordinal(Number(place)),
-    }))
-    .sort((a, b) => {
-      const num = (label: string) => Number(label.replace(/\D/g, ""));
-      return num(a.placeLabel) - num(b.placeLabel);
-    });
+    }));
+}
+
+/** players already written in the input (every token except the one being typed) */
+function typedTokens(raw: string): Set<string> {
+  const tokens = raw.split(/[\n,]+/);
+  return new Set(
+    tokens
+      .slice(0, -1)
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean),
+  );
 }
 
 function parsePlayersInput(raw: string): {
@@ -105,7 +125,6 @@ export function TabletennisTournaments() {
   const [addPlayersNickToId, setAddPlayersNickToId] = useState<
     Map<string, string>
   >(new Map());
-  const [qualificationLocked, setQualificationLocked] = useState(false);
   const [name, setName] = useState("");
   const [playersInput, setPlayersInput] = useState("");
   const [createNickToId, setCreateNickToId] = useState<Map<string, string>>(
@@ -114,6 +133,8 @@ export function TabletennisTournaments() {
   const [showPlayerSuggestions, setShowPlayerSuggestions] = useState(false);
   const [showCreateSuggestions, setShowCreateSuggestions] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [completedPage, setCompletedPage] = useState(0);
+  const [expandedTours, setExpandedTours] = useState<Set<string>>(new Set());
   const addInputRef = useRef<HTMLInputElement>(null);
   const createInputRef = useRef<HTMLTextAreaElement>(null);
   const { showError } = useToast();
@@ -226,6 +247,7 @@ export function TabletennisTournaments() {
       .map((p) => ({
         name: p.nickname,
         id: p.innohassle_id,
+        rating: p.rating,
       }));
   }, [playersData, activeTour]);
 
@@ -278,14 +300,20 @@ export function TabletennisTournaments() {
   const addSuggestions = useMemo(() => {
     if (!addInputToken || addInputToken.length < 1) return [];
     const lower = addInputToken.toLowerCase();
+    const typed = typedTokens(addPlayersInput);
     return addablePlayers
+      .filter(
+        (p) =>
+          !typed.has(p.nickname.toLowerCase()) &&
+          !typed.has(p.innohassle_id.toLowerCase()),
+      )
       .filter(
         (p) =>
           p.nickname.toLowerCase().includes(lower) ||
           p.innohassle_id.toLowerCase().includes(lower),
       )
       .slice(0, 10);
-  }, [addablePlayers, addInputToken]);
+  }, [addablePlayers, addInputToken, addPlayersInput]);
 
   const createInputToken = useMemo(() => {
     const tokens = playersInput.split(/[\n,]+/);
@@ -295,14 +323,19 @@ export function TabletennisTournaments() {
   const createSuggestions = useMemo(() => {
     if (!createInputToken || createInputToken.length < 1) return [];
     const lower = createInputToken.toLowerCase();
+    const typed = typedTokens(playersInput);
     return allPlayers
+      .filter(
+        (p) =>
+          !typed.has(p.name.toLowerCase()) && !typed.has(p.id.toLowerCase()),
+      )
       .filter(
         (p) =>
           p.name.toLowerCase().includes(lower) ||
           p.id.toLowerCase().includes(lower),
       )
       .slice(0, 10);
-  }, [allPlayers, createInputToken]);
+  }, [allPlayers, createInputToken, playersInput]);
 
   const allGames = useMemo(() => {
     if (!gamesByIdData) return [];
@@ -322,11 +355,34 @@ export function TabletennisTournaments() {
     return allGames.filter((g) => ids.has(g.game_id));
   }, [allGames, activeTour]);
 
-  const valTop = useMemo(() => {
-    return (activeTour as unknown as Record<string, unknown>)?.val_top as
-      | Record<string, string>
-      | undefined;
-  }, [activeTour]);
+  const queryClient = useQueryClient();
+  const refreshTournament = useCallback(async () => {
+    await Promise.all([
+      refetchTours(),
+      queryClient.invalidateQueries({
+        queryKey: ["tabletennis", "get", "/get-games-by-id"],
+      }),
+    ]);
+    refetchAllTours();
+  }, [refetchTours, refetchAllTours, queryClient]);
+
+  const groupsLocked = activeTour?.groups_locked ?? false;
+
+  const { mutateAsync: changeQualTop } = $tabletennis.useMutation(
+    "post",
+    "/reg-tour/change-qual-top",
+    { onError: (error) => showError("Error", formatApiErrorMessage(error)) },
+  );
+
+  const qualProgress = useMemo(() => {
+    const seeding = activeTour?.qual_seeding ?? [];
+    if (seeding.length === 0) return null;
+    const bracket = resolveBracket(seeding, qualificationGames);
+    const left = [...bracket.matches.values()].filter(
+      (m) => m.status === "ready" || m.status === "waiting",
+    ).length;
+    return { bracket, left };
+  }, [activeTour, qualificationGames]);
 
   const handleAddOutsideClick = useCallback((e: MouseEvent) => {
     if (
@@ -373,8 +429,23 @@ export function TabletennisTournaments() {
     });
   }
 
-  function handleEndTournament() {
+  async function handleEndTournament() {
     if (!activeTour) return;
+    // store every place decided so far before the tournament is archived,
+    // so a tournament ended early still shows the places that were played out
+    if (qualProgress && qualProgress.bracket.places.length > 0) {
+      const top = standingsToTop(qualProgress.bracket.places);
+      if (!topsEqual(top, activeTour.qual_top ?? {})) {
+        try {
+          await changeQualTop({
+            params: { query: { tour_id: activeTour.id } },
+            body: top,
+          });
+        } catch {
+          return; // toast shown by onError, keep the tournament open
+        }
+      }
+    }
     finishTour({ params: { query: { tour_id: activeTour.id } } });
   }
 
@@ -426,7 +497,7 @@ export function TabletennisTournaments() {
               <span className="text-base-content/50 hidden text-xs md:inline">
                 {activeTour.name}
               </span>
-              {!qualificationLocked && (
+              {isAdmin && !groupsLocked && (
                 <button
                   type="button"
                   className="border-base-content/30 text-base-content/50 hover:text-base-content hover:bg-base-content/10 rounded-lg border px-2 py-1 text-[10px] transition-colors md:text-xs"
@@ -435,22 +506,24 @@ export function TabletennisTournaments() {
                   Add players
                 </button>
               )}
-              <button
-                type="button"
-                className="border-base-content/30 text-base-content/50 hover:text-base-content hover:bg-base-content/10 rounded-lg border px-2 py-1 text-[10px] transition-colors md:text-xs"
-                onClick={() => setShowEndConfirm(true)}
-                disabled={finishing}
-              >
-                {finishing ? (
-                  <span className="loading loading-spinner loading-sm" />
-                ) : (
-                  "End tournament"
-                )}
-              </button>
+              {isAdmin && (
+                <button
+                  type="button"
+                  className="border-base-content/30 text-base-content/50 hover:text-base-content hover:bg-base-content/10 rounded-lg border px-2 py-1 text-[10px] transition-colors md:text-xs"
+                  onClick={() => setShowEndConfirm(true)}
+                  disabled={finishing}
+                >
+                  {finishing ? (
+                    <span className="loading loading-spinner loading-sm" />
+                  ) : (
+                    "End tournament"
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
-          {showAddPlayers && !qualificationLocked && (
+          {showAddPlayers && !groupsLocked && (
             <div className="border-base-300 flex items-center gap-2 border-b px-4 py-3">
               <div className="relative flex-1">
                 <input
@@ -524,22 +597,27 @@ export function TabletennisTournaments() {
               key={`validation-${activeTour.id}`}
               players={playersList}
               tourId={activeTour.id}
+              groups={activeTour.groups ?? {}}
+              groupsLocked={groupsLocked}
+              qualStarted={(activeTour.qual_seeding ?? []).length > 0}
               validationGames={validationGames}
+              isAdmin={isAdmin}
+              onChanged={refreshTournament}
             />
           )}
           {mode === "qualification" && (
             <QualificationMatches
               key={`qualification-${activeTour.id}`}
               players={playersList}
-              validationGames={validationGames}
-              valTop={valTop}
               tourId={activeTour.id}
+              groups={activeTour.groups ?? {}}
+              groupsLocked={groupsLocked}
+              qualSeeding={activeTour.qual_seeding ?? []}
+              qualTop={activeTour.qual_top ?? {}}
+              validationGames={validationGames}
               qualificationGames={qualificationGames}
-              onTourRefetch={() => {
-                refetchTours();
-                refetchAllTours();
-              }}
-              onLock={() => setQualificationLocked(true)}
+              isAdmin={isAdmin}
+              onChanged={refreshTournament}
             />
           )}
         </div>
@@ -553,6 +631,20 @@ export function TabletennisTournaments() {
             Are you sure you want to finish <strong>{activeTour.name}</strong>?
             This action cannot be undone.
           </p>
+          {!qualProgress && (
+            <p className="mt-3 rounded-xl border border-[#712BB2]/40 bg-[#712BB2]/10 px-3 py-2 text-sm">
+              Qualification has not started, no final standings will be saved.
+            </p>
+          )}
+          {qualProgress && !qualProgress.bracket.complete && (
+            <p className="mt-3 rounded-xl border border-[#712BB2]/40 bg-[#712BB2]/10 px-3 py-2 text-sm">
+              Qualification is not finished: {qualProgress.left} match
+              {qualProgress.left === 1 ? "" : "es"} left. Only the places
+              decided so far ({qualProgress.bracket.places.length} of{" "}
+              {activeTour.qual_seeding?.length ?? 0}) will be saved, and no
+              bonuses are granted.
+            </p>
+          )}
           <div className="mt-4 flex justify-end gap-2">
             <button
               type="button"
@@ -706,33 +798,73 @@ export function TabletennisTournaments() {
           <h2 className="text-base-content mb-4 px-5 text-lg font-light">
             Completed tournaments
           </h2>
+          <Pager
+            page={completedPage}
+            total={completedTours.length}
+            onChange={setCompletedPage}
+          />
           <div className="flex flex-col gap-4">
-            {completedTours.map((tour) => {
+            {pageSlice(completedTours, completedPage).map((tour) => {
               const placements = getPlacementData(tour);
+              const expanded = expandedTours.has(tour.id);
+              const shown =
+                placements && !expanded
+                  ? placements.slice(0, TOP_PLACES_PREVIEW)
+                  : placements;
+              const hiddenCount =
+                (placements?.length ?? 0) - TOP_PLACES_PREVIEW;
               return (
                 <div key={tour.id} className="bg-base-200 rounded-box mx-5 p-4">
-                  <div className="mb-3 flex items-center justify-between">
-                    <span className="text-sm font-medium">{tour.name}</span>
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <span className="min-w-0 truncate text-sm font-medium">
+                      {tour.name}
+                    </span>
+                    {tour.date && (
+                      <span className="text-base-content/40 shrink-0 text-[11px] tabular-nums">
+                        {formatDay(tour.date)}
+                      </span>
+                    )}
                   </div>
-                  {placements ? (
+                  {shown ? (
                     <div className="flex flex-col gap-1">
-                      {[...placements]
-                        .sort((a, b) =>
-                          a.placeLabel.localeCompare(b.placeLabel),
-                        )
-                        .map((p, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center justify-between"
-                          >
-                            <span className="text-xs font-medium">
-                              {playerNameMap.get(p.playerId) ?? p.playerId}
-                            </span>
-                            <span className="text-base-content/50 text-[10px]">
-                              {p.placeLabel}
-                            </span>
-                          </div>
-                        ))}
+                      {shown.map((p) => (
+                        <div
+                          key={p.placeLabel}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="text-xs font-medium">
+                            {playerNameMap.get(p.playerId) ?? p.playerId}
+                          </span>
+                          <span className="text-base-content/50 text-[10px]">
+                            {p.placeLabel}
+                          </span>
+                        </div>
+                      ))}
+                      {hiddenCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedTours((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(tour.id)) next.delete(tour.id);
+                              else next.add(tour.id);
+                              return next;
+                            })
+                          }
+                          className="mt-1 flex min-h-9 items-center gap-1 self-start text-xs font-medium text-[#712BB2]"
+                        >
+                          <span
+                            className={
+                              expanded
+                                ? "icon-[mdi--chevron-up] text-base"
+                                : "icon-[mdi--chevron-down] text-base"
+                            }
+                          />
+                          {expanded
+                            ? "Show top 3 only"
+                            : `Show all ${placements!.length} places`}
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <p className="text-base-content/50 text-xs">

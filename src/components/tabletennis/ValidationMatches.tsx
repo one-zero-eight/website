@@ -1,533 +1,1104 @@
-import { useState, useEffect, useMemo, Fragment } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/ui/cn";
-import { $tabletennis } from "@/api/tabletennis";
+import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
+import { ScoreSheet } from "./ScoreSheet";
+import {
+  type GameData,
+  type Groups,
+  type Player,
+  groupGamesTotal,
+  groupName,
+  groupStandings,
+  pairKey,
+  snakeGroups,
+  suggestNextMatches,
+  type MatchSuggestion,
+} from "./bracket-utils";
+import { DROP_ATTR, useGroupDrag } from "./useGroupDrag";
 
-type GamePlayer = {
-  innohassle_id: string;
-  nickname: string;
-  rating: number;
-  registered: boolean;
-  score: number;
+const UNASSIGNED = "?";
+
+type OpenGame = { game_id: string; p1: string; p2: string };
+type Scoring = OpenGame & {
+  mode: "finish" | "fix";
+  initial?: [number, number];
 };
-
-type GameData = {
-  game_id: string;
-  tour_id: string;
-  tournament_name: string;
-  finished: boolean;
-  player1: GamePlayer;
-  player2: GamePlayer;
-};
-
-function matchKey(a: string, b: string) {
-  return [a, b].sort((a, b) => a.localeCompare(b)).join("-");
-}
-
-function computeValStandings(
-  players: { name: string; id: string }[],
-  games: {
-    player1_id: string;
-    player2_id: string;
-    score_player1: number;
-    score_player2: number;
-  }[],
-): { id: string; name: string; wins: number; played: number }[] {
-  const map = new Map<string, { name: string; wins: number; played: number }>();
-  for (const p of players) {
-    map.set(p.id, { name: p.name, wins: 0, played: 0 });
-  }
-  for (const g of games) {
-    const p1 = map.get(g.player1_id);
-    const p2 = map.get(g.player2_id);
-    if (p1) {
-      p1.played += 1;
-      if (g.score_player1 > g.score_player2) p1.wins += 1;
-    }
-    if (p2) {
-      p2.played += 1;
-      if (g.score_player2 > g.score_player1) p2.wins += 1;
-    }
-  }
-  return Array.from(map.entries())
-    .map(([id, s]) => ({ id, ...s }))
-    .sort((a, b) => {
-      const wpa = a.played ? a.wins / a.played : 0;
-      const wpb = b.played ? b.wins / b.played : 0;
-      if (wpb !== wpa) return wpb - wpa;
-      if (b.played !== a.played) return b.played - a.played;
-      return a.name.localeCompare(b.name);
-    });
-}
 
 export function ValidationMatches({
   players,
   tourId,
+  groups,
+  groupsLocked,
+  qualStarted,
   validationGames,
-  onStatsUpdate,
+  isAdmin,
+  onChanged,
 }: {
-  players: { name: string; id: string }[];
+  players: Player[];
   tourId: string;
+  groups: Groups;
+  groupsLocked: boolean;
+  qualStarted: boolean;
   validationGames: GameData[];
-  onStatsUpdate?: (
-    stats: { playerId: string; wins: number; played: number }[],
-  ) => void;
+  isAdmin: boolean;
+  onChanged: () => Promise<void>;
 }) {
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [ongoingMatches, setOngoingMatches] = useState<
-    { game_id: string; player1_id: string; player2_id: string }[]
-  >([]);
-  const [completedMatches, setCompletedMatches] = useState<
-    {
-      game_id: string;
-      player1_id: string;
-      player2_id: string;
-      score_player1: number;
-      score_player2: number;
-    }[]
-  >([]);
-  const [localScores, setLocalScores] = useState<
-    Record<string, [number, number]>
-  >({});
-  const [activeCompletedKey, setActiveCompletedKey] = useState<string | null>(
-    null,
+  const names = useMemo(
+    () => new Map(players.map((p) => [p.id, p.name])),
+    [players],
   );
-  const [creating, setCreating] = useState(false);
-  const [finishing, setFinishing] = useState<string | null>(null);
-  const { showError } = useToast();
+  const getName = (id: string) => names.get(id) ?? id;
 
-  const { mutateAsync: createGame } = $tabletennis.useMutation(
-    "post",
-    "/reg-game",
-    {
-      onError: (error) => showError("Error", formatApiErrorMessage(error)),
-    },
-  );
-
-  const { mutateAsync: finishGame } = $tabletennis.useMutation(
-    "post",
-    "/finish-game",
-    {
-      onError: (error) => showError("Error", formatApiErrorMessage(error)),
-    },
-  );
-  const { mutateAsync: changeValTop } = $tabletennis.useMutation(
-    "post",
-    "/reg-tour/change-val-top",
-    {
-      onError: (error) => showError("Error", formatApiErrorMessage(error)),
-    },
-  );
-
-  useEffect(() => {
-    for (const game of validationGames) {
-      const p1Id = game.player1.innohassle_id;
-      const p2Id = game.player2.innohassle_id;
-      const key = matchKey(p1Id, p2Id);
-      if (game.finished || game.player1.score > 0 || game.player2.score > 0) {
-        setCompletedMatches((prev) => {
-          if (prev.some((m) => m.game_id === game.game_id)) return prev;
-          return [
-            ...prev,
-            {
-              game_id: game.game_id,
-              player1_id: p1Id,
-              player2_id: p2Id,
-              score_player1: game.player1.score,
-              score_player2: game.player2.score,
-            },
-          ];
-        });
-      } else {
-        setOngoingMatches((prev) => {
-          if (prev.some((m) => matchKey(m.player1_id, m.player2_id) === key))
-            return prev;
-          return [
-            ...prev,
-            {
-              game_id: game.game_id,
-              player1_id: p1Id,
-              player2_id: p2Id,
-            },
-          ];
-        });
-      }
-    }
-  }, [validationGames]);
-
-  const ongoingIds = ongoingMatches.flatMap((m) => [
-    m.player1_id,
-    m.player2_id,
-  ]);
-  const availablePlayers = players.filter((p) => !ongoingIds.includes(p.id));
-
-  const alreadyPlayedKeys = useMemo(() => {
-    const keys = new Set<string>();
-    for (const m of completedMatches) {
-      keys.add(matchKey(m.player1_id, m.player2_id));
-    }
-    return keys;
-  }, [completedMatches]);
-
-  useEffect(() => {
-    if (!onStatsUpdate) return;
-    const stats = players.map((p) => {
-      const played = completedMatches.filter(
-        (m) => m.player1_id === p.id || m.player2_id === p.id,
-      ).length;
-      const wins = completedMatches.filter(
-        (m) =>
-          (m.player1_id === p.id && m.score_player1 > m.score_player2) ||
-          (m.player2_id === p.id && m.score_player2 > m.score_player1),
-      ).length;
-      return { playerId: p.id, wins, played };
-    });
-    onStatsUpdate(stats);
-  }, [completedMatches, players, onStatsUpdate]);
-
-  function handleToggle(id: string) {
-    setSelectedIds((prev) => {
-      if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (prev.length >= 2) return prev;
-      if (prev.length === 1 && alreadyPlayedKeys.has(matchKey(prev[0]!, id)))
-        return prev;
-      return [...prev, id];
-    });
-  }
-
-  async function handleStartGame() {
-    if (selectedIds.length !== 2) return;
-    setCreating(true);
-    try {
-      const result = await createGame({
-        params: {
-          query: {
-            tour_id: tourId,
-            tip: "val" as const,
-            player1_id: selectedIds[0],
-            player2_id: selectedIds[1],
-          },
-        },
-      } as any);
-
-      const gameId =
-        (result as any)?.id ??
-        (result as any)?._id ??
-        (result as any)?.game_id ??
-        "";
-      setOngoingMatches((prev) => [
-        ...prev,
-        {
-          game_id: gameId,
-          player1_id: selectedIds[0]!,
-          player2_id: selectedIds[1]!,
-        },
-      ]);
-      setLocalScores((prev) => ({
-        ...prev,
-        [matchKey(selectedIds[0]!, selectedIds[1]!)]: [0, 0],
-      }));
-      setSelectedIds([]);
-    } catch {
-      // error handled by onError callback
-    } finally {
-      setCreating(false);
-    }
-  }
-
-  async function handleComplete(match: {
-    game_id: string;
-    player1_id: string;
-    player2_id: string;
-  }) {
-    const key = matchKey(match.player1_id, match.player2_id);
-    const scores = localScores[key] ?? [0, 0];
-    setFinishing(match.game_id);
-    try {
-      await finishGame({
-        params: {
-          query: {
-            game_id: match.game_id,
-            s1: scores[0],
-            s2: scores[1],
-            tour_id: tourId,
-          },
-        },
-      } as any);
-
-      const newCompleted = {
-        game_id: match.game_id,
-        player1_id: match.player1_id,
-        player2_id: match.player2_id,
-        score_player1: scores[0],
-        score_player2: scores[1],
-      };
-      setCompletedMatches((prev) => [...prev, newCompleted]);
-      setOngoingMatches((prev) =>
-        prev.filter((m) => m.game_id !== match.game_id),
-      );
-      // Sync standings to server
-      const allCompleted = [...completedMatches, newCompleted];
-      const standings = computeValStandings(players, allCompleted);
-      const valTopBody: Record<string, string> = {};
-      standings.forEach(({ id }, idx) => {
-        valTopBody[String(idx + 1)] = id;
-      });
-      await changeValTop({
-        params: { query: { tour_id: tourId } },
-        body: valTopBody,
-      } as any);
-    } catch {
-      // error handled by onError callback
-    } finally {
-      setFinishing(null);
-    }
-  }
-
-  function handleScoreChange(
-    match: { player1_id: string; player2_id: string },
-    player: 1 | 2,
-    value: string,
-  ) {
-    const key = matchKey(match.player1_id, match.player2_id);
-    setLocalScores((prev) => {
-      const current = prev[key] ?? [0, 0];
-      const next: [number, number] =
-        player === 1
-          ? [Math.max(0, Number(value) || 0), current[1]]
-          : [current[0], Math.max(0, Number(value) || 0)];
-      return { ...prev, [key]: next };
-    });
-  }
-
-  function getPlayerName(id: string) {
-    return players.find((p) => p.id === id)?.name ?? id;
-  }
-
-  function getKey(match: { player1_id: string; player2_id: string }) {
-    return matchKey(match.player1_id, match.player2_id);
-  }
-
-  function OngoingCard({
-    match,
-  }: {
-    match: { game_id: string; player1_id: string; player2_id: string };
-  }) {
-    const key = getKey(match);
-    const scores = localScores[key] ?? [0, 0];
-    const isFinishing = finishing === match.game_id;
-
+  if (!groupsLocked) {
     return (
-      <div className="bg-base-200 rounded-box flex flex-col gap-2 border border-[#712BB2]/30 p-3">
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-xs font-medium md:text-sm">
-            {getPlayerName(match.player1_id)}
+      <GroupSetup
+        players={players}
+        tourId={tourId}
+        serverGroups={groups}
+        isAdmin={isAdmin}
+        getName={getName}
+        onChanged={onChanged}
+      />
+    );
+  }
+
+  return (
+    <GroupStage
+      players={players}
+      tourId={tourId}
+      groups={groups}
+      qualStarted={qualStarted}
+      validationGames={validationGames}
+      isAdmin={isAdmin}
+      getName={getName}
+      onChanged={onChanged}
+    />
+  );
+}
+
+// ── stage 1: build groups ─────────────────────────────────────
+
+function GroupSetup({
+  players,
+  tourId,
+  serverGroups,
+  isAdmin,
+  getName,
+  onChanged,
+}: {
+  players: Player[];
+  tourId: string;
+  serverGroups: Groups;
+  isAdmin: boolean;
+  getName: (id: string) => string;
+  onChanged: () => Promise<void>;
+}) {
+  const { showError } = useToast();
+  const hasServerGroups = Object.keys(serverGroups).length > 0;
+  const defaultCount = Math.max(1, Math.round(players.length / 4));
+
+  const [draft, setDraft] = useState<Groups>(() =>
+    hasServerGroups ? serverGroups : snakeGroups(players, defaultCount),
+  );
+  const [dirty, setDirty] = useState(!hasServerGroups);
+  const [countPref, setCountPref] = useState<number | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  // follow server groups (another admin, a refetch) unless there are local edits
+  const serverKey = JSON.stringify(serverGroups);
+  useEffect(() => {
+    if (!dirty && hasServerGroups) setDraft(serverGroups);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverKey]);
+
+  // a fresh tournament without saved groups: re-snake when players load or change
+  const playersKey = players.map((p) => p.id).join();
+  useEffect(() => {
+    if (!hasServerGroups && dirty) {
+      setDraft(snakeGroups(players, countPref ?? defaultCount));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playersKey]);
+
+  const groupCount = Object.keys(draft).length;
+  const assigned = new Set(Object.values(draft).flat());
+  const unassigned = players
+    .filter((p) => !assigned.has(p.id))
+    .map((p) => p.id);
+  const tooSmall = Object.values(draft).some((m) => m.length < 2);
+  const canLock = unassigned.length === 0 && !tooSmall && groupCount > 0;
+
+  const { mutateAsync: setGroups } = $tabletennis.useMutation(
+    "post",
+    "/reg-tour/set-groups",
+    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+  );
+  const { mutateAsync: lockGroups } = $tabletennis.useMutation(
+    "post",
+    "/reg-tour/lock-groups",
+    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+  );
+
+  function edit(next: Groups) {
+    setDraft(next);
+    setDirty(true);
+  }
+
+  function changeCount(delta: number) {
+    const count = Math.min(
+      Math.max(1, groupCount + delta),
+      Math.max(1, Math.floor(players.length / 2)),
+    );
+    setCountPref(count);
+    edit(snakeGroups(players, count));
+    setSelected(null);
+  }
+
+  function movePlayer(id: string, target: string) {
+    setSelected(null);
+    const alreadyThere =
+      target === UNASSIGNED
+        ? !Object.values(draft).some((m) => m.includes(id))
+        : draft[target]?.includes(id);
+    if (alreadyThere) return;
+    const next: Groups = {};
+    for (const [name, members] of Object.entries(draft)) {
+      next[name] = members.filter((m) => m !== id);
+    }
+    if (target !== UNASSIGNED) next[target] = [...(next[target] ?? []), id];
+    edit(next);
+  }
+
+  function moveSelected(target: string) {
+    if (selected) movePlayer(selected, target);
+  }
+
+  const { drag, chipProps, consumeClick } = useGroupDrag(movePlayer);
+
+  function dropState(group: string) {
+    if (!drag) return undefined;
+    return drag.over === group ? "over" : "available";
+  }
+
+  function toggleSelected(id: string) {
+    if (consumeClick()) return;
+    setSelected(selected === id ? null : id);
+  }
+
+  async function run(action: "save" | "lock") {
+    setBusy(true);
+    try {
+      await setGroups({ params: { query: { tour_id: tourId } }, body: draft });
+      if (action === "lock") {
+        await lockGroups({ params: { query: { tour_id: tourId } } });
+      }
+      setDirty(false);
+      await onChanged();
+    } catch {
+      // toast shown by onError
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="flex flex-col gap-3 px-4 py-5 md:px-7">
+        <h2 className="text-xl font-light">Groups</h2>
+        {hasServerGroups ? (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Object.entries(serverGroups).map(([name, members]) => (
+              <GroupShell
+                key={name}
+                name={name}
+                subtitle={`${members.length} players`}
+              >
+                <div className="flex flex-wrap gap-2">
+                  {members.map((id) => (
+                    <span
+                      key={id}
+                      className="bg-base-200 rounded-lg px-3 py-1.5 text-sm"
+                    >
+                      {getName(id)}
+                    </span>
+                  ))}
+                </div>
+              </GroupShell>
+            ))}
+          </div>
+        ) : (
+          <p className="text-base-content/50 text-sm">
+            The organiser is forming the groups.
           </p>
-          <input
-            type="number"
-            min={0}
-            value={scores[0]}
-            disabled={isFinishing}
-            onFocus={(e) => e.target.select()}
-            onChange={(e) => handleScoreChange(match, 1, e.target.value)}
-            className="input input-xs bg-base-100 w-10 shrink-0 rounded-lg text-center disabled:opacity-30"
-          />
-        </div>
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-xs font-medium md:text-sm">
-            {getPlayerName(match.player2_id)}
-          </p>
-          <input
-            type="number"
-            min={0}
-            value={scores[1]}
-            disabled={isFinishing}
-            onFocus={(e) => e.target.select()}
-            onChange={(e) => handleScoreChange(match, 2, e.target.value)}
-            className="input input-xs bg-base-100 w-10 shrink-0 rounded-lg text-center disabled:opacity-30"
-          />
-        </div>
-        <div className="mt-1 flex justify-end gap-2">
-          <button
-            type="button"
-            disabled={isFinishing}
-            className="rounded-lg border border-[#712BB2] px-2 py-1 text-[10px] text-[#712BB2] transition-colors hover:bg-[#712BB2]/10 disabled:opacity-40"
-            onClick={() => handleComplete(match)}
-          >
-            {isFinishing ? (
-              <span className="loading loading-spinner loading-xs" />
-            ) : (
-              "Complete"
-            )}
-          </button>
-        </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 px-7 py-5">
-      <h2 className="text-base-content text-xl font-light">
-        Select two players for a match
-      </h2>
-
-      <div className="flex flex-wrap gap-3">
-        {availablePlayers.map((p) => {
-          const alreadyPlayed =
-            selectedIds.length === 1 &&
-            alreadyPlayedKeys.has(matchKey(selectedIds[0]!, p.id));
-          return (
+    <div className="flex flex-col gap-4 px-4 py-5 md:px-7">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-light">Split players into groups</h2>
+          <p className="text-base-content/50 mt-0.5 text-xs">
+            Hold a player and drag them to another group, or tap a player and
+            then a group. Groups can be of any size.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-base-content/60 text-xs">Groups</span>
+          <div className="border-base-300 flex items-center rounded-xl border">
             <button
-              key={p.id}
               type="button"
-              disabled={alreadyPlayed}
-              title={
-                alreadyPlayed
-                  ? `Already played with ${getPlayerName(selectedIds[0]!)}`
-                  : undefined
-              }
-              onClick={() => handleToggle(p.id)}
-              className={cn(
-                "rounded-xl border-2 px-3 py-1.5 text-xs font-medium transition-all duration-150 md:px-4 md:py-2 md:text-sm",
-                selectedIds.includes(p.id)
-                  ? "border-[#712BB2] bg-[#712BB2] text-white"
-                  : alreadyPlayed
-                    ? "border-base-content/20 text-base-content/20 cursor-not-allowed"
-                    : "border-[#712BB2] hover:bg-[#712BB2]/10",
-              )}
+              aria-label="Fewer groups"
+              onClick={() => changeCount(-1)}
+              disabled={groupCount <= 1}
+              className="flex h-10 w-10 items-center justify-center disabled:opacity-30"
             >
-              {p.name}
+              <span className="icon-[mdi--minus]" />
             </button>
-          );
-        })}
+            <span className="w-6 text-center font-semibold tabular-nums">
+              {groupCount}
+            </span>
+            <button
+              type="button"
+              aria-label="More groups"
+              onClick={() => changeCount(1)}
+              disabled={groupCount >= Math.floor(players.length / 2)}
+              className="flex h-10 w-10 items-center justify-center disabled:opacity-30"
+            >
+              <span className="icon-[mdi--plus]" />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => changeCount(0)}
+            className="flex h-10 items-center gap-1 rounded-xl border border-[#712BB2] px-3 text-xs font-medium text-[#712BB2]"
+          >
+            <span className="icon-[mdi--shuffle-variant] text-base" />
+            By rating
+          </button>
+        </div>
       </div>
 
-      {selectedIds.length > 0 && (
-        <p className="text-base-content/70 text-sm">
-          Selected: {selectedIds.map((id) => getPlayerName(id)).join(", ")}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {Object.entries(draft).map(([name, members]) => (
+          <GroupShell
+            key={name}
+            name={name}
+            subtitle={`${members.length} player${members.length === 1 ? "" : "s"}`}
+            highlight={!drag && !!selected && !members.includes(selected)}
+            warn={members.length < 2}
+            onHeaderClick={selected ? () => moveSelected(name) : undefined}
+            dropId={name}
+            dropState={dropState(name)}
+          >
+            <div className="flex min-h-10 flex-wrap gap-2">
+              {members.map((id) => (
+                <PlayerChip
+                  key={id}
+                  label={getName(id)}
+                  active={selected === id}
+                  dragging={drag?.id === id}
+                  onClick={() => toggleSelected(id)}
+                  {...chipProps(id)}
+                />
+              ))}
+              {members.length === 0 && (
+                <span className="text-base-content/40 text-xs">
+                  Empty group
+                </span>
+              )}
+            </div>
+          </GroupShell>
+        ))}
+        {(unassigned.length > 0 || drag) && (
+          <GroupShell
+            name={UNASSIGNED}
+            subtitle="Not in a group"
+            warn
+            dropId={UNASSIGNED}
+            dropState={dropState(UNASSIGNED)}
+          >
+            <div className="flex min-h-10 flex-wrap gap-2">
+              {unassigned.map((id) => (
+                <PlayerChip
+                  key={id}
+                  label={getName(id)}
+                  active={selected === id}
+                  dragging={drag?.id === id}
+                  onClick={() => toggleSelected(id)}
+                  {...chipProps(id)}
+                />
+              ))}
+              {unassigned.length === 0 && (
+                <span className="text-base-content/40 text-xs">
+                  Drop here to remove from groups
+                </span>
+              )}
+            </div>
+          </GroupShell>
+        )}
+      </div>
+
+      {drag && (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed z-50 flex min-h-10 -translate-x-1/2 -translate-y-[130%] scale-105 items-center gap-1 rounded-xl border-2 border-[#712BB2] bg-[#712BB2] px-3 text-sm font-medium whitespace-nowrap text-white shadow-[0_12px_32px_rgba(113,43,178,0.45)]"
+          style={{ left: drag.x, top: drag.y }}
+        >
+          <span className="icon-[mdi--drag] text-base" />
+          {getName(drag.id)}
+        </div>
+      )}
+
+      {selected && (
+        <div className="bg-base-100/95 border-base-300 sticky bottom-0 z-[1] -mx-4 flex flex-wrap items-center gap-2 border-t px-4 py-3 backdrop-blur md:mx-0 md:rounded-xl md:border">
+          <span className="text-sm">
+            Move <b>{getName(selected)}</b> to
+          </span>
+          {Object.keys(draft).map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => moveSelected(name)}
+              disabled={draft[name]!.includes(selected)}
+              className="h-10 min-w-10 rounded-xl bg-[#712BB2] px-3 text-sm font-semibold text-white disabled:opacity-30"
+            >
+              {name}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => edit({ ...draft, [groupName(groupCount)]: [] })}
+            className="h-10 rounded-xl border border-[#712BB2] px-3 text-sm text-[#712BB2]"
+          >
+            + New group
+          </button>
+        </div>
+      )}
+
+      {tooSmall && (
+        <p className="text-warning text-xs">
+          Every group needs at least 2 players.
         </p>
       )}
 
-      <div>
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
         <button
           type="button"
-          disabled={selectedIds.length !== 2 || creating}
-          className={cn(
-            "rounded-xl border-2 border-[#712BB2] px-4 py-2 text-xs font-medium transition-all duration-150 md:px-6 md:py-3 md:text-sm",
-            selectedIds.length === 2 && !creating
-              ? "bg-[#712BB2] text-white hover:bg-[#712BB2]/90"
-              : "text-base-content/30 border-base-content/30 cursor-not-allowed",
-          )}
-          onClick={handleStartGame}
+          disabled={busy}
+          onClick={() => run("save")}
+          className="border-base-content/20 h-12 rounded-xl border px-6 text-sm font-medium disabled:opacity-40"
         >
-          {creating ? (
+          Save draft
+        </button>
+        <button
+          type="button"
+          disabled={busy || !canLock}
+          onClick={() => run("lock")}
+          className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#712BB2] px-6 text-sm font-medium text-white disabled:opacity-40"
+        >
+          {busy ? (
             <span className="loading loading-spinner loading-sm" />
           ) : (
-            "Start game"
+            <>
+              <span className="icon-[mdi--lock]" />
+              Lock groups & start
+            </>
           )}
         </button>
       </div>
+    </div>
+  );
+}
 
-      {ongoingMatches.length > 0 && (
-        <div>
-          <h3 className="text-base-content mb-3 text-sm font-semibold">
-            Ongoing matches
+// ── stage 2: round robin inside groups ───────────────────────
+
+function GroupStage({
+  players,
+  tourId,
+  groups,
+  qualStarted,
+  validationGames,
+  isAdmin,
+  getName,
+  onChanged,
+}: {
+  players: Player[];
+  tourId: string;
+  groups: Groups;
+  qualStarted: boolean;
+  validationGames: GameData[];
+  isAdmin: boolean;
+  getName: (id: string) => string;
+  onChanged: () => Promise<void>;
+}) {
+  const { showError, showConfirm } = useToast();
+  const [scoring, setScoring] = useState<Scoring | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const { mutateAsync: fixGame } = $tabletennis.useMutation(
+    "post",
+    "/fix-game",
+    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+  );
+  const { mutateAsync: cancelGame } = $tabletennis.useMutation(
+    "post",
+    "/cancel-game",
+    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+  );
+
+  const { mutateAsync: createGame } = $tabletennis.useMutation(
+    "post",
+    "/reg-game",
+    {
+      onError: (e) => showError("Error", formatApiErrorMessage(e)),
+    },
+  );
+  const { mutateAsync: finishGame } = $tabletennis.useMutation(
+    "post",
+    "/finish-game",
+    {
+      onError: (e) => showError("Error", formatApiErrorMessage(e)),
+    },
+  );
+  const { mutateAsync: unlockGroups } = $tabletennis.useMutation(
+    "post",
+    "/reg-tour/unlock-groups",
+    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+  );
+
+  const totalGames = Object.values(groups).reduce(
+    (s, m) => s + groupGamesTotal(m.length),
+    0,
+  );
+  const finishedCount = validationGames.filter((g) => g.finished).length;
+  const leftCount = Math.max(0, totalGames - finishedCount);
+  const canPlay = isAdmin && !qualStarted;
+  const suggestions = useMemo(
+    () =>
+      canPlay
+        ? suggestNextMatches(
+            groups,
+            validationGames,
+            Object.keys(groups).length,
+          )
+        : [],
+    [canPlay, groups, validationGames],
+  );
+
+  async function startMatch(p1: string, p2: string) {
+    setBusy(true);
+    try {
+      const res = await createGame({
+        params: {
+          query: {
+            tour_id: tourId,
+            tip: tabletennisTypes.PathsRegGamePostParametersQueryTip.val,
+            player1_id: p1,
+            player2_id: p2,
+          },
+        },
+      });
+      await onChanged();
+      const gameId = (res as { game_id?: string }).game_id;
+      if (gameId) setScoring({ game_id: gameId, p1, p2, mode: "finish" });
+    } catch {
+      // toast shown by onError; another admin may have started this pair, resync
+      await onChanged();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitScore(s1: number, s2: number) {
+    if (!scoring) return;
+    const query = { game_id: scoring.game_id, s1, s2, tour_id: tourId };
+    try {
+      if (scoring.mode === "fix") await fixGame({ params: { query } });
+      else await finishGame({ params: { query } });
+    } finally {
+      await onChanged();
+    }
+  }
+
+  async function cancelScoring() {
+    if (!scoring) return;
+    const ok = await showConfirm({
+      title: "Cancel match",
+      message: `Delete the match ${getName(scoring.p1)} vs ${getName(scoring.p2)}? No rating changes.`,
+      confirmText: "Delete",
+      cancelText: "Keep",
+      type: "warning",
+    });
+    if (!ok) throw new Error("kept");
+    try {
+      await cancelGame({
+        params: { query: { game_id: scoring.game_id, tour_id: tourId } },
+      });
+    } finally {
+      await onChanged();
+    }
+  }
+
+  async function unlock() {
+    setBusy(true);
+    try {
+      await unlockGroups({ params: { query: { tour_id: tourId } } });
+      await onChanged();
+    } catch {
+      // toast shown by onError
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-4 px-4 py-5 md:px-7">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl font-light">Group stage</h2>
+          <p className="text-base-content/50 text-xs">
+            {finishedCount} of {totalGames} games played · {leftCount} left ·{" "}
+            {players.length} players
+          </p>
+        </div>
+        {isAdmin && validationGames.length === 0 && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={unlock}
+            className="border-base-content/20 text-base-content/70 flex h-10 items-center gap-1 rounded-xl border px-3 text-xs"
+          >
+            <span className="icon-[mdi--lock-open-variant-outline]" />
+            Edit groups
+          </button>
+        )}
+      </div>
+      <div className="bg-base-300 h-1.5 overflow-hidden rounded-full">
+        <div
+          className="h-full rounded-full bg-[#712BB2] transition-all"
+          style={{
+            width: `${totalGames ? (finishedCount / totalGames) * 100 : 0}%`,
+          }}
+        />
+      </div>
+
+      {qualStarted && (
+        <p className="bg-base-200 rounded-xl px-4 py-3 text-xs">
+          Qualification has started, the group stage is closed.
+        </p>
+      )}
+
+      {suggestions.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <h3 className="flex items-center gap-2 text-sm font-semibold">
+            <span className="icon-[mdi--lightbulb-on-outline] text-lg text-[#712BB2]" />
+            Suggested next
           </h3>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {ongoingMatches.map((m, i) => (
-              <OngoingCard key={m.game_id || `${getKey(m)}-${i}`} match={m} />
+          <div className="-mx-4 flex snap-x scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:px-0">
+            {suggestions.map((s) => (
+              <div
+                key={`${s.group}-${s.p1}-${s.p2}`}
+                className="bg-base-100 flex w-64 shrink-0 snap-start flex-col gap-2 rounded-2xl border border-[#712BB2] p-3 shadow-[0_0_0_3px_rgba(113,43,178,0.12)]"
+              >
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#712BB2] font-bold text-white">
+                    {s.group}
+                  </span>
+                  <span className="text-base-content/60">
+                    {s.remaining} game{s.remaining === 1 ? "" : "s"} not started
+                  </span>
+                </div>
+                <p className="truncate text-sm font-medium">
+                  {getName(s.p1)}{" "}
+                  <span className="text-base-content/40">vs</span>{" "}
+                  {getName(s.p2)}
+                </p>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => startMatch(s.p1, s.p2)}
+                  className="flex h-10 items-center justify-center gap-1 rounded-xl bg-[#712BB2] text-sm font-medium text-white disabled:opacity-40"
+                >
+                  <span className="icon-[mdi--play]" />
+                  Start
+                </button>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {completedMatches.length > 0 && (
-        <div>
-          <h3 className="text-base-content mb-3 text-sm font-semibold">
-            Completed matches
-          </h3>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {completedMatches.map((m, i) => {
-              const key = getKey(m);
-              const isActive = activeCompletedKey === key;
-              return (
-                <div
-                  key={m.game_id || `${key}-${i}`}
-                  className="bg-base-200 rounded-box cursor-pointer border border-[#712BB2]/30 p-3"
-                  onClick={() =>
-                    setActiveCompletedKey((prev) => (prev === key ? null : key))
-                  }
-                >
-                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs font-medium md:text-sm">
-                    <span className="truncate text-left">
-                      {getPlayerName(m.player1_id)}
-                    </span>
-                    <div className="flex items-center justify-center gap-1.5 md:gap-3">
-                      <span className="tabular-nums">{m.score_player1}</span>
-                      <span className="text-base-content/50">:</span>
-                      <span className="tabular-nums">{m.score_player2}</span>
-                    </div>
-                    <span className="truncate text-right">
-                      {getPlayerName(m.player2_id)}
-                    </span>
-                  </div>
-                  {isActive && <div className="mt-2 flex justify-end gap-2" />}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {Object.entries(groups).map(([name, members]) => (
+          <GroupCard
+            key={name}
+            name={name}
+            members={members}
+            games={validationGames}
+            getName={getName}
+            canPlay={canPlay}
+            busy={busy}
+            suggestion={suggestions.find((s) => s.group === name)}
+            onStart={startMatch}
+            onOpenGame={setScoring}
+          />
+        ))}
+      </div>
 
-      {completedMatches.length > 0 && (
-        <div>
-          <h3 className="text-base-content mb-3 text-sm font-semibold">
-            Player stats
-          </h3>
-          <div className="bg-base-200 rounded-box border border-[#712BB2]/30 p-3">
-            {(() => {
-              const stats = players
-                .map((p) => {
-                  const played = completedMatches.filter(
-                    (m) => m.player1_id === p.id || m.player2_id === p.id,
-                  ).length;
-                  const wins = completedMatches.filter(
-                    (m) =>
-                      (m.player1_id === p.id &&
-                        m.score_player1 > m.score_player2) ||
-                      (m.player2_id === p.id &&
-                        m.score_player2 > m.score_player1),
-                  ).length;
-                  return { ...p, played, wins };
-                })
-                .filter((s) => s.played > 0);
-
-              return (
-                <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 gap-y-1 text-xs md:text-sm">
-                  {stats.map((s) => (
-                    <Fragment key={s.id}>
-                      <span className="truncate">{s.name}</span>
-                      <span className="text-base-content/70 tabular-nums">
-                        {s.played} played
-                      </span>
-                      <span className="text-base-content/70 tabular-nums">
-                        {s.wins} win{s.wins !== 1 ? "s" : ""}
-                      </span>
-                    </Fragment>
-                  ))}
-                </div>
-              );
-            })()}
-          </div>
-        </div>
-      )}
-
-      {availablePlayers.length === 0 && ongoingMatches.length === 0 && (
-        <p className="text-base-content/50 text-center text-sm">
-          All players have played
-        </p>
-      )}
+      <ScoreSheet
+        open={!!scoring}
+        onOpenChange={(v) => !v && setScoring(null)}
+        title={scoring?.mode === "fix" ? "Correct score" : "Group match"}
+        player1={scoring ? getName(scoring.p1) : ""}
+        player2={scoring ? getName(scoring.p2) : ""}
+        onSubmit={submitScore}
+        initial={scoring?.initial}
+        submitLabel={
+          scoring?.mode === "fix" ? "Save correction" : "Finish match"
+        }
+        note={
+          scoring?.mode === "fix"
+            ? "The old result's rating change is rolled back and recalculated."
+            : undefined
+        }
+        secondaryAction={
+          scoring?.mode === "finish"
+            ? { label: "Cancel this match", onClick: cancelScoring }
+            : undefined
+        }
+      />
     </div>
+  );
+}
+
+function GroupCard({
+  name,
+  members,
+  games,
+  getName,
+  canPlay,
+  busy,
+  suggestion,
+  onStart,
+  onOpenGame,
+}: {
+  name: string;
+  members: string[];
+  games: GameData[];
+  getName: (id: string) => string;
+  canPlay: boolean;
+  busy: boolean;
+  suggestion?: MatchSuggestion;
+  onStart: (p1: string, p2: string) => void;
+  onOpenGame: (g: Scoring) => void;
+}) {
+  const [open, setOpen] = useState(true);
+  const [picked, setPicked] = useState<string[]>([]);
+
+  const memberSet = useMemo(() => new Set(members), [members]);
+  const groupGames = useMemo(
+    () =>
+      games.filter(
+        (g) =>
+          memberSet.has(g.player1.innohassle_id) &&
+          memberSet.has(g.player2.innohassle_id),
+      ),
+    [games, memberSet],
+  );
+  const names = useMemo(
+    () => new Map(members.map((id) => [id, getName(id)])),
+    [members, getName],
+  );
+  const standings = useMemo(
+    () => groupStandings(name, members, groupGames, names),
+    [name, members, groupGames, names],
+  );
+
+  const results = new Map<string, GameData>();
+  const busyPlayers = new Set<string>();
+  const openGames: OpenGame[] = [];
+  for (const g of groupGames) {
+    const p1 = g.player1.innohassle_id;
+    const p2 = g.player2.innohassle_id;
+    if (g.finished) results.set(pairKey(p1, p2), g);
+    else {
+      busyPlayers.add(p1);
+      busyPlayers.add(p2);
+      openGames.push({ game_id: g.game_id, p1, p2 });
+    }
+  }
+  const openPairs = new Set(openGames.map((g) => pairKey(g.p1, g.p2)));
+
+  const total = groupGamesTotal(members.length);
+  const played = results.size;
+
+  function scoreFor(row: string, col: string) {
+    const g = results.get(pairKey(row, col));
+    if (!g) return null;
+    const rowIsP1 = g.player1.innohassle_id === row;
+    const mine = rowIsP1 ? g.player1.score : g.player2.score;
+    const theirs = rowIsP1 ? g.player2.score : g.player1.score;
+    return { mine, theirs, won: mine > theirs, game: g };
+  }
+
+  function toggle(id: string) {
+    setPicked((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= 2) return [id];
+      if (
+        prev.length === 1 &&
+        (results.has(pairKey(prev[0]!, id)) ||
+          openPairs.has(pairKey(prev[0]!, id)))
+      )
+        return prev;
+      return [...prev, id];
+    });
+  }
+
+  return (
+    <GroupShell
+      name={name}
+      subtitle={`${members.length} players · ${played}/${total} played · ${
+        total - played === 0 ? "all done" : `${total - played} left`
+      }`}
+      done={played === total}
+      collapsible
+      open={open}
+      onHeaderClick={() => setOpen((v) => !v)}
+    >
+      {open && (
+        <div className="flex flex-col gap-4">
+          <div className="-mx-4 overflow-x-auto px-4">
+            <table className="w-full min-w-max border-separate border-spacing-0 text-xs">
+              <thead>
+                <tr className="text-base-content/50">
+                  <th className="bg-base-100 sticky left-0 z-[1] py-1.5 pr-2 text-left font-medium">
+                    #
+                  </th>
+                  <th className="bg-base-100 sticky left-6 z-[1] py-1.5 pr-3 text-left font-medium">
+                    Player
+                  </th>
+                  <th className="w-9 py-1.5 text-center font-semibold text-[#712BB2]">
+                    Pts
+                  </th>
+                  <th className="w-11 py-1.5 pr-1 text-center font-medium">
+                    Sets
+                  </th>
+                  {standings.map((s) => (
+                    <th
+                      key={s.id}
+                      className="w-10 py-1.5 text-center font-medium"
+                    >
+                      {s.place}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {standings.map((row) => (
+                  <tr key={row.id}>
+                    <td className="bg-base-100 border-base-300 sticky left-0 z-[1] w-6 border-t py-2 pr-2 font-semibold tabular-nums">
+                      {row.place}
+                    </td>
+                    <td className="bg-base-100 border-base-300 sticky left-6 z-[1] max-w-[6.5rem] truncate border-t py-2 pr-3 font-medium">
+                      {getName(row.id)}
+                    </td>
+                    <td className="border-base-300 border-t py-2 text-center text-sm font-semibold tabular-nums">
+                      {row.points}
+                    </td>
+                    <td className="border-base-300 text-base-content/70 border-t py-2 pr-1 text-center tabular-nums">
+                      {row.setsWon}:{row.setsLost}
+                    </td>
+                    {standings.map((col) => {
+                      if (col.id === row.id) {
+                        return (
+                          <td
+                            key={col.id}
+                            className="border-base-300 border-t p-0.5"
+                          >
+                            <div className="bg-base-300 h-7 rounded-md bg-[repeating-linear-gradient(135deg,transparent_0_4px,rgba(113,43,178,0.25)_4px_5px)]" />
+                          </td>
+                        );
+                      }
+                      const sc = scoreFor(row.id, col.id);
+                      const live = openPairs.has(pairKey(row.id, col.id));
+                      return (
+                        <td
+                          key={col.id}
+                          className="border-base-300 border-t p-0.5"
+                        >
+                          <button
+                            type="button"
+                            disabled={!sc || !canPlay}
+                            aria-label={sc ? "Correct this score" : undefined}
+                            onClick={() =>
+                              sc &&
+                              onOpenGame({
+                                game_id: sc.game.game_id,
+                                p1: sc.game.player1.innohassle_id,
+                                p2: sc.game.player2.innohassle_id,
+                                mode: "fix",
+                                initial: [
+                                  sc.game.player1.score,
+                                  sc.game.player2.score,
+                                ],
+                              })
+                            }
+                            className={cn(
+                              "flex h-7 w-full items-center justify-center rounded-md tabular-nums disabled:cursor-default",
+                              sc && canPlay && "active:scale-95",
+                              sc?.won &&
+                                "bg-[#712BB2] font-semibold text-white",
+                              sc &&
+                                !sc.won &&
+                                "bg-base-200 text-base-content/70",
+                              live &&
+                                "border border-dashed border-[#712BB2] text-[#712BB2]",
+                            )}
+                          >
+                            {sc
+                              ? `${sc.mine}:${sc.theirs}`
+                              : live
+                                ? "live"
+                                : ""}
+                          </button>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {openGames.length > 0 && (
+            <div className="flex flex-col gap-2">
+              {openGames.map((g) => (
+                <button
+                  key={g.game_id}
+                  type="button"
+                  disabled={!canPlay}
+                  onClick={() => onOpenGame({ ...g, mode: "finish" })}
+                  className="flex min-h-12 items-center gap-2 rounded-xl border border-[#712BB2] px-3 py-2 text-left text-sm"
+                >
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#712BB2] opacity-60" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[#712BB2]" />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {getName(g.p1)}{" "}
+                    <span className="text-base-content/40">vs</span>{" "}
+                    {getName(g.p2)}
+                  </span>
+                  {canPlay && (
+                    <span className="shrink-0 text-xs font-medium text-[#712BB2]">
+                      Enter score
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {canPlay && played + openGames.length < total && (
+            <div className="flex flex-col gap-2">
+              <p className="text-base-content/50 text-xs">
+                Pick two players for the next match
+              </p>
+              {suggestion && (
+                <button
+                  type="button"
+                  onClick={() => setPicked([suggestion.p1, suggestion.p2])}
+                  className="flex min-h-10 items-center gap-2 rounded-xl border border-dashed border-[#712BB2] px-3 text-left text-xs text-[#712BB2]"
+                >
+                  <span className="icon-[mdi--lightbulb-on-outline] shrink-0 text-base" />
+                  <span className="min-w-0 flex-1 truncate">
+                    Suggested: {getName(suggestion.p1)} vs{" "}
+                    {getName(suggestion.p2)}
+                  </span>
+                </button>
+              )}
+              <div className="flex flex-wrap gap-2">
+                {members.map((id) => {
+                  const inGame = busyPlayers.has(id);
+                  const blocked =
+                    picked.length === 1 &&
+                    picked[0] !== id &&
+                    (results.has(pairKey(picked[0]!, id)) ||
+                      openPairs.has(pairKey(picked[0]!, id)));
+                  const everyoneDone = members.every(
+                    (o) =>
+                      o === id ||
+                      results.has(pairKey(id, o)) ||
+                      openPairs.has(pairKey(id, o)),
+                  );
+                  return (
+                    <PlayerChip
+                      key={id}
+                      label={getName(id)}
+                      active={picked.includes(id)}
+                      disabled={inGame || blocked || everyoneDone}
+                      hint={inGame ? "playing" : undefined}
+                      onClick={() => toggle(id)}
+                    />
+                  );
+                })}
+              </div>
+              <button
+                type="button"
+                disabled={picked.length !== 2 || busy}
+                onClick={() => {
+                  onStart(picked[0]!, picked[1]!);
+                  setPicked([]);
+                }}
+                className="flex h-12 items-center justify-center rounded-xl bg-[#712BB2] text-sm font-medium text-white disabled:opacity-30"
+              >
+                {busy ? (
+                  <span className="loading loading-spinner loading-sm" />
+                ) : picked.length === 2 ? (
+                  `Start ${getName(picked[0]!)} vs ${getName(picked[1]!)}`
+                ) : (
+                  "Start match"
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </GroupShell>
+  );
+}
+
+// ── shared bits ───────────────────────────────────────────────
+
+function GroupShell({
+  name,
+  subtitle,
+  children,
+  highlight,
+  warn,
+  done,
+  collapsible,
+  open,
+  onHeaderClick,
+  dropId,
+  dropState,
+}: React.PropsWithChildren<{
+  name: string;
+  subtitle: string;
+  highlight?: boolean;
+  warn?: boolean;
+  done?: boolean;
+  collapsible?: boolean;
+  open?: boolean;
+  onHeaderClick?: () => void;
+  /** makes the card a drop target for dragged players */
+  dropId?: string;
+  dropState?: "available" | "over";
+}>) {
+  return (
+    <section
+      {...(dropId !== undefined ? { [DROP_ATTR]: dropId } : {})}
+      className={cn(
+        "bg-base-100 border-base-300 rounded-2xl border p-4 transition-colors",
+        highlight && "border-dashed border-[#712BB2]",
+        dropState === "available" && "border-dashed border-[#712BB2]/50",
+        dropState === "over" &&
+          "border-[#712BB2] bg-[#712BB2]/10 ring-2 ring-[#712BB2]/40",
+      )}
+    >
+      <button
+        type="button"
+        onClick={onHeaderClick}
+        disabled={!onHeaderClick}
+        className="mb-3 flex w-full items-center gap-3 text-left disabled:cursor-default"
+      >
+        <span
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-base font-bold",
+            warn
+              ? "bg-base-300 text-base-content/60"
+              : "bg-[#712BB2] text-white",
+          )}
+        >
+          {name}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold">
+            {name === "?" ? "Unassigned" : `Group ${name}`}
+          </span>
+          <span className="text-base-content/50 block text-xs">{subtitle}</span>
+        </span>
+        {done && (
+          <span className="icon-[mdi--check-circle] text-xl text-[#712BB2]" />
+        )}
+        {highlight && (
+          <span className="text-xs font-medium text-[#712BB2]">Move here</span>
+        )}
+        {dropState === "over" && (
+          <span className="text-xs font-medium text-[#712BB2]">Drop here</span>
+        )}
+        {collapsible && (
+          <span
+            className={cn(
+              "icon-[mdi--chevron-down] text-base-content/50 text-xl transition-transform",
+              open && "rotate-180",
+            )}
+          />
+        )}
+      </button>
+      {children}
+    </section>
+  );
+}
+
+function PlayerChip({
+  label,
+  active,
+  disabled,
+  hint,
+  dragging,
+  onClick,
+  onPointerDown,
+  onContextMenu,
+}: {
+  label: string;
+  active: boolean;
+  disabled?: boolean;
+  hint?: string;
+  dragging?: boolean;
+  onClick: () => void;
+  onPointerDown?: (e: React.PointerEvent<HTMLElement>) => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
+}) {
+  const draggable = !!onPointerDown;
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      onPointerDown={onPointerDown}
+      onContextMenu={onContextMenu}
+      className={cn(
+        "flex min-h-10 items-center gap-1.5 rounded-xl border-2 px-3 text-sm font-medium transition-colors",
+        active
+          ? "border-[#712BB2] bg-[#712BB2] text-white"
+          : "border-base-300 hover:border-[#712BB2]",
+        disabled &&
+          "border-base-300 text-base-content/25 hover:border-base-300 cursor-not-allowed",
+        draggable &&
+          "cursor-grab touch-manipulation select-none [-webkit-touch-callout:none]",
+        dragging && "border-dashed opacity-40",
+      )}
+    >
+      {label}
+      {hint && <span className="text-[10px] font-normal">· {hint}</span>}
+    </button>
   );
 }
