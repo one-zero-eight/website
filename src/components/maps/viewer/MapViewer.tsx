@@ -25,6 +25,32 @@ import { useNavigate } from "@tanstack/react-router";
 // so both rotation gestures feel identical.
 const ROTATE_DEG_PER_PX = 0.4;
 
+// Wheel deltas don't arrive in comparable units across browsers: Chrome reports
+// pixels (~120 per notch), while Firefox reports *lines* for a real mouse wheel
+// (deltaMode 1, ~3 per notch). Feeding the raw deltaY into the zoom factor made
+// one notch worth ~13% in Chrome but ~0.3% in Firefox — so on Firefox the map
+// looked like it had stopped responding to the wheel entirely. 40px per line
+// matches Chrome's per-notch delta (3 lines x 40 = 120), the same constant
+// MapLibre uses for this.
+const WHEEL_PX_PER_LINE = 40;
+const WHEEL_PX_PER_PAGE = 400;
+
+const MIN_ZOOM = 0.5;
+// Deliberately capped low (it used to be 6). The browser rasterizes the floor
+// plan into a texture whose size grows with the zoom factor, and past roughly
+// 3x that texture stops fitting the compositor's cache: profiling Firefox
+// showed it churning ~750 texture allocations for 74 composites, with single
+// uploads blocking for 313ms and frames taking 250ms-1.7s to reach the screen.
+const MAX_ZOOM = 3;
+
+function wheelDeltaToPixels(e: WheelEvent) {
+  if (e.deltaMode === WheelEvent.DOM_DELTA_LINE)
+    return e.deltaY * WHEEL_PX_PER_LINE;
+  if (e.deltaMode === WheelEvent.DOM_DELTA_PAGE)
+    return e.deltaY * WHEEL_PX_PER_PAGE;
+  return e.deltaY;
+}
+
 export type MapUserLocation = {
   /** Position in SVG viewBox units. */
   x: number;
@@ -71,6 +97,7 @@ export const MapViewer = memo(
     const transformRef = useRef<HTMLDivElement>(null);
     const imageRef = useRef<HTMLDivElement>(null);
     const overlaySvgRef = useRef<SVGSVGElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const options = useRef({
       offsetX: 0,
       offsetY: 0,
@@ -94,6 +121,50 @@ export const MapViewer = memo(
       () => () => {
         if (bearingRafIdRef.current != null) {
           cancelAnimationFrame(bearingRafIdRef.current);
+        }
+      },
+      [],
+    );
+
+    // While any gesture is running the hidden bitmap stands in for the live
+    // SVG, so the compositor transforms one fixed-size texture instead of
+    // re-rasterising every path each frame. Tracked as a set of active
+    // gestures because zoom and drag overlap — the wheel's idle timer must not
+    // end the swap while a drag is still in progress.
+    const bitmapReadyRef = useRef(false);
+    const activeGesturesRef = useRef(new Set<string>());
+    const wheelIdleTimerRef = useRef<number | null>(null);
+
+    const beginGesture = useCallback((name: string) => {
+      const wasIdle = activeGesturesRef.current.size === 0;
+      activeGesturesRef.current.add(name);
+      if (!wasIdle || !bitmapReadyRef.current) return;
+      if (canvasRef.current) canvasRef.current.style.visibility = "visible";
+      if (imageRef.current) imageRef.current.style.visibility = "hidden";
+    }, []);
+
+    const endGesture = useCallback((name: string) => {
+      activeGesturesRef.current.delete(name);
+      if (activeGesturesRef.current.size > 0) return;
+      if (canvasRef.current) canvasRef.current.style.visibility = "hidden";
+      if (imageRef.current) imageRef.current.style.visibility = "";
+    }, []);
+
+    // The wheel has no gesture-end event, so fall back to an idle timeout.
+    const refreshWheelIdleTimer = useCallback(() => {
+      if (wheelIdleTimerRef.current != null) {
+        clearTimeout(wheelIdleTimerRef.current);
+      }
+      wheelIdleTimerRef.current = window.setTimeout(() => {
+        wheelIdleTimerRef.current = null;
+        endGesture("wheel");
+      }, 180);
+    }, [endGesture]);
+
+    useEffect(
+      () => () => {
+        if (wheelIdleTimerRef.current != null) {
+          clearTimeout(wheelIdleTimerRef.current);
         }
       },
       [],
@@ -158,6 +229,10 @@ export const MapViewer = memo(
         overlaySvgRef.current.style.transformOrigin = "center";
         overlaySvgRef.current.style.transform = rotateTransform;
       }
+      if (canvasRef.current) {
+        canvasRef.current.style.transformOrigin = "center";
+        canvasRef.current.style.transform = rotateTransform;
+      }
     };
 
     useEffect(() => {
@@ -193,6 +268,9 @@ export const MapViewer = memo(
         const startOffsetX = options.current.offsetX;
         const startOffsetY = options.current.offsetY;
         const onMouseMove = (e: MouseEvent) => {
+          // Swapped in on first movement rather than on mousedown, so a plain
+          // click on a room doesn't flash the bitmap.
+          beginGesture("drag");
           options.current.offsetX = startOffsetX + e.clientX - startX;
           options.current.offsetY = startOffsetY + e.clientY - startY;
           updateImage();
@@ -200,6 +278,7 @@ export const MapViewer = memo(
         const onMouseUp = () => {
           window.removeEventListener("mousemove", onMouseMove);
           window.removeEventListener("mouseup", onMouseUp);
+          endGesture("drag");
           if (containerRef.current) {
             containerRef.current.style.cursor = "grab";
           }
@@ -217,14 +296,17 @@ export const MapViewer = memo(
         e.preventDefault();
         if (!containerRef.current) return;
 
+        beginGesture("wheel");
+        refreshWheelIdleTimer();
+
         // Should zoom to the center of the wheel event
         const rect = containerRef.current.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
         const oldZoom = options.current.zoom;
         const newZoom = Math.min(
-          Math.max(oldZoom * Math.pow(1.001, -e.deltaY), 0.5),
-          6,
+          Math.max(oldZoom * Math.pow(1.001, -wheelDeltaToPixels(e)), MIN_ZOOM),
+          MAX_ZOOM,
         );
         const zoomRatio = newZoom / oldZoom;
         options.current.zoom = newZoom;
@@ -250,6 +332,7 @@ export const MapViewer = memo(
         const startOffsetX = options.current.offsetX;
         const startOffsetY = options.current.offsetY;
         const onTouchMove = (e: TouchEvent) => {
+          beginGesture("touch-pan");
           options.current.offsetX =
             startOffsetX + e.touches[0].clientX - startX;
           options.current.offsetY =
@@ -259,6 +342,7 @@ export const MapViewer = memo(
         const onTouchEnd = () => {
           window.removeEventListener("touchmove", onTouchMove);
           window.removeEventListener("touchend", onTouchEnd);
+          endGesture("touch-pan");
         };
         window.addEventListener("touchmove", onTouchMove);
         window.addEventListener("touchend", onTouchEnd);
@@ -298,6 +382,7 @@ export const MapViewer = memo(
           e.preventDefault();
           if (e.touches.length !== 2) return;
 
+          beginGesture("pinch");
           const touch1 = e.touches[0];
           const touch2 = e.touches[1];
           const newDistance = Math.hypot(
@@ -305,8 +390,8 @@ export const MapViewer = memo(
             touch1.clientY - touch2.clientY,
           );
           const newZoom = Math.min(
-            Math.max(oldZoom * (newDistance / oldDistance), 0.5),
-            6,
+            Math.max(oldZoom * (newDistance / oldDistance), MIN_ZOOM),
+            MAX_ZOOM,
           );
           const zoomRatio = newZoom / oldZoom;
           const newAngle = Math.atan2(
@@ -327,6 +412,7 @@ export const MapViewer = memo(
         const onTouchEnd = () => {
           window.removeEventListener("touchmove", onTouchMove);
           window.removeEventListener("touchend", onTouchEnd);
+          endGesture("pinch");
         };
         window.addEventListener("touchmove", onTouchMove);
         window.addEventListener("touchend", onTouchEnd);
@@ -356,6 +442,7 @@ export const MapViewer = memo(
         const startBearing = options.current.bearing;
 
         const onMouseMove = (e: MouseEvent) => {
+          beginGesture("rotate");
           const deltaBearingDeg = (e.clientX - startX) * ROTATE_DEG_PER_PX;
           options.current.bearing = startBearing + deltaBearingDeg;
           updateImage();
@@ -364,6 +451,7 @@ export const MapViewer = memo(
         const onMouseUp = () => {
           window.removeEventListener("mousemove", onMouseMove);
           window.removeEventListener("mouseup", onMouseUp);
+          endGesture("rotate");
         };
         window.addEventListener("mousemove", onMouseMove);
         window.addEventListener("mouseup", onMouseUp);
@@ -487,7 +575,10 @@ export const MapViewer = memo(
 
       const zoomX = rect.width / (maxX - minX + 50);
       const zoomY = rect.height / (maxY - minY + 50);
-      const zoom = Math.min(Math.max(Math.min(zoomX, zoomY), 0.5), 4);
+      const zoom = Math.min(
+        Math.max(Math.min(zoomX, zoomY), MIN_ZOOM),
+        MAX_ZOOM,
+      );
 
       const areaCenterX = minX + (maxX - minX) / 2;
       const areaCenterY = minY + (maxY - minY) / 2;
@@ -549,7 +640,7 @@ export const MapViewer = memo(
       if (!pix) return;
 
       const rect = containerRef.current.getBoundingClientRect();
-      const zoom = Math.min(Math.max(options.current.zoom, 2), 4);
+      const zoom = Math.min(Math.max(options.current.zoom, 2), MAX_ZOOM);
       options.current.zoom = zoom;
       options.current.offsetX = rect.width / 2 - pix.px * zoom;
       options.current.offsetY = rect.height / 2 - pix.py * zoom;
@@ -558,6 +649,106 @@ export const MapViewer = memo(
       notifyBearingChange();
       centeredForLocationRef.current = true;
     }, [userLocation, highlightAreas, notifyBearingChange]);
+
+    // Rasterise the floor plan into a fixed-size canvas, kept hidden until a
+    // gesture starts. Live SVG has to be re-rasterised by the compositor at
+    // whatever scale the transform currently says, so panning/zooming/rotating
+    // it re-renders every vector path every frame; a canvas is one texture of
+    // a fixed size that costs the same to transform at any zoom.
+    //
+    // Keyed on a string rather than the highlightAreas array, whose identity
+    // changes on every render — depending on the array itself would re-encode
+    // the whole SVG on every frame of a gesture.
+    const highlightKey = highlightAreas.map((a) => a.svg_polygon_id).join(",");
+    useEffect(() => {
+      if (!mapSvgData) return;
+      bitmapReadyRef.current = false;
+      let cancelled = false;
+      let resizeTimer: number | null = null;
+
+      const rasterise = () => {
+        const canvas = canvasRef.current;
+        const box = imageRef.current;
+        if (cancelled || !canvas || !box) return;
+        const boxWidth = box.clientWidth;
+        const boxHeight = box.clientHeight;
+        // Nothing laid out yet; the ResizeObserver below will call back.
+        if (!boxWidth || !boxHeight) return;
+
+        // Page CSS doesn't reach an SVG loaded as an image, so the highlight
+        // fill has to be baked into the markup or highlighted rooms would lose
+        // their colour for as long as the gesture lasts. The pulse animation is
+        // dropped on purpose — a static raster can't animate it anyway.
+        const selector = highlightKey
+          ? highlightKey
+              .split(",")
+              .map((id) => `[id="${id}"]`)
+              .join(",")
+          : "";
+        const markup = selector
+          ? mapSvgData.replace(
+              /(<svg\b[^>]*>)/,
+              `$1<style>${selector}{fill:violet;opacity:0.35}</style>`,
+            )
+          : mapSvgData;
+
+        const url = URL.createObjectURL(
+          new Blob([markup], { type: "image/svg+xml" }),
+        );
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          if (cancelled) return;
+          // Oversample a little so the bitmap still reads acceptably a couple
+          // of zoom steps in, while staying bounded instead of growing with
+          // zoom the way the live SVG's surface does.
+          const scale = Math.min(2 * (window.devicePixelRatio || 1), 3);
+          canvas.width = Math.round(boxWidth * scale);
+          canvas.height = Math.round(boxHeight * scale);
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+
+          // Reproduce how the live SVG fits its box (preserveAspectRatio
+          // defaults to xMidYMid meet): scale to fit, then centre. The canvas
+          // shares the box's aspect ratio, so the two line up exactly.
+          const aspect =
+            img.naturalWidth && img.naturalHeight
+              ? img.naturalWidth / img.naturalHeight
+              : canvas.width / canvas.height;
+          const drawn =
+            canvas.width / canvas.height > aspect
+              ? { w: canvas.height * aspect, h: canvas.height }
+              : { w: canvas.width, h: canvas.width / aspect };
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(
+            img,
+            (canvas.width - drawn.w) / 2,
+            (canvas.height - drawn.h) / 2,
+            drawn.w,
+            drawn.h,
+          );
+          bitmapReadyRef.current = true;
+        };
+        img.onerror = () => URL.revokeObjectURL(url);
+        img.src = url;
+      };
+
+      rasterise();
+
+      // The box has no size on the first pass, and changes on fullscreen or
+      // window resize; re-rasterise so the bitmap keeps matching its aspect.
+      const observer = new ResizeObserver(() => {
+        if (resizeTimer != null) clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(rasterise, 100);
+      });
+      if (imageRef.current) observer.observe(imageRef.current);
+
+      return () => {
+        cancelled = true;
+        if (resizeTimer != null) clearTimeout(resizeTimer);
+        observer.disconnect();
+      };
+    }, [mapSvgData, highlightKey]);
 
     const svgDiv = useMemo(
       () =>
@@ -610,6 +801,12 @@ export const MapViewer = memo(
         </style>
         <div ref={transformRef} className="relative h-full w-full">
           {svgDiv}
+          <canvas
+            ref={canvasRef}
+            aria-hidden="true"
+            style={{ visibility: "hidden" }}
+            className="pointer-events-none absolute inset-0 h-full w-full"
+          />
           {(userLocation || debugControlPoints?.length) && (
             <svg
               ref={overlaySvgRef}
