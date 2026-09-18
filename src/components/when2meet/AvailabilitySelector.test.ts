@@ -68,14 +68,37 @@ describe("final meeting selection on the grid", () => {
     type: string,
     pointerType = "mouse",
     clientX = 0,
+    pointerId = 1,
   ) {
+    if (pointerType === "touch") {
+      const event = new Event(
+        type
+          .replace("pointer", "touch")
+          .replace("down", "start")
+          .replace("up", "end"),
+        {
+          bubbles: true,
+          cancelable: true,
+        },
+      );
+      const touch = { identifier: pointerId, clientX, clientY: 0 };
+      Object.defineProperties(event, {
+        touches: {
+          value:
+            type === "pointerup" || type === "pointercancel" ? [] : [touch],
+        },
+        changedTouches: { value: [touch] },
+      });
+      (target === window ? cell("12:30") : target).dispatchEvent(event);
+      return event;
+    }
     const event = new MouseEvent(type, {
       bubbles: true,
       cancelable: true,
       clientX,
     });
     Object.defineProperties(event, {
-      pointerId: { value: 1 },
+      pointerId: { value: pointerId },
       pointerType: { value: pointerType },
     });
     target.dispatchEvent(event);
@@ -91,14 +114,14 @@ describe("final meeting selection on the grid", () => {
           "pointerdown",
           isPhone ? "touch" : "mouse",
         );
-        dispatchPointer(window, "pointerup");
+        dispatchPointer(window, "pointerup", isPhone ? "touch" : "mouse");
         dispatchPointer(
           cell("12:00"),
           "pointerdown",
           isPhone ? "touch" : "mouse",
         );
         vi.advanceTimersByTime(300);
-        dispatchPointer(window, "pointerup");
+        dispatchPointer(window, "pointerup", isPhone ? "touch" : "mouse");
       });
       expect(onChange).not.toHaveBeenCalled();
       expect(onEnd).not.toHaveBeenCalled();
@@ -133,39 +156,90 @@ describe("final meeting selection on the grid", () => {
     },
   );
 
-  it("rechecks time after the touch hold delay", () => {
-    vi.setSystemTime(Date.parse("2027-06-15T09:29:59.900Z"));
+  it("selects availability on a short touch without waiting", () => {
+    renderGrid(true, false);
+    act(() => {
+      dispatchPointer(cell("12:30"), "pointerdown", "touch");
+      dispatchPointer(window, "pointerup", "touch");
+    });
+    expect(onApplySlots).toHaveBeenCalledExactlyOnceWith(
+      [slot("12:30")],
+      "add",
+    );
+  });
+
+  it("selects a meeting interval on a short tap", () => {
+    renderGrid(true);
+    act(() => {
+      dispatchPointer(cell("12:30"), "pointerdown", "touch");
+      dispatchPointer(window, "pointerup", "touch");
+    });
+    expect(onChange).toHaveBeenCalledExactlyOnceWith([slot("12:30")]);
+    expect(onEnd).toHaveBeenCalledExactlyOnceWith([slot("12:30")]);
+  });
+
+  it("cancels an interval without confirming it and allows another gesture", () => {
     renderGrid(true);
     act(() => {
       dispatchPointer(cell("12:30"), "pointerdown", "touch");
       vi.advanceTimersByTime(300);
-      dispatchPointer(window, "pointerup", "touch");
-    });
-    expect(onChange).not.toHaveBeenCalled();
-    expect(onEnd).not.toHaveBeenCalled();
-    expect(onPastMeetingTimeAttempt).toHaveBeenCalledTimes(1);
-  });
-
-  it("does not warn when a touch on past slots becomes a scroll", () => {
-    renderGrid(true);
-    act(() => {
-      dispatchPointer(cell("11:30"), "pointerdown", "touch");
-      dispatchPointer(window, "pointermove", "touch", 20);
-      vi.advanceTimersByTime(300);
-      dispatchPointer(window, "pointerup", "touch");
-    });
-    expect(onPastMeetingTimeAttempt).not.toHaveBeenCalled();
-    expect(onChange).not.toHaveBeenCalled();
-  });
-
-  it("does not warn when the browser cancels a touch", () => {
-    renderGrid(true);
-    act(() => {
-      dispatchPointer(cell("11:30"), "pointerdown", "touch");
       dispatchPointer(window, "pointercancel", "touch");
-      vi.advanceTimersByTime(300);
     });
-    expect(onPastMeetingTimeAttempt).not.toHaveBeenCalled();
+    expect(onChange).toHaveBeenLastCalledWith([]);
+    expect(onEnd).not.toHaveBeenCalled();
+
+    act(() => {
+      dispatchPointer(cell("13:00"), "pointerdown", "touch");
+      dispatchPointer(window, "pointerup", "touch");
+    });
+    expect(onEnd).toHaveBeenCalledExactlyOnceWith([slot("13:00")]);
+  });
+
+  it("lets a swipe scroll without changing slots, even after waiting", () => {
+    renderGrid(true, false);
+    act(() => {
+      dispatchPointer(cell("12:30"), "pointerdown", "touch");
+      const move = dispatchPointer(window, "pointermove", "touch", 20);
+      expect(move?.defaultPrevented).toBe(false);
+      vi.advanceTimersByTime(500);
+      dispatchPointer(window, "pointerup", "touch", 20);
+    });
+    expect(onApplySlots).not.toHaveBeenCalled();
+  });
+
+  it("keeps selecting after pointercancel and blocks scrolling only after holding", () => {
+    renderGrid(true);
+    Object.defineProperty(document, "elementFromPoint", {
+      configurable: true,
+      value: () => cell("13:00"),
+    });
+    act(() => {
+      dispatchPointer(cell("12:30"), "pointerdown", "touch");
+      vi.advanceTimersByTime(300);
+      const cancel = new Event("pointercancel", { bubbles: true });
+      Object.defineProperties(cancel, {
+        pointerType: { value: "touch" },
+        pointerId: { value: 1 },
+      });
+      window.dispatchEvent(cancel);
+      const move = dispatchPointer(window, "pointermove", "touch", 20);
+      expect(move?.defaultPrevented).toBe(true);
+      dispatchPointer(window, "pointerup", "touch", 20);
+    });
+    expect(onEnd).toHaveBeenCalledExactlyOnceWith([
+      slot("12:30"),
+      slot("13:00"),
+    ]);
+  });
+
+  it("clears a pending hold on unmount", () => {
+    renderGrid(true, false);
+    act(() => {
+      dispatchPointer(cell("12:30"), "pointerdown", "touch");
+      root.render(null);
+    });
+    act(() => vi.advanceTimersByTime(500));
+    expect(onApplySlots).not.toHaveBeenCalled();
   });
 
   it("does not warn for a future meeting time", () => {
