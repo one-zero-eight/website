@@ -1,4 +1,5 @@
 import { $when2meet } from "@/api/when2meet";
+import { MeetingStatus } from "@/api/when2meet/types.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { useMemo, useState } from "react";
@@ -53,7 +54,7 @@ function MeetingsSkeletonGrid() {
   );
 }
 
-export function MeetingsLandingPage() {
+export function MeetingsLandingPage({ status }: { status: MeetingStatus }) {
   const [search, setSearch] = useState("");
 
   const {
@@ -62,7 +63,9 @@ export function MeetingsLandingPage() {
     isError: isOwnedError,
     error: ownedError,
     refetch: refetchOwned,
-  } = $when2meet.useQuery("get", "/meetings/");
+  } = $when2meet.useQuery("get", "/meetings/", {
+    params: { query: { status } },
+  });
 
   const {
     data: participatingMeetings = [],
@@ -70,7 +73,9 @@ export function MeetingsLandingPage() {
     isError: isParticipatingError,
     error: participatingError,
     refetch: refetchParticipating,
-  } = $when2meet.useQuery("get", "/meetings/participating");
+  } = $when2meet.useQuery("get", "/meetings/participating", {
+    params: { query: { status } },
+  });
 
   const filteredOwnedMeetings = useMemo(
     () => filterMeetings(ownedMeetings, search),
@@ -82,7 +87,7 @@ export function MeetingsLandingPage() {
     [participatingMeetings, search],
   );
 
-  const isPending = isOwnedPending || isParticipatingPending;
+  const isArchived = status === MeetingStatus.archived;
 
   return (
     <RequireAuth>
@@ -113,11 +118,15 @@ export function MeetingsLandingPage() {
               </div>
             )}
 
-            {isPending ? (
+            {isOwnedError ? null : isOwnedPending ? (
               <MeetingsSkeletonGrid />
             ) : filteredOwnedMeetings.length === 0 ? (
               <div className="text-base-content/50 py-8 text-center text-sm">
-                You have not created any meetings yet.
+                {search.trim()
+                  ? "No meetings match your search."
+                  : isArchived
+                    ? "You have no archived meetings."
+                    : "You have no active meetings."}
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -144,11 +153,15 @@ export function MeetingsLandingPage() {
               </div>
             )}
 
-            {isPending ? (
+            {isParticipatingError ? null : isParticipatingPending ? (
               <MeetingsSkeletonGrid />
             ) : filteredParticipatingMeetings.length === 0 ? (
               <div className="text-base-content/50 py-8 text-center text-sm">
-                You are not participating in any meetings yet.
+                {search.trim()
+                  ? "No meetings match your search."
+                  : isArchived
+                    ? "You have no archived meetings you participated in."
+                    : "You are not participating in any active meetings."}
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

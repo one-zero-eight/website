@@ -36,12 +36,17 @@ export function MeetingItem({
             <span className="icon-[mdi--account-group-outline] text-primary shrink-0 text-lg" />
             <span>{meeting.participants_count} participants</span>
           </div>
-          {selectedTimeLabel && (
+          {meeting.is_archived ? (
+            <div className="flex items-center gap-2">
+              <span className="icon-[mdi--archive-outline] shrink-0 text-lg" />
+              <span>Archived</span>
+            </div>
+          ) : selectedTimeLabel ? (
             <div className="flex items-center gap-2">
               <span className="icon-[material-symbols--schedule-outline] text-secondary shrink-0 text-lg" />
               <span>{selectedTimeLabel}</span>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </Link>

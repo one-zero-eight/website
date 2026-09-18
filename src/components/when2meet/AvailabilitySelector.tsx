@@ -10,6 +10,10 @@ import { cn } from "@/lib/ui/cn";
 import type { MeetingDate, MeetingUser } from "./types.ts";
 import { countExplicitSlotAvailability } from "./utils/participants.ts";
 import {
+  getAllowedMeetingInterval,
+  isMeetingSlotInFuture,
+} from "./utils/meeting-time-selection.ts";
+import {
   areConsecutiveDateIds,
   getSlotHeatmapAppearance,
   getSlotHeatmapAppearanceColorblindSafe,
@@ -95,6 +99,7 @@ export function AvailabilitySelector({
   onApplySlots,
   isPhone = false,
   allowedSlots,
+  getUnavailableSlotHint,
   selectionOnly = false,
   hideHint = false,
   bestIntersectionSlotKeys,
@@ -104,6 +109,7 @@ export function AvailabilitySelector({
   intervalSelectionSlots,
   onIntervalSelectionSlotsChange,
   onIntervalSelectionEnd,
+  onPastMeetingTimeAttempt,
   selectedMeetingSlotKeys,
   showCalendarOverlay = false,
   calendarSlotEvents,
@@ -119,6 +125,7 @@ export function AvailabilitySelector({
   onApplySlots: (slotKeys: string[], mode: DragMode) => void;
   isPhone?: boolean;
   allowedSlots?: Set<string>;
+  getUnavailableSlotHint?: (slotKey: string) => string;
   selectionOnly?: boolean;
   hideHint?: boolean;
   bestIntersectionSlotKeys?: Set<string>;
@@ -128,6 +135,7 @@ export function AvailabilitySelector({
   intervalSelectionSlots?: Set<string>;
   onIntervalSelectionSlotsChange?: (slotKeys: string[]) => void;
   onIntervalSelectionEnd?: (slotKeys: string[]) => void;
+  onPastMeetingTimeAttempt?: () => void;
   selectedMeetingSlotKeys?: Set<string>;
   showCalendarOverlay?: boolean;
   calendarSlotEvents?: Map<string, string[]>;
@@ -176,10 +184,13 @@ export function AvailabilitySelector({
   const onIntervalSelectionEndRef = useRef(onIntervalSelectionEnd);
   onIntervalSelectionEndRef.current = onIntervalSelectionEnd;
 
+  const onPastMeetingTimeAttemptRef = useRef(onPastMeetingTimeAttempt);
+  onPastMeetingTimeAttemptRef.current = onPastMeetingTimeAttempt;
+  const hasWarnedPastMeetingTimeRef = useRef(false);
+
   const intervalSelectionSlotsRef = useRef(intervalSelectionSlots);
   intervalSelectionSlotsRef.current = intervalSelectionSlots;
 
-  const intervalAnchorDateRef = useRef<string | null>(null);
   const intervalDragStartRef = useRef<string | null>(null);
 
   const isEditing = editingUserId !== null;
@@ -221,11 +232,12 @@ export function AvailabilitySelector({
   }, [isEditing, onHoveredSlotKeyChange, selectionOnly, showCalendarOverlay]);
 
   function isSlotAllowed(dateId: string, time: string) {
-    if (!allowedSlots) {
-      return true;
+    const slotKey = getSlotKey(dateId, time);
+    if (intervalSelectionMode && !isMeetingSlotInFuture(slotKey, Date.now())) {
+      return false;
     }
 
-    return allowedSlots.has(getSlotKey(dateId, time));
+    return !allowedSlotsRef.current || allowedSlotsRef.current.has(slotKey);
   }
 
   function getAvailableCount(dateId: string, time: string) {
@@ -305,19 +317,21 @@ export function AvailabilitySelector({
     onHoveredSlotKeyChange?.(null);
   }
 
-  function getIntervalSlotKeysBetween(fromSlotKey: string, toSlotKey: string) {
-    const anchorDateId = intervalAnchorDateRef.current;
+  function applyIntervalSelection(slotKeys: string[]) {
+    intervalSelectionSlotsRef.current = new Set(slotKeys);
+    onIntervalSelectionSlotsChangeRef.current?.(slotKeys);
+  }
 
-    if (!anchorDateId) {
-      return [toSlotKey];
+  function notifyPastMeetingTimeAttempt(slotKey: string) {
+    if (
+      hasWarnedPastMeetingTimeRef.current ||
+      isMeetingSlotInFuture(slotKey, Date.now())
+    ) {
+      return;
     }
 
-    return getSlotKeysBetween(
-      fromSlotKey,
-      toSlotKey,
-      visibleDateIdsRef.current,
-      timeSlotsRef.current,
-    ).filter((slotKey) => parseSlotKey(slotKey).dateId === anchorDateId);
+    hasWarnedPastMeetingTimeRef.current = true;
+    onPastMeetingTimeAttemptRef.current?.();
   }
 
   function isEditingUserSlot(dateId: string, time: string) {
@@ -339,13 +353,16 @@ export function AvailabilitySelector({
   }
 
   function beginIntervalDrag(dateId: string, time: string, pointerId: number) {
+    notifyPastMeetingTimeAttempt(getSlotKey(dateId, time));
+    if (!isSlotAllowed(dateId, time)) {
+      return;
+    }
     capturePointer(pointerId);
 
     const slotKey = getSlotKey(dateId, time);
-    intervalAnchorDateRef.current = dateId;
     intervalDragStartRef.current = slotKey;
     isDraggingRef.current = true;
-    onIntervalSelectionSlotsChangeRef.current?.([slotKey]);
+    applyIntervalSelection([slotKey]);
   }
 
   function beginEditingDrag(dateId: string, time: string, pointerId: number) {
@@ -365,8 +382,16 @@ export function AvailabilitySelector({
     event: ReactPointerEvent<HTMLButtonElement>,
   ) {
     const isInterval = intervalSelectionMode;
+    hasWarnedPastMeetingTimeRef.current = false;
 
-    if (isInterval ? !isSlotAllowed(dateId, time) : !editingUserId) {
+    if (
+      isInterval
+        ? !isSlotAllowed(dateId, time) && event.pointerType !== "touch"
+        : !editingUserId
+    ) {
+      if (isInterval) {
+        notifyPastMeetingTimeAttempt(getSlotKey(dateId, time));
+      }
       return;
     }
 
@@ -393,6 +418,15 @@ export function AvailabilitySelector({
         longPressTimerRef.current = null;
 
         if (!pending) {
+          return;
+        }
+
+        if (!isSlotAllowed(pending.dateId, pending.time)) {
+          if (pending.isInterval) {
+            notifyPastMeetingTimeAttempt(
+              getSlotKey(pending.dateId, pending.time),
+            );
+          }
           return;
         }
 
@@ -495,14 +529,23 @@ export function AvailabilitySelector({
 
       if (intervalDragStartRef.current) {
         const dragStart = intervalDragStartRef.current;
+        notifyPastMeetingTimeAttempt(dragStart);
+        notifyPastMeetingTimeAttempt(
+          getSlotKey(
+            parseSlotKey(dragStart).dateId,
+            parseSlotKey(slotKey).time,
+          ),
+        );
 
-        if (slotKey === dragStart) {
-          onIntervalSelectionSlotsChangeRef.current?.([dragStart]);
-          return;
-        }
-
-        onIntervalSelectionSlotsChangeRef.current?.(
-          getIntervalSlotKeysBetween(dragStart, slotKey),
+        applyIntervalSelection(
+          getAllowedMeetingInterval(
+            dragStart,
+            slotKey,
+            visibleDateIdsRef.current,
+            timeSlotsRef.current,
+            Date.now(),
+            allowedSlotsRef.current,
+          ),
         );
         return;
       }
@@ -543,7 +586,11 @@ export function AvailabilitySelector({
       lastVisitedSlotKeyRef.current = slotKey;
     }
 
-    function handlePointerUp() {
+    function handlePointerUp(event: PointerEvent) {
+      const pending = pendingTouchRef.current;
+      if (event.type !== "pointercancel" && pending?.isInterval) {
+        notifyPastMeetingTimeAttempt(getSlotKey(pending.dateId, pending.time));
+      }
       clearPendingLongPress();
 
       if (
@@ -558,7 +605,6 @@ export function AvailabilitySelector({
       isDraggingRef.current = false;
       visitedSlotsRef.current.clear();
       lastVisitedSlotKeyRef.current = null;
-      intervalAnchorDateRef.current = null;
       intervalDragStartRef.current = null;
       setIsTouchDragging(false);
     }
@@ -919,7 +965,7 @@ export function AvailabilitySelector({
                 )}
                 title={
                   !slotAllowed
-                    ? `${date.monthDay}, ${time}: not available for this meeting`
+                    ? `${date.monthDay}, ${time}: ${getUnavailableSlotHint?.(slotKey) ?? "not available for this meeting"}`
                     : isIntervalSelected
                       ? `${date.monthDay}, ${time}: selecting meeting time`
                       : isSelectedMeetingSlot

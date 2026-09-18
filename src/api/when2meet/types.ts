@@ -339,7 +339,7 @@ export interface components {
        * Slots
        * @description All possible slots for the event
        */
-      slots?: string[] | null;
+      slots?: string[];
       /**
        * Timezone
        * @description IANA timezone name
@@ -778,12 +778,14 @@ export interface operations {
           "application/json": components["schemas"]["EventView"];
         };
       };
-      /** @description Cannot clear selected meeting time while a room is booked */
+      /** @description Selected meeting start must be in the future; cannot clear selected time while a room is booked */
       400: {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": unknown;
+        };
       };
       /** @description Unable to verify credentials OR Credentials not provided */
       401: {
