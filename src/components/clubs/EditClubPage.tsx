@@ -69,6 +69,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const [links, setLinks] = useState<clubsTypes.SchemaLinkSchema[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  // Leader asked to drop the logo already waiting for approval; applied on save
+  // together with the rest of the request.
+  const [cancelPendingLogo, setCancelPendingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const editorRef = useRef<TiptapEditorRef | null>(null);
 
@@ -206,7 +210,8 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       initial.isSport !== current.isSport ||
       initial.sportId !== current.sportId ||
       JSON.stringify(initial.links) !== JSON.stringify(current.links) ||
-      logoFile !== null
+      logoFile !== null ||
+      cancelPendingLogo
     );
   }, [
     slug,
@@ -219,6 +224,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     sportId,
     links,
     logoFile,
+    cancelPendingLogo,
   ]);
 
   useBlocker({
@@ -348,9 +354,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       // A leader's save rewrites the whole pending request, so carry the
       // already-submitted logo over instead of resetting it to the approved
       // one. Admin edits apply directly and have no request to preserve.
-      logo_file_id: isAdmin
-        ? (club?.logo_file_id ?? null)
-        : (pendingUpdate?.logo_file_id ?? club?.logo_file_id ?? null),
+      logo_file_id:
+        isAdmin || cancelPendingLogo
+          ? (club?.logo_file_id ?? null)
+          : (pendingUpdate?.logo_file_id ?? club?.logo_file_id ?? null),
       sport_id: isSport ? sportId || null : null,
       links: links.length > 0 ? links : undefined,
     };
@@ -428,6 +435,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setCancelPendingLogo(false);
       setLogoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -556,9 +564,33 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                           </div>
                         </div>
                       )}
-                      <p className="text-primary/70 text-sm">
-                        Submitted, waiting for approval
-                      </p>
+                      {cancelPendingLogo ? (
+                        <>
+                          <p className="text-base-content/70 text-sm">
+                            This logo change will be cancelled when you save.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setCancelPendingLogo(false)}
+                            className="btn btn-ghost btn-sm w-full"
+                          >
+                            Keep submitted logo
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-primary/70 text-sm">
+                            Submitted, waiting for approval
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setCancelPendingLogo(true)}
+                            className="btn btn-ghost btn-sm w-full"
+                          >
+                            Cancel logo change
+                          </button>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <div className="bg-base-200 border-base-300 rounded-field flex items-center justify-center border p-4">
@@ -571,12 +603,28 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                     </div>
                   )}
 
+                  {/* The native file input is hidden because its "Choose
+                      file" / "No file chosen" labels are rendered by the
+                      browser in its own UI language. */}
                   <input
+                    ref={logoInputRef}
                     type="file"
                     accept="image/*"
                     onChange={handleLogoFileChange}
-                    className="text-base-content file:bg-primary hover:file:bg-primary/90 file:rounded-field w-full text-sm file:mr-4 file:border-0 file:px-4 file:py-2 file:text-white"
+                    className="hidden"
                   />
+                  <div className="flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      className="btn btn-primary btn-sm"
+                    >
+                      Choose file
+                    </button>
+                    <span className="text-base-content/70 truncate text-sm">
+                      {logoFile ? logoFile.name : "No file selected"}
+                    </span>
+                  </div>
 
                   {logoFile && (
                     <>
@@ -588,6 +636,9 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                         onClick={() => {
                           setLogoFile(null);
                           setLogoPreview(null);
+                          if (logoInputRef.current) {
+                            logoInputRef.current.value = "";
+                          }
                         }}
                         className="btn btn-ghost btn-sm w-full"
                       >
