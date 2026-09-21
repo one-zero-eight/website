@@ -153,7 +153,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                   <span className="icon-[mdi--calendar] size-6" />
                   Upcoming Events
                 </h2>
-                {canEditClub && (
+                {clubsUser?.leader_in_clubs.some((c) => c.id === club.id) && (
                   <Link to="/events/drafts" className="btn btn-primary btn-sm">
                     <span className="icon-[material-symbols--add-rounded] size-5" />
                     Add event
