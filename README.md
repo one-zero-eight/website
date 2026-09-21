@@ -94,7 +94,7 @@ Pick one method:
 **USB**
 
 1. Enable **USB debugging**, plug in USB.
-2. Run `adb dev ices` — status should be `device`.
+2. Run `adb devices` — status should be `device`.
    - If `unauthorized`, confirm the RSA dialog on the phone and run `adb devices` again.
 
 **Wi‑Fi — Wireless debugging (Android 11+, preferred)**

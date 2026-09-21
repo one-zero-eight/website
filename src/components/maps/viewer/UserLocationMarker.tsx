@@ -78,9 +78,11 @@ export function UserLocationMarker({
             d="M 0 -62 L -16 -30 L 16 -30 Z"
             className="fill-primary"
             style={{
-              // Counter-rotate against the map's own rotation so the arrow keeps
-              // pointing the correct real-world direction regardless of bearing.
-              transform: `rotate(calc(${heading}deg - 1deg * var(--map-bearing, 0)))`,
+              // Drawn in map space, so it rides the camera's rotation: at
+              // bearing B a real-world heading H correctly lands at H + B on
+              // screen. Counter-rotating by the bearing here would cancel that
+              // out and pin the arrow to screen-up instead.
+              transform: `rotate(${heading}deg)`,
               transition: "transform 0.6s ease-out",
             }}
           />

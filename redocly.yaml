@@ -10,7 +10,7 @@ apis:
       output: ./src/api/schedule/types.ts
       #  --root-types --enum
   maps:
-    root: https://api.innohassle.ru/maps/staging-v0/openapi.json
+    root: http://127.0.0.1:8009/maps/staging-v0/openapi.json
     x-openapi-ts:
       output: ./src/api/maps/types.ts
       #  --root-types --enum
