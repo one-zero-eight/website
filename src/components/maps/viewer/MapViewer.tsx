@@ -94,8 +94,6 @@ export type MapUserLocation = {
   /** Position in SVG viewBox units. */
   x: number;
   y: number;
-  /** GPS accuracy radius converted to SVG units. */
-  accuracyUnits: number;
   heading: number | null;
   /** Whether the dot should actually be drawn (in bounds and accurate enough). */
   visible: boolean;
@@ -846,7 +844,6 @@ export const MapViewer = memo(
                 <UserLocationMarker
                   x={userLocation.x}
                   y={userLocation.y}
-                  accuracyUnits={userLocation.accuracyUnits}
                   heading={userLocation.heading}
                 />
               )}

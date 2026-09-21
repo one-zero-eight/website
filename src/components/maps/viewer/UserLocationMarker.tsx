@@ -6,13 +6,10 @@
 export function UserLocationMarker({
   x,
   y,
-  accuracyUnits,
   heading,
 }: {
   x: number;
   y: number;
-  /** GPS accuracy radius, already converted to SVG user-units. */
-  accuracyUnits: number;
   heading: number | null;
 }) {
   return (
@@ -23,19 +20,6 @@ export function UserLocationMarker({
         transition: "transform 0.6s ease-out",
       }}
     >
-      {accuracyUnits > 0 && (
-        <circle
-          cx={0}
-          cy={0}
-          r={accuracyUnits}
-          className="fill-primary stroke-primary"
-          fillOpacity={0.12}
-          strokeOpacity={0.3}
-          strokeWidth={2}
-          style={{ transition: "r 0.6s ease-out" }}
-        />
-      )}
-
       {/* Icon shapes counter-scaled against map zoom so they stay a sensible
           screen size instead of growing huge as the user zooms in. */}
       <g

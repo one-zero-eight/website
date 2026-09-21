@@ -95,13 +95,11 @@ export function MapView({
   const userLocation = useMemo(() => {
     if (!position || !geoTransform || !geoRef) return null;
     const { x, y } = geoTransform.project(position.lat, position.lon);
-    const accuracyUnits = position.accuracyM * geoTransform.svgUnitsPerMeter;
     const withinBounds = isWithinViewBox(x, y);
     const accurate = position.accuracyM <= geoRef.accuracyThresholdM;
     return {
       x,
       y,
-      accuracyUnits,
       accuracyM: position.accuracyM,
       heading: position.heading,
       visible: withinBounds && accurate,
