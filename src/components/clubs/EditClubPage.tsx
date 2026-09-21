@@ -1,5 +1,8 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
-import { getDescriptionImageUrl } from "@/api/clubs/links.ts";
+import {
+  getDescriptionImageUrl,
+  getPendingLogoPreviewUrl,
+} from "@/api/clubs/links.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
@@ -33,6 +36,22 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const canEditClub = canUserEditClub(clubsUser, club?.id);
   const isAdmin = clubsUser?.role === "admin";
+
+  // A leader's own change request, if it is still waiting for approval. The
+  // club endpoint already returns it to the leader (it is stripped for
+  // everyone else), so there is nothing extra to fetch: the whole form is
+  // seeded from it below, letting the leader keep editing the request.
+  const pendingUpdate = club?.pending_update ?? null;
+  // Logo is the one pending field that isn't a plain form value, so it is
+  // read straight from the request instead of form state.
+  const pendingLogoFileId =
+    pendingUpdate?.logo_file_id != null &&
+    pendingUpdate.logo_file_id !== club?.logo_file_id
+      ? pendingUpdate.logo_file_id
+      : null;
+  const pendingLogoUrl = pendingLogoFileId
+    ? getPendingLogoPreviewUrl(pendingLogoFileId)
+    : null;
 
   // Form state
   const [slug, setSlug] = useState("");
@@ -326,6 +345,12 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       description: descriptionString,
       is_active: isActive,
       type,
+      // A leader's save rewrites the whole pending request, so carry the
+      // already-submitted logo over instead of resetting it to the approved
+      // one. Admin edits apply directly and have no request to preserve.
+      logo_file_id: isAdmin
+        ? (club?.logo_file_id ?? null)
+        : (pendingUpdate?.logo_file_id ?? club?.logo_file_id ?? null),
       sport_id: isSport ? sportId || null : null,
       links: links.length > 0 ? links : undefined,
     };
@@ -460,6 +485,23 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
         </div>
       </div>
 
+      {pendingUpdate && !isAdmin && (
+        <div className="card card-border border-primary/40 bg-primary/5">
+          <div className="card-body flex-row items-start gap-3">
+            <span className="icon-[mdi--clock-outline] text-primary mt-0.5 size-5 shrink-0" />
+            <div>
+              <p className="text-base-content font-medium">
+                You have changes waiting for approval
+              </p>
+              <p className="text-base-content/70 text-sm">
+                The form below shows what you submitted, not what is published
+                yet. Keep editing and save again to update the request.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Logo Upload Section */}
         <div className="card card-border">
@@ -497,6 +539,26 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                         alt="Logo preview"
                         className="rounded-field max-h-48 max-w-full object-contain"
                       />
+                    </div>
+                  ) : pendingLogoFileId ? (
+                    <div className="flex flex-col items-center gap-2">
+                      {pendingLogoUrl ? (
+                        <img
+                          src={pendingLogoUrl}
+                          alt="Submitted logo"
+                          className="rounded-field max-h-48 max-w-full object-contain"
+                        />
+                      ) : (
+                        <div className="bg-base-200 border-base-300 rounded-field flex w-full items-center justify-center border p-4">
+                          <div className="text-base-content/30 flex flex-col items-center gap-2 py-8">
+                            <span className="icon-[mdi--image-check] size-12" />
+                            <span className="text-sm">Preview unavailable</span>
+                          </div>
+                        </div>
+                      )}
+                      <p className="text-primary/70 text-sm">
+                        Submitted, waiting for approval
+                      </p>
                     </div>
                   ) : (
                     <div className="bg-base-200 border-base-300 rounded-field flex items-center justify-center border p-4">
@@ -569,68 +631,69 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               </div>
             )}
 
-            {/* Title */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text text-base-content font-medium">
-                  Title <span className="text-red-500">*</span>
-                </span>
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                className="input input-bordered w-full"
-              />
-            </div>
+            {/* Title, slug and type are admin-only: leaders can't change a
+                club's identity, so these fields are not rendered for them. */}
+            {isAdmin && (
+              <>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-base-content font-medium">
+                      Title <span className="text-red-500">*</span>
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                    className="input input-bordered w-full"
+                  />
+                </div>
 
-            {/* Slug */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text text-base-content font-medium">
-                  Slug <span className="text-red-500">*</span>
-                </span>
-              </label>
-              <input
-                type="text"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                required
-                readOnly={!isAdmin}
-                disabled={!isAdmin}
-                className="input input-bordered w-full"
-                placeholder="club-slug"
-              />
-              <label className="label">
-                <span className="label-text-alt text-base-content/50">
-                  {isAdmin
-                    ? "URL-friendly identifier for the club"
-                    : "Only an admin can change the club's URL slug"}
-                </span>
-              </label>
-            </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-base-content font-medium">
+                      Slug <span className="text-red-500">*</span>
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    required
+                    className="input input-bordered w-full"
+                    placeholder="club-slug"
+                  />
+                  <label className="label">
+                    <span className="label-text-alt text-base-content/50">
+                      URL-friendly identifier for the club
+                    </span>
+                  </label>
+                </div>
 
-            {/* Type */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text text-base-content font-medium">
-                  Type <span className="text-red-500">*</span>
-                </span>
-              </label>
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value as clubsTypes.ClubType)}
-                required
-                className="select select-bordered w-full"
-              >
-                {Object.values(clubsTypes.ClubType).map((clubType) => (
-                  <option key={clubType} value={clubType}>
-                    {getClubTypeLabel(clubType)}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-base-content font-medium">
+                      Type <span className="text-red-500">*</span>
+                    </span>
+                  </label>
+                  <select
+                    value={type}
+                    onChange={(e) =>
+                      setType(e.target.value as clubsTypes.ClubType)
+                    }
+                    required
+                    className="select select-bordered w-full"
+                  >
+                    {Object.values(clubsTypes.ClubType).map((clubType) => (
+                      <option key={clubType} value={clubType}>
+                        {getClubTypeLabel(clubType)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
 
             {/* Short Description */}
             <div className="form-control">
@@ -680,161 +743,169 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
           </div>
         </div>
 
-        {/* Leader Information */}
-        <div className="card card-border">
-          <div className="card-body">
-            <h2 className="card-title">
-              <span className="icon-[mdi--account] size-6" />
-              Club Leader
-            </h2>
+        {/* Leader Information (admin-only: the leader's own page has nothing
+            to show or change here) */}
+        {isAdmin && (
+          <div className="card card-border">
+            <div className="card-body">
+              <h2 className="card-title">
+                <span className="icon-[mdi--account] size-6" />
+                Club Leader
+              </h2>
 
-            {/* Current Leader Info */}
-            {clubLeader && (
-              <div className="bg-base-200 rounded-field mb-4 space-y-3 p-4">
-                {clubLeader.name && (
-                  <div className="flex items-start gap-3">
-                    <span className="icon-[mdi--account] text-base-content/50 mt-0.5 size-5" />
-                    <div>
-                      <div className="text-base-content/50 text-sm">Name</div>
-                      <div className="text-base-content font-medium">
-                        {clubLeader.name}
+              {/* Current Leader Info */}
+              {clubLeader && (
+                <div className="bg-base-200 rounded-field mb-4 space-y-3 p-4">
+                  {clubLeader.name && (
+                    <div className="flex items-start gap-3">
+                      <span className="icon-[mdi--account] text-base-content/50 mt-0.5 size-5" />
+                      <div>
+                        <div className="text-base-content/50 text-sm">Name</div>
+                        <div className="text-base-content font-medium">
+                          {clubLeader.name}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-                {clubLeader.email && (
-                  <div className="flex items-start gap-3">
-                    <span className="icon-[mdi--email] text-base-content/50 mt-0.5 size-5" />
-                    <div>
-                      <div className="text-base-content/50 text-sm">Email</div>
-                      <div className="text-base-content font-medium">
-                        {clubLeader.email}
+                  )}
+                  {clubLeader.email && (
+                    <div className="flex items-start gap-3">
+                      <span className="icon-[mdi--email] text-base-content/50 mt-0.5 size-5" />
+                      <div>
+                        <div className="text-base-content/50 text-sm">
+                          Email
+                        </div>
+                        <div className="text-base-content font-medium">
+                          {clubLeader.email}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-                {clubLeader.telegram_alias && (
-                  <div className="flex items-start gap-3">
-                    <span className="icon-[mdi--telegram] text-base-content/50 mt-0.5 size-5" />
-                    <div>
-                      <div className="text-base-content/50 text-sm">
-                        Telegram
+                  )}
+                  {clubLeader.telegram_alias && (
+                    <div className="flex items-start gap-3">
+                      <span className="icon-[mdi--telegram] text-base-content/50 mt-0.5 size-5" />
+                      <div>
+                        <div className="text-base-content/50 text-sm">
+                          Telegram
+                        </div>
+                        <a
+                          href={`https://telegram.me/${clubLeader.telegram_alias}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link link-hover link-primary"
+                        >
+                          @{clubLeader.telegram_alias}
+                        </a>
                       </div>
-                      <a
-                        href={`https://telegram.me/${clubLeader.telegram_alias}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="link link-hover link-primary"
-                      >
-                        @{clubLeader.telegram_alias}
-                      </a>
                     </div>
+                  )}
+                </div>
+              )}
+
+              {/* Change Leader Button */}
+              {!showChangeLeader && (
+                <button
+                  type="button"
+                  onClick={() => setShowChangeLeader(true)}
+                  className="btn btn-outline btn-primary w-full"
+                >
+                  <span className="icon-[mdi--account-edit] size-5" />
+                  Change Leader
+                </button>
+              )}
+
+              {/* Set New Leader */}
+              {showChangeLeader && (
+                <div className="form-control">
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className="label">
+                      <span className="label-text text-base-content font-medium">
+                        Set New Leader (Innopolis Email)
+                      </span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowChangeLeader(false);
+                        setLeaderEmail(clubLeader?.email || "");
+                      }}
+                      className="btn btn-ghost btn-sm"
+                    >
+                      Cancel
+                    </button>
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* Change Leader Button */}
-            {!showChangeLeader && (
-              <button
-                type="button"
-                onClick={() => setShowChangeLeader(true)}
-                className="btn btn-outline btn-primary w-full"
-              >
-                <span className="icon-[mdi--account-edit] size-5" />
-                Change Leader
-              </button>
-            )}
-
-            {/* Set New Leader */}
-            {showChangeLeader && (
-              <div className="form-control">
-                <div className="mb-2 flex items-center justify-between">
+                  <input
+                    type="email"
+                    value={leaderEmail}
+                    onChange={(e) => setLeaderEmail(e.target.value)}
+                    className="input input-bordered w-full"
+                    placeholder="user@innopolis.university"
+                  />
                   <label className="label">
-                    <span className="label-text text-base-content font-medium">
-                      Set New Leader (Innopolis Email)
+                    <span className="label-text-alt text-base-content/50">
+                      Enter Innopolis email to set as new club leader
                     </span>
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowChangeLeader(false);
-                      setLeaderEmail(clubLeader?.email || "");
-                    }}
-                    className="btn btn-ghost btn-sm"
-                  >
-                    Cancel
-                  </button>
                 </div>
-                <input
-                  type="email"
-                  value={leaderEmail}
-                  onChange={(e) => setLeaderEmail(e.target.value)}
-                  className="input input-bordered w-full"
-                  placeholder="user@innopolis.university"
-                />
-                <label className="label">
-                  <span className="label-text-alt text-base-content/50">
-                    Enter Innopolis email to set as new club leader
-                  </span>
-                </label>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Sport Information */}
-        <div className="card card-border">
-          <div className="card-body">
-            <h2 className="card-title">
-              <span className="icon-[mdi--dumbbell] size-6" />
-              Sport Information
-            </h2>
-
-            {/* Is Sport Checkbox */}
-            <div className="form-control">
-              <label className="label cursor-pointer justify-start gap-3">
-                <input
-                  type="checkbox"
-                  checked={isSport}
-                  onChange={(e) => {
-                    setIsSport(e.target.checked);
-                    if (!e.target.checked) {
-                      setSportId("");
-                    }
-                  }}
-                  className="checkbox checkbox-primary"
-                />
-                <span className="label-text text-base-content font-medium">
-                  Is InnoSport club
-                </span>
-              </label>
+              )}
             </div>
+          </div>
+        )}
 
-            {/* Sport ID - Only shown if isSport is true */}
-            {isSport && (
+        {/* Sport Information (admin-only: leaders can't mark a club as an
+            InnoSport club or change its sport id) */}
+        {isAdmin && (
+          <div className="card card-border">
+            <div className="card-body">
+              <h2 className="card-title">
+                <span className="icon-[mdi--dumbbell] size-6" />
+                Sport Information
+              </h2>
+
+              {/* Is Sport Checkbox */}
               <div className="form-control">
-                <label className="label">
+                <label className="label cursor-pointer justify-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={isSport}
+                    onChange={(e) => {
+                      setIsSport(e.target.checked);
+                      if (!e.target.checked) {
+                        setSportId("");
+                      }
+                    }}
+                    className="checkbox checkbox-primary"
+                  />
                   <span className="label-text text-base-content font-medium">
-                    Sport ID
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  value={sportId}
-                  onChange={(e) => setSportId(e.target.value)}
-                  className="input input-bordered w-full"
-                  placeholder="ID from InnoSport system"
-                />
-                <label className="label">
-                  <span className="label-text-alt text-base-content/50">
-                    Sport type ID from InnoSport system
+                    Is InnoSport club
                   </span>
                 </label>
               </div>
-            )}
+
+              {/* Sport ID - Only shown if isSport is true */}
+              {isSport && (
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-base-content font-medium">
+                      Sport ID
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={sportId}
+                    onChange={(e) => setSportId(e.target.value)}
+                    className="input input-bordered w-full"
+                    placeholder="ID from InnoSport system"
+                  />
+                  <label className="label">
+                    <span className="label-text-alt text-base-content/50">
+                      Sport type ID from InnoSport system
+                    </span>
+                  </label>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Links */}
         <div className="card card-border">

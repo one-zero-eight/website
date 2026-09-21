@@ -266,55 +266,11 @@ export function ClubPendingUpdateDetailPage({ slug }: { slug: string }) {
     );
   }
 
-  if (
-    pending.logo_file_id != null &&
-    pending.logo_file_id !== club.logo_file_id
-  ) {
-    const pendingLogoUrl = getPendingLogoPreviewUrl(pending.logo_file_id);
-    rows.push(
-      <DiffRow
-        key="logo"
-        label="Logo"
-        current={
-          club.logo_file_id ? (
-            <img
-              src={getLogoURLById(club.id!, club.logo_file_id)}
-              alt="Current logo"
-              className="size-24 rounded-full object-contain"
-            />
-          ) : (
-            <span className="text-base-content/70 italic">No logo</span>
-          )
-        }
-        proposed={
-          <>
-            {pendingLogoUrl && (
-              <img
-                src={pendingLogoUrl}
-                alt="Proposed logo"
-                className="size-24 rounded-full object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                  e.currentTarget.nextElementSibling?.classList.remove(
-                    "hidden",
-                  );
-                }}
-              />
-            )}
-            <span
-              className={cn(
-                "text-base-content/70 italic",
-                pendingLogoUrl && "hidden",
-              )}
-            >
-              New logo submitted (preview unavailable — set VITE_CLUBS_MINIO_URL
-              to enable it locally)
-            </span>
-          </>
-        }
-      />,
-    );
-  }
+  const logoChanged =
+    pending.logo_file_id != null && pending.logo_file_id !== club.logo_file_id;
+  const pendingLogoUrl = logoChanged
+    ? getPendingLogoPreviewUrl(pending.logo_file_id!)
+    : null;
 
   const descriptionChanged =
     pending.description != null && pending.description !== club.description;
@@ -338,7 +294,7 @@ export function ClubPendingUpdateDetailPage({ slug }: { slug: string }) {
         </div>
       </div>
 
-      {rows.length === 0 && !descriptionChanged ? (
+      {rows.length === 0 && !logoChanged && !descriptionChanged ? (
         <div className="card card-border">
           <div className="card-body text-base-content/50">
             No detectable field changes.
@@ -347,6 +303,57 @@ export function ClubPendingUpdateDetailPage({ slug }: { slug: string }) {
       ) : (
         <div className="card card-border">
           <div className="card-body space-y-4">{rows}</div>
+        </div>
+      )}
+
+      {logoChanged && (
+        <div className="card card-border">
+          <div className="card-body">
+            <h2 className="card-title mb-2">Logo</h2>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <div className="text-base-content/40 mb-2 text-xs uppercase">
+                  Current
+                </div>
+                {club.logo_file_id ? (
+                  <img
+                    src={getLogoURLById(club.id!, club.logo_file_id)}
+                    alt="Current logo"
+                    className="size-24 rounded-full object-contain"
+                  />
+                ) : (
+                  <span className="text-base-content/70 italic">No logo</span>
+                )}
+              </div>
+              <div>
+                <div className="text-primary/70 mb-2 text-xs uppercase">
+                  Proposed
+                </div>
+                {pendingLogoUrl && (
+                  <img
+                    src={pendingLogoUrl}
+                    alt="Proposed logo"
+                    className="size-24 rounded-full object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.nextElementSibling?.classList.remove(
+                        "hidden",
+                      );
+                    }}
+                  />
+                )}
+                <span
+                  className={cn(
+                    "text-base-content/70 italic",
+                    pendingLogoUrl && "hidden",
+                  )}
+                >
+                  New logo submitted (preview unavailable — set
+                  VITE_CLUBS_MINIO_URL to enable it locally)
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

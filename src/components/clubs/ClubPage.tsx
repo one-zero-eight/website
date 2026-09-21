@@ -95,19 +95,21 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
             logoFileId={club.logo_file_id}
             className="size-48"
           />
-          {canEditClub && (
-            <Link
-              to="/clubs/$slug/edit"
-              params={{ slug: clubSlug }}
-              className="btn btn-square btn-ghost btn-primary btn-lg absolute top-0 right-0"
-            >
-              <span className="icon-[mynaui--pencil]" />
-            </Link>
-          )}
         </div>
         <div className="card-body">
-          <div className="flex justify-between">
-            <h1 className="card-title text-3xl font-bold">{club.title}</h1>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1">
+              <h1 className="card-title text-3xl font-bold">{club.title}</h1>
+              {canEditClub && (
+                <Link
+                  to="/clubs/$slug/edit"
+                  params={{ slug: clubSlug }}
+                  className="btn btn-square btn-ghost btn-primary btn-lg"
+                >
+                  <span className="icon-[mynaui--pencil]" />
+                </Link>
+              )}
+            </div>
             {!club.is_active && (
               <span className="badge badge-error">Inactive</span>
             )}
