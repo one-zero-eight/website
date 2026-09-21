@@ -23,7 +23,6 @@ export function GeoControlPointMarkers({
             fill="none"
             stroke={color}
             strokeWidth={4}
-            vectorEffect="non-scaling-stroke"
           />
           <line
             x1={p.x - 44}
@@ -32,7 +31,6 @@ export function GeoControlPointMarkers({
             y2={p.y}
             stroke={color}
             strokeWidth={3}
-            vectorEffect="non-scaling-stroke"
           />
           <line
             x1={p.x}
@@ -41,7 +39,6 @@ export function GeoControlPointMarkers({
             y2={p.y + 44}
             stroke={color}
             strokeWidth={3}
-            vectorEffect="non-scaling-stroke"
           />
           <text
             x={p.x + 34}
