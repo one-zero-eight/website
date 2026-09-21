@@ -10,6 +10,10 @@ import { cn } from "@/lib/ui/cn";
 import type { MeetingDate, MeetingUser } from "./types.ts";
 import { countExplicitSlotAvailability } from "./utils/participants.ts";
 import {
+  getAllowedMeetingInterval,
+  isMeetingSlotInFuture,
+} from "./utils/meeting-time-selection.ts";
+import {
   areConsecutiveDateIds,
   getSlotHeatmapAppearance,
   getSlotHeatmapAppearanceColorblindSafe,
@@ -19,11 +23,6 @@ import {
 } from "./utils/slots.ts";
 
 type DragMode = "add" | "remove";
-
-// On touch we defer selecting until a short press-and-hold so a normal swipe
-// scrolls the page instead of accidentally marking slots.
-const LONG_PRESS_MS = 250;
-const TOUCH_MOVE_CANCEL_PX = 10;
 
 function getMeetingTimeOverlayClassName({
   continuesAbove,
@@ -95,6 +94,7 @@ export function AvailabilitySelector({
   onApplySlots,
   isPhone = false,
   allowedSlots,
+  getUnavailableSlotHint,
   selectionOnly = false,
   hideHint = false,
   bestIntersectionSlotKeys,
@@ -104,6 +104,7 @@ export function AvailabilitySelector({
   intervalSelectionSlots,
   onIntervalSelectionSlotsChange,
   onIntervalSelectionEnd,
+  onPastMeetingTimeAttempt,
   selectedMeetingSlotKeys,
   showCalendarOverlay = false,
   calendarSlotEvents,
@@ -119,6 +120,7 @@ export function AvailabilitySelector({
   onApplySlots: (slotKeys: string[], mode: DragMode) => void;
   isPhone?: boolean;
   allowedSlots?: Set<string>;
+  getUnavailableSlotHint?: (slotKey: string) => string;
   selectionOnly?: boolean;
   hideHint?: boolean;
   bestIntersectionSlotKeys?: Set<string>;
@@ -128,6 +130,7 @@ export function AvailabilitySelector({
   intervalSelectionSlots?: Set<string>;
   onIntervalSelectionSlotsChange?: (slotKeys: string[]) => void;
   onIntervalSelectionEnd?: (slotKeys: string[]) => void;
+  onPastMeetingTimeAttempt?: () => void;
   selectedMeetingSlotKeys?: Set<string>;
   showCalendarOverlay?: boolean;
   calendarSlotEvents?: Map<string, string[]>;
@@ -142,24 +145,7 @@ export function AvailabilitySelector({
   const allowedSlotsRef = useRef(allowedSlots);
   allowedSlotsRef.current = allowedSlots;
 
-  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingTouchRef = useRef<{
-    x: number;
-    y: number;
-    dateId: string;
-    time: string;
-    pointerId: number;
-    isInterval: boolean;
-  } | null>(null);
-  const [isTouchDragging, setIsTouchDragging] = useState(false);
-
-  const clearPendingLongPress = useCallback(() => {
-    if (longPressTimerRef.current !== null) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-    pendingTouchRef.current = null;
-  }, []);
+  const activePointerIdRef = useRef<number | null>(null);
 
   const visibleDateIdsRef = useRef<string[]>([]);
   const timeSlotsRef = useRef(timeSlots);
@@ -176,10 +162,13 @@ export function AvailabilitySelector({
   const onIntervalSelectionEndRef = useRef(onIntervalSelectionEnd);
   onIntervalSelectionEndRef.current = onIntervalSelectionEnd;
 
+  const onPastMeetingTimeAttemptRef = useRef(onPastMeetingTimeAttempt);
+  onPastMeetingTimeAttemptRef.current = onPastMeetingTimeAttempt;
+  const hasWarnedPastMeetingTimeRef = useRef(false);
+
   const intervalSelectionSlotsRef = useRef(intervalSelectionSlots);
   intervalSelectionSlotsRef.current = intervalSelectionSlots;
 
-  const intervalAnchorDateRef = useRef<string | null>(null);
   const intervalDragStartRef = useRef<string | null>(null);
 
   const isEditing = editingUserId !== null;
@@ -221,11 +210,12 @@ export function AvailabilitySelector({
   }, [isEditing, onHoveredSlotKeyChange, selectionOnly, showCalendarOverlay]);
 
   function isSlotAllowed(dateId: string, time: string) {
-    if (!allowedSlots) {
-      return true;
+    const slotKey = getSlotKey(dateId, time);
+    if (intervalSelectionMode && !isMeetingSlotInFuture(slotKey, Date.now())) {
+      return false;
     }
 
-    return allowedSlots.has(getSlotKey(dateId, time));
+    return !allowedSlotsRef.current || allowedSlotsRef.current.has(slotKey);
   }
 
   function getAvailableCount(dateId: string, time: string) {
@@ -305,19 +295,21 @@ export function AvailabilitySelector({
     onHoveredSlotKeyChange?.(null);
   }
 
-  function getIntervalSlotKeysBetween(fromSlotKey: string, toSlotKey: string) {
-    const anchorDateId = intervalAnchorDateRef.current;
+  function applyIntervalSelection(slotKeys: string[]) {
+    intervalSelectionSlotsRef.current = new Set(slotKeys);
+    onIntervalSelectionSlotsChangeRef.current?.(slotKeys);
+  }
 
-    if (!anchorDateId) {
-      return [toSlotKey];
+  function notifyPastMeetingTimeAttempt(slotKey: string) {
+    if (
+      hasWarnedPastMeetingTimeRef.current ||
+      isMeetingSlotInFuture(slotKey, Date.now())
+    ) {
+      return;
     }
 
-    return getSlotKeysBetween(
-      fromSlotKey,
-      toSlotKey,
-      visibleDateIdsRef.current,
-      timeSlotsRef.current,
-    ).filter((slotKey) => parseSlotKey(slotKey).dateId === anchorDateId);
+    hasWarnedPastMeetingTimeRef.current = true;
+    onPastMeetingTimeAttemptRef.current?.();
   }
 
   function isEditingUserSlot(dateId: string, time: string) {
@@ -338,18 +330,35 @@ export function AvailabilitySelector({
     }
   }
 
-  function beginIntervalDrag(dateId: string, time: string, pointerId: number) {
-    capturePointer(pointerId);
+  function beginIntervalDrag(
+    dateId: string,
+    time: string,
+    pointerId: number | null,
+  ) {
+    notifyPastMeetingTimeAttempt(getSlotKey(dateId, time));
+    if (!isSlotAllowed(dateId, time)) {
+      return;
+    }
+    activePointerIdRef.current = pointerId;
+    if (pointerId !== null) {
+      capturePointer(pointerId);
+    }
 
     const slotKey = getSlotKey(dateId, time);
-    intervalAnchorDateRef.current = dateId;
     intervalDragStartRef.current = slotKey;
     isDraggingRef.current = true;
-    onIntervalSelectionSlotsChangeRef.current?.([slotKey]);
+    applyIntervalSelection([slotKey]);
   }
 
-  function beginEditingDrag(dateId: string, time: string, pointerId: number) {
-    capturePointer(pointerId);
+  function beginEditingDrag(
+    dateId: string,
+    time: string,
+    pointerId: number | null,
+  ) {
+    activePointerIdRef.current = pointerId;
+    if (pointerId !== null) {
+      capturePointer(pointerId);
+    }
 
     const slotKey = getSlotKey(dateId, time);
     dragModeRef.current = draftSlots.has(slotKey) ? "remove" : "add";
@@ -364,50 +373,28 @@ export function AvailabilitySelector({
     time: string,
     event: ReactPointerEvent<HTMLButtonElement>,
   ) {
+    if (
+      event.pointerType === "touch" ||
+      isDraggingRef.current ||
+      event.button !== 0
+    ) {
+      return;
+    }
+
     const isInterval = intervalSelectionMode;
+    hasWarnedPastMeetingTimeRef.current = false;
 
-    if (isInterval ? !isSlotAllowed(dateId, time) : !editingUserId) {
+    if (!isInterval && !isEditing) {
       return;
     }
 
-    if (!isInterval && !isSlotAllowed(dateId, time)) {
+    if (!isSlotAllowed(dateId, time)) {
+      if (isInterval) {
+        notifyPastMeetingTimeAttempt(getSlotKey(dateId, time));
+      }
       return;
     }
 
-    // Touch: arm a long-press. Don't preventDefault/capture yet so a normal
-    // swipe keeps scrolling the page; selection begins only on hold.
-    if (event.pointerType === "touch") {
-      clearPendingLongPress();
-      pendingTouchRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-        dateId,
-        time,
-        pointerId: event.pointerId,
-        isInterval,
-      };
-
-      longPressTimerRef.current = setTimeout(() => {
-        const pending = pendingTouchRef.current;
-        pendingTouchRef.current = null;
-        longPressTimerRef.current = null;
-
-        if (!pending) {
-          return;
-        }
-
-        setIsTouchDragging(true);
-
-        if (pending.isInterval) {
-          beginIntervalDrag(pending.dateId, pending.time, pending.pointerId);
-        } else {
-          beginEditingDrag(pending.dateId, pending.time, pending.pointerId);
-        }
-      }, LONG_PRESS_MS);
-      return;
-    }
-
-    // Mouse / pen: start immediately.
     event.preventDefault();
 
     if (isInterval) {
@@ -416,6 +403,17 @@ export function AvailabilitySelector({
       beginEditingDrag(dateId, time, event.pointerId);
     }
   }
+
+  const beginTouchSelectionRef = useRef<(slotKey: string) => void>(() => {});
+  beginTouchSelectionRef.current = (slotKey: string) => {
+    const { dateId, time } = parseSlotKey(slotKey);
+    hasWarnedPastMeetingTimeRef.current = false;
+    if (intervalSelectionMode) {
+      beginIntervalDrag(dateId, time, null);
+    } else if (isEditing && isSlotAllowed(dateId, time)) {
+      beginEditingDrag(dateId, time, null);
+    }
+  };
 
   function handleSlotTap(slotKey: string) {
     // Phone-only: tapping a slot in view mode reveals who is available there.
@@ -463,31 +461,8 @@ export function AvailabilitySelector({
   }, []);
 
   useEffect(() => {
-    function handlePointerMove(event: PointerEvent) {
-      // Still waiting on a long-press: if the finger travels far enough it's a
-      // scroll, so cancel the pending selection and let the page scroll.
-      const pending = pendingTouchRef.current;
-
-      if (pending && event.pointerId === pending.pointerId) {
-        const distance = Math.hypot(
-          event.clientX - pending.x,
-          event.clientY - pending.y,
-        );
-
-        if (distance > TOUCH_MOVE_CANCEL_PX) {
-          clearPendingLongPress();
-        }
-
-        return;
-      }
-
-      if (!isDraggingRef.current) {
-        return;
-      }
-
-      event.preventDefault();
-
-      const slotKey = getSlotKeyFromPoint(event.clientX, event.clientY);
+    function updateDrag(clientX: number, clientY: number) {
+      const slotKey = getSlotKeyFromPoint(clientX, clientY);
 
       if (!slotKey) {
         return;
@@ -495,14 +470,23 @@ export function AvailabilitySelector({
 
       if (intervalDragStartRef.current) {
         const dragStart = intervalDragStartRef.current;
+        notifyPastMeetingTimeAttempt(dragStart);
+        notifyPastMeetingTimeAttempt(
+          getSlotKey(
+            parseSlotKey(dragStart).dateId,
+            parseSlotKey(slotKey).time,
+          ),
+        );
 
-        if (slotKey === dragStart) {
-          onIntervalSelectionSlotsChangeRef.current?.([dragStart]);
-          return;
-        }
-
-        onIntervalSelectionSlotsChangeRef.current?.(
-          getIntervalSlotKeysBetween(dragStart, slotKey),
+        applyIntervalSelection(
+          getAllowedMeetingInterval(
+            dragStart,
+            slotKey,
+            visibleDateIdsRef.current,
+            timeSlotsRef.current,
+            Date.now(),
+            allowedSlotsRef.current,
+          ),
         );
         return;
       }
@@ -543,53 +527,188 @@ export function AvailabilitySelector({
       lastVisitedSlotKeyRef.current = slotKey;
     }
 
-    function handlePointerUp() {
-      clearPendingLongPress();
-
-      if (
-        intervalDragStartRef.current &&
-        intervalSelectionSlotsRef.current?.size
-      ) {
-        onIntervalSelectionEndRef.current?.([
-          ...intervalSelectionSlotsRef.current,
-        ]);
+    function finishDrag(cancelled: boolean) {
+      if (intervalDragStartRef.current) {
+        if (cancelled) {
+          applyIntervalSelection([]);
+        } else if (intervalSelectionSlotsRef.current?.size) {
+          onIntervalSelectionEndRef.current?.([
+            ...intervalSelectionSlotsRef.current,
+          ]);
+        }
       }
 
       isDraggingRef.current = false;
+      activePointerIdRef.current = null;
       visitedSlotsRef.current.clear();
       lastVisitedSlotKeyRef.current = null;
-      intervalAnchorDateRef.current = null;
       intervalDragStartRef.current = null;
-      setIsTouchDragging(false);
     }
 
-    // While an active touch selection is in progress, cancel scrolling so the
-    // drag keeps painting slots instead of moving the page.
+    function handlePointerUp(event: PointerEvent) {
+      if (
+        event.pointerType !== "touch" &&
+        event.pointerId === activePointerIdRef.current
+      ) {
+        finishDrag(false);
+      }
+    }
+
+    function handlePointerCancel(event: PointerEvent) {
+      if (
+        event.pointerType !== "touch" &&
+        event.pointerId === activePointerIdRef.current
+      ) {
+        finishDrag(true);
+      }
+    }
+
+    function handlePointerMove(event: PointerEvent) {
+      if (
+        event.pointerType === "touch" ||
+        !isDraggingRef.current ||
+        event.pointerId !== activePointerIdRef.current
+      ) {
+        return;
+      }
+      event.preventDefault();
+      updateDrag(event.clientX, event.clientY);
+    }
+
+    // Touch owns its lifecycle: Firefox may cancel pointer events while the
+    // touch stream continues. Cancel native touchmove before scrolling starts.
+    let touchGesture: {
+      identifier: number;
+      slotKey: string;
+      attemptedSelection: boolean;
+    } | null = null;
+    let holdTimer: ReturnType<typeof setTimeout> | undefined;
+
+    function clearTouchGesture() {
+      clearTimeout(holdTimer);
+      holdTimer = undefined;
+      touchGesture = null;
+    }
+
+    function handleTouchStart(event: TouchEvent) {
+      if (event.touches.length !== 1) {
+        if (touchGesture) {
+          finishDrag(true);
+          clearTouchGesture();
+        }
+        return;
+      }
+      if (
+        touchGesture ||
+        isDraggingRef.current ||
+        (!editingUserId && !intervalSelectionMode)
+      ) {
+        return;
+      }
+      const target = event.target;
+      const cell =
+        target instanceof Element ? target.closest("[data-slot-key]") : null;
+      const slotKey = cell?.getAttribute("data-slot-key");
+      const touch = event.changedTouches[0];
+      if (!slotKey || !touch) {
+        return;
+      }
+      touchGesture = {
+        identifier: touch.identifier,
+        slotKey,
+        attemptedSelection: false,
+      };
+      holdTimer = setTimeout(() => {
+        if (touchGesture) {
+          touchGesture.attemptedSelection = true;
+          beginTouchSelectionRef.current(touchGesture.slotKey);
+        }
+      }, 250);
+    }
+
     function handleTouchMove(event: TouchEvent) {
-      if (isDraggingRef.current && event.cancelable) {
+      if (!touchGesture) {
+        return;
+      }
+      const touch = Array.from(event.changedTouches).find(
+        (touch) => touch.identifier === touchGesture?.identifier,
+      );
+      if (!touch) {
+        return;
+      }
+      if (isDraggingRef.current) {
+        if (!event.cancelable) {
+          finishDrag(true);
+          clearTouchGesture();
+          return;
+        }
+        event.preventDefault();
+        updateDrag(touch.clientX, touch.clientY);
+        return;
+      }
+      // Any movement before the hold belongs to native scrolling. Never take
+      // over a gesture after allowing its first touchmove through.
+      clearTouchGesture();
+    }
+
+    function handleTouchEnd(event: TouchEvent) {
+      if (
+        !touchGesture ||
+        !Array.from(event.changedTouches).some(
+          (touch) => touch.identifier === touchGesture?.identifier,
+        )
+      ) {
+        return;
+      }
+      if (!touchGesture.attemptedSelection) {
+        beginTouchSelectionRef.current(touchGesture.slotKey);
+      }
+      finishDrag(false);
+      clearTouchGesture();
+    }
+
+    function handleTouchCancel() {
+      if (!touchGesture) {
+        return;
+      }
+      finishDrag(true);
+      clearTouchGesture();
+    }
+
+    function handleContextMenu(event: Event) {
+      if (touchGesture) {
         event.preventDefault();
       }
     }
+
+    const grid = gridRef.current;
+    grid?.addEventListener("touchstart", handleTouchStart, { passive: true });
+    grid?.addEventListener("touchmove", handleTouchMove, { passive: false });
+    grid?.addEventListener("touchend", handleTouchEnd);
+    grid?.addEventListener("touchcancel", handleTouchCancel);
+    grid?.addEventListener("contextmenu", handleContextMenu);
 
     window.addEventListener("pointermove", handlePointerMove, {
       passive: false,
     });
     window.addEventListener("pointerup", handlePointerUp);
-    window.addEventListener("pointercancel", handlePointerUp);
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("pointercancel", handlePointerCancel);
 
     return () => {
+      clearTouchGesture();
+      isDraggingRef.current = false;
+      activePointerIdRef.current = null;
+      intervalDragStartRef.current = null;
+      grid?.removeEventListener("touchstart", handleTouchStart);
+      grid?.removeEventListener("touchmove", handleTouchMove);
+      grid?.removeEventListener("touchend", handleTouchEnd);
+      grid?.removeEventListener("touchcancel", handleTouchCancel);
+      grid?.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
-      window.removeEventListener("pointercancel", handlePointerUp);
-      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("pointercancel", handlePointerCancel);
     };
-  }, [
-    editingUserId,
-    getSlotKeyFromPoint,
-    intervalSelectionMode,
-    clearPendingLongPress,
-  ]);
+  }, [editingUserId, getSlotKeyFromPoint, intervalSelectionMode]);
 
   const gridTemplateColumns = isPhone
     ? `2.25rem repeat(${visibleDates.length}, minmax(0, 1fr))`
@@ -706,13 +825,11 @@ export function AvailabilitySelector({
       onMouseLeave={handleGridMouseLeave}
       className={cn(
         "grid w-full min-w-0",
+
         !isEditing && !selectionOnly && "opacity-95",
       )}
       style={{
         gridTemplateColumns,
-        // Only lock scrolling once a touch drag is actually underway; before
-        // that the page must stay scrollable over the grid.
-        touchAction: isTouchDragging ? "none" : undefined,
       }}
     >
       <div />
@@ -919,7 +1036,7 @@ export function AvailabilitySelector({
                 )}
                 title={
                   !slotAllowed
-                    ? `${date.monthDay}, ${time}: not available for this meeting`
+                    ? `${date.monthDay}, ${time}: ${getUnavailableSlotHint?.(slotKey) ?? "not available for this meeting"}`
                     : isIntervalSelected
                       ? `${date.monthDay}, ${time}: selecting meeting time`
                       : isSelectedMeetingSlot
@@ -1016,13 +1133,15 @@ export function AvailabilitySelector({
 
       {!hideHint && intervalSelectionMode && (
         <p className="text-base-content/60 mb-3 text-sm">
-          Drag on the grid to select the meeting time.
+          Tap a slot or hold and drag to select the meeting time. Swipe to
+          scroll.
         </p>
       )}
 
       {!hideHint && isEditing && !intervalSelectionMode && (
         <p className="text-base-content/60 mb-3 text-sm">
-          Click timeslots on the grid to mark your availability.
+          Tap a slot or hold and drag to mark your availability. Swipe to
+          scroll.
         </p>
       )}
 
