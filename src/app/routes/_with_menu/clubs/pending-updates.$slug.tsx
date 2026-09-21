@@ -20,7 +20,7 @@ function RouteComponent() {
         <title>Review club changes</title>
         <meta
           name="description"
-          content="Review a pending club change proposed by a club leader."
+          content="Review a club change proposed by a club leader."
         />
       </Helmet>
 

@@ -12,7 +12,7 @@ export function ClubsTabs() {
       {clubsUser?.role === "admin" && (
         <>
           <TabLink to="/clubs/admin">Admin</TabLink>
-          <TabLink to="/clubs/pending-updates">Pending Changes</TabLink>
+          <TabLink to="/clubs/pending-updates">Review Changes</TabLink>
         </>
       )}
     </div>

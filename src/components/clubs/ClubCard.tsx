@@ -13,11 +13,9 @@ import {
 function ClubCard({
   club,
   isOwner = false,
-  canEdit = false,
 }: {
   club: clubsTypes.SchemaClub;
   isOwner?: boolean;
-  canEdit?: boolean;
 }) {
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
   const clubLeader = useMemo(
@@ -55,17 +53,6 @@ function ClubCard({
             <span className={cn("badge shrink-0", getClubTypeColor(club.type))}>
               {getClubTypeLabel(club.type)}
             </span>
-            {canEdit && (
-              <Link
-                to="/clubs/$slug/edit"
-                params={{ slug: club.slug }}
-                className="btn btn-ghost btn-square btn-sm"
-                title="Edit club"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span className="icon-[mynaui--pencil] size-4" />
-              </Link>
-            )}
           </div>
         </div>
 
@@ -126,8 +113,7 @@ function ClubCard({
 const MemoizedClubCard = React.memo(ClubCard, (prevProps, nextProps) => {
   return (
     prevProps.club.id === nextProps.club.id &&
-    prevProps.isOwner === nextProps.isOwner &&
-    prevProps.canEdit === nextProps.canEdit
+    prevProps.isOwner === nextProps.isOwner
   );
 });
 export { MemoizedClubCard as ClubCard };

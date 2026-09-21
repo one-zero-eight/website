@@ -13,7 +13,7 @@ import {
   clubTypesOrder,
   getClubTypeLabel,
 } from "./constants.ts";
-import { canUserEditClub, isClubOwner } from "./permissions.ts";
+import { isClubOwner } from "./permissions.ts";
 
 export function ClubsListPage() {
   const { data: clubs, isPending } = $clubs.useQuery(
@@ -160,7 +160,6 @@ export function ClubsListPage() {
                       key={club.id}
                       club={club}
                       isOwner={isClubOwner(clubsUser, club.id)}
-                      canEdit={canUserEditClub(clubsUser, club.id)}
                     />
                   ))}
                 </div>
@@ -174,7 +173,6 @@ export function ClubsListPage() {
                     key={club.id}
                     club={club}
                     isOwner={isClubOwner(clubsUser, club.id)}
-                    canEdit={canUserEditClub(clubsUser, club.id)}
                   />
                 ))}
               </div>

@@ -19,6 +19,23 @@ import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
 import { canUserEditClub } from "./permissions.ts";
 
+/** Deep-compares two values that are only ever plain JSON. */
+function isSameJson(a: unknown, b: unknown) {
+  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+}
+
+/** Club descriptions come back either as a JSON string or as parsed JSON. */
+function parseDescription(description: unknown): any {
+  if (typeof description !== "string") {
+    return description ?? null;
+  }
+  try {
+    return description ? JSON.parse(description) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -115,19 +132,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       setSlug(club.slug);
       setTitle(title);
       setShortDescription(shortDescription);
-      // Parse description JSON if it's a string, otherwise use as-is
-      try {
-        const parsedDescription =
-          typeof description === "string"
-            ? description
-              ? JSON.parse(description)
-              : null
-            : description;
-        setDescription(parsedDescription);
-      } catch {
-        // If parsing fails, treat as empty
-        setDescription(null);
-      }
+      setDescription(parseDescription(description));
       setIsActive(club.is_active);
       setType(type);
       setIsSport(!!sportId);
@@ -149,18 +154,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       const pending = club.pending_update;
       const description = pending?.description ?? club.description;
 
-      // Parse description JSON if it's a string, otherwise use as-is
-      let parsedDescription: any = null;
-      try {
-        parsedDescription =
-          typeof description === "string"
-            ? description
-              ? JSON.parse(description)
-              : null
-            : description;
-      } catch {
-        parsedDescription = null;
-      }
+      const parsedDescription = parseDescription(description);
 
       initialFormStateRef.current = {
         slug: club.slug,
@@ -176,6 +170,17 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       };
     }
   }, [club, clubLeader, leaderEmail]);
+
+  const publishedDescription = parseDescription(club?.description);
+
+  // The description lives inside the editor, so its "changed" flag is kept in
+  // state and refreshed both on seeding and on every keystroke.
+  const [isDescriptionChanged, setIsDescriptionChanged] = useState(false);
+
+  useEffect(() => {
+    setIsDescriptionChanged(!isSameJson(description, publishedDescription));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [description, club?.description]);
 
   // Check if form has unsaved changes
   const hasUnsavedChanges = useCallback(() => {
@@ -400,7 +405,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     if (!isAdmin) {
       showSuccess(
         "Submitted for review",
-        "An admin needs to approve your changes before they go live.",
+        "An admin needs to review your changes before they go live.",
       );
     }
     // Navigate to new slug if it changed, otherwise stay on current slug
@@ -430,6 +435,99 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     const newLinks = [...links];
     newLinks[index] = { ...newLinks[index], [field]: value || null };
     setLinks(newLinks);
+  };
+
+  // Sections that currently differ from what is published on the club: only
+  // these show the "Revert changes" button, so it comes and goes as the user
+  // edits the form.
+  const changedSections = {
+    logo: !!logoFile || (!!pendingLogoFileId && !cancelPendingLogo),
+    basicInfo:
+      !!club &&
+      (slug !== club.slug ||
+        title !== club.title ||
+        type !== club.type ||
+        isActive !== club.is_active ||
+        shortDescription !== club.short_description),
+    description: isDescriptionChanged,
+    leader: leaderEmail !== (clubLeader?.email ?? ""),
+    sport:
+      !!club &&
+      (isSport !== !!club.sport_id || sportId !== (club.sport_id ?? "")),
+    links: !!club && !isSameJson(links, club.links ?? []),
+  };
+
+  // Sections the club already had changes for when the page opened, i.e. the
+  // request waiting for review. These get the "Modified" tag.
+  const modifiedSections = {
+    logo: !!pendingLogoFileId,
+    basicInfo:
+      !!club &&
+      !!pendingUpdate &&
+      ((pendingUpdate.title != null && pendingUpdate.title !== club.title) ||
+        (pendingUpdate.short_description != null &&
+          pendingUpdate.short_description !== club.short_description) ||
+        (pendingUpdate.type != null && pendingUpdate.type !== club.type)),
+    description:
+      !!club &&
+      pendingUpdate?.description != null &&
+      pendingUpdate.description !== club.description,
+    leader:
+      !!club &&
+      pendingUpdate?.leader_innohassle_id !== undefined &&
+      pendingUpdate.leader_innohassle_id !== club.leader_innohassle_id,
+    sport:
+      !!club &&
+      pendingUpdate?.sport_id !== undefined &&
+      pendingUpdate.sport_id !== club.sport_id,
+    links:
+      !!club &&
+      pendingUpdate?.links != null &&
+      !isSameJson(pendingUpdate.links, club.links ?? []),
+  };
+
+  // Per-section "Revert changes": drops the section back to what is published
+  // on the club right now, so it also throws away whatever this section had in
+  // the pending request — not just the edits made since the form opened.
+  const revertBasicInfo = () => {
+    if (!club) return;
+    setSlug(club.slug);
+    setTitle(club.title);
+    setType(club.type);
+    setIsActive(club.is_active);
+    setShortDescription(club.short_description);
+  };
+
+  const revertDescription = () => {
+    if (!club) return;
+    const published = parseDescription(club.description);
+    setDescription(published);
+    editorRef.current?.editor?.commands.setContent(published ?? "");
+  };
+
+  const revertLeader = () => {
+    setShowChangeLeader(false);
+    setLeaderEmail(clubLeader?.email || "");
+  };
+
+  const revertSport = () => {
+    if (!club) return;
+    setIsSport(!!club.sport_id);
+    setSportId(club.sport_id || "");
+  };
+
+  const revertLinks = () => {
+    if (!club) return;
+    setLinks(club.links ?? []);
+  };
+
+  const revertLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    if (logoInputRef.current) {
+      logoInputRef.current.value = "";
+    }
+    setCancelPendingLogo(!!pendingLogoFileId);
   };
 
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -499,7 +597,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
             <span className="icon-[mdi--clock-outline] text-primary mt-0.5 size-5 shrink-0" />
             <div>
               <p className="text-base-content font-medium">
-                You have changes waiting for approval
+                You have changes waiting for review
               </p>
               <p className="text-base-content/70 text-sm">
                 The form below shows what you submitted, not what is published
@@ -514,10 +612,17 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
         {/* Logo Upload Section */}
         <div className="card card-border">
           <div className="card-body">
-            <h2 className="card-title">
-              <span className="icon-[mdi--image] size-6" />
-              Club Logo
-            </h2>
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="card-title">
+                <span className="icon-[mdi--image] size-6" />
+                Club Logo
+                {modifiedSections.logo && <ModifiedBadge />}
+              </h2>
+              <RevertSectionButton
+                changed={changedSections.logo}
+                onRevert={revertLogo}
+              />
+            </div>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {/* Current Logo */}
@@ -578,18 +683,9 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                           </button>
                         </>
                       ) : (
-                        <>
-                          <p className="text-primary/70 text-sm">
-                            Submitted, waiting for approval
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => setCancelPendingLogo(true)}
-                            className="btn btn-ghost btn-sm w-full"
-                          >
-                            Cancel logo change
-                          </button>
-                        </>
+                        <p className="text-primary/70 text-sm">
+                          Submitted, waiting for review
+                        </p>
                       )}
                     </div>
                   ) : (
@@ -660,7 +756,16 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
         {/* Basic Information */}
         <div className="card card-border">
           <div className="card-body">
-            <h2 className="card-title">Basic information</h2>
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="card-title">
+                Basic information
+                {modifiedSections.basicInfo && <ModifiedBadge />}
+              </h2>
+              <RevertSectionButton
+                changed={changedSections.basicInfo}
+                onRevert={revertBasicInfo}
+              />
+            </div>
 
             {/* Active Status (admin-only: leaders' edits to this are dropped by the backend) */}
             {isAdmin && (
@@ -772,15 +877,22 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               <h2 className="card-title">
                 <span className="icon-[material-symbols--article-outline-rounded] size-6" />
                 About
+                {modifiedSections.description && <ModifiedBadge />}
               </h2>
-              <button
-                type="button"
-                onClick={() => setShowPreview(true)}
-                className="btn btn-outline btn-primary btn-sm"
-              >
-                <span className="icon-[mdi--eye] size-5" />
-                Preview
-              </button>
+              <div className="flex items-center gap-2">
+                <RevertSectionButton
+                  changed={changedSections.description}
+                  onRevert={revertDescription}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPreview(true)}
+                  className="btn btn-outline btn-primary btn-sm"
+                >
+                  <span className="icon-[mdi--eye] size-5" />
+                  Preview
+                </button>
+              </div>
             </div>
 
             <div className="-mx-6 -mb-6">
@@ -789,6 +901,14 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 className="px-6 pb-6"
                 initialContent={description}
                 imageHandlers={descriptionImageHandlers}
+                onUpdate={() =>
+                  setIsDescriptionChanged(
+                    !isSameJson(
+                      editorRef.current?.getJSON() ?? null,
+                      publishedDescription,
+                    ),
+                  )
+                }
               />
             </div>
           </div>
@@ -799,10 +919,17 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
         {isAdmin && (
           <div className="card card-border">
             <div className="card-body">
-              <h2 className="card-title">
-                <span className="icon-[mdi--account] size-6" />
-                Club Leader
-              </h2>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="card-title">
+                  <span className="icon-[mdi--account] size-6" />
+                  Club Leader
+                  {modifiedSections.leader && <ModifiedBadge />}
+                </h2>
+                <RevertSectionButton
+                  changed={changedSections.leader}
+                  onRevert={revertLeader}
+                />
+              </div>
 
               {/* Current Leader Info */}
               {clubLeader && (
@@ -907,10 +1034,17 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
         {isAdmin && (
           <div className="card card-border">
             <div className="card-body">
-              <h2 className="card-title">
-                <span className="icon-[mdi--dumbbell] size-6" />
-                Sport Information
-              </h2>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="card-title">
+                  <span className="icon-[mdi--dumbbell] size-6" />
+                  Sport Information
+                  {modifiedSections.sport && <ModifiedBadge />}
+                </h2>
+                <RevertSectionButton
+                  changed={changedSections.sport}
+                  onRevert={revertSport}
+                />
+              </div>
 
               {/* Is Sport Checkbox */}
               <div className="form-control">
@@ -965,15 +1099,22 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               <h2 className="card-title">
                 <span className="icon-[mdi--link] size-6" />
                 Resources & Links
+                {modifiedSections.links && <ModifiedBadge />}
               </h2>
-              <button
-                type="button"
-                onClick={handleAddLink}
-                className="btn btn-primary btn-sm"
-              >
-                <span className="icon-[mdi--plus] size-5" />
-                Add Link
-              </button>
+              <div className="flex items-center gap-2">
+                <RevertSectionButton
+                  changed={changedSections.links}
+                  onRevert={revertLinks}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddLink}
+                  className="btn btn-primary btn-sm"
+                >
+                  <span className="icon-[mdi--plus] size-5" />
+                  Add Link
+                </button>
+              </div>
             </div>
 
             {links.length === 0 ? (
@@ -1132,5 +1273,35 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
         </div>
       </Modal>
     </div>
+  );
+}
+
+/** Tag marking a section that already has changes waiting for review. */
+function ModifiedBadge() {
+  return <span className="badge badge-primary badge-soft">Modified</span>;
+}
+
+/** Undo control shown in a section header while it differs from the club. */
+function RevertSectionButton({
+  changed,
+  onRevert,
+}: {
+  changed: boolean;
+  onRevert: () => void;
+}) {
+  if (!changed) {
+    return null;
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onRevert}
+      className="btn btn-ghost btn-sm shrink-0"
+      title="Revert this section to the published values"
+    >
+      <span className="icon-[mdi--undo] size-4" />
+      Revert changes
+    </button>
   );
 }

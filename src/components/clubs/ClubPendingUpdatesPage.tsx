@@ -17,7 +17,7 @@ export function ClubPendingUpdatesPage() {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-base-content/50 text-lg">
-          Loading pending changes...
+          Loading changes for review...
         </div>
       </div>
     );
@@ -27,7 +27,7 @@ export function ClubPendingUpdatesPage() {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-2">
         <span className="icon-[mdi--check-circle-outline] text-base-content/20 size-12" />
-        <div className="text-base-content/50 text-lg">No pending changes</div>
+        <div className="text-base-content/50 text-lg">No changes to review</div>
       </div>
     );
   }
@@ -36,8 +36,8 @@ export function ClubPendingUpdatesPage() {
     <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 py-8 lg:px-8">
       <div className="text-base-content/70 text-sm">
         <span className="font-semibold">{clubs.length}</span>{" "}
-        {clubs.length === 1 ? "club has" : "clubs have"} changes awaiting
-        approval
+        {clubs.length === 1 ? "club has" : "clubs have"} changes waiting for
+        review
       </div>
 
       <div className="flex flex-col gap-4">
@@ -61,7 +61,7 @@ export function ClubPendingUpdatesPage() {
                   {club.title}
                 </span>
                 <span className="badge badge-warning badge-sm">
-                  Pending review
+                  Waiting for review
                 </span>
               </div>
               <p className="text-base-content/50 line-clamp-1 text-sm">

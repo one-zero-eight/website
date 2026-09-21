@@ -107,11 +107,14 @@ function TiptapDescriptionEditor(
     isReadOnly,
     initialContent,
     imageHandlers,
+    onUpdate,
   }: {
     className?: string;
     isReadOnly?: boolean;
     initialContent?: Content;
     imageHandlers?: EditorImageHandlers;
+    /** Called on every content change made by the user. */
+    onUpdate?: () => void;
   },
   ref: React.Ref<TiptapEditorRef>,
 ) {
@@ -163,6 +166,7 @@ function TiptapDescriptionEditor(
     },
     extensions: extensions,
     content: initialContent || "",
+    onUpdate: () => onUpdate?.(),
   });
 
   // Expose editor ref

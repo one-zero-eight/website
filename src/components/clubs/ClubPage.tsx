@@ -61,7 +61,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
         <div className="alert alert-info items-start">
           <span className="icon-[mdi--clock-outline] size-5" />
           <span>
-            This club has changes pending admin approval.{" "}
+            This club has changes waiting for admin review.{" "}
             {clubsUser?.role === "admin" ? (
               <Link
                 to="/clubs/pending-updates/$slug"
@@ -76,7 +76,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                 params={{ slug: clubSlug }}
                 className="link link-primary"
               >
-                View your pending edit
+                View your submitted changes
               </Link>
             )}
           </span>
@@ -98,21 +98,22 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
         </div>
         <div className="card-body">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1">
-              <h1 className="card-title text-3xl font-bold">{club.title}</h1>
+            <h1 className="card-title text-3xl font-bold">{club.title}</h1>
+            <div className="flex shrink-0 items-center gap-2">
+              {!club.is_active && (
+                <span className="badge badge-error">Inactive</span>
+              )}
               {canEditClub && (
                 <Link
                   to="/clubs/$slug/edit"
                   params={{ slug: clubSlug }}
-                  className="btn btn-square btn-ghost btn-primary btn-lg"
+                  className="btn btn-primary btn-soft"
                 >
-                  <span className="icon-[mynaui--pencil]" />
+                  <span className="icon-[mynaui--pencil] size-5" />
+                  Edit club
                 </Link>
               )}
             </div>
-            {!club.is_active && (
-              <span className="badge badge-error">Inactive</span>
-            )}
           </div>
           <span className={cn("badge", getClubTypeColor(club.type))}>
             {getClubTypeLabel(club.type)}
@@ -147,10 +148,18 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
           {/* Upcoming Events Section */}
           <div className="card card-border">
             <div className="card-body">
-              <h2 className="card-title">
-                <span className="icon-[mdi--calendar] size-6" />
-                Upcoming Events
-              </h2>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="card-title">
+                  <span className="icon-[mdi--calendar] size-6" />
+                  Upcoming Events
+                </h2>
+                {canEditClub && (
+                  <Link to="/events/drafts" className="btn btn-primary btn-sm">
+                    <span className="icon-[material-symbols--add-rounded] size-5" />
+                    Add event
+                  </Link>
+                )}
+              </div>
               <div className="space-y-4">
                 <p className="text-base-content/50 italic">No events yet.</p>
               </div>

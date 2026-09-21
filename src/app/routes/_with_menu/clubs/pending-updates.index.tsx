@@ -13,10 +13,10 @@ function RouteComponent() {
   return (
     <>
       <Helmet>
-        <title>Pending club changes</title>
+        <title>Review club changes</title>
         <meta
           name="description"
-          content="Review pending club changes proposed by club leaders."
+          content="Review club changes proposed by club leaders."
         />
       </Helmet>
 
