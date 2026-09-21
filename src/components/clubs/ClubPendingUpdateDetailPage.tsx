@@ -2,7 +2,7 @@ import { $clubs, clubsTypes } from "@/api/clubs";
 import {
   getDescriptionImageUrl,
   getLogoURLById,
-  getPendingLogoPreviewUrl,
+  getPendingLogoURLById,
 } from "@/api/clubs/links.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
@@ -276,7 +276,6 @@ export function ClubPendingUpdateDetailPage({ slug }: { slug: string }) {
     pending.logo_file_id != null &&
     pending.logo_file_id !== club.logo_file_id
   ) {
-    const pendingLogoUrl = getPendingLogoPreviewUrl(pending.logo_file_id);
     blocks.push(
       <DiffBlock
         key="logo"
@@ -294,27 +293,17 @@ export function ClubPendingUpdateDetailPage({ slug }: { slug: string }) {
         }
         proposed={
           <>
-            {pendingLogoUrl && (
-              <img
-                src={pendingLogoUrl}
-                alt="Proposed logo"
-                className="rounded-field bg-base-200 size-24 object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                  e.currentTarget.nextElementSibling?.classList.remove(
-                    "hidden",
-                  );
-                }}
-              />
-            )}
-            <span
-              className={cn(
-                "text-base-content/70 italic",
-                pendingLogoUrl && "hidden",
-              )}
-            >
-              New logo submitted (preview unavailable — set VITE_CLUBS_MINIO_URL
-              to enable it locally)
+            <img
+              src={getPendingLogoURLById(club.id!, pending.logo_file_id)}
+              alt="Proposed logo"
+              className="rounded-field bg-base-200 size-24 object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                e.currentTarget.nextElementSibling?.classList.remove("hidden");
+              }}
+            />
+            <span className="text-base-content/70 hidden italic">
+              New logo submitted (preview failed to load)
             </span>
           </>
         }

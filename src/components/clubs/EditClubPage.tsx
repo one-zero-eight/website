@@ -1,7 +1,7 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
 import {
   getDescriptionImageUrl,
-  getPendingLogoPreviewUrl,
+  getPendingLogoURLById,
 } from "@/api/clubs/links.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
@@ -66,9 +66,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     pendingUpdate.logo_file_id !== club?.logo_file_id
       ? pendingUpdate.logo_file_id
       : null;
-  const pendingLogoUrl = pendingLogoFileId
-    ? getPendingLogoPreviewUrl(pendingLogoFileId)
-    : null;
+  const pendingLogoUrl =
+    pendingLogoFileId && club?.id
+      ? getPendingLogoURLById(club.id, pendingLogoFileId)
+      : null;
 
   // Form state
   const [slug, setSlug] = useState("");
