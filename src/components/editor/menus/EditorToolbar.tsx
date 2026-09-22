@@ -2,6 +2,7 @@ import { moveBlock } from "@/components/editor/utils/moveBlock";
 import { Editor } from "@tiptap/react";
 import { BubbleMenuButton } from "./BubbleMenuButton";
 import { EditorMenuItems } from "./EditorMenuItems";
+import { LinkDialog } from "./LinkButton";
 import { useEditorMenuState } from "./useEditorMenuState";
 
 export function EditorToolbar({ editor }: { editor: Editor }) {
@@ -38,6 +39,7 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
           />
         </ul>
       </div>
+      <LinkDialog editor={editor} />
     </div>
   );
 }
