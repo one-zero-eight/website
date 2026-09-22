@@ -42,7 +42,7 @@ export function pickImageFile(): Promise<File | null> {
   return new Promise((resolve) => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = "image/*";
+    input.accept = "image/jpeg,image/png,image/webp";
     input.onchange = () => {
       resolve(input.files?.[0] ?? null);
     };

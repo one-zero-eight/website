@@ -8,7 +8,12 @@ export const ImageUploadPlaceholder = Node.create({
   atom: true,
 
   addAttributes() {
-    return {};
+    return {
+      uploadId: {
+        default: null,
+        rendered: false,
+      },
+    };
   },
 
   parseHTML() {
