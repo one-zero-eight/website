@@ -57,24 +57,17 @@ export function ClubsListPage() {
       foundClubs = searchClubs(fuse, trimmedSearch);
     }
 
-    const visible = foundClubs.filter(
+    return foundClubs.filter(
       (club) =>
         club.is_active &&
         (selectedTypes.has(club.type) || selectedTypes.size === 0),
     );
+  }, [clubs, fuse, search, selectedTypes]);
 
-    // Clubs the current user leads float to the top of whatever list/section
-    // they'd otherwise appear in (stable sort keeps everything else as-is).
-    return visible
-      .map((club, index) => ({ club, index }))
-      .sort((a, b) => {
-        const aIsLeader = isClubLeader(clubsUser, a.club.id) ? 0 : 1;
-        const bIsLeader = isClubLeader(clubsUser, b.club.id) ? 0 : 1;
-        if (aIsLeader !== bIsLeader) return aIsLeader - bIsLeader;
-        return a.index - b.index;
-      })
-      .map(({ club }) => club);
-  }, [clubs, fuse, search, selectedTypes, clubsUser]);
+  const yourClubs =
+    !search && selectedTypes.size === 0
+      ? filteredClubs.filter((club) => isClubLeader(clubsUser, club.id))
+      : [];
 
   const handleTypeToggle = (type: clubsTypes.ClubType) => {
     setSelectedTypes((prev) => {
@@ -133,6 +126,18 @@ export function ClubsListPage() {
         </div>
       ) : (
         <div className="flex grow flex-col gap-6">
+          {yourClubs.length > 0 && (
+            <section>
+              <h2 className="text-base-content text-xl font-semibold">
+                Your club
+              </h2>
+              <div className="mt-4 flex flex-col gap-6">
+                {yourClubs.map((club) => (
+                  <ClubCard key={club.id} club={club} />
+                ))}
+              </div>
+            </section>
+          )}
           {!search ? (
             Object.entries(groupedClubs).map(([type, clubsOfType]) => (
               <div key={type}>
