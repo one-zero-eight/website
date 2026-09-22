@@ -39,7 +39,12 @@ export function BubbleMenuContent({ editor }: { editor: Editor }) {
   }
 
   return (
-    <BubbleMenu editor={editor} shouldShow={shouldShow} updateDelay={0}>
+    <BubbleMenu
+      editor={editor}
+      shouldShow={shouldShow}
+      updateDelay={0}
+      className="z-20"
+    >
       <ul
         data-testid="bubble-menu"
         className="menu menu-horizontal bg-base-200 rounded-field p-1 shadow-lg"
