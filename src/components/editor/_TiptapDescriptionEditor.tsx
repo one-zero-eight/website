@@ -22,6 +22,7 @@ import { ImageUploadPlaceholder } from "@/components/editor/extensions/image/Ima
 import { BubbleMenuContent } from "@/components/editor/menus/BubbleMenuContent";
 import { ClickableDragHandle } from "@/components/editor/menus/ClickableDragHandle";
 import { MobileBottomMenu } from "@/components/editor/menus/MobileBottomMenu";
+import { EditorToolbar } from "@/components/editor/menus/EditorToolbar";
 import { EditorImageHandlersExtension } from "@/components/editor/extensions/EditorImageHandlers";
 import type { EditorImageHandlers } from "@/components/editor/types";
 
@@ -72,8 +73,11 @@ const baseExtensions = [
   }),
   // https://tiptap.dev/docs/editor/extensions/functionality/placeholder
   Placeholder.configure({
+    emptyEditorClass: "is-editor-empty",
+    emptyNodeClass: "is-empty",
     includeChildren: true,
     showOnlyCurrent: false,
+    showOnlyWhenEditable: true,
     placeholder: ({ node }) => {
       if (node.type.name === "heading") {
         return `Heading ${node.attrs.level}…`;
@@ -200,6 +204,7 @@ function TiptapDescriptionEditor(
   return (
     <EditorContext.Provider value={providerValue}>
       <article className="relative grid min-w-0 grid-cols-[minmax(0,1fr)] md:block">
+        {!isReadOnly && <EditorToolbar editor={editor} />}
         <EditorContent
           editor={editor}
           role="presentation"

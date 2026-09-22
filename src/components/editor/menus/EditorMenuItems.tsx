@@ -16,9 +16,11 @@ function EditorMenuSeparator() {
 export function EditorMenuItems({
   editor,
   editorState,
+  showTextFormatting = false,
 }: {
   editor: Editor;
   editorState: EditorMenuState;
+  showTextFormatting?: boolean;
 }) {
   return (
     <>
@@ -26,7 +28,7 @@ export function EditorMenuItems({
 
       {editorState.isCallout && <CalloutTypePicker editor={editor} />}
 
-      {editorState.isTextSelection && (
+      {(editorState.isTextSelection || showTextFormatting) && (
         <>
           <EditorMenuSeparator />
 

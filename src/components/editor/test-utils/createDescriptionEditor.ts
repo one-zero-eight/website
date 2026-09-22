@@ -26,8 +26,11 @@ export const descriptionEditorExtensions = [
     table: { resizable: true, cellMinWidth: 100 },
   }),
   Placeholder.configure({
+    emptyEditorClass: "is-editor-empty",
+    emptyNodeClass: "is-empty",
     includeChildren: true,
     showOnlyCurrent: false,
+    showOnlyWhenEditable: true,
     placeholder: () => "Write something…",
   }),
   Highlight,

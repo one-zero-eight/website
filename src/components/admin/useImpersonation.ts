@@ -11,6 +11,7 @@ import { useLocalStorage } from "usehooks-ts";
 export type ImpersonatingUser = {
   id: string;
   name: string;
+  email?: string;
 };
 
 export const IMPERSONATING_USER_STORAGE_KEY = "impersonatingUser";
@@ -91,6 +92,7 @@ export function useImpersonation(
     setImpersonatingUser({
       id: targetUser.id,
       name: getViewUserName(targetUser),
+      email: targetUser.innopolis_info?.email,
     });
     setToken(result.data.access_token);
     invalidateMySportAccessToken();

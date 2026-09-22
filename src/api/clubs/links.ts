@@ -5,11 +5,6 @@ export function getLogoURLById(clubId: string, logoFileId?: string | null) {
   return logoFileId ? `${base}?v=${encodeURIComponent(logoFileId)}` : base;
 }
 
-export function getPendingLogoURLById(clubId: string, logoFileId: string) {
-  const base = `${import.meta.env.VITE_CLUBS_API_URL}/clubs/by-id/${clubId}/pending-logo`;
-  return `${base}?v=${encodeURIComponent(logoFileId)}`;
-}
-
 export function getDescriptionImageUrl(imageId: string) {
   return `${import.meta.env.VITE_CLUBS_API_URL}/clubs/description-images/${imageId}`;
 }
