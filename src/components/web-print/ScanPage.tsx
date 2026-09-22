@@ -6,10 +6,8 @@ import {
   DeviceOption,
   DeviceOptionList,
 } from "@/components/web-print/DeviceOptionList.tsx";
-import {
-  FileDropzone,
-  formatFileSize,
-} from "@/components/web-print/FileDropzone.tsx";
+import { FileDropzone } from "./FileDropzone.tsx";
+import { formatFileSize } from "./print-utils.ts";
 import { getScanSessionState } from "@/components/web-print/scan-session.ts";
 import { useScanSession } from "@/components/web-print/useScanSession.ts";
 import {
