@@ -1,8 +1,6 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
-import {
-  getDescriptionImageUrl,
-  getPendingLogoURLById,
-} from "@/api/clubs/links.ts";
+import { getDescriptionImageUrl } from "@/api/clubs/links.ts";
+import { usePendingLogoUrl } from "@/api/clubs/use-pending-logo.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
@@ -66,10 +64,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     pendingUpdate.logo_file_id !== club?.logo_file_id
       ? pendingUpdate.logo_file_id
       : null;
-  const pendingLogoUrl =
-    pendingLogoFileId && club?.id
-      ? getPendingLogoURLById(club.id, pendingLogoFileId)
-      : null;
+  const { logoUrl: pendingLogoUrl } = usePendingLogoUrl(
+    club?.id,
+    pendingLogoFileId,
+  );
 
   // Form state
   const [slug, setSlug] = useState("");

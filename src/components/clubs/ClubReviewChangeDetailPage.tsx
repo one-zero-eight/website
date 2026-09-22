@@ -1,9 +1,6 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
-import {
-  getDescriptionImageUrl,
-  getLogoURLById,
-  getPendingLogoURLById,
-} from "@/api/clubs/links.ts";
+import { getDescriptionImageUrl, getLogoURLById } from "@/api/clubs/links.ts";
+import { usePendingLogoUrl } from "@/api/clubs/use-pending-logo.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
@@ -125,6 +122,15 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
     { params: { path: { slug } } },
   );
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
+  const pendingLogoFileId =
+    club?.pending_update?.logo_file_id != null &&
+    club.pending_update.logo_file_id !== club.logo_file_id
+      ? club.pending_update.logo_file_id
+      : null;
+  const { logoUrl: pendingLogoUrl } = usePendingLogoUrl(
+    club?.id,
+    pendingLogoFileId,
+  );
 
   const invalidate = (id: string | null) => {
     queryClient.invalidateQueries({
@@ -305,7 +311,7 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
       proposed: pending.logo_file_id && (
         <>
           <img
-            src={getPendingLogoURLById(club.id!, pending.logo_file_id)}
+            src={pendingLogoUrl ?? undefined}
             alt="Proposed logo"
             className="rounded-field bg-base-200 size-24 object-contain"
             onError={(e) => {
