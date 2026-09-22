@@ -561,7 +561,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-4">
+    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-4">
       <Helmet>
         <title>Edit {club.title}</title>
         <meta name="description" content={club.short_description} />

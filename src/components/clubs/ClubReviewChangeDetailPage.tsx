@@ -348,7 +348,7 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
   ]);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-4">
+    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-4">
       <div className="card card-border">
         <div className="card-body">
           <div className="mb-2 flex items-center justify-between">
