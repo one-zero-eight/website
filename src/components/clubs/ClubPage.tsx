@@ -184,7 +184,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                       >
                         <span
                           className={cn(
-                            "text-base-content",
+                            "text-base-content shrink-0",
                             getLinkIconClass(link.type),
                             "size-5",
                           )}
@@ -192,7 +192,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                         <span className="text-base-content font-medium">
                           {link.label ? link.label : getLinkLabel(link.type)}
                         </span>
-                        <span className="icon-[mdi--open-in-new] text-base-content/30 ml-auto size-4" />
+                        <span className="icon-[mdi--open-in-new] text-base-content/30 ml-auto size-4 shrink-0" />
                       </a>
                     </li>
                   ))}
