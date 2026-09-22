@@ -257,17 +257,15 @@ export const Image = BaseImage.extend({
           editor
             .chain()
             .focus()
-            .updateAttributes(extension.name, {
-              width,
-              height,
-              originalWidth:
-                sizeAttrs.originalWidth ??
-                currentNode.attrs.originalWidth ??
+            .command(({ tr }) => {
+              tr.setNodeMarkup(pos, undefined, {
+                ...currentNode.attrs,
                 width,
-              originalHeight:
-                sizeAttrs.originalHeight ??
-                currentNode.attrs.originalHeight ??
                 height,
+                originalWidth: sizeAttrs.originalWidth ?? width,
+                originalHeight: sizeAttrs.originalHeight ?? height,
+              });
+              return true;
             })
             .run();
 

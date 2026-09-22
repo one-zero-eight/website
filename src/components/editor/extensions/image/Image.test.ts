@@ -37,6 +37,86 @@ function getPlaceholderPos(editor: Editor) {
   return position;
 }
 
+describe("image resizing", () => {
+  let editor: Editor;
+
+  beforeEach(() => {
+    editor = createDescriptionEditor(`
+      <p>Text before images</p>
+      <figure data-type="image">
+        <img src="/first.png" alt="First image" width="640" height="480"
+          data-original-width="640" data-original-height="480" />
+        <figcaption>First caption</figcaption>
+      </figure>
+      <figure data-type="image">
+        <img src="/second.png" width="640" height="480"
+          data-original-width="640" data-original-height="480" />
+        <figcaption>Second caption</figcaption>
+      </figure>
+    `);
+  });
+
+  afterEach(() => {
+    editor.destroy();
+    vi.restoreAllMocks();
+  });
+
+  it.each(["caption", "paragraph"])(
+    "persists resized dimensions with the cursor in a %s",
+    (selectionNodeType) => {
+      let selectionPos: number | undefined;
+      editor.state.doc.descendants((node, pos) => {
+        if (
+          node.type.name === selectionNodeType &&
+          selectionPos === undefined
+        ) {
+          selectionPos = pos + 1;
+        }
+      });
+      editor.commands.setTextSelection(selectionPos!);
+      const onUpdate = vi.fn();
+      editor.on("update", onUpdate);
+      const originalImages = getImages(editor);
+      const image = editor.view.dom.querySelector("img")!;
+      vi.spyOn(image, "offsetWidth", "get").mockReturnValue(640);
+      vi.spyOn(image, "offsetHeight", "get").mockReturnValue(480);
+      const handle = editor.view.dom.querySelector(
+        '[data-resize-handle="right"]',
+      )!;
+
+      handle.dispatchEvent(
+        new MouseEvent("mousedown", { bubbles: true, clientX: 640 }),
+      );
+      document.dispatchEvent(new MouseEvent("mousemove", { clientX: 320 }));
+      document.dispatchEvent(new MouseEvent("mouseup"));
+
+      expect(getImages(editor)).toEqual([
+        { ...originalImages[0], width: 320, height: 240 },
+        originalImages[1],
+      ]);
+      expect(onUpdate).toHaveBeenCalledTimes(1);
+      expect(editor.state.selection.from).toBe(selectionPos);
+      const savedContent = editor.getJSON();
+
+      editor.commands.undo();
+      expect(getImages(editor)).toEqual(originalImages);
+      editor.commands.redo();
+      expect(editor.getJSON()).toEqual(savedContent);
+
+      editor.destroy();
+      editor = createDescriptionEditor(savedContent);
+      expect(getImages(editor)[0]).toMatchObject({
+        width: 320,
+        height: 240,
+        originalWidth: 640,
+        originalHeight: 480,
+      });
+      expect(editor.view.dom.querySelector("img")!.style.width).toBe("320px");
+      editor.state.doc.check();
+    },
+  );
+});
+
 describe("image clipboard uploads", () => {
   let editor: Editor;
   let resolveUpload: (imageId: string) => void;
