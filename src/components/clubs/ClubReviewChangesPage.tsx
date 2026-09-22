@@ -1,8 +1,9 @@
 import { $clubs } from "@/api/clubs";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Link } from "@tanstack/react-router";
+import moment from "moment";
 
-export function ClubPendingUpdatesPage() {
+export function ClubReviewChangesPage() {
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const { data: clubs, isPending } = $clubs.useQuery(
     "get",
@@ -44,7 +45,7 @@ export function ClubPendingUpdatesPage() {
         {clubs.map((club) => (
           <Link
             key={club.id}
-            to="/clubs/pending-updates/$slug"
+            to="/clubs/review/$slug"
             params={{ slug: club.slug }}
             className="card card-border card-sm hover:border-primary/40 md:card-side transition-colors"
           >
@@ -66,6 +67,14 @@ export function ClubPendingUpdatesPage() {
               </div>
               <p className="text-base-content/50 line-clamp-1 text-sm">
                 {club.short_description}
+              </p>
+              <p className="text-base-content/70 text-sm">
+                Submitted:{" "}
+                <time dateTime={club.pending_update!.submitted_at}>
+                  {moment(club.pending_update!.submitted_at).format(
+                    "D MMM YYYY, HH:mm",
+                  )}
+                </time>
               </p>
             </div>
           </Link>

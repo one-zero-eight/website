@@ -64,7 +64,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
             This club has changes waiting for admin review.{" "}
             {clubsUser?.role === "admin" ? (
               <Link
-                to="/clubs/pending-updates/$slug"
+                to="/clubs/review/$slug"
                 params={{ slug: clubSlug }}
                 className="link link-primary"
               >
@@ -155,8 +155,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                 </h2>
                 {clubsUser?.leader_in_clubs.some((c) => c.id === club.id) && (
                   <Link to="/events/drafts" className="btn btn-primary btn-sm">
-                    <span className="icon-[material-symbols--add-rounded] size-5" />
-                    Add event
+                    Manage events
                   </Link>
                 )}
               </div>

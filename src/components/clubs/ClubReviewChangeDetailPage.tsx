@@ -10,6 +10,7 @@ import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
+import moment from "moment";
 import {
   getClubTypeColor,
   getClubTypeLabel,
@@ -58,7 +59,61 @@ function DiffBlock({
   );
 }
 
-export function ClubPendingUpdateDetailPage({ slug }: { slug: string }) {
+type DiffField = {
+  key: string;
+  label: string;
+  changed: boolean;
+  current: React.ReactNode;
+  proposed: React.ReactNode;
+};
+
+function renderDiffFields(fields: DiffField[]) {
+  return fields
+    .filter((field) => field.changed)
+    .map(({ key, label, current, proposed }) => (
+      <DiffBlock
+        key={key}
+        label={label}
+        current={current}
+        proposed={proposed}
+      />
+    ));
+}
+
+function renderLinks(links: clubsTypes.SchemaLinkSchema[]) {
+  if (links.length === 0) {
+    return <span className="text-base-content/50 italic">No links</span>;
+  }
+
+  return (
+    <ul className="menu w-full p-0">
+      {links.map((link, index) => (
+        <li key={index}>
+          <a
+            href={link.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 p-3"
+          >
+            <span
+              className={cn(
+                "text-base-content",
+                getLinkIconClass(link.type),
+                "size-5",
+              )}
+            />
+            <span className="text-base-content font-medium">
+              {link.label ? link.label : getLinkLabel(link.type)}
+            </span>
+            <span className="icon-[mdi--open-in-new] text-base-content/30 ml-auto size-4" />
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { showError, showConfirm } = useToast();
@@ -98,7 +153,7 @@ export function ClubPendingUpdateDetailPage({ slug }: { slug: string }) {
     {
       onSuccess: (updated) => {
         invalidate(updated.id);
-        navigate({ to: "/clubs/pending-updates" });
+        navigate({ to: "/clubs/review" });
       },
       onError: (error) => showError("Error", formatApiErrorMessage(error)),
     },
@@ -110,7 +165,7 @@ export function ClubPendingUpdateDetailPage({ slug }: { slug: string }) {
     {
       onSuccess: (updated) => {
         invalidate(updated.id);
-        navigate({ to: "/clubs/pending-updates" });
+        navigate({ to: "/clubs/review" });
       },
       onError: (error) => showError("Error", formatApiErrorMessage(error)),
     },
@@ -134,7 +189,7 @@ export function ClubPendingUpdateDetailPage({ slug }: { slug: string }) {
         <p className="text-base-content/50 mb-4 text-lg">
           No changes to review for this club.
         </p>
-        <Link to="/clubs/pending-updates" className="btn btn-ghost">
+        <Link to="/clubs/review" className="btn btn-ghost">
           <span className="icon-[mdi--arrow-left] size-5" />
           Back to review changes
         </Link>
@@ -168,169 +223,123 @@ export function ClubPendingUpdateDetailPage({ slug }: { slug: string }) {
     reject({ params: { path: { id: club!.id! } } });
   }
 
-  const blocks: React.ReactNode[] = [];
-
-  if (pending.title != null && pending.title !== club.title) {
-    blocks.push(
-      <DiffBlock
-        key="title"
-        label="Title"
-        current={club.title}
-        proposed={pending.title}
-      />,
-    );
-  }
-
-  if (
-    pending.short_description != null &&
-    pending.short_description !== club.short_description
-  ) {
-    blocks.push(
-      <DiffBlock
-        key="short_description"
-        label="Short description"
-        current={club.short_description}
-        proposed={pending.short_description}
-      />,
-    );
-  }
-
-  if (pending.type != null && pending.type !== club.type) {
-    blocks.push(
-      <DiffBlock
-        key="type"
-        label="Type"
-        current={
-          <span className={cn("badge", getClubTypeColor(club.type))}>
-            {getClubTypeLabel(club.type)}
-          </span>
-        }
-        proposed={
-          <span className={cn("badge", getClubTypeColor(pending.type))}>
-            {getClubTypeLabel(pending.type)}
-          </span>
-        }
-      />,
-    );
-  }
-
-  if (pending.sport_id !== undefined && pending.sport_id !== club.sport_id) {
-    blocks.push(
-      <DiffBlock
-        key="sport_id"
-        label="Sport ID"
-        current={club.sport_id || "Not a sport club"}
-        proposed={pending.sport_id || "Not a sport club"}
-      />,
-    );
-  }
-
-  if (
-    pending.leader_innohassle_id !== undefined &&
-    pending.leader_innohassle_id !== club.leader_innohassle_id
-  ) {
-    const currentLeader = club.leader_innohassle_id
-      ? clubLeaders?.[club.leader_innohassle_id]
-      : null;
-    const proposedLeader = pending.leader_innohassle_id
-      ? clubLeaders?.[pending.leader_innohassle_id]
-      : null;
-    blocks.push(
-      <DiffBlock
-        key="leader"
-        label="Leader"
-        current={currentLeader?.name || currentLeader?.email || "None"}
-        proposed={proposedLeader?.name || proposedLeader?.email || "None"}
-      />,
-    );
-  }
-
-  const linksChanged =
-    pending.links != null &&
-    JSON.stringify(pending.links) !== JSON.stringify(club.links);
-  if (linksChanged) {
-    const renderLinks = (links: clubsTypes.SchemaLinkSchema[]) =>
-      links.length === 0 ? (
-        <span className="text-base-content/50 italic">No links</span>
+  const currentLeader = club.leader_innohassle_id
+    ? clubLeaders?.[club.leader_innohassle_id]
+    : null;
+  const proposedLeader = pending.leader_innohassle_id
+    ? clubLeaders?.[pending.leader_innohassle_id]
+    : null;
+  const blocks = renderDiffFields([
+    {
+      key: "title",
+      label: "Title",
+      changed: pending.title != null && pending.title !== club.title,
+      current: club.title,
+      proposed: pending.title,
+    },
+    {
+      key: "short_description",
+      label: "Short description",
+      changed:
+        pending.short_description != null &&
+        pending.short_description !== club.short_description,
+      current: club.short_description,
+      proposed: pending.short_description,
+    },
+    {
+      key: "type",
+      label: "Type",
+      changed: pending.type != null && pending.type !== club.type,
+      current: (
+        <span className={cn("badge", getClubTypeColor(club.type))}>
+          {getClubTypeLabel(club.type)}
+        </span>
+      ),
+      proposed: pending.type && (
+        <span className={cn("badge", getClubTypeColor(pending.type))}>
+          {getClubTypeLabel(pending.type)}
+        </span>
+      ),
+    },
+    {
+      key: "sport_id",
+      label: "Sport ID",
+      changed:
+        pending.sport_id !== undefined && pending.sport_id !== club.sport_id,
+      current: club.sport_id || "Not a sport club",
+      proposed: pending.sport_id || "Not a sport club",
+    },
+    {
+      key: "leader",
+      label: "Leader",
+      changed:
+        pending.leader_innohassle_id !== undefined &&
+        pending.leader_innohassle_id !== club.leader_innohassle_id,
+      current: currentLeader?.name || currentLeader?.email || "None",
+      proposed: proposedLeader?.name || proposedLeader?.email || "None",
+    },
+    {
+      key: "links",
+      label: "Links",
+      changed:
+        pending.links != null &&
+        JSON.stringify(pending.links) !== JSON.stringify(club.links),
+      current: renderLinks(club.links),
+      proposed: pending.links && renderLinks(pending.links),
+    },
+    {
+      key: "logo",
+      label: "Logo",
+      changed:
+        pending.logo_file_id != null &&
+        pending.logo_file_id !== club.logo_file_id,
+      current: club.logo_file_id ? (
+        <img
+          src={getLogoURLById(club.id!, club.logo_file_id)}
+          alt="Current logo"
+          className="rounded-field bg-base-200 size-24 object-contain"
+        />
       ) : (
-        <ul className="flex flex-col gap-1">
-          {links.map((link, i) => (
-            <li key={i} className="flex items-center gap-2">
-              <span className={cn(getLinkIconClass(link.type), "size-4")} />
-              <span>{link.label || getLinkLabel(link.type)}</span>
-            </li>
-          ))}
-        </ul>
-      );
-    blocks.push(
-      <DiffBlock
-        key="links"
-        label="Links"
-        current={renderLinks(club.links)}
-        proposed={renderLinks(pending.links!)}
-      />,
-    );
-  }
-
-  if (
-    pending.logo_file_id != null &&
-    pending.logo_file_id !== club.logo_file_id
-  ) {
-    blocks.push(
-      <DiffBlock
-        key="logo"
-        label="Logo"
-        current={
-          club.logo_file_id ? (
-            <img
-              src={getLogoURLById(club.id!, club.logo_file_id)}
-              alt="Current logo"
-              className="rounded-field bg-base-200 size-24 object-contain"
-            />
-          ) : (
-            <span className="text-base-content/70 italic">No logo</span>
-          )
-        }
-        proposed={
-          <>
-            <img
-              src={getPendingLogoURLById(club.id!, pending.logo_file_id)}
-              alt="Proposed logo"
-              className="rounded-field bg-base-200 size-24 object-contain"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-                e.currentTarget.nextElementSibling?.classList.remove("hidden");
-              }}
-            />
-            <span className="text-base-content/70 hidden italic">
-              New logo submitted (preview failed to load)
-            </span>
-          </>
-        }
-      />,
-    );
-  }
-
-  if (pending.description != null && pending.description !== club.description) {
-    blocks.push(
-      <DiffBlock
-        key="description"
-        label="Description"
-        current={
-          <DescriptionViewer
-            content={parseDescription(club.description)}
-            imageHandlers={{ resolveImageUrl: getDescriptionImageUrl }}
+        <span className="text-base-content/70 italic">No logo</span>
+      ),
+      proposed: pending.logo_file_id && (
+        <>
+          <img
+            src={getPendingLogoURLById(club.id!, pending.logo_file_id)}
+            alt="Proposed logo"
+            className="rounded-field bg-base-200 size-24 object-contain"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+              e.currentTarget.nextElementSibling?.classList.remove("hidden");
+            }}
           />
-        }
-        proposed={
-          <DescriptionViewer
-            content={parseDescription(pending.description)}
-            imageHandlers={{ resolveImageUrl: getDescriptionImageUrl }}
-          />
-        }
-      />,
-    );
-  }
+          <span className="text-base-content/70 hidden italic">
+            New logo submitted (preview failed to load)
+          </span>
+        </>
+      ),
+    },
+    {
+      key: "description",
+      label: "Description",
+      changed:
+        pending.description != null &&
+        JSON.stringify(pending.description) !==
+          JSON.stringify(club.description),
+      current: (
+        <DescriptionViewer
+          content={parseDescription(club.description)}
+          imageHandlers={{ resolveImageUrl: getDescriptionImageUrl }}
+        />
+      ),
+      proposed: (
+        <DescriptionViewer
+          content={parseDescription(pending.description)}
+          imageHandlers={{ resolveImageUrl: getDescriptionImageUrl }}
+        />
+      ),
+    },
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-4">
@@ -340,13 +349,19 @@ export function ClubPendingUpdateDetailPage({ slug }: { slug: string }) {
             <h1 className="card-title text-2xl font-bold">
               Review changes — {club.title}
             </h1>
-            <Link to="/clubs/pending-updates" className="btn btn-ghost btn-sm">
+            <Link to="/clubs/review" className="btn btn-ghost btn-sm">
               <span className="icon-[mdi--arrow-left] size-4" />
               Back
             </Link>
           </div>
           <p className="text-base-content/70 text-sm">
             Proposed by the club leader, waiting for your review.
+          </p>
+          <p className="text-base-content/70 text-sm">
+            Submitted:{" "}
+            <time dateTime={pending.submitted_at}>
+              {moment(pending.submitted_at).format("D MMM YYYY, HH:mm")}
+            </time>
           </p>
         </div>
       </div>

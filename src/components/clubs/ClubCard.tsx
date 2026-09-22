@@ -3,6 +3,7 @@ import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 import React, { useMemo } from "react";
+import { isClubLeader } from "./permissions.ts";
 import {
   getClubTypeLabel,
   getClubTypeColor,
@@ -10,14 +11,10 @@ import {
   getLinkLabel,
 } from "./constants.ts";
 
-function ClubCard({
-  club,
-  isOwner = false,
-}: {
-  club: clubsTypes.SchemaClub;
-  isOwner?: boolean;
-}) {
+function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
+  const isLeader = isClubLeader(clubsUser, club.id);
   const clubLeader = useMemo(
     () =>
       club.leader_innohassle_id
@@ -45,9 +42,9 @@ function ClubCard({
             {club.title}
           </Link>
           <div className="flex shrink-0 items-center gap-2">
-            {isOwner && (
+            {isLeader && (
               <span className="badge badge-primary badge-soft shrink-0">
-                Owner
+                Leader
               </span>
             )}
             <span className={cn("badge shrink-0", getClubTypeColor(club.type))}>
@@ -110,10 +107,5 @@ function ClubCard({
   );
 }
 
-const MemoizedClubCard = React.memo(ClubCard, (prevProps, nextProps) => {
-  return (
-    prevProps.club.id === nextProps.club.id &&
-    prevProps.isOwner === nextProps.isOwner
-  );
-});
+const MemoizedClubCard = React.memo(ClubCard);
 export { MemoizedClubCard as ClubCard };

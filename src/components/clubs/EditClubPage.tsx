@@ -592,17 +592,20 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
         </div>
       </div>
 
-      {pendingUpdate && !isAdmin && (
+      {pendingUpdate && (
         <div className="card card-border border-primary/40 bg-primary/5">
           <div className="card-body flex-row items-start gap-3">
             <span className="icon-[mdi--clock-outline] text-primary mt-0.5 size-5 shrink-0" />
             <div>
               <p className="text-base-content font-medium">
-                You have changes waiting for review
+                {isAdmin
+                  ? "This club has changes waiting for review"
+                  : "You have changes waiting for review"}
               </p>
               <p className="text-base-content/70 text-sm">
-                The form below shows what you submitted, not what is published
-                yet. Keep editing and save again to update the request.
+                {isAdmin
+                  ? "The form below shows the leader's submitted changes. Saving will apply your edits directly to the club."
+                  : "The form below shows what you submitted, not what is published yet. Keep editing and save again to update the request."}
               </p>
             </div>
           </div>

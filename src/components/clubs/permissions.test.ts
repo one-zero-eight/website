@@ -1,6 +1,6 @@
 import { UserRole } from "@/api/clubs/types.ts";
 import { describe, expect, it } from "vitest";
-import { canUserEditClub, isClubOwner } from "./permissions.ts";
+import { canUserEditClub, isClubLeader } from "./permissions.ts";
 
 describe("canUserEditClub", () => {
   it("allows an admin", () => {
@@ -44,25 +44,25 @@ describe("canUserEditClub", () => {
   });
 });
 
-describe("isClubOwner", () => {
+describe("isClubLeader", () => {
   it("rejects an admin who isn't the leader", () => {
-    expect(isClubOwner({ leader_in_clubs: [] }, "club-1")).toBe(false);
+    expect(isClubLeader({ leader_in_clubs: [] }, "club-1")).toBe(false);
   });
 
   it("allows the leader of the current club", () => {
-    expect(isClubOwner({ leader_in_clubs: [{ id: "club-1" }] }, "club-1")).toBe(
-      true,
-    );
+    expect(
+      isClubLeader({ leader_in_clubs: [{ id: "club-1" }] }, "club-1"),
+    ).toBe(true);
   });
 
   it("rejects the leader of another club", () => {
-    expect(isClubOwner({ leader_in_clubs: [{ id: "club-2" }] }, "club-1")).toBe(
-      false,
-    );
+    expect(
+      isClubLeader({ leader_in_clubs: [{ id: "club-2" }] }, "club-1"),
+    ).toBe(false);
   });
 
   it("rejects a missing user or club", () => {
-    expect(isClubOwner(undefined, "club-1")).toBe(false);
-    expect(isClubOwner({ leader_in_clubs: [] }, undefined)).toBe(false);
+    expect(isClubLeader(undefined, "club-1")).toBe(false);
+    expect(isClubLeader({ leader_in_clubs: [] }, undefined)).toBe(false);
   });
 });

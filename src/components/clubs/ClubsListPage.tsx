@@ -13,7 +13,7 @@ import {
   clubTypesOrder,
   getClubTypeLabel,
 } from "./constants.ts";
-import { isClubOwner } from "./permissions.ts";
+import { isClubLeader } from "./permissions.ts";
 
 export function ClubsListPage() {
   const { data: clubs, isPending } = $clubs.useQuery(
@@ -68,9 +68,9 @@ export function ClubsListPage() {
     return visible
       .map((club, index) => ({ club, index }))
       .sort((a, b) => {
-        const aOwned = isClubOwner(clubsUser, a.club.id) ? 0 : 1;
-        const bOwned = isClubOwner(clubsUser, b.club.id) ? 0 : 1;
-        if (aOwned !== bOwned) return aOwned - bOwned;
+        const aIsLeader = isClubLeader(clubsUser, a.club.id) ? 0 : 1;
+        const bIsLeader = isClubLeader(clubsUser, b.club.id) ? 0 : 1;
+        if (aIsLeader !== bIsLeader) return aIsLeader - bIsLeader;
         return a.index - b.index;
       })
       .map(({ club }) => club);
@@ -156,11 +156,7 @@ export function ClubsListPage() {
                 </span>
                 <div className="mt-4 flex flex-col gap-6">
                   {clubsOfType.map((club) => (
-                    <ClubCard
-                      key={club.id}
-                      club={club}
-                      isOwner={isClubOwner(clubsUser, club.id)}
-                    />
+                    <ClubCard key={club.id} club={club} />
                   ))}
                 </div>
               </div>
@@ -169,11 +165,7 @@ export function ClubsListPage() {
             <div>
               <div className="mt-4 flex flex-col gap-6">
                 {filteredClubs.map((club) => (
-                  <ClubCard
-                    key={club.id}
-                    club={club}
-                    isOwner={isClubOwner(clubsUser, club.id)}
-                  />
+                  <ClubCard key={club.id} club={club} />
                 ))}
               </div>
             </div>
