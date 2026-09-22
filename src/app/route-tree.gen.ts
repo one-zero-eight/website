@@ -89,7 +89,7 @@ import { Route as With_menuRoomBookingRoomsRoomRouteImport } from "./routes/_wit
 import { Route as With_menuEventsSubmissionsIdRouteImport } from "./routes/_with_menu/events/submissions/$id";
 import { Route as With_menuEventsPIdRouteImport } from "./routes/_with_menu/events/p.$id";
 import { Route as With_menuEventsDraftsIdRouteImport } from "./routes/_with_menu/events/drafts/$id";
-import { Route as With_menuClubsReviewSlugRouteImport } from "./routes/_with_menu/clubs/review.$slug";
+import { Route as With_menuClubsSlugReviewRouteImport } from "./routes/_with_menu/clubs/$slug.review";
 import { Route as With_menuClubsSlugEditRouteImport } from "./routes/_with_menu/clubs/$slug.edit";
 import { Route as With_menuAdminUsersIdRouteImport } from "./routes/_with_menu/admin/users.$id";
 import { Route as GuardGoogleFilesSlugJoinRouteImport } from "./routes/guard.google.files.$slug.join";
@@ -525,10 +525,10 @@ const With_menuEventsDraftsIdRoute = With_menuEventsDraftsIdRouteImport.update({
   path: "/events/drafts/$id",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
-const With_menuClubsReviewSlugRoute =
-  With_menuClubsReviewSlugRouteImport.update({
-    id: "/clubs/review/$slug",
-    path: "/clubs/review/$slug",
+const With_menuClubsSlugReviewRoute =
+  With_menuClubsSlugReviewRouteImport.update({
+    id: "/clubs/$slug/review",
+    path: "/clubs/$slug/review",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
 const With_menuClubsSlugEditRoute = With_menuClubsSlugEditRouteImport.update({
@@ -617,7 +617,7 @@ export interface FileRoutesByFullPath {
   "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
   "/admin/users/$id": typeof With_menuAdminUsersIdRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
-  "/clubs/review/$slug": typeof With_menuClubsReviewSlugRoute;
+  "/clubs/$slug/review": typeof With_menuClubsSlugReviewRoute;
   "/events/drafts/$id": typeof With_menuEventsDraftsIdRoute;
   "/events/p/$id": typeof With_menuEventsPIdRoute;
   "/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
@@ -700,7 +700,7 @@ export interface FileRoutesByTo {
   "/schedule-assistant/settings": typeof ScheduleAssistantSettingsIndexRoute;
   "/admin/users/$id": typeof With_menuAdminUsersIdRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
-  "/clubs/review/$slug": typeof With_menuClubsReviewSlugRoute;
+  "/clubs/$slug/review": typeof With_menuClubsSlugReviewRoute;
   "/events/drafts/$id": typeof With_menuEventsDraftsIdRoute;
   "/events/p/$id": typeof With_menuEventsPIdRoute;
   "/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
@@ -787,7 +787,7 @@ export interface FileRoutesById {
   "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
   "/_with_menu/admin/users/$id": typeof With_menuAdminUsersIdRoute;
   "/_with_menu/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
-  "/_with_menu/clubs/review/$slug": typeof With_menuClubsReviewSlugRoute;
+  "/_with_menu/clubs/$slug/review": typeof With_menuClubsSlugReviewRoute;
   "/_with_menu/events/drafts/$id": typeof With_menuEventsDraftsIdRoute;
   "/_with_menu/events/p/$id": typeof With_menuEventsPIdRoute;
   "/_with_menu/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
@@ -874,7 +874,7 @@ export interface FileRouteTypes {
     | "/schedule-assistant/settings/"
     | "/admin/users/$id"
     | "/clubs/$slug/edit"
-    | "/clubs/review/$slug"
+    | "/clubs/$slug/review"
     | "/events/drafts/$id"
     | "/events/p/$id"
     | "/events/submissions/$id"
@@ -957,7 +957,7 @@ export interface FileRouteTypes {
     | "/schedule-assistant/settings"
     | "/admin/users/$id"
     | "/clubs/$slug/edit"
-    | "/clubs/review/$slug"
+    | "/clubs/$slug/review"
     | "/events/drafts/$id"
     | "/events/p/$id"
     | "/events/submissions/$id"
@@ -1043,7 +1043,7 @@ export interface FileRouteTypes {
     | "/schedule-assistant/settings/"
     | "/_with_menu/admin/users/$id"
     | "/_with_menu/clubs/$slug/edit"
-    | "/_with_menu/clubs/review/$slug"
+    | "/_with_menu/clubs/$slug/review"
     | "/_with_menu/events/drafts/$id"
     | "/_with_menu/events/p/$id"
     | "/_with_menu/events/submissions/$id"
@@ -1632,11 +1632,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuEventsDraftsIdRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/clubs/review/$slug": {
-      id: "/_with_menu/clubs/review/$slug";
-      path: "/clubs/review/$slug";
-      fullPath: "/clubs/review/$slug";
-      preLoaderRoute: typeof With_menuClubsReviewSlugRouteImport;
+    "/_with_menu/clubs/$slug/review": {
+      id: "/_with_menu/clubs/$slug/review";
+      path: "/clubs/$slug/review";
+      fullPath: "/clubs/$slug/review";
+      preLoaderRoute: typeof With_menuClubsSlugReviewRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/clubs/$slug/edit": {
@@ -1719,7 +1719,7 @@ interface With_menuRouteRouteChildren {
   With_menuWhen2meetIndexRoute: typeof With_menuWhen2meetIndexRoute;
   With_menuAdminUsersIdRoute: typeof With_menuAdminUsersIdRoute;
   With_menuClubsSlugEditRoute: typeof With_menuClubsSlugEditRoute;
-  With_menuClubsReviewSlugRoute: typeof With_menuClubsReviewSlugRoute;
+  With_menuClubsSlugReviewRoute: typeof With_menuClubsSlugReviewRoute;
   With_menuEventsDraftsIdRoute: typeof With_menuEventsDraftsIdRoute;
   With_menuEventsPIdRoute: typeof With_menuEventsPIdRoute;
   With_menuEventsSubmissionsIdRoute: typeof With_menuEventsSubmissionsIdRoute;
@@ -1791,7 +1791,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuWhen2meetIndexRoute: With_menuWhen2meetIndexRoute,
   With_menuAdminUsersIdRoute: With_menuAdminUsersIdRoute,
   With_menuClubsSlugEditRoute: With_menuClubsSlugEditRoute,
-  With_menuClubsReviewSlugRoute: With_menuClubsReviewSlugRoute,
+  With_menuClubsSlugReviewRoute: With_menuClubsSlugReviewRoute,
   With_menuEventsDraftsIdRoute: With_menuEventsDraftsIdRoute,
   With_menuEventsPIdRoute: With_menuEventsPIdRoute,
   With_menuEventsSubmissionsIdRoute: With_menuEventsSubmissionsIdRoute,

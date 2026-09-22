@@ -87,7 +87,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
             This club has changes waiting for admin review.{" "}
             {clubsUser?.role === "admin" ? (
               <Link
-                to="/clubs/review/$slug"
+                to="/clubs/$slug/review"
                 params={{ slug: clubSlug }}
                 className="link link-primary"
               >

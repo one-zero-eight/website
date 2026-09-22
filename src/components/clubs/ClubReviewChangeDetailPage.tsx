@@ -195,10 +195,17 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
         <p className="text-base-content/50 mb-4 text-lg">
           No changes to review for this club.
         </p>
-        <Link to="/clubs/review" className="btn btn-ghost">
-          <span className="icon-[mdi--arrow-left] size-5" />
-          Back to review changes
-        </Link>
+        <div className="flex flex-wrap justify-center gap-2">
+          {club && (
+            <Link to="/clubs/$slug" params={{ slug }} className="btn btn-ghost">
+              View club
+            </Link>
+          )}
+          <Link to="/clubs/review" className="btn btn-ghost">
+            <span className="icon-[mdi--arrow-left] size-5" />
+            Back to review changes
+          </Link>
+        </div>
       </div>
     );
   }
@@ -349,27 +356,34 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-4">
-      <div className="card card-border">
-        <div className="card-body">
-          <div className="mb-2 flex items-center justify-between">
-            <h1 className="card-title text-2xl font-bold">
-              Review changes — {club.title}
-            </h1>
+      <div className="space-y-2">
+        <div className="mb-2 flex items-start justify-between gap-2">
+          <h1 className="min-w-0 text-2xl font-bold wrap-break-word">
+            Review changes — {club.title}
+          </h1>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              to="/clubs/$slug"
+              params={{ slug }}
+              className="btn btn-ghost btn-sm"
+            >
+              View club
+            </Link>
             <Link to="/clubs/review" className="btn btn-ghost btn-sm">
               <span className="icon-[mdi--arrow-left] size-4" />
               Back
             </Link>
           </div>
-          <p className="text-base-content/70 text-sm">
-            Proposed by the club leader, waiting for your review.
-          </p>
-          <p className="text-base-content/70 text-sm">
-            Submitted:{" "}
-            <time dateTime={pending.submitted_at}>
-              {moment(pending.submitted_at).format("D MMM YYYY, HH:mm")}
-            </time>
-          </p>
         </div>
+        <p className="text-base-content/70 text-sm">
+          Proposed by the club leader, waiting for your review.
+        </p>
+        <p className="text-base-content/70 text-sm">
+          Submitted:{" "}
+          <time dateTime={pending.submitted_at}>
+            {moment(pending.submitted_at).format("D MMM YYYY, HH:mm")}
+          </time>
+        </p>
       </div>
 
       {blocks.length === 0 ? (
@@ -382,33 +396,29 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
         blocks
       )}
 
-      <div className="card card-border">
-        <div className="card-body">
-          <div className="flex flex-wrap justify-end gap-2">
-            <button
-              type="button"
-              className="btn btn-error"
-              disabled={isApproving || isRejecting}
-              onClick={handleReject}
-            >
-              {isRejecting && (
-                <span className="loading loading-spinner loading-sm" />
-              )}
-              Reject
-            </button>
-            <button
-              type="button"
-              className="btn btn-success"
-              disabled={isApproving || isRejecting}
-              onClick={handleApprove}
-            >
-              {isApproving && (
-                <span className="loading loading-spinner loading-sm" />
-              )}
-              Approve
-            </button>
-          </div>
-        </div>
+      <div className="flex flex-wrap justify-end gap-2">
+        <button
+          type="button"
+          className="btn btn-error"
+          disabled={isApproving || isRejecting}
+          onClick={handleReject}
+        >
+          {isRejecting && (
+            <span className="loading loading-spinner loading-sm" />
+          )}
+          Reject
+        </button>
+        <button
+          type="button"
+          className="btn btn-success"
+          disabled={isApproving || isRejecting}
+          onClick={handleApprove}
+        >
+          {isApproving && (
+            <span className="loading loading-spinner loading-sm" />
+          )}
+          Approve
+        </button>
       </div>
     </div>
   );

@@ -45,7 +45,7 @@ export function ClubReviewChangesPage() {
         {clubs.map((club) => (
           <Link
             key={club.id}
-            to="/clubs/review/$slug"
+            to="/clubs/$slug/review"
             params={{ slug: club.slug }}
             className="card card-border card-sm hover:border-primary/40 md:card-side transition-colors"
           >

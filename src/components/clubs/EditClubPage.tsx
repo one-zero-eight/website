@@ -568,26 +568,24 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       </Helmet>
 
       {/* Header Section */}
-      <div className="card card-border">
-        <div className="card-body">
-          <div className="mb-4 flex items-center justify-between">
-            <h1 className="card-title text-3xl font-bold">Edit Club</h1>
-            <Link
-              to="/clubs/$slug"
-              params={{ slug: clubSlug }}
-              className="btn btn-ghost"
-            >
-              <span className="icon-[mdi--arrow-left] size-5" />
-              Back to Club
-            </Link>
-          </div>
-          <p className="text-base-content/80 text-base leading-relaxed">
-            Update the club information below
-          </p>
-          <p className="text-base-content/80 text-base leading-relaxed">
-            Club: {club.title}
-          </p>
+      <div className="space-y-2">
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Edit Club</h1>
+          <Link
+            to="/clubs/$slug"
+            params={{ slug: clubSlug }}
+            className="btn btn-ghost"
+          >
+            <span className="icon-[mdi--arrow-left] size-5" />
+            Back to Club
+          </Link>
         </div>
+        <p className="text-base-content/80 text-base leading-relaxed">
+          Update the club information below
+        </p>
+        <p className="text-base-content/80 text-base leading-relaxed">
+          Club: {club.title}
+        </p>
       </div>
 
       {pendingUpdate && (
@@ -1226,37 +1224,33 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="card card-border">
-          <div className="card-body">
-            <div className="flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() =>
-                  navigate({ to: "/clubs/$slug", params: { slug: clubSlug } })
-                }
-                className="btn btn-ghost"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isUpdating || isUploadingLogo}
-                className={cn(
-                  "btn btn-primary",
-                  (isUpdating || isUploadingLogo) && "btn-disabled",
-                )}
-              >
-                {(isUpdating || isUploadingLogo) && (
-                  <span className="loading loading-spinner loading-sm" />
-                )}
-                {isUpdating
-                  ? "Saving..."
-                  : isUploadingLogo
-                    ? "Uploading logo..."
-                    : "Save Changes"}
-              </button>
-            </div>
-          </div>
+        <div className="flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={() =>
+              navigate({ to: "/clubs/$slug", params: { slug: clubSlug } })
+            }
+            className="btn btn-ghost"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isUpdating || isUploadingLogo}
+            className={cn(
+              "btn btn-primary",
+              (isUpdating || isUploadingLogo) && "btn-disabled",
+            )}
+          >
+            {(isUpdating || isUploadingLogo) && (
+              <span className="loading loading-spinner loading-sm" />
+            )}
+            {isUpdating
+              ? "Saving..."
+              : isUploadingLogo
+                ? "Uploading logo..."
+                : "Save Changes"}
+          </button>
         </div>
       </form>
 
