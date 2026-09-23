@@ -6,6 +6,8 @@ import {
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
 import { PlayerActionMenu } from "./PlayerActionMenu.tsx";
+import { Pager } from "./Pager";
+import { pageSlice, rankByRating } from "./ranking";
 
 type PlayerEntry = {
   place: number;
@@ -89,30 +91,35 @@ export function TabletennisPlayersTop() {
     return () => clearTimeout(timer);
   }, [filters]);
 
-  const [visibleCount, setVisibleCount] = useState(20);
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
-    setVisibleCount(20);
+    setPage(0);
   }, [debounced]);
 
+  // places are counted inside the chosen status tab among the players the table
+  // can show (active ones, or everyone with "Show hidden"), so there are no gaps;
+  // the name and rating filters keep each player's place in that tab
   const entries = useMemo(() => {
     if (!data) return [];
     const raw = data as unknown as {
       total: number;
       players: (SchemaPlayer & { is_active: boolean })[];
     };
-    const sorted = [...raw.players].sort((a, b) => b.rating - a.rating);
-    return sorted.map((p, i) => toPlayerEntry(p, i + 1));
-  }, [data]);
-
-  const results = useMemo(() => {
-    const filtered = entries
-      .filter((p) => debounced.showHidden || p.visible)
+    const pool = raw.players
+      .filter((p) => debounced.showHidden || p.is_active)
       .filter(
         (p) =>
           debounced.status === "all" ||
-          p.status.toLowerCase() === debounced.status,
-      )
+          (p.status ?? "").toLowerCase() === debounced.status,
+      );
+    return rankByRating(pool).map(({ player, place }) =>
+      toPlayerEntry(player, place),
+    );
+  }, [data, debounced.showHidden, debounced.status]);
+
+  const results = useMemo(() => {
+    const filtered = entries
       .filter(
         (p) =>
           p.rating >= debounced.ratingMin && p.rating <= debounced.ratingMax,
@@ -125,13 +132,13 @@ export function TabletennisPlayersTop() {
       const mul = debounced.sortDir === "asc" ? 1 : -1;
       return debounced.sortKey === "name"
         ? a.name.localeCompare(b.name) * mul
-        : (a.rating - b.rating) * mul;
+        : (a.rating - b.rating) * mul || a.place - b.place;
     });
 
     return sorted;
   }, [entries, debounced]);
 
-  const visibleResults = results.slice(0, visibleCount);
+  const visibleResults = pageSlice(results, page);
 
   function toggleSort(key: SortKey) {
     setFilters((prev) => ({
@@ -243,8 +250,10 @@ export function TabletennisPlayersTop() {
 
       {/* Results count */}
       <p className="text-base-content/50 text-xs">
-        Showing {visibleResults.length} of {results.length} players
+        {results.length} player{results.length === 1 ? "" : "s"}
       </p>
+
+      <Pager page={page} total={results.length} onChange={setPage} />
 
       {/* Table */}
       <div className="bg-base-200 rounded-box overflow-x-auto">
@@ -282,7 +291,7 @@ export function TabletennisPlayersTop() {
           <tbody>
             {visibleResults.map((p) => (
               <tr
-                key={p.name}
+                key={p.innohassle_id}
                 className="border-base-300 border-b last:border-0"
               >
                 <td className="text-base-content/70 px-4 py-3">{p.place}</td>
@@ -322,17 +331,6 @@ export function TabletennisPlayersTop() {
           <p className="text-base-content/50 py-6 text-center">
             No players match the current filters
           </p>
-        )}
-        {visibleResults.length < results.length && (
-          <div className="flex justify-center py-4">
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              onClick={() => setVisibleCount((prev) => prev + 50)}
-            >
-              Show more (remaining {results.length - visibleResults.length})
-            </button>
-          </div>
         )}
       </div>
     </div>

@@ -65,12 +65,10 @@ export function LocaleContentSection({
             value={editName ?? ""}
             onChange={(e) => onEditNameChange?.(e.target.value)}
           />
-          {/* Border wraps the whole editor (incl. drag handle gutter), not only .tiptap */}
-          <div className="border-base-300 bg-base-100 min-h-40 rounded-xl border py-3 pr-3 pl-3 md:pl-10">
+          <div className="-mx-4 -mb-4">
             <DescriptionEditor
-              key={`${selectedLocale}-${editing}`}
               ref={editorRef}
-              className="min-h-32"
+              className="px-6 pb-6"
               initialContent={editorInitialContent ?? undefined}
             />
           </div>

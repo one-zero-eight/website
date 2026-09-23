@@ -5,7 +5,6 @@ import {
   FloatingPortal,
   offset,
   shift,
-  useClick,
   useDismiss,
   useFloating,
   useInteractions,
@@ -13,15 +12,43 @@ import {
 } from "@floating-ui/react";
 import { Editor } from "@tiptap/react";
 import { useEditorState } from "@tiptap/react";
-import { useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { BubbleMenuButton } from "./BubbleMenuContent";
 
 export function LinkButton({ editor }: { editor: Editor }) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const editorState = useEditorState({
+    editor,
+    selector: ({ editor }) => ({
+      canLink: editor.can().toggleLink(),
+      isLink: editor.isActive("link"),
+    }),
+  });
+
+  return (
+    <BubbleMenuButton
+      isActive={editorState.isLink}
+      isDisabled={!editorState.canLink}
+      title="Link"
+      iconClassName="icon-[material-symbols--link]"
+      ref={buttonRef}
+      onClick={() =>
+        editor.emit("openLinkDialog", {
+          editor,
+          reference: buttonRef.current ?? undefined,
+        })
+      }
+    />
+  );
+}
+
+export function LinkDialog({ editor }: { editor: Editor }) {
   const [isOpen, setIsOpen] = useState(false);
   const textInputRef = useRef<HTMLInputElement>(null);
   const urlInputRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");
+  const clipboardRequestRef = useRef(0);
 
   const editorState = useEditorState({
     editor,
@@ -37,37 +64,60 @@ export function LinkButton({ editor }: { editor: Editor }) {
   const { refs, context, x, y, strategy } = useFloating({
     placement: "bottom-start",
     open: isOpen,
-    onOpenChange: setIsOpen,
+    onOpenChange: handleOpenChange,
     middleware: [offset(4), flip(), shift()],
     whileElementsMounted: autoUpdate,
   });
 
-  const click = useClick(context);
+  const handleOpenLinkDialog = useEffectEvent(
+    ({ reference }: { reference?: HTMLButtonElement }) => {
+      refs.setReference(reference ?? editor.view.dom);
+      void handleOpenChange(true);
+    },
+  );
+
+  useEffect(() => {
+    editor.on("openLinkDialog", handleOpenLinkDialog);
+    return () => {
+      editor.off("openLinkDialog", handleOpenLinkDialog);
+    };
+  }, [editor]);
+
   const dismiss = useDismiss(context);
   const role = useRole(context);
 
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    click,
-    dismiss,
-    role,
-  ]);
+  const { getFloatingProps } = useInteractions([dismiss, role]);
 
-  function handleOpen() {
-    console.log(editor.getAttributes("link"));
-    setUrl(editor.getAttributes("link")?.href || "");
-    setText(
-      editor.state.doc.textBetween(
-        editor.state.selection.from,
-        editor.state.selection.to,
-      ) || "",
-    );
-    setIsOpen(true);
+  async function handleOpenChange(open: boolean) {
+    const clipboardRequest = ++clipboardRequestRef.current;
+    setIsOpen(open);
+    if (!open) return;
+
+    const linkUrl = editor.getAttributes("link").href || "";
+    const { from, to } = editor.state.selection;
+    setUrl(linkUrl);
+    setText(editor.state.doc.textBetween(from, to));
+
+    if (linkUrl) return;
+
+    try {
+      const clipboardText = (await navigator.clipboard.readText()).trim();
+      const clipboardUrl = new URL(clipboardText);
+      if (
+        clipboardRequest === clipboardRequestRef.current &&
+        ["http:", "https:"].includes(clipboardUrl.protocol)
+      ) {
+        setUrl(clipboardText);
+      }
+    } catch {
+      // Clipboard access may be denied or its contents may not be a URL.
+    }
   }
 
   function handleSetLink() {
     if (!url) {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
-      setIsOpen(false);
+      void handleOpenChange(false);
       return;
     }
 
@@ -99,30 +149,20 @@ export function LinkButton({ editor }: { editor: Editor }) {
         editor.chain().focus().setLink({ href: url }).run();
       }
     }
-    setIsOpen(false);
+    void handleOpenChange(false);
     setUrl("");
     setText("");
   }
 
   function handleRemoveLink() {
     editor.chain().focus().unsetLink().run();
-    setIsOpen(false);
+    void handleOpenChange(false);
     setUrl("");
     setText("");
   }
 
   return (
-    <div className="relative">
-      <BubbleMenuButton
-        isActive={editorState.isLink}
-        isDisabled={!editorState.canLink}
-        onClick={handleOpen}
-        title="Link"
-        iconClassName="icon-[material-symbols--link]"
-        ref={refs.setReference}
-        {...getReferenceProps()}
-      />
-
+    <>
       {isOpen && (
         <FloatingPortal>
           <FloatingFocusManager context={context} modal={false}>
@@ -160,7 +200,10 @@ export function LinkButton({ editor }: { editor: Editor }) {
                     ref={urlInputRef}
                     type="url"
                     value={url}
-                    onChange={(e) => setUrl(e.target.value)}
+                    onChange={(e) => {
+                      clipboardRequestRef.current++;
+                      setUrl(e.target.value);
+                    }}
                     placeholder="https://example.com"
                     className="input input-sm border-base-300 bg-base-100"
                     autoFocus
@@ -195,6 +238,6 @@ export function LinkButton({ editor }: { editor: Editor }) {
           </FloatingFocusManager>
         </FloatingPortal>
       )}
-    </div>
+    </>
   );
 }

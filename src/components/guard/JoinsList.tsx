@@ -185,7 +185,7 @@ function BanButton({
       {pending ? (
         <span className="loading loading-spinner loading-sm" />
       ) : (
-        <span className="icon-[material-symbols--block-rounded] text-lg" />
+        <span className="icon-[material-symbols--block] text-lg" />
       )}
     </button>
   );

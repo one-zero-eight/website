@@ -515,6 +515,8 @@ export interface components {
     };
     /** PendingClubUpdate */
     PendingClubUpdate: {
+      /** Time of the latest leader submission in UTC */
+      submitted_at: string;
       /** Title */
       title?: string | null;
       /** Short Description */

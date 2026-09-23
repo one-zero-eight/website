@@ -1,7 +1,6 @@
 import { NodeViewWrapper, ReactNodeViewProps } from "@tiptap/react";
 import { useState } from "react";
-import { buildImageSizeAttrs } from "@/components/editor/utils/imageDisplay";
-import { getEditorImageHandlers } from "@/components/editor/utils/getEditorImageHandlers";
+import { uploadEditorImage } from "@/components/editor/utils/uploadEditorImage";
 import { cn } from "@/lib/ui/cn";
 
 export function ImageUploadPlaceholderNodeView({
@@ -9,88 +8,22 @@ export function ImageUploadPlaceholderNodeView({
   editor,
   getPos,
 }: ReactNodeViewProps) {
-  const [isUploading, setIsUploading] = useState(false);
+  const [isFileUploading, setIsFileUploading] = useState(false);
+  const isUploading = isFileUploading || Boolean(node.attrs.uploadId);
 
   async function handleFileUpload(file: File) {
-    if (!editor) {
+    if (isUploading) {
       return;
     }
 
-    setIsUploading(true);
+    setIsFileUploading(true);
     try {
-      const uploadImage = getEditorImageHandlers(editor).uploadImage;
-      if (!uploadImage) {
-        throw new Error("Editor uploadImage is not configured");
-      }
-
-      const imageId = await uploadImage(file);
-      const imageUrl = getEditorImageHandlers(editor).resolveImageUrl(imageId);
-      const alt = file.name.replace(/\.[^/.]+$/, "");
-
-      const pos = getPos();
-      if (pos === undefined || pos < 0) {
-        return;
-      }
-
-      const img = new Image();
-      img.onload = () => {
-        editor
-          .chain()
-          .focus()
-          .command(({ tr, dispatch }) => {
-            if (dispatch) {
-              const nodeSize = node.nodeSize;
-              tr.replaceWith(
-                pos,
-                pos + nodeSize,
-                editor.state.schema.nodes.imageWithCaption.create({}, [
-                  editor.state.schema.nodes.image.create({
-                    imageId,
-                    src: null,
-                    alt,
-                    ...buildImageSizeAttrs({
-                      naturalWidth: img.naturalWidth,
-                      naturalHeight: img.naturalHeight,
-                    }),
-                  }),
-                  editor.state.schema.nodes.caption.create(),
-                ]),
-              );
-            }
-            return true;
-          })
-          .run();
-      };
-      img.onerror = () => {
-        editor
-          .chain()
-          .focus()
-          .command(({ tr, dispatch }) => {
-            if (dispatch) {
-              const nodeSize = node.nodeSize;
-              tr.replaceWith(
-                pos,
-                pos + nodeSize,
-                editor.state.schema.nodes.imageWithCaption.create({}, [
-                  editor.state.schema.nodes.image.create({
-                    imageId,
-                    src: null,
-                    alt,
-                  }),
-                  editor.state.schema.nodes.caption.create(),
-                ]),
-              );
-            }
-            return true;
-          })
-          .run();
-      };
-      img.src = imageUrl;
+      await uploadEditorImage(editor, file, getPos);
     } catch (error) {
       console.error("Failed to upload image:", error);
       alert("Failed to upload image");
     } finally {
-      setIsUploading(false);
+      setIsFileUploading(false);
     }
   }
 
@@ -120,7 +53,7 @@ export function ImageUploadPlaceholderNodeView({
   function handleClick() {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = "image/*";
+    input.accept = "image/jpeg,image/png,image/webp";
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
