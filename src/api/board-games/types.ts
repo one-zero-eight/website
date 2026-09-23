@@ -38,6 +38,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/board-games/{id}/photo": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Board Game Photo */
+    get: operations["get_board_game_photo_board_games__id__photo_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/admin/board-games": {
     parameters: {
       query?: never;
@@ -125,23 +142,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/admin/reservations/{id}/status": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Edit Reservation Status */
-    patch: operations["edit_reservation_status_admin_reservations__id__status_patch"];
-    trace?: never;
-  };
   "/admin/reservations/{id}": {
     parameters: {
       query?: never;
@@ -156,7 +156,8 @@ export interface paths {
     delete: operations["remove_reservation_admin_reservations__id__delete"];
     options?: never;
     head?: never;
-    patch?: never;
+    /** Edit Reservation */
+    patch: operations["edit_reservation_admin_reservations__id__patch"];
     trace?: never;
   };
   "/board-games": {
@@ -168,23 +169,6 @@ export interface paths {
     };
     /** Get All Board Games */
     get: operations["get_all_board_games_board_games_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/board-games/{id}/photo": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get Board Game Photo */
-    get: operations["get_board_game_photo_board_games__id__photo_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -353,9 +337,12 @@ export interface components {
     /** CreateReservation */
     CreateReservation: {
       /** Tg Alias */
-      tg_alias?: string | null;
-      /** Return Date */
-      return_date?: string | null;
+      tg_alias: string;
+      /**
+       * Return Date
+       * Format: date
+       */
+      return_date: string;
       /** When Available */
       when_available?: string | null;
       /** Comments */
@@ -449,11 +436,13 @@ export interface components {
       /** Comments */
       comments?: string | null;
     };
-    /** UpdateReservationStatus */
-    UpdateReservationStatus: {
-      status: components["schemas"]["ReservationStatus"];
+    /** UpdateReservationAdmin */
+    UpdateReservationAdmin: {
+      status?: components["schemas"]["ReservationStatus"] | null;
       /** Borrower Name */
-      borrower_name: string | null;
+      borrower_name?: string | null;
+      /** Return Date */
+      return_date?: string | null;
     };
     /**
      * UserRole
@@ -510,8 +499,8 @@ export type SchemaReservation = components["schemas"]["Reservation"];
 export type SchemaUpdateBoardGame = components["schemas"]["UpdateBoardGame"];
 export type SchemaUpdateReservation =
   components["schemas"]["UpdateReservation"];
-export type SchemaUpdateReservationStatus =
-  components["schemas"]["UpdateReservationStatus"];
+export type SchemaUpdateReservationAdmin =
+  components["schemas"]["UpdateReservationAdmin"];
 export type SchemaUserSchema = components["schemas"]["UserSchema"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
@@ -579,6 +568,42 @@ export interface operations {
         content?: never;
       };
       /** @description User not found in InNoHassle Accounts */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_board_game_photo_board_games__id__photo_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      307: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No photo available OR Board game not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -896,7 +921,7 @@ export interface operations {
       };
     };
   };
-  edit_reservation_status_admin_reservations__id__status_patch: {
+  remove_reservation_admin_reservations__id__delete: {
     parameters: {
       query?: never;
       header?: never;
@@ -905,11 +930,7 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateReservationStatus"];
-      };
-    };
+    requestBody?: never;
     responses: {
       /** @description Successful Response */
       200: {
@@ -917,7 +938,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Reservation"];
+          "application/json": unknown;
         };
       };
       /** @description You are not an admin in board games service */
@@ -945,7 +966,7 @@ export interface operations {
       };
     };
   };
-  remove_reservation_admin_reservations__id__delete: {
+  edit_reservation_admin_reservations__id__patch: {
     parameters: {
       query?: never;
       header?: never;
@@ -954,7 +975,11 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateReservationAdmin"];
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {
@@ -962,7 +987,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["Reservation"];
         };
       };
       /** @description You are not an admin in board games service */
@@ -1017,42 +1042,6 @@ export interface operations {
       };
     };
   };
-  get_board_game_photo_board_games__id__photo_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: components["schemas"]["PydanticObjectId"];
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      307: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description No photo available OR Board game not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
   get_users_reservations_users_me_reservations_get: {
     parameters: {
       query?: {
@@ -1100,9 +1089,9 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: {
+    requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateReservation"] | null;
+        "application/json": components["schemas"]["CreateReservation"];
       };
     };
     responses: {

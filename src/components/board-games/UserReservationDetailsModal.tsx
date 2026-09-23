@@ -4,9 +4,14 @@ import {
   ReservationStatus,
   type SchemaReservation,
 } from "@/api/board-games/types.ts";
+import {
+  boardGamesModalClassName,
+  InformationField,
+  ReservationStatusBadge,
+  telegramHandle,
+} from "@/components/board-games/shared.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
-import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
 import { FormEvent, useState } from "react";
 
@@ -23,6 +28,7 @@ export function UserReservationDetailsModal({
   const { showConfirm, showError, showSuccess } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const isReserved = reservation.status === ReservationStatus.reserved;
+  const telegram = telegramHandle(reservation.tg_alias);
 
   function invalidateUserBoardGameQueries() {
     queryClient.invalidateQueries({
@@ -67,9 +73,10 @@ export function UserReservationDetailsModal({
         open
         onOpenChange={onOpenChange}
         title="Reservation information"
+        containerClassName={boardGamesModalClassName}
         closeOnOutsidePress={!deleteMutation.isPending}
       >
-        <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-2">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 @sm/modal:grid-cols-2">
           {gameTitle && (
             <InformationField label="Game" className="@sm/modal:col-span-2">
               {gameTitle}
@@ -79,9 +86,7 @@ export function UserReservationDetailsModal({
             <ReservationStatusBadge status={reservation.status} />
           </InformationField>
           <InformationField label="Telegram alias">
-            {reservation.tg_alias
-              ? `@${reservation.tg_alias.replace(/^@/, "")}`
-              : "Not provided"}
+            {telegram ? `@${telegram}` : "Not provided"}
           </InformationField>
           <InformationField label="Return date">
             {reservation.return_date || "Not provided"}
@@ -222,6 +227,7 @@ function EditReservationModal({
       open={open}
       onOpenChange={handleOpenChange}
       title="Edit reservation"
+      containerClassName={boardGamesModalClassName}
       closeOnOutsidePress={!mutation.isPending}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
@@ -355,34 +361,4 @@ export function getReservationValidationError(
   if (missingFields.length === 0) return null;
   if (missingFields.length === 1) return `${missingFields[0]} is required.`;
   return "Telegram alias and return date are required.";
-}
-
-function InformationField({
-  label,
-  className,
-  children,
-}: React.PropsWithChildren<{ label: string; className?: string }>) {
-  return (
-    <div className={cn("min-w-0", className)}>
-      <p className="text-base-content/60 text-xs font-semibold uppercase">
-        {label}
-      </p>
-      <div className="wrap-break-word">{children}</div>
-    </div>
-  );
-}
-
-function ReservationStatusBadge({ status }: { status: ReservationStatus }) {
-  return (
-    <span
-      className={cn(
-        "badge capitalize",
-        status === ReservationStatus.reserved && "badge-warning",
-        status === ReservationStatus.taken && "badge-info",
-        status === ReservationStatus.returned && "badge-success",
-      )}
-    >
-      {status}
-    </span>
-  );
 }

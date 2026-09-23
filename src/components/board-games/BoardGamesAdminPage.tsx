@@ -5,8 +5,23 @@ import {
   type SchemaBoardGameWithStorageAvailability,
   type SchemaReservation,
 } from "@/api/board-games/types.ts";
-import { Modal } from "@/components/common/Modal.tsx";
 import { BoardGameImage } from "@/components/board-games/BoardGameImage.tsx";
+import {
+  BorrowerNameModal,
+  ReservationDetailsModal,
+} from "@/components/board-games/ReservationDetailsModal.tsx";
+import {
+  boardGamesModalClassName,
+  byCreatedAtDesc,
+  GameInfoBody,
+  ListState,
+  ReservationStatusBadge,
+  SearchInput,
+  SkeletonGrid,
+  telegramHandle,
+  withId,
+} from "@/components/board-games/shared.tsx";
+import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
@@ -16,29 +31,18 @@ import { FormEvent, useRef, useState } from "react";
 type Reservation = SchemaReservation & { id: string };
 type BoardGame = SchemaBoardGameWithStorageAvailability & { id: string };
 
-const activeStatuses: ReservationStatus[] = [
-  ReservationStatus.reserved,
-  ReservationStatus.taken,
-];
-
 export function BoardGamesAdminPage() {
+  // Omitted `how` defaults to current reservations (reserved and taken).
   const reservationsQuery = $boardGames.useQuery("get", "/admin/reservations");
   const gamesQuery = $boardGames.useQuery("get", "/admin/board-games");
-  const reservations = (reservationsQuery.data ?? []).filter(
-    (reservation): reservation is Reservation => Boolean(reservation.id),
-  );
-  const games = (gamesQuery.data ?? []).filter((game): game is BoardGame =>
-    Boolean(game.id),
-  );
-  const activeReservations = reservations.filter((reservation) =>
-    activeStatuses.includes(reservation.status),
-  );
+  const reservations = byCreatedAtDesc(withId(reservationsQuery.data));
+  const games = withId(gamesQuery.data);
   const gameTitles = new Map(games.map((game) => [game.id, game.title]));
 
   return (
     <main className="@container/content mx-auto flex w-full max-w-6xl flex-col gap-8 p-4 @md/content:p-6">
       <ReservationsSection
-        reservations={activeReservations}
+        reservations={reservations}
         gameTitles={gameTitles}
         isPending={reservationsQuery.isPending}
         error={reservationsQuery.error}
@@ -68,6 +72,9 @@ function ReservationsSection({
     useState<Reservation | null>(null);
   const [reservationToTake, setReservationToTake] =
     useState<Reservation | null>(null);
+  const { updateStatus, pendingReservationId } = useReservationStatusMutation(
+    () => setReservationToTake(null),
+  );
 
   function handleScroll(direction: -1 | 1) {
     carouselRef.current?.scrollBy({
@@ -82,7 +89,7 @@ function ReservationsSection({
         <div>
           <h1 className="text-2xl font-semibold">Current reservations</h1>
           {!isPending && !error && (
-            <p className="text-base-content/60 text-sm">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
               {reservations.length} active
             </p>
           )}
@@ -90,10 +97,10 @@ function ReservationsSection({
         <div className="flex shrink-0 items-center gap-1">
           <Link
             to="/board-games/admin/reservations"
-            className="btn btn-ghost btn-sm"
+            className="btn btn-ghost btn-sm gap-3"
           >
-            View all
-            <span className="icon-[material-symbols--arrow-forward] text-lg" />
+            Search reservations
+            <span className="icon-[material-symbols--search] text-lg" />
           </Link>
           <button
             type="button"
@@ -116,28 +123,23 @@ function ReservationsSection({
         </div>
       </div>
 
-      {isPending && (
-        <div className="flex gap-3 overflow-hidden">
-          {[0, 1, 2].map((item) => (
-            <div
-              key={item}
-              className="skeleton h-52 w-[min(86cqw,22rem)] shrink-0"
-            />
-          ))}
-        </div>
-      )}
-
-      {Boolean(error) && (
-        <QueryError title="Could not load reservations" error={error} />
-      )}
-
-      {!isPending && !error && reservations.length === 0 && (
-        <div className="border-base-300 text-base-content/60 flex min-h-40 items-center justify-center border py-8 text-center">
-          There are no active reservations.
-        </div>
-      )}
-
-      {!isPending && !error && reservations.length > 0 && (
+      <ListState
+        isPending={isPending}
+        error={error}
+        errorTitle="Could not load reservations"
+        emptyMessage={
+          reservations.length === 0
+            ? "There are no active reservations."
+            : undefined
+        }
+        pending={
+          <SkeletonGrid
+            count={3}
+            className="flex gap-3 overflow-hidden"
+            itemClassName="h-52 w-[min(86cqw,22rem)] shrink-0"
+          />
+        }
+      >
         <div
           ref={carouselRef}
           className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2"
@@ -147,20 +149,39 @@ function ReservationsSection({
               key={reservation.id}
               reservation={reservation}
               gameTitle={gameTitles.get(reservation.board_game_id)}
+              isUpdating={pendingReservationId === reservation.id}
               onView={() => setReservationToView(reservation)}
               onTake={() => setReservationToTake(reservation)}
+              onReturn={() =>
+                updateStatus(
+                  reservation.id,
+                  ReservationStatus.returned,
+                  reservation.borrower_name,
+                )
+              }
             />
           ))}
         </div>
-      )}
+      </ListState>
 
-      <BorrowerNameModal
-        reservation={reservationToTake}
-        onOpenChange={(open) => !open && setReservationToTake(null)}
-      />
+      {reservationToTake && (
+        <BorrowerNameModal
+          onOpenChange={(open) => !open && setReservationToTake(null)}
+          onSubmit={(borrowerName) =>
+            updateStatus(
+              reservationToTake.id,
+              ReservationStatus.taken,
+              borrowerName,
+            )
+          }
+          isPending={pendingReservationId === reservationToTake.id}
+          confirmLabel="Mark as taken"
+        />
+      )}
       {reservationToView && (
         <ReservationDetailsModal
           reservation={reservationToView}
+          gameTitle={gameTitles.get(reservationToView.board_game_id)}
           onOpenChange={(open) => !open && setReservationToView(null)}
         />
       )}
@@ -171,213 +192,85 @@ function ReservationsSection({
 function ReservationCard({
   reservation,
   gameTitle,
+  isUpdating,
   onView,
   onTake,
+  onReturn,
 }: {
   reservation: Reservation;
   gameTitle?: string;
+  isUpdating: boolean;
   onView: () => void;
   onTake: () => void;
+  onReturn: () => void;
 }) {
-  const { updateStatus, isPending } = useReservationStatusMutation();
   const isReserved = reservation.status === ReservationStatus.reserved;
+  const telegram = telegramHandle(reservation.tg_alias);
 
   return (
     <article
-      className="border-base-300 bg-base-100 hover:bg-base-200/50 flex w-[min(86cqw,22rem)] shrink-0 cursor-pointer snap-start flex-col gap-4 border p-4 transition-colors"
+      className="card card-border bg-base-100 hover:bg-base-200/60 w-[min(86cqw,22rem)] shrink-0 cursor-pointer snap-start transition-colors"
       onClick={onView}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold">
-            {gameTitle ?? "Unknown game"}
-          </h2>
-          <p className="text-base-content/60 text-sm">
-            {new Date(reservation.created_at).toLocaleString()}
-          </p>
-        </div>
-        <span
-          className={cn(
-            "badge shrink-0 capitalize",
-            isReserved ? "badge-warning" : "badge-info",
-          )}
-        >
-          {reservation.status}
-        </span>
-      </div>
-
-      <div className="flex flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2">
-          <span className="icon-[mdi--telegram] text-primary text-xl" />
-          {reservation.tg_alias ? (
-            <a
-              className="link link-hover font-medium"
-              href={`https://t.me/${reservation.tg_alias.replace(/^@/, "")}`}
-              onClick={(event) => event.stopPropagation()}
-            >
-              @{reservation.tg_alias.replace(/^@/, "")}
-            </a>
-          ) : (
-            <span className="text-base-content/50">Telegram not provided</span>
-          )}
-        </div>
-        {!isReserved && reservation.borrower_name && (
-          <div className="flex items-center gap-2">
-            <span className="icon-[material-symbols--person-outline] text-xl" />
-            <span>{reservation.borrower_name}</span>
+      <div className="card-body gap-3 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="card-title truncate text-lg">
+              {gameTitle ?? "Unknown game"}
+            </h2>
+            <p className="text-sm text-neutral-500 dark:text-neutral-200">
+              {new Date(reservation.created_at).toLocaleString()}
+            </p>
           </div>
-        )}
-      </div>
-
-      <button
-        type="button"
-        className={cn(
-          "btn mt-auto",
-          isReserved ? "btn-primary" : "btn-success",
-        )}
-        disabled={isPending}
-        onClick={(event) => {
-          event.stopPropagation();
-          if (isReserved) {
-            onTake();
-            return;
-          }
-          updateStatus(
-            reservation.id,
-            ReservationStatus.returned,
-            reservation.borrower_name,
-          );
-        }}
-      >
-        {isPending && <span className="loading loading-spinner loading-sm" />}
-        {isReserved ? "Mark as taken" : "Mark as returned"}
-      </button>
-    </article>
-  );
-}
-
-function ReservationDetailsModal({
-  reservation,
-  onOpenChange,
-}: {
-  reservation: Reservation;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const isReserved = reservation.status === ReservationStatus.reserved;
-
-  return (
-    <Modal open onOpenChange={onOpenChange} title="Reservation information">
-      <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-2">
-        <GameInformationField label="User email">
-          {reservation.user_email}
-        </GameInformationField>
-        <GameInformationField label="Status">
-          <span
-            className={cn(
-              "badge capitalize",
-              isReserved ? "badge-warning" : "badge-info",
-            )}
-          >
-            {reservation.status}
-          </span>
-        </GameInformationField>
-        <GameInformationField label="Telegram alias">
-          {reservation.tg_alias ? (
-            <a
-              href={`https://t.me/${reservation.tg_alias.replace(/^@/, "")}`}
-              className="link link-hover"
-              target="_blank"
-              rel="noreferrer"
-            >
-              @{reservation.tg_alias.replace(/^@/, "")}
-            </a>
-          ) : (
-            "Not provided"
-          )}
-        </GameInformationField>
-        <GameInformationField label="Return date">
-          {reservation.return_date || "Not provided"}
-        </GameInformationField>
-        <GameInformationField
-          label="When available"
-          className="@sm/modal:col-span-2"
-        >
-          {reservation.when_available || "Not provided"}
-        </GameInformationField>
-        <GameInformationField label="Comments" className="@sm/modal:col-span-2">
-          {reservation.comments || "Not provided"}
-        </GameInformationField>
-        <GameInformationField label="Borrower name">
-          {reservation.borrower_name || "Not provided"}
-        </GameInformationField>
-        <GameInformationField label="Created at">
-          {new Date(reservation.created_at).toLocaleString()}
-        </GameInformationField>
-      </div>
-    </Modal>
-  );
-}
-
-function BorrowerNameModal({
-  reservation,
-  onOpenChange,
-}: {
-  reservation: Reservation | null;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const [borrowerName, setBorrowerName] = useState("");
-  const { updateStatus, isPending } = useReservationStatusMutation(() => {
-    setBorrowerName("");
-    onOpenChange(false);
-  });
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!reservation || !borrowerName.trim()) return;
-    updateStatus(reservation.id, ReservationStatus.taken, borrowerName.trim());
-  }
-
-  return (
-    <Modal
-      open={reservation !== null}
-      onOpenChange={onOpenChange}
-      title="Confirm borrower"
-      closeOnOutsidePress={!isPending}
-    >
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <label className="fieldset">
-          <span className="fieldset-legend">Borrower name</span>
-          <input
-            className="input w-full"
-            value={borrowerName}
-            onChange={(event) => setBorrowerName(event.target.value)}
-            placeholder="Full name"
-            autoFocus
-            required
-          />
-        </label>
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            className="btn btn-ghost"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={isPending || !borrowerName.trim()}
-          >
-            {isPending && (
-              <span className="loading loading-spinner loading-sm" />
-            )}
-            Mark as taken
-          </button>
+          <ReservationStatusBadge status={reservation.status} />
         </div>
-      </form>
-    </Modal>
+
+        <div className="flex flex-col gap-2 text-sm text-neutral-500 dark:text-neutral-200">
+          <div className="flex items-center gap-2">
+            <span className="icon-[mdi--telegram] text-primary text-xl" />
+            {telegram ? (
+              <a
+                className="link link-hover font-medium"
+                href={`https://t.me/${telegram}`}
+                onClick={(event) => event.stopPropagation()}
+              >
+                @{telegram}
+              </a>
+            ) : (
+              <span className="text-neutral-400">Telegram not provided</span>
+            )}
+          </div>
+          {!isReserved && reservation.borrower_name && (
+            <div className="flex items-center gap-2">
+              <span className="icon-[material-symbols--person-outline] text-primary text-xl" />
+              <span>{reservation.borrower_name}</span>
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          className={cn(
+            "btn btn-soft mt-auto",
+            isReserved ? "btn-primary" : "btn-success",
+          )}
+          disabled={isUpdating}
+          onClick={(event) => {
+            event.stopPropagation();
+            if (isReserved) {
+              onTake();
+              return;
+            }
+            onReturn();
+          }}
+        >
+          {isUpdating && (
+            <span className="loading loading-spinner loading-sm" />
+          )}
+          {isReserved ? "Mark as taken" : "Mark as returned"}
+        </button>
+      </div>
+    </article>
   );
 }
 
@@ -386,7 +279,7 @@ function useReservationStatusMutation(onSuccess?: () => void) {
   const { showError, showSuccess } = useToast();
   const mutation = $boardGames.useMutation(
     "patch",
-    "/admin/reservations/{id}/status",
+    "/admin/reservations/{id}",
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
@@ -417,7 +310,12 @@ function useReservationStatusMutation(onSuccess?: () => void) {
     });
   }
 
-  return { updateStatus, isPending: mutation.isPending };
+  return {
+    updateStatus,
+    pendingReservationId: mutation.isPending
+      ? mutation.variables?.params.path.id
+      : null,
+  };
 }
 
 function GamesInventorySection({
@@ -484,7 +382,7 @@ function GamesInventorySection({
         <div>
           <h2 className="text-2xl font-semibold">Games in storage</h2>
           {!isPending && !error && (
-            <p className="text-base-content/60 text-sm">
+            <p className="text-base-content/70 text-sm">
               {normalizedSearchQuery
                 ? `${filteredGames.length} of ${games.length} titles`
                 : `${games.length} titles`}
@@ -501,97 +399,47 @@ function GamesInventorySection({
         </button>
       </div>
 
-      <label className="input w-full @md/content:max-w-md">
-        <span className="icon-[material-symbols--search] text-base-content/50 shrink-0 text-xl" />
-        <input
-          type="search"
-          className="grow"
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder="Search games by name"
-          disabled={isPending || Boolean(error)}
-        />
-      </label>
+      <SearchInput
+        className="@md/content:max-w-md"
+        value={searchQuery}
+        onValueChange={setSearchQuery}
+        placeholder="Search games by name"
+        disabled={isPending || Boolean(error)}
+      />
 
-      {isPending && (
-        <div className="grid grid-cols-1 gap-3 @md/content:grid-cols-2 @3xl/content:grid-cols-3">
-          {[0, 1, 2, 3, 4, 5].map((item) => (
-            <div key={item} className="skeleton h-24" />
-          ))}
-        </div>
-      )}
-      {Boolean(error) && (
-        <QueryError title="Could not load games" error={error} />
-      )}
-      {!isPending && !error && games.length === 0 && (
-        <div className="border-base-300 text-base-content/60 border py-8 text-center">
-          No games have been added yet.
-        </div>
-      )}
-      {!isPending &&
-        !error &&
-        games.length > 0 &&
-        filteredGames.length === 0 && (
-          <div className="border-base-300 text-base-content/60 border py-8 text-center">
-            No games match &quot;{searchQuery.trim()}&quot;.
-          </div>
-        )}
-      {!isPending && !error && filteredGames.length > 0 && (
-        <div className="grid grid-cols-1 gap-3 @md/content:grid-cols-2 @3xl/content:grid-cols-3">
+      <ListState
+        isPending={isPending}
+        error={error}
+        errorTitle="Could not load games"
+        emptyMessage={
+          games.length === 0
+            ? "No games have been added yet."
+            : filteredGames.length === 0
+              ? `No games match "${searchQuery.trim()}".`
+              : undefined
+        }
+        pending={
+          <SkeletonGrid
+            count={4}
+            className="flex flex-col gap-2"
+            itemClassName="h-16"
+          />
+        }
+      >
+        <div className="flex flex-col gap-2">
           {filteredGames.map((game) => (
-            <article
+            <StorageGameRow
               key={game.id}
-              className="border-base-300 bg-base-100 hover:bg-base-200/50 flex cursor-pointer items-center gap-3 border p-3 transition-colors"
-              onClick={() => setGameToView(game)}
-            >
-              <BoardGameImage
-                boardGameId={game.id}
-                photoFileId={game.photo_file_id}
-                className="h-16 w-16 shrink-0 object-cover"
-              />
-              <div className="min-w-0 grow">
-                <h3 className="truncate font-semibold">{game.title}</h3>
-                <p className="text-base-content/60 text-sm">
-                  Available in storage
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-1">
-                <span className="text-primary min-w-8 text-center text-2xl font-semibold tabular-nums">
-                  {game.available_in_storage}
-                </span>
-                <button
-                  type="button"
-                  className="btn btn-square btn-ghost btn-sm"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setGameToEdit(game);
-                  }}
-                  title={`Edit ${game.title}`}
-                  disabled={deletingGameId === game.id}
-                >
-                  <span className="icon-[material-symbols--edit-outline] text-xl" />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-square btn-ghost btn-sm text-error hover:bg-error/10"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    void handleDeleteGame(game);
-                  }}
-                  title={`Delete ${game.title}`}
-                  disabled={deleteMutation.isPending}
-                >
-                  {deletingGameId === game.id ? (
-                    <span className="loading loading-spinner loading-sm" />
-                  ) : (
-                    <span className="icon-[material-symbols--delete-outline] text-xl" />
-                  )}
-                </button>
-              </div>
-            </article>
+              game={game}
+              isDeleting={deletingGameId === game.id}
+              deleteDisabled={deleteMutation.isPending}
+              onView={() => setGameToView(game)}
+              onEdit={() => setGameToEdit(game)}
+              onDelete={() => void handleDeleteGame(game)}
+            />
           ))}
         </div>
-      )}
+      </ListState>
       <BoardGameFormModal
         open={isAddGameModalOpen}
         onOpenChange={setIsAddGameModalOpen}
@@ -614,6 +462,77 @@ function GamesInventorySection({
   );
 }
 
+function StorageGameRow({
+  game,
+  isDeleting,
+  deleteDisabled,
+  onView,
+  onEdit,
+  onDelete,
+}: {
+  game: BoardGame;
+  isDeleting: boolean;
+  deleteDisabled: boolean;
+  onView: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <article
+      className="bg-base-200 hover:bg-base-300 rounded-field flex cursor-pointer items-center gap-3 px-3 py-2 transition-colors"
+      onClick={onView}
+    >
+      <BoardGameImage
+        boardGameId={game.id}
+        photoFileId={game.photo_file_id}
+        className="rounded-field size-14 shrink-0 object-cover"
+      />
+      <div className="min-w-0 grow">
+        <h3 className="truncate font-medium">{game.title}</h3>
+        <p className="text-base-content/70 text-sm">
+          <span className="text-base-content font-medium tabular-nums">
+            {game.available_in_storage}
+          </span>
+          {" in storage"}
+          <span className="text-base-content/50">
+            {` · ${game.available_copies} available · ${game.total_copies} copies`}
+          </span>
+        </p>
+      </div>
+      <div className="flex shrink-0 items-center gap-1">
+        <button
+          type="button"
+          className="btn btn-square btn-ghost btn-sm"
+          onClick={(event) => {
+            event.stopPropagation();
+            onEdit();
+          }}
+          title={`Edit ${game.title}`}
+          disabled={isDeleting}
+        >
+          <span className="icon-[material-symbols--edit-outline] text-xl" />
+        </button>
+        <button
+          type="button"
+          className="btn btn-square btn-ghost btn-sm text-error hover:bg-error/10"
+          onClick={(event) => {
+            event.stopPropagation();
+            onDelete();
+          }}
+          title={`Delete ${game.title}`}
+          disabled={deleteDisabled}
+        >
+          {isDeleting ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : (
+            <span className="icon-[material-symbols--delete-outline] text-xl" />
+          )}
+        </button>
+      </div>
+    </article>
+  );
+}
+
 function BoardGameDetailsModal({
   game,
   onOpenChange,
@@ -622,35 +541,28 @@ function BoardGameDetailsModal({
   onOpenChange: (open: boolean) => void;
 }) {
   return (
-    <Modal open onOpenChange={onOpenChange} title="Game information">
-      <div className="flex flex-col gap-4">
-        <BoardGameImage
-          boardGameId={game.id}
-          photoFileId={game.photo_file_id}
-          className="bg-base-300 aspect-video w-full object-contain"
-        />
-
-        <div className="grid grid-cols-1 gap-3 @sm/modal:grid-cols-2">
-          <GameInformationField label="Title" className="@sm/modal:col-span-2">
-            {game.title}
-          </GameInformationField>
-          <GameInformationField
-            label="Description"
-            className="@sm/modal:col-span-2"
-          >
-            {game.description || "Not provided"}
-          </GameInformationField>
-          <GameInformationField label="Total copies">
-            {game.total_copies}
-          </GameInformationField>
-          <GameInformationField label="Available copies">
-            {game.available_copies}
-          </GameInformationField>
-          <GameInformationField label="Available in storage">
-            {game.available_in_storage}
-          </GameInformationField>
-        </div>
-        <div className="flex justify-end">
+    <Modal
+      open
+      onOpenChange={onOpenChange}
+      title="Game information"
+      containerClassName={boardGamesModalClassName}
+    >
+      <GameInfoBody
+        image={
+          <BoardGameImage
+            boardGameId={game.id}
+            photoFileId={game.photo_file_id}
+            className="bg-base-300 rounded-box aspect-video w-full object-contain"
+          />
+        }
+        title={game.title}
+        description={game.description}
+        stats={[
+          { label: "Total", value: game.total_copies },
+          { label: "Available", value: game.available_copies, accent: true },
+          { label: "In storage", value: game.available_in_storage },
+        ]}
+        action={
           <Link
             to="/board-games/admin/reservations"
             search={{ gameId: game.id }}
@@ -659,24 +571,9 @@ function BoardGameDetailsModal({
             View reservations
             <span className="icon-[material-symbols--arrow-forward] text-xl" />
           </Link>
-        </div>
-      </div>
+        }
+      />
     </Modal>
-  );
-}
-
-function GameInformationField({
-  label,
-  className,
-  children,
-}: React.PropsWithChildren<{ label: string; className?: string }>) {
-  return (
-    <div className={cn("min-w-0", className)}>
-      <p className="text-base-content/60 text-xs font-semibold uppercase">
-        {label}
-      </p>
-      <div className="wrap-break-word">{children}</div>
-    </div>
   );
 }
 
@@ -791,6 +688,7 @@ function BoardGameFormModal({
         formData.append("photo_file", photoFile);
         await photoMutation.mutateAsync({
           params: { path: { id: savedGame.id } },
+          // Generated client types this upload field as a string.
           body: formData as never,
         });
       }
@@ -806,6 +704,7 @@ function BoardGameFormModal({
       open={open}
       onOpenChange={handleOpenChange}
       title={isEditing ? "Edit board game" : "Add board game"}
+      containerClassName={boardGamesModalClassName}
       closeOnOutsidePress={!isMutationPending}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -904,17 +803,5 @@ function BoardGameFormModal({
         </div>
       </form>
     </Modal>
-  );
-}
-
-function QueryError({ title, error }: { title: string; error: unknown }) {
-  return (
-    <div className="alert alert-error">
-      <span className="icon-[material-symbols--error-outline] shrink-0 text-xl" />
-      <div>
-        <p className="font-semibold">{title}</p>
-        <p className="text-sm">{formatApiErrorMessage(error)}</p>
-      </div>
-    </div>
   );
 }

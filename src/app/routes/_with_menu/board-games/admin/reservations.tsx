@@ -1,6 +1,4 @@
-import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { ReservationsAdminPage } from "@/components/board-games/ReservationsAdminPage.tsx";
-import { Topbar } from "@/components/layout/Topbar.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -25,10 +23,7 @@ function RouteComponent() {
           content="Search and review all board game reservations."
         />
       </Helmet>
-      <Topbar title="Board Game Reservations" />
-      <RequireAuth>
-        <ReservationsAdminPage gameId={gameId} />
-      </RequireAuth>
+      <ReservationsAdminPage gameId={gameId} />
     </>
   );
 }

@@ -4,9 +4,14 @@ import {
   ReservationStatus,
   type SchemaReservation,
 } from "@/api/board-games/types.ts";
+import {
+  boardGamesModalClassName,
+  InformationField,
+  ReservationStatusBadge,
+  telegramHandle,
+} from "@/components/board-games/shared.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
-import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
 import { FormEvent, useState } from "react";
 
@@ -29,6 +34,7 @@ export function ReservationDetailsModal({
   const { showConfirm, showError, showSuccess } = useToast();
   const [selectedStatus, setSelectedStatus] = useState(reservation.status);
   const [isBorrowerModalOpen, setIsBorrowerModalOpen] = useState(false);
+  const telegram = telegramHandle(reservation.tg_alias);
 
   function invalidateAdminQueries() {
     queryClient.invalidateQueries({
@@ -41,7 +47,7 @@ export function ReservationDetailsModal({
 
   const statusMutation = $boardGames.useMutation(
     "patch",
-    "/admin/reservations/{id}/status",
+    "/admin/reservations/{id}",
     {
       onSuccess: () => {
         invalidateAdminQueries();
@@ -109,9 +115,10 @@ export function ReservationDetailsModal({
         open
         onOpenChange={onOpenChange}
         title="Reservation information"
+        containerClassName={boardGamesModalClassName}
         closeOnOutsidePress={!isMutationPending}
       >
-        <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-2">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 @sm/modal:grid-cols-2">
           {gameTitle && (
             <InformationField label="Game" className="@sm/modal:col-span-2">
               {gameTitle}
@@ -124,14 +131,14 @@ export function ReservationDetailsModal({
             <ReservationStatusBadge status={reservation.status} />
           </InformationField>
           <InformationField label="Telegram alias">
-            {reservation.tg_alias ? (
+            {telegram ? (
               <a
-                href={`https://t.me/${reservation.tg_alias.replace(/^@/, "")}`}
+                href={`https://t.me/${telegram}`}
                 className="link link-hover"
                 target="_blank"
                 rel="noreferrer"
               >
-                @{reservation.tg_alias.replace(/^@/, "")}
+                @{telegram}
               </a>
             ) : (
               "Not provided"
@@ -207,26 +214,27 @@ export function ReservationDetailsModal({
         </div>
       </Modal>
 
-      <BorrowerNameModal
-        open={isBorrowerModalOpen}
-        onOpenChange={setIsBorrowerModalOpen}
-        onSubmit={updateStatus}
-        isPending={statusMutation.isPending}
-      />
+      {isBorrowerModalOpen && (
+        <BorrowerNameModal
+          onOpenChange={setIsBorrowerModalOpen}
+          onSubmit={updateStatus}
+          isPending={statusMutation.isPending}
+        />
+      )}
     </>
   );
 }
 
-function BorrowerNameModal({
-  open,
+export function BorrowerNameModal({
   onOpenChange,
   onSubmit,
   isPending,
+  confirmLabel = "Update status",
 }: {
-  open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (borrowerName: string) => void;
   isPending: boolean;
+  confirmLabel?: string;
 }) {
   const [borrowerName, setBorrowerName] = useState("");
 
@@ -238,9 +246,10 @@ function BorrowerNameModal({
 
   return (
     <Modal
-      open={open}
+      open
       onOpenChange={onOpenChange}
       title="Confirm borrower"
+      containerClassName={boardGamesModalClassName}
       closeOnOutsidePress={!isPending}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -274,40 +283,10 @@ function BorrowerNameModal({
             {isPending && (
               <span className="loading loading-spinner loading-sm" />
             )}
-            Update status
+            {confirmLabel}
           </button>
         </div>
       </form>
     </Modal>
-  );
-}
-
-function InformationField({
-  label,
-  className,
-  children,
-}: React.PropsWithChildren<{ label: string; className?: string }>) {
-  return (
-    <div className={cn("min-w-0", className)}>
-      <p className="text-base-content/60 text-xs font-semibold uppercase">
-        {label}
-      </p>
-      <div className="wrap-break-word">{children}</div>
-    </div>
-  );
-}
-
-function ReservationStatusBadge({ status }: { status: ReservationStatus }) {
-  return (
-    <span
-      className={cn(
-        "badge capitalize",
-        status === ReservationStatus.reserved && "badge-warning",
-        status === ReservationStatus.taken && "badge-info",
-        status === ReservationStatus.returned && "badge-success",
-      )}
-    >
-      {status}
-    </span>
   );
 }
