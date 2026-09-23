@@ -25,6 +25,11 @@ import { useNavigate } from "@tanstack/react-router";
 // Shared between the two-finger touch drag and the desktop right-click drag,
 // so both rotation gestures feel identical.
 const ROTATE_DEG_PER_PX = 0.4;
+/**
+ * How far (degrees) two fingers must twist before a pinch starts rotating the
+ * map, so zooming alone does not tilt it by accident.
+ */
+const ROTATE_MOBILE_THRESHOLD = 30;
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 6;
@@ -484,6 +489,10 @@ export const MapViewer = memo(
           touch2.clientY - touch1.clientY,
           touch2.clientX - touch1.clientX,
         );
+        // Finger angle at which rotation kicked in, or null while the twist is
+        // still under ROTATE_MOBILE_THRESHOLD. Measuring from this point
+        // instead of startAngle keeps the map from jumping when it unlocks.
+        let rotationStartAngle: number | null = null;
         // The world point under the initial centroid stays under the centroid
         // for the whole gesture, so the map tracks the fingers.
         const anchor = toWorld(
@@ -511,8 +520,17 @@ export const MapViewer = memo(
             MIN_ZOOM,
             MAX_ZOOM,
           );
-          camera.current.bearing =
-            startBearing + (angle - startAngle) / DEG2RAD;
+          if (
+            rotationStartAngle === null &&
+            Math.abs(normalizeBearing((angle - startAngle) / DEG2RAD)) >
+              ROTATE_MOBILE_THRESHOLD
+          ) {
+            rotationStartAngle = angle;
+          }
+          if (rotationStartAngle !== null) {
+            camera.current.bearing =
+              startBearing + (angle - rotationStartAngle) / DEG2RAD;
+          }
           anchorWorldTo(
             anchor,
             (touch1.clientX + touch2.clientX) / 2,
