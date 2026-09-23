@@ -75,23 +75,6 @@ export function MapView({
     startLocating();
   }, [disablePopup, geoTransform, startLocating]);
 
-  // Surface permission / availability problems
-  useEffect(() => {
-    if (locationStatus === "denied") {
-      showError(
-        "Location blocked",
-        "Allow location access in your browser to see your position.",
-      );
-    } else if (locationStatus === "unavailable") {
-      showError(
-        "Location unavailable",
-        "This device can't provide a GPS position.",
-      );
-    } else if (locationStatus === "error") {
-      showError("Location error", "Couldn't get a GPS fix. Try again outside.");
-    }
-  }, [locationStatus, showError]);
-
   const userLocation = useMemo(() => {
     if (!position || !geoTransform || !geoRef) return null;
     const { x, y } = geoTransform.project(position.lat, position.lon);
@@ -107,6 +90,22 @@ export function MapView({
       accurate,
     };
   }, [position, geoTransform, geoRef]);
+
+  /**
+   * Why the location dot can't be shown, or null when it can. Shown as a
+   * message right above the location button, the control it is about.
+   */
+  const locationIssue = useMemo(() => {
+    if (locationStatus === "denied") return "Location access denied";
+    if (locationStatus === "unavailable") return "Location unavailable";
+    if (locationStatus === "error") return "No GPS signal";
+    if (userLocation && !userLocation.visible) {
+      return userLocation.withinBounds
+        ? `Weak GPS signal (±${Math.round(userLocation.accuracyM)}m)`
+        : "You are outside this map";
+    }
+    return null;
+  }, [locationStatus, userLocation]);
 
   async function handleExportPdf() {
     setIsExportingPdf(true);
@@ -200,13 +199,6 @@ export function MapView({
               )}
               <span className="text-base font-thin">Export PDF</span>
             </button>
-            {userLocation && !userLocation.visible && (
-              <div className="bg-base-300/70 text-base-content absolute top-2 left-2 max-w-xs rounded-xl px-3 py-2 text-sm">
-                {!userLocation.withinBounds
-                  ? "Your GPS position is outside this floor plan."
-                  : `Your GPS signal is too weak to show your position here (accuracy ±${Math.round(userLocation.accuracyM)}m).`}
-              </div>
-            )}
             <div className="absolute right-2 bottom-2 flex flex-col gap-2">
               {Math.abs(bearing) > 0.5 && (
                 <button
@@ -222,32 +214,48 @@ export function MapView({
                 </button>
               )}
               {geoTransform && (
-                <button
-                  type="button"
-                  className={cn(
-                    "bg-base-300/50 hover:bg-base-300/75 flex h-fit justify-center rounded-xl px-2 py-2",
-                    locationStatus === "active" && "text-primary",
+                <>
+                  {locationIssue && (
+                    // Zero-width, right-aligned wrapper: the message overflows
+                    // to the left instead of widening the button column.
+                    <div className="flex w-0 justify-end self-end">
+                      <div className="bg-base-300/70 text-base-content w-max max-w-64 shrink-0 rounded-xl px-3 py-2 text-sm">
+                        {locationIssue}
+                      </div>
+                    </div>
                   )}
-                  aria-label="Show my location"
-                  onClick={() => {
-                    if (
-                      locationStatus === "active" ||
-                      locationStatus === "locating"
-                    ) {
-                      userDisabledLocationRef.current = true;
-                      stopLocating();
-                    } else {
-                      userDisabledLocationRef.current = false;
-                      startLocating();
-                    }
-                  }}
-                >
-                  {locationStatus === "locating" ? (
-                    <span className="loading loading-spinner loading-sm" />
-                  ) : (
-                    <span className="icon-[material-symbols--my-location] text-2xl" />
-                  )}
-                </button>
+                  <button
+                    type="button"
+                    className={cn(
+                      "bg-base-300/50 hover:bg-base-300/75 flex h-fit justify-center rounded-xl px-2 py-2",
+                      locationStatus === "active" &&
+                        !locationIssue &&
+                        "text-primary",
+                      locationIssue && "text-error",
+                    )}
+                    aria-label="Show my location"
+                    onClick={() => {
+                      if (
+                        locationStatus === "active" ||
+                        locationStatus === "locating"
+                      ) {
+                        userDisabledLocationRef.current = true;
+                        stopLocating();
+                      } else {
+                        userDisabledLocationRef.current = false;
+                        startLocating();
+                      }
+                    }}
+                  >
+                    {locationStatus === "locating" ? (
+                      <span className="loading loading-spinner loading-sm" />
+                    ) : locationIssue ? (
+                      <span className="icon-[material-symbols--location-disabled] text-2xl" />
+                    ) : (
+                      <span className="icon-[material-symbols--my-location] text-2xl" />
+                    )}
+                  </button>
+                </>
               )}
               <button
                 type="button"

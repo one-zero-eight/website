@@ -30,14 +30,19 @@ export function useUserLocation() {
   const supported =
     typeof navigator !== "undefined" && "geolocation" in navigator;
 
-  const stop = useCallback(() => {
+  /** Drop the watch without touching `status`, so a failure can keep its own. */
+  const clearWatch = useCallback(() => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
+  }, []);
+
+  const stop = useCallback(() => {
+    clearWatch();
     setStatus("idle");
     setPosition(null);
-  }, []);
+  }, [clearWatch]);
 
   const start = useCallback(() => {
     if (!supported) {
@@ -61,12 +66,18 @@ export function useUserLocation() {
         setStatus("active");
       },
       (err) => {
+        // A denial ends the watch, but calling stop() here would reset the
+        // status to "idle" in the same batch and the denial would never be
+        // observable by callers.
+        if (err.code === err.PERMISSION_DENIED) {
+          clearWatch();
+          setPosition(null);
+        }
         setStatus(err.code === err.PERMISSION_DENIED ? "denied" : "error");
-        if (err.code === err.PERMISSION_DENIED) stop();
       },
       { enableHighAccuracy: true, maximumAge: 5_000, timeout: 20_000 },
     );
-  }, [supported, stop]);
+  }, [supported, clearWatch]);
 
   // Clear the watch on unmount.
   useEffect(() => {
