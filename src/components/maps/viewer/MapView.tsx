@@ -200,17 +200,23 @@ export function MapView({
               <span className="text-base font-thin">Export PDF</span>
             </button>
             <div className="absolute right-2 bottom-2 flex flex-col gap-2">
-              {Math.abs(bearing) > 0.5 && (
+              {Math.abs(bearing) > 0.2 && (
                 <button
                   type="button"
                   className="bg-base-300/50 hover:bg-base-300/75 flex h-fit justify-center rounded-xl px-2 py-2"
                   aria-label="Reset north"
                   onClick={() => mapViewerRef.current?.resetBearing()}
                 >
-                  <span
-                    className="icon-[material-symbols--navigation] text-primary text-2xl"
-                    style={{ transform: `rotate(${-bearing}deg)` }}
-                  />
+                  {/* Counter-rotated by the bearing so the white end of the
+                      needle always points to the plan's north. */}
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="size-6"
+                    style={{ transform: `rotate(${bearing}deg) scale(1.5)` }}
+                  >
+                    <path d="M12 3.5 15 12H9Z" className="fill-error" />
+                    <path d="M12 20.5 9 12h6Z" className="fill-current" />
+                  </svg>
                 </button>
               )}
               {geoTransform && (
