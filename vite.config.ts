@@ -65,12 +65,21 @@ export default defineConfig({
         runtimeCaching: [
           {
             // Calendar feeds (.ics, and external calendars proxied through
-            // check-calendar-url-to-link). Network first: a changed timetable
-            // must win whenever there is a connection; the cached copy is used
-            // offline or when the network is slower than the timeout.
+            // check-calendar-url-to-link), plus the schedule and when2meet
+            // requests the calendar page builds its list of feed URLs from:
+            // without them, offline, it doesn't know which feeds to show.
+            // Network first: a changed timetable must win whenever there is a
+            // connection; the cached copy is used offline or when the network
+            // is slower than the timeout.
             urlPattern: ({ url }) =>
               url.pathname.endsWith(".ics") ||
-              url.pathname.endsWith("/check-calendar-url-to-link"),
+              url.pathname.endsWith("/check-calendar-url-to-link") ||
+              /\/schedule\/v\d+\/(users\/me|users\/me\/predefined|event-groups\/)$/.test(
+                url.pathname,
+              ) ||
+              /\/when2meet\/v\d+\/meetings\/(participating)?$/.test(
+                url.pathname,
+              ),
             handler: "NetworkFirst",
             options: {
               cacheName: CALENDAR_FEEDS_CACHE,
