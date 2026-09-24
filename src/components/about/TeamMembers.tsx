@@ -6,17 +6,13 @@ import { MemberAvatar } from "./cards/MemberAvatar.tsx";
 const leaderRowOrder = [
   "Artem Bulgakov",
   "Ruslan Bel'kov",
-  "Anna Belyakova",
   "Alexandr Zolotarev",
-  "Vladislav Konovalov",
 ];
 
 const leaderRoles: Record<string, string> = {
-  "Anna Belyakova": "leader",
   "Artem Bulgakov": "Founder",
   "Ruslan Bel'kov": "Founder",
-  "Alexandr Zolotarev": "tech leader",
-  "Vladislav Konovalov": "tech leader",
+  "Alexandr Zolotarev": "leader",
 };
 
 const mainLeaderName = Object.entries(leaderRoles).find(
