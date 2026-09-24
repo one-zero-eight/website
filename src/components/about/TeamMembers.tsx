@@ -12,11 +12,9 @@ const leaderRowOrder = [
 ];
 
 const leaderRoles: Record<string, string> = {
-  "Anna Belyakova": "leader",
   "Artem Bulgakov": "Founder",
   "Ruslan Bel'kov": "Founder",
-  "Alexandr Zolotarev": "tech leader",
-  "Vladislav Konovalov": "tech leader",
+  "Alexandr Zolotarev": "Leader",
 };
 
 const mainLeaderName = Object.entries(leaderRoles).find(
