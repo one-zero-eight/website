@@ -106,6 +106,19 @@ export const items: ItemType[] = [
     ),
     hideOnMore: true,
   },
+  ...((import.meta.env.VITE_PRODUCTION && []) || [
+    {
+      type: "local",
+      title: "Sport",
+      to: "/sport",
+      badge: (
+        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
+          DEV
+        </span>
+      ),
+      icon: <span className="icon-[material-symbols--exercise-outline]" />,
+    },
+  ]),
   {
     type: "local",
     title: "Maps",
@@ -199,19 +212,6 @@ export const items: ItemType[] = [
     to: "/music-room",
     icon: <span className="icon-[material-symbols--piano]" />,
   },
-  ...((import.meta.env.VITE_PRODUCTION && []) || [
-    {
-      type: "local",
-      title: "Sport",
-      to: "/sport",
-      badge: (
-        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
-          DEV
-        </span>
-      ),
-      icon: <span className="icon-[material-symbols--exercise-outline]" />,
-    },
-  ]),
   {
     type: "local",
     title: "Extension",

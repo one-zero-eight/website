@@ -1,7 +1,7 @@
 import { $sport } from "@/api/sport";
 import type { SchemaBadGradeReportSchema } from "@/api/sport/types.ts";
 import type { useToast } from "@/components/toast";
-import type { useQueryClient } from "@tanstack/react-query";
+import { queryClient } from "@/app/query-client.ts";
 
 export const sportTrainerMenuBtn =
   "btn btn-outline border-2 hover:border-[#8D4CF6] hover:bg-transparent hover:text-[#8D4CF6] active:border-[#8D4CF6] active:bg-transparent active:text-[#8D4CF6]";
@@ -15,11 +15,8 @@ export function formatStudentName(student: {
   return `${student.first_name} ${student.last_name}`.trim();
 }
 
-export function invalidateAttendance(
-  client: ReturnType<typeof useQueryClient>,
-  trainingId: number,
-) {
-  client.invalidateQueries({
+export function invalidateAttendance(trainingId: number) {
+  queryClient.invalidateQueries({
     queryKey: $sport.queryOptions(
       "get",
       "/trainings/{training_id}/attendance",

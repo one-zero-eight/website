@@ -1,5 +1,6 @@
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
+import { SportPageShell } from "@/components/sport/SportPageShell.tsx";
 import { SportSchedulePage } from "@/components/sport/SportSchedulePage.tsx";
 import { SportTabs } from "@/components/sport/SportTabs.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
@@ -23,7 +24,9 @@ function RouteComponent() {
       <Topbar title="Sport" hideOnMobile />
       <SportTabs />
       <RequireAuth>
-        <SportSchedulePage />
+        <SportPageShell>
+          <SportSchedulePage />
+        </SportPageShell>
       </RequireAuth>
     </>
   );

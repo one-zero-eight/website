@@ -18,7 +18,6 @@ import { cn } from "@/lib/ui/cn";
 import listPlugin from "@fullcalendar/list";
 import FullCalendar from "@fullcalendar/react";
 import type { EventContentArg } from "@fullcalendar/core";
-import { useQueryClient } from "@tanstack/react-query";
 import moment from "moment/moment";
 import { useMemo, useState } from "react";
 
@@ -38,7 +37,6 @@ export function SportTrainingsCalendarList({
   onSelect: (row: SchemaTrainingInfoPersonalSchema) => void;
 }) {
   const { academicCalendar } = useMyAcademicCalendar();
-  const queryClient = useQueryClient();
   const { showError, showSuccess } = useToast();
   const [pendingTrainingId, setPendingTrainingId] = useState<number | null>(
     null,
@@ -64,7 +62,7 @@ export function SportTrainingsCalendarList({
         );
       },
       onSettled: (_data, _error, vars) => {
-        invalidateSportCheckinQueries(queryClient, studentId);
+        invalidateSportCheckinQueries(studentId);
         setPendingTrainingId((current) =>
           current === vars.params.path.training_id ? null : current,
         );

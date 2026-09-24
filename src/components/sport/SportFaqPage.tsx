@@ -1,25 +1,7 @@
 import { $sport } from "@/api/sport";
-import { SportPageShell } from "@/components/sport/SportPageShell.tsx";
 
 export function SportFaqPage() {
-  return (
-    <SportPageShell>
-      {(sport) => <SportFaqContent enabled={sport.canQuerySport} />}
-    </SportPageShell>
-  );
-}
-
-function SportFaqContent({ enabled }: { enabled: boolean }) {
-  const { data, isPending, isError } = $sport.useQuery(
-    "get",
-    "/faq",
-    {},
-    {
-      enabled,
-    },
-  );
-
-  if (!enabled) return null;
+  const { data, isPending, isError } = $sport.useQuery("get", "/faq");
 
   if (isPending) {
     return (

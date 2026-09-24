@@ -12,7 +12,6 @@ import {
 } from "@/components/sport/sport-trainer-utils.ts";
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
 import { useToast } from "@/components/toast";
-import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
 export function SportTrainerAttendanceModal({
@@ -27,7 +26,6 @@ export function SportTrainerAttendanceModal({
   const trainingId = row.training.id;
   const groupId = row.training.group_id;
 
-  const queryClient = useQueryClient();
   const { showError, showSuccess, showWarning } = useToast();
   const [importing, setImporting] = useState(false);
 
@@ -58,7 +56,7 @@ export function SportTrainerAttendanceModal({
     {
       onSuccess: (data) => {
         handleAttendanceResponse(data, showSuccess, showWarning);
-        invalidateAttendance(queryClient, trainingId);
+        invalidateAttendance(trainingId);
       },
       onError: () => {
         showError("Could not update attendance", "Please try again.");

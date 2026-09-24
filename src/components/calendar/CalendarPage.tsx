@@ -1,5 +1,4 @@
 import { $schedule, scheduleTypes } from "@/api/schedule";
-import { useMySportAccessToken } from "@/api/helpers/sport-access-token.ts";
 import { $sport } from "@/api/sport";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { URLType } from "@/components/calendar/CalendarViewer.tsx";
@@ -30,16 +29,12 @@ export function CalendarPage() {
     "/users/me/predefined",
   );
   const when2MeetEvents = useWhen2MeetCalendarEvents();
-  const [sportToken] = useMySportAccessToken();
   const [visibleRange, setVisibleRange] = useState<{
     start: Date;
     end: Date;
   } | null>(null);
 
   const initialWidth = useRef(window.innerWidth);
-
-  const includeSportSchedule =
-    scheduleUser?.sports_hidden === false && !!sportToken;
 
   const scheduleQuery = useMemo(() => {
     if (!visibleRange) {
@@ -68,18 +63,18 @@ export function CalendarPage() {
         },
       },
     },
-    { enabled: includeSportSchedule && scheduleQuery != null },
+    { enabled: scheduleUser?.sports_hidden === false && scheduleQuery != null },
   );
 
   const sportEvents = useMemo((): EventInput[] => {
-    if (!includeSportSchedule) {
+    if (scheduleUser?.sports_hidden !== false) {
       return [];
     }
 
     return filterUpcomingCheckedInSchedule(sportSchedule ?? []).map(
       trainingScheduleToCalendarEvent,
     );
-  }, [includeSportSchedule, sportSchedule]);
+  }, [scheduleUser?.sports_hidden, sportSchedule]);
 
   return (
     <div className="grow overflow-hidden">

@@ -1,11 +1,11 @@
 import { $sport } from "@/api/sport";
+import { queryClient } from "@/app/query-client.ts";
 import {
   invalidateAttendance,
   sportTrainerMenuBtn,
 } from "@/components/sport/sport-trainer-utils.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 
 /**
@@ -21,7 +21,6 @@ export function SportTrainerBaamImportButton({
   groupId: number;
   onImportingChange?: (importing: boolean) => void;
 }) {
-  const queryClient = useQueryClient();
   const { showError, showSuccess, showWarning } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importProgress, setImportProgress] = useState<{
@@ -95,7 +94,7 @@ export function SportTrainerBaamImportButton({
 
     setImportProgress(null);
     onImportingChange?.(false);
-    invalidateAttendance(queryClient, trainingId);
+    invalidateAttendance(trainingId);
 
     if (marked > 0) {
       showSuccess(

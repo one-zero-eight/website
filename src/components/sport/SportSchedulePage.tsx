@@ -1,47 +1,36 @@
 import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
-import { SportPageShell } from "@/components/sport/SportPageShell.tsx";
 import { SportProgressSection } from "@/components/sport/SportOverviewSection.tsx";
 import { isTrainerTraining } from "@/components/sport/sport-checkin-utils.ts";
-import type { SportProfileReady } from "@/components/sport/sport-profile.ts";
+import { useSportProfile } from "@/components/sport/sport-profile.ts";
 import { SportStudentTrainingModal } from "@/components/sport/SportStudentTrainingModal.tsx";
 import { SportTrainerTrainingModal } from "@/components/sport/SportTrainerTrainingModal.tsx";
-import { SportTrainingsCalendarList } from "@/components/sport/SportTrainingsCalendarList.tsx";
 import {
   getSchedulePeriodBounds,
   toScheduleApiDateTime,
 } from "@/components/sport/sport-week-utils.ts";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
+
+const SportTrainingsCalendarList = lazy(() =>
+  import("@/components/sport/SportTrainingsCalendarList.tsx").then(
+    (module) => ({
+      default: module.SportTrainingsCalendarList,
+    }),
+  ),
+);
 
 export function SportSchedulePage() {
-  return (
-    <SportPageShell>
-      {(sport) => <SportScheduleContent {...sport} />}
-    </SportPageShell>
-  );
-}
-
-function SportScheduleContent({
-  canQuerySport,
-  studentId,
-  trainerGroupIds,
-  profile,
-  isCollege,
-  isTrainer,
-  studentStatus,
-}: SportProfileReady) {
+  const { studentId, trainerGroupIds } = useSportProfile();
   const { data: hours } = $sport.useQuery(
     "get",
     "/students/{student_id}/hours-summary",
     { params: { path: { student_id: Number(studentId) } } },
-    { enabled: canQuerySport && studentId != null },
+    { enabled: studentId != null },
   );
 
   const { data: currentSemester } = $sport.useQuery(
     "get",
     "/semesters/current",
-    {},
-    { enabled: canQuerySport },
   );
 
   return (
@@ -50,16 +39,9 @@ function SportScheduleContent({
         hours={hours}
         currentSemester={currentSemester}
         studentId={studentId}
-        fullName={profile.full_name}
-        hasStudentInfo={!!profile.student_info}
-        isCollege={isCollege}
-        isTrainer={isTrainer}
-        studentStatus={studentStatus}
-        medicalGroup={profile.student_info?.medical_group}
       />
       {studentId != null ? (
         <SportCalendar
-          enabled={canQuerySport}
           studentId={studentId}
           trainerGroupIds={trainerGroupIds}
         />
@@ -69,11 +51,9 @@ function SportScheduleContent({
 }
 
 function SportCalendar({
-  enabled,
   studentId,
   trainerGroupIds,
 }: {
-  enabled: boolean;
   studentId: number;
   trainerGroupIds: ReadonlySet<number>;
 }) {
@@ -90,19 +70,14 @@ function SportCalendar({
     data: personalSchedule,
     isPending,
     isError,
-  } = $sport.useQuery(
-    "get",
-    "/users/me/schedule",
-    {
-      params: {
-        query: {
-          start: toScheduleApiDateTime(periodStart),
-          end: toScheduleApiDateTime(periodEnd),
-        },
+  } = $sport.useQuery("get", "/users/me/schedule", {
+    params: {
+      query: {
+        start: toScheduleApiDateTime(periodStart),
+        end: toScheduleApiDateTime(periodEnd),
       },
     },
-    { enabled },
-  );
+  });
 
   const filteredSchedule = useMemo(() => {
     return (personalSchedule ?? [])
@@ -186,13 +161,15 @@ function SportCalendar({
               Schedule could not be loaded.
             </div>
           ) : (
-            <SportTrainingsCalendarList
-              rows={filteredSchedule}
-              emptyText="No trainings match the selected filters."
-              studentId={studentId}
-              trainerGroupIds={trainerGroupIds}
-              onSelect={setSelected}
-            />
+            <Suspense fallback={<div className="skeleton h-96 w-full" />}>
+              <SportTrainingsCalendarList
+                rows={filteredSchedule}
+                emptyText="No trainings match the selected filters."
+                studentId={studentId}
+                trainerGroupIds={trainerGroupIds}
+                onSelect={setSelected}
+              />
+            </Suspense>
           )}
         </div>
       </div>

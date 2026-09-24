@@ -1,12 +1,12 @@
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import { SportFaqPage } from "@/components/sport/SportFaqPage.tsx";
 import { SportPageShell } from "@/components/sport/SportPageShell.tsx";
+import { SportProfilePage } from "@/components/sport/SportProfilePage.tsx";
 import { SportTabs } from "@/components/sport/SportTabs.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_with_menu/sport/faq")({
+export const Route = createFileRoute("/_with_menu/sport/profile")({
   component: RouteComponent,
 });
 
@@ -14,10 +14,10 @@ function RouteComponent() {
   return (
     <>
       <Helmet>
-        <title>Sport FAQ</title>
+        <title>Sport profile</title>
         <meta
           name="description"
-          content="Frequently asked questions about sport at Innopolis University."
+          content="View your sport profile and submit medical references."
         />
       </Helmet>
 
@@ -25,7 +25,7 @@ function RouteComponent() {
       <SportTabs />
       <RequireAuth>
         <SportPageShell>
-          <SportFaqPage />
+          <SportProfilePage />
         </SportPageShell>
       </RequireAuth>
     </>

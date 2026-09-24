@@ -1,6 +1,6 @@
 import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
-import type { QueryClient } from "@tanstack/react-query";
+import { queryClient } from "@/app/query-client.ts";
 
 export const SPORT_TRAINING_STATUS_COLORS = {
   trainer: "#F1C40F",
@@ -9,10 +9,7 @@ export const SPORT_TRAINING_STATUS_COLORS = {
 } as const;
 
 /** Refresh schedule + hours summary after a check-in/check-out mutation. */
-export function invalidateSportCheckinQueries(
-  queryClient: QueryClient,
-  studentId: number,
-) {
+export function invalidateSportCheckinQueries(studentId: number) {
   queryClient.invalidateQueries({
     predicate: (q) =>
       Array.isArray(q.queryKey) &&

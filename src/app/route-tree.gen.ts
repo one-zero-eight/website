@@ -58,6 +58,7 @@ import { Route as With_menuTabletennisEventsRouteImport } from "./routes/_with_m
 import { Route as With_menuStudentAffairsSignOutRouteImport } from "./routes/_with_menu/student-affairs/sign-out";
 import { Route as With_menuStudentAffairsSignInRouteImport } from "./routes/_with_menu/student-affairs/sign-in";
 import { Route as With_menuSportTrainerRouteImport } from "./routes/_with_menu/sport/trainer";
+import { Route as With_menuSportProfileRouteImport } from "./routes/_with_menu/sport/profile";
 import { Route as With_menuSportHistoryRouteImport } from "./routes/_with_menu/sport/history";
 import { Route as With_menuSportFaqRouteImport } from "./routes/_with_menu/sport/faq";
 import { Route as With_menuSearchAskRouteImport } from "./routes/_with_menu/search/ask";
@@ -356,6 +357,11 @@ const With_menuSportTrainerRoute = With_menuSportTrainerRouteImport.update({
   path: "/sport/trainer",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
+const With_menuSportProfileRoute = With_menuSportProfileRouteImport.update({
+  id: "/sport/profile",
+  path: "/sport/profile",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuSportHistoryRoute = With_menuSportHistoryRouteImport.update({
   id: "/sport/history",
   path: "/sport/history",
@@ -611,6 +617,7 @@ export interface FileRoutesByFullPath {
   "/search/ask": typeof With_menuSearchAskRoute;
   "/sport/faq": typeof With_menuSportFaqRoute;
   "/sport/history": typeof With_menuSportHistoryRoute;
+  "/sport/profile": typeof With_menuSportProfileRoute;
   "/sport/trainer": typeof With_menuSportTrainerRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
@@ -697,6 +704,7 @@ export interface FileRoutesByTo {
   "/search/ask": typeof With_menuSearchAskRoute;
   "/sport/faq": typeof With_menuSportFaqRoute;
   "/sport/history": typeof With_menuSportHistoryRoute;
+  "/sport/profile": typeof With_menuSportProfileRoute;
   "/sport/trainer": typeof With_menuSportTrainerRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
@@ -787,6 +795,7 @@ export interface FileRoutesById {
   "/_with_menu/search/ask": typeof With_menuSearchAskRoute;
   "/_with_menu/sport/faq": typeof With_menuSportFaqRoute;
   "/_with_menu/sport/history": typeof With_menuSportHistoryRoute;
+  "/_with_menu/sport/profile": typeof With_menuSportProfileRoute;
   "/_with_menu/sport/trainer": typeof With_menuSportTrainerRoute;
   "/_with_menu/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/_with_menu/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
@@ -877,6 +886,7 @@ export interface FileRouteTypes {
     | "/search/ask"
     | "/sport/faq"
     | "/sport/history"
+    | "/sport/profile"
     | "/sport/trainer"
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
@@ -963,6 +973,7 @@ export interface FileRouteTypes {
     | "/search/ask"
     | "/sport/faq"
     | "/sport/history"
+    | "/sport/profile"
     | "/sport/trainer"
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
@@ -1052,6 +1063,7 @@ export interface FileRouteTypes {
     | "/_with_menu/search/ask"
     | "/_with_menu/sport/faq"
     | "/_with_menu/sport/history"
+    | "/_with_menu/sport/profile"
     | "/_with_menu/sport/trainer"
     | "/_with_menu/student-affairs/sign-in"
     | "/_with_menu/student-affairs/sign-out"
@@ -1451,6 +1463,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuSportTrainerRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/sport/profile": {
+      id: "/_with_menu/sport/profile";
+      path: "/sport/profile";
+      fullPath: "/sport/profile";
+      preLoaderRoute: typeof With_menuSportProfileRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/sport/history": {
       id: "/_with_menu/sport/history";
       path: "/sport/history";
@@ -1755,6 +1774,7 @@ interface With_menuRouteRouteChildren {
   With_menuSearchAskRoute: typeof With_menuSearchAskRoute;
   With_menuSportFaqRoute: typeof With_menuSportFaqRoute;
   With_menuSportHistoryRoute: typeof With_menuSportHistoryRoute;
+  With_menuSportProfileRoute: typeof With_menuSportProfileRoute;
   With_menuSportTrainerRoute: typeof With_menuSportTrainerRoute;
   With_menuStudentAffairsSignInRoute: typeof With_menuStudentAffairsSignInRoute;
   With_menuStudentAffairsSignOutRoute: typeof With_menuStudentAffairsSignOutRoute;
@@ -1830,6 +1850,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuSearchAskRoute: With_menuSearchAskRoute,
   With_menuSportFaqRoute: With_menuSportFaqRoute,
   With_menuSportHistoryRoute: With_menuSportHistoryRoute,
+  With_menuSportProfileRoute: With_menuSportProfileRoute,
   With_menuSportTrainerRoute: With_menuSportTrainerRoute,
   With_menuStudentAffairsSignInRoute: With_menuStudentAffairsSignInRoute,
   With_menuStudentAffairsSignOutRoute: With_menuStudentAffairsSignOutRoute,

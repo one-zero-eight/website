@@ -8,7 +8,6 @@ import { SportTrainingModalShell } from "@/components/sport/SportTrainingModalSh
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
 import { formatTimeRangeMoscow } from "@/components/sport/sport-week-utils.ts";
 import { useToast } from "@/components/toast";
-import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 
 export function SportStudentTrainingModal({
@@ -24,7 +23,6 @@ export function SportStudentTrainingModal({
   studentId: number;
   trainerGroupIds: ReadonlySet<number>;
 }) {
-  const queryClient = useQueryClient();
   const { showError, showSuccess } = useToast();
 
   const { mutate: setCheckin, isPending } = $sport.useMutation(
@@ -32,7 +30,7 @@ export function SportStudentTrainingModal({
     "/trainings/{training_id}/checkin",
     {
       onSettled: () => {
-        invalidateSportCheckinQueries(queryClient, studentId);
+        invalidateSportCheckinQueries(studentId);
       },
       onSuccess: (_, vars) => {
         const checkin = vars.params.query.checkin;

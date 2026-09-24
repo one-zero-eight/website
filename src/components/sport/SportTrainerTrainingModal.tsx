@@ -16,7 +16,6 @@ import {
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
-import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type TrainerModalView = "main" | "attendees";
@@ -123,7 +122,6 @@ function SportTrainerTrainingModalAttendees({
   trainingId: number;
   groupId: number;
 }) {
-  const queryClient = useQueryClient();
   const { showError, showSuccess, showWarning } = useToast();
   const [hoursFilter, setHoursFilter] = useState<Set<HoursFilter>>(
     () => new Set(ALL_HOURS_FILTERS),
@@ -165,7 +163,7 @@ function SportTrainerTrainingModalAttendees({
     {
       onSuccess: (data) => {
         handleAttendanceResponse(data, showSuccess, showWarning);
-        invalidateAttendance(queryClient, trainingId);
+        invalidateAttendance(trainingId);
       },
       onError: () => {
         showError("Could not update attendance", "Please try again.");
@@ -375,7 +373,6 @@ export function SportTrainerStudentAddField({
   trainingId: number;
   groupId: number;
 }) {
-  const queryClient = useQueryClient();
   const { showError, showSuccess, showWarning } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -420,7 +417,7 @@ export function SportTrainerStudentAddField({
     {
       onSuccess: (data) => {
         handleAttendanceResponse(data, showSuccess, showWarning);
-        invalidateAttendance(queryClient, trainingId);
+        invalidateAttendance(trainingId);
         setSelectedStudent(null);
         setSearchTerm("");
         setSuggestionsOpen(false);

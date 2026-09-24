@@ -1,14 +1,10 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $sport } from "@/api/sport";
-import { useMySportAccessToken } from "@/api/helpers/sport-access-token.ts";
 import { useMemo } from "react";
 
-/** Shared sport profile/token state used by the sport tabs and every sport page. */
+/** Shared sport profile state used by the sport tabs and every sport page. */
 export function useSportProfile() {
   const { me } = useMe();
-  const [sportToken] = useMySportAccessToken();
-  const canQuerySport = !!me && !!sportToken;
-
   const {
     data: profile,
     isPending: profilePending,
@@ -19,7 +15,7 @@ export function useSportProfile() {
     "/users/me",
     {},
     {
-      enabled: canQuerySport,
+      enabled: !!me,
       retry: 1,
     },
   );
@@ -35,8 +31,6 @@ export function useSportProfile() {
   );
 
   return {
-    sportToken,
-    canQuerySport,
     profile,
     profilePending,
     profileError,

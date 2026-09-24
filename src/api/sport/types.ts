@@ -886,6 +886,12 @@ export interface components {
       session: components["schemas"]["FitnessTestSessionSchema"];
       /** Exercise Results */
       exercise_results: components["schemas"]["FitnessTestExerciseResultSchema"][];
+      /** Total Score */
+      total_score: number;
+      /** Max Score */
+      max_score: number;
+      /** Passed */
+      passed: boolean;
     };
     /** FitnessTestUpdateEntrySchema */
     FitnessTestUpdateEntrySchema: {
@@ -1047,10 +1053,16 @@ export interface components {
       semester_id: number;
       /** Semester Name */
       semester_name: string;
-      /** Semester Start */
-      semester_start: unknown;
-      /** Semester End */
-      semester_end: unknown;
+      /**
+       * Semester Start
+       * Format: date
+       */
+      semester_start: string;
+      /**
+       * Semester End
+       * Format: date
+       */
+      semester_end: string;
       /** Required Hours */
       required_hours: number;
       /** Total Hours */
@@ -1058,9 +1070,7 @@ export interface components {
       /** Trainings */
       trainings: components["schemas"]["TrainingHistorySchema"][];
       /** Fitness Tests */
-      fitness_tests?:
-        | components["schemas"]["FitnessTestStudentSessionResultSchema"][]
-        | null;
+      fitness_tests: components["schemas"]["FitnessTestStudentSessionResultSchema"][];
     };
     /** SemesterSchema */
     SemesterSchema: {
@@ -1119,12 +1129,12 @@ export interface components {
     };
     /** StudentInfoSchema */
     StudentInfoSchema: {
-      /** Is College */
-      is_college: boolean;
       /** Student Status */
       student_status: string;
       /** Medical Group */
       medical_group: string;
+      /** Is College */
+      is_college: boolean;
     };
     /** StudentStatusSchema */
     StudentStatusSchema: {

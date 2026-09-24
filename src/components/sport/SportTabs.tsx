@@ -12,14 +12,15 @@ export function SportTabs() {
     <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
       <TabLink to="/sport">Calendar</TabLink>
       <TabLink to="/sport/history">History</TabLink>
+      <TabLink to="/sport/profile">Profile</TabLink>
       {isTrainer ? <TabLink to="/sport/trainer">Trainer</TabLink> : null}
+      <TabLink to="/sport/faq">FAQ</TabLink>
       <ExternalTabLink href={SPORT_BOT_URL}>
         <span className="inline-flex items-center gap-1">
           <span className="icon-[ic--baseline-telegram] text-base" />
           Bot
         </span>
       </ExternalTabLink>
-      <TabLink to="/sport/faq">FAQ</TabLink>
       {isAdmin ? (
         <ExternalTabLink href={SPORT_ADMIN_URL}>Admin</ExternalTabLink>
       ) : null}

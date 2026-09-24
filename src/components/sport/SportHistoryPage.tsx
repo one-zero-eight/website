@@ -2,42 +2,27 @@ import { $sport } from "@/api/sport";
 import type {
   SchemaFitnessTestStudentSessionResultSchema,
   SchemaSemesterHistorySchema,
-  SchemaTrainingHistorySchema,
 } from "@/api/sport/types.ts";
-import { SportPageShell } from "@/components/sport/SportPageShell.tsx";
+import { useSportProfile } from "@/components/sport/sport-profile.ts";
+import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
+import { cn } from "@/lib/ui/cn";
 
 export function SportHistoryPage() {
-  return (
-    <SportPageShell>
-      {(sport) =>
-        sport.studentId != null ? (
-          <SportHistoryContent
-            enabled={sport.canQuerySport}
-            studentId={sport.studentId}
-          />
-        ) : null
-      }
-    </SportPageShell>
-  );
+  const { studentId } = useSportProfile();
+
+  if (studentId == null) return null;
+
+  return <SportHistoryContent studentId={studentId} />;
 }
 
-function SportHistoryContent({
-  enabled,
-  studentId,
-}: {
-  enabled: boolean;
-  studentId: number;
-}) {
+function SportHistoryContent({ studentId }: { studentId: number }) {
   const {
     data: semesters,
     isPending,
     isError,
-  } = $sport.useQuery(
-    "get",
-    "/students/{student_id}/semester-history",
-    { params: { path: { student_id: studentId } } },
-    { enabled },
-  );
+  } = $sport.useQuery("get", "/students/{student_id}/semester-history", {
+    params: { path: { student_id: studentId } },
+  });
 
   if (isError) {
     return (
@@ -89,7 +74,6 @@ function SportHistorySemesterCard({
   semester: SchemaSemesterHistorySchema;
 }) {
   const { required_hours: required, total_hours: earned } = semester;
-  const earnedPct = required > 0 ? Math.min(100, (earned / required) * 100) : 0;
   const dateRange = formatSemesterDateRange(
     semester.semester_start,
     semester.semester_end,
@@ -119,40 +103,35 @@ function SportHistorySemesterCard({
           </span>
         </p>
 
-        {required > 0 ? (
-          <div className="bg-base-300 h-3 w-full overflow-hidden rounded-lg">
-            <div
-              className="bg-info h-full"
-              style={{ width: `${earnedPct}%` }}
-            />
-          </div>
-        ) : null}
-
-        {trainings.length > 0 ? (
+        {trainings.length === 0 ? (
+          <p className="text-base-content/70 mt-1 text-sm font-medium">
+            0 trainings
+          </p>
+        ) : (
           <details className="mt-1">
             <summary className="text-base-content/70 cursor-pointer text-sm font-medium">
               {trainings.length} training{trainings.length === 1 ? "" : "s"}
             </summary>
-            <ul className="mt-2 flex flex-col gap-1">
+            <ul className="bg-base-200/50 rounded-box mt-2 p-3">
               {trainings.map((training) => (
                 <li
                   key={training.training_id}
-                  className="border-base-300 flex flex-wrap items-center justify-between gap-2 border-t py-1 text-sm"
+                  className="border-base-300/60 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t py-1 text-sm first:border-t-0"
                 >
                   <span>
-                    {training.date} {training.time}{" "}
-                    <span className="text-base-content/60">
-                      {trainingHistoryLabel(training)}
+                    <span className="font-medium">
+                      {training.date} {training.time}
+                    </span>{" "}
+                    <span className="text-base-content/70">
+                      {sportTrainingTitle({ training })}
                     </span>
                   </span>
-                  <span className="text-base-content/70 font-medium">
-                    {training.hours}h
-                  </span>
+                  <span className="font-medium">{training.hours}h</span>
                 </li>
               ))}
             </ul>
           </details>
-        ) : null}
+        )}
 
         {fitnessTests.length > 0 ? (
           <details className="mt-1">
@@ -179,7 +158,13 @@ function FitnessTestResultCard({
 }: {
   fitnessTest: SchemaFitnessTestStudentSessionResultSchema;
 }) {
-  const { session, exercise_results: exerciseResults } = fitnessTest;
+  const {
+    session,
+    exercise_results: exerciseResults,
+    total_score: totalScore,
+    max_score: maxScore,
+    passed,
+  } = fitnessTest;
   const date = toDateSafe(session.date);
 
   return (
@@ -198,7 +183,17 @@ function FitnessTestResultCard({
           {session.retake ? (
             <span className="badge badge-warning badge-sm">Retake</span>
           ) : null}
-          <span className="text-base-content/60">{session.teacher}</span>
+          <span
+            className={cn(
+              "badge badge-sm",
+              passed ? "badge-success" : "badge-error",
+            )}
+          >
+            {passed ? "Pass" : "Fail"}
+          </span>
+          <span className="font-semibold">
+            {totalScore} / {maxScore} points
+          </span>
         </div>
       </div>
       {exerciseResults.length > 0 ? (
@@ -211,25 +206,19 @@ function FitnessTestResultCard({
               <span className="text-base-content/80">
                 {result.exercise_name}
               </span>
-              <span className="text-base-content font-medium">
-                {result.value}
-                {result.unit ? ` ${result.unit}` : ""}
+              <span className="flex flex-wrap items-center gap-x-3 text-right">
+                <span className="text-base-content font-medium">
+                  {result.display_value}
+                </span>
+                <span className="text-base-content/70">
+                  {result.score} / {result.max_score} points
+                </span>
               </span>
             </li>
           ))}
         </ul>
       ) : null}
     </li>
-  );
-}
-
-function trainingHistoryLabel(training: SchemaTrainingHistorySchema): string {
-  return (
-    training.custom_name ||
-    training.group_name ||
-    training.sport_name ||
-    training.training_class ||
-    "Training"
   );
 }
 
