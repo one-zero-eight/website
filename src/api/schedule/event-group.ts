@@ -1,7 +1,7 @@
 import { $schedule, scheduleTypes } from "@/api/schedule/index.ts";
 import { useQueryClient } from "@tanstack/react-query";
 
-export function useEventGroup(group_id: number) {
+export function useEventGroup(groupAlias: string) {
   const queryClient = useQueryClient();
   const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
   const { data: predefined } = $schedule.useQuery(
@@ -24,7 +24,7 @@ export function useEventGroup(group_id: number) {
             ...oldData,
             favorite_event_groups: [
               ...(oldData.favorite_event_groups ?? []),
-              params.query.group_id,
+              params.query.group_alias,
             ],
           };
         },
@@ -41,7 +41,7 @@ export function useEventGroup(group_id: number) {
           return {
             ...prev,
             favorite_event_groups: prev.favorite_event_groups?.filter(
-              (v) => v !== params.query.group_id,
+              (v) => v !== params.query.group_alias,
             ),
           };
         },
@@ -60,14 +60,14 @@ export function useEventGroup(group_id: number) {
               ...prev,
               hidden_event_groups: [
                 ...(prev.hidden_event_groups ?? []),
-                params.query.group_id,
+                params.query.group_alias,
               ],
             };
           } else {
             return {
               ...prev,
               hidden_event_groups: prev.hidden_event_groups?.filter(
-                (v) => v !== params.query.group_id,
+                (v) => v !== params.query.group_alias,
               ),
             };
           }
@@ -77,19 +77,20 @@ export function useEventGroup(group_id: number) {
     onSettled,
   });
 
-  const isFavorite = scheduleUser?.favorite_event_groups?.includes(group_id);
-  const isPredefined = predefined?.event_groups?.includes(group_id) ?? false;
+  const isFavorite =
+    scheduleUser?.favorite_event_groups?.includes(groupAlias) ?? false;
+  const isPredefined = predefined?.event_groups?.includes(groupAlias) ?? false;
   const isHidden =
-    scheduleUser?.hidden_event_groups?.includes(group_id) ?? false;
+    scheduleUser?.hidden_event_groups?.includes(groupAlias) ?? false;
 
   const addToFavorites = () => {
     if (isPredefined) return;
-    add.mutate({ params: { query: { group_id } } });
+    add.mutate({ params: { query: { group_alias: groupAlias } } });
   };
 
   const removeFromFavorites = () => {
     if (isPredefined) return;
-    remove.mutate({ params: { query: { group_id } } });
+    remove.mutate({ params: { query: { group_alias: groupAlias } } });
   };
 
   const switchFavorite = () => {
@@ -101,11 +102,15 @@ export function useEventGroup(group_id: number) {
   };
 
   const hideFavorite = () => {
-    hide.mutate({ params: { query: { group_id, hide: true } } });
+    hide.mutate({
+      params: { query: { group_alias: groupAlias, hide: true } },
+    });
   };
 
   const unhideFavorite = () => {
-    hide.mutate({ params: { query: { group_id, hide: false } } });
+    hide.mutate({
+      params: { query: { group_alias: groupAlias, hide: false } },
+    });
   };
 
   const switchHideFavorite = () => {
@@ -117,7 +122,7 @@ export function useEventGroup(group_id: number) {
   };
 
   return {
-    group_id,
+    groupAlias,
     isHidden,
     isFavorite,
     isPredefined,

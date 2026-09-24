@@ -24,6 +24,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/me/preferences": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update My Preferences
+     * @description Partially update current user's preferences.
+     */
+    patch: operations["update_my_preferences_users_me_preferences_patch"];
+    trace?: never;
+  };
   "/users/me/avatar.jpg": {
     parameters: {
       query?: never;
@@ -57,6 +77,23 @@ export interface paths {
      * @description Suggest user on typing, for example when invite to event.
      */
     get: operations["get_hint_on_type_users_suggest_user_on_typing_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/bulk-export-for-my-uni": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Bulk Export For My Uni */
+    get: operations["bulk_export_for_my_uni_users_bulk_export_for_my_uni_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -319,7 +356,10 @@ export interface paths {
     };
     /**
      * Generate Service Token
-     * @description Generate access token for access users-related endpoints (/users/*), expires in 90 days
+     * @description Generate access token for access users-related endpoints (/users/*).
+     *
+     *     By default expires on the nearest 14 August if that is more than a month away,
+     *     otherwise on the next 14 August (so yearly tokens rotate on the same date).
      */
     get: operations["generate_service_token_tokens_generate_service_token_get"];
     put?: never;
@@ -400,7 +440,8 @@ export interface paths {
     };
     /**
      * Generate Token
-     * @description Generate arbitrary access token with some sub in `sub` field (f.e. parser), expires in 90 days, only for admins
+     * @description Generate arbitrary access token with some sub in `sub` field (f.e. parser), only for admins.
+     *     Expiration follows the same policy as generate-service-token (default: auto → Aug 14).
      */
     get: operations["generate_token_tokens_generate_access_token_get"];
     put?: never;
@@ -471,6 +512,15 @@ export interface components {
      * @enum {string}
      */
     AvailableScopes: AvailableScopes;
+    /** BulkExportUser */
+    BulkExportUser: {
+      /** Email */
+      email?: string | null;
+      /** Telegram Id */
+      telegram_id?: number | null;
+      /** Telegram Alias */
+      telegram_alias?: string | null;
+    };
     /** DeviceFlowContainer */
     DeviceFlowContainer: {
       /**
@@ -519,6 +569,11 @@ export interface components {
     };
     /** @example 5eb7cf5a86d9755df3a6c593 */
     PydanticObjectId: string;
+    /**
+     * ServiceTokenExpiration
+     * @enum {string}
+     */
+    ServiceTokenExpiration: ServiceTokenExpiration;
     /** StartDeviceFlowResponse */
     StartDeviceFlowResponse: {
       /** Code */
@@ -590,6 +645,13 @@ export interface components {
       /** Access Token */
       access_token: string;
     };
+    /** UpdateUserPreferences */
+    UpdateUserPreferences: {
+      /** Dorm Building */
+      dorm_building?: number | null;
+      /** Dorm Floor */
+      dorm_floor?: number | null;
+    };
     /** UserInfoFromSSO */
     UserInfoFromSSO: {
       /** Email */
@@ -622,6 +684,13 @@ export interface components {
       /** Group */
       group?: string | null;
     };
+    /** UserPreferences */
+    UserPreferences: {
+      /** Dorm Building */
+      dorm_building?: number | null;
+      /** Dorm Floor */
+      dorm_floor?: number | null;
+    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -646,6 +715,7 @@ export interface components {
        * @default false
        */
       innohassle_admin: boolean;
+      preferences?: components["schemas"]["UserPreferences"];
       /**
        * @deprecated
        * @description Deprecated field, use `innopolis_info` instead, dont trust data from `innopolis_sso`
@@ -664,6 +734,7 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaBulkExportUser = components["schemas"]["BulkExportUser"];
 export type SchemaDeviceFlowContainer =
   components["schemas"]["DeviceFlowContainer"];
 export type SchemaHttpValidationError =
@@ -680,7 +751,10 @@ export type SchemaTelegramUpdateData =
 export type SchemaTelegramWidgetData =
   components["schemas"]["TelegramWidgetData"];
 export type SchemaTokenData = components["schemas"]["TokenData"];
+export type SchemaUpdateUserPreferences =
+  components["schemas"]["UpdateUserPreferences"];
 export type SchemaUserInfoFromSso = components["schemas"]["UserInfoFromSSO"];
+export type SchemaUserPreferences = components["schemas"]["UserPreferences"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type SchemaViewUser = components["schemas"]["ViewUser"];
 export type $defs = Record<string, never>;
@@ -709,6 +783,46 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  update_my_preferences_users_me_preferences_patch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateUserPreferences"];
+      };
+    };
+    responses: {
+      /** @description Updated current user info */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ViewUser"];
+        };
+      };
+      /** @description User does not have a session cookie or `uid` in the session */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
       };
     };
   };
@@ -782,6 +896,40 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+    };
+  };
+  bulk_export_for_my_uni_users_bulk_export_for_my_uni_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description All users for My Uni */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BulkExportUser"][];
+        };
+      };
+      /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not enough permissions */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -1306,6 +1454,8 @@ export interface operations {
         scopes?: components["schemas"]["AvailableScopes"][];
         /** @description Generate token only for current user - other users will be marked as not existing in the system */
         only_for_me?: boolean;
+        /** @description Token expiration policy. `auto` (default): nearest 14 August if more than a month away, otherwise next 14 August. `nearest-14-august` / `next-14-august`: fixed Aug 14 targets. `in-3-month`: expire in 90 days. */
+        expiration?: components["schemas"]["ServiceTokenExpiration"];
       };
       header?: never;
       path?: never;
@@ -1473,6 +1623,8 @@ export interface operations {
         sub: string;
         /** @description Space delimited list of scopes */
         scope?: string | null;
+        /** @description Token expiration policy (same as generate-service-token) */
+        expiration?: components["schemas"]["ServiceTokenExpiration"];
       };
       header?: never;
       path?: never;
@@ -1632,4 +1784,10 @@ export interface operations {
 export enum AvailableScopes {
   users = "users",
   sport = "sport",
+}
+export enum ServiceTokenExpiration {
+  auto = "auto",
+  nearest_14_august = "nearest-14-august",
+  next_14_august = "next-14-august",
+  in_3_month = "in-3-month",
 }

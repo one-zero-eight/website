@@ -113,10 +113,13 @@ export function MusicRoomPage() {
           },
         ]}
         initialView="timeGridWeek"
-        viewId="music-room"
+        viewStorageId="music-room"
       />
       <ExportModal
-        eventGroupOrTarget={TargetForExport.music_room}
+        target={{
+          type: "personal",
+          target: TargetForExport.music_room,
+        }}
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
       />

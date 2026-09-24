@@ -3,6 +3,11 @@ import {
   PrintingOptionsSidesAnyOf0,
 } from "@/api/printers/types.ts";
 
+export function formatFileSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
 function calcNumberOfPagesInRanges(ranges: string, until: number) {
   let count = 0;
   for (const elem of ranges.split(","))

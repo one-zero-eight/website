@@ -92,7 +92,7 @@ const courseComponentsRootSchema = {
             },
           ],
         },
-        occurrences: {
+        dates_pattern: {
           anyOf: [
             { type: "null" },
             {
@@ -131,7 +131,7 @@ const courseComponentsRootSchema = {
             ],
           },
         },
-        student_groups: {
+        audience: {
           type: "array",
           items: { type: "string" },
           default: [],
@@ -199,7 +199,7 @@ function pushUnknownStudentGroupWarnings(
   for (let i = 0; i < data.length; i++) {
     const comp = data[i] as Record<string, unknown> | null;
     if (!comp || typeof comp !== "object") continue;
-    const sgs = comp.student_groups;
+    const sgs = comp.audience;
     if (!Array.isArray(sgs)) continue;
     for (let j = 0; j < sgs.length; j++) {
       const raw = sgs[j];
@@ -208,7 +208,7 @@ function pushUnknownStudentGroupWarnings(
       if (!token || isProgramSelectorToken(token)) continue;
       if (knownGroupIds.has(token)) continue;
 
-      const got = yDoc.getIn([i, "student_groups", j], true);
+      const got = yDoc.getIn([i, "audience", j], true);
       const node = got as Node | undefined;
       const rng = rangeFromNode(node, docLen);
       const from = rng?.from ?? 0;

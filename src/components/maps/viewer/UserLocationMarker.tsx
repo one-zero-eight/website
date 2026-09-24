@@ -1,0 +1,77 @@
+/**
+ * "You are here" marker, drawn in the map SVG's user-space so it pans and zooms
+ * together with the floor plan. Rendered into an overlay <svg> that shares the
+ * map's viewBox (see MapViewer).
+ */
+export function UserLocationMarker({
+  x,
+  y,
+  heading,
+}: {
+  x: number;
+  y: number;
+  heading: number | null;
+}) {
+  return (
+    <g
+      pointerEvents="none"
+      style={{
+        transform: `translate(${x}px, ${y}px)`,
+        transition: "transform 0.6s ease-out",
+      }}
+    >
+      {/* Icon shapes counter-scaled against map zoom so they stay a sensible
+          screen size instead of growing huge as the user zooms in. */}
+      <g
+        style={{
+          transform: "scale(clamp(0.4, calc(1 / var(--map-zoom, 1)), 1.2))",
+          transition: "transform 0.15s ease-out",
+        }}
+      >
+        {/* Expanding pulse */}
+        <circle cx={0} cy={0} r={26} className="fill-primary" fillOpacity={0.4}>
+          <animate
+            attributeName="r"
+            values="20;70"
+            dur="1.8s"
+            repeatCount="indefinite"
+          />
+          <animate
+            attributeName="fill-opacity"
+            values="0.4;0"
+            dur="1.8s"
+            repeatCount="indefinite"
+          />
+        </circle>
+
+        {/* Solid dot with a light outline for contrast on any background.
+            Already inside the counter-scaled group above, so its stroke
+            stays a constant screen width without needing vector-effect. */}
+        <circle
+          cx={0}
+          cy={0}
+          r={34}
+          className="fill-base-100"
+          stroke="white"
+          strokeWidth={3}
+        />
+        <circle cx={0} cy={0} r={22} className="fill-primary" />
+
+        {heading != null && (
+          <path
+            d="M 0 -62 L -16 -30 L 16 -30 Z"
+            className="fill-primary"
+            style={{
+              // Drawn in map space, so it rides the camera's rotation: at
+              // bearing B a real-world heading H correctly lands at H + B on
+              // screen. Counter-rotating by the bearing here would cancel that
+              // out and pin the arrow to screen-up instead.
+              transform: `rotate(${heading}deg)`,
+              transition: "transform 0.6s ease-out",
+            }}
+          />
+        )}
+      </g>
+    </g>
+  );
+}

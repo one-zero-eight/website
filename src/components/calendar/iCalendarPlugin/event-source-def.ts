@@ -1,5 +1,7 @@
 /* eslint-disable */
 // @ts-nocheck
+import { getMyAccessToken } from "@/api/helpers/access-token.ts";
+import { SCHEDULE_API_URL } from "@/api/schedule/links.ts";
 import { EventInput } from "@fullcalendar/core";
 import {
   addDays,
@@ -7,6 +9,7 @@ import {
   EventSourceDef,
 } from "@fullcalendar/core/internal";
 import ICAL from "ical.js";
+import { colorForSubject } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { IcalExpander } from "./ical-expander/IcalExpander";
 
 interface ICalFeedMeta {
@@ -17,6 +20,7 @@ interface ICalFeedMeta {
   sourceLink?: string;
   updatedAt?: string;
   eventGroup?: any;
+  excludeEnglish?: boolean;
 }
 
 interface InternalState {
@@ -34,6 +38,7 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
         sourceLink: refined.extraParams?.sourceLink,
         updatedAt: refined.extraParams?.updatedAt,
         eventGroup: refined.extraParams?.eventGroup,
+        excludeEnglish: refined.extraParams?.excludeEnglish,
       };
     }
     return null;
@@ -48,26 +53,43 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
     but we couldn't leverage built-in allDay-guessing, among other things.
     */
     if (!internalState || arg.isRefetch) {
+      const url =
+        meta.url.startsWith(SCHEDULE_API_URL) ||
+        meta.url.startsWith("https://api.innohassle.ru")
+          ? meta.url
+          : `${SCHEDULE_API_URL}/me/check-calendar-url-to-link?${new URLSearchParams(
+              { calendar_url: meta.url },
+            )}`;
+
       internalState = meta.internalState = {
         response: null,
-        iCalExpanderPromise: fetch(meta.url, {
+        iCalExpanderPromise: fetch(url, {
           method: "GET",
-          headers:
-            localStorage.getItem("accessToken") &&
-            localStorage.getItem("accessToken").length > 5
-              ? {
-                  Authorization:
-                    "Bearer " +
-                    localStorage.getItem("accessToken")?.slice(1, -1),
-                }
-              : undefined,
+          headers: getMyAccessToken()
+            ? { Authorization: `Bearer ${getMyAccessToken()}` }
+            : undefined,
         }).then((response) => {
+          if (!response.ok) {
+            throw new Error(
+              `Calendar feed "${meta.url}" responded with HTTP ${response.status}`,
+            );
+          }
           return response.text().then((icsText) => {
             internalState.response = response;
-            return new IcalExpander({
-              ics: icsText,
-              skipInvalidDates: true,
-            });
+            try {
+              return new IcalExpander({
+                ics: icsText,
+                skipInvalidDates: true,
+              });
+            } catch (error) {
+              // Non-ICS content (e.g. JSON error page) crashes ical.js with an
+              // obscure "designSet" TypeError; fail the source gracefully instead.
+              throw new Error(
+                `Invalid ICS from "${meta.url}": ${
+                  error instanceof Error ? error.message : String(error)
+                }`,
+              );
+            }
           });
         }),
       };
@@ -100,6 +122,7 @@ function expandICalEvents(
 
   // single events
   for (let iCalEvent of iCalRes.events) {
+    if (meta.excludeEnglish && isEnglishEvent(iCalEvent)) continue;
     expanded.push({
       ...buildNonDateProps(iCalEvent, meta, iCalExpander),
       start: iCalEvent.startDate.toString(),
@@ -113,6 +136,7 @@ function expandICalEvents(
   // recurring event instances
   for (let iCalOccurence of iCalRes.occurrences) {
     let iCalEvent = iCalOccurence.item;
+    if (meta.excludeEnglish && isEnglishEvent(iCalEvent)) continue;
     expanded.push({
       ...buildNonDateProps(iCalEvent, meta, iCalExpander),
       start: iCalOccurence.startDate.toString(),
@@ -126,16 +150,31 @@ function expandICalEvents(
   return expanded;
 }
 
+function isEnglishEvent(iCalEvent: ICAL.Event) {
+  const summary = String(iCalEvent.summary || "")
+    .trim()
+    .toLowerCase();
+  return ["english", "foreign language", "иностранный язык"].some((name) =>
+    summary.includes(name),
+  );
+}
+
 function buildNonDateProps(
   iCalEvent: ICAL.Event,
   meta: ICalFeedMeta,
   iCalExpander: IcalExpander,
 ): EventInput {
+  const scheduleAssistantColors = meta.eventGroup?.virtual
+    ? colorForSubject(courseNameFromSummary(iCalEvent.summary))
+    : null;
   return {
     id: iCalEvent.uid,
     title: iCalEvent.summary,
     url: extractEventUrl(iCalEvent),
-    color: iCalEvent.color || meta.color,
+    backgroundColor:
+      iCalEvent.color || scheduleAssistantColors?.bg || meta.color,
+    borderColor:
+      iCalEvent.color || scheduleAssistantColors?.border || meta.color,
     extendedProps: {
       location: iCalEvent.location,
       organizer: iCalEvent.organizer,
@@ -149,6 +188,10 @@ function buildNonDateProps(
       eventGroup: meta.eventGroup,
     },
   };
+}
+
+function courseNameFromSummary(summary: string) {
+  return String(summary || "").replace(/\s+\([^()]+\)\s*$/, "");
 }
 
 function extractEventUrl(iCalEvent: ICAL.Event): string {

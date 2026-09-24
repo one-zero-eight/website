@@ -5,7 +5,9 @@ import {
   calculateAcademicWeek,
   renderCalendarListEventContent,
 } from "@/components/calendar/calendar-list-view.tsx";
-import CalendarEventPopover from "@/components/calendar/CalendarEventPopover.tsx";
+import CalendarEventPopover, {
+  ScheduleDialogProps,
+} from "@/components/calendar/CalendarEventPopover.tsx";
 import { ConfigCalendarDialog } from "@/components/calendar/ConfigCalendarDialog.tsx";
 import { useMyAcademicCalendar } from "@/components/dashboard/academic-calendar.tsx";
 import {
@@ -22,12 +24,47 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { isSportCalendarEventId } from "@/components/sport/sport-calendar-events.ts";
 import { cn } from "@/lib/ui/cn";
+import {
+  autoUpdate,
+  flip,
+  FloatingPortal,
+  offset,
+  shift,
+  useClick,
+  useDismiss,
+  useFloating,
+  useInteractions,
+  useTransitionStyles,
+} from "@floating-ui/react";
 import moment from "moment/moment";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocalStorage } from "usehooks-ts";
+import {
+  ComponentType,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useLocalStorage, useMediaQuery } from "usehooks-ts";
 import iCalendarPlugin from "./iCalendarPlugin";
 import { WHEN2MEET_EVENT_ID_PREFIX } from "./when2meet-events.ts";
 import "./styles-calendar.css";
+
+export type CalendarView = {
+  id: string;
+  displayName: string;
+};
+
+export type CalendarCustomView = CalendarView & {
+  component: ComponentType<{ date: Date }>;
+};
+
+const defaultViews: CalendarView[] = [
+  { id: "timeGrid3", displayName: "3 days" },
+  { id: "timeGridWeek", displayName: "Week" },
+  { id: "dayGridMonth", displayName: "Month" },
+  { id: "listMonth", displayName: "List" },
+];
 
 export type URLType =
   | string
@@ -37,34 +74,75 @@ export type URLType =
       sourceLink?: string;
       updatedAt?: string;
       eventGroup?: scheduleTypes.SchemaViewEventGroup;
+      excludeEnglish?: boolean;
     };
 
 function toCalendarSpace(date: Date): Date {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
 }
 
-export default function CalendarViewer({
+const DEFAULT_VIEWS_IDS = defaultViews.map(({ id }) => id);
+const DEFAULT_CUSTOM_VIEWS: CalendarCustomView[] = [];
+const DEFAULT_EXTRA_EVENTS: EventInput[] = [];
+
+export function CalendarViewer({
   urls,
-  extraEvents = [],
+  extraEvents = DEFAULT_EXTRA_EVENTS,
   initialView = "listMonth",
-  viewId = "",
+  viewStorageId = "",
   isFullPage = false,
+  EventPopover = CalendarEventPopover,
+  views = DEFAULT_VIEWS_IDS,
+  customViews = DEFAULT_CUSTOM_VIEWS,
+  onEventSourceSuccess,
+  isHidden,
   sportEvents = [],
   onVisibleRangeChange,
 }: {
   urls: URLType[];
   extraEvents?: EventInput[];
   initialView?: string;
-  viewId?: string;
+  viewStorageId?: string;
   isFullPage?: boolean;
+  EventPopover?: ComponentType<ScheduleDialogProps>;
+  views?: string[];
+  customViews?: CalendarCustomView[];
+  onEventSourceSuccess?: (
+    eventsInput: EventInput[],
+    response?: Response,
+  ) => void;
+  isHidden?: boolean;
   sportEvents?: EventInput[];
   onVisibleRangeChange?: (range: { start: Date; end: Date }) => void;
 }) {
   const { academicCalendar } = useMyAcademicCalendar();
+  const isMobile = useMediaQuery("(max-width: 767px)");
   const academicCalendarRef = useRef(academicCalendar);
   useEffect(() => {
     academicCalendarRef.current = academicCalendar;
   }, [academicCalendar]);
+
+  const availableViews = useMemo(() => {
+    const builtInViews = new Map(
+      defaultViews.map((view) => [view.id, view] as const),
+    );
+
+    return [
+      ...views.flatMap((viewId) => {
+        const view = builtInViews.get(viewId);
+        return view ? [view] : [];
+      }),
+      ...customViews,
+    ];
+  }, [customViews, views]);
+  const availableViewIds = useMemo(
+    () => availableViews.map(({ id }) => id),
+    [availableViews],
+  );
+  const firstAvailableView = availableViewIds[0] ?? "dayGridMonth";
+  const fallbackInitialView = availableViewIds.includes(initialView)
+    ? initialView
+    : firstAvailableView;
 
   const [popoverInfo, setPopoverInfo] = useState({
     opened: false,
@@ -88,14 +166,56 @@ export default function CalendarViewer({
   );
 
   const [storedCalendarView, setStoredCalendarView] = useLocalStorage(
-    `calendar-view-${viewId}`,
-    initialView,
+    `calendar-view-${viewStorageId}`,
+    fallbackInitialView,
   );
-  const [calendarView, setCalendarView] = useState(storedCalendarView);
+  const builtInInitialView = defaultViews.some(
+    ({ id }) => id === storedCalendarView,
+  )
+    ? storedCalendarView
+    : "dayGridMonth";
+  const [calendarView, setCalendarView] = useState(
+    availableViewIds.includes(storedCalendarView)
+      ? storedCalendarView
+      : fallbackInitialView,
+  );
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const scrollToday = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+
+    const paddedMonth = String(month).padStart(2, "0");
+    const paddedDay = String(day).padStart(2, "0");
+    const dateStr = `${year}-${paddedMonth}-${paddedDay}`;
+    const dayEl = document.querySelector(`[data-date="${dateStr}"]`);
+
+    if (dayEl) {
+      dayEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   useEffect(() => {
+    if (!isLoading) {
+      scrollToday();
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (!availableViewIds.includes(calendarView)) {
+      setCalendarView(fallbackInitialView);
+      return;
+    }
     setStoredCalendarView(calendarView);
-  }, [calendarView, setStoredCalendarView]);
+    scrollToday();
+  }, [
+    availableViewIds,
+    calendarView,
+    fallbackInitialView,
+    setStoredCalendarView,
+  ]);
 
   const calendarRef = useRef<FullCalendar>(null);
   const visibleRangeKeyRef = useRef<string | null>(null);
@@ -110,7 +230,14 @@ export default function CalendarViewer({
       start: Date;
       end: Date;
     }) => {
-      setCalendarView(view.type);
+      // Bail out when the range didn't change: 'view.currentStart' is a fresh
+      // Date on every call, so without this comparison the component would
+      // re-render on each 'datesSet' (new props -> resetOptions -> datesSet).
+      setCurrentDate((prev) =>
+        prev.getTime() === view.currentStart.getTime()
+          ? prev
+          : view.currentStart,
+      );
 
       if (!onVisibleRangeChange) {
         return;
@@ -127,6 +254,21 @@ export default function CalendarViewer({
     [onVisibleRangeChange],
   );
 
+  const handleChangeView = (viewId: string) => {
+    if (viewId === calendarView) {
+      return;
+    }
+
+    if (defaultViews.some((view) => view.id === viewId)) {
+      calendarRef.current?.getApi().changeView(viewId);
+    }
+    setCalendarView(viewId);
+  };
+
+  const handlePrevious = () => calendarRef.current?.getApi().prev();
+  const handleNext = () => calendarRef.current?.getApi().next();
+  const handleToday = () => calendarRef.current?.getApi().today();
+
   const calendarComponent = useMemo(
     () => (
       <FullCalendar
@@ -136,7 +278,7 @@ export default function CalendarViewer({
           // Accumulate 'extendedProps.calendarURLs' to use it later.
           const unique: Record<string, EventApi> = {};
           for (const event of events) {
-            // Using 'id' instead of 'title' is a fix for Music romm
+            // Using 'id' instead of 'title' is a fix for Music room
             const uniqueId =
               (event.id || event.title) + event.startStr + event.endStr;
             if (!(uniqueId in unique)) {
@@ -195,6 +337,7 @@ export default function CalendarViewer({
 
           return input;
         }}
+        eventSourceSuccess={onEventSourceSuccess}
         progressiveEventRendering={true}
         timeZone="UTC+0" // Use the same timezone for everyone
         plugins={[
@@ -205,7 +348,7 @@ export default function CalendarViewer({
           interactionPlugin,
           iCalendarPlugin,
         ]}
-        initialView={calendarView} // Default view
+        initialView={builtInInitialView} // Default view
         eventTimeFormat={CALENDAR_LIST_EVENT_TIME_FORMAT}
         slotLabelFormat={{
           // Use 24-hour format
@@ -214,34 +357,12 @@ export default function CalendarViewer({
           meridiem: false,
           hour12: false,
         }}
-        headerToolbar={{
-          // Buttons in header
-          left: isFullPage
-            ? "prev,title,next today config"
-            : "prev,title,next today",
-          center: undefined,
-          right: "timeGrid3 timeGridWeek dayGridMonth listMonth",
-        }}
-        buttonText={{
-          today: "Today",
-          listMonth: "List",
-          timeGrid3: "3 days",
-          timeGridWeek: "Week",
-          dayGridMonth: "Month",
-        }}
-        customButtons={{
-          config: {
-            text: `${initialView === "listMonth" ? " " : "Config & Export"}`,
-            click() {
-              setSourcesDialogOpen(true);
-            },
-          },
-        }}
+        headerToolbar={false}
         titleFormat={(arg) => {
           if (arg.date.year === new Date().getFullYear()) {
             // Show only month if current year, show short month name if width is small
             return moment(arg.date).format(
-              initialView === "listMonth" ? "MMM" : "MMMM",
+              calendarView === "listMonth" ? "MMM" : "MMMM",
             );
           } else {
             // Show month and year otherwise
@@ -266,14 +387,14 @@ export default function CalendarViewer({
           timeGridWeek: {
             eventContent: renderEventTimeGridWeek,
             dayHeaderContent: renderDayHeader,
-            weekNumbers: true,
+            weekNumbers: !isMobile,
           },
           timeGrid3: {
             type: "timeGrid",
             dayCount: 3,
             eventContent: renderEventTimeGridWeek,
             dayHeaderContent: renderDayHeader,
-            weekNumbers: true,
+            weekNumbers: !isMobile,
           },
           dayGridMonth: {
             eventContent: renderEventDayGridMonth,
@@ -307,7 +428,7 @@ export default function CalendarViewer({
         }}
         firstDay={1} // From Monday
         navLinks={false} // Dates are clickable
-        weekNumbers={true} // Display numbers of weeks
+        weekNumbers={!isMobile} // Display numbers of weeks
         weekNumberFormat={{ week: "long" }} // Show "Week 1", not "W1"
         weekNumberClassNames="text-sm week-cell" // Small text size
         weekNumberCalculation={(d) =>
@@ -343,7 +464,8 @@ export default function CalendarViewer({
         loading={setIsLoading}
       />
     ),
-    [calendarView, handleDatesSet, initialView, isFullPage],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isFullPage, handleDatesSet, isMobile],
   );
 
   useEffect(() => {
@@ -386,6 +508,7 @@ export default function CalendarViewer({
                 sourceLink: url.sourceLink,
                 updatedAt: url.updatedAt,
                 eventGroup: url.eventGroup,
+                excludeEnglish: url.excludeEnglish,
               },
             },
       );
@@ -394,7 +517,12 @@ export default function CalendarViewer({
       for (const eventSource of eventSourcesPrev) {
         // Check if the source is in the list of sources to get
         const found = eventSourcesToGet.find(
-          (source) => source.url === eventSource.url,
+          (source) =>
+            source.url === eventSource.url &&
+            // @ts-expect-error internalEventSource is presented in eventSource
+            (source.color === eventSource.internalEventSource.meta.color ||
+              // @ts-expect-error internalEventSource is presented in eventSource
+              eventSource.internalEventSource.meta.color === "undefined"),
         );
         if (!found) {
           eventSource.remove();
@@ -405,7 +533,12 @@ export default function CalendarViewer({
       for (const eventSource of eventSourcesToGet) {
         // Check if the source is already in the calendar
         const found = eventSourcesPrev.find(
-          (source) => source.url === eventSource.url,
+          (source) =>
+            source.url === eventSource.url &&
+            // @ts-expect-error internalEventSource is presented in eventSource
+            (source.internalEventSource.meta.color === eventSource.color ||
+              // @ts-expect-error internalEventSource is presented in eventSource
+              source.internalEventSource.meta.color === "undefined"),
         );
         if (!found) {
           calendarApi.addEventSource(eventSource);
@@ -449,16 +582,98 @@ export default function CalendarViewer({
     });
   }, [extraEvents, isFullPage]);
 
+  const customViewIds = useMemo(
+    () => new Set(customViews.map(({ id }) => id)),
+    [customViews],
+  );
+  const isCustomView = customViewIds.has(calendarView);
+
   return (
     <div
       className={cn(
-        isFullPage ? "h-full overflow-clip" : "",
+        isFullPage ? "flex h-full flex-col overflow-clip" : "",
         isLoading && "calendar-loading",
+        isHidden && "hidden",
       )}
     >
-      {calendarComponent}
+      <div className="flex flex-none flex-nowrap items-center justify-between gap-2 overflow-x-auto px-4 pt-3 pb-4">
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            className="btn btn-sm rounded-xl"
+            onClick={handlePrevious}
+          >
+            <span className="icon-[material-symbols--chevron-left] text-xl" />
+          </button>
+          <h2 className="min-w-32 text-center text-base font-normal">
+            {moment(currentDate).format(
+              currentDate.getFullYear() === new Date().getFullYear()
+                ? calendarView === "listMonth"
+                  ? "MMM"
+                  : "MMMM"
+                : "MMMM YYYY",
+            )}
+          </h2>
+          <button
+            type="button"
+            className="btn btn-sm rounded-xl"
+            onClick={handleNext}
+          >
+            <span className="icon-[material-symbols--chevron-right] text-xl" />
+          </button>
+          <button
+            type="button"
+            className="btn btn-sm hidden rounded-xl sm:inline-flex"
+            onClick={handleToday}
+          >
+            Today
+          </button>
+        </div>
+        <div className="hidden shrink-0 items-center gap-2 sm:flex">
+          <div className="join hidden sm:flex">
+            {availableViews.map((view) => (
+              <button
+                key={view.id}
+                type="button"
+                className={cn(
+                  "btn btn-sm join-item",
+                  calendarView === view.id && "btn-active",
+                )}
+                onClick={() => handleChangeView(view.id)}
+              >
+                {view.displayName}
+              </button>
+            ))}
+          </div>
+          {isFullPage && (
+            <button
+              type="button"
+              className="btn btn-sm hidden rounded-xl sm:inline-flex"
+              onClick={() => setSourcesDialogOpen(true)}
+            >
+              <span className="icon-[material-symbols--settings-outline] text-xl" />
+              Config & Export
+            </button>
+          )}
+        </div>
+        <CalendarControlMenu
+          className="sm:hidden"
+          views={availableViews}
+          currentView={calendarView}
+          onSelectView={handleChangeView}
+          onToday={handleToday}
+          onConfigExport={() => setSourcesDialogOpen(true)}
+          showConfig={isFullPage}
+        />
+      </div>
+      <div className={cn("min-h-0 flex-1", isCustomView && "hidden")}>
+        {calendarComponent}
+      </div>
+      {customViews.map(({ id, component: CustomView }) =>
+        calendarView === id ? <CustomView key={id} date={currentDate} /> : null,
+      )}
       {popoverInfo.event && popoverInfo.eventElement && (
-        <CalendarEventPopover
+        <EventPopover
           event={popoverInfo.event}
           isOpen={popoverInfo.opened}
           setIsOpen={setIsOpenCallback}
@@ -470,6 +685,115 @@ export default function CalendarViewer({
         onOpenChange={setSourcesDialogOpen}
       />
     </div>
+  );
+}
+
+function CalendarControlMenu({
+  views,
+  currentView,
+  onSelectView,
+  onToday,
+  onConfigExport,
+  showConfig,
+  className,
+}: {
+  views: CalendarView[];
+  currentView: string;
+  onSelectView: (viewId: string) => void;
+  onToday: () => void;
+  onConfigExport?: () => void;
+  showConfig: boolean;
+  className?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { refs, floatingStyles, context } = useFloating({
+    open: isOpen,
+    onOpenChange: setIsOpen,
+    whileElementsMounted: autoUpdate,
+    strategy: "fixed",
+    middleware: [offset(8), flip(), shift({ padding: 8 })],
+  });
+
+  const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
+    duration: 50,
+  });
+  const click = useClick(context);
+  const dismiss = useDismiss(context);
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    click,
+    dismiss,
+  ]);
+
+  return (
+    <>
+      <button
+        ref={refs.setReference}
+        type="button"
+        className={cn("btn btn-sm shrink-0 rounded-xl", className)}
+        {...getReferenceProps()}
+      >
+        <span className="icon-[material-symbols--menu] text-xl" />
+      </button>
+
+      {isMounted && (
+        <FloatingPortal>
+          <div
+            ref={refs.setFloating}
+            style={{ ...floatingStyles, ...transitionStyles }}
+            {...getFloatingProps()}
+            className="bg-base-100 border-base-300 z-[100] flex w-48 flex-col gap-1 rounded-xl border p-1 pt-2 shadow-lg"
+          >
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost justify-start"
+              onClick={() => {
+                onToday();
+                setIsOpen(false);
+              }}
+            >
+              Go today
+            </button>
+
+            <div className="bg-base-300 my-1 h-px" />
+
+            {views.map((view) => (
+              <button
+                key={view.id}
+                type="button"
+                className={cn(
+                  "btn btn-sm btn-ghost justify-start",
+                  currentView === view.id && "btn-active",
+                )}
+                onClick={() => {
+                  onSelectView(view.id);
+                  setIsOpen(false);
+                }}
+              >
+                {view.displayName}
+              </button>
+            ))}
+
+            {showConfig && onConfigExport && (
+              <>
+                <div className="bg-base-300 my-1 h-px" />
+                <button
+                  type="button"
+                  className="btn btn-sm btn-ghost justify-start"
+                  onClick={() => {
+                    onConfigExport();
+                    setIsOpen(false);
+                  }}
+                >
+                  <span className="icon-[material-symbols--settings-outline] text-lg" />
+                  Config & Export
+                </button>
+              </>
+            )}
+          </div>
+        </FloatingPortal>
+      )}
+    </>
   );
 }
 
@@ -501,7 +825,7 @@ function renderEventTimeGridWeek({
       }}
     >
       <span
-        className="line-clamp-2 text-sm font-medium"
+        className="line-clamp-2 text-sm leading-tight font-medium"
         style={{
           color: `color-mix(in srgb, ${background} 60%, var(--color-base-content))`,
         }}

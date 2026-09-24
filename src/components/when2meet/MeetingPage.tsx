@@ -9,6 +9,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
+import { ArchiveMeetingButton } from "./ArchiveMeetingButton.tsx";
 import { MeetingMobileBar } from "./MeetingMobileBar.tsx";
 import { MeetingRoomModal } from "./MeetingRoomModal.tsx";
 import { useWhen2MeetPersonalCalendarOverlay } from "./useWhen2MeetPersonalCalendarOverlay.ts";
@@ -26,6 +27,12 @@ import {
 import { getCalendarConflictSlotKeys } from "./utils/calendar-overlay.ts";
 import { getIntersectionAtMinParticipants } from "./utils/best-slot.ts";
 import { formatMeetingTimeRange } from "./utils/meeting-time.ts";
+import {
+  getFutureMeetingSlotKeys,
+  isMeetingTimeInFuture,
+  isPastMeetingTimeError,
+  PAST_MEETING_TIME_MESSAGE,
+} from "./utils/meeting-time-selection.ts";
 import {
   getParticipantsWithExplicitSlot,
   getUserDisplaySlots,
@@ -59,7 +66,7 @@ export function MeetingPage({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { me } = useMe();
-  const { showSuccess, showError, showConfirm } = useToast();
+  const { showSuccess, showError, showWarning, showConfirm } = useToast();
   const [viewedUserIds, setViewedUserIds] = useState<Set<string> | null>(null);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [draftSlots, setDraftSlots] = useState<Set<string>>(new Set());
@@ -72,6 +79,8 @@ export function MeetingPage({
   >(new Set());
   const [pendingMeetingTime, setPendingMeetingTime] =
     useState<when2meetTypes.SchemaMeetingTime | null>(null);
+  const [meetingTimeNow, setMeetingTimeNow] = useState(() => Date.now());
+  const [isMeetingTimeRejected, setIsMeetingTimeRejected] = useState(false);
   const [roomModalOpen, setRoomModalOpen] = useState(false);
   const hasAutoStartedEditingRef = useRef(false);
   const hasInitializedSetupRef = useRef(false);
@@ -94,10 +103,13 @@ export function MeetingPage({
   });
 
   const isOwner = !!me?.id && event?.owner_id === me.id;
+  const isArchived = event?.is_archived === true;
   const currentUserId = me?.id;
 
   const needsSetup =
-    isOwner && (setupSlots === true || isPendingSetup(meetingId));
+    isOwner &&
+    !isArchived &&
+    (setupSlots === true || isPendingSetup(meetingId));
 
   const { mutate: saveParticipant, isPending: isSaving } =
     $when2meet.useMutation("put", "/meetings/{meeting_ref}/participants", {
@@ -153,7 +165,16 @@ export function MeetingPage({
       onSuccess: (updatedEvent) => {
         queryClient.setQueryData(meetingQueryKey, updatedEvent);
       },
-      onError: (updateError) => {
+      onError: (updateError, variables) => {
+        if (
+          variables.body?.selected_time &&
+          isPastMeetingTimeError(updateError)
+        ) {
+          setIsMeetingTimeRejected(true);
+          setMeetingTimeNow(Date.now());
+          handlePastMeetingTimeAttempt();
+          return;
+        }
         showError("Error", formatApiErrorMessage(updateError));
       },
     });
@@ -192,6 +213,39 @@ export function MeetingPage({
 
     return canvasSlots;
   }, [needsSetup, parsedSlots, canvasSlots]);
+
+  const futureMeetingSlots = useMemo(
+    () =>
+      isChoosingMeetingTime
+        ? getFutureMeetingSlotKeys(allowedSlots, meetingTimeNow)
+        : allowedSlots,
+    [allowedSlots, isChoosingMeetingTime, meetingTimeNow],
+  );
+
+  const hasPastMeetingTime =
+    !!pendingMeetingTime &&
+    (isMeetingTimeRejected ||
+      !isMeetingTimeInFuture(pendingMeetingTime, meetingTimeNow));
+
+  useEffect(() => {
+    if (!isChoosingMeetingTime) {
+      return;
+    }
+
+    function handleTimeRefresh() {
+      setMeetingTimeNow(Date.now());
+    }
+
+    const timer = window.setInterval(handleTimeRefresh, 1000);
+    window.addEventListener("focus", handleTimeRefresh);
+    document.addEventListener("visibilitychange", handleTimeRefresh);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", handleTimeRefresh);
+      document.removeEventListener("visibilitychange", handleTimeRefresh);
+    };
+  }, [isChoosingMeetingTime]);
 
   useEffect(() => {
     if (!needsSetup) {
@@ -253,7 +307,7 @@ export function MeetingPage({
 
   const selectedTimeLabel = formatMeetingTimeRange(event?.selected_time);
   const hasBookedRoom = !!event?.booked_room?.room_id;
-  const canChangeMeetingTime = isOwner && !hasBookedRoom;
+  const canChangeMeetingTime = isOwner && !isArchived && !hasBookedRoom;
 
   const { data: bookedRoomDetails } = $roomBooking.useQuery(
     "get",
@@ -491,6 +545,12 @@ export function MeetingPage({
   function handleMeetingUpdated(
     updatedMeeting: when2meetTypes.SchemaEventView,
   ) {
+    if (updatedMeeting.is_archived) {
+      setEditingUserId(null);
+      setIsChoosingMeetingTime(false);
+      setRoomModalOpen(false);
+      clearPendingSetup(meetingId);
+    }
     queryClient.setQueryData(meetingQueryKey, updatedMeeting);
     queryClient.invalidateQueries({
       queryKey: $when2meet.queryOptions("get", "/meetings/").queryKey,
@@ -502,7 +562,7 @@ export function MeetingPage({
   }
 
   function handleStartEditing(userId: string) {
-    if (userId !== currentUserId) {
+    if (isArchived || userId !== currentUserId) {
       return;
     }
 
@@ -522,6 +582,7 @@ export function MeetingPage({
     if (
       !currentUserId ||
       !event ||
+      event.is_archived ||
       needsSetup ||
       currentUser ||
       hasAutoStartedEditingRef.current
@@ -730,6 +791,7 @@ export function MeetingPage({
     setIsChoosingMeetingTime(false);
     setMeetingTimeSelectionSlots(new Set());
     setPendingMeetingTime(null);
+    setIsMeetingTimeRejected(false);
   }
 
   function handleStartChoosingMeetingTime() {
@@ -742,12 +804,23 @@ export function MeetingPage({
     }
 
     setIsChoosingMeetingTime(true);
+    setMeetingTimeNow(Date.now());
     setMeetingTimeSelectionSlots(new Set());
     setPendingMeetingTime(null);
+    setIsMeetingTimeRejected(false);
   }
 
   function handleMeetingTimeSlotsChange(slotKeys: string[]) {
     setMeetingTimeSelectionSlots(new Set(slotKeys));
+    setPendingMeetingTime(null);
+    setIsMeetingTimeRejected(false);
+  }
+
+  function handlePastMeetingTimeAttempt() {
+    showWarning(
+      "Cannot select a past time",
+      "Choose a meeting start time in the future.",
+    );
   }
 
   function handleMeetingTimeSelectionEnd(slotKeys: string[]) {
@@ -756,12 +829,37 @@ export function MeetingPage({
       return;
     }
 
+    const now = Date.now();
+    const futureSlots = getFutureMeetingSlotKeys(allowedSlots, now);
+    setMeetingTimeNow(now);
     setPendingMeetingTime(slotKeysToMeetingTime(slotKeys, timeSlots));
+    const isPastSelection = slotKeys.some(
+      (slotKey) => !futureSlots.has(slotKey),
+    );
+    setIsMeetingTimeRejected(isPastSelection);
+    if (isPastSelection) {
+      handlePastMeetingTimeAttempt();
+    }
   }
 
   function handleSaveMeetingTime() {
+    if (!canChangeMeetingTime || isUpdatingMeeting) {
+      return;
+    }
+
     if (!pendingMeetingTime) {
       showError("Error", "Choose a meeting time on the grid first.");
+      return;
+    }
+
+    const now = Date.now();
+    setMeetingTimeNow(now);
+    if (
+      isMeetingTimeRejected ||
+      !isMeetingTimeInFuture(pendingMeetingTime, now)
+    ) {
+      setIsMeetingTimeRejected(true);
+      handlePastMeetingTimeAttempt();
       return;
     }
 
@@ -869,7 +967,13 @@ export function MeetingPage({
     currentUserId,
     draftSlots,
     onApplySlots: handleApplySlots,
-    allowedSlots,
+    allowedSlots: isChoosingMeetingTime ? futureMeetingSlots : allowedSlots,
+    getUnavailableSlotHint: isChoosingMeetingTime
+      ? (slotKey: string) =>
+          allowedSlots.has(slotKey)
+            ? "Meeting start time must be in the future"
+            : "Not available for this meeting"
+      : undefined,
     selectionOnly: needsSetup,
     hideHint: !!currentUser && (isEditingSelf || !isOwner),
     bestIntersectionSlotKeys: slotAvailability.slotKeys,
@@ -879,6 +983,7 @@ export function MeetingPage({
     intervalSelectionSlots: meetingTimeSelectionSlots,
     onIntervalSelectionSlotsChange: handleMeetingTimeSlotsChange,
     onIntervalSelectionEnd: handleMeetingTimeSelectionEnd,
+    onPastMeetingTimeAttempt: handlePastMeetingTimeAttempt,
     selectedMeetingSlotKeys,
     showCalendarOverlay,
     calendarSlotEvents,
@@ -911,11 +1016,13 @@ export function MeetingPage({
               <div className="text-base-content/70 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                 <span>{formatDateRangeLabel(formattedDates)}</span>
                 <span>{users.length} responses</span>
-                {selectedTimeLabel && (
+                {isArchived ? (
+                  <span>Archived</span>
+                ) : selectedTimeLabel ? (
                   <span className="text-secondary">
                     Meeting time: {selectedTimeLabel}
                   </span>
-                )}
+                ) : null}
                 {bookedRoomTitle && (
                   <span className="text-primary">Room: {bookedRoomTitle}</span>
                 )}
@@ -925,7 +1032,7 @@ export function MeetingPage({
             <div className="flex flex-wrap gap-2">
               {needsSetup ? (
                 isOwner && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="hidden flex-wrap gap-2 md:flex">
                     <button
                       type="button"
                       className="btn btn-error"
@@ -960,7 +1067,7 @@ export function MeetingPage({
                       Share link
                     </button>
                   )}
-                  {currentUserId && (
+                  {currentUserId && !isArchived && (
                     <div className="hidden flex-wrap gap-2 md:flex">
                       {isEditingSelf && (
                         <>
@@ -1112,10 +1219,20 @@ export function MeetingPage({
                               Selected: {pendingMeetingTimeLabel}
                             </div>
                           )}
+                          {hasPastMeetingTime && (
+                            <p className="text-error text-sm">
+                              {PAST_MEETING_TIME_MESSAGE}
+                            </p>
+                          )}
                           <button
                             type="button"
                             className="btn btn-primary gap-2"
-                            disabled={!pendingMeetingTime || isUpdatingMeeting}
+                            disabled={
+                              !pendingMeetingTime ||
+                              hasPastMeetingTime ||
+                              !canChangeMeetingTime ||
+                              isUpdatingMeeting
+                            }
                             onClick={handleSaveMeetingTime}
                           >
                             {isUpdatingMeeting ? (
@@ -1171,13 +1288,13 @@ export function MeetingPage({
                               Choose meeting time
                             </button>
                           )}
-                          {hasBookedRoom && (
+                          {hasBookedRoom && !isArchived && (
                             <p className="text-base-content/60 text-xs">
                               Cancel the room booking before changing the
                               meeting time.
                             </p>
                           )}
-                          {event.selected_time && (
+                          {event.selected_time && !isArchived && (
                             <button
                               type="button"
                               className="btn btn-primary gap-2"
@@ -1189,31 +1306,54 @@ export function MeetingPage({
                           )}
                         </>
                       )}
-                      <div className="grid w-full grid-cols-2 gap-2">
-                        <Link
-                          to="/when2meet/$meetingId/edit"
-                          params={{ meetingId: meetingSlug }}
-                          className="btn grow gap-2"
-                        >
-                          <span className="icon-[material-symbols--edit-outline] text-lg" />
-                          Edit event
-                        </Link>
-                        <button
-                          type="button"
-                          className="btn btn-link btn-error grow gap-2 no-underline"
-                          disabled={isDeletingMeeting}
-                          onClick={handleDeleteMeeting}
-                        >
-                          {isDeletingMeeting ? (
-                            <span className="loading loading-spinner loading-sm" />
-                          ) : (
-                            <>
-                              <span className="icon-[material-symbols--delete-outline] text-lg" />
-                              Delete event
-                            </>
+                      {!isArchived && !isChoosingMeetingTime && (
+                        <div
+                          className={cn(
+                            "grid w-full gap-2",
+                            !needsSetup && "grid-cols-2",
                           )}
-                        </button>
-                      </div>
+                        >
+                          <Link
+                            to="/when2meet/$meetingId/edit"
+                            params={{ meetingId: meetingSlug }}
+                            className="btn grow gap-2"
+                          >
+                            <span className="icon-[material-symbols--edit-outline] text-lg" />
+                            Edit event
+                          </Link>
+                          {!needsSetup && (
+                            <ArchiveMeetingButton
+                              meetingRef={meetingId}
+                              meetingName={meetingName}
+                              disabled={
+                                isSaving ||
+                                isUpdatingMeeting ||
+                                isDeletingMeeting ||
+                                isDeletingParticipant ||
+                                isEditingSelf ||
+                                isChoosingMeetingTime ||
+                                roomModalOpen
+                              }
+                              onMeetingUpdated={handleMeetingUpdated}
+                            />
+                          )}
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        className="btn btn-link btn-error w-full gap-2 no-underline"
+                        disabled={isDeletingMeeting}
+                        onClick={handleDeleteMeeting}
+                      >
+                        {isDeletingMeeting ? (
+                          <span className="loading loading-spinner loading-sm" />
+                        ) : (
+                          <>
+                            <span className="icon-[material-symbols--delete-outline] text-lg" />
+                            Delete event
+                          </>
+                        )}
+                      </button>
                     </div>
                   )}
                   <div
@@ -1282,7 +1422,8 @@ export function MeetingPage({
                       filteredUsers.map((user) => {
                         const isEditing = editingUserId === user.id;
                         const isCurrentUser = user.id === currentUserId;
-                        const canDeleteOther = isOwner && !isCurrentUser;
+                        const canDeleteOther =
+                          isOwner && !isArchived && !isCurrentUser;
                         const isSlotResponder =
                           isHoveringAllowedSlot && userHasHoveredSlot(user);
                         const isDimmed =
@@ -1360,7 +1501,7 @@ export function MeetingPage({
             canClearSetup={draftSlots.size > 0}
             isSavingSetup={isUpdatingMeeting}
             onToggleAvailability={
-              currentUserId && !needsSetup
+              currentUserId && !needsSetup && !isArchived
                 ? handleToggleAvailability
                 : undefined
             }

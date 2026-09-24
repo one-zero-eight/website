@@ -56,6 +56,36 @@ function useScheduleConfigInvalidation() {
   }, [queryClient]);
 }
 
+const coursesQueryKey = $scheduleAssistant.queryOptions(
+  "get",
+  "/schedule-config/courses",
+).queryKey;
+
+function useCoursesCacheWrite() {
+  const queryClient = useQueryClient();
+  return useCallback(
+    (
+      updater: (prev: SchemaCourseConfig[] | undefined) => SchemaCourseConfig[],
+    ) => {
+      queryClient.setQueryData(coursesQueryKey, updater);
+    },
+    [queryClient],
+  );
+}
+
+function replaceCourseInList(
+  prev: SchemaCourseConfig[] | undefined,
+  pathName: string,
+  nextCourse: SchemaCourseConfig,
+) {
+  if (!prev) return [nextCourse];
+  const idx = prev.findIndex((course) => course.name === pathName);
+  if (idx < 0) return [...prev, nextCourse];
+  const next = prev.slice();
+  next[idx] = nextCourse;
+  return next;
+}
+
 function useScheduleConfigMutationToast() {
   const { showError } = useToast();
   return useCallback(
@@ -390,35 +420,64 @@ export function useDeleteInstructorMutation() {
 }
 
 export function useCreateCourseMutation() {
-  const invalidate = useScheduleConfigInvalidation();
+  const writeCourses = useCoursesCacheWrite();
   const onError = useScheduleConfigMutationToast();
   return $scheduleAssistant.useMutation("post", "/schedule-config/courses", {
-    onSuccess: invalidate,
+    onSuccess: (saved) => {
+      writeCourses((prev) => (prev ? [...prev, saved] : [saved]));
+    },
     onError,
   });
 }
 
 export function useUpdateCourseMutation() {
-  const invalidate = useScheduleConfigInvalidation();
-  const onError = useScheduleConfigMutationToast();
+  const queryClient = useQueryClient();
+  const writeCourses = useCoursesCacheWrite();
+  const onErrorToast = useScheduleConfigMutationToast();
   return $scheduleAssistant.useMutation(
     "put",
     "/schedule-config/courses/{course_name}",
     {
-      onSuccess: invalidate,
-      onError,
+      onMutate: async (variables) => {
+        const pathName = variables.params.path.course_name;
+        const body = variables.body;
+        const previous =
+          queryClient.getQueryData<SchemaCourseConfig[]>(coursesQueryKey);
+        // Apply optimistic data before cancelQueries yields, so a closing modal
+        // cannot remount before the timetable sees the new course.
+        writeCourses((prev) => replaceCourseInList(prev, pathName, body));
+        await queryClient.cancelQueries({ queryKey: coursesQueryKey });
+        return { previous };
+      },
+      onError: (error, _variables, context) => {
+        if (context?.previous) {
+          queryClient.setQueryData(coursesQueryKey, context.previous);
+        }
+        onErrorToast(error);
+      },
+      onSuccess: (saved, variables) => {
+        const pathName = variables.params.path.course_name;
+        // Always merge the server course. Skipping this left the UI stuck when
+        // the optimistic write was cancelled/raced and never rebuilt meetings.
+        writeCourses((prev) => replaceCourseInList(prev, pathName, saved));
+      },
     },
   );
 }
 
 export function useDeleteCourseMutation() {
-  const invalidate = useScheduleConfigInvalidation();
+  const writeCourses = useCoursesCacheWrite();
   const onError = useScheduleConfigMutationToast();
   return $scheduleAssistant.useMutation(
     "delete",
     "/schedule-config/courses/{course_name}",
     {
-      onSuccess: invalidate,
+      onSuccess: (_data, variables) => {
+        const pathName = variables.params.path.course_name;
+        writeCourses((prev) =>
+          (prev ?? []).filter((course) => course.name !== pathName),
+        );
+      },
       onError,
     },
   );
@@ -476,11 +535,23 @@ export function useUpdateProgramMutation(
   } = useUpdateTermMutation();
 
   const updateProgram = useCallback(
-    (mutator: (program: SchemaSectionProgram) => void) => {
+    (
+      mutator: (program: SchemaSectionProgram) => void,
+      options?: {
+        onSuccess?: () => void;
+        onError?: () => void;
+      },
+    ) => {
       if (!term) return;
-      updateTerm({
-        body: mutateProgramInTerm(term, sectionCode, programIndex, mutator),
-      });
+      updateTerm(
+        {
+          body: mutateProgramInTerm(term, sectionCode, programIndex, mutator),
+        },
+        {
+          onSuccess: options?.onSuccess,
+          onError: options?.onError,
+        },
+      );
     },
     [programIndex, sectionCode, term, updateTerm],
   );
@@ -542,13 +613,12 @@ export function usePatchInstructorMutation(instructorId: string | undefined) {
   const patchInstructor = useCallback(
     (patch: Partial<SchemaInstructor>) => {
       if (!instructorId || !query.data) return;
-      const { meetings_count: _meetingsCount, ...instructor } = {
-        ...query.data,
-        ...patch,
-      };
       mutate({
         params: { path: { instructor_id: instructorId } },
-        body: instructor,
+        body: {
+          ...query.data,
+          ...patch,
+        },
       });
     },
     [instructorId, mutate, query.data],
@@ -606,7 +676,7 @@ function courseReferencesStudentGroup(
   groupCode: string,
 ): boolean {
   for (const component of course.components) {
-    if (component.student_groups.includes(groupCode)) return true;
+    if (component.audience.includes(groupCode)) return true;
     for (const series of component.sessions ?? []) {
       if (series.audience.includes(groupCode)) return true;
     }
@@ -667,7 +737,7 @@ export function useAddSection() {
       const nextTerm = structuredClone(term);
       nextTerm.sections = [
         ...(nextTerm.sections ?? []),
-        { code, name, kind: null, programs: [] },
+        { code, name, programs: [] },
       ];
       updateTerm(
         { body: nextTerm },

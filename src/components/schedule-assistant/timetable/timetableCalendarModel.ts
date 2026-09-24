@@ -1,5 +1,6 @@
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
+import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 
 import {
   buildGroupToProgramMap,
@@ -15,6 +16,7 @@ import {
   DAY_NAMES,
   WEEKDAY_LABEL_RU,
   filterMeetingsByTab,
+  formatDisplayDate,
   normalizedTermDays,
   todayIsoDate,
   weekRelativeToToday,
@@ -30,6 +32,7 @@ export type CalendarDayColumn = {
   headerLabel: string;
   dateLabel: string;
   isToday: boolean;
+  isInactive: boolean;
 };
 
 export type CalendarWeekBlock = {
@@ -71,11 +74,7 @@ function dateForWeekDay(
 }
 
 function formatCalendarDate(dateStr: string) {
-  const date = new Date(`${dateStr}T00:00:00`);
-  return date.toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "long",
-  });
+  return formatDisplayDate(dateStr, { withYear: false });
 }
 
 export function formatCalendarWeekRange(start: string, end: string) {
@@ -126,6 +125,7 @@ export function buildCalendarGrid(
   allMeetings: Meeting[],
   weeks: WeekRange[],
   tabMode: string,
+  programCode?: string,
 ): BuiltCalendarGrid | null {
   if (!weeks.length) return null;
 
@@ -150,8 +150,27 @@ export function buildCalendarGrid(
   }));
   const slotByStart = new Map(slotsResolved.map((slot) => [slot.start, slot]));
 
-  const tabMeetings = filterMeetingsByTab(allMeetings, tabMode, config).filter(
-    (meeting) => !meeting.cancelled,
+  const selectedProgram = getScheduleSections(config)
+    .find((section) => section.code === tabMode)
+    ?.programs?.find((program) => program.code === programCode);
+  const selectedProgramGroups = selectedProgram
+    ? new Set(
+        normalizeTracksFromSectionProgram(selectedProgram).flatMap(
+          (track) => track.groups,
+        ),
+      )
+    : null;
+  const programSemester = selectedProgram?.semester
+    ? {
+        start: String(selectedProgram.semester.start_date).slice(0, 10),
+        end: String(selectedProgram.semester.end_date).slice(0, 10),
+      }
+    : null;
+  const tabMeetings = filterMeetingsByTab(allMeetings, tabMode).filter(
+    (meeting) =>
+      !meeting.cancelled &&
+      (!selectedProgramGroups ||
+        meeting.groups.some((group) => selectedProgramGroups.has(group))),
   );
 
   const cells = new Map<string, Meeting[]>();
@@ -225,6 +244,9 @@ export function buildCalendarGrid(
         headerLabel: WEEKDAY_LABEL_RU[day],
         dateLabel: formatCalendarDate(date),
         isToday: date === today,
+        isInactive:
+          programSemester != null &&
+          (date < programSemester.start || date > programSemester.end),
       };
     }),
   }));

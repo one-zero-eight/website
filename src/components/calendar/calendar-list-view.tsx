@@ -16,9 +16,13 @@ export const CALENDAR_LIST_EVENT_CLASS_NAMES =
   "cursor-pointer text-sm rounded-md! bg-transparent! border-0! overflow-clip";
 
 export function renderCalendarListEventContent({ event }: EventContentArg) {
+  // FullCalendar list view marks rows with `.fc-event-forced-url` when the event
+  // has a URL, then on click does `querySelector('a[href]').href`. Custom
+  // eventContent must keep an anchor or that click handler throws and eventClick
+  // never runs (events.ics includes URL; schedule feeds often don't).
   return (
     <div className="flex flex-wrap gap-x-1 text-left">
-      {event.title}
+      {event.url ? <a href={event.url}>{event.title}</a> : event.title}
       <span className="text-base-content/30 break-all">
         {event.extendedProps.location}
       </span>

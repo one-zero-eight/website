@@ -8,6 +8,8 @@ import {
 
 const TODAY_HEAD_SHADOW =
   "shadow-[inset_2px_0_0_#f5a623,inset_-2px_0_0_#f5a623,inset_0_2px_0_#f5a623]";
+const TODAY_GROUPS_DAY_ROW_SHADOW =
+  "shadow-[inset_2px_0_0_#f5a623,inset_0_2px_0_#f5a623]";
 const TODAY_BODY_SHADOW =
   "shadow-[inset_2px_0_0_#f5a623,inset_-2px_0_0_#f5a623]";
 const TODAY_BODY_LAST_SHADOW =
@@ -44,7 +46,7 @@ export function todayCalendarColumnBodyClass(
 
 export function todayGroupsDayRowClass(isToday: boolean) {
   if (!isToday) return null;
-  return TODAY_HEAD_SHADOW;
+  return cn(TODAY_GROUPS_DAY_ROW_SHADOW, "relative z-[27]");
 }
 
 export function todayGroupsSlotTimeClass(

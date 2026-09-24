@@ -192,23 +192,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/bookings/cancel-extra": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Cancel Extra Booking */
-    post: operations["bookings_cancel_extra_booking"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/bookings/{outlook_booking_id}": {
     parameters: {
       query?: never;
@@ -317,6 +300,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/bmp/auto-bookings/cancel-extra": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel Extra Auto Booking
+     * @description Cancel an unmatched schedule-assistant auto-booking (service callers only).
+     */
+    post: operations["bmp_specialist_cancel_extra_auto_booking"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/status": {
     parameters: {
       query?: never;
@@ -379,19 +382,6 @@ export interface components {
     BmpBatchCancelRequest: {
       /** Outlook Booking Ids */
       outlook_booking_ids: string[];
-    };
-    /** BmpBatchItemResult */
-    BmpBatchItemResult: {
-      /**
-       * Status
-       * @enum {string}
-       */
-      status: BmpBatchItemResultStatus;
-      booking?: components["schemas"]["Booking"] | null;
-      /** Error */
-      error?: string | null;
-      /** Message Body */
-      message_body?: string | null;
     };
     /** BmpBatchRequest */
     BmpBatchRequest: {
@@ -615,8 +605,6 @@ export type SchemaAttendee = components["schemas"]["Attendee"];
 export type SchemaAttendeeDetails = components["schemas"]["AttendeeDetails"];
 export type SchemaBmpBatchCancelRequest =
   components["schemas"]["BmpBatchCancelRequest"];
-export type SchemaBmpBatchItemResult =
-  components["schemas"]["BmpBatchItemResult"];
 export type SchemaBmpBatchRequest = components["schemas"]["BmpBatchRequest"];
 export type SchemaBooking = components["schemas"]["Booking"];
 export type SchemaCanBookResponse = components["schemas"]["CanBookResponse"];
@@ -1155,60 +1143,6 @@ export interface operations {
       cookie?: never;
     };
     requestBody?: never;
-    responses: {
-      /** @description Canceled successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description You are not the participant of the booking */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Booking not found OR Room not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-      /** @description EWS error, probably Outlook is down */
-      429: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  bookings_cancel_extra_booking: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CancelExtraBookingRequest"];
-      };
-    };
     responses: {
       /** @description Canceled successfully */
       200: {
@@ -1854,9 +1788,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            [key: string]: components["schemas"]["BmpBatchItemResult"];
-          };
+          "application/json": unknown;
         };
       };
       /** @description Unable to verify credentials OR Credentials not provided */
@@ -1959,6 +1891,67 @@ export interface operations {
       };
     };
   };
+  bmp_specialist_cancel_extra_auto_booking: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancelExtraBookingRequest"];
+      };
+    };
+    responses: {
+      /** @description Canceled successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking OR Recurrence not allowed */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking not found OR Room not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   get_status: {
     parameters: {
       query?: never;
@@ -1979,10 +1972,6 @@ export interface operations {
       };
     };
   };
-}
-export enum BmpBatchItemResultStatus {
-  ok = "ok",
-  error = "error",
 }
 export enum BookingStatus {
   Accept = "Accept",

@@ -12,6 +12,8 @@ export const DEFAULT_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_outlook: false,
   check_unbooked: false,
   check_unplaced: true,
+  check_missing_room: true,
+  check_missing_instructor: true,
   check_per_week: true,
   check_instructor_id: true,
   check_student_email: true,
@@ -31,6 +33,8 @@ export const ALL_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_outlook: true,
   check_unbooked: true,
   check_unplaced: true,
+  check_missing_room: true,
+  check_missing_instructor: true,
   check_per_week: true,
   check_instructor_id: true,
   check_student_email: true,
@@ -50,6 +54,8 @@ export const NO_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_outlook: false,
   check_unbooked: false,
   check_unplaced: false,
+  check_missing_room: false,
+  check_missing_instructor: false,
   check_per_week: false,
   check_instructor_id: false,
   check_student_email: false,
@@ -77,8 +83,8 @@ export const CHECK_OPTIONS: {
 }[] = [
   {
     key: "check_room",
-    label: "Аудитории",
-    description: "Пересечения занятий в одной аудитории",
+    label: "Локации",
+    description: "Пересечения занятий в одной локации",
     countTouchingKey: "count_touching_room",
   },
   {
@@ -122,6 +128,16 @@ export const CHECK_OPTIONS: {
     description: "Компоненты курса без занятий в расписании",
   },
   {
+    key: "check_missing_room",
+    label: "Без локации",
+    description: "Занятия в сетке без назначенной локации",
+  },
+  {
+    key: "check_missing_instructor",
+    label: "Без преподавателя",
+    description: "Занятия в сетке без назначенного преподавателя",
+  },
+  {
     key: "check_per_week",
     label: "Частота в неделю",
     description: "Число слотов не совпадает с per_week",
@@ -148,7 +164,7 @@ export function areAllChecksEnabled(value: SchemaCheckParameters): boolean {
 }
 
 export const ISSUE_TYPE_LABELS: Record<SchemaIssue["issue_type"], string> = {
-  room: "Аудитории",
+  room: "Локации",
   teacher: "Преподаватели",
   capacity: "Вместимость",
   group: "Группы",
@@ -156,6 +172,8 @@ export const ISSUE_TYPE_LABELS: Record<SchemaIssue["issue_type"], string> = {
   outlook: "Outlook",
   unbooked: "Бронирования",
   unplaced: "Неразмещённые",
+  missing_room: "Без локации",
+  missing_instructor: "Без преподавателя",
   per_week: "Частота в неделю",
   instructor_id: "ID преподавателей",
   student_email: "Email студентов",
@@ -164,7 +182,7 @@ export const ISSUE_TYPE_LABELS: Record<SchemaIssue["issue_type"], string> = {
 };
 
 export const ISSUE_TYPE_HEADINGS: Record<SchemaIssue["issue_type"], string> = {
-  room: "Пересечение в аудитории",
+  room: "Пересечение в локации",
   teacher: "Конфликт преподавателя",
   capacity: "Превышена вместимость",
   group: "Пересечение у группы",
@@ -172,6 +190,8 @@ export const ISSUE_TYPE_HEADINGS: Record<SchemaIssue["issue_type"], string> = {
   outlook: "Конфликт с Outlook",
   unbooked: "Нет бронирования",
   unplaced: "Компонент без занятий",
+  missing_room: "Нет локации",
+  missing_instructor: "Нет преподавателя",
   per_week: "Неверная частота в неделю",
   instructor_id: "Некорректный ID преподавателя",
   student_email: "Некорректный email студента",
@@ -202,6 +222,9 @@ export function getIssueMetric(issue: SchemaIssue): string | null {
       return `${issue.instructor_id}, ${issue.weekday} ${String(issue.start_time).slice(0, 5)}`;
     case "unplaced":
       return `${issue.course_name} · ${issue.component_tag}`;
+    case "missing_room":
+    case "missing_instructor":
+      return `${issue.meeting.course_name} · ${issue.meeting.component_tag}`;
     case "per_week":
       return `${issue.actual_per_week}/${issue.expected_per_week} в неделю`;
     case "unbooked":
@@ -265,4 +288,18 @@ export function groupIssuesByType(
       issues: groupedIssues,
     }))
     .sort((left, right) => compareIssueTypes(left.issueType, right.issueType));
+}
+
+export function formatIssuesText(issues: SchemaIssue[]) {
+  if (issues.length === 0) return "Проблем не найдено.";
+
+  const lines: string[] = [`Найдено проблем: ${issues.length}`, ""];
+  for (const { issueType, issues: grouped } of groupIssuesByType(issues)) {
+    lines.push(`${ISSUE_TYPE_HEADINGS[issueType]} (${grouped.length})`);
+    for (const issue of grouped) {
+      lines.push(issue.text);
+    }
+    lines.push("");
+  }
+  return lines.join("\n").trimEnd();
 }

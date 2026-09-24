@@ -3,6 +3,7 @@ import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 import React, { useMemo } from "react";
+import { isClubLeader } from "./permissions.ts";
 import {
   getClubTypeLabel,
   getClubTypeColor,
@@ -11,7 +12,9 @@ import {
 } from "./constants.ts";
 
 function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
+  const isLeader = isClubLeader(clubsUser, club.id);
   const clubLeader = useMemo(
     () =>
       club.leader_innohassle_id
@@ -23,7 +26,11 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
   return (
     <div className="card card-border md:card-side">
       <figure className="shrink-0 items-start p-6 pb-0 md:pr-0 md:pb-6">
-        <ClubLogo clubId={club.id} className="size-48" />
+        <ClubLogo
+          clubId={club.id}
+          logoFileId={club.logo_file_id}
+          className="size-48"
+        />
       </figure>
       <div className="card-body">
         <div className="flex shrink-0 flex-col items-start gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
@@ -34,9 +41,16 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
           >
             {club.title}
           </Link>
-          <span className={cn("badge shrink-0", getClubTypeColor(club.type))}>
-            {getClubTypeLabel(club.type)}
-          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            {isLeader && (
+              <span className="badge badge-primary badge-soft shrink-0">
+                Leader
+              </span>
+            )}
+            <span className={cn("badge shrink-0", getClubTypeColor(club.type))}>
+              {getClubTypeLabel(club.type)}
+            </span>
+          </div>
         </div>
 
         <p className="text-base-content/50 text-sm md:text-base">
@@ -93,7 +107,5 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
   );
 }
 
-const MemoizedClubCard = React.memo(ClubCard, (prevProps, nextProps) => {
-  return prevProps.club.id === nextProps.club.id;
-});
+const MemoizedClubCard = React.memo(ClubCard);
 export { MemoizedClubCard as ClubCard };

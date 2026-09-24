@@ -429,6 +429,8 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
     >
       {isSubmitting ? (
         <span className="loading loading-spinner loading-sm" />
+      ) : timeSetupMode === "manual_slots" ? (
+        "Next"
       ) : (
         "Create"
       )}

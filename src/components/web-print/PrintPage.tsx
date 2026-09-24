@@ -5,15 +5,13 @@ import {
   DeviceOption,
   DeviceOptionList,
 } from "@/components/web-print/DeviceOptionList.tsx";
-import {
-  FileDropzone,
-  formatFileSize,
-} from "@/components/web-print/FileDropzone.tsx";
+import { FileDropzone } from "./FileDropzone.tsx";
 // import { LayoutSelector } from "@/components/web-print/LayoutSelector.tsx";
 import {
   calcPrintJobActualPapersCount,
+  formatFileSize,
   resolvePreviewPageRanges,
-} from "@/components/web-print/print-utils.ts";
+} from "./print-utils.ts";
 import {
   getPrintSessionState,
   requestStopPrintJobPolling,

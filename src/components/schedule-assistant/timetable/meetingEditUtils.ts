@@ -33,6 +33,7 @@ import {
   buildGroupToProgramMap,
   findProgramByNameOrCode,
   programResolvedTimeSlots,
+  resolveAudienceSemester,
   termResolvedTimeSlots,
   unionResolvedTimeSlots,
 } from "./programTimeSlots.ts";
@@ -61,6 +62,42 @@ export type MeetingRef =
       date: string;
     };
 
+export function weeklySlotExcludeRef(
+  base: {
+    courseIdx: number;
+    componentIdx: number;
+    seriesIdx: number;
+    date?: string;
+  },
+  slotIdx: number,
+): MeetingRef {
+  return {
+    kind: "wp",
+    courseIdx: base.courseIdx,
+    componentIdx: base.componentIdx,
+    seriesIdx: base.seriesIdx,
+    slotIdx,
+    date: base.date ?? "",
+  };
+}
+
+export function occurrenceExcludeRef(
+  base: {
+    courseIdx: number;
+    componentIdx: number;
+    seriesIdx: number;
+  },
+  occIdx: number,
+): MeetingRef {
+  return {
+    kind: "occ",
+    courseIdx: base.courseIdx,
+    componentIdx: base.componentIdx,
+    seriesIdx: base.seriesIdx,
+    occIdx,
+  };
+}
+
 export type EditClassAction =
   | "room"
   | "time"
@@ -75,6 +112,8 @@ export type MeetingFieldEdits = {
   /** Optional explicit end; when set with time, skips slot lookup. */
   endTime?: string;
   weekday?: TermWeekdayKey;
+  /** Absolute date change for occurrence meetings (single scope). */
+  date?: string;
   instructor?: string | string[] | null;
   audience?: string[];
   cancel?: boolean;
@@ -85,6 +124,7 @@ export type MeetingOriginalValues = {
   time: string;
   endTime: string;
   weekday: TermWeekdayKey;
+  date: string;
   instructor: string;
   audience: string[];
 };
@@ -112,10 +152,7 @@ export function serializeAudienceTokens(tokens: string[]) {
 }
 
 export function resolveMeetingAudienceTokens(
-  component:
-    | { student_groups?: string[]; per_group?: boolean }
-    | null
-    | undefined,
+  component: { audience?: string[]; per_group?: boolean } | null | undefined,
   series: { audience?: string[] } | null | undefined,
   meetingGroups?: string[],
 ) {
@@ -124,7 +161,7 @@ export function resolveMeetingAudienceTokens(
   if (component?.per_group && meetingGroups?.length) {
     return [String(meetingGroups[0] || "").trim()].filter(Boolean);
   }
-  return [...(component?.student_groups || [])];
+  return [...(component?.audience || [])];
 }
 
 export function audienceTokensEquivalent(
@@ -145,20 +182,13 @@ export function audienceTokensEquivalent(
 
 export function isMeetingAudienceOverridden(
   config: SchemaScheduleConfig,
-  component:
-    | { student_groups?: string[]; per_group?: boolean }
-    | null
-    | undefined,
+  component: { audience?: string[]; per_group?: boolean } | null | undefined,
   series: { audience?: string[] } | null | undefined,
 ) {
   if (!component || component.per_group) return false;
   const explicit = series?.audience || [];
   if (!explicit.length) return false;
-  return !audienceTokensEquivalent(
-    config,
-    explicit,
-    component.student_groups || [],
-  );
+  return !audienceTokensEquivalent(config, explicit, component.audience || []);
 }
 
 function studentGroupNameByCode(config: SchemaScheduleConfig) {
@@ -203,7 +233,7 @@ export function formatAudienceTokensLabel(
 
 export function audienceTokenHints(
   config: SchemaScheduleConfig,
-  component: { student_groups?: string[] } | null | undefined,
+  component: { audience?: string[] } | null | undefined,
 ): { value: string; label: string }[] {
   const seen = new Set<string>();
   const hints: { value: string; label: string }[] = [];
@@ -215,7 +245,7 @@ export function audienceTokenHints(
     hints.push({ value: trimmed, label });
   }
 
-  for (const token of component?.student_groups || []) {
+  for (const token of component?.audience || []) {
     push(token, formatAudienceTokenLabel(config, token));
   }
 
@@ -244,10 +274,7 @@ export function audienceTokenHints(
 
 export function meetingEditOriginalValues(
   meeting: Meeting,
-  component:
-    | { student_groups?: string[]; per_group?: boolean }
-    | null
-    | undefined,
+  component: { audience?: string[]; per_group?: boolean } | null | undefined,
   series: { audience?: string[] } | null | undefined,
 ): MeetingOriginalValues {
   const instructors =
@@ -259,6 +286,7 @@ export function meetingEditOriginalValues(
     time: String(meeting.start || "").slice(0, 5),
     endTime: String(meeting.end || "").slice(0, 5),
     weekday: currentMeetingWeekday(meeting),
+    date: String(meeting.date || "").trim(),
     instructor: String(instructors || "").trim(),
     audience: resolveMeetingAudienceTokens(component, series, meeting.groups),
   };
@@ -279,14 +307,14 @@ export function meetingGroupsEqual(a: string[], b: string[]) {
 
 export function componentStudentGroupPool(
   config: SchemaScheduleConfig,
-  component: { student_groups?: string[] },
+  component: { audience?: string[] },
 ) {
-  return expandStudentGroupSelectors(config, component.student_groups || []);
+  return expandStudentGroupSelectors(config, component.audience || []);
 }
 
 export function perGroupAudienceOptions(
   config: SchemaScheduleConfig,
-  component: { student_groups?: string[] },
+  component: { audience?: string[] },
 ) {
   return componentStudentGroupPool(config, component)
     .map((code) => ({
@@ -306,6 +334,7 @@ export function meetingOriginalValues(meeting: Meeting): MeetingOriginalValues {
     time: String(meeting.start || "").slice(0, 5),
     endTime: String(meeting.end || "").slice(0, 5),
     weekday: currentMeetingWeekday(meeting),
+    date: String(meeting.date || "").trim(),
     instructor: String(instructors || "").trim(),
     audience: [...(meeting.groups || [])].sort((a, b) =>
       a.localeCompare(b, "ru"),
@@ -454,10 +483,13 @@ export function dateForWeekdayInWeek(
 function weeklyMeetingDatesForSlot(
   config: SchemaScheduleConfig,
   slot: SchemaWeeklyPatternSlot,
+  audienceTokens: string[] = [],
 ): string[] {
   const weekday = weeklyPatternDayKey(String(slot.weekday));
   if (!weekday) return [];
-  return semesterDatesForWeekday(config, weekday);
+  const window = resolveAudienceSemester(config, audienceTokens);
+  if (window == null) return [];
+  return semesterDatesForWeekday(config, weekday, window);
 }
 
 function getWeeklySlotContext(
@@ -477,7 +509,7 @@ function getOccurrenceContext(
 ) {
   const component = course.components?.[ref.componentIdx];
   const series = component?.sessions?.[ref.seriesIdx];
-  const occurrence = series?.occurrences?.[ref.occIdx];
+  const occurrence = series?.dates_pattern?.[ref.occIdx];
   if (!component || !series || !occurrence) return null;
   return { component, series, occurrence };
 }
@@ -616,7 +648,9 @@ function patchOccurrenceFromEdits(
       ? normalizeTimeToApi(edits.endTime)
       : resolveEndTimeForStart(config, start);
   }
-  if (edits.weekday !== undefined) {
+  if (edits.date !== undefined) {
+    patched.date = edits.date;
+  } else if (edits.weekday !== undefined) {
     patched.date = dateForWeekdayInWeek(
       occurrence.date,
       edits.weekday,
@@ -625,6 +659,62 @@ function patchOccurrenceFromEdits(
   }
   if (edits.instructor !== undefined) patched.instructor = edits.instructor;
   return patched;
+}
+
+/** Replace series schedule (and optional audience) for create-like multi-row edit. */
+export function applySeriesScheduleToCourse(
+  course: SchemaCourseConfig,
+  ref: MeetingRef,
+  config: SchemaScheduleConfig,
+  update: {
+    audience?: string[];
+    dates_pattern?: SchemaSessionOccurrence[] | null;
+    weeklyPattern?: SchemaWeeklyPatternSlot[] | null;
+  },
+): SchemaCourseConfig | null {
+  const nextCourse = structuredClone(course);
+  const component = nextCourse.components?.[ref.componentIdx];
+  const series = component?.sessions?.[ref.seriesIdx];
+  if (!component || !series) return null;
+
+  if (update.audience !== undefined) {
+    series.audience = minimizeAudienceTokens(
+      update.audience
+        .map((token) => String(token || "").trim())
+        .filter(Boolean),
+      buildAudienceSelectorTree(config, {
+        sectionCode: course.section_code,
+      }),
+    );
+  }
+
+  if (update.dates_pattern !== undefined) {
+    series.dates_pattern = (update.dates_pattern ?? []).map((occurrence) => ({
+      date: String(occurrence.date || "").trim(),
+      start_time: normalizeTimeToApi(occurrence.start_time),
+      end_time: normalizeTimeToApi(
+        occurrence.end_time ||
+          resolveEndTimeForStart(config, occurrence.start_time),
+      ),
+      room: String(occurrence.room || "").trim() || null,
+      instructor: occurrence.instructor ?? null,
+    }));
+  }
+
+  if (update.weeklyPattern !== undefined) {
+    series.weekly_pattern = (update.weeklyPattern ?? []).map((slot) => ({
+      weekday: slot.weekday,
+      start_time: normalizeTimeToApi(slot.start_time),
+      end_time: normalizeTimeToApi(
+        slot.end_time || resolveEndTimeForStart(config, slot.start_time),
+      ),
+      room: String(slot.room || "").trim() || null,
+      instructor: slot.instructor ?? null,
+      edits: slot.edits ?? null,
+    }));
+  }
+
+  return nextCourse;
 }
 
 export function applyMeetingEditsToCourse(
@@ -644,14 +734,16 @@ export function applyMeetingEditsToCourse(
     if (!component || !series) return null;
     series.audience = minimizeAudienceTokens(
       edits.audience.map((token) => String(token || "").trim()).filter(Boolean),
-      buildAudienceSelectorTree(config),
+      buildAudienceSelectorTree(config, {
+        sectionCode: course.section_code,
+      }),
     );
   }
 
   if (ref.kind === "occ") {
     const ctx = getOccurrenceContext(nextCourse, ref);
     if (!ctx) return null;
-    const occurrences = [...(ctx.series.occurrences || [])];
+    const occurrences = [...(ctx.series.dates_pattern || [])];
     const fromDate = meeting.date;
 
     if (edits.cancel) {
@@ -662,7 +754,7 @@ export function applyMeetingEditsToCourse(
               if (scope === "all") return false;
               return occurrence.date < fromDate;
             });
-      ctx.series.occurrences = filtered;
+      ctx.series.dates_pattern = filtered;
       return nextCourse;
     }
 
@@ -673,11 +765,11 @@ export function applyMeetingEditsToCourse(
       const target = occurrences[ref.occIdx];
       if (!target) return null;
       occurrences[ref.occIdx] = patchOccurrence(target);
-      ctx.series.occurrences = occurrences;
+      ctx.series.dates_pattern = occurrences;
       return nextCourse;
     }
 
-    ctx.series.occurrences = applyOccurrencePatch(
+    ctx.series.dates_pattern = applyOccurrencePatch(
       occurrences,
       fromDate,
       scope,
@@ -698,7 +790,15 @@ export function applyMeetingEditsToCourse(
     }
 
     if (scope === "future") {
-      for (const date of weeklyMeetingDatesForSlot(config, slot)) {
+      const audienceTokens =
+        (ctx.series.audience?.length
+          ? ctx.series.audience
+          : ctx.component.audience) || [];
+      for (const date of weeklyMeetingDatesForSlot(
+        config,
+        slot,
+        audienceTokens,
+      )) {
         if (date < meetingDate) continue;
         applyWeeklySingleEdit(slot, date, startingDay, { cancel: true });
       }
@@ -843,31 +943,13 @@ export function parseLooseTimeToken(token: string): string | undefined {
   const raw = String(token || "").trim();
   if (!raw) return undefined;
 
-  if (/^\d{1,2}:\d{2}$/.test(raw)) {
-    const normalized = normalizeTypedHhmm(raw);
-    return /^\d{2}:\d{2}$/.test(normalized) ? normalized : undefined;
-  }
+  const direct = normalizeTypedHhmm(raw);
+  if (/^\d{2}:\d{2}$/.test(direct)) return direct;
 
   const digits = raw.replace(/\D/g, "");
-  if (!digits) return undefined;
-
-  let hours: number;
-  let minutes: number;
-
-  if (digits.length <= 2) {
-    hours = Number(digits);
-    minutes = 0;
-  } else if (digits.length === 3) {
-    hours = Number(digits.slice(0, 1));
-    minutes = Number(digits.slice(1));
-  } else {
-    hours = Number(digits.slice(0, 2));
-    minutes = Number(digits.slice(2, 4));
-  }
-
-  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return undefined;
-  if (hours > 23 || minutes > 59) return undefined;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  if (!digits || digits === raw) return undefined;
+  const fromDigits = normalizeTypedHhmm(digits);
+  return /^\d{2}:\d{2}$/.test(fromDigits) ? fromDigits : undefined;
 }
 
 /**
@@ -938,13 +1020,38 @@ export function timeOptionsForConfig(
     .filter((slot) => slot.value);
 }
 
-/** Normalize typed HH:mm (allows 9:00 → 09:00). Empty stays empty. */
+/** Normalize typed time (allows 9:00 → 09:00, 1900 → 19:00). Empty stays empty. */
 export function normalizeTypedHhmm(value: string): string {
   const raw = String(value || "").trim();
   if (!raw) return "";
-  const match = raw.match(/^(\d{1,2}):(\d{2})$/);
-  if (!match) return raw;
-  return `${match[1]!.padStart(2, "0")}:${match[2]}`;
+
+  const withColon = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if (withColon) {
+    const hours = Number(withColon[1]);
+    const minutes = Number(withColon[2]);
+    if (hours > 23 || minutes > 59) return raw;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  }
+
+  if (/^\d{1,4}$/.test(raw)) {
+    let hours: number;
+    let minutes: number;
+    if (raw.length <= 2) {
+      hours = Number(raw);
+      minutes = 0;
+    } else if (raw.length === 3) {
+      hours = Number(raw.slice(0, 1));
+      minutes = Number(raw.slice(1));
+    } else {
+      hours = Number(raw.slice(0, 2));
+      minutes = Number(raw.slice(2, 4));
+    }
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return raw;
+    if (hours > 23 || minutes > 59) return raw;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  }
+
+  return raw;
 }
 
 export function currentMeetingWeekday(meeting: Meeting): TermWeekdayKey {
@@ -977,6 +1084,7 @@ export function meetingPatternBaseValues(
     time: String(slot.start_time).slice(0, 5),
     endTime: String(slot.end_time).slice(0, 5),
     weekday: (weekday || "Mon") as TermWeekdayKey,
+    date: "",
     instructor: String(instructor ?? "").trim(),
     audience: [],
   };

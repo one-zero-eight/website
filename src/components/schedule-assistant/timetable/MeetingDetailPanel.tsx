@@ -3,65 +3,41 @@ import type {
   SchemaCourseConfig,
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
-import Tooltip from "@/components/common/Tooltip.tsx";
-import { AudienceTreeInfoIcon } from "@/components/schedule-assistant/settings/courses/audienceTreeTooltip.tsx";
-import { cn } from "@/lib/ui/cn";
-import type { ReactNode } from "react";
-
-import { summarizeMeetingAudience } from "./meetingAudienceSummary.ts";
-import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {
-  MeetingOverrideIndicator,
-  formatMeetingOverrideFields,
-} from "./meetingOverrideIndicator.tsx";
+  CourseComponentAccordionItem,
+  CourseComponentDetailsFields,
+  CourseComponentsAccordionList,
+  DetailField,
+  DetailSection,
+  MeetingAudienceInline,
+  SeriesScheduleItemsList,
+} from "@/components/schedule-assistant/courses/CourseComponentDetailsView.tsx";
+import {
+  useInstructorsQuery,
+  usePatchCourseMutation,
+  useSemesterSettings,
+} from "@/components/schedule-assistant/config/useConfig.tsx";
+import { ComponentEditModal } from "@/components/schedule-assistant/settings/courses/ComponentEditModal.tsx";
+import { useEffect, useState, type ReactNode } from "react";
+
+import {
+  courseDisplayTitle,
+  findMeetingForComponent,
+  formatComponentProgressHint,
+  listComponentSeriesNavItemsForRef,
+  meetingToScheduleTooltipItem,
+  resolveCourseAndComponent,
+} from "./meetingComponentContext.ts";
+import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {
   buildInstructorLabelById,
   dayKey,
   everyWeekdayPhraseRu,
+  formatDisplayDate,
   resolveInstructorLabel,
   weekdayLabelRu,
   type Meeting,
 } from "./timetableViewerModel.ts";
-
-function DetailSection({ title }: { title: string }) {
-  return (
-    <div className="text-base-content/55 mt-3 mb-1.5 text-xs font-semibold tracking-wide uppercase first:mt-0">
-      {title}
-    </div>
-  );
-}
-
-function DetailField({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="border-base-300/70 text-base-content border-b py-1.5 text-sm leading-snug last:border-b-0">
-      <span className="text-base-content/55 mr-1.5">{label}</span>
-      <span className="[overflow-wrap:anywhere]">{children}</span>
-    </div>
-  );
-}
-
-function formatInstructorPool(
-  pool: unknown[],
-  instructorLabelById: Record<string, string>,
-) {
-  if (!pool?.length) return "—";
-  return pool
-    .map((entry) => {
-      if (Array.isArray(entry)) {
-        return `[${entry
-          .map((id) => resolveInstructorLabel(String(id), instructorLabelById))
-          .join(" + ")}]`;
-      }
-      return resolveInstructorLabel(String(entry), instructorLabelById);
-    })
-    .join(" · ");
-}
 
 function formatInstructors(
   instructors: string | string[],
@@ -79,234 +55,225 @@ function formatInstructors(
     .join(", ");
 }
 
-function resolveCourseAndComponent(
-  config: SchemaScheduleConfig,
+function occurrenceMeetingsForSeries(
+  allMeetings: Meeting[],
   meeting: Meeting,
-): {
-  course: SchemaCourseConfig | null;
-  component: SchemaComponent | null;
-} {
-  const ref = parseMeetingInstanceId(meeting.instance_id);
-  const courses = config.courses ?? [];
-
-  if (ref) {
-    const course = courses[ref.courseIdx] ?? null;
-    const component = course?.components?.[ref.componentIdx] ?? null;
-    if (course && component) return { course, component };
-  }
-
-  const course =
-    courses.find((item) => String(item.name || "") === meeting.course) ?? null;
-  const component =
-    course?.components?.find(
-      (item) =>
-        String(item.tag || "").trim() === String(meeting.tag || "").trim(),
-    ) ?? null;
-  return { course, component };
-}
-
-function occurrenceDatesForMeeting(
-  config: SchemaScheduleConfig,
-  meeting: Meeting,
-): string[] {
+): Meeting[] {
   const ref = parseMeetingInstanceId(meeting.instance_id);
   if (!ref || ref.kind !== "occ") {
-    return meeting.date ? [meeting.date] : [];
+    return meeting.date ? [meeting] : [];
   }
 
-  const course = config.courses?.[ref.courseIdx];
-  const series =
-    course?.components?.[ref.componentIdx]?.sessions?.[ref.seriesIdx];
-  const dates = (series?.occurrences ?? [])
-    .map((occurrence) => String(occurrence.date || "").trim())
-    .filter(Boolean)
-    .sort((a, b) => a.localeCompare(b));
-
-  if (dates.length) return [...new Set(dates)];
-  return meeting.date ? [meeting.date] : [];
+  return allMeetings
+    .filter((candidate) => {
+      const candidateRef = parseMeetingInstanceId(candidate.instance_id);
+      return (
+        candidateRef?.kind === "occ" &&
+        candidateRef.courseIdx === ref.courseIdx &&
+        candidateRef.componentIdx === ref.componentIdx &&
+        candidateRef.seriesIdx === ref.seriesIdx
+      );
+    })
+    .sort((a, b) => {
+      const byDate = a.date.localeCompare(b.date);
+      if (byDate) return byDate;
+      return a.instance_id.localeCompare(b.instance_id);
+    });
 }
 
-function MeetingScheduleKind({
+function resolveMeetingSchedule({
   meeting,
-  config,
+  allMeetings,
+  instructorLabelById,
+  onNavigateToMeeting,
 }: {
   meeting: Meeting;
-  config: SchemaScheduleConfig;
-}) {
+  allMeetings: Meeting[];
+  instructorLabelById: Record<string, string>;
+  onNavigateToMeeting: (meeting: Meeting) => void;
+}): { phrase: ReactNode; datesList: ReactNode | null } {
   const ref = parseMeetingInstanceId(meeting.instance_id);
   const weekday = dayKey(meeting.date);
 
   if (meeting.cancelled) {
-    return <span className="badge badge-error badge-sm">Отменено</span>;
+    return {
+      phrase: <span className="badge badge-error badge-sm">Отменено</span>,
+      datesList: null,
+    };
   }
 
   if (ref?.kind === "occ") {
-    const dates = occurrenceDatesForMeeting(config, meeting);
-    return (
-      <Tooltip
-        content={
-          <div className="flex max-w-xs flex-col gap-0.5 text-xs leading-snug">
-            {dates.map((date) => (
-              <div key={date}>
-                {date}, {weekdayLabelRu(dayKey(date))}
-              </div>
-            ))}
-          </div>
-        }
-      >
-        <span className="text-base-content cursor-help underline decoration-dotted decoration-2 underline-offset-2">
-          На определенные даты
-        </span>
-      </Tooltip>
+    const siblings = occurrenceMeetingsForSeries(allMeetings, meeting);
+    const items = siblings.map((item) =>
+      meetingToScheduleTooltipItem(
+        item,
+        instructorLabelById,
+        item.instance_id === meeting.instance_id,
+      ),
     );
+
+    return {
+      phrase: "На определенные даты",
+      datesList: items.length ? (
+        <div className="border-base-300/70 w-full border-b pb-1.5">
+          <SeriesScheduleItemsList
+            items={items}
+            onNavigateToMeeting={onNavigateToMeeting}
+          />
+        </div>
+      ) : null,
+    };
   }
 
   if (ref?.kind === "wp") {
-    return (
-      <span className="text-base-content">
-        {everyWeekdayPhraseRu(weekday)}
-        {meeting.override_fields?.length ? (
-          <span className="text-base-content/60">
-            {" "}
-            · переопределено:{" "}
-            {formatMeetingOverrideFields(meeting.override_fields)}
-          </span>
-        ) : null}
-      </span>
-    );
+    return {
+      phrase: <>{everyWeekdayPhraseRu(weekday)}</>,
+      datesList: null,
+    };
   }
 
-  return <span className="text-base-content">{weekdayLabelRu(weekday)}</span>;
+  return {
+    phrase: weekdayLabelRu(weekday),
+    datesList: null,
+  };
 }
 
-function MeetingAudienceBlock({
+function CourseComponentsAccordion({
   config,
-  groupIds,
+  course,
+  courseIdx,
+  components,
+  currentComponentIdx,
+  currentMeeting,
+  allMeetings,
+  instructorLabelById,
+  onNavigateToMeeting,
 }: {
   config: SchemaScheduleConfig;
-  groupIds: string[];
+  course: SchemaCourseConfig | null;
+  courseIdx: number | null;
+  components: SchemaComponent[];
+  currentComponentIdx: number | null;
+  currentMeeting: Meeting;
+  allMeetings: Meeting[];
+  instructorLabelById: Record<string, string>;
+  onNavigateToMeeting: (meeting: Meeting) => void;
 }) {
-  const programs = summarizeMeetingAudience(config, groupIds);
+  const [openIdx, setOpenIdx] = useState<number | null>(currentComponentIdx);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const { term } = useSemesterSettings();
+  const { data: instructors = [] } = useInstructorsQuery();
+  const courseName = String(course?.name || "").trim();
+  const { patchCourse } = usePatchCourseMutation(courseName || undefined);
+  const editingComponent =
+    editIndex === null ? null : (components[editIndex] ?? null);
 
-  if (!programs.length) {
-    return <span className="text-base-content/50">—</span>;
-  }
+  useEffect(() => {
+    setOpenIdx(currentComponentIdx);
+  }, [currentMeeting.instance_id, currentComponentIdx]);
+
+  if (!components.length || courseIdx == null) return null;
 
   return (
-    <div className="flex flex-col gap-1.5">
-      {programs.flatMap((program) => {
-        if (program.full) {
-          return [
-            <div
-              key={program.selector || program.title}
-              className="border-base-300/80 rounded-box bg-base-200/25 border px-2.5 py-2"
-            >
-              <div className="flex items-center gap-1.5 text-sm font-medium">
-                <span className="min-w-0 [overflow-wrap:anywhere]">
-                  {program.title}
-                </span>
-                {program.selector ? (
-                  <AudienceTreeInfoIcon
-                    config={config}
-                    selector={program.selector}
-                    mode="program"
-                  />
-                ) : null}
-              </div>
-              <div className="text-base-content/50 mt-0.5 text-xs">
-                вся программа
-              </div>
-            </div>,
-          ];
-        }
+    <>
+      <DetailSection title="Компоненты курса" />
+      <CourseComponentsAccordionList>
+        {components.map((sibling, idx) => {
+          const tag =
+            String(sibling.tag || "").trim() || `Компонент ${idx + 1}`;
+          const open = openIdx === idx;
+          const isCurrent = idx === currentComponentIdx;
+          const hint = formatComponentProgressHint(config, sibling);
+          const seriesNavItems = listComponentSeriesNavItemsForRef(
+            config,
+            allMeetings,
+            courseIdx,
+            idx,
+            currentMeeting,
+            instructorLabelById,
+          );
+          const assigned = isCurrent
+            ? currentMeeting.instructors
+            : findMeetingForComponent(
+                allMeetings,
+                courseIdx,
+                idx,
+                currentMeeting,
+              )?.instructors;
 
-        const trackRows = program.tracks.flatMap((track) => {
-          if (track.full) {
-            return [
-              <div
-                key={track.selector + track.title}
-                className="border-base-300/80 rounded-box bg-base-200/25 border px-2.5 py-2"
-              >
-                <div className="flex items-center gap-1.5 text-sm font-medium">
-                  <span className="min-w-0 [overflow-wrap:anywhere]">
-                    {track.title}
-                  </span>
-                  {track.selector ? (
-                    <AudienceTreeInfoIcon
-                      config={config}
-                      selector={track.selector}
-                      mode="track"
-                    />
-                  ) : null}
-                </div>
-                <div className="text-base-content/50 mt-0.5 text-xs">
-                  {program.title}
-                </div>
-              </div>,
-            ];
-          }
-
-          if (!track.groups.length) return [];
-
-          return [
-            <div
-              key={`${track.selector}-groups`}
-              className="border-base-300/80 rounded-box bg-base-200/25 border px-2.5 py-2"
-            >
-              <div className="text-sm font-medium [overflow-wrap:anywhere]">
-                {track.groups.map((group) => group.title).join(", ")}
-              </div>
-              <div className="text-base-content/50 mt-0.5 text-xs [overflow-wrap:anywhere]">
-                {track.title}, {program.title}
-              </div>
-            </div>,
-          ];
-        });
-
-        const flatRows =
-          program.flatGroups.length > 0
-            ? [
-                <div
-                  key={`${program.programCode || "other"}-groups`}
-                  className="border-base-300/80 rounded-box bg-base-200/25 border px-2.5 py-2"
+          return (
+            <CourseComponentAccordionItem
+              key={`${tag}-${idx}`}
+              tag={tag}
+              hint={hint || undefined}
+              selected={isCurrent}
+              open={open}
+              onToggle={() => setOpenIdx(open ? null : idx)}
+              afterTag={
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-xs btn-square"
+                  title="Редактировать"
+                  onClick={() => setEditIndex(idx)}
                 >
-                  <div className="text-sm font-medium [overflow-wrap:anywhere]">
-                    {program.flatGroups.map((group) => group.title).join(", ")}
-                  </div>
-                  {program.title ? (
-                    <div className="text-base-content/50 mt-0.5 text-xs [overflow-wrap:anywhere]">
-                      {program.title}
-                    </div>
-                  ) : null}
-                </div>,
-              ]
-            : [];
-
-        return [...trackRows, ...flatRows];
-      })}
-    </div>
+                  <span className="icon-[material-symbols--edit-outline-rounded] text-base" />
+                </button>
+              }
+            >
+              <CourseComponentDetailsFields
+                config={config}
+                component={sibling}
+                instructorLabelById={instructorLabelById}
+                assignedInstructors={assigned}
+                showAudienceAlways
+                seriesItems={seriesNavItems}
+                onNavigateToMeeting={onNavigateToMeeting}
+                compact
+              />
+            </CourseComponentAccordionItem>
+          );
+        })}
+      </CourseComponentsAccordionList>
+      <ComponentEditModal
+        open={editIndex !== null && !!editingComponent}
+        onOpenChange={(open) => {
+          if (!open) setEditIndex(null);
+        }}
+        config={config}
+        courseIndex={courseIdx}
+        componentIndex={editIndex}
+        component={editingComponent}
+        tagOptions={(term?.course_component_tags ?? []).filter(Boolean)}
+        instructors={instructors}
+        courseInstructors={course?.instructors}
+        onSave={(component) => {
+          if (editIndex === null) return;
+          const next = [...components];
+          next[editIndex] = component;
+          patchCourse({ components: next });
+        }}
+      />
+    </>
   );
 }
 
 export function MeetingDetailPanel({
   meeting,
   config,
+  allMeetings,
+  onNavigateToMeeting,
 }: {
   meeting: Meeting;
   config: SchemaScheduleConfig;
+  allMeetings: Meeting[];
+  onNavigateToMeeting: (meeting: Meeting) => void;
 }) {
   const instructorLabelById = buildInstructorLabelById(config);
-  const { course, component } = resolveCourseAndComponent(config, meeting);
+  const { course } = resolveCourseAndComponent(config, meeting);
+  const meetingRef = parseMeetingInstanceId(meeting.instance_id);
 
-  const courseTitle =
-    String(
-      course?.name_ru ||
-        course?.short_name_ru ||
-        course?.name ||
-        meeting.course_short_name ||
-        meeting.course ||
-        "",
-    ).trim() || "—";
+  const courseTitle = courseDisplayTitle(course, meeting);
+
   const timeRange = meeting.end
     ? `${meeting.start}–${meeting.end}`
     : meeting.start || "—";
@@ -315,13 +282,20 @@ export function MeetingDetailPanel({
     meeting.instructors,
     instructorLabelById,
   );
-  const pool = formatInstructorPool(
-    meeting.instructor_pool || component?.instructor_pool || [],
-    instructorLabelById,
+
+  const staff = (course?.instructors ?? []).filter(
+    (entry) => String(entry.id || "").trim() && String(entry.role || "").trim(),
   );
-  const audienceSelectors = (component?.student_groups ?? [])
-    .map((token) => String(token || "").trim())
-    .filter(Boolean);
+  const siblings = course?.components ?? [];
+  const courseShortName =
+    String(course?.short_name || course?.short_name_ru || "").trim() || "—";
+
+  const schedule = resolveMeetingSchedule({
+    meeting,
+    allMeetings,
+    instructorLabelById,
+    onNavigateToMeeting,
+  });
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-1 text-sm" id="detailList">
@@ -334,54 +308,57 @@ export function MeetingDetailPanel({
       <DetailSection title="Занятие" />
       <DetailField label="Дата">
         {meeting.date
-          ? `${meeting.date}, ${weekdayLabelRu(dayKey(meeting.date))}`
+          ? `${formatDisplayDate(meeting.date)}, ${weekdayLabelRu(dayKey(meeting.date))}`
           : "—"}
       </DetailField>
       <DetailField label="Время">{timeRange}</DetailField>
       <DetailField label="Повтор">
-        <span className="inline-flex flex-wrap items-center gap-1.5">
-          <MeetingScheduleKind meeting={meeting} config={config} />
-          <MeetingOverrideIndicator fields={meeting.override_fields} />
+        <span className="inline-flex min-w-0 flex-wrap items-center gap-1.5">
+          {schedule.phrase}
         </span>
       </DetailField>
-      <DetailField label="Аудитория">{room}</DetailField>
+      {schedule.datesList}
+      <DetailField label="Локация">{room}</DetailField>
       <DetailField label="Преподаватель">{instructors}</DetailField>
-
-      <DetailSection title="Группы" />
-      <MeetingAudienceBlock config={config} groupIds={meeting.groups || []} />
-
-      <DetailSection title="Компонент и предмет" />
-      <DetailField label="Предмет">{courseTitle}</DetailField>
-      <DetailField label="Компонент">
-        {String(component?.tag || meeting.tag || "").trim() || "—"}
+      <DetailField label="Группы">
+        <MeetingAudienceInline
+          config={config}
+          groupIds={meeting.groups || []}
+        />
       </DetailField>
-      {audienceSelectors.length ? (
-        <DetailField label="Аудитория в конфиге">
-          <span className="inline-flex flex-wrap items-center gap-1.5">
-            {audienceSelectors.map((selector) => (
-              <span
-                key={selector}
-                className={cn(
-                  "bg-base-200 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs",
-                )}
-              >
-                {selector}
-                {selector.startsWith("@") ? (
-                  <AudienceTreeInfoIcon
-                    config={config}
-                    selector={selector}
-                    mode={selector.includes("/") ? "track" : "program"}
-                  />
-                ) : null}
+
+      <DetailSection title="Предмет" />
+      <DetailField label="Название" truncate>
+        {courseTitle}
+      </DetailField>
+      <DetailField label="Короткое название" truncate>
+        {courseShortName}
+      </DetailField>
+      <DetailField label="Преподаватели">
+        {staff.length ? (
+          <span className="flex flex-col gap-0.5">
+            {staff.map((entry) => (
+              <span key={`${entry.id}:${entry.role}`}>
+                {resolveInstructorLabel(entry.id, instructorLabelById)}
+                <span className="text-base-content/55"> · {entry.role}</span>
               </span>
             ))}
           </span>
-        </DetailField>
-      ) : null}
-      <DetailField label="Пул преподавателей">{pool}</DetailField>
-      {course?.short_name ? (
-        <DetailField label="Код">{course.short_name}</DetailField>
-      ) : null}
+        ) : (
+          "—"
+        )}
+      </DetailField>
+      <CourseComponentsAccordion
+        config={config}
+        course={course}
+        courseIdx={meetingRef?.courseIdx ?? null}
+        components={siblings}
+        currentComponentIdx={meetingRef?.componentIdx ?? null}
+        currentMeeting={meeting}
+        allMeetings={allMeetings}
+        instructorLabelById={instructorLabelById}
+        onNavigateToMeeting={onNavigateToMeeting}
+      />
     </div>
   );
 }

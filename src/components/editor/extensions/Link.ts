@@ -3,6 +3,12 @@ import type { Editor } from "@tiptap/core";
 import type { MarkType } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 
+declare module "@tiptap/core" {
+  interface EditorEvents {
+    openLinkDialog: { editor: Editor; reference?: HTMLButtonElement };
+  }
+}
+
 // https://tiptap.dev/docs/editor/extensions/marks/link
 /**
  * Custom Link:
@@ -19,6 +25,19 @@ export const Link = BaseLink.extend({
       linkOnPaste: true,
       enableClickSelection: true,
     } as LinkOptions;
+  },
+  addKeyboardShortcuts() {
+    return {
+      ...this.parent?.(),
+      "Mod-k": () => {
+        if (!this.editor.isEditable || !this.editor.can().toggleLink()) {
+          return false;
+        }
+
+        this.editor.emit("openLinkDialog", { editor: this.editor });
+        return true;
+      },
+    };
   },
   addProseMirrorPlugins() {
     return [

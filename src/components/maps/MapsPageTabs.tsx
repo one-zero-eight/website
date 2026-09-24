@@ -28,14 +28,14 @@ export function MapsPageTabs() {
     <div className="flex shrink-0 flex-col whitespace-nowrap @3xl/content:flex-row">
       <form
         onSubmit={onSubmit}
-        className="border-base-300 focus-within:border-b-primary flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0"
+        className="border-base-300 focus-within:border-b-primary flex items-center border-b px-1 pb-px focus-within:border-b-2 focus-within:pb-0"
       >
         <input
           ref={inputRef}
           placeholder="Search any place"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="min-w-0 grow bg-transparent px-2 py-1 outline-hidden"
+          className="min-w-0 grow bg-transparent px-3 py-2.5 outline-hidden"
         />
         <button
           type="submit"
@@ -45,14 +45,14 @@ export function MapsPageTabs() {
       </form>
 
       <div className="flex grow flex-row overflow-x-auto whitespace-nowrap">
-        <div className="border-base-300 w-2 shrink-0 border-b @3xl/content:w-1" />
+        <div className="border-base-300 w-1 shrink-0 border-b" />
         {scenes?.map((scene, i) => (
           <Link
             key={scene.scene_id}
             to="/maps"
             search={{ scene: scene.scene_id }}
             className={cn(
-              "px-2 py-1",
+              "px-3 py-2.5",
               scene.scene_id === sceneId || (sceneId === undefined && i === 0)
                 ? "border-b-primary border-b-2"
                 : "border-base-300 border-b",

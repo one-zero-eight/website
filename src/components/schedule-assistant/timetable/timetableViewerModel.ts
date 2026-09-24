@@ -6,11 +6,7 @@ import type {
 } from "@/api/schedule-assistant/types.ts";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
-import {
-  expandStudentGroupSelectors,
-  isStudentGroupSelector,
-  parseStudentGroupSelector,
-} from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
+import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 import {
   buildGroupToProgramMap,
@@ -19,10 +15,12 @@ import {
   nearestSlotStart,
   normalizeHhmm,
   programResolvedTimeSlots,
+  resolveAudienceSemester,
   resolveProgramTimeColumns,
   termResolvedTimeSlots,
   toMinutes as slotToMinutes,
   unionResolvedTimeSlots,
+  type ResolvedDateRange,
   type ResolvedTimeSlot,
 } from "./programTimeSlots.ts";
 
@@ -69,9 +67,15 @@ export function everyWeekdayPhraseRu(day: string) {
   );
 }
 
+export function weeklyConflictWhenLabel(dates: string[]): string {
+  const date = dates[0]?.trim();
+  if (!date) return "каждую неделю";
+  return everyWeekdayPhraseRu(dayKey(date)).toLowerCase();
+}
+
 /** Один источник текстов `title` для таблицы и для HTML панели деталей. */
 export const scheduleAssistantDetailTooltips = {
-  room: "Показать аудиторию в панели деталей",
+  room: "Показать локацию в панели деталей",
   instructor: "Показать преподавателя в панели деталей",
   group: "Показать группу в панели деталей",
   program: "Показать программу в панели деталей",
@@ -127,7 +131,8 @@ export type Meeting = {
   instructors: string | string[];
   /** Copied from component; used in detail panel. */
   instructor_pool: unknown[];
-  sections: string[];
+  /** Course section_code. */
+  section: string;
   /** Canonical weekly-pattern date before edit.date override. */
   pattern_date?: string;
   /** Fields that differ from the recurring weekly pattern base. */
@@ -167,9 +172,20 @@ export type BuiltGrid = {
   tabMode: string;
 };
 
+export type TimetableGridRow = {
+  day: string;
+  slotStart: string;
+};
+
 export type Selection =
   | null
-  | { type: "meeting"; value: string; course: string }
+  | {
+      type: "meeting";
+      value: string;
+      course: string;
+      /** Component tag whose meetings get related highlight; defaults to selected meeting tag. */
+      focusTag?: string;
+    }
   | { type: "program"; value: string }
   | { type: "group"; value: string }
   | { type: "instructor"; value: string }
@@ -178,6 +194,21 @@ export type Selection =
 export function dayKey(dateStr: string) {
   const d = new Date(`${dateStr}T00:00:00`);
   return DAY_NAMES[d.getDay() === 0 ? 6 : d.getDay() - 1];
+}
+
+/** Display ISO `yyyy-mm-dd` as `dd.mm.yyyy` (default) or `dd.mm`. */
+export function formatDisplayDate(
+  dateStr: string,
+  options?: { withYear?: boolean },
+): string {
+  const iso = String(dateStr || "")
+    .trim()
+    .slice(0, 10);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!match) return iso || "—";
+  const [, year, month, day] = match;
+  if (options?.withYear === false) return `${day}.${month}`;
+  return `${day}.${month}.${year}`;
 }
 
 const WEEKLY_PATTERN_DAY_TO_KEY: Record<string, (typeof DAY_NAMES)[number]> = {
@@ -258,10 +289,22 @@ export function findEditForMeetingDate(
 ) {
   if (!edits?.length) return undefined;
   const weekKey = weekStartForDate(date, startingDay);
-  return edits.find(
-    (edit) => weekStartForDate(edit.select_week, startingDay) === weekKey,
-  );
+  let byWeek = editLookupByWeekCache.get(edits);
+  if (!byWeek || byWeek.startingDay !== startingDay) {
+    const map = new Map<string, SchemaWeeklyPatternSlotEdit>();
+    for (const edit of edits) {
+      map.set(weekStartForDate(edit.select_week, startingDay), edit);
+    }
+    byWeek = { startingDay, map };
+    editLookupByWeekCache.set(edits, byWeek);
+  }
+  return byWeek.map.get(weekKey);
 }
+
+const editLookupByWeekCache = new WeakMap<
+  SchemaWeeklyPatternSlotEdit[],
+  { startingDay: Weekday; map: Map<string, SchemaWeeklyPatternSlotEdit> }
+>();
 
 function instructorKey(value: string | string[] | null | undefined) {
   const list = typeof value === "string" ? [value] : value || [];
@@ -285,8 +328,10 @@ export function weeklyMeetingOverrideFields(
   slot: SchemaWeeklyPatternSlot,
   patternDate: string,
   config: SchemaScheduleConfig,
+  resolvedFields?: ReturnType<typeof resolveWeeklyMeetingFields>,
 ): MeetingOverrideField[] {
-  const resolved = resolveWeeklyMeetingFields(slot, patternDate, config);
+  const resolved =
+    resolvedFields ?? resolveWeeklyMeetingFields(slot, patternDate, config);
   if (resolved.cancelled) return [];
 
   const fields: MeetingOverrideField[] = [];
@@ -369,9 +414,14 @@ export function weekStartMondayIso(dateStr: string) {
 export function semesterDatesForWeekday(
   config: SchemaScheduleConfig,
   weekday: (typeof DAY_NAMES)[number],
+  range: ResolvedDateRange | null = null,
 ) {
-  const semester = config.term.semester;
+  const semester = range ?? {
+    start_date: String(config.term.semester?.start_date ?? "").slice(0, 10),
+    end_date: String(config.term.semester?.end_date ?? "").slice(0, 10),
+  };
   if (!semester.start_date || !semester.end_date) return [];
+  if (semester.start_date > semester.end_date) return [];
   const allowed = normalizedTermDaySet(config);
   if (!allowed.has(weekday)) return [];
   const out: string[] = [];
@@ -383,6 +433,21 @@ export function semesterDatesForWeekday(
     cur.setDate(cur.getDate() + 1);
   }
   return out;
+}
+
+export function countWeeklyPatternSlotOccurrences(
+  config: SchemaScheduleConfig,
+  slot: SchemaWeeklyPatternSlot,
+  audienceTokens: string[],
+): number {
+  const weekday = weeklyPatternDayKey(String(slot.weekday));
+  if (!weekday) return 0;
+  const range = resolveAudienceSemester(config, audienceTokens);
+  if (!range) return 0;
+
+  return semesterDatesForWeekday(config, weekday, range).filter(
+    (date) => !resolveWeeklyMeetingFields(slot, date, config).cancelled,
+  ).length;
 }
 
 export function toMinutes(timeStr: string) {
@@ -421,20 +486,22 @@ export function buildCourseColors(meetings: Meeting[]) {
     new Set((meetings || []).map((m) => courseColorKey(m.course))),
   ).sort();
   const out: Record<string, { bg: string; border: string }> = {};
-  const GOLDEN_HUE_STEP = 137.508;
   for (const subject of subjects) {
-    const hue = (hashString(subject) * GOLDEN_HUE_STEP) % 360;
-    const mix = hashString(`${subject}\0sat`);
-    const s = 64 + (mix % 4) * 9;
-    const l = 78 + ((mix >>> 3) % 5) * 3.2;
-    const borderS = Math.min(96, s + 8);
-    const borderL = Math.max(34, l - 28);
-    out[subject] = {
-      bg: `hsl(${hue.toFixed(2)}, ${s}%, ${l.toFixed(1)}%)`,
-      border: `hsl(${hue.toFixed(2)}, ${borderS}%, ${borderL}%)`,
-    };
+    out[subject] = colorForSubject(subject);
   }
   return out;
+}
+
+export function colorForSubject(subject: string) {
+  const key = courseColorKey(subject);
+  const hue = (hashString(key) * 137.508) % 360;
+  const mix = hashString(`${key}\0sat`);
+  const saturation = 64 + (mix % 4) * 9;
+  const lightness = 78 + ((mix >>> 3) % 5) * 3.2;
+  return {
+    bg: `hsl(${hue.toFixed(2)}, ${saturation}%, ${lightness.toFixed(1)}%)`,
+    border: `hsl(${hue.toFixed(2)}, ${Math.min(96, saturation + 8)}%, ${Math.max(34, lightness - 28)}%)`,
+  };
 }
 
 export function colorBySubject(
@@ -574,43 +641,19 @@ export function buildSectionGroupSets(config: SchemaScheduleConfig) {
 }
 
 function sessionAudienceTokens(
-  component: { student_groups?: string[] },
+  component: { audience?: string[] },
   series: { audience?: string[] },
 ): string[] {
   const audience = series.audience || [];
   if (audience.length) return audience;
-  return component.student_groups || [];
+  return component.audience || [];
 }
 
-function meetingMatchesSectionTab(
-  meeting: Meeting,
-  tabMode: string,
-  sectionGroupSets: Record<string, Set<string>>,
-) {
-  const sectionGroups = sectionGroupSets[tabMode];
-  if (sectionGroups?.size) {
-    if ((meeting.groups || []).some((groupId) => sectionGroups.has(groupId))) {
-      return true;
-    }
-  }
-  return (meeting.sections || []).includes(tabMode);
-}
-
-export function filterMeetingsByTab(
-  meetings: Meeting[],
-  tabMode: string,
-  config?: SchemaScheduleConfig | null,
-) {
+export function filterMeetingsByTab(meetings: Meeting[], tabMode: string) {
   if (tabMode === "instructor" || tabMode === "room" || tabMode === "all") {
     return meetings;
   }
-  if (!config) {
-    return meetings.filter((m) => m.sections.includes(tabMode));
-  }
-  const sectionGroupSets = buildSectionGroupSets(config);
-  return meetings.filter((m) =>
-    meetingMatchesSectionTab(m, tabMode, sectionGroupSets),
-  );
+  return meetings.filter((m) => m.section === tabMode);
 }
 
 export function roomFillPercent(
@@ -640,7 +683,7 @@ export function buildColumns(config: SchemaScheduleConfig) {
       if (!comp.sessions?.length) {
         for (const groupId of expandStudentGroupSelectors(
           config,
-          comp.student_groups || [],
+          comp.audience || [],
         )) {
           usedGroups.add(groupId);
         }
@@ -659,7 +702,7 @@ export function buildColumns(config: SchemaScheduleConfig) {
         undefined;
       for (const track of normalizeTracksFromSectionProgram(program)) {
         for (const gid of track.groups || []) {
-          if (!usedGroups.has(gid) || known.has(gid)) continue;
+          if (known.has(gid)) continue;
           columns.push({
             yearLabel,
             groupId: gid,
@@ -693,91 +736,114 @@ function meetingCourseFields(course: {
   };
 }
 
-export function buildMeetings(
-  config: SchemaScheduleConfig,
-  coursesToSections: { [key: string]: string[] },
-) {
-  const flat: Meeting[] = [];
-  for (const [courseIdx, course] of (config.courses ?? []).entries()) {
-    for (const [componentIdx, component] of (
-      course.components || []
-    ).entries()) {
-      for (const [seriesIdx, series] of (component.sessions || []).entries()) {
-        const audienceGroups = expandStudentGroupSelectors(
-          config,
-          sessionAudienceTokens(component, series),
-        );
+export function buildSemesterDatesByWeekday(config: SchemaScheduleConfig) {
+  const datesByWeekday = new Map<(typeof DAY_NAMES)[number], string[]>();
+  for (const weekday of DAY_NAMES) {
+    datesByWeekday.set(weekday, semesterDatesForWeekday(config, weekday));
+  }
+  return datesByWeekday;
+}
 
-        for (const [occIdx, occurrence] of (
-          series.occurrences || []
-        ).entries()) {
-          if (!occurrence.date || !occurrence.start_time) continue;
+export function meetingCourseIndex(meeting: Meeting): number {
+  return Number(String(meeting.instance_id).split(":")[0]);
+}
+
+export function buildMeetingsForCourse(
+  config: SchemaScheduleConfig,
+  courseIdx: number,
+  _datesByWeekday: Map<
+    (typeof DAY_NAMES)[number],
+    string[]
+  > = buildSemesterDatesByWeekday(config),
+) {
+  const course = config.courses?.[courseIdx];
+  if (!course) return [] as Meeting[];
+  const section = course.section_code;
+  const groupToProgram = buildGroupToProgramMap(config);
+
+  const flat: Meeting[] = [];
+  for (const [componentIdx, component] of (course.components || []).entries()) {
+    for (const [seriesIdx, series] of (component.sessions || []).entries()) {
+      const audienceTokens = sessionAudienceTokens(component, series);
+      const audienceGroups = expandStudentGroupSelectors(
+        config,
+        audienceTokens,
+      );
+      const audienceWindow = resolveAudienceSemester(
+        config,
+        audienceTokens,
+        groupToProgram,
+      );
+
+      for (const [occIdx, occurrence] of (
+        series.dates_pattern || []
+      ).entries()) {
+        if (!occurrence.date || !occurrence.start_time) continue;
+        flat.push({
+          instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:occ:${occIdx}`,
+          ...meetingCourseFields(course),
+          tag: component.tag,
+          groups: audienceGroups,
+          date: occurrence.date,
+          start: String(occurrence.start_time).slice(0, 5),
+          end: occurrence.end_time
+            ? String(occurrence.end_time).slice(0, 5)
+            : undefined,
+          room: occurrence.room ?? "",
+          instructors: occurrence.instructor ?? "",
+          instructor_pool: component.instructor_pool,
+          section,
+        });
+      }
+
+      const pattern = series.weekly_pattern || [];
+      if (pattern.length === 0) continue;
+      if (audienceWindow == null) continue;
+      for (const [slotIdx, slot] of pattern.entries()) {
+        const weekday = weeklyPatternDayKey(String(slot.weekday ?? ""));
+        if (!weekday) continue;
+        const dates = semesterDatesForWeekday(config, weekday, audienceWindow);
+        for (const date of dates) {
+          const resolved = resolveWeeklyMeetingFields(slot, date, config);
+          if (resolved.cancelled) {
+            flat.push({
+              instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
+              ...meetingCourseFields(course),
+              tag: component.tag,
+              groups: audienceGroups,
+              date: resolved.date,
+              start: resolved.start,
+              end: resolved.end,
+              room: resolved.room,
+              instructors: resolved.instructors,
+              instructor_pool: component.instructor_pool,
+              section,
+              pattern_date: date,
+              cancelled: true,
+            });
+            continue;
+          }
+          const overrideFields = weeklyMeetingOverrideFields(
+            slot,
+            date,
+            config,
+            resolved,
+          );
           flat.push({
-            instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:occ:${occIdx}`,
+            instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
             ...meetingCourseFields(course),
             tag: component.tag,
             groups: audienceGroups,
-            date: occurrence.date,
-            start: String(occurrence.start_time).slice(0, 5),
-            end: occurrence.end_time
-              ? String(occurrence.end_time).slice(0, 5)
-              : undefined,
-            room: occurrence.room ?? "",
-            instructors: occurrence.instructor ?? "",
+            date: resolved.date,
+            start: resolved.start,
+            end: resolved.end,
+            room: resolved.room,
+            instructors: resolved.instructors,
             instructor_pool: component.instructor_pool,
-            sections: coursesToSections[courseIdx] ?? [],
+            section,
+            pattern_date: date,
+            override_fields: overrideFields.length ? overrideFields : undefined,
           });
-        }
-
-        const pattern = series.weekly_pattern || [];
-        if (pattern.length > 0) {
-          for (const [slotIdx, slot] of pattern.entries()) {
-            const weekday = weeklyPatternDayKey(String(slot.weekday ?? ""));
-            if (!weekday) continue;
-            for (const date of semesterDatesForWeekday(config, weekday)) {
-              const resolved = resolveWeeklyMeetingFields(slot, date, config);
-              if (resolved.cancelled) {
-                flat.push({
-                  instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
-                  ...meetingCourseFields(course),
-                  tag: component.tag,
-                  groups: audienceGroups,
-                  date: resolved.date,
-                  start: resolved.start,
-                  end: resolved.end,
-                  room: resolved.room,
-                  instructors: resolved.instructors,
-                  instructor_pool: component.instructor_pool,
-                  sections: coursesToSections[courseIdx] ?? [],
-                  pattern_date: date,
-                  cancelled: true,
-                });
-                continue;
-              }
-              const overrideFields = weeklyMeetingOverrideFields(
-                slot,
-                date,
-                config,
-              );
-              flat.push({
-                instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
-                ...meetingCourseFields(course),
-                tag: component.tag,
-                groups: audienceGroups,
-                date: resolved.date,
-                start: resolved.start,
-                end: resolved.end,
-                room: resolved.room,
-                instructors: resolved.instructors,
-                instructor_pool: component.instructor_pool,
-                sections: coursesToSections[courseIdx] ?? [],
-                pattern_date: date,
-                override_fields: overrideFields.length
-                  ? overrideFields
-                  : undefined,
-              });
-            }
-          }
         }
       }
     }
@@ -785,76 +851,31 @@ export function buildMeetings(
   return flat;
 }
 
-type SectionLookupMaps = {
-  programToSection: Record<string, string>;
-  groupsToSections: Record<string, string>;
-};
+export function buildMeetings(config: SchemaScheduleConfig) {
+  const datesByWeekday = buildSemesterDatesByWeekday(config);
+  const flat: Meeting[] = [];
+  for (const courseIdx of (config.courses ?? []).keys()) {
+    flat.push(...buildMeetingsForCourse(config, courseIdx, datesByWeekday));
+  }
+  return flat;
+}
 
-function buildSectionLookupMaps(
+export function rebuildMeetingsForChangedCourses(
+  previousMeetings: Meeting[],
   config: SchemaScheduleConfig,
-): SectionLookupMaps {
-  const programToSection: Record<string, string> = {};
-  const groupsToSections: Record<string, string> = {};
-
-  for (const section of getScheduleSections(config)) {
-    const sectionCode = String(section.code || "").trim();
-    if (!sectionCode) continue;
-    for (const program of section.programs || []) {
-      const programCode = String(program.code || "").trim();
-      if (programCode) programToSection[programCode] = sectionCode;
-      for (const track of normalizeTracksFromSectionProgram(program)) {
-        for (const group of track.groups || []) {
-          groupsToSections[String(group)] = sectionCode;
-        }
-      }
-    }
+  changedCourseIndexes: number[],
+) {
+  if (!changedCourseIndexes.length) return previousMeetings;
+  const changed = new Set(changedCourseIndexes);
+  const kept = previousMeetings.filter(
+    (meeting) => !changed.has(meetingCourseIndex(meeting)),
+  );
+  const datesByWeekday = buildSemesterDatesByWeekday(config);
+  const rebuilt: Meeting[] = [];
+  for (const courseIdx of changedCourseIndexes) {
+    rebuilt.push(...buildMeetingsForCourse(config, courseIdx, datesByWeekday));
   }
-
-  return { programToSection, groupsToSections };
-}
-
-function resolveAudienceTokenToSection(
-  token: string,
-  maps: SectionLookupMaps,
-): string | null {
-  const raw = String(token || "").trim();
-  if (!raw) return null;
-
-  const parsed = parseStudentGroupSelector(raw);
-  if (parsed) return maps.programToSection[parsed.programCode] ?? null;
-  if (isStudentGroupSelector(raw)) return null;
-
-  return maps.groupsToSections[raw] ?? null;
-}
-
-export function buildCoursesToSections(config: SchemaScheduleConfig) {
-  const maps = buildSectionLookupMaps(config);
-  const coursesToSections: Record<string, string[]> = {};
-
-  for (const [courseIdx, course] of (config.courses ?? []).entries()) {
-    const courseSections = new Set<string>();
-
-    for (const component of course.components || []) {
-      const tokens = [
-        ...(component.student_groups || []),
-        ...(component.sessions || []).flatMap(
-          (session) => session.audience || [],
-        ),
-      ];
-      for (const token of tokens) {
-        const sectionCode = resolveAudienceTokenToSection(token, maps);
-        if (sectionCode) courseSections.add(sectionCode);
-      }
-      for (const groupId of expandStudentGroupSelectors(config, tokens)) {
-        const sectionCode = maps.groupsToSections[groupId];
-        if (sectionCode) courseSections.add(sectionCode);
-      }
-    }
-
-    coursesToSections[courseIdx] = Array.from(courseSections);
-  }
-
-  return coursesToSections;
+  return kept.concat(rebuilt);
 }
 
 export function buildWeeks(meetings: Meeting[]) {
@@ -907,15 +928,15 @@ export function weekIndexForDate(weeks: WeekRange[], dateStr: string) {
 export type WeekRelativePosition = "current" | "past" | "future";
 
 export const WEEK_RELATIVE_LABELS: Record<WeekRelativePosition, string> = {
-  current: "текущая",
-  past: "прошлая",
-  future: "будущая",
+  current: "Текущая",
+  past: "Прошлая",
+  future: "Будущая",
 };
 
-export const WEEK_RELATIVE_BADGE_CLASS: Record<WeekRelativePosition, string> = {
-  current: "badge-success",
-  past: "badge-error",
-  future: "badge-info",
+export const WEEK_RELATIVE_DOT_CLASS: Record<WeekRelativePosition, string> = {
+  current: "bg-success",
+  past: "bg-error",
+  future: "bg-info",
 };
 
 export function weekRelativeToToday(
@@ -935,12 +956,10 @@ export function buildGrid(
   tabMode: string,
   visibleColumns?: Column[],
 ): BuiltGrid {
-  const meetings = filterMeetingsByTab(allMeetings, tabMode, config).filter(
-    (m) => {
-      if (m.cancelled) return false;
-      return weekStartMondayIso(m.date) === weekStart;
-    },
-  );
+  const meetings = filterMeetingsByTab(allMeetings, tabMode).filter((m) => {
+    if (m.cancelled) return false;
+    return weekStartMondayIso(m.date) === weekStart;
+  });
 
   const allowedDays = normalizedTermDays(config);
   const termSlots = termResolvedTimeSlots(config);
@@ -1093,6 +1112,46 @@ export function buildGrid(
   };
 }
 
+export function compactGroupRows(
+  config: SchemaScheduleConfig,
+  allMeetings: Meeting[],
+  tabMode: string,
+  visibleColumns: Column[],
+): TimetableGridRow[] {
+  const columnGroups = new Set(visibleColumns.map((column) => column.groupId));
+  const usedPairs = new Set<string>();
+  const termSlots = termResolvedTimeSlots(config);
+
+  for (const meeting of filterMeetingsByTab(allMeetings, tabMode)) {
+    if (meeting.cancelled) continue;
+    if (
+      columnGroups.size &&
+      !meeting.groups.some((groupId) => columnGroups.has(groupId))
+    ) {
+      continue;
+    }
+    const start = normalizeHhmm(meeting.start);
+    const rowStart =
+      termSlots.find((slot) => slot.start === start)?.start ??
+      nearestSlotStart(start, termSlots) ??
+      start;
+    usedPairs.add(`${dayKey(meeting.date)}|${rowStart}`);
+  }
+
+  const rows: TimetableGridRow[] = [];
+  for (const day of normalizedTermDays(config)) {
+    const starts = new Set<string>();
+    for (const pair of usedPairs) {
+      const [pairDay, start] = pair.split("|");
+      if (pairDay === day && start) starts.add(start);
+    }
+    [...starts]
+      .sort((a, b) => slotToMinutes(a) - slotToMinutes(b))
+      .forEach((slotStart) => rows.push({ day, slotStart }));
+  }
+  return rows;
+}
+
 export function columnsForTab(
   tabMode: string,
   baseColumns: Column[],
@@ -1100,19 +1159,18 @@ export function columnsForTab(
   config: SchemaScheduleConfig,
 ): Column[] {
   if (!baseColumns.length) return [];
-  if (tabMode === "instructor" || tabMode === "room") return baseColumns;
-  const tabMeetings = filterMeetingsByTab(allMeetings, tabMode, config);
+  if (tabMode === "instructor" || tabMode === "room" || tabMode === "all") {
+    return baseColumns;
+  }
+  const tabMeetings = filterMeetingsByTab(allMeetings, tabMode);
   const usedGroups = new Set<string>();
   for (const m of tabMeetings) {
     for (const g of m.groups || []) usedGroups.add(g);
   }
-  let sectionColumns = baseColumns.filter((c) => usedGroups.has(c.groupId));
-  if (!sectionColumns.length) {
-    const sectionGroups = buildSectionGroupSets(config)[tabMode];
-    if (sectionGroups?.size) {
-      sectionColumns = baseColumns.filter((c) => sectionGroups.has(c.groupId));
-    }
-  }
+  const sectionGroups = buildSectionGroupSets(config)[tabMode];
+  const sectionColumns = sectionGroups?.size
+    ? baseColumns.filter((column) => sectionGroups.has(column.groupId))
+    : baseColumns.filter((column) => usedGroups.has(column.groupId));
   if (tabMode === "english") {
     const normalizeEnglishTrackLabel = (trackName: string, groupId: string) => {
       const t = String(trackName || "")
@@ -1138,7 +1196,7 @@ export function columnsForTab(
       for (const track of normalizeTracksFromSectionProgram(program)) {
         const trackLabel = normalizeEnglishTrackLabel(track?.name || "", "");
         for (const gid of track?.groups || []) {
-          if (!usedGroups.has(gid) || seen.has(gid)) continue;
+          if (seen.has(gid)) continue;
           const base = byId[gid];
           const baseGroupLabel = base?.groupLabel || gid;
           ordered.push({

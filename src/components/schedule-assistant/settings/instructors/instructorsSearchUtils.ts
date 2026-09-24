@@ -1,10 +1,11 @@
-import type { SchemaInstructorListItem } from "@/api/schedule-assistant/types.ts";
+import type { SchemaInstructor } from "@/api/schedule-assistant/types.ts";
 import { fixKeyboardLayout, transliterates } from "@/lib/utils/searchUtils.ts";
 import MiniSearch from "minisearch";
 import { transliterate } from "transliteration";
 
-export type InstructorSearchItem = SchemaInstructorListItem & {
+export type InstructorSearchItem = SchemaInstructor & {
   instructorIndex: number;
+  meetings_count?: number;
   /** Alias without leading @, lowercased. */
   alias_search: string;
   /** Normalized searchable names (RU/EN + translit / ё variants). */
@@ -64,7 +65,7 @@ function latinYoVariants(latin: string): string[] {
   return [lower, lower.replaceAll("yo", "e").replaceAll("jo", "e")];
 }
 
-function buildNameSearchText(instructor: SchemaInstructorListItem): string {
+function buildNameSearchText(instructor: SchemaInstructor): string {
   const variants = new Set<string>();
 
   for (const raw of [instructor.name_ru, instructor.name_en]) {
@@ -125,9 +126,7 @@ function queryTerms(query: string): string[] {
   return base.length === 1 ? Array.from(new Set([base[0]!, ...extra])) : base;
 }
 
-export function instructorDisplayName(
-  instructor: SchemaInstructorListItem,
-): string {
+export function instructorDisplayName(instructor: SchemaInstructor): string {
   return (
     instructor.name_en?.trim() ||
     instructor.name_ru?.trim() ||
@@ -137,11 +136,11 @@ export function instructorDisplayName(
   );
 }
 
-function nameKey(instructor: SchemaInstructorListItem): string {
+function nameKey(instructor: SchemaInstructor): string {
   return instructorDisplayName(instructor).trim().toLocaleLowerCase("ru");
 }
 
-function positionKey(instructor: SchemaInstructorListItem): string {
+function positionKey(instructor: SchemaInstructor): string {
   return (instructor.position ?? "").trim();
 }
 
@@ -158,13 +157,13 @@ function positionEnumIndex(
   );
 }
 
-function preferencesCount(instructor: SchemaInstructorListItem): number {
+function preferencesCount(instructor: SchemaInstructor): number {
   return instructor.slot_preferences?.length ?? 0;
 }
 
 export function compareInstructors(
-  a: SchemaInstructorListItem,
-  b: SchemaInstructorListItem,
+  a: SchemaInstructor & { meetings_count?: number },
+  b: SchemaInstructor & { meetings_count?: number },
   mode: InstructorSortMode,
   positionOrder?: readonly string[],
 ): number {
@@ -222,7 +221,7 @@ function tokenizeNormalized(text: string): string[] {
 }
 
 export function createInstructorsSearchIndex(
-  instructors: SchemaInstructorListItem[],
+  instructors: SchemaInstructor[],
 ): InstructorsSearchIndex {
   const items: InstructorSearchItem[] = instructors.map(
     (instructor, instructorIndex) => {

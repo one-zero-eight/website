@@ -27,6 +27,16 @@ import {
 
 export type RoomAvailabilityStatus = "green" | "orange" | "red";
 
+/** Virtual location — does not consume a physical room (matches backend VIRTUAL_ROOM_ID). */
+export const VIRTUAL_ROOM_ID = "ONLINE";
+
+export function isVirtualRoom(roomId: string | null | undefined): boolean {
+  const room = String(roomId || "")
+    .trim()
+    .toLocaleUpperCase("en-US");
+  return room === VIRTUAL_ROOM_ID || room === "ОНЛАЙН";
+}
+
 export type RoomConflictMeeting = {
   label: string;
   start: string;
@@ -112,21 +122,20 @@ export function isSameLogicalMeeting(
 ): boolean {
   const ref = parseMeetingInstanceId(meeting.instance_id);
   if (!ref) return false;
-  if (excludeRef.kind === "wp" && ref.kind === "wp") {
-    return (
-      ref.courseIdx === excludeRef.courseIdx &&
-      ref.componentIdx === excludeRef.componentIdx &&
-      ref.seriesIdx === excludeRef.seriesIdx &&
-      ref.slotIdx === excludeRef.slotIdx
-    );
+  if (
+    ref.courseIdx !== excludeRef.courseIdx ||
+    ref.componentIdx !== excludeRef.componentIdx ||
+    ref.seriesIdx !== excludeRef.seriesIdx
+  ) {
+    return false;
   }
+  // Weekly slots: only the same slot across dates (other slots stay real conflicts).
+  if (excludeRef.kind === "wp" && ref.kind === "wp") {
+    return ref.slotIdx === excludeRef.slotIdx;
+  }
+  // Occurrences: only the same date row (overlapping sibling dates are conflicts).
   if (excludeRef.kind === "occ" && ref.kind === "occ") {
-    return (
-      ref.courseIdx === excludeRef.courseIdx &&
-      ref.componentIdx === excludeRef.componentIdx &&
-      ref.seriesIdx === excludeRef.seriesIdx &&
-      ref.occIdx === excludeRef.occIdx
-    );
+    return ref.occIdx === excludeRef.occIdx;
   }
   return false;
 }
@@ -217,6 +226,15 @@ export function roomAvailabilityForSlot({
   index?: MeetingPickerIndex | null;
 }): RoomAvailabilityInfo {
   const room = roomId.trim();
+  if (isVirtualRoom(room)) {
+    return {
+      status: "green",
+      conflictDates: [],
+      conflicts: [],
+      capacityIssue: null,
+    };
+  }
+
   const proposedStart = normalizeHhmm(start);
   const proposedEnd =
     normalizeHhmm(end) ||
@@ -303,9 +321,18 @@ export function roomAvailabilityForSlot({
 
   const hasWeeklyConflict = conflicts.some((conflict) => conflict.weekly);
   const onceConflicts = conflicts.filter((conflict) => !conflict.weekly);
+  // Date-pattern checks use one date: any hit is a hard conflict (red).
+  // Weekly checks across many dates: a single once-hit stays orange.
+  const everyCheckedDateConflicts =
+    dateSet.size > 0 && conflictDates.length >= dateSet.size;
 
   let status: RoomAvailabilityStatus = "green";
-  if (capacityIssue || hasWeeklyConflict || conflictDates.length >= 2) {
+  if (
+    capacityIssue ||
+    hasWeeklyConflict ||
+    conflictDates.length >= 2 ||
+    everyCheckedDateConflicts
+  ) {
     status = "red";
   } else if (onceConflicts.length === 1 || conflictDates.length === 1) {
     status = "orange";
@@ -388,6 +415,7 @@ export function buildRoomPickerOptions({
   );
 
   const ids = new Set<string>();
+  ids.add(VIRTUAL_ROOM_ID);
   for (const id of roomsById.keys()) ids.add(id);
   for (const id of includeRoomIds || []) {
     const trimmed = id.trim();
@@ -464,6 +492,8 @@ export function buildRoomPickerOptions({
       };
     })
     .sort((a, b) => {
+      if (a.value === VIRTUAL_ROOM_ID) return -1;
+      if (b.value === VIRTUAL_ROOM_ID) return 1;
       if (includeStatus && a.status && b.status) {
         const statusDiff = statusSortRank(a.status) - statusSortRank(b.status);
         if (statusDiff !== 0) return statusDiff;
@@ -484,4 +514,69 @@ export function buildRoomPickerOptions({
         endAdornment,
       }),
     );
+}
+
+/** Best free physical room for a slot (green, capacity-fit). Skips ONLINE. */
+export function suggestBestRoomId({
+  config,
+  meetings,
+  date,
+  dates,
+  start,
+  end,
+  audienceTokens,
+  index,
+}: {
+  config: SchemaScheduleConfig;
+  meetings: Meeting[];
+  date: string;
+  dates: string[];
+  start: string;
+  end?: string;
+  audienceTokens?: string[];
+  index?: MeetingPickerIndex | null;
+}): string | null {
+  const startHhmm = String(start || "")
+    .trim()
+    .slice(0, 5);
+  if (!date.trim() || !startHhmm || !dates.length) return null;
+
+  const roomsById = new Map(
+    (config.rooms || [])
+      .map((room) => [String(room.id || "").trim(), room] as const)
+      .filter(([id]) => !!id),
+  );
+  const audienceSize = audienceSizeForTokens(config, audienceTokens);
+  const pickerIndex = index ?? buildMeetingPickerIndex(meetings);
+
+  const ranked = [...roomsById.entries()]
+    .filter(([roomId]) => !isVirtualRoom(roomId))
+    .map(([roomId, room]) => {
+      const availability = roomAvailabilityForSlot({
+        config,
+        meetings,
+        roomId,
+        dates,
+        start: startHhmm,
+        end: end?.slice(0, 5) || undefined,
+        audienceSize,
+        capacity: room.capacity,
+        index: pickerIndex,
+      });
+      return {
+        roomId,
+        capacity: room.capacity ?? null,
+        status: availability.status,
+      };
+    })
+    .filter((item) => item.status === "green")
+    .sort((a, b) => {
+      const [tierA, capA] = roomSortKey(a.capacity, audienceSize);
+      const [tierB, capB] = roomSortKey(b.capacity, audienceSize);
+      if (tierA !== tierB) return tierA - tierB;
+      if (capA !== capB) return capA - capB;
+      return a.roomId.localeCompare(b.roomId, "ru");
+    });
+
+  return ranked[0]?.roomId ?? null;
 }

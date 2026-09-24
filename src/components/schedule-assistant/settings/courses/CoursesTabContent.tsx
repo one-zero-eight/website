@@ -69,10 +69,7 @@ export function CoursesTabContent() {
   const { mutate: createCourse, isPending: isCreating } =
     useCreateCourseMutation();
   const { selectedSelectionId, selectItem } = useSelection();
-  const { sections, unassigned } = useMemo(
-    () => buildCoursesTabSections(config),
-    [config],
-  );
+  const { sections } = useMemo(() => buildCoursesTabSections(config), [config]);
   const [activeSectionKey, setActiveSectionKey] = useState(() => {
     if (typeof window === "undefined") return "";
     return window.localStorage.getItem(COURSES_SUBTAB_STORAGE_KEY) || "";
@@ -124,11 +121,13 @@ export function CoursesTabContent() {
 
   function handleCreateCourse() {
     const name = newName.trim();
-    if (!name) return;
+    const sectionCode = activeSectionKey.trim();
+    if (!name || !sectionCode) return;
     createCourse(
       {
         body: {
           name,
+          section_code: sectionCode,
           short_name: newShortName.trim() || null,
           name_ru: newNameRu.trim() || null,
           short_name_ru: newShortNameRu.trim() || null,
@@ -149,6 +148,7 @@ export function CoursesTabContent() {
     <button
       type="button"
       className="btn btn-outline btn-secondary btn-sm w-fit shrink-0"
+      disabled={!activeSectionKey}
       onClick={() => {
         resetCreateForm();
         setNewName("Новый курс");
@@ -168,6 +168,20 @@ export function CoursesTabContent() {
       isPending={isCreating}
       onSubmit={handleCreateCourse}
     >
+      <SettingsCreateField label="Секция" required>
+        <select
+          className="select select-bordered select-sm w-full"
+          value={activeSectionKey}
+          required
+          onChange={(e) => setActiveSectionKey(e.target.value)}
+        >
+          {sections.map((section) => (
+            <option key={section.key} value={section.key}>
+              {section.title}
+            </option>
+          ))}
+        </select>
+      </SettingsCreateField>
       <SettingsCreateField label="Название" required>
         <input
           className="input input-bordered input-sm w-full"
@@ -212,31 +226,7 @@ export function CoursesTabContent() {
     );
   }
 
-  const unassignedBlock =
-    unassigned.length > 0 ? (
-      <div className="border-base-300 rounded-box overflow-hidden border">
-        <div className="border-base-300 bg-base-200/70 rounded-t-box border-b px-3 py-2 text-sm font-semibold">
-          Без привязки к программе
-        </div>
-        <div className="divide-base-300 divide-y">
-          {unassigned.map((course, courseIndex) => (
-            <CourseRowButton
-              key={`unassigned-${course.id}`}
-              course={course}
-              selected={
-                selectedSelectionId ===
-                getSettingsSelectionKey(course.selection)
-              }
-              isLast={courseIndex === unassigned.length - 1}
-              indentClass="px-3 py-1"
-              onSelect={() => selectItem(course.selection)}
-            />
-          ))}
-        </div>
-      </div>
-    ) : null;
-
-  if (!config || (!sections.length && !unassigned.length)) {
+  if (!config || !sections.length) {
     return (
       <div className="flex flex-col gap-2">
         <div className="text-base-content/70 text-sm">
@@ -251,6 +241,7 @@ export function CoursesTabContent() {
   const activeSection =
     sections.find((section) => section.key === activeSectionKey) || null;
   const programs = activeSection?.programs || [];
+  const looseCourses = activeSection?.looseCourses || [];
   const tabs = sections.map((section) => ({
     key: section.key,
     label: section.title,
@@ -271,11 +262,32 @@ export function CoursesTabContent() {
         </div>
       )}
       {createButton}
-      {unassignedBlock}
       <div className="flex flex-col gap-6">
-        {sections.length && !programs.length ? (
+        {sections.length && !programs.length && !looseCourses.length ? (
           <div className="text-base-content/70 text-sm">
             В этом разделе нет курсов.
+          </div>
+        ) : null}
+        {looseCourses.length ? (
+          <div className="border-base-300 rounded-box overflow-hidden border">
+            <div className="border-base-300 bg-base-200/70 rounded-t-box border-b px-3 py-2 text-sm font-semibold">
+              Без аудитории
+            </div>
+            <div className="divide-base-300 divide-y">
+              {looseCourses.map((course, courseIndex) => (
+                <CourseRowButton
+                  key={`loose-${course.id}`}
+                  course={course}
+                  selected={
+                    selectedSelectionId ===
+                    getSettingsSelectionKey(course.selection)
+                  }
+                  isLast={courseIndex === looseCourses.length - 1}
+                  indentClass="px-3 py-1"
+                  onSelect={() => selectItem(course.selection)}
+                />
+              ))}
+            </div>
           </div>
         ) : null}
         {programs.map((program) => {

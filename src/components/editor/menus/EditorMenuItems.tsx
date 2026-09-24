@@ -16,9 +16,11 @@ function EditorMenuSeparator() {
 export function EditorMenuItems({
   editor,
   editorState,
+  showTextFormatting = false,
 }: {
   editor: Editor;
   editorState: EditorMenuState;
+  showTextFormatting?: boolean;
 }) {
   return (
     <>
@@ -26,7 +28,7 @@ export function EditorMenuItems({
 
       {editorState.isCallout && <CalloutTypePicker editor={editor} />}
 
-      {editorState.isTextSelection && (
+      {(editorState.isTextSelection || showTextFormatting) && (
         <>
           <EditorMenuSeparator />
 
@@ -43,6 +45,13 @@ export function EditorMenuItems({
             onClick={() => editor.chain().focus().toggleItalic().run()}
             title="Italic"
             iconClassName="icon-[material-symbols--format-italic]"
+          />
+          <BubbleMenuButton
+            isActive={editorState.isUnderline}
+            isDisabled={!editorState.canUnderline}
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            title="Underline"
+            iconClassName="icon-[material-symbols--format-underlined]"
           />
           <BubbleMenuButton
             isActive={editorState.isStrike}

@@ -1,20 +1,37 @@
-import { $clubs } from "@/api/clubs";
+import { useMe } from "@/api/accounts/user.ts";
 import { $workshops } from "@/api/workshops";
-import { UserRole } from "@/api/workshops/types";
 
 export function useEventsAuth() {
-  const { data: eventsUser } = $workshops.useQuery("get", "/users/me");
-  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
+  const { me: accountMe } = useMe();
+  const {
+    data: me,
+    isPending,
+    isError,
+    error,
+    refetch,
+  } = $workshops.useQuery("get", "/users/me", undefined, {
+    enabled: !!accountMe,
+  });
 
-  const isAdmin = eventsUser?.role === UserRole.admin;
-  const leaderClubIds = clubsUser?.leader_in_clubs?.map((c) => c.id) ?? [];
-  const isClubLeader = leaderClubIds.length > 0;
+  const roles = me?.roles ?? [];
+  const clubs = me?.clubs ?? [];
+
+  const isClubLeader = roles.includes("club-leader");
+  const isEventManager = roles.includes("event-manager");
+  const isModerator = roles.includes("moderator");
+  const canManage = isClubLeader || isEventManager;
 
   return {
-    eventsUser,
-    clubsUser,
-    isAdmin,
-    leaderClubIds,
+    me,
+    clubs,
+    roles,
+    isPending: !!accountMe && isPending,
+    isError: !!accountMe && isError,
+    error,
+    refetch,
     isClubLeader,
+    isEventManager,
+    isModerator,
+    canManage,
   };
 }

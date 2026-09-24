@@ -153,12 +153,12 @@ export function RoomAttributesConfigModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Атрибуты аудиторий"
+      title="Атрибуты локаций"
       containerClassName="max-w-3xl"
     >
       <div className="@container/modal flex flex-col gap-3">
         <p className="text-base-content/70 text-sm">
-          Эти определения общие для всех аудиторий: ключ, тип и подсказка.
+          Эти определения общие для всех локаций: ключ, тип и подсказка.
         </p>
 
         {draft.length === 0 ? (

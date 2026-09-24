@@ -1,12 +1,13 @@
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 
-export type TimetableLayoutMode = "groups" | "calendar";
+export type TimetableLayoutMode = "groups" | "compact_groups" | "calendar";
 
 const LAYOUT_OPTIONS: {
   value: TimetableLayoutMode;
   label: string;
 }[] = [
   { value: "groups", label: "По группам" },
+  { value: "compact_groups", label: "По группам (компактно)" },
   { value: "calendar", label: "По дням" },
 ];
 

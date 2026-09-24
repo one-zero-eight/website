@@ -108,6 +108,48 @@ export interface components {
        */
       scene_pointer?: string | null;
     };
+    /** GeoControlPoint */
+    GeoControlPoint: {
+      /**
+       * Label
+       * @description Human-readable note, e.g. 'garage entrance, NE corner'
+       */
+      label: string;
+      /**
+       * Lat
+       * @description Real-world latitude (WGS84)
+       */
+      lat: number;
+      /**
+       * Lon
+       * @description Real-world longitude (WGS84)
+       */
+      lon: number;
+      /**
+       * X
+       * @description Position of the same spot in the SVG user-space (viewBox units)
+       */
+      x: number;
+      /**
+       * Y
+       * @description Position of the same spot in the SVG user-space (viewBox units)
+       */
+      y: number;
+    };
+    /** GeoReference */
+    GeoReference: {
+      /**
+       * Control Points
+       * @description At least 2 spread-out, non-collinear points to fit a 2D affine transform; fewer means no location dot
+       */
+      control_points?: components["schemas"]["GeoControlPoint"][];
+      /**
+       * Accuracy Threshold M
+       * @description Hide the location dot when the browser's reported accuracy is worse than this (meters)
+       * @default 150
+       */
+      accuracy_threshold_m: number;
+    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -146,6 +188,8 @@ export interface components {
        * @description Areas of the scene
        */
       areas?: components["schemas"]["Area"][];
+      /** @description GPS-to-SVG calibration for the 'you are here' dot; null if the scene isn't georeferenced */
+      geo_reference?: components["schemas"]["GeoReference"] | null;
     };
     /** SearchResult */
     SearchResult: {
@@ -176,6 +220,8 @@ export interface components {
   pathItems: never;
 }
 export type SchemaArea = components["schemas"]["Area"];
+export type SchemaGeoControlPoint = components["schemas"]["GeoControlPoint"];
+export type SchemaGeoReference = components["schemas"]["GeoReference"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaPdfExport = components["schemas"]["PdfExport"];

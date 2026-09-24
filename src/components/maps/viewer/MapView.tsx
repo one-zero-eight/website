@@ -1,9 +1,23 @@
 import { customFetch } from "@/api/helpers/custom-fetch.ts";
 import { mapsTypes } from "@/api/maps";
+import {
+  getSceneGeoReference,
+  isWithinViewBox,
+  solveGeoTransform,
+} from "@/components/maps/georeference.ts";
+import { useUserLocation } from "@/components/maps/viewer/useUserLocation.ts";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/ui/cn";
 import { FloatingOverlay, FloatingPortal } from "@floating-ui/react";
-import { PropsWithChildren, useCallback, useEffect, useState } from "react";
-import { MapViewer } from "./MapViewer.tsx";
+import {
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { MapViewer, type MapViewerHandle } from "./MapViewer.tsx";
 
 export function MapView({
   scene,
@@ -18,6 +32,80 @@ export function MapView({
   const [fullscreen, setFullscreen] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const switchFullscreen = useCallback(() => setFullscreen((v) => !v), []);
+  const mapViewerRef = useRef<MapViewerHandle>(null);
+  const [bearing, setBearing] = useState(0);
+
+  const geoRef = useMemo(
+    () => getSceneGeoReference(scene.geo_reference),
+    [scene.geo_reference],
+  );
+  const geoTransform = useMemo(
+    () => (geoRef ? solveGeoTransform(geoRef) : null),
+    [geoRef],
+  );
+  // TEMPORARY dev-only: draw the raw control points on the map for calibration
+  const debugControlPoints = import.meta.env.DEV
+    ? geoRef?.controlPoints
+    : undefined;
+  const {
+    position,
+    status: locationStatus,
+    start: startLocating,
+    stop: stopLocating,
+  } = useUserLocation();
+
+  // Remembers an explicit "turn location off" tap so the auto-start effect below
+  // doesn't immediately switch it back on. Reset for the session only (no persistence).
+  const userDisabledLocationRef = useRef(false);
+
+  // Stop watching if the new scene doesn't support the location dot; otherwise keep tracking across floor changes
+  useEffect(() => {
+    if (!geoTransform) {
+      stopLocating();
+    }
+  }, [geoTransform, stopLocating]);
+
+  // Location is on by default on the interactive maps page: start tracking as soon
+  // as the current scene is georeferenced, unless the user has turned it off.
+  // Embedded previews (`disablePopup`) stay opt-in and never prompt for permission.
+  useEffect(() => {
+    if (disablePopup) return;
+    if (!geoTransform) return;
+    if (userDisabledLocationRef.current) return;
+    startLocating();
+  }, [disablePopup, geoTransform, startLocating]);
+
+  const userLocation = useMemo(() => {
+    if (!position || !geoTransform || !geoRef) return null;
+    const { x, y } = geoTransform.project(position.lat, position.lon);
+    const withinBounds = isWithinViewBox(x, y);
+    const accurate = position.accuracyM <= geoRef.accuracyThresholdM;
+    return {
+      x,
+      y,
+      accuracyM: position.accuracyM,
+      heading: position.heading,
+      visible: withinBounds && accurate,
+      withinBounds,
+      accurate,
+    };
+  }, [position, geoTransform, geoRef]);
+
+  /**
+   * Why the location dot can't be shown, or null when it can. Shown as a
+   * message right above the location button, the control it is about.
+   */
+  const locationIssue = useMemo(() => {
+    if (locationStatus === "denied") return "Location access denied";
+    if (locationStatus === "unavailable") return "Location unavailable";
+    if (locationStatus === "error") return "No GPS signal";
+    if (userLocation && !userLocation.visible) {
+      return userLocation.withinBounds
+        ? `Weak GPS signal (±${Math.round(userLocation.accuracyM)}m)`
+        : "You are outside this map";
+    }
+    return null;
+  }, [locationStatus, userLocation]);
 
   async function handleExportPdf() {
     setIsExportingPdf(true);
@@ -88,9 +176,13 @@ export function MapView({
     <FullscreenMode enable={fullscreen}>
       <div className="relative h-full w-full overflow-hidden">
         <MapViewer
+          ref={mapViewerRef}
           scene={scene}
           highlightAreas={highlightAreas}
           disablePopup={disablePopup}
+          userLocation={userLocation}
+          debugControlPoints={debugControlPoints}
+          onBearingChange={setBearing}
         />
         {!disablePopup && (
           <>
@@ -107,13 +199,78 @@ export function MapView({
               )}
               <span className="text-base font-thin">Export PDF</span>
             </button>
-            <button
-              type="button"
-              className="bg-base-300/50 hover:bg-base-300/75 absolute right-2 bottom-2 flex h-fit rounded-xl px-2 py-2"
-              onClick={() => switchFullscreen()}
-            >
-              <span className="icon-[material-symbols--fullscreen] text-2xl" />
-            </button>
+            <div className="absolute right-2 bottom-2 flex flex-col gap-2">
+              {Math.abs(bearing) > 0.2 && (
+                <button
+                  type="button"
+                  className="bg-base-300/50 hover:bg-base-300/75 flex h-fit justify-center rounded-xl px-2 py-2"
+                  aria-label="Reset north"
+                  onClick={() => mapViewerRef.current?.resetBearing()}
+                >
+                  {/* Counter-rotated by the bearing so the white end of the
+                      needle always points to the plan's north. */}
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="size-6"
+                    style={{ transform: `rotate(${bearing}deg) scale(1.5)` }}
+                  >
+                    <path d="M12 3.5 15 12H9Z" className="fill-error" />
+                    <path d="M12 20.5 9 12h6Z" className="fill-current" />
+                  </svg>
+                </button>
+              )}
+              {geoTransform && (
+                <>
+                  {locationIssue && (
+                    // Zero-width, right-aligned wrapper: the message overflows
+                    // to the left instead of widening the button column.
+                    <div className="flex w-0 justify-end self-end">
+                      <div className="bg-base-300/70 text-base-content w-max max-w-64 shrink-0 rounded-xl px-3 py-2 text-sm">
+                        {locationIssue}
+                      </div>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    className={cn(
+                      "bg-base-300/50 hover:bg-base-300/75 flex h-fit justify-center rounded-xl px-2 py-2",
+                      locationStatus === "active" &&
+                        !locationIssue &&
+                        "text-primary",
+                      locationIssue && "text-error",
+                    )}
+                    aria-label="Show my location"
+                    onClick={() => {
+                      if (
+                        locationStatus === "active" ||
+                        locationStatus === "locating"
+                      ) {
+                        userDisabledLocationRef.current = true;
+                        stopLocating();
+                      } else {
+                        userDisabledLocationRef.current = false;
+                        startLocating();
+                      }
+                    }}
+                  >
+                    {locationStatus === "locating" ? (
+                      <span className="loading loading-spinner loading-sm" />
+                    ) : locationIssue ? (
+                      <span className="icon-[material-symbols--location-disabled] text-2xl" />
+                    ) : (
+                      <span className="icon-[material-symbols--my-location] text-2xl" />
+                    )}
+                  </button>
+                </>
+              )}
+              <button
+                type="button"
+                className="bg-base-300/50 hover:bg-base-300/75 flex h-fit rounded-xl px-2 py-2"
+                onClick={() => switchFullscreen()}
+              >
+                <span className="icon-[material-symbols--fullscreen] text-2xl" />
+              </button>
+            </div>
           </>
         )}
       </div>

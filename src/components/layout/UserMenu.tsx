@@ -19,11 +19,13 @@ import {
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 import { useState } from "react";
+import { ConfigCalendarDialog } from "@/components/calendar/ConfigCalendarDialog.tsx";
 
 type UserMenuProps = {
   isMobile: boolean;
   isSidebar: boolean;
 };
+
 function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   const { me } = useMe();
   const [isOpen, setIsOpen] = useState(false);
@@ -53,6 +55,8 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
     dismiss,
     role,
   ]);
+
+  const [configModalOpen, setConfigModalOpen] = useState(false);
 
   if (!me) {
     return <SignInButton onClick={() => setIsOpen(false)} />;
@@ -125,6 +129,14 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                   </Link>
                   <button
                     type="button"
+                    onClick={() => setConfigModalOpen(true)}
+                    className="bg-base-200 text-base-content/75 hover:bg-base-300 rounded-box flex w-full flex-row items-center justify-center gap-2 px-6 py-2 text-center whitespace-nowrap"
+                  >
+                    <span className="icon-[material-symbols--settings-outline] text-2xl" />
+                    Config & Export
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => {
                       navigateToSignOut();
                       setIsOpen(false);
@@ -136,6 +148,10 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                   </button>
                 </div>
               </div>
+              <ConfigCalendarDialog
+                open={configModalOpen}
+                onOpenChange={setConfigModalOpen}
+              />
             </div>
           </FloatingFocusManager>
         </FloatingPortal>

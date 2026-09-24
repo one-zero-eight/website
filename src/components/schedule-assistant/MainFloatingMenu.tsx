@@ -25,6 +25,13 @@ export function MainFloatingMenu() {
         >
           Проверка
         </Link>
+        <Link
+          to="/schedule-assistant/bookings"
+          className="tab"
+          activeProps={{ className: "tab-active" }}
+        >
+          Бронирование
+        </Link>
       </div>
     </div>
   );

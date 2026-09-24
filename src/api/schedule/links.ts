@@ -1,14 +1,22 @@
 export const SCHEDULE_API_URL = import.meta.env.VITE_SCHEDULE_API_URL!;
 export const WORKSHOPS_API_URL = import.meta.env.VITE_WORKSHOPS_API_URL!;
 
+export const CALENDAR_EXPORT_HOST = import.meta.env.VITE_CALENDAR_EXPORT_HOST!;
+
+export function rewriteCalendarExportHost(url: string) {
+  const parsed = new URL(url);
+  parsed.host = CALENDAR_EXPORT_HOST;
+  return parsed.toString();
+}
+
 export function getICSLink(
   groupAlias: string,
   userId: number | undefined,
   exportType: string | "web" | "url" = "web",
 ) {
-  return `${SCHEDULE_API_URL}/${groupAlias}.ics?user_id=${
-    userId || 0
-  }&export_type=${exportType}`;
+  const url = `${SCHEDULE_API_URL}/${groupAlias}.ics?user_id=${userId || 0}&export_type=${exportType}`;
+  if (exportType === "web") return url;
+  return rewriteCalendarExportHost(url);
 }
 
 export function getMusicRoomLink() {
@@ -32,7 +40,7 @@ export function getMyMoodleLink() {
 }
 
 export function getMyWorkshopsLink() {
-  return `${SCHEDULE_API_URL}/users/me/workshops.ics`;
+  return `${WORKSHOPS_API_URL}/users/me/events.ics`;
 }
 
 export function getMyRoomBookingsLink() {
@@ -40,5 +48,14 @@ export function getMyRoomBookingsLink() {
 }
 
 export function getPersonalLink(resourcePath: string, accessKey: string) {
-  return `${SCHEDULE_API_URL}${resourcePath}?access_key=${accessKey}`;
+  return rewriteCalendarExportHost(
+    `${SCHEDULE_API_URL}${resourcePath}?access_key=${accessKey}`,
+  );
+}
+
+export function getImportedLink(
+  userId: number | undefined,
+  linkedAlias: string,
+) {
+  return `${SCHEDULE_API_URL}/users/${userId}/linked/${linkedAlias}.ics`;
 }

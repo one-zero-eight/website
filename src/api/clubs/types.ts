@@ -44,6 +44,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/clubs/owned-by/{innohassle_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Clubs Owned By
+     * @description Get clubs owned by a user (service-to-service integration).
+     */
+    get: operations["get_clubs_owned_by_clubs_owned_by__innohassle_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/clubs/": {
     parameters: {
       query?: never;
@@ -483,8 +503,20 @@ export interface components {
      * @enum {string}
      */
     LinkType: LinkType;
+    /**
+     * OwnedClub
+     * @description Minimal club info for service-to-service integration.
+     */
+    OwnedClub: {
+      /** Club Id */
+      club_id: string;
+      /** Title */
+      title: string;
+    };
     /** PendingClubUpdate */
     PendingClubUpdate: {
+      /** Time of the latest leader submission in UTC */
+      submitted_at: string;
       /** Title */
       title?: string | null;
       /** Short Description */
@@ -613,6 +645,7 @@ export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaLeader = components["schemas"]["Leader"];
 export type SchemaLinkSchema = components["schemas"]["LinkSchema"];
+export type SchemaOwnedClub = components["schemas"]["OwnedClub"];
 export type SchemaPendingClubUpdate =
   components["schemas"]["PendingClubUpdate"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
@@ -685,6 +718,44 @@ export interface operations {
       };
       /** @description User not found in InNoHassle Accounts */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_clubs_owned_by_clubs_owned_by__innohassle_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        innohassle_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Clubs owned by the given user */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OwnedClub"][];
+        };
+      };
+      /** @description Invalid service API key */
+      401: {
         headers: {
           [name: string]: unknown;
         };
@@ -1005,6 +1076,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+      /** @description Stored club is missing its document ID */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

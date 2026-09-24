@@ -1,3 +1,11 @@
+import { $workshops } from "@/api/workshops";
+import {
+  IcsHostsList,
+  PublicHostsList,
+} from "@/components/events/shared/HostLink";
+import { parseIcsHostDescription } from "@/components/events/utils/host";
+import { extractEventIdFromUrl } from "@/components/events/utils/links";
+import { LocationLink } from "@/components/events/shared/LocationLink";
 import {
   autoUpdate,
   flip,
@@ -14,7 +22,7 @@ import {
 import { EventApi } from "@fullcalendar/core";
 import { Link } from "@tanstack/react-router";
 import moment from "moment";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 export type ScheduleDialogProps = {
   event: EventApi;
@@ -23,12 +31,25 @@ export type ScheduleDialogProps = {
   eventElement: HTMLElement;
 };
 
-export default function CalendarEventPopover({
+export function CalendarEventPopover({
   event,
   isOpen,
   setIsOpen,
   eventElement,
-}: React.PropsWithChildren<ScheduleDialogProps>) {
+}: ScheduleDialogProps) {
+  const eventId = extractEventIdFromUrl(event.url);
+  const icsHosts = parseIcsHostDescription(
+    event.extendedProps?.description as string | undefined,
+  );
+  const isWorkshopsEvent = !!eventId || icsHosts.length > 0;
+
+  const { data: eventData } = $workshops.useQuery(
+    "get",
+    "/events/{id}",
+    { params: { path: { id: eventId ?? "" } } },
+    { enabled: !!eventId && isOpen },
+  );
+
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
@@ -46,7 +67,6 @@ export default function CalendarEventPopover({
     refs.setPositionReference(eventElement);
   }, [eventElement, refs]);
 
-  // Transition effect
   const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
     common: {
       transitionProperty: "all",
@@ -54,7 +74,6 @@ export default function CalendarEventPopover({
     duration: 50,
   });
 
-  // Event listeners to change the open state
   const dismiss = useDismiss(context, {
     outsidePressEvent: "click",
     referencePress: true,
@@ -62,15 +81,17 @@ export default function CalendarEventPopover({
       outsidePress: false,
     },
   });
-  // Role props for screen readers
   const role = useRole(context);
-
-  // Merge all the interactions into prop getters
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
-  let locations: string[] | undefined = undefined;
-  if (event.extendedProps?.location)
-    locations = event.extendedProps?.location.split("/");
+  const resolvedLocation = eventData?.data.location;
+  const icsLocation = event.extendedProps?.location as string | undefined;
+  const locations =
+    !isWorkshopsEvent && icsLocation ? icsLocation.split("/") : undefined;
+  const hosts = eventData?.data.hosts;
+  const showHosts = (hosts && hosts.length > 0) || icsHosts.length > 0;
+  const showRawDescription =
+    !!event.extendedProps?.description && !isWorkshopsEvent;
 
   return (
     <>
@@ -92,7 +113,7 @@ export default function CalendarEventPopover({
                   <div
                     className="h-4 w-4 rounded-full"
                     style={{ backgroundColor: event.backgroundColor }}
-                  ></div>
+                  />
                 </div>
                 <div className="text-bold flex text-xl wrap-anywhere whitespace-pre-wrap">
                   {event.title}
@@ -110,15 +131,44 @@ export default function CalendarEventPopover({
                 </p>
               </div>
 
+              {isWorkshopsEvent && (resolvedLocation || icsLocation) && (
+                <div className="flex flex-row gap-2">
+                  <div className="w-6">
+                    <span className="icon-[material-symbols--location-on-outline] text-2xl" />
+                  </div>
+                  {resolvedLocation ? (
+                    <LocationLink
+                      location={resolvedLocation}
+                      className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap"
+                    />
+                  ) : icsLocation &&
+                    (icsLocation.toUpperCase() === "ONLINE" ||
+                      icsLocation.toUpperCase() === "ОНЛАЙН" ||
+                      icsLocation.toUpperCase() === "TBA") ? (
+                    <span className="flex w-full py-1 whitespace-pre-wrap">
+                      {icsLocation}
+                    </span>
+                  ) : (
+                    <Link
+                      to="/maps"
+                      search={{ q: icsLocation }}
+                      className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap underline underline-offset-2"
+                    >
+                      {icsLocation}
+                    </Link>
+                  )}
+                </div>
+              )}
+
               {locations && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
                     <span className="icon-[material-symbols--location-on-outline] text-2xl" />
                   </div>
                   <div className="flex flex-row flex-wrap gap-1">
-                    {locations.map((location: string, index: number) =>
-                      location.toUpperCase() !== "ONLINE" &&
-                      location.toUpperCase() !== "ОНЛАЙН" ? (
+                    {locations.map((item: string, index: number) =>
+                      item.toUpperCase() !== "ONLINE" &&
+                      item.toUpperCase() !== "ОНЛАЙН" ? (
                         <div
                           key={index}
                           className="flex flex-row items-center gap-1"
@@ -126,12 +176,12 @@ export default function CalendarEventPopover({
                           <Link
                             to="/maps"
                             search={{
-                              q: location,
+                              q: item,
                             }}
                             target="_blank"
                             className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap underline underline-offset-2"
                           >
-                            {location}
+                            {item}
                           </Link>
                           {index !== locations.length - 1 && (
                             <span className="py-1">/</span>
@@ -142,7 +192,7 @@ export default function CalendarEventPopover({
                           key={index}
                           className="flex w-full py-1 whitespace-pre-wrap"
                         >
-                          {location.concat(
+                          {item.concat(
                             index !== locations.length - 1 ? " / " : "",
                           )}
                         </span>
@@ -151,7 +201,23 @@ export default function CalendarEventPopover({
                   </div>
                 </div>
               )}
-              {event.extendedProps?.description && (
+
+              {showHosts && (
+                <div className="flex flex-row gap-2">
+                  <div className="w-6">
+                    <span className="icon-[material-symbols--person-outline] text-2xl" />
+                  </div>
+                  <div className="flex w-full py-1 wrap-anywhere">
+                    {hosts && hosts.length > 0 ? (
+                      <PublicHostsList hosts={hosts} />
+                    ) : (
+                      <IcsHostsList hosts={icsHosts} />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {showRawDescription && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
                     <span className="icon-[material-symbols--notes] text-2xl" />
@@ -161,6 +227,23 @@ export default function CalendarEventPopover({
                   </p>
                 </div>
               )}
+
+              {eventId && (
+                <div className="flex flex-row gap-2">
+                  <div className="w-6">
+                    <span className="icon-[material-symbols--link] text-2xl" />
+                  </div>
+                  <Link
+                    to="/events/p/$id"
+                    params={{ id: eventId }}
+                    className="flex w-full py-1 underline underline-offset-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Open event page
+                  </Link>
+                </div>
+              )}
+
               {event.extendedProps?.updatedAt && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
@@ -174,7 +257,7 @@ export default function CalendarEventPopover({
                   </p>
                 </div>
               )}
-              {event.extendedProps?.sourceLink && (
+              {event.extendedProps?.sourceLink && !eventId && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
                     <span className="icon-[material-symbols--link] text-2xl" />
@@ -195,3 +278,5 @@ export default function CalendarEventPopover({
     </>
   );
 }
+
+export default CalendarEventPopover;

@@ -41,24 +41,6 @@
     "avatar": ""
   },
   {
-    "fullName": "Danil Chegaev",
-    "telegram": "ZGFuaWxsYXRlbmN5",
-    "github": "ZGFuaWxsYXRlbmN5",
-    "avatar": ""
-  },
-  {
-    "fullName": "Karina Krotova",
-    "telegram": "b3Blbmlzc3Vlcw==",
-    "github": "b3Blbmlzc3Vlcw==",
-    "avatar": ""
-  },
-  {
-    "fullName": "Maxim Fomin",
-    "telegram": "bWF4aW1mMw==",
-    "github": "TWFrY2Fs",
-    "avatar": ""
-  },
-  {
     "fullName": "Khayotbek Mamajonov",
     "telegram": "d2h5bWVfeGM=",
     "github": "dGhleGF5b3RiZQ==",
@@ -188,6 +170,18 @@
     "fullName": "Timur Khasanov",
     "telegram": "dGltYWRhZGE=",
     "github": "bDFiZXJ0eS1kZXY=",
+    "avatar": ""
+  },
+  {
+    "fullName": "Serafim Soldatov",
+    "telegram": "U2VyYWZpbV9Tb2xkYXRvdg==",
+    "github": "U2VyYWZpbVNvbGRhdG92",
+    "avatar": ""
+  },
+  {
+    "fullName": "Dmitry Bevz",
+    "telegram": "RmVzdG90ZWxs",
+    "github": "bWFpblN0b3JuZQ==",
     "avatar": ""
   }
 ]

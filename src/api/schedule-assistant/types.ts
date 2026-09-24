@@ -4,15 +4,15 @@
  */
 
 export interface paths {
-  "/dev/bookings": {
+  "/bookings/review": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get All Bookings */
-    get: operations["bookings_get_all_bookings"];
+    /** Get Booking Review */
+    get: operations["bookings_get_booking_review"];
     put?: never;
     post?: never;
     delete?: never;
@@ -21,15 +21,15 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/dev/bookings/{room_id}": {
+  "/bookings/tasks/{task_id}": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get Bookings */
-    get: operations["bookings_get_bookings"];
+    /** Get Booking Task */
+    get: operations["bookings_get_booking_task"];
     put?: never;
     post?: never;
     delete?: never;
@@ -38,17 +38,34 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/dev/rooms": {
+  "/bookings/batch": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get Rooms */
-    get: operations["bookings_get_rooms"];
+    get?: never;
     put?: never;
-    post?: never;
+    /** Batch Book Slots */
+    post: operations["bookings_batch_book_slots"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/bookings/cancel-extra": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Cancel Extra Bookings */
+    post: operations["bookings_cancel_extra_bookings"];
     delete?: never;
     options?: never;
     head?: never;
@@ -329,6 +346,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/integration/event-groups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Event Groups */
+    get: operations["schedule_integration_list_event_groups"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/integration/users/{email}/predefined": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Predefined Aliases */
+    get: operations["schedule_integration_get_predefined_aliases"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/integration/event-groups/schedule.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Get Event Groups Ics */
+    post: operations["schedule_integration_get_event_groups_ics"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/integration/event-groups/{alias}/schedule.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Event Group Ics */
+    get: operations["schedule_integration_get_event_group_ics"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/schedule-config/": {
     parameters: {
       query?: never;
@@ -448,6 +533,28 @@ export interface paths {
     put?: never;
     /** Create Instructor */
     post: operations["schedule_config_create_instructor"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/instructors/meetings-counts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Instructor Meetings Counts
+     * @description Count placed term meetings for instructors.
+     *
+     *     Omit `instructor_id` to count all instructors; pass one or more ids to count selectively.
+     */
+    get: operations["schedule_config_instructor_meetings_counts"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -619,6 +726,55 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** BatchAliasesIcsRequest */
+    BatchAliasesIcsRequest: {
+      /** Aliases */
+      aliases?: string[];
+    };
+    /** BatchBookItemResult */
+    BatchBookItemResult: {
+      /**
+       * Index
+       * @description Index in the submitted batch
+       */
+      index: string;
+      status: components["schemas"]["BookingItemResultStatus"];
+      /**
+       * Title
+       * @description Booking title that was submitted
+       */
+      title: string | null;
+      /**
+       * Error
+       * @description Error message when status is error
+       */
+      error: string | null;
+    };
+    /** BatchBookRequest */
+    BatchBookRequest: {
+      /**
+       * Slot Ids
+       * @description Selected slot ids from the review tree
+       */
+      slot_ids: string[];
+      /**
+       * Conflict Modes
+       * @description Per-slot action for conflict rows: skip, book, or split
+       */
+      conflict_modes?: {
+        [key: string]: components["schemas"]["ConflictMode"];
+      };
+    };
+    /** BatchBookResponse */
+    BatchBookResponse: {
+      /**
+       * Submitted
+       * @description Number of payloads sent to BMP
+       */
+      submitted: number;
+      /** Results */
+      results: components["schemas"]["BatchBookItemResult"][];
+    };
     /** Body_distributions_apply_distribution */
     Body_distributions_apply_distribution: {
       /**
@@ -732,6 +888,119 @@ export interface components {
        * @description ID of outlook booking in service account calendar. Only set if we can manage the booking.
        */
       outlook_booking_id: string | null;
+      /**
+       * Outlook Entry Id
+       * @description Hex Entry Id from Outlook free/busy. Set when we cannot manage the booking.
+       */
+      outlook_entry_id: string | null;
+    };
+    /**
+     * BookingItemResultStatus
+     * @enum {string}
+     */
+    BookingItemResultStatus: BookingItemResultStatus;
+    /** BookingReview */
+    BookingReview: {
+      /** Programs */
+      programs: components["schemas"]["ReviewProgram"][];
+      /** Extra Auto Bookings */
+      extra_auto_bookings: components["schemas"]["ExtraAutoBooking"][];
+    };
+    /** BookingTask */
+    BookingTask: {
+      /** Task Id */
+      task_id: string;
+      kind: components["schemas"]["BookingTaskKind"];
+      status: components["schemas"]["BookingTaskStatus"];
+      /**
+       * Sent
+       * @description Invites sent, waiting for room Accept
+       * @default 0
+       */
+      sent: number;
+      /**
+       * Done
+       * @description Items that already finished (ok or error)
+       * @default 0
+       */
+      done: number;
+      /**
+       * Total
+       * @default 0
+       */
+      total: number;
+      /**
+       * Current
+       * @description Title of the last updated item
+       */
+      current: string | null;
+      /** Items */
+      items: components["schemas"]["BookingTaskItem"][];
+      /**
+       * Error
+       * @description Task-level failure
+       */
+      error: string | null;
+      book: components["schemas"]["BatchBookResponse"] | null;
+      cancel: components["schemas"]["CancelExtraResponse"] | null;
+    };
+    /** BookingTaskItem */
+    BookingTaskItem: {
+      /**
+       * Index
+       * @description Index in the submitted batch, or extra_id for cancel
+       */
+      index: string;
+      /**
+       * Title
+       * @description Human-readable slot or extra label
+       */
+      title: string | null;
+      /** @description pending → sent (invite left) → ok (Accept) / error */
+      status: components["schemas"]["BookingTaskItemStatus"];
+      /**
+       * Error
+       * @description Error message when status is error
+       */
+      error: string | null;
+    };
+    /**
+     * BookingTaskItemStatus
+     * @enum {string}
+     */
+    BookingTaskItemStatus: BookingTaskItemStatus;
+    /**
+     * BookingTaskKind
+     * @enum {string}
+     */
+    BookingTaskKind: BookingTaskKind;
+    /**
+     * BookingTaskStatus
+     * @enum {string}
+     */
+    BookingTaskStatus: BookingTaskStatus;
+    /** CancelExtraRequest */
+    CancelExtraRequest: {
+      /**
+       * Extra Ids
+       * @description Extra auto-booking ids from the review tree
+       */
+      extra_ids: string[];
+    };
+    /** CancelExtraResponse */
+    CancelExtraResponse: {
+      /**
+       * Cancelled
+       * @description Successfully cancelled extra ids or outlook ids
+       */
+      cancelled: string[];
+      /**
+       * Failed
+       * @description Map of extra id → error
+       */
+      failed: {
+        [key: string]: string;
+      };
     };
     /**
      * CapacityIssue
@@ -798,6 +1067,16 @@ export interface components {
        * @default true
        */
       check_unplaced: boolean;
+      /**
+       * Check Missing Room
+       * @default true
+       */
+      check_missing_room: boolean;
+      /**
+       * Check Missing Instructor
+       * @default true
+       */
+      check_missing_instructor: boolean;
       /**
        * Check Per Week
        * @default true
@@ -879,7 +1158,7 @@ export interface components {
        */
       instructor_pool: (string | string[])[];
       /**
-       * Student Groups
+       * Audience
        * @description Who attends: each entry is a group id or an ``@`` selector from ``sections`` hierarchy (union if several).
        *
        *     Examples:
@@ -889,15 +1168,15 @@ export interface components {
        *     - ``[ENG-eap1]`` or ``[B22-CBS-02]`` — direct group id
        * @default []
        */
-      student_groups: string[];
+      audience: string[];
       /**
        * Expected Enrollment
-       * @description Expected enrollment used for room sizing, defer from sum(student_group.size for groups in student_groups) if None
+       * @description Expected enrollment used for room sizing, defer from sum(student_group.size for groups in audience) if None
        */
       expected_enrollment?: number | null;
       /**
        * Per Group
-       * @description Whether one class instance should be created per group, if True, then one class instance will be created for each group in student_groups. It is useful for lab classes where each group needs a separate meeting. If false, then one class instance (meeting) will be created for all groups in student_groups, so they will be effectively in same time, same room, same instructor.
+       * @description Whether one class instance should be created per group, if True, then one class instance will be created for each group in audience. It is useful for lab classes where each group needs a separate meeting. If false, then one class instance (meeting) will be created for all groups in audience, so they will be effectively in same time, same room, same instructor.
        * @default false
        */
       per_group: boolean;
@@ -919,7 +1198,7 @@ export interface components {
     ComponentSessionSeries: {
       /**
        * Audience
-       * @description Student group ids for this session series (subset of component student_groups)
+       * @description Student group ids for this session series (subset of component audience)
        * @default []
        */
       audience: string[];
@@ -929,10 +1208,10 @@ export interface components {
        */
       weekly_pattern?: components["schemas"]["WeeklyPatternSlot"][] | null;
       /**
-       * Occurrences
+       * Dates Pattern
        * @description Concrete placed meetings (for electives and other calendar-date series)
        */
-      occurrences?: components["schemas"]["SessionOccurrence"][] | null;
+      dates_pattern?: components["schemas"]["SessionOccurrence"][] | null;
     };
     /** ConfigChangeEvent */
     ConfigChangeEvent: {
@@ -992,6 +1271,36 @@ export interface components {
        */
       change_count: number;
     };
+    /** ConflictHit */
+    ConflictHit: {
+      /**
+       * Start
+       * Format: date-time
+       * @description Occurrence start that overlaps an existing booking
+       */
+      start: string;
+      /**
+       * End
+       * Format: date-time
+       * @description Occurrence end that overlaps an existing booking
+       */
+      end: string;
+      /**
+       * Title
+       * @description Title of the overlapping Outlook booking
+       */
+      title: string;
+      /**
+       * Room Id
+       * @description Room of the overlapping booking
+       */
+      room_id: string;
+    };
+    /**
+     * ConflictMode
+     * @enum {string}
+     */
+    ConflictMode: ConflictMode;
     /** CourseConfig */
     CourseConfig: {
       /**
@@ -999,6 +1308,11 @@ export interface components {
        * @description Course name
        */
       name: string;
+      /**
+       * Section Code
+       * @description Exactly one timetable section this course belongs to (term.sections[].code)
+       */
+      section_code: string;
       /**
        * Short Name
        * @description Short English display name
@@ -1139,8 +1453,6 @@ export interface components {
       code: string;
       /** Name */
       name?: string | null;
-      /** Kind */
-      kind: string;
       /**
        * Students Count
        * @default 0
@@ -1272,6 +1584,51 @@ export interface components {
        */
       file_size: number;
     };
+    /** ExtraAutoBooking */
+    ExtraAutoBooking: {
+      /**
+       * Extra Id
+       * @description Stable id used to cancel this extra booking
+       */
+      extra_id: string;
+      /**
+       * Label
+       * @description Human-readable extra booking line
+       */
+      label: string;
+      /**
+       * Room Id
+       * @description Booked room
+       */
+      room_id: string;
+      /**
+       * Start
+       * Format: date-time
+       * @description Booking start
+       */
+      start: string;
+      /**
+       * End
+       * Format: date-time
+       * @description Booking end
+       */
+      end: string;
+      /**
+       * Title
+       * @description Outlook title
+       */
+      title: string;
+      /**
+       * Outlook Booking Id
+       * @description BMP calendar item id when we can manage the booking
+       */
+      outlook_booking_id: string | null;
+      /**
+       * Outlook Entry Id
+       * @description Room-calendar entry id fallback
+       */
+      outlook_entry_id: string | null;
+    };
     /**
      * GroupIssue
      * @description Одна группа одновременно должна быть на нескольких занятиях.
@@ -1378,49 +1735,15 @@ export interface components {
       /** Instructor Id */
       instructor_id: string;
     };
-    /** InstructorListItem */
-    InstructorListItem: {
+    /** InstructorMeetingsCountsResponse */
+    InstructorMeetingsCountsResponse: {
       /**
-       * Id
-       * @description Instructor unique identifier
+       * Counts
+       * @description Map of instructor id → placed meetings in the current term
        */
-      id: string;
-      /**
-       * Name En
-       * @description English display name
-       */
-      name_en?: string | null;
-      /**
-       * Name Ru
-       * @description Russian display name
-       */
-      name_ru?: string | null;
-      /**
-       * Email
-       * @description Work email when known
-       */
-      email?: string | null;
-      /**
-       * Alias
-       * @description Short handle or Telegram-style alias from staff roster
-       */
-      alias?: string | null;
-      /**
-       * Position
-       * @description Staff position from roster (for example, Full Professor, Visiting)
-       */
-      position?: string | null;
-      /**
-       * Slot Preferences
-       * @description Sparse weekday+slot preference grid; omitted cells are neutral
-       */
-      slot_preferences?: components["schemas"]["InstructorSlotPreferenceEntry"][];
-      /**
-       * Meetings Count
-       * @description Placed meetings in the current term; weekly patterns expand by +1 per week
-       * @default 0
-       */
-      meetings_count: number;
+      counts: {
+        [key: string]: number;
+      };
     };
     /** InstructorPreferenceForm */
     InstructorPreferenceForm: {
@@ -1490,6 +1813,8 @@ export interface components {
       | components["schemas"]["OutlookIssue"]
       | components["schemas"]["TeacherIssue"]
       | components["schemas"]["UnplacedIssue"]
+      | components["schemas"]["MissingRoomIssue"]
+      | components["schemas"]["MissingInstructorIssue"]
       | components["schemas"]["InstructorIdIssue"]
       | components["schemas"]["StudentEmailIssue"]
       | components["schemas"]["UnbookedIssue"]
@@ -1531,7 +1856,7 @@ export interface components {
      *     - `starts_from`: "STARTS FROM 21/09" → starts_from=date(2024, 9, 21)
      *     - `ends_on`: "ENDS ON 12/03" or "ДО 12/03" or "КОНЕЦ 12/03" → ends_on=date(2024, 3, 12)
      *     - `starts_at`: "STARTS AT 18:00" → starts_at=time(18, 0)
-     *     - `till`: "TILL 21:00" → till=time(21, 0)
+     *     - `till`: "TILL 21:00" or "ДО 13:00" → till=time(21, 0) / time(13, 0)
      *     - `on_weeks`: "WEEK 1-3" → on_weeks=[1, 2, 3]
      *     - `on`: "ON 13/09, 20/09" → on=[date(2024, 9, 13), date(2024, 9, 20)]
      *     - `except_`: "EXCEPT 30/01, 06/02" → except_=[date(2024, 1, 30), date(2024, 2, 6)]
@@ -1651,6 +1976,11 @@ export interface components {
        */
       NEST?: components["schemas"]["Item"][] | null;
     };
+    /** ListVirtualEventGroupsResponse */
+    ListVirtualEventGroupsResponse: {
+      /** Event Groups */
+      event_groups: components["schemas"]["VirtualEventGroup"][];
+    };
     /** MeResponse */
     MeResponse: {
       /**
@@ -1663,6 +1993,40 @@ export interface components {
        * @description Whether the user may modify schedule-assistant data
        */
       is_moderator: boolean;
+    };
+    /**
+     * MissingInstructorIssue
+     * @description Занятие стоит в сетке, но преподаватель ещё не назначен.
+     */
+    MissingInstructorIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: MissingInstructorIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      meeting: components["schemas"]["ScheduledMeeting"];
+    };
+    /**
+     * MissingRoomIssue
+     * @description Занятие стоит в сетке, но локация ещё не назначена.
+     */
+    MissingRoomIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: MissingRoomIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      meeting: components["schemas"]["ScheduledMeeting"];
     };
     /** OccurrencePlacement */
     OccurrencePlacement: {
@@ -1725,11 +2089,6 @@ export interface components {
       /** Component Tag */
       component_tag: string;
       /**
-       * Source Kind
-       * @enum {string}
-       */
-      source_kind: PerWeekIssueSource_kind;
-      /**
        * Student Groups
        * @default []
        */
@@ -1738,6 +2097,11 @@ export interface components {
       expected_per_week: number;
       /** Actual Per Week */
       actual_per_week: number;
+    };
+    /** PredefinedAliasesResponse */
+    PredefinedAliasesResponse: {
+      /** Event Groups */
+      event_groups: string[];
     };
     /** PreferenceShareLinkResponse */
     PreferenceShareLinkResponse: {
@@ -1767,6 +2131,124 @@ export interface components {
        * @default []
        */
       groups: string[];
+    };
+    /** ReviewComponent */
+    ReviewComponent: {
+      /**
+       * Component Id
+       * @description Stable id for the course component + audience session
+       */
+      component_id: string;
+      /**
+       * Label
+       * @description Component tag and audiences
+       */
+      label: string;
+      /** Slots */
+      slots: components["schemas"]["ReviewSlot"][];
+    };
+    /** ReviewCourse */
+    ReviewCourse: {
+      /**
+       * Course Id
+       * @description Course name
+       */
+      course_id: string;
+      /**
+       * Name
+       * @description Course display name
+       */
+      name: string;
+      /** Components */
+      components: components["schemas"]["ReviewComponent"][];
+    };
+    /**
+     * ReviewKind
+     * @enum {string}
+     */
+    ReviewKind: ReviewKind;
+    /** ReviewProgram */
+    ReviewProgram: {
+      /**
+       * Program Id
+       * @description Program track label
+       */
+      program_id: string;
+      /**
+       * Name
+       * @description Program track label
+       */
+      name: string;
+      /** Courses */
+      courses: components["schemas"]["ReviewCourse"][];
+    };
+    /** ReviewSlot */
+    ReviewSlot: {
+      /**
+       * Slot Id
+       * @description Stable id for this bookable slot
+       */
+      slot_id: string;
+      /**
+       * Label
+       * @description Human-readable schedule line
+       */
+      label: string;
+      /**
+       * Date
+       * @description ISO date for a one-off slot, or weekday name for a weekly series
+       */
+      date: string;
+      /**
+       * Start Time
+       * @description Slot start time HH:MM:SS
+       */
+      start_time: string;
+      /**
+       * End Time
+       * @description Slot end time HH:MM:SS
+       */
+      end_time: string;
+      /**
+       * Room
+       * @description Room id to book, if any
+       */
+      room: string | null;
+      /**
+       * Bookable
+       * @description False when the room is missing, online, or unknown
+       */
+      bookable: boolean;
+      /**
+       * Disabled Reason
+       * @description Why the slot cannot be booked
+       */
+      disabled_reason: string | null;
+      /**
+       * Recurring
+       * @description True for weekly series payloads
+       * @default false
+       */
+      recurring: boolean;
+      /** @description Classification against current Outlook bookings */
+      review_kind: components["schemas"]["ReviewKind"] | null;
+      /**
+       * Partially Booked
+       * @description True when this slot already has a matching auto-booking
+       * @default false
+       */
+      partially_booked: boolean;
+      /**
+       * Can Split
+       * @description True when a weekly conflict can be booked around conflicting dates
+       * @default false
+       */
+      can_split: boolean;
+      /**
+       * Conflicts
+       * @description Overlapping foreign Outlook bookings
+       */
+      conflicts: components["schemas"]["ConflictHit"][];
     };
     /** Room */
     Room: {
@@ -1816,48 +2298,6 @@ export interface components {
        * @description Allowed values when type is enum; ignored otherwise
        */
       enum_values?: string[];
-    };
-    /**
-     * RoomDTO
-     * @description Room description.
-     */
-    RoomDTO: {
-      /**
-       * Id
-       * @description Room slug
-       */
-      id: string;
-      /**
-       * Title
-       * @description Room title
-       */
-      title: string | null;
-      /**
-       * Short Name
-       * @description Shorter version of room title
-       */
-      short_name: string | null;
-      /**
-       * My Uni Id
-       * @description ID of room on My University portal
-       */
-      my_uni_id: number | null;
-      /**
-       * Capacity
-       * @description Room capacity, amount of people
-       */
-      capacity: number | null;
-      /**
-       * Access Level
-       * @description Access level to the room. Yellow = for students. Red = for employees. Special = special rules apply.
-       */
-      access_level: RoomDTOAccess_levelAnyOf0 | null;
-      /**
-       * Restrict Daytime
-       * @description Prohibit to book during working hours. True = this room is available only at night 19:00-8:00, or full day on weekends.
-       * @default false
-       */
-      restrict_daytime: boolean;
     };
     /**
      * RoomIssue
@@ -1935,11 +2375,6 @@ export interface components {
       course_name: string;
       /** Component Tag */
       component_tag: string;
-      /**
-       * Source Kind
-       * @enum {string}
-       */
-      source_kind: ScheduledMeetingSource_kind;
       /** Placement */
       placement:
         | components["schemas"]["OccurrencePlacement"]
@@ -1979,13 +2414,8 @@ export interface components {
        */
       name: string;
       /**
-       * Kind
-       * @description Section kind marker (for example, core/english/electives)
-       */
-      kind?: SectionConfigKindAnyOf0 | string | null;
-      /**
        * Default Layout
-       * @description Default timetable layout when opening this section (groups or calendar)
+       * @description Default timetable layout when opening this section (groups, compact groups, or calendar)
        */
       default_layout?: SectionConfigDefault_layoutAnyOf0 | null;
       /**
@@ -2024,6 +2454,8 @@ export interface components {
        * @description Optional custom teaching slots for this program; when set, replaces term.time_slots for this program
        */
       time_slots?: components["schemas"]["TermTimeSlot"][] | null;
+      /** @description Optional teaching window for this program; when set, replaces term.semester for this program */
+      semester?: components["schemas"]["DateRange"] | null;
     };
     /**
      * SessionOccurrence
@@ -2109,11 +2541,6 @@ export interface components {
        * @description Student entity code (group/program/selector id)
        */
       code: string;
-      /**
-       * Kind
-       * @description Distribution kind (for example, core/english/elective)
-       */
-      kind: string;
       /**
        * Name
        * @description Optional display name
@@ -2237,7 +2664,7 @@ export interface components {
       course_component_tags?: string[];
       /**
        * Room Attributes
-       * @description Allowed room.features keys with types; empty means unrestricted legacy keys
+       * @description Allowed room.features keys with types; empty means any key is allowed
        */
       room_attributes?: components["schemas"]["RoomAttributeDef"][];
     };
@@ -2314,11 +2741,6 @@ export interface components {
       /** Component Tag */
       component_tag: string;
       /**
-       * Source Kind
-       * @enum {string}
-       */
-      source_kind: UnplacedIssueSource_kind;
-      /**
        * Student Groups
        * @default []
        */
@@ -2337,6 +2759,21 @@ export interface components {
       /** Context */
       ctx?: Record<string, never>;
     };
+    /** VirtualEventGroup */
+    VirtualEventGroup: {
+      /** Id */
+      id: null;
+      /** Alias */
+      alias: string;
+      /** Name */
+      name: string;
+      /** Description */
+      description: string;
+      /** Group Code */
+      group_code: string | null;
+      /** Instructor Id */
+      instructor_id: string | null;
+    };
     /**
      * Weekday
      * @enum {string}
@@ -2352,6 +2789,12 @@ export interface components {
       weekday: components["schemas"]["Weekday"];
       /** Edits */
       edits: components["schemas"]["WeeklyPatternSlotEdit"][];
+      /** Start Date */
+      start_date: string | null;
+      /** End Date */
+      end_date: string | null;
+      /** @default MONDAY */
+      starting_day: components["schemas"]["Weekday"];
     };
     /**
      * WeeklyPatternSlot
@@ -2438,6 +2881,13 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaBatchAliasesIcsRequest =
+  components["schemas"]["BatchAliasesIcsRequest"];
+export type SchemaBatchBookItemResult =
+  components["schemas"]["BatchBookItemResult"];
+export type SchemaBatchBookRequest = components["schemas"]["BatchBookRequest"];
+export type SchemaBatchBookResponse =
+  components["schemas"]["BatchBookResponse"];
 export type SchemaBodyDistributionsApplyDistribution =
   components["schemas"]["Body_distributions_apply_distribution"];
 export type SchemaBodyDistributionsPreviewDistribution =
@@ -2445,6 +2895,13 @@ export type SchemaBodyDistributionsPreviewDistribution =
 export type SchemaBodyScheduleConfigPutScheduleConfigYamlFile =
   components["schemas"]["Body_schedule_config_put_schedule_config_yaml_file"];
 export type SchemaBookingDto = components["schemas"]["BookingDTO"];
+export type SchemaBookingReview = components["schemas"]["BookingReview"];
+export type SchemaBookingTask = components["schemas"]["BookingTask"];
+export type SchemaBookingTaskItem = components["schemas"]["BookingTaskItem"];
+export type SchemaCancelExtraRequest =
+  components["schemas"]["CancelExtraRequest"];
+export type SchemaCancelExtraResponse =
+  components["schemas"]["CancelExtraResponse"];
 export type SchemaCapacityIssue = components["schemas"]["CapacityIssue"];
 export type SchemaCheckParameters = components["schemas"]["CheckParameters"];
 export type SchemaCheckResults = components["schemas"]["CheckResults"];
@@ -2455,6 +2912,7 @@ export type SchemaConfigChangeEvent =
   components["schemas"]["ConfigChangeEvent"];
 export type SchemaConfigChangeEventSummary =
   components["schemas"]["ConfigChangeEventSummary"];
+export type SchemaConflictHit = components["schemas"]["ConflictHit"];
 export type SchemaCourseConfig = components["schemas"]["CourseConfig"];
 export type SchemaCourseInstructor = components["schemas"]["CourseInstructor"];
 export type SchemaCoursesConfig = components["schemas"]["CoursesConfig"];
@@ -2477,6 +2935,7 @@ export type SchemaDistributionUploadStats =
   components["schemas"]["DistributionUploadStats"];
 export type SchemaDistributionUploadSummary =
   components["schemas"]["DistributionUploadSummary"];
+export type SchemaExtraAutoBooking = components["schemas"]["ExtraAutoBooking"];
 export type SchemaGroupIssue = components["schemas"]["GroupIssue"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
@@ -2485,8 +2944,8 @@ export type SchemaInstructorBannedSlotIssue =
   components["schemas"]["InstructorBannedSlotIssue"];
 export type SchemaInstructorIdIssue =
   components["schemas"]["InstructorIdIssue"];
-export type SchemaInstructorListItem =
-  components["schemas"]["InstructorListItem"];
+export type SchemaInstructorMeetingsCountsResponse =
+  components["schemas"]["InstructorMeetingsCountsResponse"];
 export type SchemaInstructorPreferenceForm =
   components["schemas"]["InstructorPreferenceForm"];
 export type SchemaInstructorPreferenceIssue =
@@ -2497,19 +2956,29 @@ export type SchemaInstructorSlotPreferenceEntry =
   components["schemas"]["InstructorSlotPreferenceEntry"];
 export type SchemaIssue = components["schemas"]["Issue"];
 export type SchemaItem = components["schemas"]["Item"];
+export type SchemaListVirtualEventGroupsResponse =
+  components["schemas"]["ListVirtualEventGroupsResponse"];
 export type SchemaMeResponse = components["schemas"]["MeResponse"];
+export type SchemaMissingInstructorIssue =
+  components["schemas"]["MissingInstructorIssue"];
+export type SchemaMissingRoomIssue = components["schemas"]["MissingRoomIssue"];
 export type SchemaOccurrencePlacement =
   components["schemas"]["OccurrencePlacement"];
 export type SchemaOutlookIssue = components["schemas"]["OutlookIssue"];
 export type SchemaParseLocationStringResponse =
   components["schemas"]["ParseLocationStringResponse"];
 export type SchemaPerWeekIssue = components["schemas"]["PerWeekIssue"];
+export type SchemaPredefinedAliasesResponse =
+  components["schemas"]["PredefinedAliasesResponse"];
 export type SchemaPreferenceShareLinkResponse =
   components["schemas"]["PreferenceShareLinkResponse"];
 export type SchemaProgramTrack = components["schemas"]["ProgramTrack"];
+export type SchemaReviewComponent = components["schemas"]["ReviewComponent"];
+export type SchemaReviewCourse = components["schemas"]["ReviewCourse"];
+export type SchemaReviewProgram = components["schemas"]["ReviewProgram"];
+export type SchemaReviewSlot = components["schemas"]["ReviewSlot"];
 export type SchemaRoom = components["schemas"]["Room"];
 export type SchemaRoomAttributeDef = components["schemas"]["RoomAttributeDef"];
-export type SchemaRoomDto = components["schemas"]["RoomDTO"];
 export type SchemaRoomIssue = components["schemas"]["RoomIssue"];
 export type SchemaScheduleConfig = components["schemas"]["ScheduleConfig"];
 export type SchemaScheduleConfigUpdate =
@@ -2531,6 +3000,8 @@ export type SchemaTermTimeSlot = components["schemas"]["TermTimeSlot"];
 export type SchemaUnbookedIssue = components["schemas"]["UnbookedIssue"];
 export type SchemaUnplacedIssue = components["schemas"]["UnplacedIssue"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
+export type SchemaVirtualEventGroup =
+  components["schemas"]["VirtualEventGroup"];
 export type SchemaWeeklyPatternPlacement =
   components["schemas"]["WeeklyPatternPlacement"];
 export type SchemaWeeklyPatternSlot =
@@ -2539,7 +3010,7 @@ export type SchemaWeeklyPatternSlotEdit =
   components["schemas"]["WeeklyPatternSlotEdit"];
 export type $defs = Record<string, never>;
 export interface operations {
-  bookings_get_all_bookings: {
+  bookings_get_booking_review: {
     parameters: {
       query?: never;
       header?: never;
@@ -2554,17 +3025,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["BookingDTO"][];
+          "application/json": components["schemas"]["BookingReview"];
         };
       };
     };
   };
-  bookings_get_bookings: {
+  bookings_get_booking_task: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        room_id: string;
+        task_id: string;
       };
       cookie?: never;
     };
@@ -2576,7 +3047,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["BookingDTO"][];
+          "application/json": components["schemas"]["BookingTask"];
         };
       };
       /** @description Validation Error */
@@ -2590,14 +3061,18 @@ export interface operations {
       };
     };
   };
-  bookings_get_rooms: {
+  bookings_batch_book_slots: {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BatchBookRequest"];
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {
@@ -2605,7 +3080,49 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["RoomDTO"][];
+          "application/json": components["schemas"]["BookingTask"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  bookings_cancel_extra_bookings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancelExtraRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingTask"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -3159,6 +3676,121 @@ export interface operations {
       };
     };
   };
+  schedule_integration_list_event_groups: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListVirtualEventGroupsResponse"];
+        };
+      };
+    };
+  };
+  schedule_integration_get_predefined_aliases: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        email: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PredefinedAliasesResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_integration_get_event_groups_ics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BatchAliasesIcsRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_integration_get_event_group_ics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        alias: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   schedule_config_get_schedule_config: {
     parameters: {
       query?: never;
@@ -3494,7 +4126,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["InstructorListItem"][];
+          "application/json": components["schemas"]["Instructor"][];
         };
       };
     };
@@ -3519,6 +4151,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Instructor"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_instructor_meetings_counts: {
+    parameters: {
+      query?: {
+        instructor_id?: string[] | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InstructorMeetingsCountsResponse"];
         };
       };
       /** @description Validation Error */
@@ -4026,6 +4689,26 @@ export interface operations {
     };
   };
 }
+export enum BookingItemResultStatus {
+  ok = "ok",
+  error = "error",
+}
+export enum BookingTaskItemStatus {
+  pending = "pending",
+  sent = "sent",
+  ok = "ok",
+  error = "error",
+}
+export enum BookingTaskKind {
+  book = "book",
+  cancel = "cancel",
+}
+export enum BookingTaskStatus {
+  queued = "queued",
+  running = "running",
+  done = "done",
+  error = "error",
+}
 export enum CapacityIssueIssue_type {
   capacity = "capacity",
 }
@@ -4049,6 +4732,11 @@ export enum ConfigChangeEventSummaryResources {
   rooms = "rooms",
   instructors = "instructors",
 }
+export enum ConflictMode {
+  skip = "skip",
+  book = "book",
+  split = "split",
+}
 export enum GroupIssueIssue_type {
   group = "group",
 }
@@ -4067,6 +4755,12 @@ export enum InstructorSlotPreferenceLevel {
   discouraged = "discouraged",
   banned = "banned",
 }
+export enum MissingInstructorIssueIssue_type {
+  missing_instructor = "missing_instructor",
+}
+export enum MissingRoomIssueIssue_type {
+  missing_room = "missing_room",
+}
 export enum OccurrencePlacementKind {
   occurrence = "occurrence",
 }
@@ -4076,9 +4770,10 @@ export enum OutlookIssueIssue_type {
 export enum PerWeekIssueIssue_type {
   per_week = "per_week",
 }
-export enum PerWeekIssueSource_kind {
-  core_course = "core_course",
-  elective = "elective",
+export enum ReviewKind {
+  ready = "ready",
+  booked = "booked",
+  conflict = "conflict",
 }
 export enum RoomAttributeDefType {
   boolean = "boolean",
@@ -4087,25 +4782,12 @@ export enum RoomAttributeDefType {
   enum = "enum",
   list = "list",
 }
-export enum RoomDTOAccess_levelAnyOf0 {
-  yellow = "yellow",
-  red = "red",
-  special = "special",
-}
 export enum RoomIssueIssue_type {
   room = "room",
 }
-export enum ScheduledMeetingSource_kind {
-  core_course = "core_course",
-  elective = "elective",
-}
-export enum SectionConfigKindAnyOf0 {
-  core = "core",
-  english = "english",
-  electives = "electives",
-}
 export enum SectionConfigDefault_layoutAnyOf0 {
   groups = "groups",
+  compact_groups = "compact_groups",
   calendar = "calendar",
 }
 export enum StudentEmailIssueIssue_type {
@@ -4122,10 +4804,6 @@ export enum UnbookedIssueIssue_type {
 }
 export enum UnplacedIssueIssue_type {
   unplaced = "unplaced",
-}
-export enum UnplacedIssueSource_kind {
-  core_course = "core_course",
-  elective = "elective",
 }
 export enum Weekday {
   MONDAY = "MONDAY",

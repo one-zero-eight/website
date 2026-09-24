@@ -1,6 +1,6 @@
 import { scheduleTypes } from "@/api/schedule";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
-import HideButton from "@/components/schedule/group-card/HideButton";
+import HideButtonGroup from "@/components/schedule/group-card/HideButtonGroup.tsx";
 import {
   getAllTagsByType,
   getFirstTagByType,
@@ -61,8 +61,8 @@ export function GroupCard({
       </div>
       <div className="flex flex-row place-items-center select-none">
         <SimpleExportButton onClick={exportButtonOnClick} />
-        {canHide && <HideButton groupId={group.id} />}
-        <FavoriteButton groupId={group.id} />
+        {canHide && <HideButtonGroup groupAlias={group.alias} />}
+        <FavoriteButton groupAlias={group.alias} />
       </div>
     </Link>
   );

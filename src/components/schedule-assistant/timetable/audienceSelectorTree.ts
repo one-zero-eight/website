@@ -37,60 +37,87 @@ function groupTitleByCode(config: SchemaScheduleConfig) {
   );
 }
 
+type AudienceTreeCache = {
+  studentsGroups: SchemaScheduleConfig["students_groups"];
+  sections: NonNullable<SchemaScheduleConfig["term"]>["sections"];
+  tree: AudienceSelectorSection[];
+};
+
+let audienceTreeCache: AudienceTreeCache | null = null;
+
 export function buildAudienceSelectorTree(
   config: SchemaScheduleConfig,
+  options: { sectionCode: string },
 ): AudienceSelectorSection[] {
-  const groupTitles = groupTitleByCode(config);
-  const sections: AudienceSelectorSection[] = [];
+  const studentsGroups = config.students_groups;
+  const termSections = config.term?.sections;
+  let tree: AudienceSelectorSection[];
+  if (
+    audienceTreeCache &&
+    audienceTreeCache.studentsGroups === studentsGroups &&
+    audienceTreeCache.sections === termSections
+  ) {
+    tree = audienceTreeCache.tree;
+  } else {
+    const groupTitles = groupTitleByCode(config);
+    const sections: AudienceSelectorSection[] = [];
 
-  for (const section of getScheduleSections(config)) {
-    const sectionCode = String(section.code || "").trim();
-    const sectionTitle = String(section.name || sectionCode).trim();
-    if (!sectionCode || !sectionTitle) continue;
+    for (const section of getScheduleSections(config)) {
+      const sectionCode = String(section.code || "").trim();
+      const sectionTitle = String(section.name || sectionCode).trim();
+      if (!sectionCode || !sectionTitle) continue;
 
-    const programs: AudienceSelectorProgram[] = [];
-    for (const program of section.programs || []) {
-      const code = String(program.code || "").trim();
-      if (!code) continue;
-      const title = String(program.name || code).trim();
-      const tracks: AudienceSelectorTrack[] = [];
+      const programs: AudienceSelectorProgram[] = [];
+      for (const program of section.programs || []) {
+        const code = String(program.code || "").trim();
+        if (!code) continue;
+        const title = String(program.name || code).trim();
+        const tracks: AudienceSelectorTrack[] = [];
 
-      for (const [trackIndex, track] of normalizeTracksFromSectionProgram(
-        program,
-      ).entries()) {
-        const trackName = String(track.name || "Трек").trim();
-        const trackRef = String(track.code || track.name || "").trim();
-        const groups = (track.groups || []).map((groupId) => {
-          const gid = String(groupId).trim();
-          return {
-            token: gid,
-            code: gid,
-            title: groupTitles.get(gid) || gid,
-          };
-        });
-        if (!trackRef && !groups.length) continue;
-        tracks.push({
-          key: `${sectionCode}-${code}-t${trackIndex}`,
-          token: trackRef ? `@${code}/${trackRef}` : "",
-          title: trackName,
-          groups,
+        for (const [trackIndex, track] of normalizeTracksFromSectionProgram(
+          program,
+        ).entries()) {
+          const trackName = String(track.name || "Трек").trim();
+          const trackRef = String(track.code || track.name || "").trim();
+          const groups = (track.groups || []).map((groupId) => {
+            const gid = String(groupId).trim();
+            return {
+              token: gid,
+              code: gid,
+              title: groupTitles.get(gid) || gid,
+            };
+          });
+          if (!trackRef && !groups.length) continue;
+          tracks.push({
+            key: `${sectionCode}-${code}-t${trackIndex}`,
+            token: trackRef ? `@${code}/${trackRef}` : "",
+            title: trackName,
+            groups,
+          });
+        }
+
+        programs.push({
+          key: `${sectionCode}-${code}`,
+          token: `@${code}`,
+          title,
+          tracks,
         });
       }
 
-      programs.push({
-        key: `${sectionCode}-${code}`,
-        token: `@${code}`,
-        title,
-        tracks,
-      });
+      if (programs.length) {
+        sections.push({ key: sectionCode, title: sectionTitle, programs });
+      }
     }
 
-    if (programs.length) {
-      sections.push({ key: sectionCode, title: sectionTitle, programs });
-    }
+    audienceTreeCache = {
+      studentsGroups,
+      sections: termSections,
+      tree: sections,
+    };
+    tree = sections;
   }
 
-  return sections;
+  return tree.filter((section) => section.key === options.sectionCode);
 }
 
 export function collectTrackTokens(track: AudienceSelectorTrack): string[] {

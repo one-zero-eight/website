@@ -1,13 +1,5 @@
 import { cn } from "@/lib/ui/cn";
-import {
-  Fragment,
-  memo,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Fragment, memo } from "react";
 
 import {
   meetingCalendarCellLabel,
@@ -27,6 +19,8 @@ import {
   type Meeting,
 } from "./timetableViewerModel.ts";
 import type { CreateMeetingCellContext } from "./createMeetingUtils.ts";
+import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
+import type { UnarrangedLessonItem } from "./unarrangedLessons.ts";
 
 const CALENDAR_TIME_COL_WIDTH = "w-[130px] min-w-[130px] max-w-[130px]";
 const CALENDAR_DAY_COL_WIDTH = "w-[170px] min-w-[170px] max-w-[170px]";
@@ -35,45 +29,26 @@ const CALENDAR_TABLE_CLASS =
 const CALENDAR_HEAD_ROW_CLASS = "h-12";
 /** h-12 + нижняя граница шапки */
 const CALENDAR_STICKY_SLOT_TOP_CLASS = "top-[calc(3rem+1px)]";
-/** Approx. week block height (header + 7 slots) for unmounted placeholders. */
-const CALENDAR_WEEK_PLACEHOLDER_HEIGHT_PX = 800;
+/** Approx. week block height hint for content-visibility. */
 const CALENDAR_WEEK_SHELL_CLASS =
   "[content-visibility:auto] [contain-intrinsic-size:auto_800px]";
-/** Keep only a sliding window of weeks mounted so layout switches stay cheap. */
-const CALENDAR_MAX_MOUNTED_WEEKS = 3;
-const CALENDAR_INITIAL_WEEK_RADIUS = 0;
-
-function mountedWeekRangeAround(
-  focusIndex: number,
-  weekCount: number,
-  radius: number,
-  maxMounted: number,
-): { start: number; end: number } {
-  if (weekCount <= 0) return { start: 0, end: 0 };
-  const focus = Math.min(Math.max(focusIndex, 0), weekCount - 1);
-  const maxRadius = Math.max(0, Math.floor((maxMounted - 1) / 2));
-  const usedRadius = Math.min(radius, maxRadius);
-  let start = Math.max(0, focus - usedRadius);
-  let end = Math.min(weekCount - 1, focus + usedRadius);
-  // Prefer growing toward maxMounted without jumping far from focus.
-  while (end - start + 1 < Math.min(maxMounted, weekCount)) {
-    const canBefore = start > 0;
-    const canAfter = end < weekCount - 1;
-    if (!canBefore && !canAfter) break;
-    if (canAfter && (!canBefore || focus - start <= end - focus)) end += 1;
-    else start -= 1;
-  }
-  return { start, end };
-}
 
 const CalendarMeetingCard = memo(function CalendarMeetingCard({
   meeting,
   courseColors,
   onSelectMeeting,
+  onOpenMeetingEdit,
+  disableSelect = false,
 }: {
   meeting: Meeting;
   courseColors: Record<string, { bg: string; border: string }>;
-  onSelectMeeting: (valueKey: string, course: string) => void;
+  onSelectMeeting: (
+    valueKey: string,
+    course: string,
+    focusTag?: string,
+  ) => void;
+  onOpenMeetingEdit: (meeting: Meeting) => void;
+  disableSelect?: boolean;
 }) {
   const courseTitle = String(meeting.course || "").trim() || "—";
   const key = meetingSelectionKey(meeting);
@@ -83,6 +58,7 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
   const bits = useMeetingHighlightBits(meeting);
   const isSelected = (bits & 1) !== 0;
   const isRelated = (bits & 2) !== 0;
+  const canEdit = !!parseMeetingInstanceId(meeting.instance_id);
 
   return (
     <button
@@ -90,6 +66,7 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
       data-meeting-id={meeting.instance_id}
       className={cn(
         "meeting block w-full min-w-0 truncate rounded border px-1 py-px text-left text-[0.6875rem] leading-tight text-[#1a2332]",
+        disableSelect && "pointer-events-none",
         isSelected &&
           "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2)] outline-2 outline-[#1d3f70]",
         !isSelected &&
@@ -100,7 +77,15 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
         backgroundColor: colors.bg,
         borderColor: colors.border,
       }}
-      onClick={() => onSelectMeeting(key, meeting.course || courseTitle)}
+      onClick={() => {
+        if (disableSelect) return;
+        onSelectMeeting(key, meeting.course || courseTitle, meeting.tag);
+      }}
+      onDoubleClick={(event) => {
+        event.stopPropagation();
+        if (disableSelect || !canEdit) return;
+        onOpenMeetingEdit(meeting);
+      }}
       title={meetingCalendarCellLabel(meeting, null)}
     >
       {meeting.off_grid ? (
@@ -116,6 +101,58 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
     </button>
   );
 });
+
+function CalendarAddSlotButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      className="flex w-full items-center justify-center rounded bg-[#f3f7ff] px-1 py-0.5 text-[0.8125rem] leading-none font-semibold text-[#1d3f70] opacity-50 hover:bg-[#e4edff] hover:opacity-100"
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick();
+      }}
+    >
+      +
+    </button>
+  );
+}
+
+function CalendarPlaceGhost({
+  label,
+  room,
+  instructor,
+  colors,
+}: {
+  label: string;
+  room?: string;
+  instructor?: string;
+  colors: { bg: string; border: string };
+}) {
+  const roomLabel = String(room || "").trim();
+  const instructorLabel = String(instructor || "").trim();
+  return (
+    <div
+      className="meeting ring-dashed pointer-events-none block w-full min-w-0 rounded border px-1 py-px text-left text-[0.6875rem] leading-tight text-[#1a2332] opacity-70 ring-2 ring-[#1d3f70]/55 ring-inset"
+      style={{ backgroundColor: colors.bg, borderColor: colors.border }}
+    >
+      <span className="block truncate font-semibold" title={label}>
+        {label}
+      </span>
+      <span
+        className="block truncate text-[0.625rem] font-semibold text-[#4f5c6d]"
+        title={instructorLabel || undefined}
+      >
+        {instructorLabel || "—"}
+      </span>
+      <span
+        className="block truncate text-[0.625rem] font-semibold text-[#4f5c6d]"
+        title={roomLabel || undefined}
+      >
+        {roomLabel || "—"}
+      </span>
+    </div>
+  );
+}
 
 function CalendarWeekHeader({ week }: { week: CalendarWeekBlock }) {
   return (
@@ -146,6 +183,8 @@ function CalendarWeekHeader({ week }: { week: CalendarWeekBlock }) {
               "border-t border-r border-b border-[#d8dfeb] bg-[#edf4ff] px-1 py-0.5 text-center align-middle text-[0.6875rem] leading-tight font-medium text-[#1d3f70]",
               CALENDAR_HEAD_ROW_CLASS,
               todayCalendarColumnHeadClass(day.isToday),
+              day.isInactive &&
+                "bg-[#e8e8e8] [background-image:repeating-linear-gradient(135deg,transparent,transparent_5px,rgba(120,120,120,0.12)_5px,rgba(120,120,120,0.12)_6px)] text-[#8a8a8a]",
             )}
           >
             <span className="block truncate text-[0.625rem] font-semibold text-[#2d77cc]">
@@ -164,16 +203,35 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
   calendarGrid,
   courseColors,
   selectMeeting,
+  openMeetingEdit,
   clearSelection,
   onEmptyCellClick,
+  placeTarget,
+  placeGhostRoom,
+  placeGhostInstructor,
+  hoverPlaceCell,
+  onHoverPlaceCell,
 }: {
   week: CalendarWeekBlock;
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
-  selectMeeting: (valueKey: string, course: string) => void;
+  selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
+  openMeetingEdit: (meeting: Meeting) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
+  placeTarget: UnarrangedLessonItem | null;
+  placeGhostRoom?: string;
+  placeGhostInstructor?: string;
+  hoverPlaceCell: CreateMeetingCellContext | null;
+  onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 }) {
+  const ghostColors = placeTarget
+    ? colorBySubject(
+        placeTarget.courseName || placeTarget.shortName,
+        courseColors,
+      )
+    : null;
+
   return (
     <table className={CALENDAR_TABLE_CLASS}>
       <CalendarWeekHeader week={week} />
@@ -199,6 +257,21 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
               const cellMeetings =
                 calendarGrid.cells.get(`${day.date}|${slot.start}`) || [];
               const isLastSlot = slotIndex === calendarGrid.slots.length - 1;
+              const createContext: CreateMeetingCellContext = {
+                weekday: day.day,
+                time: slot.start,
+                date: day.date,
+              };
+              const showGhost =
+                !!placeTarget &&
+                !!ghostColors &&
+                !!hoverPlaceCell &&
+                hoverPlaceCell.weekday === createContext.weekday &&
+                hoverPlaceCell.time === createContext.time &&
+                hoverPlaceCell.date === createContext.date;
+
+              const canPlaceHere = !!placeTarget;
+              const canCreateHere = !placeTarget && !cellMeetings.length;
 
               return (
                 <td
@@ -207,22 +280,34 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
                     CALENDAR_DAY_COL_WIDTH,
                     "link-cell relative border-r border-b border-[#d8dfeb] bg-[#fafcff] p-0.5 align-top text-[0.6875rem] leading-tight",
                     todayCalendarColumnBodyClass(day.isToday, isLastSlot),
-                    !cellMeetings.length &&
-                      onEmptyCellClick &&
-                      "cursor-pointer hover:bg-[#eef4ff]",
+                    day.isInactive &&
+                      "bg-[#f0f0f0] [background-image:repeating-linear-gradient(135deg,transparent,transparent_5px,rgba(120,120,120,0.12)_5px,rgba(120,120,120,0.12)_6px)] opacity-60",
+                    (canCreateHere && onEmptyCellClick) || canPlaceHere
+                      ? "cursor-pointer hover:bg-[#eef4ff]"
+                      : null,
+                    showGhost && "bg-[#eef4ff]",
                   )}
+                  onMouseEnter={() => {
+                    if (!canPlaceHere || !onHoverPlaceCell) return;
+                    onHoverPlaceCell(createContext);
+                  }}
+                  onMouseLeave={() => {
+                    if (!canPlaceHere || !onHoverPlaceCell) return;
+                    onHoverPlaceCell(null);
+                  }}
                   onClick={(event) => {
-                    if (cellMeetings.length) return;
                     event.stopPropagation();
+                    if (placeTarget) {
+                      if (!canPlaceHere || !onEmptyCellClick) return;
+                      onEmptyCellClick(createContext);
+                      return;
+                    }
+                    if (cellMeetings.length) return;
                     if (!onEmptyCellClick) {
                       clearSelection();
                       return;
                     }
-                    onEmptyCellClick({
-                      weekday: day.day,
-                      time: slot.start,
-                      date: day.date,
-                    });
+                    onEmptyCellClick(createContext);
                   }}
                 >
                   {cellMeetings.length ? (
@@ -233,15 +318,38 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
                           meeting={meeting}
                           courseColors={courseColors}
                           onSelectMeeting={selectMeeting}
+                          onOpenMeetingEdit={openMeetingEdit}
+                          disableSelect={canPlaceHere}
                         />
                       ))}
+                      {onEmptyCellClick ? (
+                        placeTarget && showGhost && ghostColors ? (
+                          <CalendarPlaceGhost
+                            label={placeTarget.label}
+                            room={placeGhostRoom}
+                            instructor={placeGhostInstructor}
+                            colors={ghostColors}
+                          />
+                        ) : (
+                          <CalendarAddSlotButton
+                            onClick={() => onEmptyCellClick(createContext)}
+                          />
+                        )
+                      ) : null}
                     </div>
+                  ) : showGhost ? (
+                    <CalendarPlaceGhost
+                      label={placeTarget!.label}
+                      room={placeGhostRoom}
+                      instructor={placeGhostInstructor}
+                      colors={ghostColors!}
+                    />
                   ) : (
                     <div className="empty min-h-4" />
                   )}
                 </td>
               );
-            })}
+            })}{" "}
           </tr>
         ))}
       </tbody>
@@ -253,136 +361,61 @@ function CalendarStackedTable({
   calendarGrid,
   courseColors,
   selectMeeting,
+  openMeetingEdit,
   clearSelection,
   onEmptyCellClick,
+  placeTarget,
+  placeGhostRoom,
+  placeGhostInstructor,
+  hoverPlaceCell,
+  onHoverPlaceCell,
 }: {
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
-  selectMeeting: (valueKey: string, course: string) => void;
+  selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
+  openMeetingEdit: (meeting: Meeting) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
+  placeTarget: UnarrangedLessonItem | null;
+  placeGhostRoom?: string;
+  placeGhostInstructor?: string;
+  hoverPlaceCell: CreateMeetingCellContext | null;
+  onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 }) {
   const weeks = calendarGrid.weeks;
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const currentWeekIndex = useMemo(() => {
-    const idx = weeks.findIndex((week) => week.weekRelative === "current");
-    return idx >= 0 ? idx : 0;
-  }, [weeks]);
 
-  const [mountedRange, setMountedRange] = useState(() =>
-    mountedWeekRangeAround(
-      currentWeekIndex,
-      weeks.length,
-      CALENDAR_INITIAL_WEEK_RADIUS,
-      1,
-    ),
-  );
-  const [placeholderHeightPx, setPlaceholderHeightPx] = useState(
-    CALENDAR_WEEK_PLACEHOLDER_HEIGHT_PX,
-  );
-
-  useEffect(() => {
-    setMountedRange(
-      mountedWeekRangeAround(
-        currentWeekIndex,
-        weeks.length,
-        CALENDAR_INITIAL_WEEK_RADIUS,
-        1,
-      ),
-    );
-  }, [calendarGrid, currentWeekIndex, weeks.length]);
-
-  useLayoutEffect(() => {
-    const mountedWeek = rootRef.current?.querySelector(".calendar-week-table");
-    if (!(mountedWeek instanceof HTMLElement)) return;
-    const height = Math.round(mountedWeek.getBoundingClientRect().height);
-    if (height > 0) setPlaceholderHeightPx(height);
-  }, [mountedRange, calendarGrid]);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    const scrollRoot =
-      root.closest("#gridWrap") ??
-      root.closest('[class*="overflow-auto"]') ??
-      null;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        let focusIndex: number | null = null;
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const raw = (entry.target as HTMLElement).dataset.calendarWeekIndex;
-          const idx = raw == null ? NaN : Number(raw);
-          if (!Number.isFinite(idx)) continue;
-          focusIndex = idx;
-          break;
-        }
-        if (focusIndex == null) return;
-        setMountedRange((prev) => {
-          const next = mountedWeekRangeAround(
-            focusIndex,
-            weeks.length,
-            1,
-            CALENDAR_MAX_MOUNTED_WEEKS,
-          );
-          if (next.start === prev.start && next.end === prev.end) return prev;
-          return next;
-        });
-      },
-      {
-        root: scrollRoot instanceof Element ? scrollRoot : null,
-        rootMargin: "600px 0px",
-        threshold: 0,
-      },
-    );
-
-    root
-      .querySelectorAll("[data-calendar-week-placeholder]")
-      .forEach((node) => observer.observe(node));
-
-    return () => observer.disconnect();
-  }, [mountedRange, weeks.length]);
-
+  // Mount all weeks. Sliding-window virtualization fights variable elective
+  // week heights (flicker / blank gaps on scroll). A term is ~15–20 weeks.
   return (
-    <div
-      id="calendar-table"
-      ref={rootRef}
-      className="flex w-max min-w-full flex-col"
-    >
-      {weeks.map((week, weekIndex) => {
-        const mounted =
-          weekIndex >= mountedRange.start && weekIndex <= mountedRange.end;
-        return (
-          <Fragment key={week.key}>
-            {mounted ? (
-              <div
-                className={CALENDAR_WEEK_SHELL_CLASS}
-                data-calendar-week-index={weekIndex}
-              >
-                <CalendarWeekTable
-                  week={week}
-                  calendarGrid={calendarGrid}
-                  courseColors={courseColors}
-                  selectMeeting={selectMeeting}
-                  clearSelection={clearSelection}
-                  onEmptyCellClick={onEmptyCellClick}
-                />
-              </div>
-            ) : (
-              <div
-                className={CALENDAR_WEEK_SHELL_CLASS}
-                data-calendar-week-placeholder={week.key}
-                data-calendar-week-index={weekIndex}
-                style={{ height: placeholderHeightPx }}
-              />
-            )}
-            {weekIndex < weeks.length - 1 ? (
-              <div className="h-px shrink-0 bg-[#d8dfeb]" />
-            ) : null}
-          </Fragment>
-        );
-      })}
+    <div id="calendar-table" className="flex w-max min-w-full flex-col">
+      {weeks.map((week, weekIndex) => (
+        <Fragment key={week.key}>
+          <div
+            className={CALENDAR_WEEK_SHELL_CLASS}
+            data-calendar-week-index={weekIndex}
+            data-calendar-week-start={week.days[0]?.date}
+            data-calendar-week-end={week.days.at(-1)?.date}
+          >
+            <CalendarWeekTable
+              week={week}
+              calendarGrid={calendarGrid}
+              courseColors={courseColors}
+              selectMeeting={selectMeeting}
+              openMeetingEdit={openMeetingEdit}
+              clearSelection={clearSelection}
+              onEmptyCellClick={onEmptyCellClick}
+              placeTarget={placeTarget}
+              placeGhostRoom={placeGhostRoom}
+              placeGhostInstructor={placeGhostInstructor}
+              hoverPlaceCell={hoverPlaceCell}
+              onHoverPlaceCell={onHoverPlaceCell}
+            />
+          </div>
+          {weekIndex < weeks.length - 1 ? (
+            <div className="h-px shrink-0 bg-[#d8dfeb]" />
+          ) : null}
+        </Fragment>
+      ))}
     </div>
   );
 }
@@ -391,14 +424,26 @@ export const TimetableCalendarTable = memo(function TimetableCalendarTable({
   calendarGrid,
   courseColors,
   selectMeeting,
+  openMeetingEdit,
   clearSelection,
   onEmptyCellClick,
+  placeTarget = null,
+  placeGhostRoom,
+  placeGhostInstructor,
+  hoverPlaceCell = null,
+  onHoverPlaceCell,
 }: {
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
-  selectMeeting: (valueKey: string, course: string) => void;
+  selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
+  openMeetingEdit: (meeting: Meeting) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
+  placeTarget?: UnarrangedLessonItem | null;
+  placeGhostRoom?: string;
+  placeGhostInstructor?: string;
+  hoverPlaceCell?: CreateMeetingCellContext | null;
+  onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 }) {
   if (!calendarGrid.weeks.length) return null;
 
@@ -407,8 +452,14 @@ export const TimetableCalendarTable = memo(function TimetableCalendarTable({
       calendarGrid={calendarGrid}
       courseColors={courseColors}
       selectMeeting={selectMeeting}
+      openMeetingEdit={openMeetingEdit}
       clearSelection={clearSelection}
       onEmptyCellClick={onEmptyCellClick}
+      placeTarget={placeTarget}
+      placeGhostRoom={placeGhostRoom}
+      placeGhostInstructor={placeGhostInstructor}
+      hoverPlaceCell={hoverPlaceCell}
+      onHoverPlaceCell={onHoverPlaceCell}
     />
   );
 });

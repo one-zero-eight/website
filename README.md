@@ -77,9 +77,9 @@ To work on several branches in parallel and run multiple frontend instances (dif
 > [!TIP]
 > When the API types change, you can run `pnpm run gen:api` to generate new client types and functions.
 
-### Development preview on Android via USB (ADB)
+### Development preview on Android via ADB (USB or Wi‑Fi)
 
-Use this setup if you want to open the local dev version on a physical Android device over USB.
+Use this setup if you want to open the local dev version on a physical Android device over USB or Wi‑Fi.
 
 #### Prerequisites
 
@@ -87,25 +87,51 @@ Use this setup if you want to open the local dev version on a physical Android d
 - Install Android SDK Platform Tools (`adb`): [SDK Platform Tools release notes and downloads](https://developer.android.com/tools/releases/platform-tools)
 - (Linux) If the device is not detected, check USB/device setup: [Run apps on a hardware device](https://developer.android.com/studio/run/device)
 
-#### Step-by-step
+#### 1. Connect the device
 
-1. Enable **USB debugging** on the Android device.
-2. Connect Android to your computer via USB and keep the phone unlocked.
-3. Run:
+Pick one method:
+
+**USB**
+
+1. Enable **USB debugging**, plug in USB.
+2. Run `adb devices` — status should be `device`.
+   - If `unauthorized`, confirm the RSA dialog on the phone and run `adb devices` again.
+
+**Wi‑Fi — Wireless debugging (Android 11+, preferred)**
+
+1. Developer options → **Wireless debugging** → enable it.
+2. Open **Pair device with pairing code**, note the IP, pairing port, and 6‑digit code.
+3. On the computer:
    ```bash
+   adb pair PHONE_IP:PAIRING_PORT
+   ```
+   Enter the pairing code when prompted.
+4. Run `adb devices` — the device should already appear.
+
+**Wi‑Fi — via USB first (Android versions older than 11)**
+
+1. Connect via USB and confirm `adb devices` shows `device`.
+2. Enable TCP mode, then connect over Wi‑Fi and unplug USB:
+   ```bash
+   adb tcpip 5555
+   adb connect PHONE_IP:5555
    adb devices
    ```
-4. Make sure your device appears with `device` status.
-   - If you see `unauthorized`, confirm the RSA fingerprint dialog on the phone and run `adb devices` again.
-5. Forward port `3000` from Android to your computer:
-   ```bash
-   adb reverse tcp:3000 tcp:3000
-   ```
-6. Start the dev server on your computer:
-   ```bash
-   pnpm run dev --host
-   ```
-7. Open on Android: https://local.innohassle.ru:3000/
+   Use the phone’s LAN IP (Settings → About / Wi‑Fi details).
+
+#### 2. Forward the port and open the app
+
+Same for every connection method:
+
+```bash
+adb reverse tcp:3000 tcp:3000
+pnpm run dev --host
+```
+
+Open on Android: https://local.innohassle.ru:3000/
+
+> [!NOTE]
+> For Wi‑Fi: phone and computer must be on the same network. If pairing or `adb connect` fails, try disabling VPN on the phone. After reconnecting Wi‑Fi or rebooting, you may need to pair / `adb connect` again, then re-run `adb reverse`.
 
 #### Quick troubleshooting
 

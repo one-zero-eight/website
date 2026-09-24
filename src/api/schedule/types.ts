@@ -489,40 +489,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/parse/cleaning": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Parse Cleaning Schedule */
-    post: operations["parse_parse_cleaning_schedule"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/parse/bootcamp": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Parse Bootcamp Schedule */
-    post: operations["parse_parse_bootcamp_schedule"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/get-predefined-data": {
     parameters: {
       query?: never;
@@ -712,7 +678,7 @@ export interface paths {
     put?: never;
     /**
      * Hide Favorite
-     * @description Hide favorite from current user
+     * @description Hide a favorite or predefined event group from current user
      */
     post: operations["users_hide_favorite"];
     delete?: never;
@@ -866,45 +832,10 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/metrics": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Metrics
-     * @description Endpoint that serves Prometheus metrics.
-     */
-    get: operations["metrics"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** AcademicGroup */
-    AcademicGroup: {
-      /** Name */
-      name: string;
-      /**
-       * Ru
-       * @default false
-       */
-      ru: boolean;
-      english?: components["schemas"]["Entry"] | null;
-      labs?: components["schemas"]["Entry"] | null;
-      math?: components["schemas"]["Entry"] | null;
-      programming?: components["schemas"]["Entry"] | null;
-      physics?: components["schemas"]["Entry"] | null;
-    };
     /** Body_event_groups_batch_create_event_groups */
     Body_event_groups_batch_create_event_groups: {
       /** Event Groups */
@@ -919,53 +850,6 @@ export interface components {
     Body_tags_batch_create_tags: {
       /** Tags */
       tags: components["schemas"]["CreateTag"][];
-    };
-    /** BootcampParserConfig */
-    BootcampParserConfig: {
-      /**
-       * When
-       * @example 2024.08
-       */
-      when: string;
-      /** General Events */
-      general_events: components["schemas"]["Entry"][];
-      /** Academic Groups */
-      academic_groups: components["schemas"]["AcademicGroup"][];
-      /** Buddy Groups */
-      buddy_groups: components["schemas"]["BuddyGroup"][];
-    };
-    /** BuddyGroup */
-    BuddyGroup: {
-      /** Number */
-      number: string;
-      /** Name */
-      name: string;
-      /** Tg */
-      tg: string;
-    };
-    /** CleaningEntry */
-    CleaningEntry: {
-      /**
-       * Name
-       * @default Cleaning
-       */
-      name: string;
-      /** Location */
-      location: string;
-      /** Dates */
-      dates: string[];
-    };
-    /** CleaningParserConfig */
-    CleaningParserConfig: {
-      /**
-       * Start Date
-       * Format: date
-       */
-      start_date: string;
-      /** Cleaning Entries */
-      cleaning_entries: components["schemas"]["CleaningEntry"][];
-      /** Linen Change Entries */
-      linen_change_entries: components["schemas"]["LinenChangeEntry"][];
     };
     /** CreateEventGroup */
     CreateEventGroup: {
@@ -990,32 +874,6 @@ export interface components {
       name?: string | null;
       /** Satellite */
       satellite?: string | null;
-    };
-    /** Entry */
-    Entry: {
-      /** Subject */
-      subject?: string | null;
-      /** Subject Ru */
-      subject_ru?: string | null;
-      /** Instructor */
-      instructor?: string | null;
-      /** Location */
-      location?: string | null;
-      /** Location Ru */
-      location_ru?: string | null;
-      /**
-       * When
-       * @example [
-       *       "1 10:00-12:00",
-       *       "2-6 10:00-12:00"
-       *     ]
-       */
-      when: string[];
-      /**
-       * Buddy
-       * @default false
-       */
-      buddy: boolean;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -1044,20 +902,6 @@ export interface components {
       users?: components["schemas"]["InJsonUser"][];
       /** Academic Groups */
       academic_groups?: components["schemas"]["InJsonAcademicGroup"][];
-    };
-    /** LinenChangeEntry */
-    LinenChangeEntry: {
-      /**
-       * Name
-       * @default Linen change
-       */
-      name: string;
-      /** Location */
-      location: string;
-      /** Rrule */
-      rrule: {
-        [key: string]: string;
-      };
     };
     /**
      * LinkedCalendarCreate
@@ -1158,7 +1002,7 @@ export interface components {
     /** UserPredefinedGroupsResponse */
     UserPredefinedGroupsResponse: {
       /** Event Groups */
-      event_groups: number[];
+      event_groups: string[];
     };
     /** ValidationError */
     ValidationError: {
@@ -1179,19 +1023,13 @@ export interface components {
      */
     ViewEventGroup: {
       /** Id */
-      id: number;
+      id?: number | null;
       /** Alias */
       alias: string;
-      /**
-       * Updated At
-       * Format: date-time
-       */
-      updated_at: string;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at: string;
+      /** Updated At */
+      updated_at?: string | null;
+      /** Created At */
+      created_at?: string | null;
       /** Path */
       path?: string | null;
       /** Name */
@@ -1200,6 +1038,11 @@ export interface components {
       description?: string | null;
       /** Tags */
       tags?: components["schemas"]["ViewTag"][];
+      /**
+       * Virtual
+       * @default false
+       */
+      virtual: boolean;
     };
     /** ViewTag */
     ViewTag: {
@@ -1230,9 +1073,9 @@ export interface components {
       /** Name */
       name?: string | null;
       /** Favorite Event Groups */
-      favorite_event_groups?: number[];
+      favorite_event_groups?: string[];
       /** Hidden Event Groups */
-      hidden_event_groups?: number[];
+      hidden_event_groups?: string[];
       /** Linked Calendars */
       linked_calendars?: {
         [key: string]: components["schemas"]["LinkedCalendarView"];
@@ -1277,22 +1120,14 @@ export interface components {
   headers: never;
   pathItems: never;
 }
-export type SchemaAcademicGroup = components["schemas"]["AcademicGroup"];
 export type SchemaBodyEventGroupsBatchCreateEventGroups =
   components["schemas"]["Body_event_groups_batch_create_event_groups"];
 export type SchemaBodyEventGroupsSetEventGroupIcs =
   components["schemas"]["Body_event_groups_set_event_group_ics"];
 export type SchemaBodyTagsBatchCreateTags =
   components["schemas"]["Body_tags_batch_create_tags"];
-export type SchemaBootcampParserConfig =
-  components["schemas"]["BootcampParserConfig"];
-export type SchemaBuddyGroup = components["schemas"]["BuddyGroup"];
-export type SchemaCleaningEntry = components["schemas"]["CleaningEntry"];
-export type SchemaCleaningParserConfig =
-  components["schemas"]["CleaningParserConfig"];
 export type SchemaCreateEventGroup = components["schemas"]["CreateEventGroup"];
 export type SchemaCreateTag = components["schemas"]["CreateTag"];
-export type SchemaEntry = components["schemas"]["Entry"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaInJsonAcademicGroup =
@@ -1300,7 +1135,6 @@ export type SchemaInJsonAcademicGroup =
 export type SchemaInJsonUser = components["schemas"]["InJsonUser"];
 export type SchemaJsonPredefinedUsers =
   components["schemas"]["JsonPredefinedUsers"];
-export type SchemaLinenChangeEntry = components["schemas"]["LinenChangeEntry"];
 export type SchemaLinkedCalendarCreate =
   components["schemas"]["LinkedCalendarCreate"];
 export type SchemaLinkedCalendarUpdate =
@@ -1508,6 +1342,13 @@ export interface operations {
       };
       /** @description Event group not found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Event group alias cannot be changed */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -2460,86 +2301,6 @@ export interface operations {
       };
     };
   };
-  parse_parse_cleaning_schedule: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CleaningParserConfig"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Unable to verify credentials OR Credentials not provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  parse_parse_bootcamp_schedule: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BootcampParserConfig"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Unable to verify credentials OR Credentials not provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
   predefined_get_predefined_data: {
     parameters: {
       query?: never;
@@ -2560,6 +2321,13 @@ export interface operations {
       };
       /** @description Unable to verify credentials OR Credentials not provided */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Access denied, not enough permissions */
+      403: {
         headers: {
           [name: string]: unknown;
         };
@@ -2591,6 +2359,13 @@ export interface operations {
       };
       /** @description Unable to verify credentials OR Credentials not provided */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Access denied, not enough permissions */
+      403: {
         headers: {
           [name: string]: unknown;
         };
@@ -2807,7 +2582,7 @@ export interface operations {
   users_add_favorite: {
     parameters: {
       query: {
-        group_id: number;
+        group_alias: string;
       };
       header?: never;
       path?: never;
@@ -2852,7 +2627,7 @@ export interface operations {
   users_delete_favorite: {
     parameters: {
       query: {
-        group_id: number;
+        group_alias: string;
       };
       header?: never;
       path?: never;
@@ -2890,7 +2665,7 @@ export interface operations {
   users_hide_favorite: {
     parameters: {
       query: {
-        group_id: number;
+        group_alias: string;
         hide?: boolean;
       };
       header?: never;
@@ -3306,26 +3081,6 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  metrics: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
         };
       };
     };

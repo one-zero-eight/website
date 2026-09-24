@@ -68,13 +68,6 @@ async function validateFile(file: File): Promise<ReactNode | null> {
   return null;
 }
 
-function formatFileSize(bytes: number) {
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-}
-
-export { formatFileSize };
-
 export function FileDropzone({
   fileProcess,
   isFileProcessing,
@@ -247,7 +240,7 @@ export function FileDropzone({
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-3">
-                      <span className="icon-[material-symbols--cloud-upload-rounded] text-base-content/25 text-6xl" />
+                      <span className="icon-[material-symbols--cloud-upload] text-base-content/25 text-6xl" />
                       <div>
                         <p className="font-medium">Drop your file here</p>
                         <p className="text-base-content/50 mt-1 text-sm">

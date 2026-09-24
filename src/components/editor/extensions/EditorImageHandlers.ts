@@ -7,9 +7,7 @@ export const EditorImageHandlersExtension =
 
     addOptions() {
       return {
-        uploadImage: async () => {
-          throw new Error("Editor uploadImage is not configured");
-        },
+        uploadImage: undefined,
         resolveImageUrl: (imageId: string) => imageId,
       };
     },

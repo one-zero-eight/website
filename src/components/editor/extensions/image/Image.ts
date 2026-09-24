@@ -9,6 +9,7 @@ import {
   type ImageSizeAttrs,
 } from "@/components/editor/utils/imageDisplay";
 import { resolveImageAttrSrc } from "@/components/editor/utils/getEditorImageHandlers";
+import { uploadEditorImage } from "@/components/editor/utils/uploadEditorImage";
 import { createImageResizeTouchFixPlugin } from "./imageResizeTouchFix";
 
 function selectImageBlock(editor: Editor, imagePos: number) {
@@ -256,17 +257,15 @@ export const Image = BaseImage.extend({
           editor
             .chain()
             .focus()
-            .updateAttributes(extension.name, {
-              width,
-              height,
-              originalWidth:
-                sizeAttrs.originalWidth ??
-                currentNode.attrs.originalWidth ??
+            .command(({ tr }) => {
+              tr.setNodeMarkup(pos, undefined, {
+                ...currentNode.attrs,
                 width,
-              originalHeight:
-                sizeAttrs.originalHeight ??
-                currentNode.attrs.originalHeight ??
                 height,
+                originalWidth: sizeAttrs.originalWidth ?? width,
+                originalHeight: sizeAttrs.originalHeight ?? height,
+              });
+              return true;
             })
             .run();
 
@@ -365,9 +364,9 @@ export const Image = BaseImage.extend({
       new Plugin({
         key: imageClipboardParserKey,
         props: {
-          handlePaste: (view, event) => {
+          handlePaste: (_view, event) => {
             const items = event.clipboardData?.items;
-            if (!items) {
+            if (!this.editor.isEditable || !items) {
               return false;
             }
 
@@ -376,28 +375,47 @@ export const Image = BaseImage.extend({
               if (item.type.startsWith("image/")) {
                 const file = item.getAsFile();
                 if (file) {
-                  const reader = new FileReader();
-                  reader.onload = (e) => {
-                    const dataUrl = e.target?.result as string;
-                    if (dataUrl) {
-                      const currentState = view.state;
-                      const currentFrom = currentState.selection.from;
+                  const editor = this.editor;
+                  const uploadId = crypto.randomUUID();
+                  const inserted = editor.commands.insertContent({
+                    type: "imageUploadPlaceholder",
+                    attrs: { uploadId },
+                  });
+                  if (!inserted) {
+                    return false;
+                  }
 
-                      const placeholderNode =
-                        currentState.schema.nodes.imageUploadPlaceholder.create(
-                          {
-                            fileDataUrl: dataUrl,
-                          },
-                        );
-
-                      const tr = currentState.tr.insert(
-                        currentFrom,
-                        placeholderNode,
-                      );
-                      view.dispatch(tr);
-                    }
+                  const getPos = () => {
+                    let position: number | undefined;
+                    editor.state.doc.descendants((node, pos) => {
+                      if (
+                        node.type.name === "imageUploadPlaceholder" &&
+                        node.attrs.uploadId === uploadId
+                      ) {
+                        position = pos;
+                      }
+                    });
+                    return position;
                   };
-                  reader.readAsDataURL(file);
+
+                  void uploadEditorImage(editor, file, getPos).catch(
+                    (error) => {
+                      console.error("Failed to upload image:", error);
+                      if (editor.isDestroyed) {
+                        return;
+                      }
+
+                      const pos = getPos();
+                      if (pos !== undefined) {
+                        editor.view.dispatch(
+                          editor.state.tr.setNodeMarkup(pos, undefined, {
+                            uploadId: null,
+                          }),
+                        );
+                      }
+                      alert("Failed to upload image");
+                    },
+                  );
 
                   return true;
                 }

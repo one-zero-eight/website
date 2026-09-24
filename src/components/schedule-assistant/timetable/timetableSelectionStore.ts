@@ -29,7 +29,13 @@ export function createSelectionStore(): SelectionStore {
         selection?.type === next?.type &&
         selection?.value === next?.value &&
         (selection?.type !== "meeting" ||
-          selection.course === (next as { course?: string })?.course)
+          (selection.course ===
+            (next as { course?: string; focusTag?: string })?.course &&
+            String(selection.focusTag || "") ===
+              String(
+                (next as { course?: string; focusTag?: string })?.focusTag ||
+                  "",
+              )))
       ) {
         return;
       }
@@ -102,13 +108,16 @@ export function useMeetingHighlightBits(m: Meeting): number {
   const courseTitle = String(m.course || "").trim() || "—";
   const key = meetingSelectionKey(m);
   const course = m.course || courseTitle;
+  const tag = String(m.tag || "").trim();
   return useSyncExternalStore(
     store.subscribe,
     () => {
       const sel = store.getSelection();
       if (sel?.type !== "meeting") return 0;
       const selected = sel.value === key ? 1 : 0;
-      const related = sel.course === course ? 2 : 0;
+      if (sel.course !== course) return selected;
+      const focusTag = String(sel.focusTag || "").trim();
+      const related = !focusTag || tag === focusTag ? 2 : 0;
       return selected | related;
     },
     () => 0,

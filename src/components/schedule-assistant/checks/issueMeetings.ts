@@ -7,6 +7,7 @@ import type { Meeting } from "@/components/schedule-assistant/timetable/timetabl
 import {
   dayKey,
   everyWeekdayPhraseRu,
+  formatDisplayDate,
   todayIsoDate,
   weekdayLabelRu,
   weeklyPatternDayKey,
@@ -17,6 +18,7 @@ function instructorKey(value: string | string[] | null | undefined) {
   return list
     .map((item) => String(item).trim())
     .filter(Boolean)
+    .sort((left, right) => left.localeCompare(right))
     .join("\0");
 }
 
@@ -34,12 +36,58 @@ function groupsKey(groups: string[]) {
   return [...groups].sort((a, b) => a.localeCompare(b)).join("|");
 }
 
+function roomsCompatible(
+  meetingRoom: string | null | undefined,
+  scheduledRoom: string | null | undefined,
+) {
+  const meeting = String(meetingRoom || "").trim();
+  const scheduled = String(scheduledRoom ?? "").trim();
+  if (!scheduled || !meeting) return true;
+  return meeting === scheduled;
+}
+
+function instructorsCompatible(
+  meetingInstructors: string | string[] | null | undefined,
+  scheduledInstructor: string | string[] | null | undefined,
+) {
+  const scheduled = instructorKey(scheduledInstructor);
+  if (!scheduled) return true;
+  return instructorKey(meetingInstructors) === scheduled;
+}
+
+function groupsCompatible(meetingGroups: string[], scheduledGroups: string[]) {
+  if (!scheduledGroups.length || !meetingGroups.length) return true;
+  if (groupsKey(meetingGroups) === groupsKey(scheduledGroups)) return true;
+  const meetingSet = new Set(
+    meetingGroups.map((group) => group.trim()).filter(Boolean),
+  );
+  return scheduledGroups.some((group) => meetingSet.has(group.trim()));
+}
+
+function courseMatches(meeting: Meeting, scheduled: SchemaScheduledMeeting) {
+  const name = String(scheduled.course_name || "").trim();
+  if (!name) return false;
+  if (String(meeting.course || "").trim() === name) return true;
+  return String(meeting.course_short_name || "").trim() === name;
+}
+
+function placementMatches(meeting: Meeting, scheduled: SchemaScheduledMeeting) {
+  if (scheduled.placement.kind === "occurrence") {
+    return dateOnly(meeting.date) === dateOnly(scheduled.placement.date);
+  }
+  const weekdayKey = weeklyPatternDayKey(String(scheduled.placement.weekday));
+  if (!weekdayKey) return false;
+  return dayKey(meeting.date) === weekdayKey;
+}
+
 export function extractMeetingsFromIssue(
   issue: SchemaIssue,
 ): SchemaScheduledMeeting[] {
   switch (issue.issue_type) {
     case "capacity":
     case "unbooked":
+    case "missing_room":
+    case "missing_instructor":
     case "instructor_banned_slot":
     case "instructor_preference":
       return [issue.meeting];
@@ -59,24 +107,25 @@ export function scheduledMeetingMatches(
   meeting: Meeting,
   scheduled: SchemaScheduledMeeting,
 ): boolean {
-  if (meeting.course !== scheduled.course_name) return false;
+  if (!courseMatches(meeting, scheduled)) return false;
   if (meeting.tag !== scheduled.component_tag) return false;
   if (timeKey(meeting.start) !== timeKey(scheduled.start_time)) return false;
-  if (String(meeting.room || "").trim() !== String(scheduled.room ?? "").trim())
+  if (!roomsCompatible(meeting.room, scheduled.room)) return false;
+  if (!instructorsCompatible(meeting.instructors, scheduled.instructor)) {
     return false;
-  if (
-    instructorKey(meeting.instructors) !== instructorKey(scheduled.instructor)
-  )
-    return false;
-  if (groupsKey(meeting.groups) !== groupsKey(scheduled.groups)) return false;
-
-  if (scheduled.placement.kind === "occurrence") {
-    return dateOnly(meeting.date) === dateOnly(scheduled.placement.date);
   }
+  if (!groupsCompatible(meeting.groups, scheduled.groups ?? [])) return false;
+  return placementMatches(meeting, scheduled);
+}
 
-  const weekdayKey = weeklyPatternDayKey(String(scheduled.placement.weekday));
-  if (!weekdayKey) return false;
-  return dayKey(meeting.date) === weekdayKey;
+function scheduledMeetingMatchesLoose(
+  meeting: Meeting,
+  scheduled: SchemaScheduledMeeting,
+): boolean {
+  if (!courseMatches(meeting, scheduled)) return false;
+  if (meeting.tag !== scheduled.component_tag) return false;
+  if (timeKey(meeting.start) !== timeKey(scheduled.start_time)) return false;
+  return placementMatches(meeting, scheduled);
 }
 
 function meetingIdentityKey(parts: {
@@ -130,50 +179,38 @@ function pickInstanceId(matches: Meeting[]): string | null {
   return (upcoming ?? sorted[0]).instance_id;
 }
 
+function collectIndexedMeetings(index: MeetingInstanceIndex): Meeting[] {
+  const meetings: Meeting[] = [];
+  for (const bucket of index.values()) meetings.push(...bucket);
+  return meetings;
+}
+
 export function resolveMeetingInstanceId(
   scheduled: SchemaScheduledMeeting,
   allMeetings: Meeting[] | MeetingInstanceIndex,
 ): string | null {
-  if (Array.isArray(allMeetings)) {
-    return pickInstanceId(
-      allMeetings.filter(
-        (meeting) =>
-          !meeting.cancelled && scheduledMeetingMatches(meeting, scheduled),
-      ),
-    );
-  }
+  const pool = Array.isArray(allMeetings)
+    ? allMeetings
+    : collectIndexedMeetings(allMeetings);
 
-  const key = meetingIdentityKey({
-    course: scheduled.course_name,
-    tag: scheduled.component_tag,
-    start: scheduled.start_time,
-    room: scheduled.room,
-    instructor: scheduled.instructor,
-    groups: scheduled.groups,
-  });
-  const candidates = allMeetings.get(key) ?? [];
-  if (scheduled.placement.kind === "occurrence") {
-    const date = dateOnly(scheduled.placement.date);
-    return pickInstanceId(
-      candidates.filter((meeting) => dateOnly(meeting.date) === date),
-    );
-  }
+  const exact = pickInstanceId(
+    pool.filter(
+      (meeting) =>
+        !meeting.cancelled && scheduledMeetingMatches(meeting, scheduled),
+    ),
+  );
+  if (exact) return exact;
 
-  const weekdayKey = weeklyPatternDayKey(String(scheduled.placement.weekday));
-  if (!weekdayKey) return null;
   return pickInstanceId(
-    candidates.filter((meeting) => dayKey(meeting.date) === weekdayKey),
+    pool.filter(
+      (meeting) =>
+        !meeting.cancelled && scheduledMeetingMatchesLoose(meeting, scheduled),
+    ),
   );
 }
 
 export function formatRuDate(dateStr: string) {
-  const [year, month, day] = dateStr.slice(0, 10).split("-").map(Number);
-  if (!year || !month || !day) return dateStr;
-  return new Date(year, month - 1, day).toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  return formatDisplayDate(dateStr);
 }
 
 export function formatScheduledMeetingWhen(scheduled: SchemaScheduledMeeting) {
@@ -201,8 +238,8 @@ export function formatInstructorLabel(
     .map((id) => {
       const entry = instructorsById.get(id);
       return (
-        entry?.name_ru?.trim() ||
         entry?.name_en?.trim() ||
+        entry?.name_ru?.trim() ||
         entry?.alias?.trim() ||
         id
       );
@@ -217,6 +254,10 @@ export function buildInstructorsById(
   const map = new Map<string, SchemaInstructor>();
   for (const instructor of instructors ?? []) {
     map.set(instructor.id, instructor);
+    const email = instructor.email?.trim();
+    if (email && !map.has(email)) {
+      map.set(email, instructor);
+    }
   }
   return map;
 }

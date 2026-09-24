@@ -4,7 +4,7 @@ export const MEETING_OVERRIDE_FIELD_LABELS: Record<
   MeetingOverrideField,
   string
 > = {
-  room: "аудитория",
+  room: "локация",
   time: "время",
   weekday: "день недели",
   instructor: "преподаватель",

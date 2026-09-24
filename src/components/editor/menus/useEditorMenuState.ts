@@ -22,6 +22,8 @@ export function useEditorMenuState(editor: Editor) {
         canBold: ctx.editor.can().toggleBold(),
         isItalic: ctx.editor.isActive("italic") ?? false,
         canItalic: ctx.editor.can().toggleItalic(),
+        isUnderline: ctx.editor.isActive("underline") ?? false,
+        canUnderline: ctx.editor.can().toggleUnderline(),
         isStrike: ctx.editor.isActive("strike") ?? false,
         canStrike: ctx.editor.can().toggleStrike(),
         isCode: ctx.editor.isActive("code") ?? false,

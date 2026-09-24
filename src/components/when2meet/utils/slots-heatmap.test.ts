@@ -157,6 +157,18 @@ assert(
   "slot count ignores participants without explicit availability",
 );
 
+assert(
+  countExplicitSlotAvailability(
+    usersWithNonResponder,
+    new Set(["a", "b", "c", "d"]),
+    "2026-07-16_09:00",
+    "a",
+    new Set(["2026-07-16_09:00"]),
+    "a",
+  ) === 1,
+  "slot count can exclude the participant whose availability is being edited",
+);
+
 const explicitParticipants = getParticipantsWithExplicitSlot(
   usersWithNonResponder,
   "2026-07-16_09:00",

@@ -18,21 +18,23 @@ export function getPersonalCalendarIcsUrls({
   sportsHidden,
   moodleHidden,
 }: {
-  favorites: number[];
-  hidden: number[];
-  predefined: number[];
+  favorites: string[];
+  hidden: string[];
+  predefined: string[];
   eventGroups: scheduleTypes.SchemaListEventGroupsResponse;
   userId: number | undefined;
   musicRoomHidden: boolean;
   sportsHidden: boolean;
   moodleHidden: boolean;
 }) {
-  const urls: string[] = favorites.concat(predefined).flatMap((groupId) => {
-    if (hidden.includes(groupId)) {
+  const urls: string[] = favorites.concat(predefined).flatMap((groupAlias) => {
+    if (hidden.includes(groupAlias)) {
       return [];
     }
 
-    const group = eventGroups.event_groups.find((item) => item.id === groupId);
+    const group = eventGroups.event_groups.find(
+      (item) => item.alias === groupAlias,
+    );
 
     if (!group) {
       return [];

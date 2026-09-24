@@ -1,7 +1,7 @@
-import Tooltip from "@/components/common/Tooltip";
 import { $schedule } from "@/api/schedule";
 import { TargetForExport } from "@/api/schedule/types.ts";
 import { useQueryClient } from "@tanstack/react-query";
+import HideButtonUI from "@/components/schedule/HideButtonUI.tsx";
 
 export default function HideButtonPersonal({
   target,
@@ -31,7 +31,6 @@ export default function HideButtonPersonal({
 
   const hide = $schedule.useMutation("post", "/users/me/{target}/hide", {
     onMutate: ({ params }) => {
-      console.log(params);
       queryClient.setQueryData(
         $schedule.queryOptions("get", "/users/me").queryKey,
         (prev) => {
@@ -67,21 +66,13 @@ export default function HideButtonPersonal({
   };
 
   return (
-    <Tooltip content={isHidden ? "Hidden from calendar" : "Hide from calendar"}>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          switchHideFavorite?.();
-        }}
-        className="hover:bg-base-200 rounded-box flex h-10 w-10 items-center justify-center text-3xl"
-      >
-        {isHidden ? (
-          <span className="icon-[material-symbols--visibility-off-outline] text-base-content/50" />
-        ) : (
-          <span className="icon-[material-symbols--visibility-outline] text-base-content/50" />
-        )}
-      </button>
-    </Tooltip>
+    <HideButtonUI
+      isHidden={isHidden}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        switchHideFavorite?.();
+      }}
+    />
   );
 }

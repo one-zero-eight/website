@@ -13,6 +13,7 @@ import {
   clubTypesOrder,
   getClubTypeLabel,
 } from "./constants.ts";
+import { isClubLeader } from "./permissions.ts";
 
 export function ClubsListPage() {
   const { data: clubs, isPending } = $clubs.useQuery(
@@ -35,6 +36,7 @@ export function ClubsListPage() {
     },
   );
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const [search, setSearch] = useState("");
   const [selectedTypes, setSelectedTypes] = useState<Set<clubsTypes.ClubType>>(
     new Set(),
@@ -61,6 +63,11 @@ export function ClubsListPage() {
         (selectedTypes.has(club.type) || selectedTypes.size === 0),
     );
   }, [clubs, fuse, search, selectedTypes]);
+
+  const yourClubs =
+    !search && selectedTypes.size === 0
+      ? filteredClubs.filter((club) => isClubLeader(clubsUser, club.id))
+      : [];
 
   const handleTypeToggle = (type: clubsTypes.ClubType) => {
     setSelectedTypes((prev) => {
@@ -119,6 +126,18 @@ export function ClubsListPage() {
         </div>
       ) : (
         <div className="flex grow flex-col gap-6">
+          {yourClubs.length > 0 && (
+            <section>
+              <h2 className="text-base-content text-xl font-semibold">
+                Your club
+              </h2>
+              <div className="mt-4 flex flex-col gap-6">
+                {yourClubs.map((club) => (
+                  <ClubCard key={club.id} club={club} />
+                ))}
+              </div>
+            </section>
+          )}
           {!search ? (
             Object.entries(groupedClubs).map(([type, clubsOfType]) => (
               <div key={type}>

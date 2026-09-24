@@ -163,11 +163,11 @@ export function RoomsTabContent() {
           setCreateOpen(true);
         }}
       >
-        Добавить аудиторию
+        Добавить локацию
       </button>
       {!groups.length ? (
         <div className="text-base-content/70 text-sm">
-          Нет аудиторий в конфигурации.
+          Нет локаций в конфигурации.
         </div>
       ) : (
         <div className="flex flex-col gap-1.5">
@@ -215,7 +215,7 @@ export function RoomsTabContent() {
       <SettingsCreateModal
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Новая аудитория"
+        title="Новая локация"
         submitLabel="Создать"
         isPending={isCreating}
         onSubmit={handleCreateRoom}
@@ -233,7 +233,7 @@ export function RoomsTabContent() {
           <input
             className="input input-bordered input-sm w-full"
             value={newName}
-            placeholder="Аудитория 108"
+            placeholder="Локация 108"
             onChange={(e) => setNewName(e.target.value)}
           />
         </SettingsCreateField>

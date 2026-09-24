@@ -22,6 +22,7 @@ import { ImageUploadPlaceholder } from "@/components/editor/extensions/image/Ima
 import { BubbleMenuContent } from "@/components/editor/menus/BubbleMenuContent";
 import { ClickableDragHandle } from "@/components/editor/menus/ClickableDragHandle";
 import { MobileBottomMenu } from "@/components/editor/menus/MobileBottomMenu";
+import { EditorToolbar } from "@/components/editor/menus/EditorToolbar";
 import { EditorImageHandlersExtension } from "@/components/editor/extensions/EditorImageHandlers";
 import type { EditorImageHandlers } from "@/components/editor/types";
 
@@ -72,8 +73,11 @@ const baseExtensions = [
   }),
   // https://tiptap.dev/docs/editor/extensions/functionality/placeholder
   Placeholder.configure({
+    emptyEditorClass: "is-editor-empty",
+    emptyNodeClass: "is-empty",
     includeChildren: true,
     showOnlyCurrent: false,
+    showOnlyWhenEditable: true,
     placeholder: ({ node }) => {
       if (node.type.name === "heading") {
         return `Heading ${node.attrs.level}…`;
@@ -107,11 +111,14 @@ function TiptapDescriptionEditor(
     isReadOnly,
     initialContent,
     imageHandlers,
+    onUpdate,
   }: {
     className?: string;
     isReadOnly?: boolean;
     initialContent?: Content;
     imageHandlers?: EditorImageHandlers;
+    /** Called on every content change made by the user. */
+    onUpdate?: () => void;
   },
   ref: React.Ref<TiptapEditorRef>,
 ) {
@@ -163,6 +170,7 @@ function TiptapDescriptionEditor(
     },
     extensions: extensions,
     content: initialContent || "",
+    onUpdate: () => onUpdate?.(),
   });
 
   // Expose editor ref
@@ -196,10 +204,14 @@ function TiptapDescriptionEditor(
   return (
     <EditorContext.Provider value={providerValue}>
       <article className="relative grid min-w-0 grid-cols-[minmax(0,1fr)] md:block">
+        {!isReadOnly && <EditorToolbar editor={editor} />}
         <EditorContent
           editor={editor}
           role="presentation"
-          className="col-start-1 row-start-1 min-w-0 [&_.tiptap]:pb-12 md:[&_.tiptap]:pb-0"
+          className={cn(
+            "col-start-1 row-start-1 min-w-0",
+            !isReadOnly && "[&_.tiptap]:pb-12 md:[&_.tiptap]:pb-0",
+          )}
         />
         {!isReadOnly && <ClickableDragHandle editor={editor} />}
         {!isReadOnly && <BubbleMenuContent editor={editor} />}

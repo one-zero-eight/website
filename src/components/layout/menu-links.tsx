@@ -25,6 +25,7 @@
  *     },
  *   ]),
  */
+import { accountsTypes } from "@/api/accounts";
 import { ValidateLinkOptions } from "@tanstack/react-router";
 
 export type LocalLink = {
@@ -47,11 +48,38 @@ export type SeparatorItem = {
 export type ItemType = (LocalLink | ExternalLink | SeparatorItem) & {
   hideOnMore?: boolean;
   staff_only?: boolean;
+  innohassle_admin_only?: boolean;
 };
 export type LinkItemType = (LocalLink | ExternalLink) & {
   hideOnMore?: boolean;
   staff_only?: boolean;
+  innohassle_admin_only?: boolean;
 };
+
+export function isMenuItemVisible(
+  item: ItemType,
+  me: accountsTypes.SchemaViewUser | null | undefined,
+  isImpersonating = false,
+) {
+  if (item.type === "separator") return true;
+
+  if (
+    item.staff_only &&
+    !(
+      me?.innopolis_sso?.is_staff ||
+      me?.id === "65f6ef2847289ea08482e3bf" ||
+      !import.meta.env.VITE_PRODUCTION
+    )
+  ) {
+    return false;
+  }
+
+  if (item.innohassle_admin_only && !me?.innohassle_admin && !isImpersonating) {
+    return false;
+  }
+
+  return true;
+}
 
 export const items: ItemType[] = [
   // Our flagman services:
@@ -96,19 +124,17 @@ export const items: ItemType[] = [
   },
   { type: "separator", hideOnMore: true },
   // On-site services:
-  ...((import.meta.env.VITE_PRODUCTION && []) || [
-    {
-      type: "local",
-      title: "Events",
-      to: "/events",
-      badge: (
-        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
-          DEV
-        </span>
-      ),
-      icon: <span className="icon-[material-symbols--campaign-rounded]" />,
-    },
-  ]),
+  {
+    type: "local",
+    title: "Events",
+    to: "/events",
+    badge: (
+      <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
+        NEW
+      </span>
+    ),
+    icon: <span className="icon-[material-symbols--campaign-rounded]" />,
+  },
   {
     type: "local",
     title: "Clubs",
@@ -212,6 +238,15 @@ export const items: ItemType[] = [
         STAFF
       </span>
     ),
+  },
+  {
+    type: "local",
+    title: "Admin",
+    to: "/admin",
+    icon: (
+      <span className="icon-[material-symbols--admin-panel-settings-outline-rounded]" />
+    ),
+    innohassle_admin_only: true,
   },
   {
     type: "local",

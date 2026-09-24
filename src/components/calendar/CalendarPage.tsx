@@ -11,12 +11,14 @@ import {
 import { toScheduleApiDateTime } from "@/components/sport/sport-week-utils.ts";
 import { useWhen2MeetCalendarEvents } from "@/components/calendar/useWhen2MeetCalendarEvents.ts";
 import {
+  getImportedLink,
   getICSLink,
   getMyMoodleLink,
   getMyMusicRoomLink,
   getMyRoomBookingsLink,
   getMyWorkshopsLink,
 } from "@/api/schedule/links.ts";
+import { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 import type { EventInput } from "@fullcalendar/core";
 import { useMemo, useRef, useState } from "react";
 
@@ -97,6 +99,7 @@ export function CalendarPage() {
                 scheduleUser.id,
                 scheduleUser.music_room_hidden,
                 scheduleUser.moodle_hidden,
+                Object.values(scheduleUser.linked_calendars || {}),
               )
         }
         sportEvents={sportEvents}
@@ -110,7 +113,7 @@ export function CalendarPage() {
                 : "listMonth"
             : "dayGridMonth"
         }
-        viewId="page"
+        viewStorageId="page"
         isFullPage={true}
       />
     </div>
@@ -118,20 +121,38 @@ export function CalendarPage() {
 }
 
 function getCalendarsToShow(
-  favorites: number[],
-  hidden: number[],
-  predefined: number[],
+  favorites: string[],
+  hidden: string[],
+  predefined: string[],
   eventGroups: scheduleTypes.SchemaListEventGroupsResponse,
   userId: number | undefined,
   music_room_hidden: boolean,
   moodle_hidden: boolean,
+  imported: SchemaLinkedCalendarView[],
 ): URLType[] {
+  const visibleAliases = new Set(
+    favorites.concat(predefined).filter((alias) => !hidden.includes(alias)),
+  );
+  const hasAssistantEnglish = [...visibleAliases].some((alias) =>
+    alias.startsWith("english-"),
+  );
+
   // Remove hidden calendars
-  const toShow: URLType[] = favorites.concat(predefined).flatMap((v) => {
-    if (hidden.includes(v)) return [];
-    const group = eventGroups.event_groups.find((group) => group.id === v);
+  const toShow: URLType[] = [...visibleAliases].flatMap((alias) => {
+    const group = eventGroups.event_groups.find(
+      (eventGroup) => eventGroup.alias === alias,
+    );
     if (!group) return [];
-    return [{ url: getICSLink(group.alias, userId), eventGroup: group }];
+    const isCoreCourses = group.tags?.some(
+      (tag) => tag.type === "core-courses",
+    );
+    return [
+      {
+        url: getICSLink(group.alias, userId),
+        eventGroup: group,
+        excludeEnglish: hasAssistantEnglish && isCoreCourses,
+      },
+    ];
   });
 
   // Add personal calendars
@@ -166,6 +187,16 @@ function getCalendarsToShow(
     color: "seagreen",
     sourceLink: "https://innohassle.ru/room-booking",
     updatedAt: new Date().toISOString(),
+  });
+
+  // Add imported calendars
+  imported.forEach((v) => {
+    if (v.is_active)
+      toShow.push({
+        url: getImportedLink(userId, v.alias),
+        color: v.color || undefined,
+        updatedAt: new Date().toISOString(),
+      });
   });
 
   // Return unique items

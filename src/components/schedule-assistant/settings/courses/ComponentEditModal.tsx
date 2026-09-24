@@ -1,13 +1,15 @@
 import type {
   SchemaComponent,
+  SchemaComponentSessionSeries,
   SchemaCourseConfig,
-  SchemaInstructorListItem,
+  SchemaInstructor,
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import { ComponentSessionsEditor } from "@/components/schedule-assistant/settings/courses/ComponentSessionsEditor.tsx";
 import { InstructorPoolEditor } from "@/components/schedule-assistant/settings/courses/InstructorPoolEditor.tsx";
+import { AudienceTokensInfoIcon } from "@/components/schedule-assistant/settings/courses/audienceTreeTooltip.tsx";
 import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { EditClassAudienceMultiSelect } from "@/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx";
 import {
@@ -16,7 +18,7 @@ import {
 } from "@/components/schedule-assistant/timetable/audienceSelectorTree.ts";
 import { formatAudienceTokensLabel } from "@/components/schedule-assistant/timetable/meetingEditUtils.ts";
 import { cn } from "@/lib/ui/cn";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type EditTab = "basics" | "people" | "sessions";
 
@@ -39,10 +41,7 @@ function normalizeComponentForCompare(
         ? null
         : Number(component.per_semester),
     per_group: Boolean(component.per_group),
-    student_groups: minimizeAudienceTokens(
-      component.student_groups ?? [],
-      tree,
-    ),
+    audience: minimizeAudienceTokens(component.audience ?? [], tree),
     instructor_pool: component.instructor_pool ?? [],
     sessions:
       component.sessions && component.sessions.length
@@ -55,14 +54,19 @@ function AudienceSummaryEditor({
   config,
   tokens,
   onChange,
+  sectionCode,
 }: {
   config: SchemaScheduleConfig;
   tokens: string[];
   onChange: (tokens: string[]) => void;
+  sectionCode: string;
 }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(tokens);
-  const tree = useMemo(() => buildAudienceSelectorTree(config), [config]);
+  const tree = useMemo(
+    () => buildAudienceSelectorTree(config, { sectionCode }),
+    [config, sectionCode],
+  );
   const label = tokens.length
     ? formatAudienceTokensLabel(config, tokens)
     : "Не выбраны";
@@ -78,8 +82,9 @@ function AudienceSummaryEditor({
       <div className="border-base-300 rounded-box flex items-start justify-between gap-3 border px-3 py-2.5">
         <div className="min-w-0">
           <div className="text-base-content/50 text-xs">Группы</div>
-          <div className="mt-0.5 text-sm leading-snug [overflow-wrap:anywhere]">
-            {label}
+          <div className="mt-0.5 inline-flex max-w-full items-center gap-1 text-sm leading-snug">
+            <span className="min-w-0 [overflow-wrap:anywhere]">{label}</span>
+            <AudienceTokensInfoIcon config={config} tokens={tokens} />
           </div>
           {expandedCount > 0 ? (
             <div className="text-base-content/45 mt-0.5 text-xs">
@@ -104,10 +109,15 @@ function AudienceSummaryEditor({
         <div className="flex flex-col gap-3">
           <div className="rounded-box border-base-300 bg-base-100 border px-3 py-2 text-sm">
             <div className="text-base-content/50 text-xs">Выбрано</div>
-            <div className="mt-0.5 leading-snug [overflow-wrap:anywhere]">
-              {draft.length
-                ? formatAudienceTokensLabel(config, draft)
-                : "Не выбраны"}
+            <div className="mt-0.5 inline-flex min-w-0 items-center gap-1 leading-snug">
+              <span className="min-w-0 [overflow-wrap:anywhere]">
+                {draft.length
+                  ? formatAudienceTokensLabel(config, draft)
+                  : "Не выбраны"}
+              </span>
+              {draft.length ? (
+                <AudienceTokensInfoIcon config={config} tokens={draft} />
+              ) : null}
             </div>
           </div>
           <EditClassAudienceMultiSelect
@@ -115,6 +125,7 @@ function AudienceSummaryEditor({
             config={config}
             tokens={draft}
             onChange={setDraft}
+            sectionCode={sectionCode}
           />
           <div className="flex justify-end gap-2">
             <button
@@ -162,24 +173,32 @@ export function ComponentEditModal({
   component: SchemaComponent | null;
   isNew?: boolean;
   tagOptions: string[];
-  instructors: SchemaInstructorListItem[];
+  instructors: SchemaInstructor[];
   courseInstructors: SchemaCourseConfig["instructors"];
   onSave: (component: SchemaComponent) => void;
 }) {
   const [draft, setDraft] = useState<SchemaComponent | null>(null);
   const [baseline, setBaseline] = useState<SchemaComponent | null>(null);
   const [tab, setTab] = useState<EditTab>("basics");
-  const tree = useMemo(() => buildAudienceSelectorTree(config), [config]);
+  const [sessionDeletesDirty, setSessionDeletesDirty] = useState(false);
+  const [sessionsResetKey, setSessionsResetKey] = useState(0);
+  const sessionsForSaveRef = useRef<
+    (() => SchemaComponentSessionSeries[] | null) | null
+  >(null);
+  const courseSectionCode = config.courses![courseIndex].section_code;
+  const tree = useMemo(
+    () => buildAudienceSelectorTree(config, { sectionCode: courseSectionCode }),
+    [config, courseSectionCode],
+  );
 
   useEffect(() => {
     if (!open || !component) return;
     const next = cloneComponent(component);
-    next.student_groups = minimizeAudienceTokens(
-      next.student_groups ?? [],
-      tree,
-    );
+    next.audience = minimizeAudienceTokens(next.audience ?? [], tree);
     setDraft(next);
     setBaseline(cloneComponent(next));
+    setSessionDeletesDirty(false);
+    setSessionsResetKey((key) => key + 1);
     setTab("basics");
   }, [open, component, tree]);
 
@@ -194,24 +213,35 @@ export function ComponentEditModal({
   const sessionCount = draft?.sessions?.length ?? 0;
   const hasTag = Boolean(String(draft?.tag || "").trim());
   const isDirty =
-    !!draft &&
-    !!baseline &&
-    normalizeComponentForCompare(draft, tree) !==
-      normalizeComponentForCompare(baseline, tree);
+    (!!draft &&
+      !!baseline &&
+      normalizeComponentForCompare(draft, tree) !==
+        normalizeComponentForCompare(baseline, tree)) ||
+    sessionDeletesDirty;
   const canSave = hasTag && (isNew || isDirty);
 
   function handleClose() {
     onOpenChange(false);
   }
 
+  function handleReset() {
+    if (!baseline) return;
+    setDraft(cloneComponent(baseline));
+    setSessionDeletesDirty(false);
+    setSessionsResetKey((key) => key + 1);
+  }
+
   function handleSave() {
     if (!draft || !canSave) return;
     const tag = String(draft.tag || "").trim();
     if (!tag) return;
+    const sessions =
+      sessionsForSaveRef.current?.() ??
+      (draft.sessions && draft.sessions.length ? draft.sessions : null);
     onSave({
       ...draft,
       tag,
-      student_groups: minimizeAudienceTokens(draft.student_groups ?? [], tree),
+      audience: minimizeAudienceTokens(draft.audience ?? [], tree),
       instructor_pool: draft.instructor_pool ?? [],
       per_group: Boolean(draft.per_group),
       per_week:
@@ -222,7 +252,7 @@ export function ComponentEditModal({
         draft.per_semester === null || draft.per_semester === undefined
           ? null
           : Number(draft.per_semester),
-      sessions: draft.sessions && draft.sessions.length ? draft.sessions : null,
+      sessions: sessions && sessions.length ? sessions : null,
     });
     onOpenChange(false);
   }
@@ -257,8 +287,8 @@ export function ComponentEditModal({
         else onOpenChange(next);
       }}
       title={`Компонент · ${draft.tag || "новый"}`}
-      overlayClassName="!flex items-start justify-center overflow-y-auto pt-[max(1rem,6vh)]"
-      containerClassName="max-h-[calc(100dvh-2rem-6vh)] max-w-2xl overflow-y-auto"
+      overlayClassName="!flex items-start justify-center overflow-hidden py-4"
+      containerClassName="max-h-[calc(100dvh-2rem)] max-w-2xl overflow-y-auto"
     >
       <div className="flex flex-col gap-4">
         <div className="tabs tabs-box tabs-sm bg-base-200/60 w-full p-1">
@@ -309,10 +339,9 @@ export function ComponentEditModal({
 
             <AudienceSummaryEditor
               config={config}
-              tokens={draft.student_groups ?? []}
-              onChange={(student_groups) =>
-                setDraft({ ...draft, student_groups })
-              }
+              tokens={draft.audience ?? []}
+              sectionCode={courseSectionCode}
+              onChange={(audience) => setDraft({ ...draft, audience })}
             />
 
             <label className="label cursor-pointer justify-start gap-3 px-0">
@@ -327,8 +356,8 @@ export function ComponentEditModal({
               <span className="label-text text-sm leading-snug">
                 Отдельное занятие на каждую группу
                 <span className="text-base-content/55 block text-xs">
-                  Для lab: каждая группа в своё время/аудиторию. Иначе все
-                  группы вместе.
+                  Для lab: каждая группа в своё время/локацию. Иначе все группы
+                  вместе.
                 </span>
               </span>
             </label>
@@ -336,7 +365,7 @@ export function ComponentEditModal({
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="form-control w-full gap-1.5">
                 <span className="label-text text-xs font-medium tracking-wide uppercase">
-                  В неделю
+                  Цель в неделю
                 </span>
                 <input
                   type="number"
@@ -355,7 +384,7 @@ export function ComponentEditModal({
               </label>
               <label className="form-control w-full gap-1.5">
                 <span className="label-text text-xs font-medium tracking-wide uppercase">
-                  За семестр
+                  Цель за семестр
                 </span>
                 <input
                   type="number"
@@ -394,12 +423,27 @@ export function ComponentEditModal({
             componentIndex={componentIndex}
             sessions={draft.sessions}
             courseInstructors={courseInstructors}
-            componentGroups={draft.student_groups}
+            instructorPool={draft.instructor_pool}
+            componentGroups={draft.audience}
+            perGroup={Boolean(draft.per_group)}
             onChange={(sessions) => setDraft({ ...draft, sessions })}
+            baselineSessions={baseline?.sessions}
+            onDeletedDirtyChange={setSessionDeletesDirty}
+            sessionsForSaveRef={sessionsForSaveRef}
+            resetKey={sessionsResetKey}
           />
         ) : null}
 
-        <div className="flex justify-end gap-2 border-t pt-3">
+        <div className="flex items-center justify-end gap-3 border-t pt-3">
+          {isDirty ? (
+            <button
+              type="button"
+              className="text-base-content/50 hover:text-base-content/80 text-sm"
+              onClick={handleReset}
+            >
+              Сбросить изменения
+            </button>
+          ) : null}
           <button type="button" className="btn btn-ghost" onClick={handleClose}>
             Отмена
           </button>

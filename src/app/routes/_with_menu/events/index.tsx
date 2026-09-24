@@ -1,5 +1,5 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import { EventsListPage } from "@/components/events/EventsListPage";
+import { EventsCalendarPage } from "@/components/events/calendar/EventsCalendarPage";
 import { EventsTabs } from "@/components/events/EventsTabs";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
@@ -13,12 +13,12 @@ function RouteComponent() {
     <>
       <Helmet>
         <title>Events</title>
-        <meta name="description" content="Check in to events here." />
+        <meta name="description" content="University events calendar." />
       </Helmet>
 
-      <Topbar title="University Events" hideOnMobile={true} />
+      <Topbar title="Events" hideOnMobile={true} />
       <EventsTabs />
-      <EventsListPage />
+      <EventsCalendarPage />
     </>
   );
 }

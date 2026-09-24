@@ -1,16 +1,22 @@
 import { $clubs } from "@/api/clubs";
 import { getDescriptionImageUrl } from "@/api/clubs/links.ts";
+import { $workshops } from "@/api/workshops";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
-import { Helmet } from "@dr.pogodin/react-helmet";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
-import { Link } from "@tanstack/react-router";
+import { EventSummaryCard } from "@/components/events/shared/EventSummaryCard.tsx";
+import { getEventImageUrl } from "@/components/events/utils/links.ts";
 import { cn } from "@/lib/ui/cn";
+import { Helmet } from "@dr.pogodin/react-helmet";
+import { Link } from "@tanstack/react-router";
+import moment from "moment";
+import { useMemo } from "react";
 import {
-  getClubTypeLabel,
   getClubTypeColor,
+  getClubTypeLabel,
   getLinkIconClass,
   getLinkLabel,
 } from "./constants.ts";
+import { canUserEditClub } from "./permissions.ts";
 
 export function ClubPage({ clubSlug }: { clubSlug: string }) {
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
@@ -27,6 +33,24 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
     {
       params: { path: { slug: clubSlug } },
     },
+  );
+
+  const eventsRange = useMemo(
+    () => ({
+      from: moment().toISOString(),
+      to: moment().add(3, "months").toISOString(),
+    }),
+    [],
+  );
+  const { data: events, isPending: eventsPending } = $workshops.useQuery(
+    "get",
+    "/events/",
+    { params: { query: { ...eventsRange, club: club?.id ?? undefined } } },
+    { enabled: !!club?.id },
+  );
+  const clubEvents = (events ?? []).sort(
+    (a, b) =>
+      moment(a.data.starts_at).valueOf() - moment(b.data.starts_at).valueOf(),
   );
 
   if (clubPending) {
@@ -47,12 +71,40 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
     );
   }
 
+  const canEditClub = canUserEditClub(clubsUser, club.id);
+
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-4">
       <Helmet>
         <title>{club.title}</title>
         <meta name="description" content={club.short_description} />
       </Helmet>
+
+      {club.pending_update && (
+        <div className="alert alert-info items-start">
+          <span className="icon-[mdi--clock-outline] size-5" />
+          <span>
+            This club has changes waiting for admin review.{" "}
+            {clubsUser?.role === "admin" ? (
+              <Link
+                to="/clubs/$slug/review"
+                params={{ slug: clubSlug }}
+                className="link link-primary"
+              >
+                Review changes
+              </Link>
+            ) : (
+              <Link
+                to="/clubs/$slug/edit"
+                params={{ slug: clubSlug }}
+                className="link link-primary"
+              >
+                View your submitted changes
+              </Link>
+            )}
+          </span>
+        </div>
+      )}
 
       {/* Header Section */}
       <div className="card card-border">
@@ -61,23 +113,30 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
             style={{ backgroundImage: "url(/pattern.svg)" }}
             className="absolute inset-0 bg-repeat"
           />
-          <ClubLogo clubId={club.id} className="size-48" />
-          {clubsUser?.role === "admin" && (
-            <Link
-              to="/clubs/$slug/edit"
-              params={{ slug: clubSlug }}
-              className="btn btn-square btn-ghost btn-primary btn-lg absolute top-0 right-0"
-            >
-              <span className="icon-[mynaui--pencil]" />
-            </Link>
-          )}
+          <ClubLogo
+            clubId={club.id}
+            logoFileId={club.logo_file_id}
+            className="size-48"
+          />
         </div>
         <div className="card-body">
-          <div className="flex justify-between">
+          <div className="flex items-center justify-between gap-2">
             <h1 className="card-title text-3xl font-bold">{club.title}</h1>
-            {!club.is_active && (
-              <span className="badge badge-error">Inactive</span>
-            )}
+            <div className="flex shrink-0 items-center gap-2">
+              {!club.is_active && (
+                <span className="badge badge-error">Inactive</span>
+              )}
+              {canEditClub && (
+                <Link
+                  to="/clubs/$slug/edit"
+                  params={{ slug: clubSlug }}
+                  className="btn btn-primary btn-soft"
+                >
+                  <span className="icon-[mynaui--pencil] size-5" />
+                  Edit club
+                </Link>
+              )}
+            </div>
           </div>
           <span className={cn("badge", getClubTypeColor(club.type))}>
             {getClubTypeLabel(club.type)}
@@ -112,12 +171,45 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
           {/* Upcoming Events Section */}
           <div className="card card-border">
             <div className="card-body">
-              <h2 className="card-title">
-                <span className="icon-[mdi--calendar] size-6" />
-                Upcoming Events
-              </h2>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="card-title">
+                  <span className="icon-[mdi--calendar] size-6" />
+                  Upcoming Events
+                </h2>
+                {clubsUser?.leader_in_clubs.some((c) => c.id === club.id) && (
+                  <Link to="/events/drafts" className="btn btn-primary btn-sm">
+                    Manage events
+                  </Link>
+                )}
+              </div>
               <div className="space-y-4">
-                <p className="text-base-content/50 italic">No events yet.</p>
+                {eventsPending ? (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="skeleton h-48 rounded-2xl" />
+                    <div className="skeleton h-48 rounded-2xl" />
+                  </div>
+                ) : clubEvents.length === 0 ? (
+                  <p className="text-base-content/50 italic">No events yet.</p>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {clubEvents.map((event) => (
+                      <EventSummaryCard
+                        key={event.id}
+                        href={`/events/p/${event.id}`}
+                        imageUrl={
+                          event.data.image_id
+                            ? getEventImageUrl(event.id)
+                            : null
+                        }
+                        name={event.data.name}
+                        publicHosts={event.data.hosts}
+                        startsAt={event.data.starts_at}
+                        location={event.data.location}
+                        compact
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -141,7 +233,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                       >
                         <span
                           className={cn(
-                            "text-base-content",
+                            "text-base-content shrink-0",
                             getLinkIconClass(link.type),
                             "size-5",
                           )}
@@ -149,7 +241,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                         <span className="text-base-content font-medium">
                           {link.label ? link.label : getLinkLabel(link.type)}
                         </span>
-                        <span className="icon-[mdi--open-in-new] text-base-content/30 ml-auto size-4" />
+                        <span className="icon-[mdi--open-in-new] text-base-content/30 ml-auto size-4 shrink-0" />
                       </a>
                     </li>
                   ))}

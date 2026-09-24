@@ -1067,7 +1067,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description File not found. OR File with slug {e.slug} not found */
+      /** @description File with slug {e.slug} not found OR File not found. */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1123,7 +1123,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description User with user_id {request.user_id} not found in joins OR File not found */
+      /** @description File not found OR User with user_id {request.user_id} not found in joins */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1285,7 +1285,7 @@ export interface operations {
           "application/json": components["schemas"]["UpdateUserRoleResponse"];
         };
       };
-      /** @description Invalid user_id OR User does not have a permission_id */
+      /** @description User does not have a permission_id OR Invalid user_id */
       400: {
         headers: {
           [name: string]: unknown;
