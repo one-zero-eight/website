@@ -71,6 +71,13 @@ export default defineConfig({
     hmr: {
       host: "local.innohassle.ru",
     },
+    proxy: {
+      "/board-games-api": {
+        target: "http://127.0.0.1:8016",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/board-games-api/, ""),
+      },
+    },
   },
 
   resolve: {
