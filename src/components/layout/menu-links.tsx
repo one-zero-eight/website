@@ -162,15 +162,14 @@ export const items: ItemType[] = [
   },
   {
     type: "local",
-    title: "Timer",
-    to: "/timer",
-    icon: <span className="icon-[material-symbols--timer-outline-rounded]" />,
-  },
-  {
-    type: "local",
-    title: "Board Games",
-    to: "/board-games",
-    icon: <span className="icon-[fluent--board-games-20-regular]" />,
+    title: "Printers",
+    to: "/printers",
+    badge: (
+      <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
+        NEW
+      </span>
+    ),
+    icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
   },
   ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
@@ -185,6 +184,27 @@ export const items: ItemType[] = [
       icon: <span className="icon-[mdi--calendar-outline]" />,
     },
   ]),
+  ...((import.meta.env.VITE_PRODUCTION && []) || [
+    {
+      type: "local",
+      title: "Board games",
+      to: "/board-games",
+      badge: (
+        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
+          DEV
+        </span>
+      ),
+      icon: (
+        <span className="icon-[mdi--cards-playing-heart-multiple-outline]" />
+      ),
+    },
+  ]),
+  {
+    type: "local",
+    title: "Timer",
+    to: "/timer",
+    icon: <span className="icon-[material-symbols--timer-outline-rounded]" />,
+  },
   {
     type: "local",
     title: "Scholarship",
@@ -193,17 +213,6 @@ export const items: ItemType[] = [
   },
   { type: "separator" },
   // Informational pages about our services on external platforms: bots, extensions, etc.:
-  {
-    type: "local",
-    title: "Printers",
-    to: "/printers",
-    badge: (
-      <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
-        NEW
-      </span>
-    ),
-    icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
-  },
   {
     type: "local",
     title: "Dorms",

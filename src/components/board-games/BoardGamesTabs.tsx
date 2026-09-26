@@ -6,6 +6,10 @@ import type { ReactNode } from "react";
 export function BoardGamesTabs() {
   const { data: user } = $boardGames.useQuery("get", "/users/me");
 
+  if (user?.role !== "admin") {
+    return null;
+  }
+
   return (
     <div className="border-base-300 flex shrink-0 gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
       <TabLink to="/board-games">Games</TabLink>
