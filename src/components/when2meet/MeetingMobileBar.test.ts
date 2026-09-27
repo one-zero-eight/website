@@ -34,16 +34,18 @@ describe("MeetingMobileBar", () => {
       );
     });
 
-    expect(container.textContent).toContain("Sep 19, 17:30");
-    expect(container.textContent).toContain(
+    expect(document.body.textContent).toContain("Sep 19, 17:30");
+    expect(document.body.textContent).toContain(
       "2 available: T. Khasanov, A. Belyakova",
     );
-    expect(container.textContent).not.toContain("Timur Khasanov");
+    expect(document.body.textContent).not.toContain("Timur Khasanov");
 
-    const participantList = container.querySelector("[data-slot-participants]");
-    const showAllButton = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent === "Show all",
+    const participantList = document.body.querySelector(
+      "[data-slot-participants]",
     );
+    const showAllButton = Array.from(
+      document.body.querySelectorAll("button"),
+    ).find((button) => button.textContent === "Show all");
 
     expect(participantList?.classList.contains("truncate")).toBe(true);
     expect(showAllButton).toBeDefined();
@@ -55,7 +57,7 @@ describe("MeetingMobileBar", () => {
     expect(participantList?.classList.contains("max-h-[min(35vh,12rem)]")).toBe(
       true,
     );
-    expect(container.textContent).toContain("Hide all");
+    expect(document.body.textContent).toContain("Hide all");
   });
 
   it("keeps a details-only menu left-aligned without action spacing", () => {
@@ -70,12 +72,14 @@ describe("MeetingMobileBar", () => {
       );
     });
 
-    expect(container.querySelector("[data-mobile-bar-actions]")).toBeNull();
+    expect(document.body.querySelector("[data-mobile-bar-actions]")).toBeNull();
     expect(
-      container.querySelector("[data-mobile-bar]")?.classList.contains("py-3"),
+      document.body
+        .querySelector("[data-mobile-bar]")
+        ?.classList.contains("py-3"),
     ).toBe(true);
     expect(
-      container
+      document.body
         .querySelector("[data-selected-slot-details]")
         ?.classList.contains("text-left"),
     ).toBe(true);

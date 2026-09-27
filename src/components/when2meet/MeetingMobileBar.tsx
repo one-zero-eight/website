@@ -1,5 +1,6 @@
 import { cn } from "@/lib/ui/cn";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { formatParticipantShortName } from "./utils/participants.ts";
 
 export function MeetingMobileBar({
@@ -43,7 +44,7 @@ export function MeetingMobileBar({
   const hasPrimaryActions = Boolean(onDelete || onToggleAvailability);
 
   if (onSaveSetup) {
-    return (
+    return createPortal(
       <div className="border-base-300 bg-base-200 fixed bottom-12 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b p-4 md:hidden">
         {onClearSetup && (
           <button
@@ -67,7 +68,8 @@ export function MeetingMobileBar({
             "Save timeslots"
           )}
         </button>
-      </div>
+      </div>,
+      document.body,
     );
   }
 
@@ -75,7 +77,7 @@ export function MeetingMobileBar({
     return null;
   }
 
-  return (
+  return createPortal(
     <div
       data-mobile-bar
       className={cn(
@@ -189,6 +191,7 @@ export function MeetingMobileBar({
           )}
         </div>
       )}
-    </div>
+    </div>,
+    document.body,
   );
 }
