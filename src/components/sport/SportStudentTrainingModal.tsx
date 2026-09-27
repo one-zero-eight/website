@@ -1,14 +1,18 @@
+import { $clubs } from "@/api/clubs";
 import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
+import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import {
   canShowCheckInButton,
+  getCheckInUnavailableReason,
   invalidateSportCheckinQueries,
 } from "@/components/sport/sport-checkin-utils.ts";
 import { SportTrainingModalShell } from "@/components/sport/SportTrainingModalShell.tsx";
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
 import { formatTimeRangeMoscow } from "@/components/sport/sport-week-utils.ts";
-import { useToast } from "@/components/toast";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
+import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 
 export function SportStudentTrainingModal({
   open,
@@ -23,32 +27,57 @@ export function SportStudentTrainingModal({
   studentId: number;
   trainerGroupIds: ReadonlySet<number>;
 }) {
-  const { showError, showSuccess } = useToast();
+  const [checkinFeedback, setCheckinFeedback] = useState<{
+    message: string;
+    isError: boolean;
+  } | null>(null);
+  useEffect(() => {
+    if (!checkinFeedback || checkinFeedback.isError) return;
+
+    const timeout = setTimeout(() => setCheckinFeedback(null), 2500);
+    return () => clearTimeout(timeout);
+  }, [checkinFeedback]);
+
+  const {
+    data: profile,
+    isPending: profilePending,
+    isError: profileError,
+  } = $sport.useQuery("get", "/users/me");
 
   const { mutate: setCheckin, isPending } = $sport.useMutation(
     "post",
     "/trainings/{training_id}/checkin",
     {
-      onSettled: () => {
-        invalidateSportCheckinQueries(studentId);
-      },
       onSuccess: (_, vars) => {
-        const checkin = vars.params.query.checkin;
-        showSuccess(
-          checkin ? "Checked in" : "Check-in cancelled",
-          checkin
-            ? "You are signed up for this training."
-            : "You are no longer signed up.",
-        );
-        onOpenChange(false);
+        invalidateSportCheckinQueries(studentId);
+        if (!vars.params.query.checkin) {
+          onOpenChange(false);
+          return;
+        }
+
+        setCheckinFeedback({ message: "Checked in", isError: false });
       },
-      onError: () => {
-        showError(
-          "Could not update check-in",
-          "Please try again or use the Telegram bot.",
-        );
+      onError: (_error, vars) => {
+        setCheckinFeedback({
+          message: vars.params.query.checkin
+            ? "Check-in failed · Retry"
+            : "Check-out failed · Retry",
+          isError: true,
+        });
       },
     },
+  );
+
+  const { data: clubs, isError: clubsError } = $clubs.useQuery(
+    "get",
+    "/clubs/",
+  );
+  const club = clubs?.findLast(
+    (club) =>
+      club.is_active &&
+      club.sport_id != null &&
+      row.training.sport_id != null &&
+      club.sport_id === String(row.training.sport_id),
   );
 
   const inlineDescription = getTrainingDescription(row);
@@ -61,16 +90,40 @@ export function SportStudentTrainingModal({
     "get",
     "/sport-groups/{group_id}",
     { params: { path: { group_id: Number(groupId) } } },
-    { enabled: groupId != null && !inlineDescription },
+    { enabled: groupId != null },
   );
 
   const training = row.training;
+  const hasEnded = new Date(training.end).getTime() <= Date.now();
+  const {
+    data: semesters,
+    isPending: historyPending,
+    isError: historyError,
+  } = $sport.useQuery(
+    "get",
+    "/students/{student_id}/semester-history",
+    { params: { path: { student_id: studentId } } },
+    { enabled: hasEnded },
+  );
+  const earnedHours = semesters
+    ?.flatMap((semester) => semester.trainings)
+    .find((entry) => entry.training_id === training.id)?.hours;
   const title = sportTrainingTitle(row);
   const when = new Date(training.start);
-  const dateStr = when.toLocaleDateString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
+  const moscowYear = new Intl.DateTimeFormat("en-US", {
     year: "numeric",
+    timeZone: "Europe/Moscow",
+  });
+  const dateStr = when.toLocaleDateString("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    ...(moscowYear.format(when) === moscowYear.format(new Date())
+      ? {}
+      : { year: "numeric" as const }),
+    timeZone: "Europe/Moscow",
+  });
+  const weekdayStr = when.toLocaleDateString("en-US", {
+    weekday: "long",
     timeZone: "Europe/Moscow",
   });
   const timeStr = formatTimeRangeMoscow(training.start, training.end);
@@ -85,6 +138,12 @@ export function SportStudentTrainingModal({
     row.checked_in,
     trainerGroupIds,
   );
+  const isTrainer = trainerGroupIds.has(training.group_id);
+  const unavailableReason = getCheckInUnavailableReason(
+    row,
+    group,
+    profile?.student_info,
+  );
 
   return (
     <SportTrainingModalShell
@@ -92,33 +151,106 @@ export function SportStudentTrainingModal({
       onOpenChange={onOpenChange}
       title={title}
       closeDisabled={isPending}
-      titleBadges={
-        <>
-          <span
-            className={clsx(
-              "badge badge-sm",
-              training.is_paid ? "badge-warning" : "badge-success",
-            )}
-          >
-            {training.is_paid ? "Paid" : "Free"}
-          </span>
-          {training.is_accredited ? (
-            <span className="badge badge-info badge-sm">Accredited</span>
-          ) : null}
-          {training.is_club ? (
-            <span className="badge badge-secondary badge-sm">Club</span>
-          ) : null}
-        </>
-      }
     >
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         <dl className="flex flex-col gap-3 text-sm">
           <div>
             <dt className="text-base-content/60 font-semibold">Time & date</dt>
             <dd>
-              {timeStr}, {dateStr}
+              {timeStr}, {dateStr}, {weekdayStr}
             </dd>
           </div>
+          <div>
+            <dt className="text-base-content/60 font-semibold">Places</dt>
+            <dd>
+              {placesFree} / {training.max_checkins} free
+              {isFull ? " (no places left)" : ""}
+            </dd>
+          </div>
+          {!canShowCheckIn &&
+          !row.checked_in &&
+          !isTrainer &&
+          (groupPending || profilePending) ? (
+            <div className="skeleton h-10 w-full" />
+          ) : null}
+          {(groupError || profileError) &&
+          !canShowCheckIn &&
+          !row.checked_in &&
+          !isTrainer ? (
+            <div className="text-error">
+              Training eligibility could not be fully loaded.
+            </div>
+          ) : null}
+          {!canShowCheckIn && !isTrainer && row.checked_in ? (
+            <div>
+              <dt className="text-base-content/60 font-semibold">
+                Cannot check out
+              </dt>
+              <dd className="text-error">
+                This training has already {hasEnded ? "ended" : "started"}.
+              </dd>
+            </div>
+          ) : !canShowCheckIn && !isTrainer && unavailableReason ? (
+            <div>
+              <dt className="text-base-content/60 font-semibold">
+                Cannot check in
+              </dt>
+              <dd className="text-error">{unavailableReason}</dd>
+            </div>
+          ) : null}
+          {training.training_location ? (
+            <div>
+              <dt className="text-base-content/60 font-semibold">Location</dt>
+              <dd>
+                <Link
+                  to="/maps"
+                  search={{ q: training.training_location.name }}
+                  className="underline underline-offset-2"
+                >
+                  {training.training_location.name}
+                </Link>
+              </dd>
+            </div>
+          ) : null}
+          {hasEnded && historyPending ? (
+            <div className="skeleton h-10 w-full" />
+          ) : hasEnded && historyError ? (
+            <div className="text-error">
+              Earned sport hours could not be loaded.
+            </div>
+          ) : earnedHours != null && earnedHours > 0 ? (
+            <div>
+              <dt className="text-base-content/60 font-semibold">
+                Sport hours earned
+              </dt>
+              <dd>
+                <span className="badge badge-success badge-sm">
+                  {earnedHours}h
+                </span>
+              </dd>
+            </div>
+          ) : null}
+          {club ? (
+            <div>
+              <dt className="text-base-content/60 font-semibold">Club</dt>
+              <dd>
+                <Link
+                  to="/clubs/$slug"
+                  params={{ slug: club.slug }}
+                  className="link link-hover inline-flex items-center gap-2"
+                >
+                  <ClubLogo
+                    clubId={club.id}
+                    logoFileId={club.logo_file_id}
+                    className="size-8"
+                  />
+                  <span>{club.title}</span>
+                </Link>
+              </dd>
+            </div>
+          ) : clubsError ? (
+            <div className="text-error">Club could not be loaded.</div>
+          ) : null}
           {groupPending && !description ? (
             <div>
               <dt className="text-base-content/60 font-semibold">
@@ -144,19 +276,6 @@ export function SportStudentTrainingModal({
               />
             </div>
           ) : null}
-          <div>
-            <dt className="text-base-content/60 font-semibold">Places</dt>
-            <dd>
-              {placesFree} / {training.max_checkins} free
-              {isFull ? " (full)" : ""}
-            </dd>
-          </div>
-          {training.training_location ? (
-            <div>
-              <dt className="text-base-content/60 font-semibold">Location</dt>
-              <dd>{training.training_location.name}</dd>
-            </div>
-          ) : null}
         </dl>
       </div>
 
@@ -173,34 +292,96 @@ export function SportStudentTrainingModal({
           row.checked_in ? (
             <button
               type="button"
-              className="btn btn-error btn-outline"
-              disabled={isPending}
-              onClick={() =>
+              className={cn(
+                "btn",
+                checkinFeedback
+                  ? checkinFeedback.isError
+                    ? "btn-error"
+                    : "btn-success disabled:bg-success! disabled:text-success-content! disabled:opacity-100!"
+                  : "btn-error btn-outline",
+              )}
+              disabled={
+                isPending ||
+                (checkinFeedback !== null && !checkinFeedback.isError)
+              }
+              title={
+                checkinFeedback?.isError ? checkinFeedback.message : undefined
+              }
+              onClick={() => {
+                setCheckinFeedback(null);
                 setCheckin({
                   params: {
                     path: { training_id: training.id },
                     query: { checkin: false },
                   },
-                })
-              }
+                });
+              }}
             >
-              Cancel check-in
+              <span className="grid place-items-center">
+                <span className="invisible col-start-1 row-start-1 whitespace-nowrap">
+                  Check out
+                </span>
+                <span className="col-start-1 row-start-1">
+                  {isPending ? (
+                    <span className="loading loading-spinner loading-sm" />
+                  ) : checkinFeedback ? (
+                    checkinFeedback.isError ? (
+                      "Retry"
+                    ) : (
+                      <span className="icon-[material-symbols--check] text-xl" />
+                    )
+                  ) : (
+                    "Check out"
+                  )}
+                </span>
+              </span>
             </button>
           ) : (
             <button
               type="button"
-              className="btn btn-primary"
-              disabled={isPending}
-              onClick={() =>
+              className={cn(
+                "btn",
+                checkinFeedback
+                  ? checkinFeedback.isError
+                    ? "btn-error"
+                    : "btn-success disabled:bg-success! disabled:text-success-content! disabled:opacity-100!"
+                  : "btn-primary",
+              )}
+              disabled={
+                isPending ||
+                (checkinFeedback !== null && !checkinFeedback.isError)
+              }
+              title={
+                checkinFeedback?.isError ? checkinFeedback.message : undefined
+              }
+              onClick={() => {
+                setCheckinFeedback(null);
                 setCheckin({
                   params: {
                     path: { training_id: training.id },
                     query: { checkin: true },
                   },
-                })
-              }
+                });
+              }}
             >
-              Check in
+              <span className="grid place-items-center">
+                <span className="invisible col-start-1 row-start-1 whitespace-nowrap">
+                  Check out
+                </span>
+                <span className="col-start-1 row-start-1">
+                  {isPending ? (
+                    <span className="loading loading-spinner loading-sm" />
+                  ) : checkinFeedback ? (
+                    checkinFeedback.isError ? (
+                      "Retry"
+                    ) : (
+                      <span className="icon-[material-symbols--check] text-xl" />
+                    )
+                  ) : (
+                    "Check in"
+                  )}
+                </span>
+              </span>
             </button>
           )
         ) : null}
