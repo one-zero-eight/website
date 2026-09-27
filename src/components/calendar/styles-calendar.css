@@ -154,6 +154,10 @@
     @apply font-medium;
   }
 
+  .fc-list-sticky .fc-list-day > * {
+    z-index: 1;
+  }
+
   .fc-list-day-side-text {
     @apply text-base-content/50 min-h-full align-bottom font-light;
   }
