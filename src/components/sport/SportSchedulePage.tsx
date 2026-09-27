@@ -26,21 +26,40 @@ const SportTrainingsCalendarList = lazy(() =>
 );
 
 export function SportSchedulePage() {
-  const { studentId, trainerGroupIds } = useSportProfile();
-  const { data: hours } = $sport.useQuery(
+  const { studentId, trainerGroupIds, studentStatus } = useSportProfile();
+  const { data: hours, isError: hoursError } = $sport.useQuery(
     "get",
     "/students/{student_id}/hours-summary",
     { params: { path: { student_id: Number(studentId) } } },
     { enabled: studentId != null },
   );
 
-  const { data: currentSemester } = $sport.useQuery(
+  const { data: currentSemester, isError: semesterError } = $sport.useQuery(
     "get",
     "/semesters/current",
   );
 
   return (
     <>
+      {hoursError || semesterError ? (
+        <div className="alert alert-error mb-6">
+          Sport progress could not be loaded.
+        </div>
+      ) : null}
+      {studentStatus?.trim().toLowerCase() === "normal" &&
+      hours &&
+      hours.hours_from_groups + hours.self_sport_hours < hours.debt ? (
+        <div className="alert alert-error mx-auto mb-6 flex w-full max-w-xl flex-col items-start gap-2">
+          <h2 className="font-semibold">Dear student!</h2>
+          <p>
+            <strong>To remove</strong> the DEBTOR status you should clear the
+            debt bar, attending <strong>on trainings</strong>.
+            <br />
+            Closing the debt is{" "}
+            <strong>required to pass the sport course</strong>.
+          </p>
+        </div>
+      ) : null}
       <SportProgressSection
         hours={hours}
         currentSemester={currentSemester}
