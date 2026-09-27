@@ -30,39 +30,36 @@ export function SportFaqPage() {
   const columns = [categories.slice(0, midpoint), categories.slice(midpoint)];
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-3xl font-medium">FAQ</h2>
-      <div className="flex flex-col items-start gap-4 @4xl/content:flex-row">
-        {columns.map((column, columnIndex) => (
-          <div key={columnIndex} className="flex w-full flex-1 flex-col gap-4">
-            {column.map(([category, questions]) => (
-              <div key={category} className="card card-border bg-base-100">
-                <div className="card-body gap-3">
-                  <h3 className="text-xl font-semibold">{category}</h3>
-                  <div className="flex flex-col gap-2">
-                    {Object.entries(questions).map(([question, answer]) => (
-                      <details
-                        key={question}
-                        className="collapse-arrow bg-base-200 collapse"
-                      >
-                        <summary className="collapse-title text-lg font-medium">
-                          {question}
-                        </summary>
-                        <div className="collapse-content">
-                          <div
-                            className="prose dark:prose-invert text-base-content/80 max-w-none text-base"
-                            dangerouslySetInnerHTML={{ __html: answer }}
-                          />
-                        </div>
-                      </details>
-                    ))}
-                  </div>
+    <div className="flex flex-col items-start gap-4 @4xl/content:flex-row">
+      {columns.map((column, columnIndex) => (
+        <div key={columnIndex} className="flex w-full flex-1 flex-col gap-4">
+          {column.map(([category, questions]) => (
+            <div key={category} className="card card-border bg-base-100">
+              <div className="card-body gap-3">
+                <h3 className="text-xl font-semibold">{category}</h3>
+                <div className="flex flex-col gap-2">
+                  {Object.entries(questions).map(([question, answer]) => (
+                    <details
+                      key={question}
+                      className="collapse-arrow bg-base-200 collapse"
+                    >
+                      <summary className="collapse-title text-lg font-medium">
+                        {question}
+                      </summary>
+                      <div className="collapse-content">
+                        <div
+                          className="prose dark:prose-invert text-base-content/80 max-w-none text-base"
+                          dangerouslySetInnerHTML={{ __html: answer }}
+                        />
+                      </div>
+                    </details>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        ))}
-      </div>
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }

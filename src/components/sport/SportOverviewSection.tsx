@@ -69,7 +69,7 @@ export function SportProgressSection({
               {earned} out of {required} hours
             </span>
           </p>
-          <div className="bg-base-200 overflow-hidden rounded-lg">
+          <div className="bg-base-200 mx-auto w-full max-w-xl overflow-hidden rounded-lg">
             <div className="grid grid-cols-2 px-4 py-2 text-xs font-semibold">
               <span className="text-info text-center">
                 Regular sport ({hours.hours_from_groups}h)
@@ -111,7 +111,7 @@ export function SportProgressSection({
           <div className="flex flex-wrap justify-center gap-2 pt-1">
             <button
               type="button"
-              className="btn btn-primary btn-sm"
+              className="btn btn-outline btn-sm"
               onClick={() => setSelfSportModalOpen(true)}
             >
               Self-sport upload

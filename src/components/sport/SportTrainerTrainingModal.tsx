@@ -1,3 +1,4 @@
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $sport } from "@/api/sport";
 import type {
   SchemaAttendanceStudentGradeSchema,
@@ -19,9 +20,6 @@ import { cn } from "@/lib/ui/cn";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type TrainerModalView = "main" | "attendees";
-type HoursFilter = 0 | 1 | 2;
-
-const ALL_HOURS_FILTERS: HoursFilter[] = [0, 1, 2];
 const HOLD_ALL_ZERO_MS = 3000;
 
 export function SportTrainerTrainingModal({
@@ -42,12 +40,20 @@ export function SportTrainerTrainingModal({
   }, [open]);
 
   const title = sportTrainingTitle(row) + " (Trainer)";
+  const [importing, setImporting] = useState(false);
+  const { data: attendance } = $sport.useQuery(
+    "get",
+    "/trainings/{training_id}/attendance",
+    { params: { path: { training_id: row.training.id } } },
+    { enabled: open && view === "attendees" },
+  );
 
   return (
     <SportTrainingModalShell
       open={open}
       onOpenChange={onOpenChange}
       title={title}
+      closeDisabled={importing}
       onBack={view === "attendees" ? () => setView("main") : undefined}
     >
       {view === "main" ? (
@@ -55,6 +61,7 @@ export function SportTrainerTrainingModal({
           open={open}
           trainingId={row.training.id}
           groupId={row.training.group_id}
+          canEdit={row.can_edit}
           onViewAttendees={() => setView("attendees")}
         />
       ) : (
@@ -62,20 +69,31 @@ export function SportTrainerTrainingModal({
           open={open}
           trainingId={row.training.id}
           groupId={row.training.group_id}
+          canEdit={row.can_edit}
+          importing={importing}
         />
       )}
 
-      <div className="border-t-base-300 flex shrink-0 flex-wrap gap-2 border-t p-4">
+      <div className="border-t-base-300 flex shrink-0 flex-wrap items-center gap-2 border-t p-4">
         <button
           type="button"
           className={cn(
             "btn btn-ghost",
             "active:border active:border-[#8D4CF6] active:text-[#8D4CF6]",
           )}
+          disabled={importing}
           onClick={() => onOpenChange(false)}
         >
           Close
         </button>
+        {view === "attendees" && row.can_edit ? (
+          <SportTrainerBaamImportButton
+            trainingId={row.training.id}
+            groupId={row.training.group_id}
+            maxHours={attendance?.academic_duration}
+            onImportingChange={setImporting}
+          />
+        ) : null}
       </div>
     </SportTrainingModalShell>
   );
@@ -85,22 +103,32 @@ function SportTrainerTrainingModalMain({
   open,
   trainingId,
   groupId,
+  canEdit,
   onViewAttendees,
 }: {
   open: boolean;
   trainingId: number;
   groupId: number;
+  canEdit: boolean;
   onViewAttendees: () => void;
 }) {
+  const { data: attendance } = $sport.useQuery(
+    "get",
+    "/trainings/{training_id}/attendance",
+    { params: { path: { training_id: trainingId } } },
+    { enabled: open && canEdit },
+  );
+
   return (
     <div className="flex flex-col gap-3 p-4">
-      <SportTrainerStudentAddField
-        open={open}
-        trainingId={trainingId}
-        groupId={groupId}
-      />
-
-      <SportTrainerBaamImportButton trainingId={trainingId} groupId={groupId} />
+      {canEdit ? (
+        <SportTrainerStudentAddField
+          open={open}
+          trainingId={trainingId}
+          groupId={groupId}
+          maxHours={attendance?.academic_duration}
+        />
+      ) : null}
 
       <button
         type="button"
@@ -117,22 +145,24 @@ function SportTrainerTrainingModalAttendees({
   open,
   trainingId,
   groupId,
+  canEdit,
+  importing,
 }: {
   open: boolean;
   trainingId: number;
   groupId: number;
+  canEdit: boolean;
+  importing: boolean;
 }) {
   const { showError, showSuccess, showWarning } = useToast();
-  const [hoursFilter, setHoursFilter] = useState<Set<HoursFilter>>(
-    () => new Set(ALL_HOURS_FILTERS),
-  );
+  const [hoursFilter, setHoursFilter] = useState<Set<number> | null>(null);
   const [holdHintVisible, setHoldHintVisible] = useState(false);
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const holdHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!open) {
-      setHoursFilter(new Set(ALL_HOURS_FILTERS));
+      setHoursFilter(null);
       setHoldHintVisible(false);
       clearHoldTimer();
       clearHoldHintTimer();
@@ -165,8 +195,8 @@ function SportTrainerTrainingModalAttendees({
         handleAttendanceResponse(data, showSuccess, showWarning);
         invalidateAttendance(trainingId);
       },
-      onError: () => {
-        showError("Could not update attendance", "Please try again.");
+      onError: (error) => {
+        showError("Could not update attendance", formatApiErrorMessage(error));
       },
     },
   );
@@ -179,9 +209,16 @@ function SportTrainerTrainingModalAttendees({
     );
   }, [attendance?.grades]);
 
+  const hourOptions = useMemo(() => {
+    const maxHours = attendance?.academic_duration ?? 0;
+    const existingHours = sortedGrades.map((grade) => grade.hours);
+    return [...new Set([0, 1, 2, maxHours, ...existingHours])]
+      .filter((hours) => hours <= maxHours || existingHours.includes(hours))
+      .sort((a, b) => a - b);
+  }, [attendance?.academic_duration, sortedGrades]);
   const filteredGrades = useMemo(() => {
     return sortedGrades.filter((grade) =>
-      hoursFilter.has(grade.hours as HoursFilter),
+      hoursFilter ? hoursFilter.has(grade.hours) : true,
     );
   }, [hoursFilter, sortedGrades]);
 
@@ -217,7 +254,7 @@ function SportTrainerTrainingModalAttendees({
 
   function handleStudentHours(studentId: number, hours: number) {
     const grade = sortedGrades.find((item) => item.id === studentId);
-    if (grade?.hours === hours) {
+    if (!canEdit || !grade || grade.hours === hours) {
       return;
     }
 
@@ -225,15 +262,20 @@ function SportTrainerTrainingModalAttendees({
   }
 
   function handleAllHours(hours: number) {
-    if (!sortedGrades.length) {
+    if (!canEdit || !sortedGrades.length) {
       return;
     }
 
-    markHours(sortedGrades.map((grade) => ({ student_id: grade.id, hours })));
+    const gradesToUpdate = sortedGrades
+      .filter((grade) => (hours === 0 ? grade.hours !== 0 : grade.hours === 0))
+      .map((grade) => ({ student_id: grade.id, hours }));
+    if (gradesToUpdate.length) {
+      markHours(gradesToUpdate);
+    }
   }
 
   function handleAllZeroHoldStart() {
-    if (!sortedGrades.length || markPending) {
+    if (!canEdit || !sortedGrades.length || markPending || importing) {
       return;
     }
 
@@ -256,35 +298,41 @@ function SportTrainerTrainingModalAttendees({
     showHoldHint();
   }
 
-  function toggleHoursFilter(hours: HoursFilter) {
+  function toggleHoursFilter(hours: number) {
     setHoursFilter((current) => {
-      const next = new Set(current);
+      const next = new Set(current ?? hourOptions);
       if (next.has(hours)) {
         if (next.size === 1) {
           return current;
         }
         next.delete(hours);
-        return next;
+      } else {
+        next.add(hours);
       }
-
-      next.add(hours);
-      return next;
+      return next.size === hourOptions.length ? null : next;
     });
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-4">
       {holdHintVisible ? (
         <div className="text-warning text-center text-sm font-medium">
           hold to set all 0h
         </div>
       ) : null}
 
-      <SportTrainerStudentAddField
-        open={open}
-        trainingId={trainingId}
-        groupId={groupId}
-      />
+      {canEdit ? (
+        <SportTrainerStudentAddField
+          open={open}
+          trainingId={trainingId}
+          groupId={groupId}
+          maxHours={attendance?.academic_duration}
+        />
+      ) : (
+        <div className="text-warning text-sm">
+          You can't change this training.
+        </div>
+      )}
 
       {isPending ? (
         <div className="flex flex-col gap-2">
@@ -302,15 +350,26 @@ function SportTrainerTrainingModalAttendees({
             <button
               type="button"
               className={cn(sportTrainerMenuBtn, "btn-sm")}
-              disabled={!sortedGrades.length || markPending}
-              onClick={() => handleAllHours(2)}
+              disabled={
+                !canEdit ||
+                !sortedGrades.some((grade) => grade.hours === 0) ||
+                markPending ||
+                importing ||
+                (attendance?.academic_duration ?? 0) <= 0
+              }
+              onClick={() => handleAllHours(attendance?.academic_duration ?? 0)}
             >
-              All 2h
+              All {attendance?.academic_duration ?? 0}h
             </button>
             <button
               type="button"
               className={cn(sportTrainerMenuBtn, "btn-sm")}
-              disabled={!sortedGrades.length || markPending}
+              disabled={
+                !canEdit ||
+                !sortedGrades.some((grade) => grade.hours !== 0) ||
+                markPending ||
+                importing
+              }
               onPointerDown={handleAllZeroHoldStart}
               onPointerUp={handleAllZeroHoldEnd}
               onPointerLeave={handleAllZeroHoldEnd}
@@ -321,13 +380,13 @@ function SportTrainerTrainingModalAttendees({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {ALL_HOURS_FILTERS.map((hours) => (
+            {hourOptions.map((hours) => (
               <button
                 key={hours}
                 type="button"
                 className={cn(
                   "btn btn-xs border-2",
-                  hoursFilter.has(hours)
+                  (hoursFilter?.has(hours) ?? true)
                     ? sportTrainerMenuBtnActive
                     : sportTrainerMenuBtn,
                 )}
@@ -339,12 +398,13 @@ function SportTrainerTrainingModalAttendees({
           </div>
 
           {filteredGrades.length ? (
-            <ul className="flex flex-col gap-2">
+            <ul className="divide-base-300 divide-y">
               {filteredGrades.map((grade) => (
                 <SportTrainerAttendanceRow
                   key={grade.id}
                   grade={grade}
-                  disabled={markPending}
+                  maxHours={attendance?.academic_duration ?? 0}
+                  disabled={!canEdit || markPending || importing}
                   onHoursChange={handleStudentHours}
                 />
               ))}
@@ -368,10 +428,12 @@ export function SportTrainerStudentAddField({
   open,
   trainingId,
   groupId,
+  maxHours,
 }: {
   open: boolean;
   trainingId: number;
   groupId: number;
+  maxHours?: number;
 }) {
   const { showError, showSuccess, showWarning } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -422,8 +484,8 @@ export function SportTrainerStudentAddField({
         setSearchTerm("");
         setSuggestionsOpen(false);
       },
-      onError: () => {
-        showError("Could not update attendance", "Please try again.");
+      onError: (error) => {
+        showError("Could not update attendance", formatApiErrorMessage(error));
       },
     },
   );
@@ -440,8 +502,8 @@ export function SportTrainerStudentAddField({
     setSuggestionsOpen(value.trim().length >= 2);
   }
 
-  function handleAddTwoHours() {
-    if (!selectedStudent) {
+  function handleAddStudent() {
+    if (!selectedStudent || maxHours == null || maxHours <= 0) {
       return;
     }
 
@@ -449,7 +511,7 @@ export function SportTrainerStudentAddField({
       params: { path: { training_id: trainingId } },
       body: {
         training_id: trainingId,
-        students_hours: [{ student_id: selectedStudent.id, hours: 2 }],
+        students_hours: [{ student_id: selectedStudent.id, hours: maxHours }],
       },
     });
   }
@@ -517,13 +579,17 @@ export function SportTrainerStudentAddField({
       <button
         type="button"
         className={cn(sportTrainerMenuBtn, "shrink-0")}
-        disabled={!selectedStudent || markPending}
-        onClick={handleAddTwoHours}
+        disabled={
+          !selectedStudent || markPending || maxHours == null || maxHours <= 0
+        }
+        onClick={handleAddStudent}
       >
         {markPending ? (
           <span className="loading loading-spinner loading-sm" />
+        ) : maxHours == null ? (
+          "Add"
         ) : (
-          "Add 2"
+          `Add ${maxHours}`
         )}
       </button>
     </div>
@@ -532,15 +598,21 @@ export function SportTrainerStudentAddField({
 
 export function SportTrainerAttendanceRow({
   grade,
+  maxHours,
   disabled,
   onHoursChange,
 }: {
   grade: SchemaAttendanceStudentGradeSchema;
+  maxHours: number;
   disabled: boolean;
   onHoursChange: (studentId: number, hours: number) => void;
 }) {
+  const hourOptions = [...new Set([0, 1, 2, maxHours, grade.hours])]
+    .filter((hours) => hours <= maxHours || hours === grade.hours)
+    .sort((a, b) => a - b);
+
   return (
-    <li className="border-base-300 rounded-box flex flex-col gap-2 border p-3 @sm/modal:flex-row @sm/modal:items-center @sm/modal:justify-between">
+    <li className="flex flex-col gap-1 py-1.5 @sm/modal:flex-row @sm/modal:items-center @sm/modal:justify-between @sm/modal:gap-2">
       <div className="min-w-0">
         <div className="font-medium wrap-break-word">
           {formatStudentName(grade)}
@@ -550,12 +622,12 @@ export function SportTrainerAttendanceRow({
         </div>
       </div>
       <div className="join shrink-0">
-        {([0, 1, 2] as const).map((hours) => (
+        {hourOptions.map((hours) => (
           <button
             key={hours}
             type="button"
             className={cn(
-              "btn btn-sm join-item min-w-10 border-2",
+              "btn btn-xs join-item min-w-9 border-2",
               grade.hours === hours
                 ? sportTrainerMenuBtnActive
                 : sportTrainerMenuBtn,

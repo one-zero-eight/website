@@ -5,6 +5,7 @@ import type {
   SchemaTrainingInfoPersonalSchema,
 } from "@/api/sport/types.ts";
 import { queryClient } from "@/app/query-client.ts";
+import { moscowDateKey } from "@/components/sport/sport-week-utils.ts";
 
 const CHECK_IN_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -63,6 +64,7 @@ export function getCheckInUnavailableReason(
   row: SchemaTrainingInfoPersonalSchema,
   group?: SchemaApiV3RoutersGroupsGroupInfoSchema,
   student?: SchemaStudentInfoSchema | null,
+  dailySchedule?: SchemaTrainingInfoPersonalSchema[],
 ): string | null {
   if (row.checked_in) return null;
 
@@ -102,7 +104,48 @@ export function getCheckInUnavailableReason(
   ) {
     return "This training is for university students only.";
   }
+  if (dailySchedule) {
+    const trainingDay = moscowDateKey(training.start);
+    const checkedInToday = dailySchedule.filter(
+      (scheduled) =>
+        scheduled.checked_in &&
+        moscowDateKey(scheduled.training.start) === trainingDay,
+    );
+    const durationHours = getAcademicDuration(training);
+    const totalHours = checkedInToday.reduce(
+      (hours, scheduled) => hours + getAcademicDuration(scheduled.training),
+      0,
+    );
+    if (totalHours + durationHours > 4) {
+      return "Daily limit: 4 sport hours (usually 2 trainings).";
+    }
+    const sameSportHours = checkedInToday.reduce(
+      (hours, scheduled) =>
+        hours +
+        (scheduled.training.sport_id === training.sport_id
+          ? getAcademicDuration(scheduled.training)
+          : 0),
+      0,
+    );
+    if (training.sport_id != null && sameSportHours + durationHours > 2) {
+      return "Daily limit for the same sport: 2 sport hours (usually 1 training).";
+    }
+  }
   return "Check-in is not available for this training.";
+}
+
+function getAcademicDuration(
+  training: SchemaTrainingInfoPersonalSchema["training"],
+): number {
+  if (!training.is_accredited) return 0;
+
+  const durationSeconds =
+    (new Date(training.end).getTime() - new Date(training.start).getTime()) /
+    1000;
+  return Math.min(
+    2,
+    Math.floor((durationSeconds + 45 * 60 * 0.05) / (45 * 60)),
+  );
 }
 
 export function canShowCheckInButton(

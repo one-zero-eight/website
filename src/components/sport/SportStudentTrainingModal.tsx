@@ -9,7 +9,11 @@ import {
 } from "@/components/sport/sport-checkin-utils.ts";
 import { SportTrainingModalShell } from "@/components/sport/SportTrainingModalShell.tsx";
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
-import { formatTimeRangeMoscow } from "@/components/sport/sport-week-utils.ts";
+import {
+  formatTimeRangeMoscow,
+  moscowDateKey,
+  toScheduleApiDateTime,
+} from "@/components/sport/sport-week-utils.ts";
 import { cn } from "@/lib/ui/cn";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -17,15 +21,21 @@ import { useEffect, useState } from "react";
 export function SportStudentTrainingModal({
   open,
   onOpenChange,
+  onCheckinSuccess,
   row,
   studentId,
   trainerGroupIds,
+  onAttendance,
+  readOnly = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCheckinSuccess: () => void;
   row: SchemaTrainingInfoPersonalSchema;
   studentId: number;
   trainerGroupIds: ReadonlySet<number>;
+  onAttendance?: () => void;
+  readOnly?: boolean;
 }) {
   const [checkinFeedback, setCheckinFeedback] = useState<{
     message: string;
@@ -55,7 +65,8 @@ export function SportStudentTrainingModal({
           return;
         }
 
-        setCheckinFeedback({ message: "Checked in", isError: false });
+        onOpenChange(false);
+        onCheckinSuccess();
       },
       onError: (_error, vars) => {
         setCheckinFeedback({
@@ -94,7 +105,29 @@ export function SportStudentTrainingModal({
   );
 
   const training = row.training;
+  const trainingDay = moscowDateKey(training.start);
+  const dailyStart = new Date(`${trainingDay}T00:00:00+03:00`);
+  const dailyEnd = new Date(dailyStart.getTime() + 24 * 60 * 60 * 1000);
   const hasEnded = new Date(training.end).getTime() <= Date.now();
+  const needsDailySchedule =
+    !readOnly && !row.checked_in && !row.can_check_in && !hasEnded;
+  const {
+    data: dailySchedule,
+    isPending: dailySchedulePending,
+    isError: dailyScheduleError,
+  } = $sport.useQuery(
+    "get",
+    "/users/me/schedule",
+    {
+      params: {
+        query: {
+          start: toScheduleApiDateTime(dailyStart),
+          end: toScheduleApiDateTime(dailyEnd),
+        },
+      },
+    },
+    { enabled: needsDailySchedule },
+  );
   const {
     data: semesters,
     isPending: historyPending,
@@ -143,7 +176,12 @@ export function SportStudentTrainingModal({
     row,
     group,
     profile?.student_info,
+    dailySchedule,
   );
+  const isCheckingDailyLimit = needsDailySchedule && dailySchedulePending;
+  const showUnavailableReason =
+    unavailableReason !== "Check-in is not available for this training." ||
+    !isCheckingDailyLimit;
 
   return (
     <SportTrainingModalShell
@@ -167,13 +205,19 @@ export function SportStudentTrainingModal({
               {isFull ? " (no places left)" : ""}
             </dd>
           </div>
-          {!canShowCheckIn &&
+          {!readOnly &&
+          !canShowCheckIn &&
           !row.checked_in &&
           !isTrainer &&
-          (groupPending || profilePending) ? (
+          (groupPending ||
+            profilePending ||
+            (needsDailySchedule && dailySchedulePending)) ? (
             <div className="skeleton h-10 w-full" />
           ) : null}
-          {(groupError || profileError) &&
+          {!readOnly &&
+          (groupError ||
+            profileError ||
+            (needsDailySchedule && dailyScheduleError)) &&
           !canShowCheckIn &&
           !row.checked_in &&
           !isTrainer ? (
@@ -181,7 +225,7 @@ export function SportStudentTrainingModal({
               Training eligibility could not be fully loaded.
             </div>
           ) : null}
-          {!canShowCheckIn && !isTrainer && row.checked_in ? (
+          {!readOnly && !canShowCheckIn && !isTrainer && row.checked_in ? (
             <div>
               <dt className="text-base-content/60 font-semibold">
                 Cannot check out
@@ -190,7 +234,11 @@ export function SportStudentTrainingModal({
                 This training has already {hasEnded ? "ended" : "started"}.
               </dd>
             </div>
-          ) : !canShowCheckIn && !isTrainer && unavailableReason ? (
+          ) : !readOnly &&
+            !canShowCheckIn &&
+            !isTrainer &&
+            unavailableReason &&
+            showUnavailableReason ? (
             <div>
               <dt className="text-base-content/60 font-semibold">
                 Cannot check in
@@ -288,7 +336,16 @@ export function SportStudentTrainingModal({
         >
           Close
         </button>
-        {canShowCheckIn ? (
+        {isTrainer && onAttendance ? (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={onAttendance}
+          >
+            To attendance
+          </button>
+        ) : null}
+        {!readOnly && canShowCheckIn ? (
           row.checked_in ? (
             <button
               type="button"

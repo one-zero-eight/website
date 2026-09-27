@@ -1,3 +1,4 @@
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $sport } from "@/api/sport";
 import { queryClient } from "@/app/query-client.ts";
 import {
@@ -10,15 +11,17 @@ import { useRef, useState } from "react";
 
 /**
  * Imports attendance from a BAAM .txt export: one student email per line.
- * Each email is resolved via suggest-student and marked with 2 hours.
+ * Each email is resolved via suggest-student and marked with the training's academic duration.
  */
 export function SportTrainerBaamImportButton({
   trainingId,
   groupId,
+  maxHours,
   onImportingChange,
 }: {
   trainingId: number;
   groupId: number;
+  maxHours: number | undefined;
   onImportingChange?: (importing: boolean) => void;
 }) {
   const { showError, showSuccess, showWarning } = useToast();
@@ -39,6 +42,14 @@ export function SportTrainerBaamImportButton({
     const notFound: string[] = [];
     const failed: string[] = [];
     let marked = 0;
+    const hours = maxHours;
+    if (hours == null || hours <= 0) {
+      showError(
+        "Could not import attendance",
+        "Training duration is unavailable.",
+      );
+      return;
+    }
 
     onImportingChange?.(true);
     setImportProgress({ done: 0, total: emails.length });
@@ -74,7 +85,7 @@ export function SportTrainerBaamImportButton({
           params: { path: { training_id: trainingId } },
           body: {
             training_id: trainingId,
-            students_hours: [{ student_id: match.id, hours: 2 }],
+            students_hours: [{ student_id: match.id, hours }],
           },
         });
 
@@ -83,8 +94,8 @@ export function SportTrainerBaamImportButton({
         } else {
           failed.push(`${email} (${result.description})`);
         }
-      } catch {
-        failed.push(email);
+      } catch (error) {
+        failed.push(`${email} (${formatApiErrorMessage(error)})`);
       } finally {
         setImportProgress((progress) =>
           progress ? { ...progress, done: progress.done + 1 } : progress,
@@ -99,7 +110,7 @@ export function SportTrainerBaamImportButton({
     if (marked > 0) {
       showSuccess(
         "Attendance imported",
-        `Marked 2h for ${marked} student${marked === 1 ? "" : "s"}.`,
+        `Marked ${hours}h for ${marked} student${marked === 1 ? "" : "s"}.`,
       );
     }
     if (notFound.length > 0) {
@@ -139,8 +150,8 @@ export function SportTrainerBaamImportButton({
       />
       <button
         type="button"
-        className={cn(sportTrainerMenuBtn, "w-full")}
-        disabled={importing}
+        className={cn(sportTrainerMenuBtn, "btn-sm")}
+        disabled={importing || maxHours == null || maxHours <= 0}
         onClick={() => fileInputRef.current?.click()}
       >
         {importing ? (

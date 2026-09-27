@@ -4,10 +4,11 @@ import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { SportProgressSection } from "@/components/sport/SportOverviewSection.tsx";
 import { isTrainerTraining } from "@/components/sport/sport-checkin-utils.ts";
+import { SportCheckinRulesModal } from "@/components/sport/SportCheckinRulesModal.tsx";
 import { useSportProfile } from "@/components/sport/sport-profile.ts";
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
 import { SportStudentTrainingModal } from "@/components/sport/SportStudentTrainingModal.tsx";
-import { SportTrainerTrainingModal } from "@/components/sport/SportTrainerTrainingModal.tsx";
+import { SportTrainerAttendanceModal } from "@/components/sport/SportTrainerAttendanceModal.tsx";
 import {
   formatTimeRangeMoscow,
   getSchedulePeriodBounds,
@@ -66,6 +67,8 @@ function SportCalendar({
   semesterEnd?: string;
 }) {
   const [periodOffset, setPeriodOffset] = useState(0);
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [attendanceOpen, setAttendanceOpen] = useState(false);
   const [selected, setSelected] =
     useState<SchemaTrainingInfoPersonalSchema | null>(null);
 
@@ -150,12 +153,18 @@ function SportCalendar({
       ) ??
       selected;
 
-    if (isTrainerTraining(currentSelection, trainerGroupIds)) {
+    if (
+      attendanceOpen &&
+      isTrainerTraining(currentSelection, trainerGroupIds)
+    ) {
       return (
-        <SportTrainerTrainingModal
+        <SportTrainerAttendanceModal
           open
           onOpenChange={(open) => {
-            if (!open) setSelected(null);
+            if (!open) {
+              setSelected(null);
+              setAttendanceOpen(false);
+            }
           }}
           row={currentSelection}
         />
@@ -166,11 +175,16 @@ function SportCalendar({
       <SportStudentTrainingModal
         open
         onOpenChange={(open) => {
-          if (!open) setSelected(null);
+          if (!open) {
+            setSelected(null);
+            setAttendanceOpen(false);
+          }
         }}
         row={currentSelection}
         studentId={studentId}
         trainerGroupIds={trainerGroupIds}
+        onCheckinSuccess={() => setRulesOpen(true)}
+        onAttendance={() => setAttendanceOpen(true)}
       />
     );
   }
@@ -215,7 +229,7 @@ function SportCalendar({
           {isPending ? (
             <div className="skeleton h-96 w-full" />
           ) : isError ? (
-            <div className="alert alert-error">
+            <div className="alert alert-error mx-4">
               Schedule could not be loaded.
             </div>
           ) : (
@@ -226,6 +240,7 @@ function SportCalendar({
                 studentId={studentId}
                 trainerGroupIds={trainerGroupIds}
                 onSelect={setSelected}
+                onCheckinSuccess={() => setRulesOpen(true)}
               />
             </Suspense>
           )}
@@ -233,6 +248,7 @@ function SportCalendar({
       </div>
 
       {renderSelectedTrainingModal()}
+      <SportCheckinRulesModal open={rulesOpen} onOpenChange={setRulesOpen} />
     </>
   );
 }

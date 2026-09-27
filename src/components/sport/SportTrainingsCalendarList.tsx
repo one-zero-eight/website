@@ -28,6 +28,7 @@ export function SportTrainingsCalendarList({
   studentId,
   trainerGroupIds,
   onSelect,
+  onCheckinSuccess,
 }: {
   rows: SchemaTrainingInfoPersonalSchema[];
   emptyText: string;
@@ -35,6 +36,7 @@ export function SportTrainingsCalendarList({
   studentId: number;
   trainerGroupIds: ReadonlySet<number>;
   onSelect: (row: SchemaTrainingInfoPersonalSchema) => void;
+  onCheckinSuccess: () => void;
 }) {
   const { academicCalendar } = useMyAcademicCalendar();
   const { data: clubs, isError: clubsError } = $clubs.useQuery(
@@ -111,6 +113,7 @@ export function SportTrainingsCalendarList({
           isError: false,
         });
         invalidateSportCheckinQueries(studentId);
+        if (vars.params.query.checkin) onCheckinSuccess();
       },
       onError: (_error, vars) => {
         setCheckinFeedback({
