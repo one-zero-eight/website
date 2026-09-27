@@ -1,8 +1,14 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
 import { $when2meet, type when2meetTypes } from "@/api/when2meet";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  formatApiErrorMessage,
+  isApiHttpError,
+} from "@/api/helpers/create-query-client";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
+import Tooltip from "@/components/common/Tooltip.tsx";
+import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
+import { schemaToBooking } from "@/components/room-booking/timeline/types.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -88,8 +94,10 @@ export function MeetingPage({
   );
   const [isMeetingTimeRejected, setIsMeetingTimeRejected] = useState(false);
   const [roomModalOpen, setRoomModalOpen] = useState(false);
+  const [bookingDetailsOpen, setBookingDetailsOpen] = useState(false);
   const hasAutoStartedEditingRef = useRef(false);
   const hasInitializedSetupRef = useRef(false);
+  const reconciledMissingBookingRef = useRef<string | null>(null);
 
   const meetingQueryKey = $when2meet.queryOptions(
     "get",
@@ -366,6 +374,114 @@ export function MeetingPage({
 
   const bookedRoomTitle =
     bookedRoomDetails?.title ?? event?.booked_room?.room_id ?? null;
+
+  const outlookBookingId = event?.booked_room?.outlook_booking_id;
+  const outlookEntryId = event?.booked_room?.outlook_entry_id;
+  const bookedRoomId = event?.booked_room?.room_id;
+
+  const bookingByIdQuery = $roomBooking.useQuery(
+    "get",
+    "/bookings/{outlook_booking_id}",
+    {
+      params: {
+        path: { outlook_booking_id: outlookBookingId ?? "" },
+      },
+    },
+    {
+      enabled: !!outlookBookingId && !needsSetup,
+    },
+  );
+
+  const bookingByEntryIdQuery = $roomBooking.useQuery(
+    "get",
+    "/bookings/by-entry-id/{outlook_entry_id}",
+    {
+      params: {
+        path: { outlook_entry_id: outlookEntryId ?? "" },
+        query: { room_id: bookedRoomId ?? "" },
+      },
+    },
+    {
+      enabled:
+        !outlookBookingId && !!outlookEntryId && !!bookedRoomId && !needsSetup,
+    },
+  );
+
+  const bookedRoomBookingDetails =
+    bookingByIdQuery.data ?? bookingByEntryIdQuery.data;
+  const bookedRoomBooking = useMemo(
+    () =>
+      bookedRoomBookingDetails
+        ? schemaToBooking(bookedRoomBookingDetails)
+        : undefined,
+    [bookedRoomBookingDetails],
+  );
+  const isBookedRoomBookingPending = outlookBookingId
+    ? bookingByIdQuery.isPending
+    : !!outlookEntryId && bookingByEntryIdQuery.isPending;
+  const bookedRoomBookingError = outlookBookingId
+    ? bookingByIdQuery.error
+    : bookingByEntryIdQuery.error;
+  const missingBookingReference = outlookBookingId ?? outlookEntryId ?? null;
+  const isBookedRoomBookingMissing =
+    isApiHttpError(bookedRoomBookingError) &&
+    bookedRoomBookingError.httpCode === 404;
+
+  const {
+    mutate: reconcileMissingBooking,
+    isPending: isReconcilingMissingBooking,
+  } = $when2meet.useMutation("delete", "/meetings/{meeting_ref}/book-room", {
+    onSuccess: (updatedMeeting) => {
+      setBookingDetailsOpen(false);
+      handleMeetingUpdated(updatedMeeting);
+      // showWarning(
+      //   "Room booking removed",
+      //   "The booking no longer exists in Room Booking, so it was removed from the meeting.",
+      // );
+    },
+    onError: (reconciliationError) => {
+      showError("Error", formatApiErrorMessage(reconciliationError));
+    },
+  });
+
+  useEffect(() => {
+    if (
+      !isOwner ||
+      !isBookedRoomBookingMissing ||
+      !missingBookingReference ||
+      reconciledMissingBookingRef.current === missingBookingReference
+    ) {
+      return;
+    }
+
+    reconciledMissingBookingRef.current = missingBookingReference;
+    reconcileMissingBooking({
+      params: { path: { meeting_ref: meetingId } },
+    });
+  }, [
+    isBookedRoomBookingMissing,
+    isOwner,
+    meetingId,
+    missingBookingReference,
+    reconcileMissingBooking,
+  ]);
+
+  function handleBookingDetailsOpenChange(open: boolean) {
+    setBookingDetailsOpen(open);
+
+    if (open) {
+      return;
+    }
+
+    if (outlookBookingId) {
+      bookingByIdQuery.refetch();
+      return;
+    }
+
+    if (outlookEntryId) {
+      bookingByEntryIdQuery.refetch();
+    }
+  }
 
   const selectedMeetingSlotKeys = useMemo(() => {
     if (!event?.selected_time || !parsedSlots) {
@@ -1256,9 +1372,38 @@ export function MeetingPage({
                   )}
 
                   {bookedRoomTitle && (
-                    <div className="border-base-300 bg-primary/5 rounded-box mb-3 border p-3 text-sm">
-                      <div className="text-base-content/60">Booked room</div>
-                      <div className="font-semibold">{bookedRoomTitle}</div>
+                    <div className="border-base-300 bg-primary/5 rounded-box mb-3 flex items-center gap-3 border p-3 text-sm">
+                      <div className="min-w-0 grow">
+                        <div className="text-base-content/60">Booked room</div>
+                        <div className="truncate font-semibold">
+                          {bookedRoomTitle}
+                        </div>
+                        {bookedRoomBookingError &&
+                          !isBookedRoomBookingMissing && (
+                            <div className="text-error mt-1 text-xs">
+                              Unable to load booking details.
+                            </div>
+                          )}
+                        {isBookedRoomBookingMissing && !isOwner && (
+                          <div className="text-error mt-1 text-xs">
+                            This room booking no longer exists.
+                          </div>
+                        )}
+                      </div>
+                      {isBookedRoomBookingPending ||
+                      isReconcilingMissingBooking ? (
+                        <span className="loading loading-spinner loading-sm text-primary shrink-0" />
+                      ) : bookedRoomBooking ? (
+                        <Tooltip content="Open details">
+                          <button
+                            type="button"
+                            className="text-base-content/50 hover:bg-base-300 flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                            onClick={() => setBookingDetailsOpen(true)}
+                          >
+                            <span className="icon-[material-symbols--notes] text-3xl" />
+                          </button>
+                        </Tooltip>
+                      ) : null}
                     </div>
                   )}
 
@@ -1599,8 +1744,18 @@ export function MeetingPage({
             open={roomModalOpen}
             onOpenChange={setRoomModalOpen}
             bookedRoom={event.booked_room}
+            meetingName={meetingName}
+            selectedTime={event.selected_time}
             selectedTimeLabel={selectedTimeLabel}
             onMeetingUpdated={handleMeetingUpdated}
+          />
+        )}
+
+        {bookedRoomBooking && (
+          <BookingModal
+            detailsBooking={bookedRoomBooking}
+            open={bookingDetailsOpen}
+            onOpenChange={handleBookingDetailsOpenChange}
           />
         )}
       </>
