@@ -41,6 +41,16 @@ export function getParticipantDisplayName(
   return participant.user_id;
 }
 
+export function formatParticipantShortName(name: string) {
+  const nameParts = name.trim().split(/\s+/);
+
+  if (nameParts.length < 2) {
+    return name;
+  }
+
+  return `${nameParts[0].slice(0, 1)}. ${nameParts.at(-1)}`;
+}
+
 export function participantsToUsers(
   participants: when2meetTypes.SchemaParticipantView[],
 ): MeetingUser[] {

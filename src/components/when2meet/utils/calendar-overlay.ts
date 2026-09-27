@@ -4,11 +4,19 @@ import ICAL from "ical.js";
 import { slotKeyToDateRange } from "./api-slots.ts";
 import { getSlotKey } from "./slots.ts";
 
-export type PersonalCalendarEvent = {
-  title: string;
-  start: Date;
-  end: Date;
-};
+export type PersonalCalendarEvent =
+  | {
+      title: string;
+      allDay: false;
+      start: Date;
+      end: Date;
+    }
+  | {
+      title: string;
+      allDay: true;
+      startDateId: string;
+      endDateIdExclusive: string;
+    };
 
 type IcalExpandedResult = {
   events: ICAL.Event[];
@@ -38,6 +46,60 @@ function intervalsOverlap(
   rightEnd: Date,
 ) {
   return leftStart < rightEnd && leftEnd > rightStart;
+}
+
+function getNextDateId(dateId: string) {
+  const date = new Date(`${dateId}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
+function createPersonalCalendarEvent(
+  title: string,
+  startDate: ICAL.Time,
+  endDate: ICAL.Time | null,
+): PersonalCalendarEvent {
+  if (!startDate.isDate) {
+    return {
+      title,
+      allDay: false,
+      start: startDate.toJSDate(),
+      end: endDate?.toJSDate() ?? startDate.toJSDate(),
+    };
+  }
+
+  const startDateId = startDate.toString().slice(0, 10);
+  const parsedEndDateId = endDate?.toString().slice(0, 10);
+
+  return {
+    title,
+    allDay: true,
+    startDateId,
+    endDateIdExclusive:
+      parsedEndDateId && parsedEndDateId > startDateId
+        ? parsedEndDateId
+        : getNextDateId(startDateId),
+  };
+}
+
+function eventOverlapsRange(
+  event: PersonalCalendarEvent,
+  rangeStart: Date,
+  rangeEnd: Date,
+) {
+  if (!event.allDay) {
+    return intervalsOverlap(event.start, event.end, rangeStart, rangeEnd);
+  }
+
+  const rangeStartDateId = rangeStart.toLocaleDateString("en-CA");
+  const rangeEndDateIdExclusive = getNextDateId(
+    rangeEnd.toLocaleDateString("en-CA"),
+  );
+
+  return (
+    event.startDateId < rangeEndDateIdExclusive &&
+    event.endDateIdExclusive > rangeStartDateId
+  );
 }
 
 export function getMeetingCalendarRange(dateIds: string[]) {
@@ -82,23 +144,27 @@ async function fetchEventsFromIcsUrl(
   const events: PersonalCalendarEvent[] = [];
 
   for (const event of expanded.events) {
-    events.push({
-      title: event.summary || "Busy",
-      start: event.startDate.toJSDate(),
-      end: event.endDate?.toJSDate() ?? event.startDate.toJSDate(),
-    });
+    events.push(
+      createPersonalCalendarEvent(
+        event.summary || "Busy",
+        event.startDate,
+        event.endDate,
+      ),
+    );
   }
 
   for (const occurrence of expanded.occurrences) {
-    events.push({
-      title: occurrence.item.summary || "Busy",
-      start: occurrence.startDate.toJSDate(),
-      end: occurrence.endDate?.toJSDate() ?? occurrence.startDate.toJSDate(),
-    });
+    events.push(
+      createPersonalCalendarEvent(
+        occurrence.item.summary || "Busy",
+        occurrence.startDate,
+        occurrence.endDate,
+      ),
+    );
   }
 
   return events.filter((event) =>
-    intervalsOverlap(event.start, event.end, rangeStart, rangeEnd),
+    eventOverlapsRange(event, rangeStart, rangeEnd),
   );
 }
 
@@ -134,6 +200,10 @@ export function buildCalendarSlotOverlay(
       const titles: string[] = [];
 
       for (const event of events) {
+        if (event.allDay) {
+          continue;
+        }
+
         if (intervalsOverlap(start, end, event.start, event.end)) {
           titles.push(event.title);
         }
@@ -146,6 +216,30 @@ export function buildCalendarSlotOverlay(
   }
 
   return slotEvents;
+}
+
+export function buildCalendarAllDayOverlay(
+  events: PersonalCalendarEvent[],
+  dateIds: string[],
+) {
+  const allDayEvents = new Map<string, string[]>();
+
+  for (const dateId of dateIds) {
+    const titles = events
+      .filter(
+        (event) =>
+          event.allDay &&
+          event.startDateId <= dateId &&
+          event.endDateIdExclusive > dateId,
+      )
+      .map((event) => event.title);
+
+    if (titles.length > 0) {
+      allDayEvents.set(dateId, [...new Set(titles)]);
+    }
+  }
+
+  return allDayEvents;
 }
 
 export function getCalendarConflictSlotKeys(

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { getPersonalCalendarIcsUrls } from "./utils/personal-calendar-urls.ts";
 import {
+  buildCalendarAllDayOverlay,
   buildCalendarSlotOverlay,
   fetchPersonalCalendarEvents,
   getMeetingCalendarRange,
@@ -95,9 +96,15 @@ export function useWhen2MeetPersonalCalendarOverlay({
     [calendarEvents, dateIds, timeSlots, allowedSlots],
   );
 
+  const allDayEvents = useMemo(
+    () => buildCalendarAllDayOverlay(calendarEvents, dateIds),
+    [calendarEvents, dateIds],
+  );
+
   return {
     slotEvents,
+    allDayEvents,
     isPending,
-    hasCalendarData: slotEvents.size > 0,
+    hasCalendarData: slotEvents.size > 0 || allDayEvents.size > 0,
   };
 }

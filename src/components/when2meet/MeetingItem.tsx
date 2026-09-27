@@ -17,7 +17,15 @@ export function MeetingItem({
     >
       <div className="card-body flex grow flex-col gap-3 p-4">
         <div className="flex flex-col gap-1">
-          <h3 className="text-lg font-semibold">{meeting.name}</h3>
+          <div className="flex min-w-0 items-center gap-2">
+            <h3 className="min-w-0 text-lg font-semibold">{meeting.name}</h3>
+            {meeting.is_archived && (
+              <span
+                className="icon-[mdi--archive-outline] text-base-content/60 shrink-0 text-lg"
+                title="Archived"
+              />
+            )}
+          </div>
           {meeting.description && (
             <p className="text-base-content/70 line-clamp-2 text-sm">
               {meeting.description}
@@ -34,19 +42,19 @@ export function MeetingItem({
           )}
           <div className="flex items-center gap-2">
             <span className="icon-[mdi--account-group-outline] text-primary shrink-0 text-lg" />
-            <span>{meeting.participants_count} participants</span>
+            <span>{meeting.participants_count}</span>
           </div>
-          {meeting.is_archived ? (
-            <div className="flex items-center gap-2">
-              <span className="icon-[mdi--archive-outline] shrink-0 text-lg" />
-              <span>Archived</span>
-            </div>
-          ) : selectedTimeLabel ? (
+          {selectedTimeLabel ? (
             <div className="flex items-center gap-2">
               <span className="icon-[material-symbols--schedule-outline] text-secondary shrink-0 text-lg" />
               <span>{selectedTimeLabel}</span>
             </div>
-          ) : null}
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="icon-[material-symbols--schedule-outline] text-base-content/50 shrink-0 text-lg" />
+              <span>Not selected</span>
+            </div>
+          )}
         </div>
       </div>
     </Link>

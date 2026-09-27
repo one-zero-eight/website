@@ -406,13 +406,16 @@ export function MeetingPage({
 
   const isEditingSelf = editingUserId === currentUserId;
 
-  const { slotEvents: calendarSlotEvents, hasCalendarData } =
-    useWhen2MeetPersonalCalendarOverlay({
-      dateIds: meetingDateIds,
-      timeSlots,
-      allowedSlots,
-      enabled: (isEditingSelf || needsSetup) && formattedDates.length > 0,
-    });
+  const {
+    slotEvents: calendarSlotEvents,
+    allDayEvents: calendarAllDayEvents,
+    hasCalendarData,
+  } = useWhen2MeetPersonalCalendarOverlay({
+    dateIds: meetingDateIds,
+    timeSlots,
+    allowedSlots,
+    enabled: (isEditingSelf || needsSetup) && formattedDates.length > 0,
+  });
 
   const showCalendarOverlay = (isEditingSelf || needsSetup) && hasCalendarData;
 
@@ -644,6 +647,20 @@ export function MeetingPage({
 
     if (isChoosingMeetingTime) {
       handleCancelChoosingMeetingTime();
+    }
+
+    handleStartEditing(currentUserId);
+  }
+
+  function handleTimeGridDoubleClick() {
+    if (
+      !currentUserId ||
+      isArchived ||
+      needsSetup ||
+      editingUserId !== null ||
+      isChoosingMeetingTime
+    ) {
+      return;
     }
 
     handleStartEditing(currentUserId);
@@ -987,6 +1004,8 @@ export function MeetingPage({
     selectedMeetingSlotKeys,
     showCalendarOverlay,
     calendarSlotEvents,
+    calendarAllDayEvents,
+    onTimeGridDoubleClick: handleTimeGridDoubleClick,
     calendarConflictSlotKeys:
       editingUserId === currentUserId ? calendarConflictSlotKeys : undefined,
   };
@@ -1004,29 +1023,44 @@ export function MeetingPage({
           </Link>
 
           <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <h1 className="text-2xl font-semibold">{meetingName}</h1>
-              </div>
-              {meetingDescription && (
-                <p className="text-base-content/70 mt-2 max-w-3xl text-sm">
-                  {meetingDescription}
-                </p>
-              )}
-              <div className="text-base-content/70 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                <span>{formatDateRangeLabel(formattedDates)}</span>
-                <span>{users.length} responses</span>
-                {isArchived ? (
-                  <span>Archived</span>
-                ) : selectedTimeLabel ? (
-                  <span className="text-secondary">
-                    Meeting time: {selectedTimeLabel}
-                  </span>
-                ) : null}
-                {bookedRoomTitle && (
-                  <span className="text-primary">Room: {bookedRoomTitle}</span>
+            <div className="flex min-w-0 items-start justify-between gap-3 md:block">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <h1 className="text-2xl font-semibold">{meetingName}</h1>
+                </div>
+                {meetingDescription && (
+                  <p className="text-base-content/70 mt-2 max-w-3xl text-sm">
+                    {meetingDescription}
+                  </p>
                 )}
+                <div className="text-base-content/70 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                  <span>{formatDateRangeLabel(formattedDates)}</span>
+                  <span>{users.length} responses</span>
+                  {isArchived ? (
+                    <span>Archived</span>
+                  ) : selectedTimeLabel ? (
+                    <span className="text-secondary inline-flex items-center gap-1">
+                      <span className="icon-[material-symbols--schedule-outline] shrink-0 text-base" />
+                      {selectedTimeLabel}
+                    </span>
+                  ) : null}
+                  {bookedRoomTitle && (
+                    <span className="text-primary">
+                      Room: {bookedRoomTitle}
+                    </span>
+                  )}
+                </div>
               </div>
+              {isOwner && !needsSetup && (
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm shrink-0 gap-1 md:hidden"
+                  onClick={handleShareLink}
+                >
+                  <span className="icon-[material-symbols--share-outline] text-base" />
+                  Share link
+                </button>
+              )}
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -1130,32 +1164,6 @@ export function MeetingPage({
             <div className="bg-base-100 border-base-300 rounded-box min-w-0 border p-4 md:p-5">
               <div className="md:hidden">
                 <AvailabilitySelector {...availabilitySelectorProps} isPhone />
-                {!needsSetup &&
-                  !isEditingSelf &&
-                  !isChoosingMeetingTime &&
-                  hoveredSlotKey && (
-                    <div className="border-base-300 bg-base-200 rounded-box mt-3 border p-3 text-sm">
-                      <div className="font-medium">{hoveredSlotLabel}</div>
-                      {isHoveredSlotDisabled ? (
-                        <div className="text-base-content/60 mt-1">
-                          No one is allowed here
-                        </div>
-                      ) : hoveredSlotParticipants.length === 0 ? (
-                        <div className="text-base-content/60 mt-1">
-                          No one is available
-                        </div>
-                      ) : (
-                        <div className="mt-1">
-                          <span className="text-base-content/60">
-                            {hoveredSlotParticipants.length} available:{" "}
-                          </span>
-                          {hoveredSlotParticipants
-                            .map((participant) => participant.name)
-                            .join(", ")}
-                        </div>
-                      )}
-                    </div>
-                  )}
               </div>
               <div className="hidden md:block">
                 <AvailabilitySelector {...availabilitySelectorProps} />
@@ -1197,10 +1205,9 @@ export function MeetingPage({
                   </div>
 
                   {selectedTimeLabel && (
-                    <div className="border-base-300 bg-secondary/5 rounded-box mb-3 border p-3 text-sm">
-                      <div className="text-base-content/60">Meeting time</div>
-                      <div className="font-semibold">{selectedTimeLabel}</div>
-                    </div>
+                    <span className="text-secondary mb-3 text-sm">
+                      Meeting time: {selectedTimeLabel}
+                    </span>
                   )}
 
                   {bookedRoomTitle && (
@@ -1356,9 +1363,25 @@ export function MeetingPage({
                       </button>
                     </div>
                   )}
+                </div>
+
+                <div className="bg-base-100 border-base-300 rounded-box flex flex-col border p-4">
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <h2 className="text-lg font-semibold">Responses</h2>
+                    {listUsers.length > 1 && (
+                      <button
+                        type="button"
+                        className="btn btn-link"
+                        onClick={handleToggleViewAllUsers}
+                      >
+                        {allUsersViewed ? "Hide all" : "View all"}
+                      </button>
+                    )}
+                  </div>
+
                   <div
                     className={cn(
-                      "text-base-content/70 mt-3 flex min-w-0 flex-col justify-center text-sm",
+                      "text-base-content/70 mb-3 flex min-w-0 flex-col justify-center text-sm",
                       editingUserId !== null ? "h-9" : "h-4",
                     )}
                   >
@@ -1384,21 +1407,6 @@ export function MeetingPage({
                       <span className="block">No slot selected</span>
                     )}
                   </div>
-                </div>
-
-                <div className="bg-base-100 border-base-300 rounded-box flex flex-col border p-4">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <h2 className="text-lg font-semibold">Responses</h2>
-                    {listUsers.length > 1 && (
-                      <button
-                        type="button"
-                        className="btn btn-link"
-                        onClick={handleToggleViewAllUsers}
-                      >
-                        {allUsersViewed ? "Hide all" : "View all"}
-                      </button>
-                    )}
-                  </div>
 
                   <label className="input input-bordered mb-3 w-full rounded-xl focus:outline-none">
                     <span className="icon-[material-symbols--search] text-base-content/50" />
@@ -1422,6 +1430,7 @@ export function MeetingPage({
                       filteredUsers.map((user) => {
                         const isEditing = editingUserId === user.id;
                         const isCurrentUser = user.id === currentUserId;
+                        const isMeetingOwner = user.id === event.owner_id;
                         const canDeleteOther =
                           isOwner && !isArchived && !isCurrentUser;
                         const isSlotResponder =
@@ -1455,7 +1464,7 @@ export function MeetingPage({
                                   isViewed ? "bg-primary" : "bg-base-300",
                                 )}
                               />
-                              <span className="truncate text-sm">
+                              <span className="min-w-0 truncate text-sm">
                                 {user.name}
                                 {isCurrentUser && (
                                   <span className="text-base-content/60 ml-1 font-normal">
@@ -1463,6 +1472,11 @@ export function MeetingPage({
                                   </span>
                                 )}
                               </span>
+                              {isMeetingOwner && (
+                                <span className="badge badge-primary badge-outline badge-sm shrink-0 border-[1px]">
+                                  Owner
+                                </span>
+                              )}
                             </button>
                             {canDeleteOther ? (
                               <button
@@ -1493,7 +1507,6 @@ export function MeetingPage({
 
         {(isOwner || currentUserId) && (
           <MeetingMobileBar
-            onShare={isOwner && !needsSetup ? handleShareLink : undefined}
             onSaveSetup={isOwner && needsSetup ? handleSaveSetup : undefined}
             onClearSetup={
               isOwner && needsSetup ? handleClearSetupSlots : undefined
@@ -1514,6 +1527,24 @@ export function MeetingPage({
             isEditingAvailability={isEditingSelf}
             isSavingAvailability={isSaving}
             canClearAvailability={draftSlots.size > 0}
+            selectedSlotDetails={
+              !needsSetup &&
+              !isEditingSelf &&
+              !isChoosingMeetingTime &&
+              hoveredSlotKey
+                ? {
+                    label: hoveredSlotLabel,
+                    unavailableMessage: isHoveredSlotDisabled
+                      ? "No one is allowed here"
+                      : hoveredSlotParticipants.length === 0
+                        ? "No one is available"
+                        : undefined,
+                    participantNames: hoveredSlotParticipants.map(
+                      (participant) => participant.name,
+                    ),
+                  }
+                : undefined
+            }
           />
         )}
 

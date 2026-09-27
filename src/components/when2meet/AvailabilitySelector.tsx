@@ -24,6 +24,9 @@ import {
 
 type DragMode = "add" | "remove";
 
+const CALENDAR_EVENT_TEXT_CLASS_NAME =
+  "text-[10px] leading-none md:text-[11px]";
+
 function getMeetingTimeOverlayClassName({
   continuesAbove,
   continuesBelow,
@@ -108,7 +111,9 @@ export function AvailabilitySelector({
   selectedMeetingSlotKeys,
   showCalendarOverlay = false,
   calendarSlotEvents,
+  calendarAllDayEvents,
   calendarConflictSlotKeys,
+  onTimeGridDoubleClick,
 }: {
   dates: MeetingDate[];
   timeSlots: string[];
@@ -134,7 +139,9 @@ export function AvailabilitySelector({
   selectedMeetingSlotKeys?: Set<string>;
   showCalendarOverlay?: boolean;
   calendarSlotEvents?: Map<string, string[]>;
+  calendarAllDayEvents?: Map<string, string[]>;
   calendarConflictSlotKeys?: Set<string>;
+  onTimeGridDoubleClick?: () => void;
 }) {
   const daysPerPage = isPhone ? 3 : 7;
   const [dateOffset, setDateOffset] = useState(0);
@@ -193,6 +200,9 @@ export function AvailabilitySelector({
   const hasPrevPage = dateOffset > 0;
   const hasNextPage = dateOffset + daysPerPage < dates.length;
   const showPagination = dates.length > daysPerPage;
+  const hasVisibleAllDayEvents =
+    showCalendarOverlay &&
+    visibleDates.some((date) => calendarAllDayEvents?.has(date.id));
 
   useEffect(() => {
     setDateOffset(0);
@@ -860,6 +870,45 @@ export function AvailabilitySelector({
         );
       })}
 
+      {hasVisibleAllDayEvents && (
+        <>
+          <div />
+          {visibleDates.map((date, visibleIndex) => {
+            const dateIndex = dateOffset + visibleIndex;
+            const dateColumnGapClassName = getDateColumnGapClassName(dateIndex);
+            const dateColumnGapBorderClassName =
+              getDateColumnGapBorderClassName(dateIndex);
+            const eventTitles = calendarAllDayEvents?.get(date.id) ?? [];
+
+            return (
+              <div
+                key={`all-day-${date.id}`}
+                data-all-day-date={date.id}
+                className={cn(
+                  "border-base-300 mb-2 grid min-w-0 gap-1 border-r px-0.5",
+                  visibleIndex === 0 && "border-l",
+                  dateColumnGapClassName,
+                  dateColumnGapBorderClassName,
+                )}
+              >
+                {eventTitles.map((title) => (
+                  <div
+                    key={title}
+                    title={title}
+                    className={cn(
+                      "text-base-content/80 flex min-h-5 min-w-0 items-center justify-center truncate bg-[repeating-linear-gradient(-45deg,color-mix(in_oklch,var(--color-accent)_24%,transparent),color-mix(in_oklch,var(--color-accent)_24%,transparent)_8px,transparent_8px,transparent_16px)] px-0.5 text-center dark:text-[#f5f0d8]",
+                      CALENDAR_EVENT_TEXT_CLASS_NAME,
+                    )}
+                  >
+                    {title}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </>
+      )}
+
       {timeSlots.map((time, timeIndex) => (
         <div key={time} className="contents">
           <div
@@ -1052,6 +1101,7 @@ export function AvailabilitySelector({
                   handleSlotPointerDown(date.id, time, event)
                 }
                 onClick={() => handleSlotTap(slotKey)}
+                onDoubleClick={onTimeGridDoubleClick}
               >
                 {showAvailabilityEditing && isSelected && (
                   <span
@@ -1063,7 +1113,12 @@ export function AvailabilitySelector({
                   />
                 )}
                 {hasCalendarEvent && (
-                  <span className="text-base-content/80 pointer-events-none absolute inset-0 flex items-center justify-center truncate px-0.5 text-center text-[10px] leading-none md:text-[11px] dark:text-[#f5f0d8]">
+                  <span
+                    className={cn(
+                      "text-base-content/80 pointer-events-none absolute inset-0 flex items-center justify-center truncate px-0.5 text-center dark:text-[#f5f0d8]",
+                      CALENDAR_EVENT_TEXT_CLASS_NAME,
+                    )}
+                  >
                     {calendarEventLabel}
                   </span>
                 )}
@@ -1146,12 +1201,10 @@ export function AvailabilitySelector({
       )}
 
       {!selectionOnly && (
-        <div className="text-base-content/70 mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
-          <span className="inline-flex items-center gap-1.5 lg:px-3">
+        <div className="text-base-content/70 mb-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
+          <span className="inline-flex items-center gap-1.5">
             <span className="bg-primary/50 border-base-300 h-3 w-5 rounded-sm border" />
-            {showAvailabilityEditing
-              ? "Other participants"
-              : "Participant availability"}
+            {showAvailabilityEditing ? "Other participants" : "Availability"}
           </span>
           {currentUserId && (
             <span className="inline-flex items-center gap-1.5">
@@ -1163,13 +1216,13 @@ export function AvailabilitySelector({
                     : "border-primary",
                 )}
               />
-              Your timeslots
+              Your
             </span>
           )}
           {(selectedMeetingSlotKeys?.size || intervalSelectionMode) && (
             <span className="inline-flex items-center gap-1.5">
               <span className="border-secondary bg-secondary/15 h-3 w-5 rounded-sm border-2" />
-              Chosen meeting time
+              Chosen
             </span>
           )}
         </div>

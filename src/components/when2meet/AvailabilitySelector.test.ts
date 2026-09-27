@@ -262,3 +262,120 @@ describe("final meeting selection on the grid", () => {
     expect(onPastMeetingTimeAttempt).not.toHaveBeenCalled();
   });
 });
+
+describe("all-day personal calendar events", () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  beforeEach(() => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    vi.unstubAllGlobals();
+  });
+
+  it.each([
+    { isPhone: false, visibleDates: 4 },
+    { isPhone: true, visibleDates: 3 },
+  ])(
+    "renders all-day events above the visible grid dates (phone=$isPhone)",
+    ({ isPhone, visibleDates }) => {
+      const dates = ["15", "16", "17", "18"].map((day) => ({
+        id: `2027-06-${day}`,
+        monthDay: `Jun ${day}`,
+        weekDay: "Tue",
+      }));
+
+      act(() => {
+        root.render(
+          createElement(AvailabilitySelector, {
+            dates,
+            timeSlots: ["12:00"],
+            users: [],
+            viewedUserIds: new Set<string>(),
+            editingUserId: "user",
+            draftSlots: new Set<string>(),
+            onApplySlots: vi.fn(),
+            showCalendarOverlay: true,
+            calendarAllDayEvents: new Map(
+              dates.map((date) => [date.id, ["Linen change"]]),
+            ),
+            isPhone,
+          }),
+        );
+      });
+
+      expect(container.querySelectorAll("[data-all-day-date]")).toHaveLength(
+        visibleDates,
+      );
+      expect(container.textContent?.match(/Linen change/g)).toHaveLength(
+        visibleDates,
+      );
+      expect(container.querySelectorAll("[data-slot-key]")).toHaveLength(
+        visibleDates,
+      );
+      const gridItems = container.querySelectorAll(
+        "[data-all-day-date], [data-slot-key]",
+      );
+      expect(gridItems[0]?.hasAttribute("data-all-day-date")).toBe(true);
+    },
+  );
+});
+
+describe("time grid double click", () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  beforeEach(() => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    vi.unstubAllGlobals();
+  });
+
+  it.each([{ isPhone: false }, { isPhone: true }])(
+    "starts editing from the time grid (phone=$isPhone)",
+    ({ isPhone }) => {
+      const handleTimeGridDoubleClick = vi.fn();
+
+      act(() => {
+        root.render(
+          createElement(AvailabilitySelector, {
+            dates: [{ id: "2027-06-15", monthDay: "Jun 15", weekDay: "Tue" }],
+            timeSlots: ["12:00"],
+            users: [],
+            viewedUserIds: new Set<string>(),
+            editingUserId: null,
+            draftSlots: new Set<string>(),
+            onApplySlots: vi.fn(),
+            onTimeGridDoubleClick: handleTimeGridDoubleClick,
+            isPhone,
+          }),
+        );
+      });
+
+      const cell = container.querySelector("[data-slot-key]");
+      expect(cell).not.toBeNull();
+
+      act(() => {
+        cell!.dispatchEvent(
+          new MouseEvent("dblclick", { bubbles: true, cancelable: true }),
+        );
+      });
+
+      expect(handleTimeGridDoubleClick).toHaveBeenCalledOnce();
+    },
+  );
+});
