@@ -53,6 +53,7 @@ import {
 import type { MeetingUser } from "./types.ts";
 
 const SETUP_USER_ID = "__setup__";
+const MILLISECONDS_PER_MINUTE = 60_000;
 
 export function MeetingPage({
   meetingId,
@@ -80,6 +81,11 @@ export function MeetingPage({
   const [pendingMeetingTime, setPendingMeetingTime] =
     useState<when2meetTypes.SchemaMeetingTime | null>(null);
   const [meetingTimeNow, setMeetingTimeNow] = useState(() => Date.now());
+  const [currentTimeIndicatorNow, setCurrentTimeIndicatorNow] = useState(
+    () =>
+      Math.floor(Date.now() / MILLISECONDS_PER_MINUTE) *
+      MILLISECONDS_PER_MINUTE,
+  );
   const [isMeetingTimeRejected, setIsMeetingTimeRejected] = useState(false);
   const [roomModalOpen, setRoomModalOpen] = useState(false);
   const hasAutoStartedEditingRef = useRef(false);
@@ -236,6 +242,7 @@ export function MeetingPage({
       setMeetingTimeNow(Date.now());
     }
 
+    handleTimeRefresh();
     const timer = window.setInterval(handleTimeRefresh, 1000);
     window.addEventListener("focus", handleTimeRefresh);
     document.addEventListener("visibilitychange", handleTimeRefresh);
@@ -246,6 +253,41 @@ export function MeetingPage({
       document.removeEventListener("visibilitychange", handleTimeRefresh);
     };
   }, [isChoosingMeetingTime]);
+
+  useEffect(() => {
+    let timer: number | undefined;
+
+    function handleCurrentTimeIndicatorRefresh() {
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+      }
+
+      const now = Date.now();
+      const minuteStart =
+        Math.floor(now / MILLISECONDS_PER_MINUTE) * MILLISECONDS_PER_MINUTE;
+      setCurrentTimeIndicatorNow(minuteStart);
+      timer = window.setTimeout(
+        handleCurrentTimeIndicatorRefresh,
+        minuteStart + MILLISECONDS_PER_MINUTE - now,
+      );
+    }
+
+    function handleVisibilityChange() {
+      if (!document.hidden) {
+        handleCurrentTimeIndicatorRefresh();
+      }
+    }
+
+    handleCurrentTimeIndicatorRefresh();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+      }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (!needsSetup) {
@@ -1006,6 +1048,8 @@ export function MeetingPage({
     calendarSlotEvents,
     calendarAllDayEvents,
     onTimeGridDoubleClick: handleTimeGridDoubleClick,
+    currentTime: currentTimeIndicatorNow,
+    timeZone: event.timezone,
     calendarConflictSlotKeys:
       editingUserId === currentUserId ? calendarConflictSlotKeys : undefined,
   };
@@ -1205,8 +1249,9 @@ export function MeetingPage({
                   </div>
 
                   {selectedTimeLabel && (
-                    <span className="text-secondary mb-3 text-sm">
-                      Meeting time: {selectedTimeLabel}
+                    <span className="text-secondary mb-3 inline-flex items-center gap-1 text-sm md:hidden">
+                      <span className="icon-[material-symbols--schedule-outline] shrink-0 text-base" />
+                      {selectedTimeLabel}
                     </span>
                   )}
 

@@ -17,6 +17,8 @@ import {
   areConsecutiveDateIds,
   getSlotHeatmapAppearance,
   getSlotHeatmapAppearanceColorblindSafe,
+  getCurrentTimeGridIndicator,
+  getDateIdInTimeZone,
   getSlotKey,
   getSlotKeysBetween,
   parseSlotKey,
@@ -114,6 +116,8 @@ export function AvailabilitySelector({
   calendarAllDayEvents,
   calendarConflictSlotKeys,
   onTimeGridDoubleClick,
+  currentTime = Date.now(),
+  timeZone = "Europe/Moscow",
 }: {
   dates: MeetingDate[];
   timeSlots: string[];
@@ -142,6 +146,8 @@ export function AvailabilitySelector({
   calendarAllDayEvents?: Map<string, string[]>;
   calendarConflictSlotKeys?: Set<string>;
   onTimeGridDoubleClick?: () => void;
+  currentTime?: number;
+  timeZone?: string;
 }) {
   const daysPerPage = isPhone ? 3 : 7;
   const [dateOffset, setDateOffset] = useState(0);
@@ -196,7 +202,11 @@ export function AvailabilitySelector({
 
   const visibleDates = dates.slice(dateOffset, dateOffset + daysPerPage);
   visibleDateIdsRef.current = visibleDates.map((date) => date.id);
-  const todayDateId = new Date().toLocaleDateString("en-CA");
+  const todayDateId = getDateIdInTimeZone(currentTime, timeZone);
+  const currentTimeIndicator = useMemo(
+    () => getCurrentTimeGridIndicator(currentTime, timeZone, timeSlots),
+    [currentTime, timeSlots, timeZone],
+  );
   const hasPrevPage = dateOffset > 0;
   const hasNextPage = dateOffset + daysPerPage < dates.length;
   const showPagination = dates.length > daysPerPage;
@@ -295,6 +305,10 @@ export function AvailabilitySelector({
 
   function handleGridMouseLeave() {
     if (selectionOnly) {
+      return;
+    }
+
+    if (isPhone) {
       return;
     }
 
@@ -832,6 +846,7 @@ export function AvailabilitySelector({
   const gridContent = (
     <div
       ref={gridRef}
+      data-time-grid
       onMouseLeave={handleGridMouseLeave}
       className={cn(
         "grid w-full min-w-0",
@@ -913,11 +928,23 @@ export function AvailabilitySelector({
         <div key={time} className="contents">
           <div
             className={cn(
-              "text-base-content/80 flex h-7 items-start justify-end pr-1 text-sm md:h-8 md:pr-2",
+              "text-base-content/80 relative flex h-7 items-start justify-end pr-1 text-sm md:h-8 md:pr-2",
               time.endsWith(":30") && "text-transparent",
             )}
           >
             <span className="-translate-y-1/2">{time}</span>
+            {currentTimeIndicator?.slotTime === time &&
+              visibleDates.some(
+                (date) => date.id === currentTimeIndicator.dateId,
+              ) && (
+                <span
+                  data-current-time-label
+                  className="bg-base-100 pointer-events-none absolute right-1 -translate-y-1/2 px-0.5 text-xs font-normal text-[red] md:right-2"
+                  style={{ top: `${currentTimeIndicator.offsetPercent}%` }}
+                >
+                  {currentTimeIndicator.timeLabel}
+                </span>
+              )}
           </div>
           {visibleDates.map((date, visibleIndex) => {
             const dateIndex = dateOffset + visibleIndex;
@@ -1018,6 +1045,11 @@ export function AvailabilitySelector({
               heatmapAvailableCount > 0 &&
               heatmapAvailableCount >= maxCount;
             const isHovered = hoveredSlotKey === slotKey;
+            const currentTimeIndicatorOffset =
+              currentTimeIndicator?.dateId === date.id &&
+              currentTimeIndicator.slotTime === time
+                ? currentTimeIndicator.offsetPercent
+                : null;
             const showHoverRing =
               isHovered &&
               (!fadeNonBestSlots || isBestIntersection || !slotAllowed);
@@ -1147,6 +1179,13 @@ export function AvailabilitySelector({
                       continuesBelow: !!intervalSelectionBelow,
                       overlapsAvailability: meetingTimeOverlapsAvailability,
                     })}
+                  />
+                )}
+                {currentTimeIndicatorOffset !== null && (
+                  <span
+                    data-current-time-indicator
+                    className="pointer-events-none absolute right-0 left-0 h-0.5 rounded-full bg-[red]"
+                    style={{ top: `${currentTimeIndicatorOffset}%` }}
                   />
                 )}
               </button>

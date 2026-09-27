@@ -139,6 +139,80 @@ export function formatDateRangeLabel(dates: MeetingDate[]) {
   return `${dates[0].monthDay} - ${dates[dates.length - 1].monthDay}`;
 }
 
+function getTimeZoneDateTime(timestamp: number, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(timestamp);
+  const values = Object.fromEntries(
+    parts.map((part) => [part.type, part.value]),
+  );
+
+  return {
+    dateId: `${values.year}-${values.month}-${values.day}`,
+    timeLabel: `${values.hour}:${values.minute}`,
+    minutes:
+      Number(values.hour) * 60 +
+      Number(values.minute) +
+      Number(values.second) / 60,
+  };
+}
+
+export function getDateIdInTimeZone(timestamp: number, timeZone: string) {
+  return getTimeZoneDateTime(timestamp, timeZone).dateId;
+}
+
+export function getCurrentTimeGridIndicator(
+  timestamp: number,
+  timeZone: string,
+  timeSlots: string[],
+) {
+  if (timeSlots.length === 0) {
+    return null;
+  }
+
+  const {
+    dateId,
+    timeLabel,
+    minutes: currentMinutes,
+  } = getTimeZoneDateTime(timestamp, timeZone);
+  const slotMinutes = timeSlots.map(timeToMinutes);
+  const defaultDuration =
+    slotMinutes
+      .slice(1)
+      .map((minutes, index) => minutes - slotMinutes[index])
+      .find((duration) => duration > 0) ?? 30;
+
+  for (let index = 0; index < timeSlots.length; index++) {
+    const slotStart = slotMinutes[index];
+    const nextSlotStart = slotMinutes[index + 1];
+    const slotEnd =
+      nextSlotStart !== undefined && nextSlotStart > slotStart
+        ? nextSlotStart
+        : slotStart + defaultDuration;
+
+    if (currentMinutes < slotStart || currentMinutes >= slotEnd) {
+      continue;
+    }
+
+    return {
+      dateId,
+      timeLabel,
+      slotTime: timeSlots[index],
+      offsetPercent:
+        ((currentMinutes - slotStart) / (slotEnd - slotStart)) * 100,
+    };
+  }
+
+  return null;
+}
+
 export function formatSlotKeyLabel(
   slotKey: string,
   formattedDates: MeetingDate[],

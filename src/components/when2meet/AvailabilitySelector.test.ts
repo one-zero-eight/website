@@ -379,3 +379,65 @@ describe("time grid double click", () => {
     },
   );
 });
+
+describe("time grid mouse leave", () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  beforeEach(() => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    vi.unstubAllGlobals();
+  });
+
+  it.each([
+    { isPhone: false, expectedCalls: 1 },
+    { isPhone: true, expectedCalls: 0 },
+  ])(
+    "clears hover only on desktop (phone=$isPhone)",
+    ({ isPhone, expectedCalls }) => {
+      const handleHoveredSlotKeyChange = vi.fn();
+
+      act(() => {
+        root.render(
+          createElement(AvailabilitySelector, {
+            dates: [{ id: "2027-06-15", monthDay: "Jun 15", weekDay: "Tue" }],
+            timeSlots: ["12:00"],
+            users: [],
+            viewedUserIds: new Set<string>(),
+            editingUserId: null,
+            draftSlots: new Set<string>(),
+            onApplySlots: vi.fn(),
+            hoveredSlotKey: "2027-06-15_12:00",
+            onHoveredSlotKeyChange: handleHoveredSlotKeyChange,
+            isPhone,
+          }),
+        );
+      });
+
+      const grid = container.querySelector("[data-time-grid]");
+      expect(grid).not.toBeNull();
+
+      act(() => {
+        grid!.dispatchEvent(
+          new MouseEvent("mouseout", {
+            bubbles: true,
+            relatedTarget: document.body,
+          }),
+        );
+      });
+
+      expect(handleHoveredSlotKeyChange).toHaveBeenCalledTimes(expectedCalls);
+      if (expectedCalls > 0) {
+        expect(handleHoveredSlotKeyChange).toHaveBeenCalledWith(null);
+      }
+    },
+  );
+});
