@@ -29,9 +29,9 @@ export function DashboardPage() {
     <div className="flex flex-col gap-4 px-4 py-4">
       <AccountWidget />
       <TelegramReconnectWidget />
-      <div className="grid min-w-0 gap-4 @4xl/content:grid-cols-2">
-        <SportsWidget />
+      <div className="grid min-w-0 gap-4 @4xl/content:grid-cols-2 [&>section:only-child]:col-span-full">
         <CalendarWidget />
+        <SportsWidget />
       </div>
       <div className="grid min-w-0 gap-4 @4xl/content:grid-cols-2 @7xl/content:grid-cols-3">
         <AcademicCalendarWidget />
