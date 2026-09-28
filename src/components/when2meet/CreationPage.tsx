@@ -484,7 +484,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
         </div>
       </div>
 
-      <footer className="border-base-300 bg-base-200 fixed bottom-12 left-0 flex w-full gap-2 rounded-t-xl border-b p-4 lg:static lg:justify-end lg:border-0 lg:bg-transparent lg:p-0 lg:pt-4">
+      <footer className="border-base-300 bg-base-200 fixed bottom-12 left-0 z-10 flex w-full gap-2 rounded-t-xl border-b p-4 lg:static lg:justify-end lg:border-0 lg:bg-transparent lg:p-0 lg:pt-4">
         {cancelLink}
         {isEditMode ? saveSubmitButton : createSubmitButton}
       </footer>
@@ -493,7 +493,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
 
   return (
     <RequireAuth>
-      <div className="mx-auto mb-20 w-full max-w-[900px] px-4 py-4 md:mb-4">
+      <div className="mx-auto w-full max-w-[900px] px-4 pt-4 pb-24 lg:pb-4">
         {isEditMode ? (
           <Link
             to="/when2meet/$meetingId"
