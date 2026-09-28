@@ -410,6 +410,9 @@ export function MeetingPage({
     },
   );
 
+  const bookedRoomBookingError = outlookBookingId
+    ? bookingByIdQuery.error
+    : bookingByEntryIdQuery.error;
   const bookedRoomBookingDetails =
     bookingByIdQuery.data ?? bookingByEntryIdQuery.data;
   const bookedRoomBooking = useMemo(
@@ -419,12 +422,17 @@ export function MeetingPage({
         : undefined,
     [bookedRoomBookingDetails],
   );
+  const hasBookedRoomTimeMismatch =
+    !!bookedRoomBooking &&
+    !bookedRoomBookingError &&
+    !!event?.selected_time &&
+    (bookedRoomBooking.startsAt.getTime() !==
+      new Date(event.selected_time.start).getTime() ||
+      bookedRoomBooking.endsAt.getTime() !==
+        new Date(event.selected_time.end).getTime());
   const isBookedRoomBookingPending = outlookBookingId
-    ? bookingByIdQuery.isPending
-    : !!outlookEntryId && bookingByEntryIdQuery.isPending;
-  const bookedRoomBookingError = outlookBookingId
-    ? bookingByIdQuery.error
-    : bookingByEntryIdQuery.error;
+    ? bookingByIdQuery.isFetching
+    : !!outlookEntryId && bookingByEntryIdQuery.isFetching;
   const missingBookingReference = outlookBookingId ?? outlookEntryId ?? null;
   const isBookedRoomBookingMissing =
     isApiHttpError(bookedRoomBookingError) &&
@@ -437,10 +445,10 @@ export function MeetingPage({
     onSuccess: (updatedMeeting) => {
       setBookingDetailsOpen(false);
       handleMeetingUpdated(updatedMeeting);
-      // showWarning(
-      //   "Room booking removed",
-      //   "The booking no longer exists in Room Booking, so it was removed from the meeting.",
-      // );
+      showWarning(
+        "Room booking removed",
+        "The booking no longer exists in Room Booking, so it was removed from the meeting.",
+      );
     },
     onError: (reconciliationError) => {
       showError("Error", formatApiErrorMessage(reconciliationError));
@@ -476,14 +484,27 @@ export function MeetingPage({
       return;
     }
 
+    refetchBookedRoomBooking();
+  }
+
+  async function refetchBookedRoomBooking() {
     if (outlookBookingId) {
-      bookingByIdQuery.refetch();
-      return;
+      return bookingByIdQuery.refetch();
     }
 
     if (outlookEntryId) {
-      bookingByEntryIdQuery.refetch();
+      return bookingByEntryIdQuery.refetch();
     }
+  }
+
+  async function handleOpenBookingDetails() {
+    const bookingDetailsResult = await refetchBookedRoomBooking();
+
+    if (!bookingDetailsResult?.data || bookingDetailsResult.error) {
+      return;
+    }
+
+    setBookingDetailsOpen(true);
   }
 
   const selectedMeetingSlotKeys = useMemo(() => {
@@ -1325,33 +1346,15 @@ export function MeetingPage({
                       </span>
                     </button>
                   )}
-                  {currentUserId && !isArchived && (
+                  {currentUserId && !isArchived && !isEditingSelf && (
                     <div className="hidden flex-wrap gap-2 md:flex">
-                      {isEditingSelf && (
-                        <>
-                          <button
-                            type="button"
-                            className="btn btn-ghost"
-                            disabled={isSaving}
-                            onClick={handleCancelEditing}
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      )}
                       <button
                         type="button"
                         className="btn btn-primary gap-2"
-                        disabled={isSaving || isChoosingMeetingTime}
+                        disabled={isChoosingMeetingTime}
                         onClick={handleToggleAvailability}
                       >
-                        {isEditingSelf && isSaving ? (
-                          <span className="loading loading-spinner loading-sm" />
-                        ) : isEditingSelf ? (
-                          "Save timeslots"
-                        ) : (
-                          "Change my availability"
-                        )}
+                        Change my availability
                       </button>
                     </div>
                   )}
@@ -1455,38 +1458,74 @@ export function MeetingPage({
                   )}
 
                   {bookedRoomTitle && (
-                    <div className="border-base-300 bg-primary/5 rounded-box mb-3 flex items-center gap-3 border p-3 text-sm">
-                      <div className="min-w-0 grow">
-                        <div className="text-base-content/60">Booked room</div>
-                        <div className="truncate font-semibold">
-                          {bookedRoomTitle}
-                        </div>
-                        {bookedRoomBookingError &&
-                          !isBookedRoomBookingMissing && (
+                    <div className="mb-3 grid gap-2">
+                      <div className="border-base-300 bg-primary/5 rounded-box flex items-center gap-3 border p-3 text-sm">
+                        <div className="min-w-0 grow">
+                          <div className="text-base-content/60">
+                            Booked room
+                          </div>
+                          <div className="truncate font-semibold">
+                            {bookedRoomTitle}
+                          </div>
+                          {bookedRoomBookingError &&
+                            !isBookedRoomBookingMissing && (
+                              <div className="text-error mt-1 text-xs">
+                                Unable to load booking details.
+                              </div>
+                            )}
+                          {isBookedRoomBookingMissing && !isOwner && (
                             <div className="text-error mt-1 text-xs">
-                              Unable to load booking details.
+                              This room booking no longer exists.
                             </div>
                           )}
-                        {isBookedRoomBookingMissing && !isOwner && (
-                          <div className="text-error mt-1 text-xs">
-                            This room booking no longer exists.
-                          </div>
-                        )}
+                        </div>
+                        {isBookedRoomBookingPending ||
+                        isReconcilingMissingBooking ? (
+                          <span className="loading loading-spinner loading-sm text-primary shrink-0" />
+                        ) : bookedRoomBooking ? (
+                          <Tooltip content="Open details">
+                            <button
+                              type="button"
+                              className="text-base-content/50 hover:bg-base-300 flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                              onClick={handleOpenBookingDetails}
+                            >
+                              <span className="icon-[material-symbols--notes] text-3xl" />
+                            </button>
+                          </Tooltip>
+                        ) : null}
                       </div>
-                      {isBookedRoomBookingPending ||
-                      isReconcilingMissingBooking ? (
-                        <span className="loading loading-spinner loading-sm text-primary shrink-0" />
-                      ) : bookedRoomBooking ? (
-                        <Tooltip content="Open details">
-                          <button
-                            type="button"
-                            className="text-base-content/50 hover:bg-base-300 flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
-                            onClick={() => setBookingDetailsOpen(true)}
-                          >
-                            <span className="icon-[material-symbols--notes] text-3xl" />
-                          </button>
-                        </Tooltip>
-                      ) : null}
+                      {hasBookedRoomTimeMismatch && (
+                        <div className="alert alert-warning px-4 py-2 text-sm">
+                          <span>
+                            Booking time differs from the selected meeting time.
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!isOwner && isEditingSelf && (
+                    <div className="hidden gap-2 md:grid">
+                      <button
+                        type="button"
+                        className="btn btn-primary gap-2"
+                        disabled={isSaving}
+                        onClick={handleSaveEditing}
+                      >
+                        {isSaving ? (
+                          <span className="loading loading-spinner loading-sm" />
+                        ) : (
+                          "Save timeslots"
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        disabled={isSaving}
+                        onClick={handleCancelEditing}
+                      >
+                        Cancel
+                      </button>
                     </div>
                   )}
 
@@ -1534,7 +1573,7 @@ export function MeetingPage({
                           </button>
                         </>
                       ) : isEditingSelf ? (
-                        <>
+                        <div className="hidden gap-2 md:grid">
                           <button
                             type="button"
                             className="btn btn-primary gap-2"
@@ -1555,7 +1594,7 @@ export function MeetingPage({
                           >
                             Cancel
                           </button>
-                        </>
+                        </div>
                       ) : (
                         <>
                           {canChangeMeetingTime && (
@@ -1824,6 +1863,14 @@ export function MeetingPage({
             onOpenChange={setRoomModalOpen}
             bookedRoom={event.booked_room}
             meetingName={meetingName}
+            bookingTitle={bookedRoomBooking?.title}
+            isBookingDetailsPending={
+              isBookedRoomBookingPending || isReconcilingMissingBooking
+            }
+            bookingDetailsError={
+              isBookedRoomBookingMissing ? undefined : bookedRoomBookingError
+            }
+            onRetryBookingDetails={refetchBookedRoomBooking}
             selectedTime={event.selected_time}
             selectedTimeLabel={selectedTimeLabel}
             onMeetingUpdated={handleMeetingUpdated}
@@ -1835,6 +1882,7 @@ export function MeetingPage({
             detailsBooking={bookedRoomBooking}
             open={bookingDetailsOpen}
             onOpenChange={handleBookingDetailsOpenChange}
+            detailsTitleOnly
           />
         )}
       </>

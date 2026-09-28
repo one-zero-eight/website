@@ -1,11 +1,11 @@
 import { $when2meet, type when2meetTypes } from "@/api/when2meet";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { Modal } from "@/components/common/Modal.tsx";
+import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { MeetingBookingConfirmationModal } from "./MeetingBookingConfirmationModal.tsx";
 
 function formatRoomDetails(room: when2meetTypes.SchemaAvailableRoom) {
   const details = [
@@ -22,6 +22,10 @@ export function MeetingRoomModal({
   onOpenChange,
   bookedRoom,
   meetingName,
+  bookingTitle,
+  isBookingDetailsPending,
+  bookingDetailsError,
+  onRetryBookingDetails,
   selectedTime,
   selectedTimeLabel,
   onMeetingUpdated,
@@ -31,6 +35,10 @@ export function MeetingRoomModal({
   onOpenChange: (open: boolean) => void;
   bookedRoom?: when2meetTypes.SchemaBookedRoom | null;
   meetingName: string;
+  bookingTitle?: string;
+  isBookingDetailsPending: boolean;
+  bookingDetailsError?: unknown;
+  onRetryBookingDetails: () => void;
   selectedTime?: when2meetTypes.SchemaMeetingTime | null;
   selectedTimeLabel?: string | null;
   onMeetingUpdated: (meeting: when2meetTypes.SchemaEventView) => void;
@@ -39,12 +47,16 @@ export function MeetingRoomModal({
   const { showSuccess, showError, showConfirm } = useToast();
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const availableRoomsQueryOptions = $when2meet.queryOptions(
-    "get",
-    "/meetings/{meeting_ref}/available-rooms",
-    {
-      params: { path: { meeting_ref: meetingRef } },
-    },
+  const availableRoomsQueryOptions = useMemo(
+    () =>
+      $when2meet.queryOptions(
+        "get",
+        "/meetings/{meeting_ref}/available-rooms",
+        {
+          params: { path: { meeting_ref: meetingRef } },
+        },
+      ),
+    [meetingRef],
   );
 
   const {
@@ -75,6 +87,10 @@ export function MeetingRoomModal({
   useEffect(() => {
     if (!open && !confirmationOpen) {
       setSelectedRoomId(null);
+      queryClient.removeQueries({
+        queryKey: availableRoomsQueryOptions.queryKey,
+        exact: true,
+      });
       return;
     }
 
@@ -86,9 +102,31 @@ export function MeetingRoomModal({
     }
 
     setSelectedRoomId(sortedRooms[0]?.id ?? null);
-  }, [confirmationOpen, open, selectedRoomId, sortedRooms]);
+  }, [
+    availableRoomsQueryOptions,
+    confirmationOpen,
+    open,
+    queryClient,
+    selectedRoomId,
+    sortedRooms,
+  ]);
 
   const selectedRoom = sortedRooms.find((room) => room.id === selectedRoomId);
+  const confirmationSlot = useMemo(() => {
+    if (!selectedRoom || !selectedTime) {
+      return undefined;
+    }
+
+    return {
+      room: {
+        id: selectedRoom.id,
+        title: selectedRoom.name,
+        capacity: selectedRoom.capacity,
+      },
+      start: new Date(selectedTime.start),
+      end: new Date(selectedTime.end),
+    };
+  }, [selectedRoom, selectedTime]);
 
   function handleRoomMutationSuccess(
     updatedMeeting: when2meetTypes.SchemaEventView,
@@ -96,9 +134,6 @@ export function MeetingRoomModal({
     message: string,
   ) {
     onMeetingUpdated(updatedMeeting);
-    queryClient.invalidateQueries({
-      queryKey: availableRoomsQueryOptions.queryKey,
-    });
     showSuccess(title, message);
     setConfirmationOpen(false);
     setSelectedRoomId(null);
@@ -147,9 +182,12 @@ export function MeetingRoomModal({
     });
 
   const isMutatingRoom = isBookingRoom || isChangingRoom || isCancelingRoom;
+  const isCurrentBookingDetailsUnavailable =
+    !!bookedRoom &&
+    (isBookingDetailsPending || !!bookingDetailsError || !bookingTitle);
 
   function handleNext() {
-    if (!selectedRoom || !selectedTime) {
+    if (!selectedRoom || !selectedTime || isCurrentBookingDetailsUnavailable) {
       return;
     }
 
@@ -159,14 +197,14 @@ export function MeetingRoomModal({
     onOpenChange(false);
   }
 
-  function handleConfirmRoom() {
+  function handleConfirmRoom(title: string) {
     if (!selectedRoom) {
       return;
     }
 
     const payload = {
       params: { path: { meeting_ref: meetingRef } },
-      body: { room_id: selectedRoom.id },
+      body: { room_id: selectedRoom.id, title },
     };
 
     if (bookedRoom) {
@@ -221,6 +259,28 @@ export function MeetingRoomModal({
         {selectedTimeLabel && (
           <p className="text-base-content/70 text-sm">{selectedTimeLabel}</p>
         )}
+
+        {bookedRoom && isBookingDetailsPending ? (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="loading loading-spinner loading-sm text-primary" />
+            Loading current booking details...
+          </div>
+        ) : bookedRoom && (bookingDetailsError || !bookingTitle) ? (
+          <div className="alert alert-error">
+            <span>
+              {bookingDetailsError
+                ? formatApiErrorMessage(bookingDetailsError)
+                : "Unable to load current booking details."}
+            </span>
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={onRetryBookingDetails}
+            >
+              Retry
+            </button>
+          </div>
+        ) : null}
 
         {isPending ? (
           <div className="flex min-h-48 items-center justify-center">
@@ -297,6 +357,7 @@ export function MeetingRoomModal({
               !selectedTime ||
               isPending ||
               isError ||
+              isCurrentBookingDetailsUnavailable ||
               isMutatingRoom
             }
             onClick={handleNext}
@@ -306,15 +367,15 @@ export function MeetingRoomModal({
         </div>
       </Modal>
 
-      <MeetingBookingConfirmationModal
+      <BookingModal
+        newSlot={confirmationSlot}
         open={confirmationOpen}
         onOpenChange={handleConfirmationOpenChange}
-        meetingName={meetingName}
-        room={selectedRoom}
-        selectedTime={selectedTime}
-        isPending={isBookingRoom || isChangingRoom}
-        error={bookedRoom ? changeRoomError : bookRoomError}
-        onConfirm={handleConfirmRoom}
+        initialTitle={bookedRoom ? bookingTitle : meetingName}
+        fixedSchedule
+        isNewBookingSubmitting={isBookingRoom || isChangingRoom}
+        newBookingSubmitError={bookedRoom ? changeRoomError : bookRoomError}
+        onNewBookingSubmit={handleConfirmRoom}
       />
     </>
   );
