@@ -3,7 +3,6 @@ import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { AcademicCalendarWidget } from "@/components/dashboard/AcademicCalendarWidget.tsx";
 import { AccountWidget } from "@/components/dashboard/AccountWidget.tsx";
 import { AdvWidget } from "@/components/dashboard/AdvWidget.tsx";
-import { CountdownWidget } from "@/components/dashboard/CountdownWidget.tsx";
 import { PwaWidget } from "@/components/dashboard/PwaWidget.tsx";
 import { SportsWidget } from "@/components/dashboard/SportsWidget.tsx";
 import { MusicRoomWidget } from "@/components/dashboard/MusicRoomWidget.tsx";
@@ -34,7 +33,6 @@ export function DashboardPage() {
         <AcademicCalendarWidget />
         <SportsWidget />
         <MusicRoomWidget />
-        <CountdownWidget />
         <PwaWidget />
         <AdvWidget />
       </div>
