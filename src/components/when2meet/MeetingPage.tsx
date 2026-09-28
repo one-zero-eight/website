@@ -1346,16 +1346,41 @@ export function MeetingPage({
                       </span>
                     </button>
                   )}
-                  {currentUserId && !isArchived && !isEditingSelf && (
+                  {currentUserId && !isArchived && (
                     <div className="hidden flex-wrap gap-2 md:flex">
-                      <button
-                        type="button"
-                        className="btn btn-primary gap-2"
-                        disabled={isChoosingMeetingTime}
-                        onClick={handleToggleAvailability}
-                      >
-                        Change my availability
-                      </button>
+                      {isEditingSelf ? (
+                        <>
+                          <button
+                            type="button"
+                            className="btn btn-ghost"
+                            disabled={isSaving}
+                            onClick={handleCancelEditing}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-primary gap-2"
+                            disabled={isSaving}
+                            onClick={handleSaveEditing}
+                          >
+                            {isSaving ? (
+                              <span className="loading loading-spinner loading-sm" />
+                            ) : (
+                              "Save timeslots"
+                            )}
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn-primary gap-2"
+                          disabled={isChoosingMeetingTime}
+                          onClick={handleToggleAvailability}
+                        >
+                          Change my availability
+                        </button>
+                      )}
                     </div>
                   )}
                 </>
@@ -1504,31 +1529,6 @@ export function MeetingPage({
                     </div>
                   )}
 
-                  {!isOwner && isEditingSelf && (
-                    <div className="hidden gap-2 md:grid">
-                      <button
-                        type="button"
-                        className="btn btn-primary gap-2"
-                        disabled={isSaving}
-                        onClick={handleSaveEditing}
-                      >
-                        {isSaving ? (
-                          <span className="loading loading-spinner loading-sm" />
-                        ) : (
-                          "Save timeslots"
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-ghost"
-                        disabled={isSaving}
-                        onClick={handleCancelEditing}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  )}
-
                   {isOwner && (
                     <div className="grid gap-2">
                       {isChoosingMeetingTime ? (
@@ -1572,30 +1572,7 @@ export function MeetingPage({
                             Cancel
                           </button>
                         </>
-                      ) : isEditingSelf ? (
-                        <div className="hidden gap-2 md:grid">
-                          <button
-                            type="button"
-                            className="btn btn-primary gap-2"
-                            disabled={isSaving}
-                            onClick={handleSaveEditing}
-                          >
-                            {isSaving ? (
-                              <span className="loading loading-spinner loading-sm" />
-                            ) : (
-                              "Save timeslots"
-                            )}
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-ghost"
-                            disabled={isSaving}
-                            onClick={handleCancelEditing}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
+                      ) : !isEditingSelf ? (
                         <>
                           {canChangeMeetingTime && (
                             <button
@@ -1624,7 +1601,7 @@ export function MeetingPage({
                             </button>
                           )}
                         </>
-                      )}
+                      ) : null}
                       {!isArchived && !isChoosingMeetingTime && (
                         <div
                           className={cn(
