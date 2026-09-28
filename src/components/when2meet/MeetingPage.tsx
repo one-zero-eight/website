@@ -79,6 +79,7 @@ export function MeetingPage({
   const [draftSlots, setDraftSlots] = useState<Set<string>>(new Set());
   const [participantSearch, setParticipantSearch] = useState("");
   const [hoveredSlotKey, setHoveredSlotKey] = useState<string | null>(null);
+  const [isBestTimeEnabled, setIsBestTimeEnabled] = useState(false);
   const [minParticipants, setMinParticipants] = useState(1);
   const [isChoosingMeetingTime, setIsChoosingMeetingTime] = useState(false);
   const [meetingTimeSelectionSlots, setMeetingTimeSelectionSlots] = useState<
@@ -95,9 +96,11 @@ export function MeetingPage({
   const [isMeetingTimeRejected, setIsMeetingTimeRejected] = useState(false);
   const [roomModalOpen, setRoomModalOpen] = useState(false);
   const [bookingDetailsOpen, setBookingDetailsOpen] = useState(false);
+  const [isShareLinkCopied, setIsShareLinkCopied] = useState(false);
   const hasAutoStartedEditingRef = useRef(false);
   const hasInitializedSetupRef = useRef(false);
   const reconciledMissingBookingRef = useRef<string | null>(null);
+  const shareLinkCopiedTimerRef = useRef<number | null>(null);
 
   const meetingQueryKey = $when2meet.queryOptions(
     "get",
@@ -558,7 +561,7 @@ export function MeetingPage({
   ]);
 
   const highlightBestIntersection =
-    minParticipants > 1 && !needsSetup && slotAvailability.slotKeys.size > 0;
+    isBestTimeEnabled && !needsSetup && slotAvailability.slotKeys.size > 0;
 
   const meetingDateIds = useMemo(() => parsedSlots?.dates ?? [], [parsedSlots]);
 
@@ -586,19 +589,18 @@ export function MeetingPage({
   }, [showCalendarOverlay, draftSlots, calendarSlotEvents]);
 
   useEffect(() => {
-    if (slotAvailability.maxCount === 0) {
+    if (!isBestTimeEnabled) {
       return;
     }
 
-    if (minParticipants < 1) {
+    if (slotAvailability.maxCount === 0) {
+      setIsBestTimeEnabled(false);
       setMinParticipants(1);
       return;
     }
 
-    if (minParticipants > slotAvailability.maxCount) {
-      setMinParticipants(slotAvailability.maxCount);
-    }
-  }, [slotAvailability.maxCount, minParticipants]);
+    setMinParticipants(slotAvailability.maxCount);
+  }, [isBestTimeEnabled, slotAvailability.maxCount]);
 
   const filteredUsers = useMemo(() => {
     const trimmedSearch = participantSearch.trim().toLowerCase();
@@ -756,14 +758,6 @@ export function MeetingPage({
     setDraftSlots(new Set());
   }, [currentUser, currentUserId, event, needsSetup]);
 
-  function handleClearAllSlots() {
-    if (editingUserId !== currentUserId) {
-      return;
-    }
-
-    setDraftSlots(new Set());
-  }
-
   function handleSaveEditing() {
     if (!currentUserId || editingUserId !== currentUserId) {
       return;
@@ -780,10 +774,6 @@ export function MeetingPage({
         onSuccess: () => {
           setEditingUserId(null);
           setDraftSlots(new Set());
-          showSuccess(
-            "Availability saved",
-            "Your timeslots were saved successfully.",
-          );
         },
       },
     );
@@ -886,6 +876,21 @@ export function MeetingPage({
     }
 
     setViewedUserIds(null);
+  }
+
+  function handleToggleBestTime() {
+    if (isBestTimeEnabled) {
+      setIsBestTimeEnabled(false);
+      setMinParticipants(1);
+      return;
+    }
+
+    if (slotAvailability.maxCount === 0) {
+      return;
+    }
+
+    setMinParticipants(slotAvailability.maxCount);
+    setIsBestTimeEnabled(true);
   }
 
   async function handleDeleteParticipant(userId: string) {
@@ -1070,11 +1075,27 @@ export function MeetingPage({
         await navigator.clipboard.writeText(shareUrl);
       }
 
-      showSuccess("Link copied", "Meeting link copied to clipboard.");
+      if (shareLinkCopiedTimerRef.current !== null) {
+        window.clearTimeout(shareLinkCopiedTimerRef.current);
+      }
+
+      setIsShareLinkCopied(true);
+      shareLinkCopiedTimerRef.current = window.setTimeout(() => {
+        setIsShareLinkCopied(false);
+        shareLinkCopiedTimerRef.current = null;
+      }, 3000);
     } catch {
       showError("Error", "Could not copy link to clipboard.");
     }
   }
+
+  useEffect(() => {
+    return () => {
+      if (shareLinkCopiedTimerRef.current !== null) {
+        window.clearTimeout(shareLinkCopiedTimerRef.current);
+      }
+    };
+  }, []);
 
   async function handleDeleteMeeting() {
     const confirmed = await showConfirm({
@@ -1151,7 +1172,9 @@ export function MeetingPage({
       : undefined,
     selectionOnly: needsSetup,
     hideHint: !!currentUser && (isEditingSelf || !isOwner),
-    bestIntersectionSlotKeys: slotAvailability.slotKeys,
+    bestIntersectionSlotKeys: isBestTimeEnabled
+      ? slotAvailability.slotKeys
+      : undefined,
     hoveredSlotKey,
     onHoveredSlotKeyChange: setHoveredSlotKey,
     intervalSelectionMode: isChoosingMeetingTime,
@@ -1214,11 +1237,27 @@ export function MeetingPage({
               {isOwner && !needsSetup && (
                 <button
                   type="button"
-                  className="btn btn-outline btn-sm shrink-0 gap-1 md:hidden"
+                  className="btn btn-ghost btn-sm shrink-0 md:hidden"
                   onClick={handleShareLink}
                 >
-                  <span className="icon-[material-symbols--share-outline] text-base" />
-                  Share link
+                  <span className="relative size-5">
+                    <span
+                      className={cn(
+                        "icon-[material-symbols--share-outline] absolute inset-0 text-xl transition-all duration-200 ease-out",
+                        isShareLinkCopied
+                          ? "scale-75 opacity-0"
+                          : "scale-100 opacity-100",
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "icon-[material-symbols--check-rounded] absolute inset-0 text-xl transition-all duration-200 ease-out",
+                        isShareLinkCopied
+                          ? "scale-100 opacity-100"
+                          : "scale-75 opacity-0",
+                      )}
+                    />
+                  </span>
                 </button>
               )}
             </div>
@@ -1254,11 +1293,36 @@ export function MeetingPage({
                   {isOwner && (
                     <button
                       type="button"
-                      className="btn btn-outline hidden gap-2 md:inline-flex"
+                      className={cn(
+                        "btn hidden md:inline-flex",
+                        isShareLinkCopied ? "btn-ghost" : "btn-outline",
+                      )}
                       onClick={handleShareLink}
                     >
-                      <span className="icon-[material-symbols--share-outline] text-lg" />
-                      Share link
+                      <span className="inline-grid">
+                        <span
+                          className={cn(
+                            "col-start-1 row-start-1 inline-flex items-center gap-2 transition-all duration-200 ease-out",
+                            isShareLinkCopied
+                              ? "scale-95 opacity-0"
+                              : "scale-100 opacity-100",
+                          )}
+                        >
+                          <span className="icon-[material-symbols--share-outline] text-lg" />
+                          Share link
+                        </span>
+                        <span
+                          className={cn(
+                            "col-start-1 row-start-1 inline-flex items-center justify-center gap-2 transition-all duration-200 ease-out",
+                            isShareLinkCopied
+                              ? "scale-100 opacity-100"
+                              : "scale-95 opacity-0",
+                          )}
+                        >
+                          <span className="icon-[material-symbols--check-rounded] text-lg" />
+                          Copied
+                        </span>
+                      </span>
                     </button>
                   )}
                   {currentUserId && !isArchived && (
@@ -1272,14 +1336,6 @@ export function MeetingPage({
                             onClick={handleCancelEditing}
                           >
                             Cancel
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-error"
-                            disabled={isSaving || draftSlots.size === 0}
-                            onClick={handleClearAllSlots}
-                          >
-                            Clear all
                           </button>
                         </>
                       )}
@@ -1334,35 +1390,62 @@ export function MeetingPage({
               <aside className="grid h-fit w-full min-w-0 gap-3">
                 <div className="bg-base-100 border-base-300 rounded-box flex h-fit w-full min-w-0 flex-col border p-4">
                   <h2 className="mb-3 text-lg font-semibold">Options</h2>
-                  <div className="mb-3 grid gap-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-base font-medium">
-                        Minimum participants
-                      </span>
-                      <span className="text-base-content/70 text-base tabular-nums">
-                        {minParticipants}+
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min={1}
-                      max={Math.max(slotAvailability.maxCount, 1)}
-                      step={1}
-                      value={Math.min(
-                        minParticipants,
-                        Math.max(slotAvailability.maxCount, 1),
+                  <button
+                    type="button"
+                    className={cn(
+                      "btn mb-3 w-full justify-center gap-2",
+                      isBestTimeEnabled ? "btn-ghost" : "btn-outline",
+                    )}
+                    disabled={slotAvailability.maxCount === 0}
+                    onClick={handleToggleBestTime}
+                  >
+                    <span>
+                      {isBestTimeEnabled ? "Hide best time" : "Show best time"}
+                    </span>
+                    <span
+                      className={cn(
+                        "icon-[material-symbols--keyboard-arrow-down-rounded] text-xl transition-transform duration-200 ease-out",
+                        isBestTimeEnabled && "rotate-180",
                       )}
-                      disabled={slotAvailability.maxCount === 0}
-                      className="range range-primary range-sm w-full"
-                      onChange={(rangeEvent) =>
-                        setMinParticipants(Number(rangeEvent.target.value))
-                      }
                     />
-                    <div className="text-base-content/60 flex justify-between text-sm tabular-nums">
-                      <span>1 (all)</span>
-                      <span>{slotAvailability.maxCount || 1}</span>
+                  </button>
+
+                  {isBestTimeEnabled && (
+                    <div className="mb-3 grid gap-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-base font-medium">
+                          Minimum participants
+                        </span>
+                        <span className="text-base-content/70 text-base tabular-nums">
+                          {minParticipants}+
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={1}
+                        max={Math.max(slotAvailability.maxCount, 1)}
+                        step={1}
+                        value={Math.min(
+                          minParticipants,
+                          Math.max(slotAvailability.maxCount, 1),
+                        )}
+                        disabled={users.length <= 1}
+                        className={cn(
+                          "range range-sm w-full",
+                          users.length <= 1
+                            ? "range-neutral cursor-not-allowed opacity-50"
+                            : "range-primary",
+                        )}
+                        onChange={(rangeEvent) =>
+                          setMinParticipants(Number(rangeEvent.target.value))
+                        }
+                      />
+                      <div className="text-base-content/60 flex justify-between text-sm tabular-nums">
+                        <span>1</span>
+                        <span>{slotAvailability.maxCount}</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {selectedTimeLabel && (
                     <span className="text-secondary mb-3 inline-flex items-center gap-1 text-sm md:hidden">
@@ -1708,15 +1791,11 @@ export function MeetingPage({
                 ? handleToggleAvailability
                 : undefined
             }
-            onClearAvailability={
-              currentUserId && !needsSetup ? handleClearAllSlots : undefined
-            }
             onCancelAvailability={
               currentUserId && !needsSetup ? handleCancelEditing : undefined
             }
             isEditingAvailability={isEditingSelf}
             isSavingAvailability={isSaving}
-            canClearAvailability={draftSlots.size > 0}
             selectedSlotDetails={
               !needsSetup &&
               !isEditingSelf &&

@@ -4,7 +4,10 @@ import {
   getSlotHeatmapAppearanceColorblindSafe,
   getSlotKeysBetween,
 } from "./slots.ts";
-import { getBestIntersection } from "./best-slot.ts";
+import {
+  getBestIntersection,
+  getIntersectionAtMinParticipants,
+} from "./best-slot.ts";
 import {
   countExplicitSlotAvailability,
   getParticipantsWithExplicitSlot,
@@ -119,6 +122,47 @@ assert(
 assert(
   bestIntersection.slotKeys.size === 2,
   "only tied slots are marked as best intersection",
+);
+
+const strictIntersection = getIntersectionAtMinParticipants(
+  users,
+  ["2026-07-16"],
+  ["09:00", "09:30", "10:00"],
+  allowedSlots,
+  viewedUserIds,
+  2,
+);
+assert(
+  strictIntersection.slotKeys.size === 2,
+  "maximum participant threshold keeps all tied best slots",
+);
+
+const allAvailableSlots = getIntersectionAtMinParticipants(
+  users,
+  ["2026-07-16"],
+  ["09:00", "09:30", "10:00"],
+  allowedSlots,
+  viewedUserIds,
+  1,
+);
+assert(
+  allAvailableSlots.slotKeys.has("2026-07-16_09:00") &&
+    allAvailableSlots.slotKeys.has("2026-07-16_10:00") &&
+    !allAvailableSlots.slotKeys.has("2026-07-16_09:30"),
+  "minimum participant threshold includes every non-empty slot",
+);
+
+const emptyIntersection = getIntersectionAtMinParticipants(
+  [],
+  ["2026-07-16"],
+  ["09:00"],
+  new Set(["2026-07-16_09:00"]),
+  new Set(),
+  1,
+);
+assert(
+  emptyIntersection.maxCount === 0 && emptyIntersection.slotKeys.size === 0,
+  "empty availability has no matching slots",
 );
 
 const usersWithNonResponder = [

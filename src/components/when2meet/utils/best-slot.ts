@@ -102,12 +102,8 @@ export function getIntersectionAtMinParticipants(
 
   const slotKeys = new Set<string>();
 
-  if (minParticipants <= 1) {
-    return { slotKeys: new Set(), maxCount };
-  }
-
   for (const [slotKey, count] of counts) {
-    if (count >= minParticipants) {
+    if (count > 0 && count >= Math.max(minParticipants, 1)) {
       slotKeys.add(slotKey);
     }
   }
