@@ -7,7 +7,7 @@ import { PwaWidget } from "@/components/dashboard/PwaWidget.tsx";
 import { SportsWidget } from "@/components/dashboard/SportsWidget.tsx";
 import { MusicRoomWidget } from "@/components/dashboard/MusicRoomWidget.tsx";
 import { TelegramReconnectWidget } from "@/components/dashboard/TelegramReconnectWidget.tsx";
-import { Link } from "@tanstack/react-router";
+import { CalendarWidget } from "./CalendarWidget.tsx";
 import Links from "./links/Links.tsx";
 
 export function DashboardPage() {
@@ -31,6 +31,7 @@ export function DashboardPage() {
       <TelegramReconnectWidget />
       <div className="grid min-w-0 gap-4 @4xl/content:grid-cols-2">
         <SportsWidget />
+        <CalendarWidget />
       </div>
       <div className="grid min-w-0 gap-4 @4xl/content:grid-cols-2 @7xl/content:grid-cols-3">
         <AcademicCalendarWidget />
@@ -38,14 +39,6 @@ export function DashboardPage() {
         <PwaWidget />
         <AdvWidget />
       </div>
-
-      <Link
-        to="/calendar"
-        className="text-primary flex w-fit items-center font-medium hover:underline"
-      >
-        <span className="icon-[material-symbols--arrow-forward] mr-1 text-xl" />
-        Go to calendar
-      </Link>
 
       <Links />
     </div>
