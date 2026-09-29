@@ -1,13 +1,8 @@
-import type { when2meetTypes } from "@/api/when2meet";
 import type { MeetingUser } from "../types.ts";
-import { parseBackendSlots } from "./api-slots.ts";
-import {
-  countExplicitSlotAvailability,
-  participantsToUsers,
-} from "./participants.ts";
+import { countExplicitSlotAvailability } from "./participants.ts";
 import { getSlotKey } from "./slots.ts";
 
-export type BestIntersectionResult = {
+type BestIntersectionResult = {
   slotKeys: Set<string>;
   maxCount: number;
 };
@@ -109,56 +104,4 @@ export function getIntersectionAtMinParticipants(
   }
 
   return { slotKeys, maxCount };
-}
-
-export function getMeetingBookingIntersection(
-  users: MeetingUser[],
-  dates: string[],
-  timeSlots: string[],
-  allowedSlots: Set<string>,
-) {
-  const viewedUserIds = new Set(users.map((user) => user.id));
-  const { slotKeys, maxCount } = getBestIntersection(
-    users,
-    dates,
-    timeSlots,
-    allowedSlots,
-    viewedUserIds,
-  );
-
-  return {
-    slotKeys: [...slotKeys].sort((a, b) => a.localeCompare(b)),
-    maxCount,
-  };
-}
-
-export function getBestMeetingSlotKey(
-  event: when2meetTypes.SchemaEventView,
-  allowedSlotKeys?: Set<string>,
-) {
-  const parsed = parseBackendSlots(event.slots);
-  const users = participantsToUsers(event.participants);
-  const allowedSlots =
-    allowedSlotKeys && allowedSlotKeys.size > 0
-      ? allowedSlotKeys
-      : new Set(parsed.slotKeys);
-
-  if (parsed.dates.length === 0 || parsed.timeSlots.length === 0) {
-    return null;
-  }
-
-  const viewedUserIds = new Set(users.map((user) => user.id));
-  const { slotKeys, maxCount } = getBestIntersection(
-    users,
-    parsed.dates,
-    parsed.timeSlots,
-    allowedSlots,
-    viewedUserIds,
-  );
-
-  if (maxCount <= 0) {
-    return null;
-  }
-
-  return [...slotKeys].sort((a, b) => a.localeCompare(b))[0] ?? null;
 }

@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
-import type { Availability, TimeRangeSelection } from "./dates.ts";
-import { formatHour, groupDatesByYearMonth, parseHour } from "./dates.ts";
+import { formatHour, parseHour } from "./dates.ts";
 import type { MeetingDate } from "../types.ts";
 
 export function getSlotKey(dateId: string, time: string) {
@@ -213,125 +212,9 @@ export function getCurrentTimeGridIndicator(
   return null;
 }
 
-export function formatSlotKeyLabel(
-  slotKey: string,
-  formattedDates: MeetingDate[],
-) {
-  const { dateId, time } = parseSlotKey(slotKey);
-  const date = formattedDates.find((meetingDate) => meetingDate.id === dateId);
-
-  return `${date?.monthDay ?? dateId}, ${time}`;
-}
-
-export function slotKeysToAvailability(slotKeys: Iterable<string>) {
-  const slotsByDate = new Map<string, string[]>();
-
-  for (const slotKey of slotKeys) {
-    const { dateId, time } = parseSlotKey(slotKey);
-    const times = slotsByDate.get(dateId) ?? [];
-    times.push(time);
-    slotsByDate.set(dateId, times);
-  }
-
-  const availability: Availability = {};
-
-  for (const [dateId, times] of slotsByDate) {
-    const sortedTimes = [...times].sort((a, b) => a.localeCompare(b));
-    const ranges: TimeRangeSelection[] = [];
-
-    let rangeStart = sortedTimes[0];
-    let previousMinutes = timeToMinutes(sortedTimes[0]);
-
-    for (let index = 1; index <= sortedTimes.length; index++) {
-      const currentTime = sortedTimes[index];
-      const currentMinutes = currentTime
-        ? timeToMinutes(currentTime)
-        : Number.NaN;
-
-      if (currentMinutes - previousMinutes === 30) {
-        previousMinutes = currentMinutes;
-        continue;
-      }
-
-      ranges.push({
-        start: rangeStart,
-        end: minutesToTime(previousMinutes + 30),
-      });
-
-      if (!currentTime) {
-        break;
-      }
-
-      rangeStart = currentTime;
-      previousMinutes = currentMinutes;
-    }
-
-    const [yearStr, monthStr, dayStr] = dateId.split("-");
-    const year = Number(yearStr);
-    const month = Number(monthStr);
-    const day = Number(dayStr);
-
-    if (!availability[year]) {
-      availability[year] = {};
-    }
-
-    if (!availability[year][month]) {
-      availability[year][month] = {};
-    }
-
-    availability[year][month][day] = ranges;
-  }
-
-  return availability;
-}
-
-export function availabilityToSlotKeys(
-  availability: Availability,
-  timeRange: TimeRangeSelection,
-) {
-  const slotKeys = new Set<string>();
-  const allowedSlots = new Set(
-    generateTimeSlots(timeRange.start, timeRange.end),
-  );
-
-  for (const year in availability) {
-    for (const month in availability[year]) {
-      for (const day in availability[year][month]) {
-        const dateId = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        const ranges = availability[year][month][day];
-
-        for (const range of ranges) {
-          const rangeSlots = generateTimeSlots(range.start, range.end);
-
-          for (const time of rangeSlots) {
-            if (allowedSlots.has(time)) {
-              slotKeys.add(getSlotKey(dateId, time));
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return slotKeys;
-}
-
-export function createBaseAvailability(
-  dates: Set<string>,
-  timeRange: TimeRangeSelection,
-) {
-  return groupDatesByYearMonth(dates, timeRange);
-}
-
 function timeToMinutes(time: string) {
   const [hourStr, minuteStr] = time.split(":");
   return Number(hourStr) * 60 + Number(minuteStr);
-}
-
-function minutesToTime(totalMinutes: number) {
-  const hour = Math.floor(totalMinutes / 60);
-  const minute = totalMinutes % 60;
-  return formatHour(hour, minute);
 }
 
 export function getSlotAvailabilityRatio(count: number, maxCount: number) {
@@ -346,7 +229,7 @@ export function getSlotAvailabilityRatio(count: number, maxCount: number) {
  * Maximum opacity for heatmap slot fills. Kept below 100% so outlines and
  * labels remain visible over the brightest heatmap slot.
  */
-export const MAX_HEATMAP_OPACITY_PERCENT = 75;
+const MAX_HEATMAP_OPACITY_PERCENT = 75;
 
 export function getSlotHeatmapAppearance(
   count: number,

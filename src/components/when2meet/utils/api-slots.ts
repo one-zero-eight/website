@@ -125,12 +125,12 @@ export function buildSlotsFromDatesAndRange(
   return slots.sort((a, b) => a.localeCompare(b));
 }
 
-export const FULL_DAY_TIME_RANGE = {
+const FULL_DAY_TIME_RANGE = {
   start: "00:00",
   end: "24:00",
 } as const;
 
-export const FULL_DAY_SLOT_INTERVAL_MINUTES = 60;
+const FULL_DAY_SLOT_INTERVAL_MINUTES = 60;
 
 export function getFullDayTimeSlots() {
   return generateTimeSlots(

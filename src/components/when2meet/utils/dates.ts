@@ -1,19 +1,3 @@
-export type Event = {
-  id: string;
-  name: string;
-  password: string | null;
-  timezone: string;
-  createdAt: Date;
-  expiresAt: Date;
-  baseAvailability: Availability;
-  participantsAvailability: ParticipantAvailability[];
-};
-
-export type ParticipantAvailability = {
-  userName: string;
-  availability: Availability;
-};
-
 export type CalendarItem = {
   date: Date;
   hidden: boolean;
@@ -24,73 +8,6 @@ export type TimeRangeSelection = {
   start: string;
   end: string;
 }; // e.g. ['09:00', '12:30']
-
-export type DayAvailability = Record<number, TimeRangeSelection[]>;
-export type MonthAvailability = Record<number, DayAvailability>;
-export type Availability = Record<number, MonthAvailability>;
-
-/**
- * Converts strings of ISO dates (YYYY-MM-DD) to JS object, grouping days
- * @param date Set of strings of ISO dates (YYYY-MM-DD)
- * @param time (optional) TimeRangeSelection object
- * @returns GroupedDates object which contains days grouped by months and years
- */
-export function groupDatesByYearMonth(
-  dates: Set<string>,
-  time: TimeRangeSelection | null = null,
-): Availability {
-  const result: Availability = {};
-
-  dates.forEach((dateStr) => {
-    const [yearStr, monthStr, dayStr] = dateStr.split("-");
-    const year = Number(yearStr);
-    const month = Number(monthStr);
-    const day = Number(dayStr);
-
-    if (!result[year]) result[year] = {};
-    if (!result[year][month]) result[year][month] = {};
-    if (!result[year][month][day]) result[year][month][day] = [];
-
-    // Push the provided time range (or an empty default)
-    if (time) {
-      result[year][month][day].push({ start: time.start, end: time.end });
-    }
-  });
-
-  // Optional: sort day keys numerically for each month
-  for (const year in result) {
-    for (const month in result[year]) {
-      const sortedDays = Object.keys(result[year][month])
-        .map(Number)
-        .sort((a, b) => a - b);
-
-      const sortedObj: Record<number, TimeRangeSelection[]> = {};
-      sortedDays.forEach((d) => {
-        sortedObj[d] = result[year][month][d];
-      });
-      result[year][month] = sortedObj;
-    }
-  }
-
-  return result;
-}
-
-/**
- * Returns latest date from set of strings of ISO dates (YYYY-MM-DD)
- * @param dates Set of strings of ISO dates (YYYY-MM-DD)
- * @returns Date object with the latest date or tommorow
- */
-export function getLatestDate(dates: Set<string>): Date {
-  if (dates.size === 0) {
-    // Return one hour from now if no dates are provided
-    return new Date(Date.now() + 60 * 60 * 1000);
-  }
-
-  const latestStr = [...dates].sort((a, b) => a.localeCompare(b)).at(-1);
-  return latestStr
-    ? new Date(latestStr)
-    : new Date(Date.now() + 60 * 60 * 1000);
-}
 
 /**
  * Generates month for calendar based on year and month
@@ -142,29 +59,6 @@ export function generateCalendarMonth(
   }
 
   return calendar;
-}
-
-/**
- * Checks wether groupedDates has empty days or  not
- * @param groupedDates
- * @returns true if there are empty days, otherwise returns false
- */
-export function hasEmptyDays(groupedDates: Availability | undefined | null) {
-  if (!groupedDates) return false;
-
-  for (const year in groupedDates) {
-    const months = groupedDates[+year];
-    for (const month in months) {
-      const days = months[+month];
-      for (const day in days) {
-        const selections = days[+day];
-        if (!selections || selections.length === 0) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
 }
 
 /**
