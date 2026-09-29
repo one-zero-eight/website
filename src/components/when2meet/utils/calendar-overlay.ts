@@ -1,7 +1,7 @@
 import { addDays } from "@fullcalendar/core/internal";
 import { IcalExpander } from "@/components/calendar/iCalendarPlugin/ical-expander/IcalExpander";
 import ICAL from "ical.js";
-import { slotKeyToDateRange } from "./api-slots.ts";
+import { getTimeSlotDurationMinutes, slotKeyToDateRange } from "./api-slots.ts";
 import { getSlotKey } from "./slots.ts";
 
 export type PersonalCalendarEvent =
@@ -187,6 +187,7 @@ export function buildCalendarSlotOverlay(
   allowedSlots?: Set<string>,
 ) {
   const slotEvents = new Map<string, string[]>();
+  const durationMinutes = getTimeSlotDurationMinutes(timeSlots);
 
   for (const dateId of dateIds) {
     for (const time of timeSlots) {
@@ -196,7 +197,7 @@ export function buildCalendarSlotOverlay(
         continue;
       }
 
-      const { start, end } = slotKeyToDateRange(slotKey);
+      const { start, end } = slotKeyToDateRange(slotKey, durationMinutes);
       const titles: string[] = [];
 
       for (const event of events) {

@@ -92,7 +92,7 @@ export function MeetingMobileBar({
 
   if (onSaveSetup) {
     return createPortal(
-      <div className="border-base-300 bg-base-200 fixed bottom-12 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b p-4 md:hidden">
+      <div className="border-base-300 bg-base-200 fixed bottom-12 left-0 z-10 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b p-4 md:hidden">
         {onClearSetup && (
           <button
             type="button"
@@ -128,7 +128,7 @@ export function MeetingMobileBar({
     <div
       data-mobile-bar
       className={cn(
-        "border-base-300 bg-base-200 fixed bottom-12 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b px-4 md:hidden",
+        "border-base-300 bg-base-200 fixed bottom-12 left-0 z-10 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b px-4 md:hidden",
         selectedSlotDetails
           ? hasPrimaryActions
             ? "pt-3 pb-4"

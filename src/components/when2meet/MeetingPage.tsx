@@ -30,7 +30,6 @@ import {
   slotKeysToBackendSlots,
   slotKeysToMeetingTime,
 } from "./utils/api-slots.ts";
-import { getCalendarConflictSlotKeys } from "./utils/calendar-overlay.ts";
 import { getIntersectionAtMinParticipants } from "./utils/best-slot.ts";
 import { formatMeetingTimeRange } from "./utils/meeting-time.ts";
 import {
@@ -79,6 +78,12 @@ export function MeetingPage({
   const [draftSlots, setDraftSlots] = useState<Set<string>>(new Set());
   const [participantSearch, setParticipantSearch] = useState("");
   const [hoveredSlotKey, setHoveredSlotKey] = useState<string | null>(null);
+  const [showCalendarEventsInEditor, setShowCalendarEventsInEditor] =
+    useState(true);
+  const [showOtherParticipantsInEditor, setShowOtherParticipantsInEditor] =
+    useState(false);
+  const [showSelectedMeetingTimeInEditor, setShowSelectedMeetingTimeInEditor] =
+    useState(true);
   const [isBestTimeEnabled, setIsBestTimeEnabled] = useState(false);
   const [minParticipants, setMinParticipants] = useState(1);
   const [isChoosingMeetingTime, setIsChoosingMeetingTime] = useState(false);
@@ -587,6 +592,7 @@ export function MeetingPage({
   const meetingDateIds = useMemo(() => parsedSlots?.dates ?? [], [parsedSlots]);
 
   const isEditingSelf = editingUserId === currentUserId;
+  const showMeetingResults = !isEditingSelf;
 
   const {
     slotEvents: calendarSlotEvents,
@@ -600,14 +606,6 @@ export function MeetingPage({
   });
 
   const showCalendarOverlay = (isEditingSelf || needsSetup) && hasCalendarData;
-
-  const calendarConflictSlotKeys = useMemo(() => {
-    if (!showCalendarOverlay) {
-      return new Set<string>();
-    }
-
-    return getCalendarConflictSlotKeys(draftSlots, calendarSlotEvents);
-  }, [showCalendarOverlay, draftSlots, calendarSlotEvents]);
 
   useEffect(() => {
     if (!isBestTimeEnabled) {
@@ -673,20 +671,39 @@ export function MeetingPage({
     hoveredSlotKey !== null && editingUserId === null && !needsSetup;
 
   const isHoveringCalendarSlot =
-    isEditingSelf && hoveredSlotKey !== null && showCalendarOverlay;
+    isEditingSelf &&
+    hoveredSlotKey !== null &&
+    (showCalendarEventsInEditor || showOtherParticipantsInEditor);
 
   const isHoveringAllowedSlot = isHoveringSlot && !isHoveredSlotDisabled;
 
   const hoveredCalendarEvents = useMemo(() => {
-    if (!hoveredSlotKey || !showCalendarOverlay) {
+    if (
+      !hoveredSlotKey ||
+      !showCalendarOverlay ||
+      !showCalendarEventsInEditor
+    ) {
       return [];
     }
 
     return calendarSlotEvents.get(hoveredSlotKey) ?? [];
-  }, [hoveredSlotKey, showCalendarOverlay, calendarSlotEvents]);
+  }, [
+    calendarSlotEvents,
+    hoveredSlotKey,
+    showCalendarEventsInEditor,
+    showCalendarOverlay,
+  ]);
 
   function userHasHoveredSlot(user: MeetingUser) {
     if (!hoveredSlotKey) {
+      return false;
+    }
+
+    if (
+      isEditingSelf &&
+      !showOtherParticipantsInEditor &&
+      user.id !== editingUserId
+    ) {
       return false;
     }
 
@@ -1207,11 +1224,15 @@ export function MeetingPage({
     showCalendarOverlay,
     calendarSlotEvents,
     calendarAllDayEvents,
+    showCalendarEvents: showCalendarEventsInEditor,
+    onShowCalendarEventsChange: setShowCalendarEventsInEditor,
+    showOtherParticipantsAvailability: showOtherParticipantsInEditor,
+    onShowOtherParticipantsAvailabilityChange: setShowOtherParticipantsInEditor,
+    showSelectedMeetingTime: showSelectedMeetingTimeInEditor,
+    onShowSelectedMeetingTimeChange: setShowSelectedMeetingTimeInEditor,
     onTimeGridDoubleClick: handleTimeGridDoubleClick,
     currentTime: currentTimeIndicatorNow,
     timeZone: event.timezone,
-    calendarConflictSlotKeys:
-      editingUserId === currentUserId ? calendarConflictSlotKeys : undefined,
   };
 
   return (
@@ -1418,61 +1439,69 @@ export function MeetingPage({
               <aside className="grid h-fit w-full min-w-0 gap-3">
                 <div className="bg-base-100 border-base-300 rounded-box flex h-fit w-full min-w-0 flex-col border p-4">
                   <h2 className="mb-3 text-lg font-semibold">Options</h2>
-                  <button
-                    type="button"
-                    className={cn(
-                      "btn mb-3 w-full justify-center gap-2",
-                      isBestTimeEnabled ? "btn-ghost" : "btn-outline",
-                    )}
-                    disabled={slotAvailability.maxCount === 0}
-                    onClick={handleToggleBestTime}
-                  >
-                    <span>
-                      {isBestTimeEnabled ? "Hide best time" : "Show best time"}
-                    </span>
-                    <span
-                      className={cn(
-                        "icon-[material-symbols--keyboard-arrow-down-rounded] text-xl transition-transform duration-200 ease-out",
-                        isBestTimeEnabled && "rotate-180",
-                      )}
-                    />
-                  </button>
-
-                  {isBestTimeEnabled && (
-                    <div className="mb-3 grid gap-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-base font-medium">
-                          Minimum participants
-                        </span>
-                        <span className="text-base-content/70 text-base tabular-nums">
-                          {minParticipants}+
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min={1}
-                        max={Math.max(slotAvailability.maxCount, 1)}
-                        step={1}
-                        value={Math.min(
-                          minParticipants,
-                          Math.max(slotAvailability.maxCount, 1),
-                        )}
-                        disabled={users.length <= 1}
+                  {showMeetingResults && (
+                    <>
+                      <button
+                        type="button"
                         className={cn(
-                          "range range-sm w-full",
-                          users.length <= 1
-                            ? "range-neutral cursor-not-allowed opacity-50"
-                            : "range-primary",
+                          "btn mb-3 w-full justify-center gap-2",
+                          isBestTimeEnabled ? "btn-ghost" : "btn-outline",
                         )}
-                        onChange={(rangeEvent) =>
-                          setMinParticipants(Number(rangeEvent.target.value))
-                        }
-                      />
-                      <div className="text-base-content/60 flex justify-between text-sm tabular-nums">
-                        <span>1</span>
-                        <span>{slotAvailability.maxCount}</span>
-                      </div>
-                    </div>
+                        disabled={slotAvailability.maxCount === 0}
+                        onClick={handleToggleBestTime}
+                      >
+                        <span>
+                          {isBestTimeEnabled
+                            ? "Hide best time"
+                            : "Show best time"}
+                        </span>
+                        <span
+                          className={cn(
+                            "icon-[material-symbols--keyboard-arrow-down-rounded] text-xl transition-transform duration-200 ease-out",
+                            isBestTimeEnabled && "rotate-180",
+                          )}
+                        />
+                      </button>
+
+                      {isBestTimeEnabled && (
+                        <div className="mb-3 grid gap-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-base font-medium">
+                              Minimum participants
+                            </span>
+                            <span className="text-base-content/70 text-base tabular-nums">
+                              {minParticipants}+
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min={1}
+                            max={Math.max(slotAvailability.maxCount, 1)}
+                            step={1}
+                            value={Math.min(
+                              minParticipants,
+                              Math.max(slotAvailability.maxCount, 1),
+                            )}
+                            disabled={users.length <= 1}
+                            className={cn(
+                              "range range-sm w-full",
+                              users.length <= 1
+                                ? "range-neutral cursor-not-allowed opacity-50"
+                                : "range-primary",
+                            )}
+                            onChange={(rangeEvent) =>
+                              setMinParticipants(
+                                Number(rangeEvent.target.value),
+                              )
+                            }
+                          />
+                          <div className="text-base-content/60 flex justify-between text-sm tabular-nums">
+                            <span>1</span>
+                            <span>{slotAvailability.maxCount}</span>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {selectedTimeLabel && (
@@ -1859,7 +1888,9 @@ export function MeetingPage({
             detailsBooking={bookedRoomBooking}
             open={bookingDetailsOpen}
             onOpenChange={handleBookingDetailsOpenChange}
-            detailsTitleOnly
+            onBookingCreated={() => {
+              refetchBookedRoomBooking();
+            }}
           />
         )}
       </>

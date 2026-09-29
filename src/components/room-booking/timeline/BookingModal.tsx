@@ -130,7 +130,6 @@ export function BookingModal({
   selectedRoomId,
   onSelectedRoomIdChange,
   fixedSchedule = false,
-  detailsTitleOnly = false,
   initialTitle,
   onNewBookingSubmit,
   isNewBookingSubmitting = false,
@@ -145,7 +144,6 @@ export function BookingModal({
   selectedRoomId?: string | null;
   onSelectedRoomIdChange?: (roomId: string) => void;
   fixedSchedule?: boolean;
-  detailsTitleOnly?: boolean;
   initialTitle?: string;
   onNewBookingSubmit?: (title: string) => void;
   isNewBookingSubmitting?: boolean;
@@ -207,12 +205,11 @@ export function BookingModal({
 
   const canFinish = useMemo(() => {
     return (
-      !detailsTitleOnly &&
       alreadyStarted &&
       detailsBooking &&
       detailsBooking.endsAt.getTime() > new Date().getTime() + 6 * T.Min
     );
-  }, [alreadyStarted, detailsBooking, detailsTitleOnly]);
+  }, [alreadyStarted, detailsBooking]);
 
   useEffect(() => {
     if (newSlot) {
@@ -349,12 +346,8 @@ export function BookingModal({
         },
         body: {
           title: title.trim(),
-          start: detailsTitleOnly
-            ? null
-            : (start ?? detailsBooking.startsAt).toISOString(),
-          end: detailsTitleOnly
-            ? null
-            : (end ?? detailsBooking.endsAt).toISOString(),
+          start: (start ?? detailsBooking.startsAt).toISOString(),
+          end: (end ?? detailsBooking.endsAt).toISOString(),
         },
       },
       {
@@ -383,7 +376,6 @@ export function BookingModal({
     mutateUpdateBooking,
     start,
     end,
-    detailsTitleOnly,
     queryClient,
     resetUpdateBooking,
     onBookingCreated,
@@ -547,37 +539,36 @@ export function BookingModal({
     end &&
     (start.getMonth() !== end.getMonth() || start.getDate() !== end.getDate());
 
-  const BookingDateTime =
-    fixedSchedule || detailsTitleOnly ? null : (
-      <div className="my-1">
-        <label htmlFor="start" className="text-base-content/75 text-base">
-          Start
-        </label>
-        <input
-          id="start"
-          type="datetime-local"
-          name="party-date"
-          value={start ? toLocalTimeString(start) : ""}
-          onChange={(e) =>
-            e.target.value && setStart(fromLocalTimeString(e.target.value))
-          }
-          className="bg-base-300 focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
-        />
-        <label htmlFor="end" className="text-base-content/75 text-base">
-          End
-        </label>
-        <input
-          id="end"
-          type="datetime-local"
-          name="party-date"
-          value={end ? toLocalTimeString(end) : ""}
-          onChange={(e) =>
-            e.target.value && setEnd(fromLocalTimeString(e.target.value))
-          }
-          className="bg-base-300 focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
-        />
-      </div>
-    );
+  const BookingDateTime = fixedSchedule ? null : (
+    <div className="my-1">
+      <label htmlFor="start" className="text-base-content/75 text-base">
+        Start
+      </label>
+      <input
+        id="start"
+        type="datetime-local"
+        name="party-date"
+        value={start ? toLocalTimeString(start) : ""}
+        onChange={(e) =>
+          e.target.value && setStart(fromLocalTimeString(e.target.value))
+        }
+        className="bg-base-300 focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
+      />
+      <label htmlFor="end" className="text-base-content/75 text-base">
+        End
+      </label>
+      <input
+        id="end"
+        type="datetime-local"
+        name="party-date"
+        value={end ? toLocalTimeString(end) : ""}
+        onChange={(e) =>
+          e.target.value && setEnd(fromLocalTimeString(e.target.value))
+        }
+        className="bg-base-300 focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
+      />
+    </div>
+  );
 
   const NoRoomsWarning =
     newSlot && roomOptions && roomOptions.length === 0 ? (
@@ -734,20 +725,18 @@ export function BookingModal({
         </div>
       </div>
     </>
-  ) : !alreadyStarted || detailsTitleOnly ? (
+  ) : !alreadyStarted ? (
     <div className="flex flex-row gap-2">
-      {!alreadyStarted && (
-        <button
-          type="button"
-          className="btn btn-error grow"
-          onClick={(event) => {
-            event.preventDefault();
-            deleteBooking();
-          }}
-        >
-          Delete
-        </button>
-      )}
+      <button
+        type="button"
+        className="btn btn-error grow"
+        onClick={(event) => {
+          event.preventDefault();
+          deleteBooking();
+        }}
+      >
+        Delete
+      </button>
       <button
         type="button"
         className="btn btn-primary grow"
