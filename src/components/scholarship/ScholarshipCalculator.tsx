@@ -81,6 +81,7 @@ export default function ScholarshipCalculator() {
     const newGPA = calculateGPA(newMarks);
     const newScholarship = calculateScholarship(
       newGPA,
+      newMarks,
       FORMULA_B_MIN,
       FORMULA_B_MAX_MAPPING[course],
     );
@@ -142,6 +143,7 @@ export default function ScholarshipCalculator() {
       const newMarks = calculateMarksFromGPA(gpa);
       const newScholarship = calculateScholarship(
         gpa,
+        newMarks,
         FORMULA_B_MIN,
         FORMULA_B_MAX_MAPPING[course],
       );

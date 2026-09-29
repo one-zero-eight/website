@@ -49,9 +49,12 @@ export function calculateGPA(marks: Mark[]): number {
  */
 export function calculateScholarship(
   GPA: number,
+  marks: Mark[],
   Bmin: number,
   Bmax: number,
 ): number {
+  // If any C or D marks appear, return 0
+  if (marks.some((v) => v === "C" || v === "D")) return 0;
   // Formula for scholarship
   const S = Bmin + (Bmax - Bmin) * Math.pow((GPA - 2) / 3, 2.5);
   // Round down to the nearest multiple of 100
