@@ -272,6 +272,7 @@ export function CalendarViewer({
   const calendarComponent = useMemo(
     () => (
       <FullCalendar
+        weekends={true}
         ref={calendarRef}
         eventsSet={(events) => {
           // Remove duplicates.
@@ -582,6 +583,47 @@ export function CalendarViewer({
     });
   }, [extraEvents, isFullPage]);
 
+  useEffect(() => {
+    const calendarApi = calendarRef.current?.getApi();
+
+    if (!calendarApi) return;
+    const today = new Date();
+
+    const prevEvents = calendarApi.getEvents();
+    for (const event of prevEvents) {
+      if (event.id == "today") continue;
+      if (event.start === null) continue;
+      const eventDate = new Date(event.start);
+      const todayDate = new Date(today);
+      const d1 = eventDate.setHours(0, 0, 0, 0);
+      console.log(d1, todayDate.setHours(0, 0, 0, 0));
+      if (d1 === todayDate.setHours(0, 0, 0, 0)) {
+        calendarApi.getEventById("today")?.remove();
+        return;
+      }
+    }
+    if (calendarApi.getEventById("today")) return;
+
+    console.log("Мяу");
+
+    const todayStr = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, "0"),
+      String(today.getDate()).padStart(2, "0"),
+    ].join("-");
+
+    const todayEvent = {
+      id: "today",
+      start: todayStr,
+      allDay: true,
+      extendedProps: {
+        emptyWeekendPlaceholder: true,
+        calendarURLs: [],
+      },
+    };
+
+    calendarApi.addEvent(todayEvent);
+  });
   const customViewIds = useMemo(
     () => new Set(customViews.map(({ id }) => id)),
     [customViews],

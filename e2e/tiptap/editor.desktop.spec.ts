@@ -36,7 +36,9 @@ test.describe("Tiptap editor desktop", () => {
     await expect(bubbleMenu(page).getByTitle("Bold")).toBeVisible();
   });
 
-  test("bubble menu stays clickable above the sticky toolbar", async ({ page }) => {
+  test("bubble menu stays clickable above the sticky toolbar", async ({
+    page,
+  }) => {
     await selectText(page, "First paragraph");
     const boldButton = bubbleMenu(page).getByTitle("Bold");
     await expect(boldButton).toBeVisible();

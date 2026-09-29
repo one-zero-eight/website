@@ -104,6 +104,20 @@
     }
   }
 
+  .fc-event:has(> td.fc-list-event-title > #today) {
+    pointer-events: none;
+    /* display: block; */
+    padding-left: 30px;
+
+    td.fc-list-event-graphic {
+      display: none;
+    }
+
+    td.fc-list-event-time {
+      display: none;
+    }
+  }
+
   .fc-scrollgrid {
     @apply border-none;
   }

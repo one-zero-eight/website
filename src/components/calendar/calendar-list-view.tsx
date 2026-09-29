@@ -20,7 +20,11 @@ export function renderCalendarListEventContent({ event }: EventContentArg) {
   // has a URL, then on click does `querySelector('a[href]').href`. Custom
   // eventContent must keep an anchor or that click handler throws and eventClick
   // never runs (events.ics includes URL; schedule feeds often don't).
-  return (
+  return event.id === "today" ? (
+    <div id="today" className="flex">
+      Chill day🥳
+    </div>
+  ) : (
     <div className="flex flex-wrap gap-x-1 text-left">
       {event.url ? <a href={event.url}>{event.title}</a> : event.title}
       <span className="text-base-content/30 break-all">
