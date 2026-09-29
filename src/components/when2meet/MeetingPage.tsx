@@ -1098,7 +1098,7 @@ export function MeetingPage({
           handleCancelChoosingMeetingTime();
           showSuccess(
             "Meeting time saved",
-            "Everyone can now see the chosen meeting time.",
+            "Everyone can now see the final meeting time.",
           );
         },
       },
@@ -1683,7 +1683,7 @@ export function MeetingPage({
                   )}
                 </div>
 
-                <div className="bg-base-100 border-base-300 rounded-box flex flex-col border p-4">
+                <div className="bg-base-100 border-base-300 rounded-box flex min-w-0 flex-col overflow-hidden border p-4">
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <h2 className="text-lg font-semibold">Responses</h2>
                     {listUsers.length > 1 && (
@@ -1716,7 +1716,7 @@ export function MeetingPage({
                       <>
                         <span className="block">{hoveredSlotLabel}</span>
                         {hoveredCalendarEvents.length > 0 && (
-                          <span className="block w-full min-w-0 truncate">
+                          <span className="block w-full max-w-full min-w-0 truncate">
                             {hoveredCalendarEvents.join(", ")}
                           </span>
                         )}

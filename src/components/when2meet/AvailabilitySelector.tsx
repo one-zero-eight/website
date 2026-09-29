@@ -81,6 +81,7 @@ function SlotVerticalBoundary({
 }) {
   return (
     <span
+      data-slot-vertical-boundary={`${color}-${side}`}
       className={cn(
         "pointer-events-none absolute top-0 bottom-0",
         foreground ? "z-[3]" : "z-[2]",
@@ -1054,7 +1055,10 @@ export function AvailabilitySelector({
             const displayedMySlots = showAvailabilityEditing
               ? draftSlots
               : mySlots;
-            const isMySlot = !selectionOnly && !!displayedMySlots?.has(slotKey);
+            const isMySlot =
+              !selectionOnly &&
+              !!displayedMySlots?.has(slotKey) &&
+              (!intervalSelectionMode || slotAllowed);
             const isIntervalSelected =
               intervalSelectionSlots?.has(slotKey) ?? false;
             const isSelectedMeetingSlot =
@@ -1087,15 +1091,18 @@ export function AvailabilitySelector({
             const mySlotAbove =
               !!displayedMySlots &&
               !!prevTime &&
+              (!intervalSelectionMode || isSlotAllowed(date.id, prevTime)) &&
               displayedMySlots.has(getSlotKey(date.id, prevTime));
             const mySlotBelow =
               !!displayedMySlots &&
               !!nextTime &&
+              (!intervalSelectionMode || isSlotAllowed(date.id, nextTime)) &&
               displayedMySlots.has(getSlotKey(date.id, nextTime));
             const mySlotLeft =
               !!displayedMySlots &&
               !!prevDate &&
               areConsecutiveDateIds(prevDate.id, date.id) &&
+              (!intervalSelectionMode || isSlotAllowed(prevDate.id, time)) &&
               displayedMySlots.has(getSlotKey(prevDate.id, time));
             const selectedMeetingSlotAbove =
               selectedMeetingTimeVisible &&
@@ -1109,6 +1116,7 @@ export function AvailabilitySelector({
               selectedMeetingSlotKeys.has(getSlotKey(date.id, nextTime));
             const selectedMeetingSlotLeft =
               selectedMeetingTimeVisible &&
+              !intervalSelectionMode &&
               !!selectedMeetingSlotKeys &&
               !!prevDate &&
               areConsecutiveDateIds(prevDate.id, date.id) &&
@@ -1279,6 +1287,7 @@ export function AvailabilitySelector({
                 )}
                 {isMySlot && !isIntervalSelected && (
                   <span
+                    data-my-availability-outline
                     className={getMyAvailabilityOutlineClassName({
                       continuesAbove: mySlotAbove,
                       continuesBelow: mySlotBelow,
@@ -1483,7 +1492,7 @@ export function AvailabilitySelector({
             (showAvailabilityEditing ? (
               <button
                 type="button"
-                title={`${showSelectedMeetingTime ? "Hide" : "Show"} chosen meeting time`}
+                title={`${showSelectedMeetingTime ? "Hide" : "Show"} final meeting time`}
                 className={cn(
                   "hover:text-base-content inline-flex items-center gap-1.5 transition-opacity",
                   !showSelectedMeetingTime && "opacity-40",
@@ -1493,12 +1502,12 @@ export function AvailabilitySelector({
                 }
               >
                 <span className="border-secondary bg-secondary/15 h-3 w-5 rounded-sm border-[3px]" />
-                <span className="underline underline-offset-2">Chosen</span>
+                <span className="underline underline-offset-2">Final time</span>
               </button>
             ) : (
               <span className="inline-flex items-center gap-1.5">
                 <span className="border-secondary bg-secondary/15 h-3 w-5 rounded-sm border-[3px]" />
-                Chosen
+                Final time
               </span>
             ))}
         </div>

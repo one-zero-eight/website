@@ -39,6 +39,17 @@ function getAuthHeaders() {
   };
 }
 
+function getSafeCalendarUrl(url: string) {
+  try {
+    const parsedUrl = new URL(url);
+    parsedUrl.search = "";
+    parsedUrl.hash = "";
+    return parsedUrl.toString();
+  } catch {
+    return "unknown calendar source";
+  }
+}
+
 function intervalsOverlap(
   leftStart: Date,
   leftEnd: Date,
@@ -126,7 +137,9 @@ async function fetchEventsFromIcsUrl(
   });
 
   if (!response.ok) {
-    return [];
+    throw new Error(
+      `Calendar feed "${getSafeCalendarUrl(url)}" responded with HTTP ${response.status}`,
+    );
   }
 
   const icsText = await response.text();
@@ -173,11 +186,21 @@ export async function fetchPersonalCalendarEvents(
   rangeStart: Date,
   rangeEnd: Date,
 ) {
-  const results = await Promise.all(
+  const results = await Promise.allSettled(
     urls.map((url) => fetchEventsFromIcsUrl(url, rangeStart, rangeEnd)),
   );
 
-  return results.flat();
+  return results.flatMap((result, index) => {
+    if (result.status === "fulfilled") {
+      return result.value;
+    }
+
+    console.warn(
+      `Failed to load calendar feed "${getSafeCalendarUrl(urls[index])}"`,
+      result.reason,
+    );
+    return [];
+  });
 }
 
 export function buildCalendarSlotOverlay(
