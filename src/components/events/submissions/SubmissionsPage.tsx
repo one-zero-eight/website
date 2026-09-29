@@ -1,9 +1,6 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
-import { $workshops } from "@/api/workshops";
-import {
-  ModerationStatus,
-  SchemaSubmissionListItem,
-} from "@/api/workshops/types";
+import { $events } from "@/api/events";
+import { ModerationStatus, SchemaSubmissionListItem } from "@/api/events/types";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { useEventsAuth } from "../hooks";
@@ -37,7 +34,7 @@ export function SubmissionsPage() {
   const navigate = useNavigate();
   const { isModerator, clubs, isPending: isAuthPending } = useEventsAuth();
 
-  const { data, isPending, isError, error, refetch } = $workshops.useQuery(
+  const { data, isPending, isError, error, refetch } = $events.useQuery(
     "get",
     "/submissions/",
     undefined,

@@ -1,4 +1,4 @@
-const workshopsApiUrl = import.meta.env.VITE_WORKSHOPS_API_URL;
+const eventsApiUrl = import.meta.env.VITE_EVENTS_API_URL;
 
 export function getLinkDisplayLabel(link: {
   url: string;
@@ -17,23 +17,19 @@ export function getLinkDisplayLabel(link: {
 }
 
 export function getEventsIcsUrl() {
-  return `${workshopsApiUrl}/events.ics`;
-}
-
-export function getMyEventsIcsUrl() {
-  return `${workshopsApiUrl}/users/me/events.ics`;
+  return `${eventsApiUrl}/events.ics`;
 }
 
 export function getEventImageUrl(id: string) {
-  return `${workshopsApiUrl}/events/${id}/image`;
+  return `${eventsApiUrl}/events/${id}/image`;
 }
 
 export function getDraftImageUrl(id: string) {
-  return `${workshopsApiUrl}/drafts/${id}/image`;
+  return `${eventsApiUrl}/drafts/${id}/image`;
 }
 
 export function getSubmissionImageUrl(id: string) {
-  return `${workshopsApiUrl}/submissions/${id}/image`;
+  return `${eventsApiUrl}/submissions/${id}/image`;
 }
 
 export function extractEventIdFromUrl(url: string | null | undefined) {

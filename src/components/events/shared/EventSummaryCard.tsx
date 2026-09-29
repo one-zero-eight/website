@@ -2,7 +2,7 @@ import {
   SchemaHost,
   SchemaPublicHost,
   SchemaResolvedLocation,
-} from "@/api/workshops/types";
+} from "@/api/events/types";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 import { formatEventDateTime } from "../utils/datetime";

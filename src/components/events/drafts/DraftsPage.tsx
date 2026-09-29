@@ -1,5 +1,5 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
-import { $workshops } from "@/api/workshops";
+import { $events } from "@/api/events";
 import { useToast } from "@/components/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -18,7 +18,7 @@ export function DraftsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
 
-  const { data, isPending, isError, error, refetch } = $workshops.useQuery(
+  const { data, isPending, isError, error, refetch } = $events.useQuery(
     "get",
     "/drafts/",
     undefined,
@@ -33,12 +33,14 @@ export function DraftsPage() {
 
   const invalidateList = () => {
     queryClient.invalidateQueries({
-      queryKey: $workshops.queryOptions("get", "/drafts/").queryKey,
+      queryKey: $events.queryOptions("get", "/drafts/").queryKey,
     });
   };
 
-  const { mutate: acceptInvite, isPending: isAccepting } =
-    $workshops.useMutation("post", "/drafts/{id}/accept", {
+  const { mutate: acceptInvite, isPending: isAccepting } = $events.useMutation(
+    "post",
+    "/drafts/{id}/accept",
+    {
       onSuccess: () => {
         setPendingId(null);
         invalidateList();
@@ -47,10 +49,13 @@ export function DraftsPage() {
         setPendingId(null);
         showError("Error", formatApiErrorMessage(mutationError));
       },
-    });
+    },
+  );
 
-  const { mutate: declineInvite, isPending: isDeclining } =
-    $workshops.useMutation("post", "/drafts/{id}/decline", {
+  const { mutate: declineInvite, isPending: isDeclining } = $events.useMutation(
+    "post",
+    "/drafts/{id}/decline",
+    {
       onSuccess: () => {
         setPendingId(null);
         invalidateList();
@@ -59,7 +64,8 @@ export function DraftsPage() {
         setPendingId(null);
         showError("Error", formatApiErrorMessage(mutationError));
       },
-    });
+    },
+  );
 
   if (isAuthPending || isPending) {
     return (

@@ -1,5 +1,5 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
-import { $workshops } from "@/api/workshops";
+import { $events } from "@/api/events";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
@@ -28,7 +28,7 @@ export function CreateDraftModal({
 }) {
   const navigate = useNavigate();
   const { showError } = useToast();
-  const { data: allowedLocales = [] } = $workshops.useQuery("get", "/locales");
+  const { data: allowedLocales = [] } = $events.useQuery("get", "/locales");
 
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
@@ -52,7 +52,7 @@ export function CreateDraftModal({
 
   const scheduleWarning = getScheduleLocalWarning(startsAt, endsAt);
 
-  const { mutate, isPending } = $workshops.useMutation("post", "/drafts/", {
+  const { mutate, isPending } = $events.useMutation("post", "/drafts/", {
     onSuccess: (draft) => {
       onOpenChange(false);
       navigate({ to: "/events/drafts/$id", params: { id: draft.id } });

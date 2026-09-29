@@ -1,4 +1,4 @@
-import { HostType, SchemaHost, SchemaPublicHost } from "@/api/workshops/types";
+import { HostType, SchemaHost, SchemaPublicHost } from "@/api/events/types";
 
 export type HostDisplay = {
   displayName: string;

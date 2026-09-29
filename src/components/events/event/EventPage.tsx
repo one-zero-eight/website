@@ -3,8 +3,8 @@ import {
   formatApiErrorMessage,
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
-import { $workshops } from "@/api/workshops";
-import { EnrollmentType } from "@/api/workshops/types";
+import { $events } from "@/api/events";
+import { EnrollmentType } from "@/api/events/types";
 import { SignInButton } from "@/components/common/SignInButton.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
@@ -30,7 +30,7 @@ export function EventPage({ id }: { id: string }) {
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
   const [enrolledOpen, setEnrolledOpen] = useState(false);
 
-  const { data, isPending, isError, error, refetch } = $workshops.useQuery(
+  const { data, isPending, isError, error, refetch } = $events.useQuery(
     "get",
     "/events/{id}",
     { params: { path: { id } } },
@@ -54,13 +54,13 @@ export function EventPage({ id }: { id: string }) {
 
   const invalidateEvent = () => {
     queryClient.invalidateQueries({
-      queryKey: $workshops.queryOptions("get", "/events/{id}", {
+      queryKey: $events.queryOptions("get", "/events/{id}", {
         params: { path: { id } },
       }).queryKey,
     });
   };
 
-  const { mutate: enroll, isPending: isEnrolling } = $workshops.useMutation(
+  const { mutate: enroll, isPending: isEnrolling } = $events.useMutation(
     "post",
     "/events/{id}/enroll",
     {
@@ -73,7 +73,7 @@ export function EventPage({ id }: { id: string }) {
     },
   );
 
-  const { mutate: unenroll, isPending: isUnenrolling } = $workshops.useMutation(
+  const { mutate: unenroll, isPending: isUnenrolling } = $events.useMutation(
     "post",
     "/events/{id}/unenroll",
     {
@@ -86,18 +86,21 @@ export function EventPage({ id }: { id: string }) {
     },
   );
 
-  const { mutate: unpublish, isPending: isUnpublishing } =
-    $workshops.useMutation("delete", "/events/{id}", {
+  const { mutate: unpublish, isPending: isUnpublishing } = $events.useMutation(
+    "delete",
+    "/events/{id}",
+    {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: $workshops.queryOptions("get", "/submissions/").queryKey,
+          queryKey: $events.queryOptions("get", "/submissions/").queryKey,
         });
         navigate({ to: "/events" });
       },
       onError: (mutationError) => {
         showError("Error", formatApiErrorMessage(mutationError));
       },
-    });
+    },
+  );
 
   async function handleUnpublish() {
     const confirmed = await showConfirm({

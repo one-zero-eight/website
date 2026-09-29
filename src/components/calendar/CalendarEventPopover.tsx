@@ -1,4 +1,4 @@
-import { $workshops } from "@/api/workshops";
+import { $events } from "@/api/events";
 import {
   IcsHostsList,
   PublicHostsList,
@@ -41,9 +41,9 @@ export function CalendarEventPopover({
   const icsHosts = parseIcsHostDescription(
     event.extendedProps?.description as string | undefined,
   );
-  const isWorkshopsEvent = !!eventId || icsHosts.length > 0;
+  const isEventFromEvents = !!eventId || icsHosts.length > 0;
 
-  const { data: eventData } = $workshops.useQuery(
+  const { data: eventData } = $events.useQuery(
     "get",
     "/events/{id}",
     { params: { path: { id: eventId ?? "" } } },
@@ -87,11 +87,11 @@ export function CalendarEventPopover({
   const resolvedLocation = eventData?.data.location;
   const icsLocation = event.extendedProps?.location as string | undefined;
   const locations =
-    !isWorkshopsEvent && icsLocation ? icsLocation.split("/") : undefined;
+    !isEventFromEvents && icsLocation ? icsLocation.split("/") : undefined;
   const hosts = eventData?.data.hosts;
   const showHosts = (hosts && hosts.length > 0) || icsHosts.length > 0;
   const showRawDescription =
-    !!event.extendedProps?.description && !isWorkshopsEvent;
+    !!event.extendedProps?.description && !isEventFromEvents;
 
   return (
     <>
@@ -131,7 +131,7 @@ export function CalendarEventPopover({
                 </p>
               </div>
 
-              {isWorkshopsEvent && (resolvedLocation || icsLocation) && (
+              {isEventFromEvents && (resolvedLocation || icsLocation) && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
                     <span className="icon-[material-symbols--location-on-outline] text-2xl" />

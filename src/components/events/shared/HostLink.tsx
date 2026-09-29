@@ -1,5 +1,5 @@
 import { $clubs } from "@/api/clubs";
-import { HostType, SchemaHost, SchemaPublicHost } from "@/api/workshops/types";
+import { HostType, SchemaHost, SchemaPublicHost } from "@/api/events/types";
 import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 import {

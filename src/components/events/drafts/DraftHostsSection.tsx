@@ -1,7 +1,7 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $clubs } from "@/api/clubs";
-import { $workshops } from "@/api/workshops";
-import { HostType, SchemaDraftOut, SchemaHost } from "@/api/workshops/types";
+import { $events } from "@/api/events";
+import { HostType, SchemaDraftOut, SchemaHost } from "@/api/events/types";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
@@ -110,19 +110,19 @@ export function DraftHostsSection({
   function invalidateDraft(next?: SchemaDraftOut) {
     if (next) {
       queryClient.setQueryData(
-        $workshops.queryOptions("get", "/drafts/{id}", {
+        $events.queryOptions("get", "/drafts/{id}", {
           params: { path: { id: draft.id } },
         }).queryKey,
         next,
       );
     }
     queryClient.invalidateQueries({
-      queryKey: $workshops.queryOptions("get", "/drafts/{id}", {
+      queryKey: $events.queryOptions("get", "/drafts/{id}", {
         params: { path: { id: draft.id } },
       }).queryKey,
     });
     queryClient.invalidateQueries({
-      queryKey: $workshops.queryOptions("get", "/drafts/").queryKey,
+      queryKey: $events.queryOptions("get", "/drafts/").queryKey,
     });
   }
 
@@ -130,13 +130,16 @@ export function DraftHostsSection({
     showError("Error", formatApiErrorMessage(error));
   };
 
-  const { mutate: addClubHost, isPending: isAddingClub } =
-    $workshops.useMutation("post", "/drafts/{id}/hosts/clubs", {
+  const { mutate: addClubHost, isPending: isAddingClub } = $events.useMutation(
+    "post",
+    "/drafts/{id}/hosts/clubs",
+    {
       onSuccess: invalidateDraft,
       onError,
-    });
+    },
+  );
 
-  const { mutate: inviteClub, isPending: isInviting } = $workshops.useMutation(
+  const { mutate: inviteClub, isPending: isInviting } = $events.useMutation(
     "post",
     "/drafts/{id}/hosts/invitations",
     {
@@ -154,7 +157,7 @@ export function DraftHostsSection({
   );
 
   const { mutate: addExternal, isPending: isAddingExternal } =
-    $workshops.useMutation("post", "/drafts/{id}/hosts/external", {
+    $events.useMutation("post", "/drafts/{id}/hosts/external", {
       onSuccess: (next) => {
         setExternalOpen(false);
         setExternalName("");
@@ -165,7 +168,7 @@ export function DraftHostsSection({
     });
 
   const { mutate: patchExternal, isPending: isPatchingExternal } =
-    $workshops.useMutation("patch", "/drafts/{id}/hosts/external/{host_id}", {
+    $events.useMutation("patch", "/drafts/{id}/hosts/external/{host_id}", {
       onSuccess: (next) => {
         setEditHost(null);
         setExternalName("");
@@ -175,23 +178,22 @@ export function DraftHostsSection({
       onError,
     });
 
-  const { mutate: deleteHost, isPending: isDeletingHost } =
-    $workshops.useMutation("delete", "/drafts/{id}/hosts/{host_id}", {
+  const { mutate: deleteHost, isPending: isDeletingHost } = $events.useMutation(
+    "delete",
+    "/drafts/{id}/hosts/{host_id}",
+    {
+      onSuccess: invalidateDraft,
+      onError,
+    },
+  );
+
+  const { mutate: deleteInvitation, isPending: isDeletingInvitation } =
+    $events.useMutation("delete", "/drafts/{id}/hosts/invitations/{club_id}", {
       onSuccess: invalidateDraft,
       onError,
     });
 
-  const { mutate: deleteInvitation, isPending: isDeletingInvitation } =
-    $workshops.useMutation(
-      "delete",
-      "/drafts/{id}/hosts/invitations/{club_id}",
-      {
-        onSuccess: invalidateDraft,
-        onError,
-      },
-    );
-
-  const { mutate: orderHosts, isPending: isOrdering } = $workshops.useMutation(
+  const { mutate: orderHosts, isPending: isOrdering } = $events.useMutation(
     "put",
     "/drafts/{id}/hosts/order",
     {

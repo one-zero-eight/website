@@ -15,7 +15,7 @@ import {
   getMyMoodleLink,
   getMyMusicRoomLink,
   getMyRoomBookingsLink,
-  getMyWorkshopsLink,
+  getMyEventsLink,
 } from "@/api/schedule/links.ts";
 import { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 import type { EventInput } from "@fullcalendar/core";
@@ -171,7 +171,7 @@ function getCalendarsToShow(
   }
 
   toShow.push({
-    url: getMyWorkshopsLink(),
+    url: getMyEventsLink(),
     color: "seagreen",
     sourceLink: "https://innohassle.ru/events",
     updatedAt: new Date().toISOString(),

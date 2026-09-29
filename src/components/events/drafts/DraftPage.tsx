@@ -1,7 +1,7 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useMe } from "@/api/accounts/user.ts";
-import { $workshops } from "@/api/workshops";
-import { DraftStatus, RestoreBodyFrom } from "@/api/workshops/types";
+import { $events } from "@/api/events";
+import { DraftStatus, RestoreBodyFrom } from "@/api/events/types";
 import { Modal } from "@/components/common/Modal.tsx";
 import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor";
 import { useToast } from "@/components/toast";
@@ -45,8 +45,8 @@ export function DraftPage({ id }: { id: string }) {
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [imageCacheBust, setImageCacheBust] = useState(0);
 
-  const { data: allowedLocales = [] } = $workshops.useQuery("get", "/locales");
-  const { data, isPending, isError, error, refetch } = $workshops.useQuery(
+  const { data: allowedLocales = [] } = $events.useQuery("get", "/locales");
+  const { data, isPending, isError, error, refetch } = $events.useQuery(
     "get",
     "/drafts/{id}",
     { params: { path: { id } } },
@@ -95,24 +95,27 @@ export function DraftPage({ id }: { id: string }) {
 
   const invalidateDraft = () => {
     queryClient.invalidateQueries({
-      queryKey: $workshops.queryOptions("get", "/drafts/{id}", {
+      queryKey: $events.queryOptions("get", "/drafts/{id}", {
         params: { path: { id } },
       }).queryKey,
     });
     queryClient.invalidateQueries({
-      queryKey: $workshops.queryOptions("get", "/drafts/").queryKey,
+      queryKey: $events.queryOptions("get", "/drafts/").queryKey,
     });
   };
 
-  const { mutate: putLocale, isPending: isSavingLocale } =
-    $workshops.useMutation("put", "/drafts/{id}/locales/{locale}", {
+  const { mutate: putLocale, isPending: isSavingLocale } = $events.useMutation(
+    "put",
+    "/drafts/{id}/locales/{locale}",
+    {
       onError: (mutationError) => {
         showError("Error", formatApiErrorMessage(mutationError));
       },
-    });
+    },
+  );
 
   const { mutate: deleteLocale, isPending: isDeletingLocale } =
-    $workshops.useMutation("delete", "/drafts/{id}/locales/{locale}", {
+    $events.useMutation("delete", "/drafts/{id}/locales/{locale}", {
       onSuccess: () => {
         setDeleteLocaleOpen(false);
         setEditingLocale(false);
@@ -124,7 +127,7 @@ export function DraftPage({ id }: { id: string }) {
     });
 
   const { mutate: uploadImage, isPending: isUploadingImage } =
-    $workshops.useMutation("post", "/drafts/{id}/image", {
+    $events.useMutation("post", "/drafts/{id}/image", {
       onSuccess: () => {
         setImageCacheBust(Date.now());
         invalidateDraft();
@@ -134,21 +137,26 @@ export function DraftPage({ id }: { id: string }) {
       },
     });
 
-  const { mutate: submitDraft, isPending: isSubmitting } =
-    $workshops.useMutation("post", "/submissions/{id}", {
+  const { mutate: submitDraft, isPending: isSubmitting } = $events.useMutation(
+    "post",
+    "/submissions/{id}",
+    {
       onSuccess: () => {
         invalidateDraft();
       },
       onError: (mutationError) => {
         showError("Error", formatApiErrorMessage(mutationError));
       },
-    });
+    },
+  );
 
-  const { mutate: acceptInvite, isPending: isAccepting } =
-    $workshops.useMutation("post", "/drafts/{id}/accept", {
+  const { mutate: acceptInvite, isPending: isAccepting } = $events.useMutation(
+    "post",
+    "/drafts/{id}/accept",
+    {
       onSuccess: (draft) => {
         queryClient.setQueryData(
-          $workshops.queryOptions("get", "/drafts/{id}", {
+          $events.queryOptions("get", "/drafts/{id}", {
             params: { path: { id } },
           }).queryKey,
           draft,
@@ -158,26 +166,30 @@ export function DraftPage({ id }: { id: string }) {
       onError: (mutationError) => {
         showError("Error", formatApiErrorMessage(mutationError));
       },
-    });
+    },
+  );
 
-  const { mutate: declineInvite, isPending: isDeclining } =
-    $workshops.useMutation("post", "/drafts/{id}/decline", {
+  const { mutate: declineInvite, isPending: isDeclining } = $events.useMutation(
+    "post",
+    "/drafts/{id}/decline",
+    {
       onSuccess: () => {
         navigate({ to: "/events/drafts" });
         queryClient.invalidateQueries({
-          queryKey: $workshops.queryOptions("get", "/drafts/").queryKey,
+          queryKey: $events.queryOptions("get", "/drafts/").queryKey,
         });
       },
       onError: (mutationError) => {
         showError("Error", formatApiErrorMessage(mutationError));
       },
-    });
+    },
+  );
 
   const { mutate: deleteDraft, isPending: isDeletingDraft } =
-    $workshops.useMutation("delete", "/drafts/{id}", {
+    $events.useMutation("delete", "/drafts/{id}", {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: $workshops.queryOptions("get", "/drafts/").queryKey,
+          queryKey: $events.queryOptions("get", "/drafts/").queryKey,
         });
         navigate({ to: "/events/drafts" });
       },
@@ -187,7 +199,7 @@ export function DraftPage({ id }: { id: string }) {
     });
 
   const { mutate: cancelSubmission, isPending: isCancelingSubmission } =
-    $workshops.useMutation("delete", "/submissions/{id}", {
+    $events.useMutation("delete", "/submissions/{id}", {
       onSuccess: () => {
         invalidateDraft();
       },
@@ -196,12 +208,14 @@ export function DraftPage({ id }: { id: string }) {
       },
     });
 
-  const { mutate: restoreDraft, isPending: isRestoring } =
-    $workshops.useMutation("post", "/drafts/{id}/restore", {
+  const { mutate: restoreDraft, isPending: isRestoring } = $events.useMutation(
+    "post",
+    "/drafts/{id}/restore",
+    {
       onSuccess: (draft) => {
         setRestoreOpen(false);
         queryClient.setQueryData(
-          $workshops.queryOptions("get", "/drafts/{id}", {
+          $events.queryOptions("get", "/drafts/{id}", {
             params: { path: { id } },
           }).queryKey,
           draft,
@@ -211,7 +225,8 @@ export function DraftPage({ id }: { id: string }) {
       onError: (mutationError) => {
         showError("Error", formatApiErrorMessage(mutationError));
       },
-    });
+    },
+  );
 
   if (isAuthPending || isPending) {
     return (
@@ -344,7 +359,7 @@ export function DraftPage({ id }: { id: string }) {
     }
 
     queryClient.setQueryData(
-      $workshops.queryOptions("get", "/drafts/{id}", {
+      $events.queryOptions("get", "/drafts/{id}", {
         params: { path: { id } },
       }).queryKey,
       draft,

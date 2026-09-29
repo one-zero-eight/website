@@ -1,6 +1,6 @@
 import { $clubs } from "@/api/clubs";
 import { getDescriptionImageUrl } from "@/api/clubs/links.ts";
-import { $workshops } from "@/api/workshops";
+import { $events } from "@/api/events";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { EventSummaryCard } from "@/components/events/shared/EventSummaryCard.tsx";
@@ -42,7 +42,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
     }),
     [],
   );
-  const { data: events, isPending: eventsPending } = $workshops.useQuery(
+  const { data: events, isPending: eventsPending } = $events.useQuery(
     "get",
     "/events/",
     { params: { query: { ...eventsRange, club: club?.id ?? undefined } } },

@@ -4,7 +4,7 @@ import {
   SchemaHost,
   SchemaPublicHost,
   SchemaResolvedLocation,
-} from "@/api/workshops/types";
+} from "@/api/events/types";
 import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
 import { PublicHostsList, StoredHostsList } from "./HostLink";
 import { LocationLink } from "./LocationLink";

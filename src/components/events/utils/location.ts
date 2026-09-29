@@ -1,4 +1,4 @@
-import { SchemaResolvedLocation } from "@/api/workshops/types";
+import { SchemaResolvedLocation } from "@/api/events/types";
 
 export function locationDisplayName(
   location: SchemaResolvedLocation | null | undefined,

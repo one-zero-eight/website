@@ -1,10 +1,10 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
-import { $workshops } from "@/api/workshops";
+import { $events } from "@/api/events";
 import {
   EnrollmentType,
   DraftStatus,
   ModerationStatus,
-} from "@/api/workshops/types";
+} from "@/api/events/types";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
@@ -30,7 +30,7 @@ export function SubmissionPage({ id }: { id: string }) {
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
   const [feedback, setFeedback] = useState("");
 
-  const { data, isPending, isError, error, refetch } = $workshops.useQuery(
+  const { data, isPending, isError, error, refetch } = $events.useQuery(
     "get",
     "/submissions/{id}",
     { params: { path: { id } } },
@@ -61,16 +61,16 @@ export function SubmissionPage({ id }: { id: string }) {
 
   const invalidate = () => {
     queryClient.invalidateQueries({
-      queryKey: $workshops.queryOptions("get", "/submissions/{id}", {
+      queryKey: $events.queryOptions("get", "/submissions/{id}", {
         params: { path: { id } },
       }).queryKey,
     });
     queryClient.invalidateQueries({
-      queryKey: $workshops.queryOptions("get", "/submissions/").queryKey,
+      queryKey: $events.queryOptions("get", "/submissions/").queryKey,
     });
   };
 
-  const { mutate: approve, isPending: isApproving } = $workshops.useMutation(
+  const { mutate: approve, isPending: isApproving } = $events.useMutation(
     "post",
     "/submissions/{id}/approve",
     {
@@ -84,7 +84,7 @@ export function SubmissionPage({ id }: { id: string }) {
     },
   );
 
-  const { mutate: decline, isPending: isDeclining } = $workshops.useMutation(
+  const { mutate: decline, isPending: isDeclining } = $events.useMutation(
     "post",
     "/submissions/{id}/decline",
     {
@@ -98,8 +98,10 @@ export function SubmissionPage({ id }: { id: string }) {
     },
   );
 
-  const { mutate: unpublish, isPending: isUnpublishing } =
-    $workshops.useMutation("delete", "/events/{id}", {
+  const { mutate: unpublish, isPending: isUnpublishing } = $events.useMutation(
+    "delete",
+    "/events/{id}",
+    {
       onSuccess: () => {
         invalidate();
         navigate({ to: "/events/submissions" });
@@ -107,7 +109,8 @@ export function SubmissionPage({ id }: { id: string }) {
       onError: (mutationError) => {
         showError("Error", formatApiErrorMessage(mutationError));
       },
-    });
+    },
+  );
 
   if (isAuthPending || isPending) {
     return (

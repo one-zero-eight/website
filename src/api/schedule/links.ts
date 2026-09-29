@@ -1,5 +1,5 @@
 export const SCHEDULE_API_URL = import.meta.env.VITE_SCHEDULE_API_URL!;
-export const WORKSHOPS_API_URL = import.meta.env.VITE_WORKSHOPS_API_URL!;
+export const EVENTS_API_URL = import.meta.env.VITE_EVENTS_API_URL!;
 
 export const CALENDAR_EXPORT_HOST = import.meta.env.VITE_CALENDAR_EXPORT_HOST!;
 
@@ -23,10 +23,6 @@ export function getMusicRoomLink() {
   return `${SCHEDULE_API_URL}/music-room.ics`;
 }
 
-export function getWorkshopsLink() {
-  return `${SCHEDULE_API_URL}/workshops.ics`;
-}
-
 export function getMyMusicRoomLink() {
   return `${SCHEDULE_API_URL}/users/me/music-room.ics`;
 }
@@ -39,8 +35,8 @@ export function getMyMoodleLink() {
   return `${SCHEDULE_API_URL}/users/me/moodle.ics`;
 }
 
-export function getMyWorkshopsLink() {
-  return `${WORKSHOPS_API_URL}/users/me/events.ics`;
+export function getMyEventsLink() {
+  return `${EVENTS_API_URL}/users/me/events.ics`;
 }
 
 export function getMyRoomBookingsLink() {

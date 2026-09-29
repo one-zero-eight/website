@@ -1,6 +1,6 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
-import { $workshops } from "@/api/workshops";
-import { SchemaDraftOut } from "@/api/workshops/types";
+import { $events } from "@/api/events";
+import { SchemaDraftOut } from "@/api/events/types";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -57,29 +57,25 @@ export function EditDraftInfoModal({
 
   const scheduleWarning = getScheduleLocalWarning(startsAt, endsAt);
 
-  const { mutate, isPending } = $workshops.useMutation(
-    "patch",
-    "/drafts/{id}",
-    {
-      onSuccess: (next) => {
-        queryClient.setQueryData(
-          $workshops.queryOptions("get", "/drafts/{id}", {
-            params: { path: { id: draft.id } },
-          }).queryKey,
-          next,
-        );
-        queryClient.invalidateQueries({
-          queryKey: $workshops.queryOptions("get", "/drafts/{id}", {
-            params: { path: { id: draft.id } },
-          }).queryKey,
-        });
-        onOpenChange(false);
-      },
-      onError: (error) => {
-        showError("Error", formatApiErrorMessage(error));
-      },
+  const { mutate, isPending } = $events.useMutation("patch", "/drafts/{id}", {
+    onSuccess: (next) => {
+      queryClient.setQueryData(
+        $events.queryOptions("get", "/drafts/{id}", {
+          params: { path: { id: draft.id } },
+        }).queryKey,
+        next,
+      );
+      queryClient.invalidateQueries({
+        queryKey: $events.queryOptions("get", "/drafts/{id}", {
+          params: { path: { id: draft.id } },
+        }).queryKey,
+      });
+      onOpenChange(false);
     },
-  );
+    onError: (error) => {
+      showError("Error", formatApiErrorMessage(error));
+    },
+  });
 
   function handleSubmit() {
     if (scheduleWarning) {

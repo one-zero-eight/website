@@ -1,5 +1,5 @@
 import { useMe } from "@/api/accounts/user.ts";
-import { $workshops } from "@/api/workshops";
+import { $events } from "@/api/events";
 
 export function useEventsAuth() {
   const { me: accountMe } = useMe();
@@ -9,7 +9,7 @@ export function useEventsAuth() {
     isError,
     error,
     refetch,
-  } = $workshops.useQuery("get", "/users/me", undefined, {
+  } = $events.useQuery("get", "/users/me", undefined, {
     enabled: !!accountMe,
   });
 

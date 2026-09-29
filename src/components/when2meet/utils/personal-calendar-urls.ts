@@ -5,7 +5,7 @@ import {
   getMyMusicRoomLink,
   getMyRoomBookingsLink,
   getMySportLink,
-  getMyWorkshopsLink,
+  getMyEventsLink,
 } from "@/api/schedule/links.ts";
 
 export function getPersonalCalendarIcsUrls({
@@ -55,7 +55,7 @@ export function getPersonalCalendarIcsUrls({
     urls.push(getMyMoodleLink());
   }
 
-  urls.push(getMyWorkshopsLink());
+  urls.push(getMyEventsLink());
   urls.push(getMyRoomBookingsLink());
 
   return [...new Set(urls)];

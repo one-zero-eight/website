@@ -1,4 +1,4 @@
-import { $workshops } from "@/api/workshops";
+import { $events } from "@/api/events";
 import {
   autoUpdate,
   flip,
@@ -34,7 +34,7 @@ export function EventsCalendarPopover({
 }) {
   const eventId = extractEventIdFromUrl(event.url);
 
-  const { data: eventData } = $workshops.useQuery(
+  const { data: eventData } = $events.useQuery(
     "get",
     "/events/{id}",
     { params: { path: { id: eventId ?? "" } } },

@@ -1,5 +1,5 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
-import { $workshops } from "@/api/workshops";
+import { $events } from "@/api/events";
 import moment from "moment";
 import { EventsByDate } from "../shared/EventsByDate";
 import { EventSummaryCard } from "../shared/EventSummaryCard";
@@ -13,7 +13,7 @@ export function EventsCardsView({ date }: { date: Date }) {
   const from = moment(date).startOf("month").toISOString();
   const to = moment(date).add(1, "month").startOf("month").toISOString();
 
-  const { data, isPending, isError, error, refetch } = $workshops.useQuery(
+  const { data, isPending, isError, error, refetch } = $events.useQuery(
     "get",
     "/events/",
     { params: { query: { from, to } } },

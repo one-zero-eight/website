@@ -2,7 +2,7 @@ import {
   RestoreBodyFrom,
   RestoreSource,
   SchemaRestoreSourceItem,
-} from "@/api/workshops/types";
+} from "@/api/events/types";
 import { Modal } from "@/components/common/Modal.tsx";
 import moment from "moment";
 

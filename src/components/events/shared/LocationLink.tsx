@@ -1,4 +1,4 @@
-import { SchemaResolvedLocation } from "@/api/workshops/types";
+import { SchemaResolvedLocation } from "@/api/events/types";
 import { cn } from "@/lib/ui/cn";
 import { Link } from "@tanstack/react-router";
 import { locationDisplayName, locationMapsSearch } from "../utils/location";

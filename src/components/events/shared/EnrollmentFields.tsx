@@ -1,4 +1,4 @@
-import { EnrollmentType, SchemaEnrollment } from "@/api/workshops/types";
+import { EnrollmentType, SchemaEnrollment } from "@/api/events/types";
 import { cn } from "@/lib/ui/cn";
 import { eventFieldClass } from "./formStyles";
 

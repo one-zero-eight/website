@@ -1,6 +1,6 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
-import { $workshops } from "@/api/workshops";
-import { SchemaDraftOut, SchemaEventLink } from "@/api/workshops/types";
+import { $events } from "@/api/events";
+import { SchemaDraftOut, SchemaEventLink } from "@/api/events/types";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
@@ -31,19 +31,19 @@ export function DraftLinksSection({
   function invalidateDraft(next?: SchemaDraftOut) {
     if (next) {
       queryClient.setQueryData(
-        $workshops.queryOptions("get", "/drafts/{id}", {
+        $events.queryOptions("get", "/drafts/{id}", {
           params: { path: { id: draft.id } },
         }).queryKey,
         next,
       );
     }
     queryClient.invalidateQueries({
-      queryKey: $workshops.queryOptions("get", "/drafts/{id}", {
+      queryKey: $events.queryOptions("get", "/drafts/{id}", {
         params: { path: { id: draft.id } },
       }).queryKey,
     });
     queryClient.invalidateQueries({
-      queryKey: $workshops.queryOptions("get", "/drafts/").queryKey,
+      queryKey: $events.queryOptions("get", "/drafts/").queryKey,
     });
   }
 
@@ -51,7 +51,7 @@ export function DraftLinksSection({
     showError("Error", formatApiErrorMessage(error));
   };
 
-  const { mutate: addLink, isPending: isAdding } = $workshops.useMutation(
+  const { mutate: addLink, isPending: isAdding } = $events.useMutation(
     "post",
     "/drafts/{id}/links",
     {
@@ -65,7 +65,7 @@ export function DraftLinksSection({
     },
   );
 
-  const { mutate: patchLink, isPending: isPatching } = $workshops.useMutation(
+  const { mutate: patchLink, isPending: isPatching } = $events.useMutation(
     "patch",
     "/drafts/{id}/links/{link_id}",
     {
@@ -80,7 +80,7 @@ export function DraftLinksSection({
     },
   );
 
-  const { mutate: deleteLink, isPending: isDeleting } = $workshops.useMutation(
+  const { mutate: deleteLink, isPending: isDeleting } = $events.useMutation(
     "delete",
     "/drafts/{id}/links/{link_id}",
     {
@@ -89,7 +89,7 @@ export function DraftLinksSection({
     },
   );
 
-  const { mutate: orderLinks, isPending: isOrdering } = $workshops.useMutation(
+  const { mutate: orderLinks, isPending: isOrdering } = $events.useMutation(
     "put",
     "/drafts/{id}/links/order",
     {
