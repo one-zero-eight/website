@@ -1,5 +1,5 @@
 import { cn } from "@/lib/ui/cn";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { formatParticipantShortName } from "./utils/participants.ts";
 
@@ -8,13 +8,11 @@ export function MeetingMobileBar({
   onSaveSetup,
   onClearSetup,
   onToggleAvailability,
-  onClearAvailability,
   onCancelAvailability,
   isDeleting,
   isSavingSetup,
   isEditingAvailability,
   isSavingAvailability,
-  canClearAvailability,
   canClearSetup,
   selectedSlotDetails,
 }: {
@@ -22,13 +20,11 @@ export function MeetingMobileBar({
   onSaveSetup?: () => void;
   onClearSetup?: () => void;
   onToggleAvailability?: () => void;
-  onClearAvailability?: () => void;
   onCancelAvailability?: () => void;
   isDeleting?: boolean;
   isSavingSetup?: boolean;
   isEditingAvailability?: boolean;
   isSavingAvailability?: boolean;
-  canClearAvailability?: boolean;
   canClearSetup?: boolean;
   selectedSlotDetails?: {
     label: string;
@@ -39,13 +35,64 @@ export function MeetingMobileBar({
   const [expandedSlotLabel, setExpandedSlotLabel] = useState<string | null>(
     null,
   );
+  const [overflowMeasurement, setOverflowMeasurement] = useState<{
+    key: string;
+    isOverflowing: boolean;
+  } | null>(null);
+  const participantRowRef = useRef<HTMLDivElement>(null);
+  const participantMeasureRef = useRef<HTMLSpanElement>(null);
   const areParticipantsExpanded =
     expandedSlotLabel === selectedSlotDetails?.label;
   const hasPrimaryActions = Boolean(onDelete || onToggleAvailability);
+  const participantNames =
+    selectedSlotDetails?.participantNames
+      .map(formatParticipantShortName)
+      .join(", ") ?? "";
+  const participantMeasurementKey = [
+    selectedSlotDetails?.label ?? "",
+    selectedSlotDetails?.participantNames.length ?? 0,
+    participantNames,
+    selectedSlotDetails?.unavailableMessage ?? "",
+  ].join("\0");
+  const areParticipantsOverflowing =
+    overflowMeasurement?.key === participantMeasurementKey &&
+    overflowMeasurement.isOverflowing;
+
+  useLayoutEffect(() => {
+    const participantRow = participantRowRef.current;
+    const participantMeasure = participantMeasureRef.current;
+
+    if (!participantRow || !participantMeasure) {
+      return;
+    }
+
+    function updateOverflowMeasurement() {
+      const isOverflowing =
+        participantMeasure.scrollWidth > participantRow.clientWidth;
+
+      setOverflowMeasurement((currentMeasurement) => {
+        if (
+          currentMeasurement?.key === participantMeasurementKey &&
+          currentMeasurement.isOverflowing === isOverflowing
+        ) {
+          return currentMeasurement;
+        }
+
+        return { key: participantMeasurementKey, isOverflowing };
+      });
+    }
+
+    updateOverflowMeasurement();
+
+    const resizeObserver = new ResizeObserver(updateOverflowMeasurement);
+    resizeObserver.observe(participantRow);
+
+    return () => resizeObserver.disconnect();
+  }, [participantMeasurementKey]);
 
   if (onSaveSetup) {
     return createPortal(
-      <div className="border-base-300 bg-base-200 fixed bottom-12 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b p-4 md:hidden">
+      <div className="border-base-300 bg-base-200 fixed bottom-12 left-0 z-10 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b p-4 md:hidden">
         {onClearSetup && (
           <button
             type="button"
@@ -81,7 +128,7 @@ export function MeetingMobileBar({
     <div
       data-mobile-bar
       className={cn(
-        "border-base-300 bg-base-200 fixed bottom-12 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b px-4 md:hidden",
+        "border-base-300 bg-base-200 fixed bottom-12 left-0 z-10 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b px-4 md:hidden",
         selectedSlotDetails
           ? hasPrimaryActions
             ? "pt-3 pb-4"
@@ -97,7 +144,21 @@ export function MeetingMobileBar({
               {selectedSlotDetails.unavailableMessage}
             </div>
           ) : (
-            <div className="mt-1 flex min-w-0 items-start gap-2">
+            <div
+              ref={participantRowRef}
+              data-slot-participants-row
+              className="relative mt-1 flex min-w-0 items-start gap-2"
+            >
+              <span
+                ref={participantMeasureRef}
+                data-slot-participants-measure
+                className="invisible absolute whitespace-nowrap"
+              >
+                <span>
+                  {selectedSlotDetails.participantNames.length} available:{" "}
+                </span>
+                {participantNames}
+              </span>
               <div
                 data-slot-participants
                 className={cn(
@@ -110,11 +171,9 @@ export function MeetingMobileBar({
                 <span className="text-base-content/60">
                   {selectedSlotDetails.participantNames.length} available:{" "}
                 </span>
-                {selectedSlotDetails.participantNames
-                  .map(formatParticipantShortName)
-                  .join(", ")}
+                {participantNames}
               </div>
-              {selectedSlotDetails.participantNames.length > 1 && (
+              {(areParticipantsOverflowing || areParticipantsExpanded) && (
                 <button
                   type="button"
                   className="btn btn-link h-auto min-h-0 shrink-0 p-0 text-xs"
@@ -133,7 +192,7 @@ export function MeetingMobileBar({
           )}
         </div>
       )}
-      {hasPrimaryActions && (
+      {hasPrimaryActions && !isEditingAvailability && (
         <div data-mobile-bar-actions className="flex flex-row gap-2">
           {onToggleAvailability && (
             <button
@@ -142,13 +201,7 @@ export function MeetingMobileBar({
               disabled={isSavingAvailability}
               onClick={onToggleAvailability}
             >
-              {isSavingAvailability ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : isEditingAvailability ? (
-                "Save timeslots"
-              ) : (
-                "Change my availability"
-              )}
+              Change my availability
             </button>
           )}
           {onDelete && (
@@ -167,7 +220,7 @@ export function MeetingMobileBar({
           )}
         </div>
       )}
-      {isEditingAvailability && (
+      {isEditingAvailability && onToggleAvailability && (
         <div className="flex w-full flex-row gap-2">
           {onCancelAvailability && (
             <button
@@ -179,16 +232,18 @@ export function MeetingMobileBar({
               Cancel
             </button>
           )}
-          {onClearAvailability && (
-            <button
-              type="button"
-              className="btn btn-error flex-1"
-              disabled={!canClearAvailability || isSavingAvailability}
-              onClick={onClearAvailability}
-            >
-              Clear all
-            </button>
-          )}
+          <button
+            type="button"
+            className="btn btn-primary flex-1 gap-2"
+            disabled={isSavingAvailability}
+            onClick={onToggleAvailability}
+          >
+            {isSavingAvailability ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              "Save timeslots"
+            )}
+          </button>
         </div>
       )}
     </div>,

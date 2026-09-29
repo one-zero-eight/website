@@ -9,6 +9,8 @@ import { cn } from "@/lib/ui/cn";
 import { CalendarItem, generateCalendarMonth } from "../utils/dates.ts";
 
 const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const TOUCH_TAP_MOVE_THRESHOLD = 8;
+const TOUCH_LONG_PRESS_DELAY = 250;
 
 function isSameDay(firstDate: Date, secondDate: Date) {
   return (
@@ -61,6 +63,15 @@ export function Calendar({
   const isDraggingRef = useRef(false);
   const isDeletingRef = useRef(false);
   const lastSelectedIndexRef = useRef<number | null>(null);
+  const touchGestureRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    index: number;
+    didMove: boolean;
+    isLongPress: boolean;
+    longPressTimer: number;
+  } | null>(null);
   const calendarRef = useRef(calendar);
   calendarRef.current = calendar;
   const gridRef = useRef<HTMLDivElement>(null);
@@ -172,7 +183,7 @@ export function Calendar({
     const day = calendar[index];
 
     return cn(
-      "my-1 flex aspect-square cursor-pointer touch-none select-none items-center justify-center",
+      "my-1 flex aspect-square cursor-pointer touch-pan-y select-none items-center justify-center",
       isSameDay(day.date, new Date()) &&
         !day.selected &&
         "border-primary rounded-full border-2",
@@ -219,6 +230,34 @@ export function Calendar({
 
   useEffect(() => {
     function handlePointerMove(event: PointerEvent) {
+      const touchGesture = touchGestureRef.current;
+
+      if (touchGesture?.pointerId === event.pointerId) {
+        if (touchGesture.isLongPress) {
+          event.preventDefault();
+
+          const index = getCellIndexFromPoint(event.clientX, event.clientY);
+
+          if (index !== null) {
+            handleSelect(index);
+          }
+
+          return;
+        }
+
+        const movedDistance = Math.hypot(
+          event.clientX - touchGesture.startX,
+          event.clientY - touchGesture.startY,
+        );
+
+        if (movedDistance > TOUCH_TAP_MOVE_THRESHOLD) {
+          touchGesture.didMove = true;
+          window.clearTimeout(touchGesture.longPressTimer);
+        }
+
+        return;
+      }
+
       if (!isDraggingRef.current) {
         return;
       }
@@ -234,27 +273,70 @@ export function Calendar({
       handleSelect(index);
     }
 
-    function handlePointerUp() {
+    function handlePointerUp(event: PointerEvent) {
+      const touchGesture = touchGestureRef.current;
+
+      if (touchGesture?.pointerId === event.pointerId) {
+        window.clearTimeout(touchGesture.longPressTimer);
+
+        if (!touchGesture.didMove && !touchGesture.isLongPress) {
+          const day = calendarRef.current[touchGesture.index];
+
+          if (day && isSelectable(day)) {
+            isDraggingRef.current = true;
+            isDeletingRef.current = day.selected;
+            lastSelectedIndexRef.current = null;
+            handleSelect(touchGesture.index);
+          }
+        }
+
+        touchGestureRef.current = null;
+      }
+
       isDraggingRef.current = false;
       lastSelectedIndexRef.current = null;
+    }
+
+    function handlePointerCancel() {
+      const touchGesture = touchGestureRef.current;
+
+      if (touchGesture) {
+        window.clearTimeout(touchGesture.longPressTimer);
+      }
+
+      touchGestureRef.current = null;
+      isDraggingRef.current = false;
+      lastSelectedIndexRef.current = null;
+    }
+
+    function handleTouchMove(event: TouchEvent) {
+      if (touchGestureRef.current?.isLongPress) {
+        event.preventDefault();
+      }
     }
 
     window.addEventListener("pointermove", handlePointerMove, {
       passive: false,
     });
     window.addEventListener("pointerup", handlePointerUp);
-    window.addEventListener("pointercancel", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerCancel);
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
+      if (touchGestureRef.current) {
+        window.clearTimeout(touchGestureRef.current.longPressTimer);
+      }
+
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
-      window.removeEventListener("pointercancel", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerCancel);
+      window.removeEventListener("touchmove", handleTouchMove);
     };
   }, [handleSelect]);
 
   return (
     <div className={cn("flex flex-col items-center", className)} {...props}>
-      <div className="bg-base-200 relative z-20 mb-4 flex w-full items-center justify-between rounded-full p-1.5">
+      <div className="bg-base-200 mb-4 flex w-full items-center justify-between rounded-full p-1.5">
         <button
           type="button"
           className="bg-base-100 text-base-content/70 hover:bg-base-300 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full transition"
@@ -265,7 +347,7 @@ export function Calendar({
 
         <div className="text-base-content/70 flex items-center text-sm font-semibold">
           <select
-            className="relative z-30 h-7 cursor-pointer appearance-none bg-transparent pr-1 text-sm font-semibold hover:underline focus:z-50 focus:outline-none"
+            className="h-7 cursor-pointer appearance-none bg-transparent pr-1 text-sm font-semibold hover:underline focus:outline-none"
             value={currentMonthRef.current.getFullYear()}
             onChange={(event) => {
               currentMonthRef.current.setFullYear(Number(event.target.value));
@@ -303,7 +385,7 @@ export function Calendar({
 
       <div
         ref={gridRef}
-        className="relative z-0 grid w-full max-w-md min-w-0 grid-cols-7"
+        className="grid w-full max-w-md min-w-0 touch-pan-y grid-cols-7"
       >
         {WEEK_DAYS.map((day) => (
           <div key={day} className="mb-2 text-center text-sm font-semibold">
@@ -320,14 +402,42 @@ export function Calendar({
                 return;
               }
 
+              if (event.pointerType === "touch") {
+                const touchGesture = {
+                  pointerId: event.pointerId,
+                  startX: event.clientX,
+                  startY: event.clientY,
+                  index,
+                  didMove: false,
+                  isLongPress: false,
+                  longPressTimer: 0,
+                };
+                touchGesture.longPressTimer = window.setTimeout(() => {
+                  if (
+                    touchGestureRef.current !== touchGesture ||
+                    touchGesture.didMove
+                  ) {
+                    return;
+                  }
+
+                  touchGesture.isLongPress = true;
+                  isDraggingRef.current = true;
+                  isDeletingRef.current = calendarRef.current[index].selected;
+                  lastSelectedIndexRef.current = null;
+                  handleSelect(index);
+                }, TOUCH_LONG_PRESS_DELAY);
+                touchGestureRef.current = touchGesture;
+                return;
+              }
+
               event.preventDefault();
               gridRef.current?.setPointerCapture(event.pointerId);
-              event.currentTarget.setPointerCapture(event.pointerId);
               isDraggingRef.current = true;
               isDeletingRef.current = calendar[index].selected;
               lastSelectedIndexRef.current = null;
               handleSelect(index);
             }}
+            onContextMenu={(event) => event.preventDefault()}
             className={getDayCellClasses(index)}
           >
             {item.date.getDate()}

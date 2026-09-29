@@ -1,7 +1,7 @@
 import { addDays } from "@fullcalendar/core/internal";
 import { IcalExpander } from "@/components/calendar/iCalendarPlugin/ical-expander/IcalExpander";
 import ICAL from "ical.js";
-import { slotKeyToDateRange } from "./api-slots.ts";
+import { getTimeSlotDurationMinutes, slotKeyToDateRange } from "./api-slots.ts";
 import { getSlotKey } from "./slots.ts";
 
 export type PersonalCalendarEvent =
@@ -37,6 +37,17 @@ function getAuthHeaders() {
   return {
     Authorization: `Bearer ${accessToken.slice(1, -1)}`,
   };
+}
+
+function getSafeCalendarUrl(url: string) {
+  try {
+    const parsedUrl = new URL(url);
+    parsedUrl.search = "";
+    parsedUrl.hash = "";
+    return parsedUrl.toString();
+  } catch {
+    return "unknown calendar source";
+  }
 }
 
 function intervalsOverlap(
@@ -126,7 +137,9 @@ async function fetchEventsFromIcsUrl(
   });
 
   if (!response.ok) {
-    return [];
+    throw new Error(
+      `Calendar feed "${getSafeCalendarUrl(url)}" responded with HTTP ${response.status}`,
+    );
   }
 
   const icsText = await response.text();
@@ -173,11 +186,21 @@ export async function fetchPersonalCalendarEvents(
   rangeStart: Date,
   rangeEnd: Date,
 ) {
-  const results = await Promise.all(
+  const results = await Promise.allSettled(
     urls.map((url) => fetchEventsFromIcsUrl(url, rangeStart, rangeEnd)),
   );
 
-  return results.flat();
+  return results.flatMap((result, index) => {
+    if (result.status === "fulfilled") {
+      return result.value;
+    }
+
+    console.warn(
+      `Failed to load calendar feed "${getSafeCalendarUrl(urls[index])}"`,
+      result.reason,
+    );
+    return [];
+  });
 }
 
 export function buildCalendarSlotOverlay(
@@ -187,6 +210,7 @@ export function buildCalendarSlotOverlay(
   allowedSlots?: Set<string>,
 ) {
   const slotEvents = new Map<string, string[]>();
+  const durationMinutes = getTimeSlotDurationMinutes(timeSlots);
 
   for (const dateId of dateIds) {
     for (const time of timeSlots) {
@@ -196,7 +220,7 @@ export function buildCalendarSlotOverlay(
         continue;
       }
 
-      const { start, end } = slotKeyToDateRange(slotKey);
+      const { start, end } = slotKeyToDateRange(slotKey, durationMinutes);
       const titles: string[] = [];
 
       for (const event of events) {

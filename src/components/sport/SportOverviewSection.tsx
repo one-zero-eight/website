@@ -31,12 +31,21 @@ export function SportProgressSection({
 
   const earned =
     hours != null ? hours.hours_from_groups + hours.self_sport_hours : 0;
-  const earnedPct =
-    hours != null && required != null
-      ? Math.min(100, (earned / required) * 100)
+  const debt = hours?.debt ?? 0;
+  const totalRequired = (required ?? 0) + debt;
+  const selfSportPct =
+    totalRequired > 0
+      ? Math.min(100, ((hours?.self_sport_hours ?? 0) / totalRequired) * 100)
       : 0;
-  const remaining =
-    hours != null && required != null ? Math.max(0, required - earned) : 0;
+  const regularSportPct =
+    totalRequired > 0
+      ? Math.min(
+          100 - selfSportPct,
+          ((hours?.hours_from_groups ?? 0) / totalRequired) * 100,
+        )
+      : 0;
+  const debtPct = totalRequired > 0 ? (debt / totalRequired) * 100 : 0;
+  const remaining = Math.max(0, totalRequired - earned);
   const deadline = currentSemester?.end ? new Date(currentSemester.end) : null;
   const daysLeft =
     deadline != null
@@ -66,24 +75,40 @@ export function SportProgressSection({
           <p className="text-base-content/80 text-center text-sm">
             Current sport hours:{" "}
             <span className="text-base-content font-semibold">
-              {earned} out of {required} hours
+              {earned} out of {required}
+              {debt > 0 ? ` + ${debt} (debt)` : ""} hours
             </span>
           </p>
-          <div className="bg-base-200 overflow-hidden rounded-lg">
-            <div className="grid grid-cols-2 px-4 py-2 text-xs font-semibold">
-              <span className="text-info text-center">
+          <div className="bg-base-200 mx-auto w-full max-w-xl overflow-hidden rounded-lg">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 px-4 py-2 text-xs font-semibold">
+              {debt > 0 ? (
+                <span className="text-error">Debt ({debt}h)</span>
+              ) : null}
+              <span className="text-info">
                 Regular sport ({hours.hours_from_groups}h)
               </span>
-              <span className="text-primary text-center">
+              <span className="text-primary">
                 Self-sport ({hours.self_sport_hours}h)
               </span>
             </div>
-            <div className="bg-base-300 h-8 w-full">
+            <div className="bg-base-300 relative flex h-8 w-full">
+              <div
+                className="bg-primary h-full"
+                style={{ width: `${selfSportPct}%` }}
+                title={`Self-sport: ${hours.self_sport_hours}h`}
+              />
               <div
                 className="bg-info h-full"
-                style={{ width: `${earnedPct}%` }}
-                title="Earned hours"
+                style={{ width: `${regularSportPct}%` }}
+                title={`Regular sport: ${hours.hours_from_groups}h`}
               />
+              {debt > 0 ? (
+                <div
+                  className="bg-error/25 absolute inset-y-0 left-0 bg-[repeating-linear-gradient(135deg,transparent_0_8px,var(--color-error)_8px_10px)] opacity-50"
+                  style={{ width: `${debtPct}%` }}
+                  title={`Debt: ${debt}h`}
+                />
+              ) : null}
             </div>
           </div>
           {remaining > 0 ? (
@@ -111,7 +136,7 @@ export function SportProgressSection({
           <div className="flex flex-wrap justify-center gap-2 pt-1">
             <button
               type="button"
-              className="btn btn-primary btn-sm"
+              className="btn btn-outline btn-sm"
               onClick={() => setSelfSportModalOpen(true)}
             >
               Self-sport upload

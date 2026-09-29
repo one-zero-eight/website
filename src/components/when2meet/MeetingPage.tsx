@@ -1,8 +1,14 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
 import { $when2meet, type when2meetTypes } from "@/api/when2meet";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  formatApiErrorMessage,
+  isApiHttpError,
+} from "@/api/helpers/create-query-client";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
+import Tooltip from "@/components/common/Tooltip.tsx";
+import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
+import { schemaToBooking } from "@/components/room-booking/timeline/types.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -24,7 +30,6 @@ import {
   slotKeysToBackendSlots,
   slotKeysToMeetingTime,
 } from "./utils/api-slots.ts";
-import { getCalendarConflictSlotKeys } from "./utils/calendar-overlay.ts";
 import { getIntersectionAtMinParticipants } from "./utils/best-slot.ts";
 import { formatMeetingTimeRange } from "./utils/meeting-time.ts";
 import {
@@ -73,6 +78,13 @@ export function MeetingPage({
   const [draftSlots, setDraftSlots] = useState<Set<string>>(new Set());
   const [participantSearch, setParticipantSearch] = useState("");
   const [hoveredSlotKey, setHoveredSlotKey] = useState<string | null>(null);
+  const [showCalendarEventsInEditor, setShowCalendarEventsInEditor] =
+    useState(true);
+  const [showOtherParticipantsInEditor, setShowOtherParticipantsInEditor] =
+    useState(false);
+  const [showSelectedMeetingTimeInEditor, setShowSelectedMeetingTimeInEditor] =
+    useState(true);
+  const [isBestTimeEnabled, setIsBestTimeEnabled] = useState(false);
   const [minParticipants, setMinParticipants] = useState(1);
   const [isChoosingMeetingTime, setIsChoosingMeetingTime] = useState(false);
   const [meetingTimeSelectionSlots, setMeetingTimeSelectionSlots] = useState<
@@ -88,8 +100,12 @@ export function MeetingPage({
   );
   const [isMeetingTimeRejected, setIsMeetingTimeRejected] = useState(false);
   const [roomModalOpen, setRoomModalOpen] = useState(false);
+  const [bookingDetailsOpen, setBookingDetailsOpen] = useState(false);
+  const [isShareLinkCopied, setIsShareLinkCopied] = useState(false);
   const hasAutoStartedEditingRef = useRef(false);
   const hasInitializedSetupRef = useRef(false);
+  const reconciledMissingBookingRef = useRef<string | null>(null);
+  const shareLinkCopiedTimerRef = useRef<number | null>(null);
 
   const meetingQueryKey = $when2meet.queryOptions(
     "get",
@@ -367,6 +383,135 @@ export function MeetingPage({
   const bookedRoomTitle =
     bookedRoomDetails?.title ?? event?.booked_room?.room_id ?? null;
 
+  const outlookBookingId = event?.booked_room?.outlook_booking_id;
+  const outlookEntryId = event?.booked_room?.outlook_entry_id;
+  const bookedRoomId = event?.booked_room?.room_id;
+
+  const bookingByIdQuery = $roomBooking.useQuery(
+    "get",
+    "/bookings/{outlook_booking_id}",
+    {
+      params: {
+        path: { outlook_booking_id: outlookBookingId ?? "" },
+      },
+    },
+    {
+      enabled: !!outlookBookingId && !needsSetup,
+    },
+  );
+
+  const bookingByEntryIdQuery = $roomBooking.useQuery(
+    "get",
+    "/bookings/by-entry-id/{outlook_entry_id}",
+    {
+      params: {
+        path: { outlook_entry_id: outlookEntryId ?? "" },
+        query: { room_id: bookedRoomId ?? "" },
+      },
+    },
+    {
+      enabled:
+        !outlookBookingId && !!outlookEntryId && !!bookedRoomId && !needsSetup,
+    },
+  );
+
+  const bookedRoomBookingError = outlookBookingId
+    ? bookingByIdQuery.error
+    : bookingByEntryIdQuery.error;
+  const bookedRoomBookingDetails =
+    bookingByIdQuery.data ?? bookingByEntryIdQuery.data;
+  const bookedRoomBooking = useMemo(
+    () =>
+      bookedRoomBookingDetails
+        ? schemaToBooking(bookedRoomBookingDetails)
+        : undefined,
+    [bookedRoomBookingDetails],
+  );
+  const hasBookedRoomTimeMismatch =
+    !!bookedRoomBooking &&
+    !bookedRoomBookingError &&
+    !!event?.selected_time &&
+    (bookedRoomBooking.startsAt.getTime() !==
+      new Date(event.selected_time.start).getTime() ||
+      bookedRoomBooking.endsAt.getTime() !==
+        new Date(event.selected_time.end).getTime());
+  const isBookedRoomBookingPending = outlookBookingId
+    ? bookingByIdQuery.isFetching
+    : !!outlookEntryId && bookingByEntryIdQuery.isFetching;
+  const missingBookingReference = outlookBookingId ?? outlookEntryId ?? null;
+  const isBookedRoomBookingMissing =
+    isApiHttpError(bookedRoomBookingError) &&
+    bookedRoomBookingError.httpCode === 404;
+
+  const {
+    mutate: reconcileMissingBooking,
+    isPending: isReconcilingMissingBooking,
+  } = $when2meet.useMutation("delete", "/meetings/{meeting_ref}/book-room", {
+    onSuccess: (updatedMeeting) => {
+      setBookingDetailsOpen(false);
+      handleMeetingUpdated(updatedMeeting);
+      showWarning(
+        "Room booking removed",
+        "The booking no longer exists in Room Booking, so it was removed from the meeting.",
+      );
+    },
+    onError: (reconciliationError) => {
+      showError("Error", formatApiErrorMessage(reconciliationError));
+    },
+  });
+
+  useEffect(() => {
+    if (
+      !isOwner ||
+      !isBookedRoomBookingMissing ||
+      !missingBookingReference ||
+      reconciledMissingBookingRef.current === missingBookingReference
+    ) {
+      return;
+    }
+
+    reconciledMissingBookingRef.current = missingBookingReference;
+    reconcileMissingBooking({
+      params: { path: { meeting_ref: meetingId } },
+    });
+  }, [
+    isBookedRoomBookingMissing,
+    isOwner,
+    meetingId,
+    missingBookingReference,
+    reconcileMissingBooking,
+  ]);
+
+  function handleBookingDetailsOpenChange(open: boolean) {
+    setBookingDetailsOpen(open);
+
+    if (open) {
+      return;
+    }
+
+    refetchBookedRoomBooking();
+  }
+
+  async function refetchBookedRoomBooking() {
+    if (outlookBookingId) {
+      return bookingByIdQuery.refetch();
+    }
+
+    if (outlookEntryId) {
+      return bookingByEntryIdQuery.refetch();
+    }
+  }
+
+  async function handleOpenBookingDetails() {
+    const bookingDetailsResult = await refetchBookedRoomBooking();
+
+    if (!bookingDetailsResult?.data || bookingDetailsResult.error) {
+      return;
+    }
+
+    setBookingDetailsOpen(true);
+  }
+
   const selectedMeetingSlotKeys = useMemo(() => {
     if (!event?.selected_time || !parsedSlots) {
       return new Set<string>();
@@ -442,11 +587,12 @@ export function MeetingPage({
   ]);
 
   const highlightBestIntersection =
-    minParticipants > 1 && !needsSetup && slotAvailability.slotKeys.size > 0;
+    isBestTimeEnabled && !needsSetup && slotAvailability.slotKeys.size > 0;
 
   const meetingDateIds = useMemo(() => parsedSlots?.dates ?? [], [parsedSlots]);
 
   const isEditingSelf = editingUserId === currentUserId;
+  const showMeetingResults = !isEditingSelf;
 
   const {
     slotEvents: calendarSlotEvents,
@@ -461,28 +607,19 @@ export function MeetingPage({
 
   const showCalendarOverlay = (isEditingSelf || needsSetup) && hasCalendarData;
 
-  const calendarConflictSlotKeys = useMemo(() => {
-    if (!showCalendarOverlay) {
-      return new Set<string>();
-    }
-
-    return getCalendarConflictSlotKeys(draftSlots, calendarSlotEvents);
-  }, [showCalendarOverlay, draftSlots, calendarSlotEvents]);
-
   useEffect(() => {
-    if (slotAvailability.maxCount === 0) {
+    if (!isBestTimeEnabled) {
       return;
     }
 
-    if (minParticipants < 1) {
+    if (slotAvailability.maxCount === 0) {
+      setIsBestTimeEnabled(false);
       setMinParticipants(1);
       return;
     }
 
-    if (minParticipants > slotAvailability.maxCount) {
-      setMinParticipants(slotAvailability.maxCount);
-    }
-  }, [slotAvailability.maxCount, minParticipants]);
+    setMinParticipants(slotAvailability.maxCount);
+  }, [isBestTimeEnabled, slotAvailability.maxCount]);
 
   const filteredUsers = useMemo(() => {
     const trimmedSearch = participantSearch.trim().toLowerCase();
@@ -534,20 +671,39 @@ export function MeetingPage({
     hoveredSlotKey !== null && editingUserId === null && !needsSetup;
 
   const isHoveringCalendarSlot =
-    isEditingSelf && hoveredSlotKey !== null && showCalendarOverlay;
+    isEditingSelf &&
+    hoveredSlotKey !== null &&
+    (showCalendarEventsInEditor || showOtherParticipantsInEditor);
 
   const isHoveringAllowedSlot = isHoveringSlot && !isHoveredSlotDisabled;
 
   const hoveredCalendarEvents = useMemo(() => {
-    if (!hoveredSlotKey || !showCalendarOverlay) {
+    if (
+      !hoveredSlotKey ||
+      !showCalendarOverlay ||
+      !showCalendarEventsInEditor
+    ) {
       return [];
     }
 
     return calendarSlotEvents.get(hoveredSlotKey) ?? [];
-  }, [hoveredSlotKey, showCalendarOverlay, calendarSlotEvents]);
+  }, [
+    calendarSlotEvents,
+    hoveredSlotKey,
+    showCalendarEventsInEditor,
+    showCalendarOverlay,
+  ]);
 
   function userHasHoveredSlot(user: MeetingUser) {
     if (!hoveredSlotKey) {
+      return false;
+    }
+
+    if (
+      isEditingSelf &&
+      !showOtherParticipantsInEditor &&
+      user.id !== editingUserId
+    ) {
       return false;
     }
 
@@ -640,14 +796,6 @@ export function MeetingPage({
     setDraftSlots(new Set());
   }, [currentUser, currentUserId, event, needsSetup]);
 
-  function handleClearAllSlots() {
-    if (editingUserId !== currentUserId) {
-      return;
-    }
-
-    setDraftSlots(new Set());
-  }
-
   function handleSaveEditing() {
     if (!currentUserId || editingUserId !== currentUserId) {
       return;
@@ -664,10 +812,6 @@ export function MeetingPage({
         onSuccess: () => {
           setEditingUserId(null);
           setDraftSlots(new Set());
-          showSuccess(
-            "Availability saved",
-            "Your timeslots were saved successfully.",
-          );
         },
       },
     );
@@ -770,6 +914,21 @@ export function MeetingPage({
     }
 
     setViewedUserIds(null);
+  }
+
+  function handleToggleBestTime() {
+    if (isBestTimeEnabled) {
+      setIsBestTimeEnabled(false);
+      setMinParticipants(1);
+      return;
+    }
+
+    if (slotAvailability.maxCount === 0) {
+      return;
+    }
+
+    setMinParticipants(slotAvailability.maxCount);
+    setIsBestTimeEnabled(true);
   }
 
   async function handleDeleteParticipant(userId: string) {
@@ -939,7 +1098,7 @@ export function MeetingPage({
           handleCancelChoosingMeetingTime();
           showSuccess(
             "Meeting time saved",
-            "Everyone can now see the chosen meeting time.",
+            "Everyone can now see the final meeting time.",
           );
         },
       },
@@ -954,11 +1113,27 @@ export function MeetingPage({
         await navigator.clipboard.writeText(shareUrl);
       }
 
-      showSuccess("Link copied", "Meeting link copied to clipboard.");
+      if (shareLinkCopiedTimerRef.current !== null) {
+        window.clearTimeout(shareLinkCopiedTimerRef.current);
+      }
+
+      setIsShareLinkCopied(true);
+      shareLinkCopiedTimerRef.current = window.setTimeout(() => {
+        setIsShareLinkCopied(false);
+        shareLinkCopiedTimerRef.current = null;
+      }, 3000);
     } catch {
       showError("Error", "Could not copy link to clipboard.");
     }
   }
+
+  useEffect(() => {
+    return () => {
+      if (shareLinkCopiedTimerRef.current !== null) {
+        window.clearTimeout(shareLinkCopiedTimerRef.current);
+      }
+    };
+  }, []);
 
   async function handleDeleteMeeting() {
     const confirmed = await showConfirm({
@@ -1035,7 +1210,9 @@ export function MeetingPage({
       : undefined,
     selectionOnly: needsSetup,
     hideHint: !!currentUser && (isEditingSelf || !isOwner),
-    bestIntersectionSlotKeys: slotAvailability.slotKeys,
+    bestIntersectionSlotKeys: isBestTimeEnabled
+      ? slotAvailability.slotKeys
+      : undefined,
     hoveredSlotKey,
     onHoveredSlotKeyChange: setHoveredSlotKey,
     intervalSelectionMode: isChoosingMeetingTime,
@@ -1047,11 +1224,15 @@ export function MeetingPage({
     showCalendarOverlay,
     calendarSlotEvents,
     calendarAllDayEvents,
+    showCalendarEvents: showCalendarEventsInEditor,
+    onShowCalendarEventsChange: setShowCalendarEventsInEditor,
+    showOtherParticipantsAvailability: showOtherParticipantsInEditor,
+    onShowOtherParticipantsAvailabilityChange: setShowOtherParticipantsInEditor,
+    showSelectedMeetingTime: showSelectedMeetingTimeInEditor,
+    onShowSelectedMeetingTimeChange: setShowSelectedMeetingTimeInEditor,
     onTimeGridDoubleClick: handleTimeGridDoubleClick,
     currentTime: currentTimeIndicatorNow,
     timeZone: event.timezone,
-    calendarConflictSlotKeys:
-      editingUserId === currentUserId ? calendarConflictSlotKeys : undefined,
   };
 
   return (
@@ -1098,11 +1279,27 @@ export function MeetingPage({
               {isOwner && !needsSetup && (
                 <button
                   type="button"
-                  className="btn btn-outline btn-sm shrink-0 gap-1 md:hidden"
+                  className="btn btn-ghost btn-sm shrink-0 md:hidden"
                   onClick={handleShareLink}
                 >
-                  <span className="icon-[material-symbols--share-outline] text-base" />
-                  Share link
+                  <span className="relative size-5">
+                    <span
+                      className={cn(
+                        "icon-[material-symbols--share-outline] absolute inset-0 text-xl transition-all duration-200 ease-out",
+                        isShareLinkCopied
+                          ? "scale-75 opacity-0"
+                          : "scale-100 opacity-100",
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "icon-[material-symbols--check-rounded] absolute inset-0 text-xl transition-all duration-200 ease-out",
+                        isShareLinkCopied
+                          ? "scale-100 opacity-100"
+                          : "scale-75 opacity-0",
+                      )}
+                    />
+                  </span>
                 </button>
               )}
             </div>
@@ -1138,16 +1335,41 @@ export function MeetingPage({
                   {isOwner && (
                     <button
                       type="button"
-                      className="btn btn-outline hidden gap-2 md:inline-flex"
+                      className={cn(
+                        "btn hidden md:inline-flex",
+                        isShareLinkCopied ? "btn-ghost" : "btn-outline",
+                      )}
                       onClick={handleShareLink}
                     >
-                      <span className="icon-[material-symbols--share-outline] text-lg" />
-                      Share link
+                      <span className="inline-grid">
+                        <span
+                          className={cn(
+                            "col-start-1 row-start-1 inline-flex items-center gap-2 transition-all duration-200 ease-out",
+                            isShareLinkCopied
+                              ? "scale-95 opacity-0"
+                              : "scale-100 opacity-100",
+                          )}
+                        >
+                          <span className="icon-[material-symbols--share-outline] text-lg" />
+                          Share link
+                        </span>
+                        <span
+                          className={cn(
+                            "col-start-1 row-start-1 inline-flex items-center justify-center gap-2 transition-all duration-200 ease-out",
+                            isShareLinkCopied
+                              ? "scale-100 opacity-100"
+                              : "scale-95 opacity-0",
+                          )}
+                        >
+                          <span className="icon-[material-symbols--check-rounded] text-lg" />
+                          Copied
+                        </span>
+                      </span>
                     </button>
                   )}
                   {currentUserId && !isArchived && (
                     <div className="hidden flex-wrap gap-2 md:flex">
-                      {isEditingSelf && (
+                      {isEditingSelf ? (
                         <>
                           <button
                             type="button"
@@ -1159,28 +1381,27 @@ export function MeetingPage({
                           </button>
                           <button
                             type="button"
-                            className="btn btn-error"
-                            disabled={isSaving || draftSlots.size === 0}
-                            onClick={handleClearAllSlots}
+                            className="btn btn-primary gap-2"
+                            disabled={isSaving}
+                            onClick={handleSaveEditing}
                           >
-                            Clear all
+                            {isSaving ? (
+                              <span className="loading loading-spinner loading-sm" />
+                            ) : (
+                              "Save timeslots"
+                            )}
                           </button>
                         </>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn-primary gap-2"
+                          disabled={isChoosingMeetingTime}
+                          onClick={handleToggleAvailability}
+                        >
+                          Change my availability
+                        </button>
                       )}
-                      <button
-                        type="button"
-                        className="btn btn-primary gap-2"
-                        disabled={isSaving || isChoosingMeetingTime}
-                        onClick={handleToggleAvailability}
-                      >
-                        {isEditingSelf && isSaving ? (
-                          <span className="loading loading-spinner loading-sm" />
-                        ) : isEditingSelf ? (
-                          "Save timeslots"
-                        ) : (
-                          "Change my availability"
-                        )}
-                      </button>
                     </div>
                   )}
                 </>
@@ -1218,35 +1439,70 @@ export function MeetingPage({
               <aside className="grid h-fit w-full min-w-0 gap-3">
                 <div className="bg-base-100 border-base-300 rounded-box flex h-fit w-full min-w-0 flex-col border p-4">
                   <h2 className="mb-3 text-lg font-semibold">Options</h2>
-                  <div className="mb-3 grid gap-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-base font-medium">
-                        Minimum participants
-                      </span>
-                      <span className="text-base-content/70 text-base tabular-nums">
-                        {minParticipants}+
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min={1}
-                      max={Math.max(slotAvailability.maxCount, 1)}
-                      step={1}
-                      value={Math.min(
-                        minParticipants,
-                        Math.max(slotAvailability.maxCount, 1),
+                  {showMeetingResults && (
+                    <>
+                      <button
+                        type="button"
+                        className={cn(
+                          "btn mb-3 w-full justify-center gap-2",
+                          isBestTimeEnabled ? "btn-ghost" : "btn-outline",
+                        )}
+                        disabled={slotAvailability.maxCount === 0}
+                        onClick={handleToggleBestTime}
+                      >
+                        <span>
+                          {isBestTimeEnabled
+                            ? "Hide best time"
+                            : "Show best time"}
+                        </span>
+                        <span
+                          className={cn(
+                            "icon-[material-symbols--keyboard-arrow-down-rounded] text-xl transition-transform duration-200 ease-out",
+                            isBestTimeEnabled && "rotate-180",
+                          )}
+                        />
+                      </button>
+
+                      {isBestTimeEnabled && (
+                        <div className="mb-3 grid gap-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-base font-medium">
+                              Minimum participants
+                            </span>
+                            <span className="text-base-content/70 text-base tabular-nums">
+                              {minParticipants}+
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min={1}
+                            max={Math.max(slotAvailability.maxCount, 1)}
+                            step={1}
+                            value={Math.min(
+                              minParticipants,
+                              Math.max(slotAvailability.maxCount, 1),
+                            )}
+                            disabled={users.length <= 1}
+                            className={cn(
+                              "range range-sm w-full",
+                              users.length <= 1
+                                ? "range-neutral cursor-not-allowed opacity-50"
+                                : "range-primary",
+                            )}
+                            onChange={(rangeEvent) =>
+                              setMinParticipants(
+                                Number(rangeEvent.target.value),
+                              )
+                            }
+                          />
+                          <div className="text-base-content/60 flex justify-between text-sm tabular-nums">
+                            <span>1</span>
+                            <span>{slotAvailability.maxCount}</span>
+                          </div>
+                        </div>
                       )}
-                      disabled={slotAvailability.maxCount === 0}
-                      className="range range-primary range-sm w-full"
-                      onChange={(rangeEvent) =>
-                        setMinParticipants(Number(rangeEvent.target.value))
-                      }
-                    />
-                    <div className="text-base-content/60 flex justify-between text-sm tabular-nums">
-                      <span>1 (all)</span>
-                      <span>{slotAvailability.maxCount || 1}</span>
-                    </div>
-                  </div>
+                    </>
+                  )}
 
                   {selectedTimeLabel && (
                     <span className="text-secondary mb-3 inline-flex items-center gap-1 text-sm md:hidden">
@@ -1256,9 +1512,49 @@ export function MeetingPage({
                   )}
 
                   {bookedRoomTitle && (
-                    <div className="border-base-300 bg-primary/5 rounded-box mb-3 border p-3 text-sm">
-                      <div className="text-base-content/60">Booked room</div>
-                      <div className="font-semibold">{bookedRoomTitle}</div>
+                    <div className="mb-3 grid gap-2">
+                      <div className="border-base-300 bg-primary/5 rounded-box flex items-center gap-3 border p-3 text-sm">
+                        <div className="min-w-0 grow">
+                          <div className="text-base-content/60">
+                            Booked room
+                          </div>
+                          <div className="truncate font-semibold">
+                            {bookedRoomTitle}
+                          </div>
+                          {bookedRoomBookingError &&
+                            !isBookedRoomBookingMissing && (
+                              <div className="text-error mt-1 text-xs">
+                                Unable to load booking details.
+                              </div>
+                            )}
+                          {isBookedRoomBookingMissing && !isOwner && (
+                            <div className="text-error mt-1 text-xs">
+                              This room booking no longer exists.
+                            </div>
+                          )}
+                        </div>
+                        {isBookedRoomBookingPending ||
+                        isReconcilingMissingBooking ? (
+                          <span className="loading loading-spinner loading-sm text-primary shrink-0" />
+                        ) : bookedRoomBooking ? (
+                          <Tooltip content="Open details">
+                            <button
+                              type="button"
+                              className="text-base-content/50 hover:bg-base-300 flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+                              onClick={handleOpenBookingDetails}
+                            >
+                              <span className="icon-[material-symbols--notes] text-3xl" />
+                            </button>
+                          </Tooltip>
+                        ) : null}
+                      </div>
+                      {hasBookedRoomTimeMismatch && (
+                        <div className="alert alert-warning px-4 py-2 text-sm">
+                          <span>
+                            Booking time differs from the selected meeting time.
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -1305,30 +1601,7 @@ export function MeetingPage({
                             Cancel
                           </button>
                         </>
-                      ) : isEditingSelf ? (
-                        <>
-                          <button
-                            type="button"
-                            className="btn btn-primary gap-2"
-                            disabled={isSaving}
-                            onClick={handleSaveEditing}
-                          >
-                            {isSaving ? (
-                              <span className="loading loading-spinner loading-sm" />
-                            ) : (
-                              "Save timeslots"
-                            )}
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-ghost"
-                            disabled={isSaving}
-                            onClick={handleCancelEditing}
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
+                      ) : !isEditingSelf ? (
                         <>
                           {canChangeMeetingTime && (
                             <button
@@ -1357,7 +1630,7 @@ export function MeetingPage({
                             </button>
                           )}
                         </>
-                      )}
+                      ) : null}
                       {!isArchived && !isChoosingMeetingTime && (
                         <div
                           className={cn(
@@ -1410,7 +1683,7 @@ export function MeetingPage({
                   )}
                 </div>
 
-                <div className="bg-base-100 border-base-300 rounded-box flex flex-col border p-4">
+                <div className="bg-base-100 border-base-300 rounded-box flex min-w-0 flex-col overflow-hidden border p-4">
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <h2 className="text-lg font-semibold">Responses</h2>
                     {listUsers.length > 1 && (
@@ -1443,7 +1716,7 @@ export function MeetingPage({
                       <>
                         <span className="block">{hoveredSlotLabel}</span>
                         {hoveredCalendarEvents.length > 0 && (
-                          <span className="block w-full min-w-0 truncate">
+                          <span className="block w-full max-w-full min-w-0 truncate">
                             {hoveredCalendarEvents.join(", ")}
                           </span>
                         )}
@@ -1563,15 +1836,11 @@ export function MeetingPage({
                 ? handleToggleAvailability
                 : undefined
             }
-            onClearAvailability={
-              currentUserId && !needsSetup ? handleClearAllSlots : undefined
-            }
             onCancelAvailability={
               currentUserId && !needsSetup ? handleCancelEditing : undefined
             }
             isEditingAvailability={isEditingSelf}
             isSavingAvailability={isSaving}
-            canClearAvailability={draftSlots.size > 0}
             selectedSlotDetails={
               !needsSetup &&
               !isEditingSelf &&
@@ -1599,8 +1868,29 @@ export function MeetingPage({
             open={roomModalOpen}
             onOpenChange={setRoomModalOpen}
             bookedRoom={event.booked_room}
+            meetingName={meetingName}
+            bookingTitle={bookedRoomBooking?.title}
+            isBookingDetailsPending={
+              isBookedRoomBookingPending || isReconcilingMissingBooking
+            }
+            bookingDetailsError={
+              isBookedRoomBookingMissing ? undefined : bookedRoomBookingError
+            }
+            onRetryBookingDetails={refetchBookedRoomBooking}
+            selectedTime={event.selected_time}
             selectedTimeLabel={selectedTimeLabel}
             onMeetingUpdated={handleMeetingUpdated}
+          />
+        )}
+
+        {bookedRoomBooking && (
+          <BookingModal
+            detailsBooking={bookedRoomBooking}
+            open={bookingDetailsOpen}
+            onOpenChange={handleBookingDetailsOpenChange}
+            onBookingCreated={() => {
+              refetchBookedRoomBooking();
+            }}
           />
         )}
       </>

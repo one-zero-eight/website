@@ -252,6 +252,88 @@ describe("final meeting selection on the grid", () => {
     expect(onPastMeetingTimeAttempt).not.toHaveBeenCalled();
   });
 
+  it("hides the previous meeting boundary while choosing a replacement", () => {
+    const previousSlot = "2027-06-15_12:30";
+    const adjacentSlot = "2027-06-16_12:30";
+
+    act(() => {
+      root.render(
+        createElement(AvailabilitySelector, {
+          dates: [
+            { id: "2027-06-15", monthDay: "Jun 15", weekDay: "Tue" },
+            { id: "2027-06-16", monthDay: "Jun 16", weekDay: "Wed" },
+          ],
+          timeSlots: ["12:30"],
+          users: [],
+          viewedUserIds: new Set<string>(),
+          editingUserId: null,
+          draftSlots: new Set<string>(),
+          onApplySlots,
+          allowedSlots: new Set([previousSlot, adjacentSlot]),
+          intervalSelectionMode: true,
+          intervalSelectionSlots: new Set<string>(),
+          selectedMeetingSlotKeys: new Set([previousSlot]),
+          onIntervalSelectionSlotsChange: onChange,
+          onIntervalSelectionEnd: onEnd,
+        }),
+      );
+    });
+
+    const adjacentCell = container.querySelector(
+      `[data-slot-key="${adjacentSlot}"]`,
+    );
+
+    expect(adjacentCell).not.toBeNull();
+    expect(
+      adjacentCell?.querySelector(
+        '[data-slot-vertical-boundary="secondary-left"]',
+      ),
+    ).toBeNull();
+    expect(container.textContent).toContain("Final time");
+    expect(container.textContent).not.toContain("Chosen");
+  });
+
+  it("hides the user's availability outline on past slots", () => {
+    const pastSlot = slot("11:30");
+    const futureSlot = slot("12:30");
+
+    act(() => {
+      root.render(
+        createElement(AvailabilitySelector, {
+          dates: [{ id: "2027-06-15", monthDay: "Jun 15", weekDay: "Tue" }],
+          timeSlots: ["11:30", "12:30"],
+          users: [
+            {
+              id: "user",
+              name: "User",
+              slots: new Set([pastSlot, futureSlot]),
+            },
+          ],
+          viewedUserIds: new Set(["user"]),
+          currentUserId: "user",
+          editingUserId: null,
+          draftSlots: new Set<string>(),
+          onApplySlots,
+          allowedSlots: new Set([pastSlot, futureSlot]),
+          intervalSelectionMode: true,
+          intervalSelectionSlots: new Set<string>(),
+          onIntervalSelectionSlotsChange: onChange,
+          onIntervalSelectionEnd: onEnd,
+        }),
+      );
+    });
+
+    expect(
+      cell("11:30").querySelector("[data-my-availability-outline]"),
+    ).toBeNull();
+    expect(
+      cell("11:30").querySelector('[data-slot-vertical-boundary^="primary-"]'),
+    ).toBeNull();
+    expect(
+      cell("12:30").querySelector("[data-my-availability-outline]"),
+    ).not.toBeNull();
+  });
+
   it("still allows historical participant availability", () => {
     renderGrid(false, false);
     act(() => {

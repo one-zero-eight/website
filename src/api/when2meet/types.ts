@@ -218,6 +218,11 @@ export interface components {
        * @description Room ID to book
        */
       room_id: string;
+      /**
+       * Title
+       * @description Optional booking title; defaults to the meeting name
+       */
+      title?: string | null;
     };
     /** BookedRoom */
     BookedRoom: {

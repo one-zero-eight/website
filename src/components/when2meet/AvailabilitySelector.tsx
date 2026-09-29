@@ -28,6 +28,8 @@ type DragMode = "add" | "remove";
 
 const CALENDAR_EVENT_TEXT_CLASS_NAME =
   "text-[10px] leading-none md:text-[11px]";
+const CALENDAR_EVENT_PATTERN_CLASS_NAME =
+  "bg-[repeating-linear-gradient(-45deg,color-mix(in_oklch,var(--color-accent)_24%,transparent),color-mix(in_oklch,var(--color-accent)_24%,transparent)_8px,transparent_8px,transparent_16px)]";
 
 function getMeetingTimeOverlayClassName({
   continuesAbove,
@@ -39,18 +41,65 @@ function getMeetingTimeOverlayClassName({
   overlapsAvailability: boolean;
 }) {
   return cn(
-    "pointer-events-none absolute inset-0 border-r-2 border-l-2",
-    overlapsAvailability
-      ? "border-success bg-success/35"
-      : "border-secondary bg-secondary/15",
+    "pointer-events-none absolute inset-0 z-[3]",
+    overlapsAvailability ? "border-success" : "border-secondary",
     !continuesAbove &&
       (overlapsAvailability
-        ? "border-t-success border-t-2"
-        : "border-t-secondary border-t-2"),
+        ? "border-t-success border-t-[3px]"
+        : "border-t-secondary border-t-[3px]"),
     !continuesBelow &&
       (overlapsAvailability
-        ? "border-b-success border-b-2"
-        : "border-b-secondary border-b-2"),
+        ? "border-b-success border-b-[3px]"
+        : "border-b-secondary border-b-[3px]"),
+  );
+}
+
+function getMyAvailabilityOutlineClassName({
+  continuesAbove,
+  continuesBelow,
+}: {
+  continuesAbove: boolean;
+  continuesBelow: boolean;
+}) {
+  return cn(
+    "border-primary pointer-events-none absolute inset-0 z-[2]",
+    !continuesAbove && "border-t-primary border-t-[3px]",
+    !continuesBelow && "border-b-primary border-b-[3px]",
+  );
+}
+
+function SlotVerticalBoundary({
+  color,
+  side,
+  wide = false,
+  foreground = false,
+}: {
+  color: "primary" | "secondary" | "success";
+  side: "left" | "right";
+  wide?: boolean;
+  foreground?: boolean;
+}) {
+  return (
+    <span
+      data-slot-vertical-boundary={`${color}-${side}`}
+      className={cn(
+        "pointer-events-none absolute top-0 bottom-0",
+        foreground ? "z-[3]" : "z-[2]",
+        color === "primary"
+          ? "bg-primary"
+          : color === "success"
+            ? "bg-success"
+            : "bg-secondary",
+        wide ? "w-[3px]" : "w-0.5",
+        side === "left"
+          ? wide
+            ? "-left-[1.5px]"
+            : "-left-px"
+          : wide
+            ? "-right-[1.5px]"
+            : "-right-px",
+      )}
+    />
   );
 }
 
@@ -114,7 +163,12 @@ export function AvailabilitySelector({
   showCalendarOverlay = false,
   calendarSlotEvents,
   calendarAllDayEvents,
-  calendarConflictSlotKeys,
+  showCalendarEvents = true,
+  onShowCalendarEventsChange,
+  showOtherParticipantsAvailability = true,
+  onShowOtherParticipantsAvailabilityChange,
+  showSelectedMeetingTime = true,
+  onShowSelectedMeetingTimeChange,
   onTimeGridDoubleClick,
   currentTime = Date.now(),
   timeZone = "Europe/Moscow",
@@ -144,7 +198,12 @@ export function AvailabilitySelector({
   showCalendarOverlay?: boolean;
   calendarSlotEvents?: Map<string, string[]>;
   calendarAllDayEvents?: Map<string, string[]>;
-  calendarConflictSlotKeys?: Set<string>;
+  showCalendarEvents?: boolean;
+  onShowCalendarEventsChange?: (show: boolean) => void;
+  showOtherParticipantsAvailability?: boolean;
+  onShowOtherParticipantsAvailabilityChange?: (show: boolean) => void;
+  showSelectedMeetingTime?: boolean;
+  onShowSelectedMeetingTimeChange?: (show: boolean) => void;
   onTimeGridDoubleClick?: () => void;
   currentTime?: number;
   timeZone?: string;
@@ -187,6 +246,22 @@ export function AvailabilitySelector({
   const isEditing = editingUserId !== null;
   const showEditingVisual = selectionOnly || isEditing;
   const showAvailabilityEditing = isEditing && !selectionOnly;
+  const calendarOverlayVisible =
+    showCalendarOverlay && (!showAvailabilityEditing || showCalendarEvents);
+  const selectedMeetingTimeVisible =
+    !showAvailabilityEditing || showSelectedMeetingTime;
+  const effectiveViewedUserIds = useMemo(() => {
+    if (!showAvailabilityEditing || showOtherParticipantsAvailability) {
+      return viewedUserIds;
+    }
+
+    return editingUserId ? new Set([editingUserId]) : new Set<string>();
+  }, [
+    editingUserId,
+    showAvailabilityEditing,
+    showOtherParticipantsAvailability,
+    viewedUserIds,
+  ]);
   const highlightBestIntersection =
     !showEditingVisual &&
     !!bestIntersectionSlotKeys &&
@@ -211,7 +286,7 @@ export function AvailabilitySelector({
   const hasNextPage = dateOffset + daysPerPage < dates.length;
   const showPagination = dates.length > daysPerPage;
   const hasVisibleAllDayEvents =
-    showCalendarOverlay &&
+    calendarOverlayVisible &&
     visibleDates.some((date) => calendarAllDayEvents?.has(date.id));
 
   useEffect(() => {
@@ -224,10 +299,20 @@ export function AvailabilitySelector({
       return;
     }
 
-    if (isEditing && !showCalendarOverlay) {
+    if (
+      isEditing &&
+      !calendarOverlayVisible &&
+      !showOtherParticipantsAvailability
+    ) {
       onHoveredSlotKeyChange?.(null);
     }
-  }, [isEditing, onHoveredSlotKeyChange, selectionOnly, showCalendarOverlay]);
+  }, [
+    calendarOverlayVisible,
+    isEditing,
+    onHoveredSlotKeyChange,
+    selectionOnly,
+    showOtherParticipantsAvailability,
+  ]);
 
   function isSlotAllowed(dateId: string, time: string) {
     const slotKey = getSlotKey(dateId, time);
@@ -245,7 +330,7 @@ export function AvailabilitySelector({
 
     return countExplicitSlotAvailability(
       users,
-      viewedUserIds,
+      effectiveViewedUserIds,
       getSlotKey(dateId, time),
       editingUserId,
       draftSlots,
@@ -259,11 +344,10 @@ export function AvailabilitySelector({
 
     return countExplicitSlotAvailability(
       users,
-      viewedUserIds,
+      effectiveViewedUserIds,
       getSlotKey(dateId, time),
       editingUserId,
       draftSlots,
-      editingUserId ?? undefined,
     );
   }
 
@@ -283,7 +367,7 @@ export function AvailabilitySelector({
     }
 
     if (isEditing) {
-      if (!showCalendarOverlay) {
+      if (!calendarOverlayVisible && !showOtherParticipantsAvailability) {
         return;
       }
 
@@ -312,7 +396,11 @@ export function AvailabilitySelector({
       return;
     }
 
-    if (isEditing && !showCalendarOverlay) {
+    if (
+      isEditing &&
+      !calendarOverlayVisible &&
+      !showOtherParticipantsAvailability
+    ) {
       return;
     }
 
@@ -786,11 +874,10 @@ export function AvailabilitySelector({
         if (
           countExplicitSlotAvailability(
             users,
-            viewedUserIds,
+            effectiveViewedUserIds,
             slotKey,
             editingUserId,
             draftSlots,
-            editingUserId ?? undefined,
           ) > 0
         ) {
           set.add(slotKey);
@@ -810,7 +897,7 @@ export function AvailabilitySelector({
     fadeNonBestSlots,
     bestIntersectionSlotKeys,
     users,
-    viewedUserIds,
+    effectiveViewedUserIds,
     editingUserId,
   ]);
 
@@ -894,7 +981,11 @@ export function AvailabilitySelector({
             const dateColumnGapBorderClassName =
               getDateColumnGapBorderClassName(dateIndex);
             const eventTitles = calendarAllDayEvents?.get(date.id) ?? [];
-
+            const firstEventTitle = eventTitles[0];
+            const allDayEventLabel =
+              eventTitles.length > 1
+                ? `${firstEventTitle} +${eventTitles.length - 1}`
+                : firstEventTitle;
             return (
               <div
                 key={`all-day-${date.id}`}
@@ -906,18 +997,20 @@ export function AvailabilitySelector({
                   dateColumnGapBorderClassName,
                 )}
               >
-                {eventTitles.map((title) => (
+                {firstEventTitle && (
                   <div
-                    key={title}
-                    title={title}
+                    title={eventTitles.join(", ")}
                     className={cn(
-                      "text-base-content/80 flex min-h-5 min-w-0 items-center justify-center truncate bg-[repeating-linear-gradient(-45deg,color-mix(in_oklch,var(--color-accent)_24%,transparent),color-mix(in_oklch,var(--color-accent)_24%,transparent)_8px,transparent_8px,transparent_16px)] px-0.5 text-center dark:text-[#f5f0d8]",
+                      "bg-base-200 text-base-content/80 relative flex min-h-5 min-w-0 items-center justify-center truncate px-0.5 text-center dark:text-[#f5f0d8]",
                       CALENDAR_EVENT_TEXT_CLASS_NAME,
+                      CALENDAR_EVENT_PATTERN_CLASS_NAME,
                     )}
                   >
-                    {title}
+                    <span className="relative truncate">
+                      {allDayEventLabel}
+                    </span>
                   </div>
-                ))}
+                )}
               </div>
             );
           })}
@@ -959,11 +1052,17 @@ export function AvailabilitySelector({
               time,
             );
             const isSelected = isEditingUserSlot(date.id, time);
+            const displayedMySlots = showAvailabilityEditing
+              ? draftSlots
+              : mySlots;
             const isMySlot =
-              !!mySlots && mySlots.has(slotKey) && !showEditingVisual;
+              !selectionOnly &&
+              !!displayedMySlots?.has(slotKey) &&
+              (!intervalSelectionMode || slotAllowed);
             const isIntervalSelected =
               intervalSelectionSlots?.has(slotKey) ?? false;
             const isSelectedMeetingSlot =
+              selectedMeetingTimeVisible &&
               !intervalSelectionMode &&
               (selectedMeetingSlotKeys?.has(slotKey) ?? false);
             const isFilled = filledSlotKeys.has(slotKey);
@@ -972,6 +1071,8 @@ export function AvailabilitySelector({
               timeIndex < timeSlots.length - 1
                 ? timeSlots[timeIndex + 1]
                 : null;
+            const prevDate =
+              visibleIndex > 0 ? visibleDates[visibleIndex - 1] : null;
             const nextDate =
               visibleIndex < visibleDates.length - 1
                 ? visibleDates[visibleIndex + 1]
@@ -985,30 +1086,41 @@ export function AvailabilitySelector({
               !!nextDate &&
               areConsecutiveDateIds(date.id, nextDate.id) &&
               filledSlotKeys.has(getSlotKey(nextDate.id, time));
+            const hasConsecutiveNextDate =
+              !!nextDate && areConsecutiveDateIds(date.id, nextDate.id);
             const mySlotAbove =
-              !!mySlots &&
+              !!displayedMySlots &&
               !!prevTime &&
-              mySlots.has(getSlotKey(date.id, prevTime));
+              (!intervalSelectionMode || isSlotAllowed(date.id, prevTime)) &&
+              displayedMySlots.has(getSlotKey(date.id, prevTime));
             const mySlotBelow =
-              !!mySlots &&
+              !!displayedMySlots &&
               !!nextTime &&
-              mySlots.has(getSlotKey(date.id, nextTime));
-            const editingSlotAbove =
-              isSelected &&
-              !!prevTime &&
-              draftSlots.has(getSlotKey(date.id, prevTime));
-            const editingSlotBelow =
-              isSelected &&
-              !!nextTime &&
-              draftSlots.has(getSlotKey(date.id, nextTime));
+              (!intervalSelectionMode || isSlotAllowed(date.id, nextTime)) &&
+              displayedMySlots.has(getSlotKey(date.id, nextTime));
+            const mySlotLeft =
+              !!displayedMySlots &&
+              !!prevDate &&
+              areConsecutiveDateIds(prevDate.id, date.id) &&
+              (!intervalSelectionMode || isSlotAllowed(prevDate.id, time)) &&
+              displayedMySlots.has(getSlotKey(prevDate.id, time));
             const selectedMeetingSlotAbove =
+              selectedMeetingTimeVisible &&
               !!selectedMeetingSlotKeys &&
               !!prevTime &&
               selectedMeetingSlotKeys.has(getSlotKey(date.id, prevTime));
             const selectedMeetingSlotBelow =
+              selectedMeetingTimeVisible &&
               !!selectedMeetingSlotKeys &&
               !!nextTime &&
               selectedMeetingSlotKeys.has(getSlotKey(date.id, nextTime));
+            const selectedMeetingSlotLeft =
+              selectedMeetingTimeVisible &&
+              !intervalSelectionMode &&
+              !!selectedMeetingSlotKeys &&
+              !!prevDate &&
+              areConsecutiveDateIds(prevDate.id, date.id) &&
+              selectedMeetingSlotKeys.has(getSlotKey(prevDate.id, time));
             const intervalSelectionAbove =
               isIntervalSelected &&
               !!prevTime &&
@@ -1017,23 +1129,32 @@ export function AvailabilitySelector({
               isIntervalSelected &&
               !!nextTime &&
               intervalSelectionSlots?.has(getSlotKey(date.id, nextTime));
+            const intervalSelectionLeft =
+              !!prevDate &&
+              areConsecutiveDateIds(prevDate.id, date.id) &&
+              intervalSelectionSlots?.has(getSlotKey(prevDate.id, time));
             const meetingTimeOverlapsAvailability =
               (isSelectedMeetingSlot || isIntervalSelected) &&
               !showEditingVisual &&
               availableCount > 0;
+            const meetingTimeLeftBoundaryOverlapsAvailability =
+              isSelectedMeetingSlot || isIntervalSelected
+                ? meetingTimeOverlapsAvailability
+                : !showEditingVisual &&
+                  !!prevDate &&
+                  (selectedMeetingSlotLeft || intervalSelectionLeft) &&
+                  getAvailableCount(prevDate.id, time) > 0;
             const calendarEventTitles =
-              showCalendarOverlay && calendarSlotEvents?.has(slotKey)
+              calendarOverlayVisible && calendarSlotEvents?.has(slotKey)
                 ? calendarSlotEvents.get(slotKey)
                 : undefined;
             const hasCalendarEvent = !!calendarEventTitles?.length;
-            const calendarEventLabel =
-              calendarEventTitles && calendarEventTitles.length > 1
-                ? `${calendarEventTitles[0]} +${calendarEventTitles.length - 1}`
-                : (calendarEventTitles?.[0] ?? "");
-            const hasCalendarConflict =
-              isSelected &&
-              !!calendarConflictSlotKeys?.has(slotKey) &&
-              hasCalendarEvent;
+            const calendarEventTitle = calendarEventTitles?.[0] ?? "";
+            const additionalCalendarEventCount =
+              (calendarEventTitles?.length ?? 0) - 1;
+            const calendarEventLabel = additionalCalendarEventCount
+              ? `${calendarEventTitle} +${additionalCalendarEventCount}`
+              : calendarEventTitle;
             const isBestIntersection =
               fadeNonBestSlots && bestIntersectionSlotKeys.has(slotKey);
             const isFilteredOut =
@@ -1097,11 +1218,7 @@ export function AvailabilitySelector({
                             !intervalSelectionMode && "pointer-events-none",
                           )
                         : heatmapAppearance?.className),
-                  hasCalendarEvent &&
-                    "bg-[repeating-linear-gradient(-45deg,color-mix(in_oklch,var(--color-accent)_24%,transparent),color-mix(in_oklch,var(--color-accent)_24%,transparent)_8px,transparent_8px,transparent_16px)]",
-                  isSelected &&
-                    hasCalendarConflict &&
-                    "shadow-[inset_0_0_0_2px_var(--color-warning)]",
+                  hasCalendarEvent && CALENDAR_EVENT_PATTERN_CLASS_NAME,
                   showPartialSlotHover &&
                     !isIntervalSelected &&
                     "ring-primary shadow-[inset_0_0_0_2px_var(--color-primary)]",
@@ -1122,9 +1239,11 @@ export function AvailabilitySelector({
                       ? `${date.monthDay}, ${time}: selecting meeting time`
                       : isSelectedMeetingSlot
                         ? `${date.monthDay}, ${time}: selected meeting time`
-                        : calendarEventTitles?.length
-                          ? `${date.monthDay}, ${time}: ${availableCount} available · ${calendarEventTitles.join(", ")}`
-                          : `${date.monthDay}, ${time}: ${availableCount} available`
+                        : showAvailabilityEditing
+                          ? `${date.monthDay}, ${time}: ${isSelected ? "your availability is selected" : "your availability is not selected"}`
+                          : calendarEventTitles?.length
+                            ? `${date.monthDay}, ${time}: ${availableCount} available · ${calendarEventTitles.join(", ")}`
+                            : `${date.monthDay}, ${time}: ${availableCount} available`
                 }
                 onMouseEnter={() =>
                   handleSlotMouseEnter(slotKey, date.id, time)
@@ -1135,33 +1254,27 @@ export function AvailabilitySelector({
                 onClick={() => handleSlotTap(slotKey)}
                 onDoubleClick={onTimeGridDoubleClick}
               >
-                {showAvailabilityEditing && isSelected && (
+                {(isSelectedMeetingSlot || isIntervalSelected) && (
                   <span
-                    className={getMeetingTimeOverlayClassName({
-                      continuesAbove: editingSlotAbove,
-                      continuesBelow: editingSlotBelow,
-                      overlapsAvailability: true,
-                    })}
+                    className={cn(
+                      "pointer-events-none absolute inset-0",
+                      meetingTimeOverlapsAvailability
+                        ? "bg-success/35"
+                        : "bg-secondary/15",
+                    )}
                   />
                 )}
                 {hasCalendarEvent && (
                   <span
                     className={cn(
-                      "text-base-content/80 pointer-events-none absolute inset-0 flex items-center justify-center truncate px-0.5 text-center dark:text-[#f5f0d8]",
+                      "text-base-content/80 pointer-events-none absolute inset-0 z-[1] flex items-center justify-center truncate px-0.5 text-center dark:text-[#f5f0d8]",
                       CALENDAR_EVENT_TEXT_CLASS_NAME,
                     )}
                   >
-                    {calendarEventLabel}
+                    <span className="relative truncate">
+                      {calendarEventLabel}
+                    </span>
                   </span>
-                )}
-                {isMySlot && !isIntervalSelected && (
-                  <span
-                    className={cn(
-                      "border-l-primary border-r-primary pointer-events-none absolute inset-0 border-r-2 border-l-2",
-                      !mySlotAbove && "border-t-primary border-t-2",
-                      !mySlotBelow && "border-b-primary border-b-2",
-                    )}
-                  />
                 )}
                 {isSelectedMeetingSlot && !isIntervalSelected && (
                   <span
@@ -1169,6 +1282,15 @@ export function AvailabilitySelector({
                       continuesAbove: !!selectedMeetingSlotAbove,
                       continuesBelow: !!selectedMeetingSlotBelow,
                       overlapsAvailability: meetingTimeOverlapsAvailability,
+                    })}
+                  />
+                )}
+                {isMySlot && !isIntervalSelected && (
+                  <span
+                    data-my-availability-outline
+                    className={getMyAvailabilityOutlineClassName({
+                      continuesAbove: mySlotAbove,
+                      continuesBelow: mySlotBelow,
                     })}
                   />
                 )}
@@ -1181,10 +1303,65 @@ export function AvailabilitySelector({
                     })}
                   />
                 )}
+                {!isIntervalSelected &&
+                  (isSelectedMeetingSlot || selectedMeetingSlotLeft) && (
+                    <SlotVerticalBoundary
+                      color={
+                        meetingTimeLeftBoundaryOverlapsAvailability
+                          ? "success"
+                          : "secondary"
+                      }
+                      side="left"
+                      wide
+                      foreground
+                    />
+                  )}
+                {!isIntervalSelected &&
+                  isSelectedMeetingSlot &&
+                  !hasConsecutiveNextDate && (
+                    <SlotVerticalBoundary
+                      color={
+                        meetingTimeOverlapsAvailability
+                          ? "success"
+                          : "secondary"
+                      }
+                      side="right"
+                      wide
+                      foreground
+                    />
+                  )}
+                {!isIntervalSelected && (isMySlot || mySlotLeft) && (
+                  <SlotVerticalBoundary color="primary" side="left" wide />
+                )}
+                {!isIntervalSelected && isMySlot && !hasConsecutiveNextDate && (
+                  <SlotVerticalBoundary color="primary" side="right" wide />
+                )}
+                {(isIntervalSelected || intervalSelectionLeft) && (
+                  <SlotVerticalBoundary
+                    color={
+                      meetingTimeLeftBoundaryOverlapsAvailability
+                        ? "success"
+                        : "secondary"
+                    }
+                    side="left"
+                    wide
+                    foreground
+                  />
+                )}
+                {isIntervalSelected && !hasConsecutiveNextDate && (
+                  <SlotVerticalBoundary
+                    color={
+                      meetingTimeOverlapsAvailability ? "success" : "secondary"
+                    }
+                    side="right"
+                    wide
+                    foreground
+                  />
+                )}
                 {currentTimeIndicatorOffset !== null && (
                   <span
                     data-current-time-indicator
-                    className="pointer-events-none absolute right-0 left-0 h-0.5 rounded-full bg-[red]"
+                    className="pointer-events-none absolute right-0 left-0 z-[4] h-0.5 rounded-full bg-[red]"
                     style={{ top: `${currentTimeIndicatorOffset}%` }}
                   />
                 )}
@@ -1241,29 +1418,98 @@ export function AvailabilitySelector({
 
       {!selectionOnly && (
         <div className="text-base-content/70 mb-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="bg-primary/50 border-base-300 h-3 w-5 rounded-sm border" />
-            {showAvailabilityEditing ? "Other participants" : "Availability"}
-          </span>
           {currentUserId && (
             <span className="inline-flex items-center gap-1.5">
               <span
                 className={cn(
-                  "h-3 w-5 rounded-sm border-2",
-                  showAvailabilityEditing
-                    ? "border-success bg-success/35"
-                    : "border-primary",
+                  "h-3 w-5 rounded-sm border-[3px]",
+                  "border-primary",
                 )}
               />
               Your
             </span>
           )}
-          {(selectedMeetingSlotKeys?.size || intervalSelectionMode) && (
+          {showAvailabilityEditing ? (
+            <button
+              type="button"
+              title={`${showOtherParticipantsAvailability ? "Hide" : "Show"} other participants' availability`}
+              className={cn(
+                "hover:text-base-content inline-flex items-center gap-1.5 transition-opacity",
+                !showOtherParticipantsAvailability && "opacity-40",
+              )}
+              onClick={() =>
+                onShowOtherParticipantsAvailabilityChange?.(
+                  !showOtherParticipantsAvailability,
+                )
+              }
+            >
+              <span className="bg-primary/50 border-base-300 h-3 w-5 rounded-sm border" />
+              <span className="underline underline-offset-2">
+                Other participants
+              </span>
+            </button>
+          ) : (
             <span className="inline-flex items-center gap-1.5">
-              <span className="border-secondary bg-secondary/15 h-3 w-5 rounded-sm border-2" />
-              Chosen
+              <span className="bg-primary/50 border-base-300 h-3 w-5 rounded-sm border" />
+              Availability
             </span>
           )}
+          {showCalendarOverlay &&
+            (showAvailabilityEditing ? (
+              <button
+                type="button"
+                title={`${showCalendarEvents ? "Hide" : "Show"} calendar events`}
+                className={cn(
+                  "hover:text-base-content inline-flex items-center gap-1.5 transition-opacity",
+                  !showCalendarEvents && "opacity-40",
+                )}
+                onClick={() =>
+                  onShowCalendarEventsChange?.(!showCalendarEvents)
+                }
+              >
+                <span
+                  className={cn(
+                    "border-base-300 h-3 w-5 rounded-sm border",
+                    CALENDAR_EVENT_PATTERN_CLASS_NAME,
+                  )}
+                />
+                <span className="underline underline-offset-2">
+                  Calendar events
+                </span>
+              </button>
+            ) : (
+              <span className="inline-flex items-center gap-1.5">
+                <span
+                  className={cn(
+                    "border-base-300 h-3 w-5 rounded-sm border",
+                    CALENDAR_EVENT_PATTERN_CLASS_NAME,
+                  )}
+                />
+                Calendar events
+              </span>
+            ))}
+          {(selectedMeetingSlotKeys?.size || intervalSelectionMode) &&
+            (showAvailabilityEditing ? (
+              <button
+                type="button"
+                title={`${showSelectedMeetingTime ? "Hide" : "Show"} final meeting time`}
+                className={cn(
+                  "hover:text-base-content inline-flex items-center gap-1.5 transition-opacity",
+                  !showSelectedMeetingTime && "opacity-40",
+                )}
+                onClick={() =>
+                  onShowSelectedMeetingTimeChange?.(!showSelectedMeetingTime)
+                }
+              >
+                <span className="border-secondary bg-secondary/15 h-3 w-5 rounded-sm border-[3px]" />
+                <span className="underline underline-offset-2">Final time</span>
+              </button>
+            ) : (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="border-secondary bg-secondary/15 h-3 w-5 rounded-sm border-[3px]" />
+                Final time
+              </span>
+            ))}
         </div>
       )}
 

@@ -343,9 +343,8 @@ export function getSlotAvailabilityRatio(count: number, maxCount: number) {
 }
 
 /**
- * Maximum opacity for heatmap slot fills. Kept below 100% so the current
- * user's slot outline (full --color-primary) is always brighter than the
- * brightest heatmap slot.
+ * Maximum opacity for heatmap slot fills. Kept below 100% so outlines and
+ * labels remain visible over the brightest heatmap slot.
  */
 export const MAX_HEATMAP_OPACITY_PERCENT = 75;
 

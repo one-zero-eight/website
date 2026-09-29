@@ -54,8 +54,9 @@ const MSK_DAY_MS = 24 * 3600 * 1000;
 
 /**
  * offset 0 = today…Sunday of the current week (Moscow week starts Monday).
- * Any other offset = the full Monday…Sunday week shifted by that many weeks
- * from the current one.
+ * offset -1 = the full current week.
+ * Negative offsets = preceding full weeks.
+ * Positive offsets = following full weeks.
  */
 export function getSchedulePeriodBounds(periodOffset: number): {
   start: Date;
@@ -68,8 +69,9 @@ export function getSchedulePeriodBounds(periodOffset: number): {
     return { start: todayStart, end: endOfSportWeekMoscow(currentWeekMonday) };
   }
 
+  const weekOffset = periodOffset < 0 ? periodOffset + 1 : periodOffset;
   const start = new Date(
-    currentWeekMonday.getTime() + periodOffset * 7 * MSK_DAY_MS,
+    currentWeekMonday.getTime() + weekOffset * 7 * MSK_DAY_MS,
   );
   return { start, end: endOfSportWeekMoscow(start) };
 }

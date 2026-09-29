@@ -1,3 +1,4 @@
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
 import { SportTrainerBaamImportButton } from "@/components/sport/SportTrainerBaamImportButton.tsx";
@@ -25,6 +26,7 @@ export function SportTrainerAttendanceModal({
 }) {
   const trainingId = row.training.id;
   const groupId = row.training.group_id;
+  const canEdit = row.can_edit;
 
   const { showError, showSuccess, showWarning } = useToast();
   const [importing, setImporting] = useState(false);
@@ -58,15 +60,15 @@ export function SportTrainerAttendanceModal({
         handleAttendanceResponse(data, showSuccess, showWarning);
         invalidateAttendance(trainingId);
       },
-      onError: () => {
-        showError("Could not update attendance", "Please try again.");
+      onError: (error) => {
+        showError("Could not update attendance", formatApiErrorMessage(error));
       },
     },
   );
 
   function handleStudentHours(studentId: number, hours: number) {
     const grade = sortedGrades.find((item) => item.id === studentId);
-    if (grade?.hours === hours) {
+    if (!canEdit || !grade || grade.hours === hours) {
       return;
     }
 
@@ -86,18 +88,19 @@ export function SportTrainerAttendanceModal({
       title={sportTrainingTitle(row) + " (Trainer)"}
       closeDisabled={importing}
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
-        <SportTrainerStudentAddField
-          open={open}
-          trainingId={trainingId}
-          groupId={groupId}
-        />
-
-        <SportTrainerBaamImportButton
-          trainingId={trainingId}
-          groupId={groupId}
-          onImportingChange={setImporting}
-        />
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-4">
+        {canEdit ? (
+          <SportTrainerStudentAddField
+            open={open}
+            trainingId={trainingId}
+            groupId={groupId}
+            maxHours={attendance?.academic_duration}
+          />
+        ) : (
+          <div className="text-warning text-sm">
+            You can't change this training.
+          </div>
+        )}
 
         {attendancePending ? (
           <div className="flex flex-col gap-2">
@@ -110,12 +113,13 @@ export function SportTrainerAttendanceModal({
             Attendance list could not be loaded.
           </div>
         ) : sortedGrades.length ? (
-          <ul className="flex flex-col gap-2">
+          <ul className="divide-base-300 divide-y">
             {sortedGrades.map((grade) => (
               <SportTrainerAttendanceRow
                 key={grade.id}
                 grade={grade}
-                disabled={markPending || importing}
+                maxHours={attendance?.academic_duration ?? 0}
+                disabled={!canEdit || markPending || importing}
                 onHoursChange={handleStudentHours}
               />
             ))}
@@ -125,7 +129,7 @@ export function SportTrainerAttendanceModal({
         )}
       </div>
 
-      <div className="border-t-base-300 flex shrink-0 flex-wrap gap-2 border-t p-4">
+      <div className="border-t-base-300 flex shrink-0 flex-wrap items-center gap-2 border-t p-4">
         <button
           type="button"
           className="btn btn-ghost"
@@ -134,6 +138,14 @@ export function SportTrainerAttendanceModal({
         >
           Close
         </button>
+        {canEdit ? (
+          <SportTrainerBaamImportButton
+            trainingId={trainingId}
+            groupId={groupId}
+            maxHours={attendance?.academic_duration}
+            onImportingChange={setImporting}
+          />
+        ) : null}
       </div>
     </SportTrainingModalShell>
   );

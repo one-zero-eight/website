@@ -12,7 +12,43 @@ import { getSlotKey } from "./slots.ts";
 describe("when2meet personal calendar overlay", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
+
+  const timedEventIcs = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "BEGIN:VEVENT",
+    "UID:lecture",
+    "DTSTART:20260703T100000Z",
+    "DTEND:20260703T110000Z",
+    "SUMMARY:Lecture",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+
+  function stubCalendarFetch(responses: Record<string, Response | Error>) {
+    vi.stubGlobal("localStorage", {
+      getItem: vi.fn(() => null),
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const response = responses[String(input)];
+
+        if (response instanceof Error) {
+          throw response;
+        }
+
+        if (!response) {
+          throw new Error(`Unexpected calendar URL: ${String(input)}`);
+        }
+
+        return response;
+      }),
+    );
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  }
 
   it("keeps timed events in slots and marks selected conflicts", () => {
     const slotKey = getSlotKey("2026-07-03", "10:00");
@@ -93,5 +129,97 @@ describe("when2meet personal calendar overlay", () => {
         endDateIdExclusive: "2026-07-05",
       },
     ]);
+  });
+
+  it.each([404, 503])(
+    "keeps successful events when another calendar responds with HTTP %s",
+    async (status) => {
+      stubCalendarFetch({
+        "https://calendar.test/working.ics": new Response(timedEventIcs, {
+          status: 200,
+        }),
+        "https://calendar.test/failing.ics": new Response(null, { status }),
+      });
+
+      const events = await fetchPersonalCalendarEvents(
+        [
+          "https://calendar.test/working.ics",
+          "https://calendar.test/failing.ics",
+        ],
+        new Date("2026-07-03T00:00:00Z"),
+        new Date("2026-07-03T23:59:59Z"),
+      );
+
+      expect(events).toHaveLength(1);
+      expect(events[0]?.title).toBe("Lecture");
+      expect(console.warn).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("keeps successful events when another calendar has a network error", async () => {
+    stubCalendarFetch({
+      "https://calendar.test/working.ics": new Response(timedEventIcs, {
+        status: 200,
+      }),
+      "https://calendar.test/failing.ics": new TypeError("Failed to fetch"),
+    });
+
+    const events = await fetchPersonalCalendarEvents(
+      [
+        "https://calendar.test/working.ics",
+        "https://calendar.test/failing.ics",
+      ],
+      new Date("2026-07-03T00:00:00Z"),
+      new Date("2026-07-03T23:59:59Z"),
+    );
+
+    expect(events).toHaveLength(1);
+    expect(events[0]?.title).toBe("Lecture");
+  });
+
+  it("keeps successful events when another calendar contains invalid ICS", async () => {
+    stubCalendarFetch({
+      "https://calendar.test/working.ics": new Response(timedEventIcs, {
+        status: 200,
+      }),
+      "https://calendar.test/invalid.ics": new Response("not an ICS file", {
+        status: 200,
+      }),
+    });
+
+    const events = await fetchPersonalCalendarEvents(
+      [
+        "https://calendar.test/working.ics",
+        "https://calendar.test/invalid.ics",
+      ],
+      new Date("2026-07-03T00:00:00Z"),
+      new Date("2026-07-03T23:59:59Z"),
+    );
+
+    expect(events).toHaveLength(1);
+    expect(events[0]?.title).toBe("Lecture");
+  });
+
+  it("returns no events when every calendar fails", async () => {
+    stubCalendarFetch({
+      "https://calendar.test/not-found.ics": new Response(null, {
+        status: 404,
+      }),
+      "https://calendar.test/unavailable.ics": new Response(null, {
+        status: 503,
+      }),
+    });
+
+    await expect(
+      fetchPersonalCalendarEvents(
+        [
+          "https://calendar.test/not-found.ics",
+          "https://calendar.test/unavailable.ics",
+        ],
+        new Date("2026-07-03T00:00:00Z"),
+        new Date("2026-07-03T23:59:59Z"),
+      ),
+    ).resolves.toEqual([]);
+    expect(console.warn).toHaveBeenCalledTimes(2);
   });
 });

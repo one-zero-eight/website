@@ -207,7 +207,7 @@ export function collapseHalfHourSlotKeysToHourly(slotKeys: Iterable<string>) {
   return collapsed;
 }
 
-function getTimeSlotDurationMinutes(timeSlots: string[]) {
+export function getTimeSlotDurationMinutes(timeSlots: string[]) {
   const sortedTimes = [...timeSlots].sort((a, b) => a.localeCompare(b));
 
   for (let index = 1; index < sortedTimes.length; index++) {

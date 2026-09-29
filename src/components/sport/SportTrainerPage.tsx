@@ -4,6 +4,7 @@ import type {
   SchemaTrainingInfoPersonalSchema,
 } from "@/api/sport/types.ts";
 import { SportStudentTrainingModal } from "@/components/sport/SportStudentTrainingModal.tsx";
+import { SportCheckinRulesModal } from "@/components/sport/SportCheckinRulesModal.tsx";
 import { SportTrainerAttendanceModal } from "@/components/sport/SportTrainerAttendanceModal.tsx";
 import { useSportProfile } from "@/components/sport/sport-profile.ts";
 import {
@@ -53,6 +54,7 @@ function SportTrainerContent({
   trainerGroupIds: ReadonlySet<number>;
   trainerGroups: SchemaTrainerInfoSchema["groups"];
 }) {
+  const [rulesOpen, setRulesOpen] = useState(false);
   const [selectedCurrent, setSelectedCurrent] =
     useState<SchemaTrainingInfoPersonalSchema | null>(null);
   const [selectedUpcoming, setSelectedUpcoming] =
@@ -60,26 +62,42 @@ function SportTrainerContent({
   const [selectedPast, setSelectedPast] =
     useState<SchemaTrainingInfoPersonalSchema | null>(null);
 
-  const { start: periodStart, end: periodEnd } = useMemo(() => {
-    const { end } = getSchedulePeriodBounds(0);
-    const start = new Date(
-      startOfTodayMoscow().getTime() - PAST_TRAININGS_LOOKBACK_MS,
-    );
-    return { start, end };
-  }, []);
+  const {
+    data: currentSemester,
+    isPending: semesterPending,
+    isError: semesterError,
+  } = $sport.useQuery("get", "/semesters/current");
+
+  const periodStart = useMemo(
+    () => new Date(startOfTodayMoscow().getTime() - PAST_TRAININGS_LOOKBACK_MS),
+    [],
+  );
+  const periodEnd = useMemo(() => {
+    const { end: weekEnd } = getSchedulePeriodBounds(0);
+    if (!currentSemester) return weekEnd;
+
+    const semesterEnd = new Date(`${currentSemester.end}T23:59:59+03:00`);
+    return semesterEnd > weekEnd ? semesterEnd : weekEnd;
+  }, [currentSemester]);
 
   const {
     data: personalSchedule,
-    isPending,
-    isError,
-  } = $sport.useQuery("get", "/users/me/schedule", {
-    params: {
-      query: {
-        start: toScheduleApiDateTime(periodStart),
-        end: toScheduleApiDateTime(periodEnd),
+    isPending: schedulePending,
+    isError: scheduleError,
+  } = $sport.useQuery(
+    "get",
+    "/users/me/schedule",
+    {
+      params: {
+        query: {
+          start: toScheduleApiDateTime(periodStart),
+          end: toScheduleApiDateTime(periodEnd),
+        },
       },
     },
-  });
+    { enabled: !semesterPending && !semesterError },
+  );
+  const isPending = semesterPending || schedulePending;
 
   const trainerTrainings = useMemo(() => {
     return (personalSchedule ?? [])
@@ -121,7 +139,7 @@ function SportTrainerContent({
       .toReversed();
   }, [trainerTrainings]);
 
-  if (isError) {
+  if (semesterError || scheduleError) {
     return (
       <div className="alert alert-error">
         Trainer schedule could not be loaded.
@@ -166,6 +184,7 @@ function SportTrainerContent({
               studentId={studentId}
               trainerGroupIds={trainerGroupIds}
               onSelect={setSelectedCurrent}
+              onCheckinSuccess={() => setRulesOpen(true)}
             />
           </Suspense>
         )}
@@ -184,6 +203,7 @@ function SportTrainerContent({
               studentId={studentId}
               trainerGroupIds={trainerGroupIds}
               onSelect={setSelectedUpcoming}
+              onCheckinSuccess={() => setRulesOpen(true)}
             />
           </Suspense>
         )}
@@ -206,6 +226,7 @@ function SportTrainerContent({
               studentId={studentId}
               trainerGroupIds={trainerGroupIds}
               onSelect={setSelectedPast}
+              onCheckinSuccess={() => setRulesOpen(true)}
             />
           </Suspense>
         )}
@@ -230,6 +251,7 @@ function SportTrainerContent({
           row={selectedUpcoming}
           studentId={studentId}
           trainerGroupIds={trainerGroupIds}
+          onCheckinSuccess={() => setRulesOpen(true)}
         />
       ) : null}
 
@@ -242,6 +264,7 @@ function SportTrainerContent({
           row={selectedPast}
         />
       ) : null}
+      <SportCheckinRulesModal open={rulesOpen} onOpenChange={setRulesOpen} />
     </>
   );
 }
