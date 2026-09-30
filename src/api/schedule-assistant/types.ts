@@ -21,6 +21,57 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/bookings/tasks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Booking Tasks */
+    get: operations["bookings_list_booking_tasks"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/bookings/tasks/{task_id}/reconcile": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Reconcile Booking Task */
+    post: operations["bookings_reconcile_booking_task"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/bookings/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Cancel Bookings */
+    post: operations["bookings_cancel_bookings"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/bookings/tasks/{task_id}": {
     parameters: {
       query?: never;
@@ -272,6 +323,26 @@ export interface paths {
     put?: never;
     /** Parse Electives Route */
     post: operations["parser_parse_electives_route"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/timetable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Timetable
+     * @description Read the timetable anonymously, without membership or scheduler-private data.
+     */
+    get: operations["public_timetable_get_timetable"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -654,49 +725,18 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/schedule-config/history/{event_id}/snapshot": {
+  "/me/student-groups": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get History Snapshot */
-    get: operations["schedule_config_get_history_snapshot"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/schedule-config/history/{event_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get History Event */
-    get: operations["schedule_config_get_history_event"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/schedule-config/history": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List History */
-    get: operations["schedule_config_list_history"];
+    /**
+     * Get My Student Groups
+     * @description Return only group codes belonging to the verified user, never membership lists.
+     */
+    get: operations["users_get_my_student_groups"];
     put?: never;
     post?: never;
     delete?: never;
@@ -733,11 +773,53 @@ export interface components {
     };
     /** BatchBookItemResult */
     BatchBookItemResult: {
+      /** Operation Id */
+      operation_id: string | null;
+      /** Outlook Booking Id */
+      outlook_booking_id: string | null;
+      /** Uid */
+      uid: string | null;
+      /** Organizer Mailbox */
+      organizer_mailbox: string | null;
+      /** Room Id */
+      room_id: string | null;
+      /**
+       * Room Response
+       * @default Unknown
+       */
+      room_response: BatchBookItemResultRoom_responseAnyOf0 | null;
+      /**
+       * Room Presence
+       * @default unknown
+       * @enum {string}
+       */
+      room_presence: BatchBookItemResultRoom_presence;
+      /**
+       * Organizer Presence
+       * @default unknown
+       * @enum {string}
+       */
+      organizer_presence: BatchBookItemResultOrganizer_presence;
+      /** Checked At */
+      checked_at: string | null;
+      /** Message Body */
+      message_body: string | null;
+      /**
+       * Can Cancel
+       * @default false
+       */
+      can_cancel: boolean;
+      /** Evidence */
+      evidence: string[];
+      /** Cancellation Status */
+      cancellation_status: BatchBookItemResultCancellation_statusAnyOf0 | null;
       /**
        * Index
        * @description Index in the submitted batch
        */
       index: string;
+      /** @default unknown */
+      outcome: components["schemas"]["BookingOutcome"];
       status: components["schemas"]["BookingItemResultStatus"];
       /**
        * Title
@@ -846,11 +928,52 @@ export interface components {
      * @description Booking description
      */
     BookingDTO: {
+      /** Operation Id */
+      operation_id: string | null;
+      /**
+       * Outlook Booking Id
+       * @description ID of outlook booking in service account calendar. Only set if we can manage the booking.
+       */
+      outlook_booking_id: string | null;
+      /** Uid */
+      uid: string | null;
+      /** Organizer Mailbox */
+      organizer_mailbox: string | null;
       /**
        * Room Id
        * @description ID of the room
        */
       room_id: string;
+      /**
+       * Room Response
+       * @default Unknown
+       */
+      room_response: BookingDTORoom_responseAnyOf0 | null;
+      /**
+       * Room Presence
+       * @default unknown
+       * @enum {string}
+       */
+      room_presence: BookingDTORoom_presence;
+      /**
+       * Organizer Presence
+       * @default unknown
+       * @enum {string}
+       */
+      organizer_presence: BookingDTOOrganizer_presence;
+      /** Checked At */
+      checked_at: string | null;
+      /** Message Body */
+      message_body: string | null;
+      /**
+       * Can Cancel
+       * @default false
+       */
+      can_cancel: boolean;
+      /** Evidence */
+      evidence: string[];
+      /** Cancellation Status */
+      cancellation_status: BookingDTOCancellation_statusAnyOf0 | null;
       /**
        * Event Id
        * @description ID of the event
@@ -884,21 +1007,47 @@ export interface components {
        */
       recurrence: string | null;
       /**
-       * Outlook Booking Id
-       * @description ID of outlook booking in service account calendar. Only set if we can manage the booking.
-       */
-      outlook_booking_id: string | null;
-      /**
        * Outlook Entry Id
        * @description Hex Entry Id from Outlook free/busy. Set when we cannot manage the booking.
        */
       outlook_entry_id: string | null;
+      /** Busy Type */
+      busy_type: string | null;
+      /**
+       * Source
+       * @default organizer
+       * @enum {string}
+       */
+      source: BookingDTOSource;
+      /** Source Item Id */
+      source_item_id: string | null;
+      /** Change Key */
+      change_key: string | null;
+      /** Attendees */
+      attendees:
+        | {
+            [key: string]: unknown;
+          }[]
+        | null;
+      /** Recurrence Complete */
+      recurrence_complete: boolean;
+      /** Deleted Occurrences */
+      deleted_occurrences: string[];
+      /** Modified Occurrences */
+      modified_occurrences: {
+        [key: string]: unknown;
+      }[];
     };
     /**
      * BookingItemResultStatus
      * @enum {string}
      */
     BookingItemResultStatus: BookingItemResultStatus;
+    /**
+     * BookingOutcome
+     * @enum {string}
+     */
+    BookingOutcome: BookingOutcome;
     /** BookingReview */
     BookingReview: {
       /** Programs */
@@ -914,7 +1063,7 @@ export interface components {
       status: components["schemas"]["BookingTaskStatus"];
       /**
        * Sent
-       * @description Invites sent, waiting for room Accept
+       * @description Invites sent; room outcome is tracked separately
        * @default 0
        */
       sent: number;
@@ -946,6 +1095,46 @@ export interface components {
     };
     /** BookingTaskItem */
     BookingTaskItem: {
+      /** Operation Id */
+      operation_id: string | null;
+      /** Outlook Booking Id */
+      outlook_booking_id: string | null;
+      /** Uid */
+      uid: string | null;
+      /** Organizer Mailbox */
+      organizer_mailbox: string | null;
+      /** Room Id */
+      room_id: string | null;
+      /**
+       * Room Response
+       * @default Unknown
+       */
+      room_response: BookingTaskItemRoom_responseAnyOf0 | null;
+      /**
+       * Room Presence
+       * @default unknown
+       * @enum {string}
+       */
+      room_presence: BookingTaskItemRoom_presence;
+      /**
+       * Organizer Presence
+       * @default unknown
+       * @enum {string}
+       */
+      organizer_presence: BookingTaskItemOrganizer_presence;
+      /** Checked At */
+      checked_at: string | null;
+      /** Message Body */
+      message_body: string | null;
+      /**
+       * Can Cancel
+       * @default false
+       */
+      can_cancel: boolean;
+      /** Evidence */
+      evidence: string[];
+      /** Cancellation Status */
+      cancellation_status: BookingTaskItemCancellation_statusAnyOf0 | null;
       /**
        * Index
        * @description Index in the submitted batch, or extra_id for cancel
@@ -956,8 +1145,26 @@ export interface components {
        * @description Human-readable slot or extra label
        */
       title: string | null;
-      /** @description pending → sent (invite left) → ok (Accept) / error */
+      /** @description Transport progress only; room outcome is independent */
       status: components["schemas"]["BookingTaskItemStatus"];
+      /** @default unknown */
+      outcome: components["schemas"]["BookingOutcome"];
+      /** Slot Ids */
+      slot_ids: string[];
+      /** Payload */
+      payload: {
+        [key: string]: unknown;
+      };
+      /** History */
+      history: {
+        [key: string]: unknown;
+      }[];
+      /** Cancellation Scope */
+      cancellation_scope: BookingTaskItemCancellation_scopeAnyOf0 | null;
+      /** Occurrence Date */
+      occurrence_date: string | null;
+      /** Source Operation Id */
+      source_operation_id: string | null;
       /**
        * Error
        * @description Error message when status is error
@@ -979,8 +1186,29 @@ export interface components {
      * @enum {string}
      */
     BookingTaskStatus: BookingTaskStatus;
+    /** CancelBookingRequest */
+    CancelBookingRequest: {
+      /** Operation Ids */
+      operation_ids?: string[];
+      /** Booking Ids */
+      booking_ids?: string[];
+      /**
+       * Scope
+       * @enum {string}
+       */
+      scope: CancelBookingRequestScope;
+      /** Occurrence Date */
+      occurrence_date?: string | null;
+    };
     /** CancelExtraRequest */
     CancelExtraRequest: {
+      /**
+       * Scope
+       * @enum {string}
+       */
+      scope: CancelExtraRequestScope;
+      /** Occurrence Date */
+      occurrence_date?: string | null;
       /**
        * Extra Ids
        * @description Extra auto-booking ids from the review tree
@@ -1001,6 +1229,11 @@ export interface components {
       failed: {
         [key: string]: string;
       };
+      /**
+       * Cancel Requested
+       * @description Cancellation requests awaiting verified removal
+       */
+      cancel_requested: string[];
     };
     /**
      * CapacityIssue
@@ -1212,64 +1445,12 @@ export interface components {
        * @description Concrete placed meetings (for electives and other calendar-date series)
        */
       dates_pattern?: components["schemas"]["SessionOccurrence"][] | null;
-    };
-    /** ConfigChangeEvent */
-    ConfigChangeEvent: {
       /**
-       * Id
-       * @description Unique event id
+       * Notes
+       * @description Public notes inherited by occurrences without their own override
+       * @default
        */
-      id: string;
-      /**
-       * Revision
-       * @description Config revision after this event
-       */
-      revision: number;
-      /**
-       * Resources
-       * @description Updated schedule-config resources in this event
-       */
-      resources: ConfigChangeEventResources[];
-      /**
-       * Saved At
-       * @description UTC timestamp in ISO format
-       */
-      saved_at: string;
-      /**
-       * Saved By
-       * @description Moderator email
-       */
-      saved_by: string;
-      /**
-       * Patch
-       * @description RFC 6902 JSON Patch operations on the assembled config
-       */
-      patch: {
-        [key: string]: unknown;
-      }[];
-      /**
-       * Snapshot
-       * @description Gzipped snapshot path relative to the history directory
-       */
-      snapshot: string;
-    };
-    /** ConfigChangeEventSummary */
-    ConfigChangeEventSummary: {
-      /** Id */
-      id: string;
-      /** Revision */
-      revision: number;
-      /** Resources */
-      resources: ConfigChangeEventSummaryResources[];
-      /** Saved At */
-      saved_at: string;
-      /** Saved By */
-      saved_by: string;
-      /**
-       * Change Count
-       * @description Number of JSON Patch operations in this event
-       */
-      change_count: number;
+      notes: string;
     };
     /** ConflictHit */
     ConflictHit: {
@@ -1308,6 +1489,11 @@ export interface components {
        * @description Course name
        */
       name: string;
+      /**
+       * Color
+       * @description Optional display color in #RRGGBB format
+       */
+      color?: string | null;
       /**
        * Section Code
        * @description Exactly one timetable section this course belongs to (term.sections[].code)
@@ -1586,6 +1772,52 @@ export interface components {
     };
     /** ExtraAutoBooking */
     ExtraAutoBooking: {
+      /** Operation Id */
+      operation_id: string | null;
+      /**
+       * Outlook Booking Id
+       * @description BMP calendar item id when we can manage the booking
+       */
+      outlook_booking_id: string | null;
+      /** Uid */
+      uid: string | null;
+      /** Organizer Mailbox */
+      organizer_mailbox: string | null;
+      /**
+       * Room Id
+       * @description Booked room
+       */
+      room_id: string;
+      /**
+       * Room Response
+       * @default Unknown
+       */
+      room_response: ExtraAutoBookingRoom_responseAnyOf0 | null;
+      /**
+       * Room Presence
+       * @default unknown
+       * @enum {string}
+       */
+      room_presence: ExtraAutoBookingRoom_presence;
+      /**
+       * Organizer Presence
+       * @default unknown
+       * @enum {string}
+       */
+      organizer_presence: ExtraAutoBookingOrganizer_presence;
+      /** Checked At */
+      checked_at: string | null;
+      /** Message Body */
+      message_body: string | null;
+      /**
+       * Can Cancel
+       * @default false
+       */
+      can_cancel: boolean;
+      /** Evidence */
+      evidence: string[];
+      /** Cancellation Status */
+      cancellation_status: ExtraAutoBookingCancellation_statusAnyOf0 | null;
       /**
        * Extra Id
        * @description Stable id used to cancel this extra booking
@@ -1596,11 +1828,6 @@ export interface components {
        * @description Human-readable extra booking line
        */
       label: string;
-      /**
-       * Room Id
-       * @description Booked room
-       */
-      room_id: string;
       /**
        * Start
        * Format: date-time
@@ -1618,11 +1845,6 @@ export interface components {
        * @description Outlook title
        */
       title: string;
-      /**
-       * Outlook Booking Id
-       * @description BMP calendar item id when we can manage the booking
-       */
-      outlook_booking_id: string | null;
       /**
        * Outlook Entry Id
        * @description Room-calendar entry id fallback
@@ -2132,6 +2354,258 @@ export interface components {
        */
       groups: string[];
     };
+    /** PublicComponent */
+    PublicComponent: {
+      /** Tag */
+      tag: string;
+      /** Audience */
+      audience?: string[];
+      /** Sessions */
+      sessions?: components["schemas"]["PublicComponentSessionSeries"][] | null;
+    };
+    /** PublicComponentSessionSeries */
+    PublicComponentSessionSeries: {
+      /** Audience */
+      audience?: string[];
+      /** Weekly Pattern */
+      weekly_pattern?:
+        | components["schemas"]["PublicWeeklyPatternSlot"][]
+        | null;
+      /** Dates Pattern */
+      dates_pattern?: components["schemas"]["PublicSessionOccurrence"][] | null;
+      /**
+       * Notes
+       * @description Public notes inherited by occurrences without their own override.
+       * @default
+       */
+      notes: string;
+    };
+    /** PublicCourse */
+    PublicCourse: {
+      /** Name */
+      name: string;
+      /** Color */
+      color?: string | null;
+      /** Section Code */
+      section_code: string;
+      /** Short Name */
+      short_name?: string | null;
+      /** Name Ru */
+      name_ru?: string | null;
+      /** Short Name Ru */
+      short_name_ru?: string | null;
+      /** Instructors */
+      instructors?: components["schemas"]["PublicCourseInstructor"][];
+      /** Components */
+      components: components["schemas"]["PublicComponent"][];
+    };
+    /** PublicCourseInstructor */
+    PublicCourseInstructor: {
+      /** Id */
+      id: string;
+      /** Role */
+      role: string;
+    };
+    /** PublicDateRange */
+    PublicDateRange: {
+      /**
+       * Start Date
+       * Format: date
+       */
+      start_date: string;
+      /**
+       * End Date
+       * Format: date
+       */
+      end_date: string;
+    };
+    /** PublicInstructor */
+    PublicInstructor: {
+      /** Id */
+      id: string;
+      /** Name En */
+      name_en?: string | null;
+      /** Name Ru */
+      name_ru?: string | null;
+      /** Email */
+      email?: string | null;
+      /** Alias */
+      alias?: string | null;
+      /** Position */
+      position?: string | null;
+    };
+    /** PublicProgram */
+    PublicProgram: {
+      /** Code */
+      code: string;
+      /** Name */
+      name: string;
+      /** Tracks */
+      tracks?: components["schemas"]["PublicTrack"][];
+      /** Groups */
+      groups?: string[];
+      /** Time Slots */
+      time_slots?: components["schemas"]["PublicTimeSlot"][] | null;
+      semester?: components["schemas"]["PublicDateRange"] | null;
+    };
+    /** PublicRoom */
+    PublicRoom: {
+      /** Id */
+      id: string;
+      /** Name */
+      name: string;
+      /** Capacity */
+      capacity?: number | null;
+    };
+    /** PublicSection */
+    PublicSection: {
+      /** Code */
+      code: string;
+      /** Name */
+      name: string;
+      /** Default Layout */
+      default_layout?: PublicSectionDefault_layoutAnyOf0 | null;
+      /** Programs */
+      programs?: components["schemas"]["PublicProgram"][];
+    };
+    /** PublicSessionOccurrence */
+    PublicSessionOccurrence: {
+      /**
+       * Date
+       * Format: date
+       */
+      date: string;
+      /**
+       * Start Time
+       * Format: time
+       */
+      start_time: string;
+      /**
+       * End Time
+       * Format: time
+       */
+      end_time: string;
+      /** Room */
+      room?: string | null;
+      /** Instructor */
+      instructor?: string | string[] | null;
+      /**
+       * Notes
+       * @description Null inherits series notes; an empty string suppresses them.
+       */
+      notes?: string | null;
+    };
+    /** PublicStudentGroup */
+    PublicStudentGroup: {
+      /** Code */
+      code: string;
+      /** Name */
+      name?: string | null;
+    };
+    /** PublicTerm */
+    PublicTerm: {
+      /** Name */
+      name: string;
+      semester: components["schemas"]["PublicDateRange"];
+      /** Days */
+      days: components["schemas"]["Weekday"][];
+      starting_day: components["schemas"]["Weekday"];
+      /** Time Slots */
+      time_slots: components["schemas"]["PublicTimeSlot"][];
+      /** Sections */
+      sections?: components["schemas"]["PublicSection"][];
+    };
+    /** PublicTimeSlot */
+    PublicTimeSlot: {
+      /**
+       * Start Time
+       * Format: time
+       */
+      start_time: string;
+      /**
+       * End Time
+       * Format: time
+       */
+      end_time: string;
+    };
+    /** PublicTimetable */
+    PublicTimetable: {
+      term: components["schemas"]["PublicTerm"];
+      /** Rooms */
+      rooms?: components["schemas"]["PublicRoom"][];
+      /** Instructors */
+      instructors?: components["schemas"]["PublicInstructor"][];
+      /** Students Groups */
+      students_groups?: components["schemas"]["PublicStudentGroup"][];
+      /** Courses */
+      courses?: components["schemas"]["PublicCourse"][];
+    };
+    /** PublicTrack */
+    PublicTrack: {
+      /** Code */
+      code: string;
+      /** Name */
+      name: string;
+      /** Groups */
+      groups?: string[];
+    };
+    /** PublicWeeklyAlternation */
+    PublicWeeklyAlternation: {
+      /**
+       * Anchor Week
+       * Format: date
+       */
+      anchor_week: string;
+    };
+    /** PublicWeeklyPatternSlot */
+    PublicWeeklyPatternSlot: {
+      weekday: components["schemas"]["Weekday"];
+      /**
+       * Start Time
+       * Format: time
+       */
+      start_time: string;
+      /**
+       * End Time
+       * Format: time
+       */
+      end_time: string;
+      /** Room */
+      room?: string | null;
+      /** Instructor */
+      instructor?: string | string[] | null;
+      alternation?: components["schemas"]["PublicWeeklyAlternation"] | null;
+      /** Edits */
+      edits?: components["schemas"]["PublicWeeklyPatternSlotEdit"][] | null;
+    };
+    /** PublicWeeklyPatternSlotEdit */
+    PublicWeeklyPatternSlotEdit: {
+      /**
+       * Select Week
+       * Format: date
+       */
+      select_week: string;
+      /**
+       * Cancel
+       * @default false
+       */
+      cancel: boolean;
+      /** Date */
+      date?: string | null;
+      /** Start Time */
+      start_time?: string | null;
+      /** End Time */
+      end_time?: string | null;
+      /** Room */
+      room?: string | null;
+      /** Instructor */
+      instructor?: string | string[] | null;
+      /**
+       * Notes
+       * @description Null inherits series notes; an empty string suppresses them.
+       */
+      notes?: string | null;
+    };
     /** ReviewComponent */
     ReviewComponent: {
       /**
@@ -2249,6 +2723,38 @@ export interface components {
        * @description Overlapping foreign Outlook bookings
        */
       conflicts: components["schemas"]["ConflictHit"][];
+      /**
+       * Room Response
+       * @default Unknown
+       */
+      room_response: string;
+      /**
+       * Room Presence
+       * @default unknown
+       * @enum {string}
+       */
+      room_presence: ReviewSlotRoom_presence;
+      /** Checked At */
+      checked_at: string | null;
+      /** Message Body */
+      message_body: string | null;
+      /** Booking Ids */
+      booking_ids: string[];
+      /** Recurrence Start */
+      recurrence_start: string | null;
+      /** Recurrence End */
+      recurrence_end: string | null;
+      /** Occurrence Dates */
+      occurrence_dates: string[];
+      /** Covered Dates */
+      covered_dates: string[];
+      /** Missing Dates */
+      missing_dates: string[];
+      /**
+       * Can Cancel
+       * @default false
+       */
+      can_cancel: boolean;
     };
     /** Room */
     Room: {
@@ -2400,6 +2906,12 @@ export interface components {
       groups: string[];
       /** Students Number */
       students_number: number | null;
+      /**
+       * Notes
+       * @description Resolved public meeting notes, including series inheritance.
+       * @default
+       */
+      notes: string;
     };
     /** SectionConfig */
     SectionConfig: {
@@ -2490,6 +3002,11 @@ export interface components {
        * @description Instructor id(s) for this meeting
        */
       instructor?: string | string[] | null;
+      /**
+       * Notes
+       * @description Public notes: None inherits series notes; an empty string suppresses them
+       */
+      notes?: string | null;
     };
     /**
      * StudentEmailIssue
@@ -2779,6 +3296,18 @@ export interface components {
      * @enum {string}
      */
     Weekday: Weekday;
+    /**
+     * WeeklyAlternation
+     * @description An active week and every second week in both directions, not a start date.
+     */
+    WeeklyAlternation: {
+      /**
+       * Anchor Week
+       * Format: date
+       * @description Date identifying an active week, normalized using term.starting_day
+       */
+      anchor_week: string;
+    };
     /** WeeklyPatternPlacement */
     WeeklyPatternPlacement: {
       /**
@@ -2787,6 +3316,7 @@ export interface components {
        */
       kind: WeeklyPatternPlacementKind;
       weekday: components["schemas"]["Weekday"];
+      alternation: components["schemas"]["WeeklyAlternation"] | null;
       /** Edits */
       edits: components["schemas"]["WeeklyPatternSlotEdit"][];
       /** Start Date */
@@ -2825,6 +3355,8 @@ export interface components {
        * @description Instructor id, or list of ids for co-teaching
        */
       instructor?: string | string[] | null;
+      /** @description None means weekly; otherwise every two weeks in the anchor phase for the whole semester */
+      alternation?: components["schemas"]["WeeklyAlternation"] | null;
       /**
        * Edits
        * @description Per-week overrides or cancellations keyed by ``select_week``
@@ -2873,6 +3405,11 @@ export interface components {
        * @description Optional instructor id(s); defaults to the pattern instructor
        */
       instructor?: string | string[] | null;
+      /**
+       * Notes
+       * @description Public notes: None inherits series notes; an empty string suppresses them
+       */
+      notes?: string | null;
     };
   };
   responses: never;
@@ -2898,6 +3435,8 @@ export type SchemaBookingDto = components["schemas"]["BookingDTO"];
 export type SchemaBookingReview = components["schemas"]["BookingReview"];
 export type SchemaBookingTask = components["schemas"]["BookingTask"];
 export type SchemaBookingTaskItem = components["schemas"]["BookingTaskItem"];
+export type SchemaCancelBookingRequest =
+  components["schemas"]["CancelBookingRequest"];
 export type SchemaCancelExtraRequest =
   components["schemas"]["CancelExtraRequest"];
 export type SchemaCancelExtraResponse =
@@ -2908,10 +3447,6 @@ export type SchemaCheckResults = components["schemas"]["CheckResults"];
 export type SchemaComponent = components["schemas"]["Component"];
 export type SchemaComponentSessionSeries =
   components["schemas"]["ComponentSessionSeries"];
-export type SchemaConfigChangeEvent =
-  components["schemas"]["ConfigChangeEvent"];
-export type SchemaConfigChangeEventSummary =
-  components["schemas"]["ConfigChangeEventSummary"];
 export type SchemaConflictHit = components["schemas"]["ConflictHit"];
 export type SchemaCourseConfig = components["schemas"]["CourseConfig"];
 export type SchemaCourseInstructor = components["schemas"]["CourseInstructor"];
@@ -2973,6 +3508,31 @@ export type SchemaPredefinedAliasesResponse =
 export type SchemaPreferenceShareLinkResponse =
   components["schemas"]["PreferenceShareLinkResponse"];
 export type SchemaProgramTrack = components["schemas"]["ProgramTrack"];
+export type SchemaPublicComponent = components["schemas"]["PublicComponent"];
+export type SchemaPublicComponentSessionSeries =
+  components["schemas"]["PublicComponentSessionSeries"];
+export type SchemaPublicCourse = components["schemas"]["PublicCourse"];
+export type SchemaPublicCourseInstructor =
+  components["schemas"]["PublicCourseInstructor"];
+export type SchemaPublicDateRange = components["schemas"]["PublicDateRange"];
+export type SchemaPublicInstructor = components["schemas"]["PublicInstructor"];
+export type SchemaPublicProgram = components["schemas"]["PublicProgram"];
+export type SchemaPublicRoom = components["schemas"]["PublicRoom"];
+export type SchemaPublicSection = components["schemas"]["PublicSection"];
+export type SchemaPublicSessionOccurrence =
+  components["schemas"]["PublicSessionOccurrence"];
+export type SchemaPublicStudentGroup =
+  components["schemas"]["PublicStudentGroup"];
+export type SchemaPublicTerm = components["schemas"]["PublicTerm"];
+export type SchemaPublicTimeSlot = components["schemas"]["PublicTimeSlot"];
+export type SchemaPublicTimetable = components["schemas"]["PublicTimetable"];
+export type SchemaPublicTrack = components["schemas"]["PublicTrack"];
+export type SchemaPublicWeeklyAlternation =
+  components["schemas"]["PublicWeeklyAlternation"];
+export type SchemaPublicWeeklyPatternSlot =
+  components["schemas"]["PublicWeeklyPatternSlot"];
+export type SchemaPublicWeeklyPatternSlotEdit =
+  components["schemas"]["PublicWeeklyPatternSlotEdit"];
 export type SchemaReviewComponent = components["schemas"]["ReviewComponent"];
 export type SchemaReviewCourse = components["schemas"]["ReviewCourse"];
 export type SchemaReviewProgram = components["schemas"]["ReviewProgram"];
@@ -3002,6 +3562,8 @@ export type SchemaUnplacedIssue = components["schemas"]["UnplacedIssue"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type SchemaVirtualEventGroup =
   components["schemas"]["VirtualEventGroup"];
+export type SchemaWeeklyAlternation =
+  components["schemas"]["WeeklyAlternation"];
 export type SchemaWeeklyPatternPlacement =
   components["schemas"]["WeeklyPatternPlacement"];
 export type SchemaWeeklyPatternSlot =
@@ -3026,6 +3588,102 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["BookingReview"];
+        };
+      };
+    };
+  };
+  bookings_list_booking_tasks: {
+    parameters: {
+      query?: {
+        limit?: number;
+        offset?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingTask"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  bookings_reconcile_booking_task: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        task_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingTask"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  bookings_cancel_bookings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancelBookingRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingTask"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -3570,6 +4228,26 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  public_timetable_get_timetable: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicTimetable"];
         };
       };
     };
@@ -4586,69 +5264,7 @@ export interface operations {
       };
     };
   };
-  schedule_config_get_history_snapshot: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        event_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ScheduleConfig"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  schedule_config_get_history_event: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        event_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ConfigChangeEvent"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  schedule_config_list_history: {
+  users_get_my_student_groups: {
     parameters: {
       query?: never;
       header?: never;
@@ -4663,7 +5279,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ConfigChangeEventSummary"][];
+          "application/json": string[];
         };
       };
     };
@@ -4689,9 +5305,93 @@ export interface operations {
     };
   };
 }
+export enum BatchBookItemResultRoom_responseAnyOf0 {
+  Accept = "Accept",
+  Tentative = "Tentative",
+  Decline = "Decline",
+  Unknown = "Unknown",
+  NoResponseReceived = "NoResponseReceived",
+}
+export enum BatchBookItemResultRoom_presence {
+  present = "present",
+  absent = "absent",
+  unknown = "unknown",
+}
+export enum BatchBookItemResultOrganizer_presence {
+  present = "present",
+  absent = "absent",
+  unknown = "unknown",
+}
+export enum BatchBookItemResultCancellation_statusAnyOf0 {
+  cancelling = "cancelling",
+  cancelled = "cancelled",
+  requires_review = "requires_review",
+}
+export enum BookingDTORoom_responseAnyOf0 {
+  Accept = "Accept",
+  Tentative = "Tentative",
+  Decline = "Decline",
+  Unknown = "Unknown",
+  NoResponseReceived = "NoResponseReceived",
+}
+export enum BookingDTORoom_presence {
+  present = "present",
+  absent = "absent",
+  unknown = "unknown",
+}
+export enum BookingDTOOrganizer_presence {
+  present = "present",
+  absent = "absent",
+  unknown = "unknown",
+}
+export enum BookingDTOCancellation_statusAnyOf0 {
+  cancelling = "cancelling",
+  cancelled = "cancelled",
+  requires_review = "requires_review",
+}
+export enum BookingDTOSource {
+  organizer = "organizer",
+  room = "room",
+  free_busy = "free_busy",
+}
 export enum BookingItemResultStatus {
   ok = "ok",
   error = "error",
+}
+export enum BookingOutcome {
+  submitted = "submitted",
+  pending_approval = "pending_approval",
+  accepted = "accepted",
+  declined = "declined",
+  unknown = "unknown",
+  cancel_requested = "cancel_requested",
+  cancelled = "cancelled",
+}
+export enum BookingTaskItemRoom_responseAnyOf0 {
+  Accept = "Accept",
+  Tentative = "Tentative",
+  Decline = "Decline",
+  Unknown = "Unknown",
+  NoResponseReceived = "NoResponseReceived",
+}
+export enum BookingTaskItemRoom_presence {
+  present = "present",
+  absent = "absent",
+  unknown = "unknown",
+}
+export enum BookingTaskItemOrganizer_presence {
+  present = "present",
+  absent = "absent",
+  unknown = "unknown",
+}
+export enum BookingTaskItemCancellation_statusAnyOf0 {
+  cancelling = "cancelling",
+  cancelled = "cancelled",
+  requires_review = "requires_review",
+}
+export enum BookingTaskItemCancellation_scopeAnyOf0 {
+  series = "series",
+  occurrence = "occurrence",
 }
 export enum BookingTaskItemStatus {
   pending = "pending",
@@ -4709,6 +5409,14 @@ export enum BookingTaskStatus {
   done = "done",
   error = "error",
 }
+export enum CancelBookingRequestScope {
+  series = "series",
+  occurrence = "occurrence",
+}
+export enum CancelExtraRequestScope {
+  series = "series",
+  occurrence = "occurrence",
+}
 export enum CapacityIssueIssue_type {
   capacity = "capacity",
 }
@@ -4718,24 +5426,32 @@ export enum CommonCourseClassTags {
   lab = "lab",
   class = "class",
 }
-export enum ConfigChangeEventResources {
-  term = "term",
-  sections = "sections",
-  courses = "courses",
-  rooms = "rooms",
-  instructors = "instructors",
-}
-export enum ConfigChangeEventSummaryResources {
-  term = "term",
-  sections = "sections",
-  courses = "courses",
-  rooms = "rooms",
-  instructors = "instructors",
-}
 export enum ConflictMode {
   skip = "skip",
   book = "book",
   split = "split",
+}
+export enum ExtraAutoBookingRoom_responseAnyOf0 {
+  Accept = "Accept",
+  Tentative = "Tentative",
+  Decline = "Decline",
+  Unknown = "Unknown",
+  NoResponseReceived = "NoResponseReceived",
+}
+export enum ExtraAutoBookingRoom_presence {
+  present = "present",
+  absent = "absent",
+  unknown = "unknown",
+}
+export enum ExtraAutoBookingOrganizer_presence {
+  present = "present",
+  absent = "absent",
+  unknown = "unknown",
+}
+export enum ExtraAutoBookingCancellation_statusAnyOf0 {
+  cancelling = "cancelling",
+  cancelled = "cancelled",
+  requires_review = "requires_review",
 }
 export enum GroupIssueIssue_type {
   group = "group",
@@ -4770,10 +5486,24 @@ export enum OutlookIssueIssue_type {
 export enum PerWeekIssueIssue_type {
   per_week = "per_week",
 }
+export enum PublicSectionDefault_layoutAnyOf0 {
+  groups = "groups",
+  compact_groups = "compact_groups",
+  calendar = "calendar",
+}
 export enum ReviewKind {
   ready = "ready",
   booked = "booked",
   conflict = "conflict",
+  pending_approval = "pending_approval",
+  unknown = "unknown",
+  declined = "declined",
+  cancelling = "cancelling",
+}
+export enum ReviewSlotRoom_presence {
+  present = "present",
+  absent = "absent",
+  unknown = "unknown",
 }
 export enum RoomAttributeDefType {
   boolean = "boolean",

@@ -267,7 +267,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/users/me/workshops.ics": {
+  "/users/me/events.ics": {
     parameters: {
       query?: never;
       header?: never;
@@ -275,10 +275,10 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Workshops Current User Schedule
+     * Get Events Current User Schedule
      * @description Get schedule in ICS format for the current user
      */
-    get: operations["ics_get_workshops_current_user_schedule"];
+    get: operations["ics_get_events_current_user_schedule"];
     put?: never;
     post?: never;
     delete?: never;
@@ -287,7 +287,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/users/{user_id}/workshops.ics": {
+  "/users/{user_id}/events.ics": {
     parameters: {
       query?: never;
       header?: never;
@@ -295,10 +295,10 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Workshops User Schedule
-     * @description Get schedule in ICS format for the user; requires access key for `/users/{user_id}/workshops.ics` resource
+     * Get Events User Schedule
+     * @description Get schedule in ICS format for the user; requires access key for `/users/{user_id}/events.ics` resource
      */
-    get: operations["ics_get_workshops_user_schedule"];
+    get: operations["ics_get_events_user_schedule"];
     put?: never;
     post?: never;
     delete?: never;
@@ -407,7 +407,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/workshops.ics": {
+  "/events.ics": {
     parameters: {
       query?: never;
       header?: never;
@@ -415,11 +415,11 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Workshops Schedule
-     * @description Get schedule in ICS format for workshops.
-     *     By default, returns only active non-draft workshops.
+     * Get Events Schedule
+     * @description Get schedule in ICS format for events.
+     *     By default, returns only active non-draft events.
      */
-    get: operations["ics_get_workshops_schedule"];
+    get: operations["ics_get_events_schedule"];
     put?: never;
     post?: never;
     delete?: never;
@@ -1086,8 +1086,8 @@ export interface components {
       sports_hidden: boolean;
       /** Moodle Hidden */
       moodle_hidden: boolean;
-      /** Workshops Hidden */
-      workshops_hidden: boolean;
+      /** Events Hidden */
+      events_hidden: boolean;
       /** Room Bookings Hidden */
       room_bookings_hidden: boolean;
       /** Moodle Userid */
@@ -1836,7 +1836,7 @@ export interface operations {
       };
     };
   };
-  ics_get_workshops_current_user_schedule: {
+  ics_get_events_current_user_schedule: {
     parameters: {
       query?: never;
       header?: never;
@@ -1845,7 +1845,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description ICS file with your workshops check-ins */
+      /** @description ICS file with your events check-ins */
       200: {
         headers: {
           [name: string]: unknown;
@@ -1871,7 +1871,7 @@ export interface operations {
       };
     };
   };
-  ics_get_workshops_user_schedule: {
+  ics_get_events_user_schedule: {
     parameters: {
       query: {
         access_key: string;
@@ -1884,7 +1884,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description ICS file with your workshops check-ins */
+      /** @description ICS file with your events check-ins */
       200: {
         headers: {
           [name: string]: unknown;
@@ -2122,7 +2122,7 @@ export interface operations {
       };
     };
   };
-  ics_get_workshops_schedule: {
+  ics_get_events_schedule: {
     parameters: {
       query?: {
         only_published?: boolean;
@@ -2133,7 +2133,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description ICS file with all workshops */
+      /** @description ICS file with all events */
       200: {
         headers: {
           [name: string]: unknown;
@@ -2143,7 +2143,7 @@ export interface operations {
           "text/calendar": string;
         };
       };
-      /** @description Workshops are not configured */
+      /** @description Events are not configured */
       404: {
         headers: {
           [name: string]: unknown;
@@ -3091,5 +3091,5 @@ export enum TargetForExport {
   sport = "sport",
   moodle = "moodle",
   room_bookings = "room-bookings",
-  workshops = "workshops",
+  events = "events",
 }

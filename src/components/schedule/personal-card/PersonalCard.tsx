@@ -73,7 +73,7 @@ const targetTypes: Record<
       "icon-[material-symbols--door-open-outline-rounded] text-[#F0B132] dark:text-[#F0B132]/70",
     tooltip: "Navigate to room booking page",
   },
-  [TargetForExport.workshops]: {
+  [TargetForExport.events]: {
     href: "/events",
     iconClassName:
       "icon-[material-symbols--campaign-rounded] text-[#F0B132] dark:text-[#F0B132]/70",

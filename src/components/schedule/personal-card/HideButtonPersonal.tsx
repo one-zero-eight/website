@@ -23,8 +23,8 @@ export default function HideButtonPersonal({
     isHidden = scheduleUser?.moodle_hidden ?? false;
   } else if (target === TargetForExport.music_room) {
     isHidden = scheduleUser?.music_room_hidden ?? false;
-  } else if (target === TargetForExport.workshops) {
-    isHidden = scheduleUser?.workshops_hidden ?? false;
+  } else if (target === TargetForExport.events) {
+    isHidden = scheduleUser?.events_hidden ?? false;
   } else if (target === TargetForExport.room_bookings) {
     isHidden = scheduleUser?.room_bookings_hidden ?? false;
   }

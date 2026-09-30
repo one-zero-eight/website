@@ -228,6 +228,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/bmp/auto-bookings/reconcile": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Reconcile Auto Bookings */
+    post: operations["bmp_specialist_reconcile_auto_bookings"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/bmp/auto-bookings/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Cancel Scoped Auto Booking */
+    post: operations["bmp_specialist_cancel_scoped_auto_booking"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/bmp/auto-bookings/": {
     parameters: {
       query?: never;
@@ -309,10 +343,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /**
-     * Cancel Extra Auto Booking
-     * @description Cancel an unmatched schedule-assistant auto-booking (service callers only).
-     */
+    /** Cancel Extra Auto Booking */
     post: operations["bmp_specialist_cancel_extra_auto_booking"];
     delete?: never;
     options?: never;
@@ -388,6 +419,11 @@ export interface components {
       /** Bookings */
       bookings: components["schemas"]["CreateBookingRequest"][];
     };
+    /** BmpReconcileRequest */
+    BmpReconcileRequest: {
+      /** Entries */
+      entries: components["schemas"]["ReconcileBookingEntry"][];
+    };
     /** Booking */
     Booking: {
       /** Room Id */
@@ -410,6 +446,31 @@ export interface components {
       outlook_entry_id: string | null;
       /** Attendees */
       attendees: components["schemas"]["Attendee"][] | null;
+      /** Operation Id */
+      operation_id?: string | null;
+      /** Uid */
+      uid?: string | null;
+      /** Organizer Mailbox */
+      organizer_mailbox?: string | null;
+      room_response?: components["schemas"]["BookingStatus"] | null;
+      /** @default unknown */
+      room_presence: components["schemas"]["Presence"];
+      /** Checked At */
+      checked_at?: string | null;
+      /** Message Body */
+      message_body?: string | null;
+      /** Busy Type */
+      busy_type?: string | null;
+      /**
+       * Source
+       * @default organizer
+       * @enum {string}
+       */
+      source: BookingSource;
+      /** Source Item Id */
+      source_item_id?: string | null;
+      /** Change Key */
+      change_key?: string | null;
       /** Categories */
       categories?: string[] | null;
       /** Recurrence */
@@ -418,7 +479,7 @@ export interface components {
       related_to_me?: boolean | null;
       /**
        * Id
-       * @description ID of the booking, computed from room_id, start and end
+       * @description Source-scoped identity, including the occurrence window. Never merge by slot alone.
        */
       readonly id: string;
     };
@@ -463,6 +524,8 @@ export interface components {
     };
     /** CreateBookingRequest */
     CreateBookingRequest: {
+      /** Operation Id */
+      operation_id?: string | null;
       /** Room Id */
       room_id: string;
       /** Title */
@@ -498,6 +561,69 @@ export interface components {
       start: string | null;
       /** End */
       end: string | null;
+    };
+    /** @enum {string} */
+    Presence: Presence;
+    /** ReconcileBookingEntry */
+    ReconcileBookingEntry: {
+      /** Operation Id */
+      operation_id?: string | null;
+      /** Outlook Booking Id */
+      outlook_booking_id?: string | null;
+      /** Uid */
+      uid?: string | null;
+      /** Organizer Mailbox */
+      organizer_mailbox?: string | null;
+      /** Room Id */
+      room_id: string;
+      /** Start */
+      start?: string | null;
+      /** End */
+      end?: string | null;
+      /**
+       * Scope
+       * @default series
+       * @enum {string}
+       */
+      scope: ReconcileBookingEntryScope;
+    };
+    /** ReconcileBookingResult */
+    ReconcileBookingResult: {
+      /** Operation Id */
+      operation_id?: string | null;
+      /** Outlook Booking Id */
+      outlook_booking_id?: string | null;
+      /** Uid */
+      uid?: string | null;
+      /** Organizer Mailbox */
+      organizer_mailbox?: string | null;
+      /** Room Id */
+      room_id: string;
+      /**
+       * Status
+       * @default ok
+       * @enum {string}
+       */
+      status: ReconcileBookingResultStatus;
+      /** @default unknown */
+      organizer_presence: components["schemas"]["Presence"];
+      /** @default unknown */
+      room_presence: components["schemas"]["Presence"];
+      room_response?: components["schemas"]["BookingStatus"] | null;
+      /**
+       * Checked At
+       * Format: date-time
+       */
+      checked_at: string;
+      /** Message Body */
+      message_body?: string | null;
+      booking?: components["schemas"]["Booking"] | null;
+      /** Evidence */
+      evidence?: string[];
+      /** Error */
+      error?: string | null;
+      /** Cancellation Status */
+      cancellation_status?: ReconcileBookingResultCancellation_statusAnyOf0 | null;
     };
     /** WeeklyUntilPattern */
     RecurrencePattern: {
@@ -561,6 +687,28 @@ export interface components {
        */
       restrict_daytime: boolean;
     };
+    /** ScopedCancelBookingRequest */
+    ScopedCancelBookingRequest: {
+      /** Operation Id */
+      operation_id?: string | null;
+      /** Outlook Booking Id */
+      outlook_booking_id?: string | null;
+      /** Uid */
+      uid?: string | null;
+      /** Organizer Mailbox */
+      organizer_mailbox?: string | null;
+      /** Room Id */
+      room_id: string;
+      /** Start */
+      start?: string | null;
+      /** End */
+      end?: string | null;
+      /**
+       * Scope
+       * @enum {string}
+       */
+      scope: ScopedCancelBookingRequestScope;
+    };
     /** Status */
     Status: {
       /** Status */
@@ -606,6 +754,8 @@ export type SchemaAttendeeDetails = components["schemas"]["AttendeeDetails"];
 export type SchemaBmpBatchCancelRequest =
   components["schemas"]["BmpBatchCancelRequest"];
 export type SchemaBmpBatchRequest = components["schemas"]["BmpBatchRequest"];
+export type SchemaBmpReconcileRequest =
+  components["schemas"]["BmpReconcileRequest"];
 export type SchemaBooking = components["schemas"]["Booking"];
 export type SchemaCanBookResponse = components["schemas"]["CanBookResponse"];
 export type SchemaCancelAllAutoBookingsResult =
@@ -618,9 +768,15 @@ export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaPatchBookingRequest =
   components["schemas"]["PatchBookingRequest"];
+export type SchemaReconcileBookingEntry =
+  components["schemas"]["ReconcileBookingEntry"];
+export type SchemaReconcileBookingResult =
+  components["schemas"]["ReconcileBookingResult"];
 export type SchemaRecurrencePattern =
   components["schemas"]["RecurrencePattern"];
 export type SchemaRoom = components["schemas"]["Room"];
+export type SchemaScopedCancelBookingRequest =
+  components["schemas"]["ScopedCancelBookingRequest"];
 export type SchemaStatus = components["schemas"]["Status"];
 export type SchemaUptimeSchema = components["schemas"]["UptimeSchema"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
@@ -1416,6 +1572,128 @@ export interface operations {
       };
     };
   };
+  bmp_specialist_reconcile_auto_bookings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BmpReconcileRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReconcileBookingResult"][];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking OR Recurrence not allowed */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking or calendar item not found (unknown id, already cancelled, or not a calendar item) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  bmp_specialist_cancel_scoped_auto_booking: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScopedCancelBookingRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReconcileBookingResult"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking OR Recurrence not allowed */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking or calendar item not found (unknown id, already cancelled, or not a calendar item) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   bmp_specialist_list_auto_bookings: {
     parameters: {
       query?: {
@@ -1973,16 +2251,44 @@ export interface operations {
     };
   };
 }
+export enum BookingSource {
+  organizer = "organizer",
+  room = "room",
+  free_busy = "free_busy",
+}
 export enum BookingStatus {
   Accept = "Accept",
   Tentative = "Tentative",
   Decline = "Decline",
   Unknown = "Unknown",
+  NoResponseReceived = "NoResponseReceived",
+}
+export enum Presence {
+  present = "present",
+  absent = "absent",
+  unknown = "unknown",
+}
+export enum ReconcileBookingEntryScope {
+  series = "series",
+  occurrence = "occurrence",
+}
+export enum ReconcileBookingResultStatus {
+  ok = "ok",
+  error = "error",
+}
+export enum ReconcileBookingResultCancellation_statusAnyOf0 {
+  cancelling = "cancelling",
+  cancelled = "cancelled",
+  requires_review = "requires_review",
 }
 export enum RoomAccess_levelAnyOf0 {
   yellow = "yellow",
   red = "red",
   special = "special",
+}
+export enum ScopedCancelBookingRequestScope {
+  series = "series",
+  occurrence = "occurrence",
 }
 export enum Weekday {
   monday = "monday",

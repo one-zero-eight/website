@@ -149,7 +149,7 @@ const modalText: Record<
       "You can add your room bookings to your favorite\n" +
       "                  calendar application and it will be updated on changes.",
   },
-  [TargetForExport.workshops]: {
+  [TargetForExport.events]: {
     title: "Export to your calendar",
     description:
       "You can add the schedule to your favorite calendar application\n" +

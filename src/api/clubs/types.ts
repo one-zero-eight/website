@@ -164,6 +164,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/clubs/by-id/{id}/pending-logo": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get pending club logo
+     * @description Get the logo from a club pending update, waiting for admin approval.
+     *
+     *     Behaves exactly like the approved logo endpoint, but serves
+     *     `pending_update.logo_file_id`. Unapproved content is not public: only the
+     *     club leader and admins can read it.
+     */
+    get: operations["get_pending_club_logo_clubs_by_id__id__pending_logo_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/clubs/description-images/{image_id}": {
     parameters: {
       query?: never;
@@ -515,7 +539,11 @@ export interface components {
     };
     /** PendingClubUpdate */
     PendingClubUpdate: {
-      /** Time of the latest leader submission in UTC */
+      /**
+       * Submitted At
+       * Format: date-time
+       * @description Time of the latest leader submission in UTC
+       */
       submitted_at: string;
       /** Title */
       title?: string | null;
@@ -1168,6 +1196,56 @@ export interface operations {
         content?: never;
       };
       /** @description Club not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_pending_club_logo_clubs_by_id__id__pending_logo_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Redirect to the pending club logo */
+      307: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Credentials not provided or invalid */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only admin or leader can view the pending club logo */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Club not found or no pending logo available */
       404: {
         headers: {
           [name: string]: unknown;

@@ -10,7 +10,7 @@ apis:
       output: ./src/api/schedule/types.ts
       #  --root-types --enum
   maps:
-    root: http://127.0.0.1:8009/maps/staging-v0/openapi.json
+    root: http://api.innohassle.ru/maps/staging-v0/openapi.json
     x-openapi-ts:
       output: ./src/api/maps/types.ts
       #  --root-types --enum
@@ -70,12 +70,12 @@ apis:
       output: ./src/api/tabletennis/types.ts
       #  --root-types --enum
   board-games:
-    root: http://localhost:8016/openapi.json
+    root: https://api.innohassle.ru/board-games/staging-v0/openapi.json
     x-openapi-ts:
       output: ./src/api/board-games/types.ts
       #  --root-types --enum
   sport:
-    root: https://stage.sport.innopolis.university/api/v3/openapi.json
+    root: https://sport.innopolis.university/api/v3/openapi.json
     x-openapi-ts:
       output: ./src/api/sport/types.ts
       #  --root-types --enum
