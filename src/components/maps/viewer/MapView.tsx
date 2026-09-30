@@ -96,16 +96,41 @@ export function MapView({
    * message right above the location button, the control it is about.
    */
   const locationIssue = useMemo(() => {
-    if (locationStatus === "denied") return "Location access denied";
-    if (locationStatus === "unavailable") return "Location unavailable";
-    if (locationStatus === "error") return "No GPS signal";
+    if (locationStatus === "denied") {
+      return { kind: "denied", message: "Location access denied" };
+    }
+    if (locationStatus === "unavailable") {
+      return { kind: "unavailable", message: "Location unavailable" };
+    }
+    if (locationStatus === "error") {
+      return { kind: "error", message: "No GPS signal" };
+    }
     if (userLocation && !userLocation.visible) {
       return userLocation.withinBounds
-        ? `Weak GPS signal (±${Math.round(userLocation.accuracyM)}m)`
-        : "You are outside this map";
+        ? {
+            kind: "weak-signal",
+            message: `Weak GPS signal (±${Math.round(userLocation.accuracyM)}m)`,
+          }
+        : { kind: "outside-map", message: "You are outside this map" };
     }
     return null;
   }, [locationStatus, userLocation]);
+
+  // The message is only a brief hint; the button keeps the error icon afterwards.
+  // Keyed by kind, so live updates of the same issue (e.g. accuracy) don't re-show it.
+  const locationIssueKind = locationIssue?.kind ?? null;
+  const [hiddenIssueKind, setHiddenIssueKind] = useState<string | null>(null);
+  useEffect(() => {
+    setHiddenIssueKind(null);
+    if (!locationIssueKind) return;
+    const timeoutId = setTimeout(
+      () => setHiddenIssueKind(locationIssueKind),
+      3000,
+    );
+    return () => clearTimeout(timeoutId);
+  }, [locationIssueKind]);
+  const isLocationIssueShown =
+    !!locationIssueKind && locationIssueKind !== hiddenIssueKind;
 
   async function handleExportPdf() {
     setIsExportingPdf(true);
@@ -221,12 +246,12 @@ export function MapView({
               )}
               {geoTransform && (
                 <>
-                  {locationIssue && (
+                  {isLocationIssueShown && (
                     // Zero-width, right-aligned wrapper: the message overflows
                     // to the left instead of widening the button column.
                     <div className="flex w-0 justify-end self-end">
                       <div className="bg-base-300/70 text-base-content w-max max-w-64 shrink-0 rounded-xl px-3 py-2 text-sm">
-                        {locationIssue}
+                        {locationIssue?.message}
                       </div>
                     </div>
                   )}
