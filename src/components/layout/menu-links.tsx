@@ -141,11 +141,6 @@ export const items: ItemType[] = [
     type: "local",
     title: "Events",
     to: "/events",
-    badge: (
-      <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
-        NEW
-      </span>
-    ),
     icon: <span className="icon-[material-symbols--campaign-rounded]" />,
   },
   {
@@ -164,26 +159,19 @@ export const items: ItemType[] = [
     type: "local",
     title: "Printers",
     to: "/printers",
+    icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
+  },
+  {
+    type: "local",
+    title: "When2Meet",
+    to: "/when2meet",
     badge: (
       <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
         NEW
       </span>
     ),
-    icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
+    icon: <span className="icon-[mdi--calendar-outline]" />,
   },
-  ...((import.meta.env.VITE_PRODUCTION && []) || [
-    {
-      type: "local",
-      title: "When2Meet",
-      to: "/when2meet",
-      badge: (
-        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
-          DEV
-        </span>
-      ),
-      icon: <span className="icon-[mdi--calendar-outline]" />,
-    },
-  ]),
   ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
