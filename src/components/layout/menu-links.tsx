@@ -224,14 +224,6 @@ export const items: ItemType[] = [
   // Services for small audience:
   {
     type: "local",
-    title: "Guard",
-    to: "/guard",
-    icon: (
-      <span className="icon-[material-symbols--verified-user-outline-rounded]" />
-    ),
-  },
-  {
-    type: "local",
     title: "Forms",
     to: "/forms",
     icon: <span className="icon-[material-symbols--description-outline]" />,
