@@ -1,17 +1,16 @@
-You are a Senior Front-End Developer and an Expert in ReactJS, TanStack Router, Vite, JavaScript, TypeScript, HTML, CSS, PNPM and modern UI/UX frameworks (e.g., TailwindCSS, Floating UI). You are thoughtful, give nuanced answers, and are brilliant at reasoning. You carefully provide accurate, factual, thoughtful answers, and are a genius at reasoning.
-
 - Follow the user’s requirements carefully & to the letter.
-- First think step-by-step - describe your plan for what to build in pseudocode, written out in great detail.
-- Confirm, then write code!
-- Always write correct, best practice, DRY principle (Don't Repeat Yourself), bug free, fully functional and working code also it should be aligned to listed rules down below at Code Implementation Guidelines .
+- Be concise. For a clear task, proceed without unnecessary confirmation or a detailed step-by-step explanation. Provide a plan when requested; ask when a material decision is unresolved.
 - Focus on easy and readability code, over being performant.
 - Fully implement all requested functionality.
 - Leave NO todo, placeholders or missing pieces.
-- Ensure code is complete! Verify thoroughly finalized.
+- Verify the result with checks relevant to the change. Report what actually ran and any blockers; do not claim checks passed if they were not run.
 - Include all required imports, and ensure proper naming of key components.
-- Be concise Minimize any other prose.
 - If you think there might not be a correct answer, you say so.
 - If you do not know the answer, say so, instead of guessing.
+- Do not create unnecessary companion Markdown files such as QUICKSTART or TASK. Explicitly requested documentation is part of the task.
+- Do not add backward compatibility or legacy normalization unless requested. This does not remove the need to preserve data in a migration task.
+- Do not add contrived fallbacks to hide errors. Implement explicitly requested fallbacks within their requested scope.
+- Before editing, check the relevant staged and unstaged changes. Preserve user changes and keep the task focused; do not refactor unrelated code just to match these guidelines.
 
 ### Coding Environment
 
@@ -31,18 +30,20 @@ The user asks questions about the following coding technologies:
 
 Project setup:
 
-- We use pnpm as package manager, project runned via `pnpm run dev --host` command (most probably it is already running, do not run it again).
-- Local development server is available at https://local.innohassle.ru:3000 (default). Allowed ports: **3000–3099** (for parallel worktrees / agents; see [WORKTREE.md](WORKTREE.md)).
-- Lint, check, prettify: `pnpm run lint:fix`, `pnpm run typecheck`, `pnpm run prettify`.
-- Generate API types: `pnpm run gen:api` (most probably it is already generated, do not run it again).
-- For parallel branches / several frontend instances via git worktrees, see [WORKTREE.md](WORKTREE.md).
+- We use pnpm as package manager; versions and scripts are defined in `package.json`. Run frontend commands from the repository root with dependencies installed.
+- The project runs via `pnpm run dev --host`. Check existing terminals before starting it: the dev server is most probably already running; do not start a duplicate.
+- Local development server is available at https://local.innohassle.ru:3000 (default). Allowed ports: **3000–3099**.
+- Check lint, types and formatting with `pnpm run lint`, `pnpm run typecheck`, `pnpm run prettier:check`. `pnpm run lint:fix` and `pnpm run prettify` modify files across the repository; do not use them as harmless checks over unrelated changes.
+- Unit tests: `pnpm run test`; the search NDCG check is separate: `pnpm run test:ndcg`. Choose checks relevant to the change, not every suite for every small edit.
+- `pnpm run test:e2e` requires Playwright browser binaries and currently tests the Tiptap fixture, not the authenticated SPA. Its server configuration is in `playwright.config.ts` and `vite.e2e.config.ts`; the SPA port rule above does not apply to that fixture.
+- Generate API types with `pnpm run gen:api` only when needed. Sources and outputs are in `redocly.yaml`; verify the schema matches the intended backend contract. The command needs access to those schemas, overwrites generated types and formats `src/api`; review the resulting diff.
 
 ### Cursor Agent — Browser Automation
 
 For Cursor Agent only (Browser Automation / `cursor-ide-browser`):
 
-- Use the Cursor browser against https://local.innohassle.ru:3000 (or another port in **3000–3099** / the route under test; see [WORKTREE.md](WORKTREE.md)).
-- When work is parallel (extra worktree, another agent already using the browser, or a non-default port), open a **new** browser tab: call `browser_navigate` with `newTab: true` instead of reusing an existing tab.
+- Use the Cursor browser against https://local.innohassle.ru:3000 (or another port in **3000–3099** / the route under test).
+- When work is parallel (another agent already using the browser or a non-default port), open a **new** browser tab: call `browser_navigate` with `newTab: true` instead of reusing an existing tab.
 - If the app is not authorized (signed-out UI, "Sign in" prompt, or auth-gated content), ask the user to sign in in that browser tab. Do not try to complete SSO/login yourself. This should be done once per session commonly.
 - If automation does not work, most probably user needs to enable it in the Cursor settings (Browser & Network).
 
@@ -51,8 +52,8 @@ For Cursor Agent only (Browser Automation / `cursor-ide-browser`):
 Follow these rules when you write code:
 
 - Use early returns whenever possible to make the code more readable.
-- Do not use default exports, use named exports instead.
-- Always use Tailwind classes for styling HTML elements; avoid using CSS or tags.
+- Use named exports for new React components. Import existing APIs in their current form (for example, the default import of `Tooltip` below); do not migrate unrelated exports as part of a local task.
+- Always use Tailwind classes for styling HTML elements; avoid separate CSS or `<style>` tags for that markup. Reuse the theme and utilities in `src/app/styles.css`.
 - Use cn to combine Tailwind classes (`import { cn } from "@/lib/ui/cn";`).
 - Use descriptive variable and function/const names. Also, event functions should be named with a "handle" prefix, like `handleClick` for onClick and `handleKeyDown` for onKeyDown.
 - If the handler just changes state or could be written in one short line, try to inline it instead of creating a function.
@@ -65,7 +66,7 @@ Follow these rules when you write code:
 - Try not to set z-index.
 - Use container queries. We use `@container/content` for main section (without sidebar), `@container/modal` for Modal content.
 - Always set `type="button"` for buttons.
-- Do not ever write aria attributes, we don't care about accessibility.
+- Do not manually add `aria-*` attributes. This does not mean removing interaction props, focus or role behavior supplied by existing Floating UI components.
 - When data is loading prefer to use skeleton components `className="skeleton"`, when action is in progress use circle spinner `<span className="loading loading-spinner loading-sm" />`.
 - Show error state to the user if useQuery returned the error.
 
@@ -170,7 +171,7 @@ If you create a new service, most probably you need to add it to the sidebar in 
 ### API calls
 
 We use TanStack Query with OpenAPI-TypeScript to call the API.
-We have several services, you can find types in `src/api/*/types.ts` files. Also do not ever change generated files manually. Do not use `fetch` API, use TanStack Query instead.
+We have several services, you can find types in `src/api/*/types.ts` files. Also do not ever change generated files manually. In feature code, use the existing `$service` query/mutation client instead of calling `fetch` or the low-level transport directly.
 
 Example of GET query:
 
