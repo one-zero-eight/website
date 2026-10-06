@@ -1,6 +1,7 @@
 import mdx from "@mdx-js/rollup";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import react from "@vitejs/plugin-react";
 import remarkGfm from "remark-gfm";
 import { defineConfig } from "vite";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
@@ -30,9 +31,10 @@ export default defineConfig({
     tailwindcss(),
 
     // MDX support
-    mdx({
-      remarkPlugins: [remarkGfm],
-    }),
+    { enforce: "pre", ...mdx({ remarkPlugins: [remarkGfm] }) },
+
+    // React Fast Refresh, including components compiled from MDX
+    react({ include: /\.(mdx|js|jsx|ts|tsx)$/ }),
 
     // Offline mode via PWA
     VitePWA({
