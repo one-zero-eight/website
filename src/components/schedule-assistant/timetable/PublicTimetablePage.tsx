@@ -38,7 +38,7 @@ export function PublicTimetablePage({
 
   return (
     <>
-      <div className="flex shrink-0 flex-wrap items-center gap-2 px-4 pb-3 text-sm">
+      <div className="flex shrink-0 flex-wrap items-center gap-2 px-4 pt-2 pb-1 text-sm">
         {!me ? (
           <>
             <span className="text-base-content/65">
