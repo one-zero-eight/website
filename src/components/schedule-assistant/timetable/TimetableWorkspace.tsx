@@ -1531,6 +1531,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
 
                 <div
                   id="tableStage"
+                  data-theme="light"
                   className="rounded-tr-box relative flex min-h-0 flex-1 flex-col overflow-hidden border border-[#d8dfeb] bg-white"
                 >
                   {ownGroups.length ? (
