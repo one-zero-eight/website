@@ -137,14 +137,21 @@ export const items: ItemType[] = [
   },
   { type: "separator", hideOnMore: true },
   // On-site services:
-  {
-    type: "local",
-    title: "Timetable",
-    to: "/timetable",
-    icon: (
-      <span className="icon-[material-symbols--calendar-view-week-outline]" />
-    ),
-  },
+  ...((import.meta.env.VITE_PRODUCTION && []) || [
+    {
+      type: "local",
+      title: "Timetable",
+      to: "/timetable",
+      badge: (
+        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
+          DEV
+        </span>
+      ),
+      icon: (
+        <span className="icon-[material-symbols--calendar-view-week-outline]" />
+      ),
+    },
+  ]),
   {
     type: "local",
     title: "Schedule",
