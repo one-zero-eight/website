@@ -142,8 +142,14 @@ export const items: ItemType[] = [
     title: "Timetable",
     to: "/timetable",
     icon: (
-      <span className="icon-[material-symbols--calendar-view-week-outline-rounded]" />
+      <span className="icon-[material-symbols--calendar-view-week-outline]" />
     ),
+  },
+  {
+    type: "local",
+    title: "Schedule",
+    to: "/schedule",
+    icon: <span className="icon-[mdi--calendars]" />,
   },
   {
     type: "local",
@@ -159,19 +165,13 @@ export const items: ItemType[] = [
   },
   {
     type: "local",
-    title: "Schedule",
-    to: "/schedule",
-    icon: <span className="icon-[mdi--calendars]" />,
-  },
-  {
-    type: "local",
     title: "Printers",
     to: "/printers",
     icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
   },
   {
     type: "local",
-    title: "When2Meet",
+    title: "When2meet",
     to: "/when2meet",
     badge: (
       <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
