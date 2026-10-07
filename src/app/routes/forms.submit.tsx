@@ -42,10 +42,10 @@ function RouteComponent() {
   // Remove after deprecation window when traffic drops to zero.
   useEffect(() => {
     if (!isLegacyFormQuery || !form || !me) return;
-    const email = me.innopolis_sso?.email;
+    const email = me.innopolis_info?.email;
     if (!email) return;
-    const telegram = me.telegram?.username;
-    const fio = me.innopolis_sso?.name;
+    const telegram = me.telegram_info?.username;
+    const fio = me.innopolis_info?.name;
 
     const redirectTimeout = setTimeout(() => {
       try {

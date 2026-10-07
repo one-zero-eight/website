@@ -358,7 +358,10 @@ export interface paths {
      * Generate Service Token
      * @description Generate access token for access users-related endpoints (/users/*).
      *
-     *     By default expires on the nearest 14 August if that is more than a month away,
+     *     Non-admin users can only request users:me and sport:me scopes.
+     *     Personal scopes are resolved to the current user's ID in the issued token.
+     *
+     *     By default, expires on the nearest 14 August if that is more than a month away,
      *     otherwise on the next 14 August (so yearly tokens rotate on the same date).
      */
     get: operations["generate_service_token_tokens_generate_service_token_get"];
@@ -652,38 +655,6 @@ export interface components {
       /** Dorm Floor */
       dorm_floor?: number | null;
     };
-    /** UserInfoFromSSO */
-    UserInfoFromSSO: {
-      /** Email */
-      email: string;
-      /** Name */
-      name?: string | null;
-      /** Access Token */
-      access_token?: string | null;
-      /** Refresh Token */
-      refresh_token?: string | null;
-      /** Expires At */
-      expires_at?: string | null;
-      /** Issued At */
-      issued_at?: string | null;
-      /**
-       * Is Student
-       * @default false
-       */
-      is_student: boolean;
-      /**
-       * Is Staff
-       * @default false
-       */
-      is_staff: boolean;
-      /**
-       * Is College
-       * @default false
-       */
-      is_college: boolean;
-      /** Group */
-      group?: string | null;
-    };
     /** UserPreferences */
     UserPreferences: {
       /** Dorm Building */
@@ -716,16 +687,6 @@ export interface components {
        */
       innohassle_admin: boolean;
       preferences?: components["schemas"]["UserPreferences"];
-      /**
-       * @deprecated
-       * @description Deprecated field, use `innopolis_info` instead, dont trust data from `innopolis_sso`
-       */
-      innopolis_sso?: components["schemas"]["UserInfoFromSSO"] | null;
-      /**
-       * @deprecated
-       * @description Deprecated field, use `telegram_info` instead
-       */
-      telegram?: components["schemas"]["TelegramWidgetData"] | null;
     };
   };
   responses: never;
@@ -753,7 +714,6 @@ export type SchemaTelegramWidgetData =
 export type SchemaTokenData = components["schemas"]["TokenData"];
 export type SchemaUpdateUserPreferences =
   components["schemas"]["UpdateUserPreferences"];
-export type SchemaUserInfoFromSso = components["schemas"]["UserInfoFromSSO"];
 export type SchemaUserPreferences = components["schemas"]["UserPreferences"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type SchemaViewUser = components["schemas"]["ViewUser"];
@@ -1452,8 +1412,6 @@ export interface operations {
         sub: string;
         /** @description List of scopes that will be in `scope` field of JWT token. Default is ['users'] */
         scopes?: components["schemas"]["AvailableScopes"][];
-        /** @description Generate token only for current user - other users will be marked as not existing in the system */
-        only_for_me?: boolean;
         /** @description Token expiration policy. `auto` (default): nearest 14 August if more than a month away, otherwise next 14 August. `nearest-14-august` / `next-14-august`: fixed Aug 14 targets. `in-3-month`: expire in 90 days. */
         expiration?: components["schemas"]["ServiceTokenExpiration"];
       };
@@ -1784,6 +1742,10 @@ export interface operations {
 export enum AvailableScopes {
   users = "users",
   sport = "sport",
+  parser = "parser",
+  my_uni = "my-uni",
+  users_me = "users:me",
+  sport_me = "sport:me",
 }
 export enum ServiceTokenExpiration {
   auto = "auto",

@@ -64,7 +64,7 @@ export function ConnectTelegramPage() {
     );
   }
 
-  if (!me.telegram || reconnect) {
+  if (!me.telegram_info || reconnect) {
     return (
       <>
         <h1 className="text-center text-2xl font-medium wrap-break-word">
@@ -89,9 +89,9 @@ export function ConnectTelegramPage() {
           </div>
         )}
         <div className="flex flex-col justify-center overflow-x-hidden text-center">
-          <p className="text-xl wrap-break-word">{me.innopolis_sso?.name}</p>
+          <p className="text-xl wrap-break-word">{me.innopolis_info?.name}</p>
           <p className="text-base-content/75 text-ellipsis">
-            {me.innopolis_sso?.email}
+            {me.innopolis_info?.email}
           </p>
         </div>
         <div className="flex items-center justify-center">
@@ -111,12 +111,12 @@ export function ConnectTelegramPage() {
         Success!
       </h1>
       <div className="flex flex-col justify-center overflow-x-hidden text-center">
-        <p className="text-xl wrap-break-word">{me.innopolis_sso?.name}</p>
+        <p className="text-xl wrap-break-word">{me.innopolis_info?.name}</p>
         <p className="text-base-content/75 text-ellipsis">
-          {me.innopolis_sso?.email}
+          {me.innopolis_info?.email}
         </p>
         <p className="text-base-content/75 text-ellipsis">
-          @{me.telegram.username}
+          @{me.telegram_info.username}
         </p>
       </div>
       <div className="flex items-center justify-center">

@@ -187,14 +187,12 @@ export function AdminUserDetails({
           <div className="min-w-0 flex-1">
             <h2 className="truncate text-2xl font-medium">
               {user.innopolis_info?.name ??
-                user.innopolis_sso?.name ??
                 telegramName ??
                 user.innopolis_info?.email ??
-                user.innopolis_sso?.email ??
                 user.id}
             </h2>
             <p className="text-base-content/75 mt-1 truncate text-sm">
-              {user.innopolis_info?.email ?? user.innopolis_sso?.email ?? "—"}
+              {user.innopolis_info?.email ?? "—"}
             </p>
           </div>
         </div>

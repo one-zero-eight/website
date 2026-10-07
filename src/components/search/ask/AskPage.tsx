@@ -89,7 +89,7 @@ export function AskPage({ askQuery }: { askQuery: string }) {
           msg.role === "user" ? (
             <div className="flex max-w-[80%] flex-col gap-1 self-start">
               <a className="text-base-content/30" href="/dashboard">
-                {me?.innopolis_sso?.name?.split(" ")[0]}
+                {me?.innopolis_info?.name?.split(" ")[0]}
               </a>
               <div
                 key={i}

@@ -8,16 +8,11 @@ export function isInnohassleAdmin(
 }
 
 export function getViewUserEmail(user: accountsTypes.SchemaViewUser) {
-  return user.innopolis_info?.email ?? user.innopolis_sso?.email;
+  return user.innopolis_info?.email;
 }
 
 export function getViewUserName(user: accountsTypes.SchemaViewUser) {
-  return (
-    user.innopolis_info?.name ??
-    user.innopolis_sso?.name ??
-    getViewUserEmail(user) ??
-    user.id
-  );
+  return user.innopolis_info?.name ?? getViewUserEmail(user) ?? user.id;
 }
 
 export function getViewUserTelegramLabel(user: accountsTypes.SchemaViewUser) {
@@ -33,11 +28,10 @@ export function getViewUserTelegramLabel(user: accountsTypes.SchemaViewUser) {
 }
 
 export function getViewUserRoleBadges(user: accountsTypes.SchemaViewUser) {
-  const info = user.innopolis_info ?? user.innopolis_sso;
   return [
-    info?.is_staff && "Staff",
-    info?.is_student && "Student",
-    info?.is_college && "College",
+    user.innopolis_info?.is_staff && "Staff",
+    user.innopolis_info?.is_student && "Student",
+    user.innopolis_info?.is_college && "College",
   ].filter((role): role is string => !!role);
 }
 
@@ -49,11 +43,10 @@ export function getViewUserContactLine(user: accountsTypes.SchemaViewUser) {
 }
 
 export function getViewUserRoles(user: accountsTypes.SchemaViewUser) {
-  const info = user.innopolis_info ?? user.innopolis_sso;
   return [
-    info?.is_staff && "Staff",
-    info?.is_student && "Student",
-    info?.is_college && "College",
+    user.innopolis_info?.is_staff && "Staff",
+    user.innopolis_info?.is_student && "Student",
+    user.innopolis_info?.is_college && "College",
     user.innohassle_admin && "InNoHassle admin",
   ]
     .filter(Boolean)
