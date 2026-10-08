@@ -15,6 +15,7 @@ import {
   EventApi,
   EventContentArg,
   EventInput,
+  ViewApi,
 } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -221,15 +222,7 @@ export function CalendarViewer({
   const visibleRangeKeyRef = useRef<string | null>(null);
 
   const handleDatesSet = useCallback(
-    ({
-      view,
-      start,
-      end,
-    }: {
-      view: { type: string };
-      start: Date;
-      end: Date;
-    }) => {
+    ({ view, start, end }: { view: ViewApi; start: Date; end: Date }) => {
       // Bail out when the range didn't change: 'view.currentStart' is a fresh
       // Date on every call, so without this comparison the component would
       // re-render on each 'datesSet' (new props -> resetOptions -> datesSet).
@@ -279,6 +272,7 @@ export function CalendarViewer({
           // Accumulate 'extendedProps.calendarURLs' to use it later.
           const unique: Record<string, EventApi> = {};
           for (const event of events) {
+            console.log("event ", event.start, event.title);
             // Using 'id' instead of 'title' is a fix for Music room
             const uniqueId =
               (event.id || event.title) + event.startStr + event.endStr;
@@ -293,6 +287,44 @@ export function CalendarViewer({
               unique[uniqueId].setExtendedProp("calendarURLs", calendarURLs);
             }
           }
+
+          const todayEvent = events.find((event) => event.id === "today");
+          const today = new Date();
+          for (const event of events) {
+            if (event.id == "today") continue;
+            if (event.start === null) continue;
+            const threeHoursInMs = 3 * 60 * 60 * 1000;
+            const originalEventDate = new Date(event.start);
+            const eventDate = new Date(
+              originalEventDate.getTime() - threeHoursInMs,
+            );
+            const todayDate = new Date(today);
+            const d1 = eventDate.setHours(0, 0, 0, 0);
+            if (d1 === todayDate.setHours(0, 0, 0, 0)) {
+              todayEvent?.remove();
+              return;
+            }
+          }
+          if (todayEvent) return;
+
+          const todayStr = [
+            today.getFullYear(),
+            String(today.getMonth() + 1).padStart(2, "0"),
+            String(today.getDate()).padStart(2, "0"),
+          ].join("-");
+
+          const calendarApi = calendarRef.current?.getApi();
+          if (!calendarApi) return;
+
+          calendarApi.addEvent({
+            id: "today",
+            start: todayStr,
+            allDay: true,
+            extendedProps: {
+              emptyWeekendPlaceholder: true,
+              calendarURLs: [],
+            },
+          });
         }}
         eventDataTransform={(input) => {
           if (
@@ -340,7 +372,7 @@ export function CalendarViewer({
         }}
         eventSourceSuccess={onEventSourceSuccess}
         progressiveEventRendering={true}
-        timeZone="UTC+0" // Use the same timezone for everyone
+        timeZone="America/New_York" // Use the same timezone for everyone
         plugins={[
           momentPlugin,
           dayGridPlugin,
@@ -583,47 +615,6 @@ export function CalendarViewer({
     });
   }, [extraEvents, isFullPage]);
 
-  useEffect(() => {
-    const calendarApi = calendarRef.current?.getApi();
-
-    if (!calendarApi) return;
-    const today = new Date();
-
-    const prevEvents = calendarApi.getEvents();
-    for (const event of prevEvents) {
-      if (event.id == "today") continue;
-      if (event.start === null) continue;
-      const eventDate = new Date(event.start);
-      const todayDate = new Date(today);
-      const d1 = eventDate.setHours(0, 0, 0, 0);
-      console.log(d1, todayDate.setHours(0, 0, 0, 0));
-      if (d1 === todayDate.setHours(0, 0, 0, 0)) {
-        calendarApi.getEventById("today")?.remove();
-        return;
-      }
-    }
-    if (calendarApi.getEventById("today")) return;
-
-    console.log("Мяу");
-
-    const todayStr = [
-      today.getFullYear(),
-      String(today.getMonth() + 1).padStart(2, "0"),
-      String(today.getDate()).padStart(2, "0"),
-    ].join("-");
-
-    const todayEvent = {
-      id: "today",
-      start: todayStr,
-      allDay: true,
-      extendedProps: {
-        emptyWeekendPlaceholder: true,
-        calendarURLs: [],
-      },
-    };
-
-    calendarApi.addEvent(todayEvent);
-  });
   const customViewIds = useMemo(
     () => new Set(customViews.map(({ id }) => id)),
     [customViews],
