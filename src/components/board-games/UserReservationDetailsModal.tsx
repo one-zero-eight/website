@@ -1,18 +1,16 @@
+import { ReservationOverdueTag } from "./ReservationOverdueTag";
 import { $boardGames } from "@/api/board-games";
+import { $accounts } from "@/api/accounts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   ReservationStatus,
-  type SchemaReservation,
+  type SchemaReservationOut,
 } from "@/api/board-games/types.ts";
-import {
-  boardGamesModalClassName,
-  InformationField,
-  ReservationStatusBadge,
-  telegramHandle,
-} from "@/components/board-games/shared.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { FormEvent, useState } from "react";
 
 export function UserReservationDetailsModal({
@@ -20,7 +18,7 @@ export function UserReservationDetailsModal({
   gameTitle,
   onOpenChange,
 }: {
-  reservation: SchemaReservation;
+  reservation: SchemaReservationOut;
   gameTitle?: string;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -28,7 +26,6 @@ export function UserReservationDetailsModal({
   const { showConfirm, showError, showSuccess } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const isReserved = reservation.status === ReservationStatus.reserved;
-  const telegram = telegramHandle(reservation.tg_alias);
 
   function invalidateUserBoardGameQueries() {
     queryClient.invalidateQueries({
@@ -73,20 +70,24 @@ export function UserReservationDetailsModal({
         open
         onOpenChange={onOpenChange}
         title="Reservation information"
-        containerClassName={boardGamesModalClassName}
         closeOnOutsidePress={!deleteMutation.isPending}
       >
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 @sm/modal:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-2">
           {gameTitle && (
             <InformationField label="Game" className="@sm/modal:col-span-2">
               {gameTitle}
             </InformationField>
           )}
           <InformationField label="Status">
-            <ReservationStatusBadge status={reservation.status} />
+            <div className="flex flex-wrap items-center gap-1.5">
+              <ReservationStatusBadge status={reservation.status} />
+              <ReservationOverdueTag reservation={reservation} />
+            </div>
           </InformationField>
           <InformationField label="Telegram alias">
-            {telegram ? `@${telegram}` : "Not provided"}
+            {reservation.tg_alias
+              ? `@${reservation.tg_alias.replace(/^@/, "")}`
+              : "Not provided"}
           </InformationField>
           <InformationField label="Return date">
             {reservation.return_date || "Not provided"}
@@ -94,15 +95,19 @@ export function UserReservationDetailsModal({
           <InformationField label="Created at">
             {new Date(reservation.created_at).toLocaleString()}
           </InformationField>
-          <InformationField
-            label="When available"
-            className="@sm/modal:col-span-2"
-          >
-            {reservation.when_available || "Not provided"}
-          </InformationField>
-          <InformationField label="Comments" className="@sm/modal:col-span-2">
-            {reservation.comments || "Not provided"}
-          </InformationField>
+          {reservation.when_available?.trim() && (
+            <InformationField
+              label="When available"
+              className="@sm/modal:col-span-2"
+            >
+              {reservation.when_available}
+            </InformationField>
+          )}
+          {reservation.comments?.trim() && (
+            <InformationField label="Comments" className="@sm/modal:col-span-2">
+              {reservation.comments}
+            </InformationField>
+          )}
           {reservation.borrower_name && (
             <InformationField
               label="Borrower name"
@@ -162,22 +167,23 @@ function EditReservationModal({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  reservation: SchemaReservation;
+  reservation: SchemaReservationOut;
   onSuccess: () => void;
 }) {
   const { showError, showSuccess } = useToast();
-  const [telegramAlias, setTelegramAlias] = useState(
-    reservation.tg_alias ?? "",
-  );
+  const accountQuery = $accounts.useQuery("get", "/users/me", undefined, {
+    enabled: open,
+  });
+  const telegramAlias =
+    accountQuery.data?.telegram_info?.username?.trim() ?? "";
   const [returnDate, setReturnDate] = useState(reservation.return_date ?? "");
   const [whenAvailable, setWhenAvailable] = useState(
     reservation.when_available ?? "",
   );
   const [comments, setComments] = useState(reservation.comments ?? "");
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
-  const validationError = hasAttemptedSubmit
-    ? getReservationValidationError(telegramAlias, returnDate)
-    : null;
+  const validationError =
+    hasAttemptedSubmit && !returnDate ? "Return date is required." : null;
   const mutation = $boardGames.useMutation(
     "patch",
     "/users/me/reservations/{id}",
@@ -193,7 +199,6 @@ function EditReservationModal({
   );
 
   function resetForm() {
-    setTelegramAlias(reservation.tg_alias ?? "");
     setReturnDate(reservation.return_date ?? "");
     setWhenAvailable(reservation.when_available ?? "");
     setComments(reservation.comments ?? "");
@@ -208,13 +213,20 @@ function EditReservationModal({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (
+      mutation.isPending ||
+      accountQuery.isPending ||
+      accountQuery.isError ||
+      !telegramAlias
+    )
+      return;
     setHasAttemptedSubmit(true);
-    if (getReservationValidationError(telegramAlias, returnDate)) return;
+    if (!returnDate) return;
     if (!reservation.id) return;
     mutation.mutate({
       params: { path: { id: reservation.id } },
       body: {
-        tg_alias: telegramAlias.trim() || null,
+        tg_alias: telegramAlias,
         return_date: returnDate || null,
         when_available: whenAvailable.trim() || null,
         comments: comments.trim() || null,
@@ -227,13 +239,30 @@ function EditReservationModal({
       open={open}
       onOpenChange={handleOpenChange}
       title="Edit reservation"
-      containerClassName={boardGamesModalClassName}
       closeOnOutsidePress={!mutation.isPending}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
+        {accountQuery.isPending && <div className="skeleton h-10 w-full" />}
+        {accountQuery.isError && (
+          <div className="alert alert-error text-sm">
+            <span>
+              Could not load your Telegram account:{" "}
+              {formatApiErrorMessage(accountQuery.error)}
+            </span>
+          </div>
+        )}
+        {!accountQuery.isPending && !accountQuery.isError && !telegramAlias && (
+          <div className="alert alert-warning text-sm">
+            <span>
+              Connect Telegram in your account settings and make sure it has a
+              username before saving your reservation.
+            </span>
+            <Link to="/account" className="link">
+              Account settings
+            </Link>
+          </div>
+        )}
         <ReservationFormFields
-          telegramAlias={telegramAlias}
-          onTelegramAliasChange={setTelegramAlias}
           returnDate={returnDate}
           onReturnDateChange={setReturnDate}
           whenAvailable={whenAvailable}
@@ -255,7 +284,12 @@ function EditReservationModal({
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={mutation.isPending}
+            disabled={
+              mutation.isPending ||
+              accountQuery.isPending ||
+              accountQuery.isError ||
+              !telegramAlias
+            }
           >
             {mutation.isPending && (
               <span className="loading loading-spinner loading-sm" />
@@ -269,8 +303,6 @@ function EditReservationModal({
 }
 
 export function ReservationFormFields({
-  telegramAlias,
-  onTelegramAliasChange,
   returnDate,
   onReturnDateChange,
   whenAvailable,
@@ -280,8 +312,6 @@ export function ReservationFormFields({
   disabled,
   validationError,
 }: {
-  telegramAlias: string;
-  onTelegramAliasChange: (value: string) => void;
   returnDate: string;
   onReturnDateChange: (value: string) => void;
   whenAvailable: string;
@@ -301,19 +331,7 @@ export function ReservationFormFields({
       )}
       <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-2">
         <label className="fieldset">
-          <span className="fieldset-legend">Telegram alias*</span>
-          <input
-            type="text"
-            className="input w-full"
-            value={telegramAlias}
-            onChange={(event) => onTelegramAliasChange(event.target.value)}
-            placeholder="@username"
-            disabled={disabled}
-            required
-          />
-        </label>
-        <label className="fieldset">
-          <span className="fieldset-legend">Return date*</span>
+          <span className="fieldset-legend">Return date *</span>
           <input
             type="date"
             className="input w-full"
@@ -349,16 +367,32 @@ export function ReservationFormFields({
   );
 }
 
-export function getReservationValidationError(
-  telegramAlias: string,
-  returnDate: string,
-) {
-  const missingFields = [
-    !telegramAlias.trim() && "Telegram alias",
-    !returnDate && "return date",
-  ].filter(Boolean);
+function InformationField({
+  label,
+  className,
+  children,
+}: React.PropsWithChildren<{ label: string; className?: string }>) {
+  return (
+    <div className={cn("min-w-0", className)}>
+      <p className="text-base-content/60 text-xs font-semibold uppercase">
+        {label}
+      </p>
+      <div className="wrap-break-word">{children}</div>
+    </div>
+  );
+}
 
-  if (missingFields.length === 0) return null;
-  if (missingFields.length === 1) return `${missingFields[0]} is required.`;
-  return "Telegram alias and return date are required.";
+function ReservationStatusBadge({ status }: { status: ReservationStatus }) {
+  return (
+    <span
+      className={cn(
+        "badge capitalize",
+        status === ReservationStatus.reserved && "badge-warning",
+        status === ReservationStatus.taken && "badge-info",
+        status === ReservationStatus.returned && "badge-success",
+      )}
+    >
+      {status}
+    </span>
+  );
 }

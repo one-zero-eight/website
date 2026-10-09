@@ -1,4 +1,7 @@
 import { BoardGamesAdminPage } from "@/components/board-games/BoardGamesAdminPage.tsx";
+import { BoardGamesTabs } from "@/components/board-games/BoardGamesTabs.tsx";
+import { RequireAuth } from "@/components/common/AuthWall.tsx";
+import { Topbar } from "@/components/layout/Topbar.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -16,7 +19,11 @@ function RouteComponent() {
           content="Manage board game reservations and storage availability."
         />
       </Helmet>
-      <BoardGamesAdminPage />
+      <Topbar title="Board Games" />
+      <BoardGamesTabs />
+      <RequireAuth>
+        <BoardGamesAdminPage />
+      </RequireAuth>
     </>
   );
 }

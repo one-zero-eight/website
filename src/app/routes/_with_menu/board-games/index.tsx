@@ -7,9 +7,16 @@ import { RequireAuth } from "@/components/common/AuthWall.tsx";
 
 export const Route = createFileRoute("/_with_menu/board-games/")({
   component: RouteComponent,
+  validateSearch: (search: Record<string, unknown>): { gameId?: string } => ({
+    gameId:
+      typeof search.gameId === "string" && search.gameId
+        ? search.gameId
+        : undefined,
+  }),
 });
 
 function RouteComponent() {
+  const { gameId } = Route.useSearch();
   return (
     <>
       <Helmet>
@@ -23,7 +30,7 @@ function RouteComponent() {
       <Topbar title="Board Games" />
       <BoardGamesTabs />
       <RequireAuth>
-        <BoardGamesPage />
+        <BoardGamesPage gameId={gameId} />
       </RequireAuth>
     </>
   );
