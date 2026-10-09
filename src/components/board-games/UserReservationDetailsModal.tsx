@@ -1,29 +1,27 @@
+import { ReservationOverdueTag } from "./ReservationOverdueTag";
 import { $boardGames } from "@/api/board-games";
-import { msg } from "@lingui/core/macro";
-import type { MessageDescriptor } from "@lingui/core";
-import { Trans, useLingui } from "@lingui/react/macro";
-import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
+import { $accounts } from "@/api/accounts";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   ReservationStatus,
-  type SchemaReservation,
+  type SchemaReservationOut,
 } from "@/api/board-games/types.ts";
-import {
-  boardGamesModalClassName,
-  InformationField,
-  ReservationStatusBadge,
-  telegramHandle,
-} from "@/components/board-games/shared.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/ui/cn";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { FormEvent, useState } from "react";
+import { getReservationStatusLabel } from "./reservation-presentation";
 
 export function UserReservationDetailsModal({
   reservation,
   gameTitle,
   onOpenChange,
 }: {
-  reservation: SchemaReservation;
+  reservation: SchemaReservationOut;
   gameTitle?: string;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -32,7 +30,6 @@ export function UserReservationDetailsModal({
   const { showConfirm, showError, showSuccess } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const isReserved = reservation.status === ReservationStatus.reserved;
-  const telegram = telegramHandle(reservation.tg_alias);
 
   function invalidateUserBoardGameQueries() {
     queryClient.invalidateQueries({
@@ -59,7 +56,7 @@ export function UserReservationDetailsModal({
       onError: (error) => {
         showError(
           msg`Could not delete reservation`,
-          formatApiErrorDescriptor(error),
+          formatApiErrorMessage(error),
         );
       },
     },
@@ -85,20 +82,24 @@ export function UserReservationDetailsModal({
         open
         onOpenChange={onOpenChange}
         title={t`Reservation information`}
-        containerClassName={boardGamesModalClassName}
         closeOnOutsidePress={!deleteMutation.isPending}
       >
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 @sm/modal:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-2">
           {gameTitle && (
             <InformationField label={t`Game`} className="@sm/modal:col-span-2">
               {gameTitle}
             </InformationField>
           )}
           <InformationField label={t`Status`}>
-            <ReservationStatusBadge status={reservation.status} />
+            <div className="flex flex-wrap items-center gap-1.5">
+              <ReservationStatusBadge status={reservation.status} />
+              <ReservationOverdueTag reservation={reservation} />
+            </div>
           </InformationField>
           <InformationField label={t`Telegram alias`}>
-            {telegram ? `@${telegram}` : t`Not provided`}
+            {reservation.tg_alias
+              ? `@${reservation.tg_alias.replace(/^@/, "")}`
+              : t`Not provided`}
           </InformationField>
           <InformationField label={t`Return date`}>
             {reservation.return_date || t`Not provided`}
@@ -106,18 +107,22 @@ export function UserReservationDetailsModal({
           <InformationField label={t`Created at`}>
             {new Date(reservation.created_at).toLocaleString(i18n.locale)}
           </InformationField>
-          <InformationField
-            label={t`When available`}
-            className="@sm/modal:col-span-2"
-          >
-            {reservation.when_available || t`Not provided`}
-          </InformationField>
-          <InformationField
-            label={t`Comments`}
-            className="@sm/modal:col-span-2"
-          >
-            {reservation.comments || t`Not provided`}
-          </InformationField>
+          {reservation.when_available?.trim() && (
+            <InformationField
+              label={t`When available`}
+              className="@sm/modal:col-span-2"
+            >
+              {reservation.when_available}
+            </InformationField>
+          )}
+          {reservation.comments?.trim() && (
+            <InformationField
+              label={t`Comments`}
+              className="@sm/modal:col-span-2"
+            >
+              {reservation.comments}
+            </InformationField>
+          )}
           {reservation.borrower_name && (
             <InformationField
               label={t`Borrower name`}
@@ -177,23 +182,25 @@ function EditReservationModal({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  reservation: SchemaReservation;
+  reservation: SchemaReservationOut;
   onSuccess: () => void;
 }) {
   const { t } = useLingui();
   const { showError, showSuccess } = useToast();
-  const [telegramAlias, setTelegramAlias] = useState(
-    reservation.tg_alias ?? "",
-  );
+  const accountQuery = $accounts.useQuery("get", "/users/me", undefined, {
+    enabled: open,
+  });
+  const telegramAlias =
+    accountQuery.data?.telegram_info?.username?.trim() ?? "";
+  const accountErrorMessage = formatApiErrorMessage(accountQuery.error);
   const [returnDate, setReturnDate] = useState(reservation.return_date ?? "");
   const [whenAvailable, setWhenAvailable] = useState(
     reservation.when_available ?? "",
   );
   const [comments, setComments] = useState(reservation.comments ?? "");
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
-  const validationError = hasAttemptedSubmit
-    ? getReservationValidationError(telegramAlias, returnDate)
-    : null;
+  const validationError =
+    hasAttemptedSubmit && !returnDate ? t`Return date is required.` : null;
   const mutation = $boardGames.useMutation(
     "patch",
     "/users/me/reservations/{id}",
@@ -208,14 +215,13 @@ function EditReservationModal({
       onError: (error) => {
         showError(
           msg`Could not update reservation`,
-          formatApiErrorDescriptor(error),
+          formatApiErrorMessage(error),
         );
       },
     },
   );
 
   function resetForm() {
-    setTelegramAlias(reservation.tg_alias ?? "");
     setReturnDate(reservation.return_date ?? "");
     setWhenAvailable(reservation.when_available ?? "");
     setComments(reservation.comments ?? "");
@@ -230,13 +236,20 @@ function EditReservationModal({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (
+      mutation.isPending ||
+      accountQuery.isPending ||
+      accountQuery.isError ||
+      !telegramAlias
+    )
+      return;
     setHasAttemptedSubmit(true);
-    if (getReservationValidationError(telegramAlias, returnDate)) return;
+    if (!returnDate) return;
     if (!reservation.id) return;
     mutation.mutate({
       params: { path: { id: reservation.id } },
       body: {
-        tg_alias: telegramAlias.trim() || null,
+        tg_alias: telegramAlias,
         return_date: returnDate || null,
         when_available: whenAvailable.trim() || null,
         comments: comments.trim() || null,
@@ -249,13 +262,33 @@ function EditReservationModal({
       open={open}
       onOpenChange={handleOpenChange}
       title={t`Edit reservation`}
-      containerClassName={boardGamesModalClassName}
       closeOnOutsidePress={!mutation.isPending}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
+        {accountQuery.isPending && <div className="skeleton h-10 w-full" />}
+        {accountQuery.isError && (
+          <div className="alert alert-error text-sm">
+            <span>
+              <Trans>
+                Could not load your Telegram account: {accountErrorMessage}
+              </Trans>
+            </span>
+          </div>
+        )}
+        {!accountQuery.isPending && !accountQuery.isError && !telegramAlias && (
+          <div className="alert alert-warning text-sm">
+            <span>
+              <Trans>
+                Connect Telegram in your account settings and make sure it has a
+                username before saving your reservation.
+              </Trans>
+            </span>
+            <Link to="/account" className="link">
+              <Trans>Account settings</Trans>
+            </Link>
+          </div>
+        )}
         <ReservationFormFields
-          telegramAlias={telegramAlias}
-          onTelegramAliasChange={setTelegramAlias}
           returnDate={returnDate}
           onReturnDateChange={setReturnDate}
           whenAvailable={whenAvailable}
@@ -277,7 +310,12 @@ function EditReservationModal({
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={mutation.isPending}
+            disabled={
+              mutation.isPending ||
+              accountQuery.isPending ||
+              accountQuery.isError ||
+              !telegramAlias
+            }
           >
             {mutation.isPending && (
               <span className="loading loading-spinner loading-sm" />
@@ -291,8 +329,6 @@ function EditReservationModal({
 }
 
 export function ReservationFormFields({
-  telegramAlias,
-  onTelegramAliasChange,
   returnDate,
   onReturnDateChange,
   whenAvailable,
@@ -302,8 +338,6 @@ export function ReservationFormFields({
   disabled,
   validationError,
 }: {
-  telegramAlias: string;
-  onTelegramAliasChange: (value: string) => void;
   returnDate: string;
   onReturnDateChange: (value: string) => void;
   whenAvailable: string;
@@ -311,35 +345,21 @@ export function ReservationFormFields({
   comments: string;
   onCommentsChange: (value: string) => void;
   disabled: boolean;
-  validationError?: MessageDescriptor | null;
+  validationError?: string | null;
 }) {
-  const { t, i18n } = useLingui();
+  const { t } = useLingui();
   return (
     <>
       {validationError && (
         <div className="alert alert-error py-2 text-sm">
           <span className="icon-[material-symbols--error-outline] shrink-0 text-xl" />
-          <span>{i18n._(validationError)}</span>
+          <span>{validationError}</span>
         </div>
       )}
       <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-2">
         <label className="fieldset">
           <span className="fieldset-legend">
-            <Trans>Telegram alias*</Trans>
-          </span>
-          <input
-            type="text"
-            className="input w-full"
-            value={telegramAlias}
-            onChange={(event) => onTelegramAliasChange(event.target.value)}
-            placeholder="@username"
-            disabled={disabled}
-            required
-          />
-        </label>
-        <label className="fieldset">
-          <span className="fieldset-legend">
-            <Trans>Return date*</Trans>
+            <Trans>Return date *</Trans>
           </span>
           <input
             type="date"
@@ -380,18 +400,33 @@ export function ReservationFormFields({
   );
 }
 
-export function getReservationValidationError(
-  telegramAlias: string,
-  returnDate: string,
-) {
-  if (!telegramAlias.trim() && !returnDate) {
-    return msg`Telegram alias and return date are required.`;
-  }
-  if (!telegramAlias.trim()) {
-    return msg`Telegram alias is required.`;
-  }
-  if (!returnDate) {
-    return msg`Return date is required.`;
-  }
-  return null;
+function InformationField({
+  label,
+  className,
+  children,
+}: React.PropsWithChildren<{ label: string; className?: string }>) {
+  return (
+    <div className={cn("min-w-0", className)}>
+      <p className="text-base-content/60 text-xs font-semibold uppercase">
+        {label}
+      </p>
+      <div className="wrap-break-word">{children}</div>
+    </div>
+  );
+}
+
+function ReservationStatusBadge({ status }: { status: ReservationStatus }) {
+  const { i18n } = useLingui();
+  return (
+    <span
+      className={cn(
+        "badge capitalize",
+        status === ReservationStatus.reserved && "badge-warning",
+        status === ReservationStatus.taken && "badge-info",
+        status === ReservationStatus.returned && "badge-success",
+      )}
+    >
+      {i18n._(getReservationStatusLabel(status))}
+    </span>
+  );
 }

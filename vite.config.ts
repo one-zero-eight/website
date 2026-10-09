@@ -123,6 +123,7 @@ export default defineConfig({
       "/board-games-api": {
         target: "http://127.0.0.1:8016",
         changeOrigin: true,
+        followRedirects: true,
         rewrite: (path) => path.replace(/^\/board-games-api/, ""),
       },
     },

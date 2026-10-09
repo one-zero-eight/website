@@ -1,15 +1,9 @@
 import { $boardGames } from "@/api/board-games";
-import { QueryError } from "@/components/board-games/shared.tsx";
-import { Trans, useLingui } from "@lingui/react/macro";
+import { Trans } from "@lingui/react/macro";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
-import type { ReactNode } from "react";
 
 export function BoardGamesTabs() {
   const { data: user } = $boardGames.useQuery("get", "/users/me");
-
-  if (user?.role !== "admin") {
-    return null;
-  }
 
   return (
     <div className="border-base-300 flex shrink-0 gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
@@ -17,51 +11,12 @@ export function BoardGamesTabs() {
         <Trans>Games</Trans>
       </TabLink>
       {user?.role === "admin" && (
-        <TabLink
-          to="/board-games/admin"
-          activeOptions={{ exact: false, includeSearch: false }}
-        >
+        <TabLink to="/board-games/admin">
           <Trans>Admin</Trans>
         </TabLink>
       )}
     </div>
   );
-}
-
-export function RequireBoardGamesAdmin({ children }: { children: ReactNode }) {
-  const { t } = useLingui();
-  const {
-    data: user,
-    isPending,
-    isError,
-    error,
-  } = $boardGames.useQuery("get", "/users/me");
-
-  if (isPending) {
-    return (
-      <div className="mx-auto w-full max-w-6xl p-4">
-        <div className="skeleton h-40 w-full" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="mx-auto w-full max-w-6xl p-4">
-        <QueryError title={t`Could not check access`} error={error} />
-      </div>
-    );
-  }
-
-  if (user.role !== "admin") {
-    return (
-      <p className="text-base-content/60 mx-auto w-full max-w-6xl p-4">
-        <Trans>You do not have access to board games admin.</Trans>
-      </p>
-    );
-  }
-
-  return children;
 }
 
 function TabLink(props: ValidateLinkOptions) {

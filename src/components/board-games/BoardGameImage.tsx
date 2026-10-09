@@ -1,41 +1,61 @@
+import type { SchemaBoardGameOut } from "@/api/board-games/types";
 import { cn } from "@/lib/ui/cn";
+import { useMutationState } from "@tanstack/react-query";
 import { useState } from "react";
+
+const boardGamePlaceholderImage = "/board-games/placeholder.png";
 
 export function BoardGameImage({
   boardGameId,
-  photoFileId,
+  hasPhoto,
   className,
 }: {
   boardGameId: string;
-  photoFileId: string | null;
+  hasPhoto: boolean;
   className?: string;
 }) {
-  const [failed, setFailed] = useState(false);
-  // Public route: the API redirects to storage. `v` only busts the browser cache.
-  const src =
-    photoFileId && !failed
-      ? `${import.meta.env.VITE_BOARD_GAMES_API_URL}/board-games/${boardGameId}/photo?v=${encodeURIComponent(photoFileId)}`
-      : null;
-
-  if (!src) {
-    return (
-      <span
-        className={cn(
-          "bg-base-200 text-base-content/30 flex items-center justify-center",
-          className,
-        )}
-      >
-        <span className="icon-[fluent--board-games-20-regular] text-3xl" />
-      </span>
-    );
-  }
+  const [initialPhotoVersion] = useState(() => Date.now());
+  const photoUploads = useMutationState({
+    filters: {
+      mutationKey: ["post", "/admin/board-games/{id}/photo"],
+      status: "success",
+      exact: true,
+    },
+    select: (mutation) => ({
+      boardGameId: (mutation.state.data as SchemaBoardGameOut | undefined)?.id,
+      submittedAt: mutation.state.submittedAt,
+    }),
+  });
+  const photoVersion = photoUploads.reduce(
+    (version, upload) =>
+      upload.boardGameId === boardGameId
+        ? Math.max(version, upload.submittedAt)
+        : version,
+    initialPhotoVersion,
+  );
+  const apiBaseUrl = import.meta.env.VITE_BOARD_GAMES_API_URL.replace(
+    /\/$/,
+    "",
+  );
+  const photoPath = `${apiBaseUrl}/board-games/${encodeURIComponent(boardGameId)}/photo`;
+  const photoUrl = hasPhoto
+    ? `${photoPath}?version=${photoVersion}`
+    : boardGamePlaceholderImage;
 
   return (
     <img
-      src={src}
+      key={photoUrl}
+      src={photoUrl}
       alt=""
       className={cn("bg-base-200", className)}
-      onError={() => setFailed(true)}
+      onError={(event) => {
+        if (
+          event.currentTarget.getAttribute("src") === boardGamePlaceholderImage
+        )
+          return;
+
+        event.currentTarget.src = boardGamePlaceholderImage;
+      }}
     />
   );
 }

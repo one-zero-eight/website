@@ -1,17 +1,11 @@
+import { ReservationOverdueTag } from "./ReservationOverdueTag";
 import { $boardGames } from "@/api/board-games";
-import { Trans, useLingui } from "@lingui/react/macro";
-import { type SchemaReservation } from "@/api/board-games/types.ts";
-import {
-  byCreatedAtDesc,
-  ListState,
-  QueryError,
-  ReservationStatusBadge,
-  SearchInput,
-  SkeletonGrid,
-  telegramHandle,
-  withId,
-} from "@/components/board-games/shared.tsx";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import type { SchemaReservationOut } from "@/api/board-games/types.ts";
 import { ReservationDetailsModal } from "@/components/board-games/ReservationDetailsModal.tsx";
+import { ReservationStatusBadge } from "./ReservationStatusBadge";
+import { formatReservationDate } from "./reservation-presentation";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -27,16 +21,16 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
   const [createdFrom, setCreatedFrom] = useState("");
   const [createdTo, setCreatedTo] = useState("");
   const [reservationToView, setReservationToView] =
-    useState<SchemaReservation | null>(null);
+    useState<SchemaReservationOut | null>(null);
 
   const gameTitles = new Map(
-    withId(gamesQuery.data).map((game) => [game.id, game.title]),
+    (gamesQuery.data ?? []).map((game) => [game.id, game.title]),
   );
   const normalizedTelegramQuery = normalizeSearchValue(telegramQuery, true);
   const normalizedGameQuery = normalizeSearchValue(gameQuery);
   const createdFromTimestamp = getDateBoundary(createdFrom, "start");
   const createdToTimestamp = getDateBoundary(createdTo, "end");
-  const reservations = byCreatedAtDesc(withId(reservationsQuery.data));
+  const reservations = reservationsQuery.data ?? [];
   const filteredReservations = reservations.filter((reservation) => {
     const telegramAlias = normalizeSearchValue(
       reservation.tg_alias ?? "",
@@ -108,10 +102,14 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
             <Trans>All reservations</Trans>
           </h1>
           {!reservationsQuery.isPending && !reservationsQuery.error && (
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
-              {hasFilters
-                ? t`Reservations: ${visibleReservationCount} of ${reservationCount}`
-                : t`Reservations: ${reservationCount}`}
+            <p className="text-base-content/60 text-sm">
+              {hasFilters ? (
+                <Trans>
+                  {visibleReservationCount} of {reservationCount} reservations
+                </Trans>
+              ) : (
+                <Trans>{reservationCount} reservations</Trans>
+              )}
             </p>
           )}
         </div>
@@ -121,116 +119,126 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
         </Link>
       </div>
 
-      <section className="card card-border bg-base-100">
-        <div className="card-body gap-4 p-4">
-          {selectedGameTitle && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm text-neutral-500 dark:text-neutral-400">
-                <Trans>Game filter:</Trans>
-              </span>
-              <span className="badge badge-primary badge-outline gap-1">
-                {selectedGameTitle}
-                <button
-                  type="button"
-                  className="flex items-center"
-                  onClick={handleClearGameFilter}
-                  title={t`Clear game filter`}
-                >
-                  <span className="icon-[material-symbols--close] text-base" />
-                </button>
-              </span>
-            </div>
-          )}
-          <div className="grid grid-cols-1 gap-3 @md/content:grid-cols-2">
-            <SearchInput
+      <section className="border-base-300 bg-base-100 rounded-box flex flex-col gap-4 border p-4">
+        {selectedGameTitle && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-base-content/60 text-sm">
+              <Trans>Game filter:</Trans>
+            </span>
+            <span className="badge badge-primary badge-outline gap-1">
+              {selectedGameTitle}
+              <button
+                type="button"
+                className="flex items-center"
+                onClick={handleClearGameFilter}
+                title={t`Clear game filter`}
+              >
+                <span className="icon-[material-symbols--close] text-base" />
+              </button>
+            </span>
+          </div>
+        )}
+        <div className="grid grid-cols-1 gap-3 @md/content:grid-cols-2">
+          <label className="input w-full">
+            <span className="icon-[material-symbols--search] text-base-content/50 shrink-0 text-xl" />
+            <input
+              type="search"
+              className="grow"
               value={gameQuery}
-              onValueChange={setGameQuery}
+              onChange={(event) => setGameQuery(event.target.value)}
               placeholder={t`Search by game name`}
               disabled={gamesQuery.isPending || Boolean(gamesQuery.error)}
             />
-            <SearchInput
+          </label>
+          <label className="input w-full">
+            <span className="icon-[mdi--telegram] text-base-content/50 shrink-0 text-xl" />
+            <input
+              type="search"
+              className="grow"
               value={telegramQuery}
-              onValueChange={setTelegramQuery}
+              onChange={(event) => setTelegramQuery(event.target.value)}
               placeholder={t`Search by Telegram alias`}
-              iconClassName="icon-[mdi--telegram]"
             />
-          </div>
+          </label>
+        </div>
 
-          <div className="flex flex-col gap-3 @md/content:flex-row @md/content:items-end">
-            <label className="fieldset grow">
-              <span className="fieldset-legend">
-                <Trans>Created from</Trans>
-              </span>
-              <input
-                type="date"
-                className="input w-full"
-                value={createdFrom}
-                onChange={(event) => setCreatedFrom(event.target.value)}
-                max={createdTo || undefined}
-              />
-            </label>
-            <label className="fieldset grow">
-              <span className="fieldset-legend">
-                <Trans>Created to</Trans>
-              </span>
-              <input
-                type="date"
-                className="input w-full"
-                value={createdTo}
-                onChange={(event) => setCreatedTo(event.target.value)}
-                min={createdFrom || undefined}
-              />
-            </label>
-            {hasFilters && (
-              <button
-                type="button"
-                className="btn btn-ghost"
-                onClick={handleClearFilters}
-              >
-                <span className="icon-[material-symbols--filter-alt-off-outline] text-xl" />
-                <Trans>Clear filters</Trans>
-              </button>
-            )}
-          </div>
+        <div className="flex flex-col gap-3 @md/content:flex-row @md/content:items-end">
+          <label className="fieldset grow">
+            <span className="fieldset-legend">
+              <Trans>Created from</Trans>
+            </span>
+            <input
+              type="date"
+              className="input w-full"
+              value={createdFrom}
+              onChange={(event) => setCreatedFrom(event.target.value)}
+              max={createdTo || undefined}
+            />
+          </label>
+          <label className="fieldset grow">
+            <span className="fieldset-legend">
+              <Trans>Created to</Trans>
+            </span>
+            <input
+              type="date"
+              className="input w-full"
+              value={createdTo}
+              onChange={(event) => setCreatedTo(event.target.value)}
+              min={createdFrom || undefined}
+            />
+          </label>
+          {hasFilters && (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={handleClearFilters}
+            >
+              <span className="icon-[material-symbols--filter-alt-off-outline] text-xl" />
+              <Trans>Clear filters</Trans>
+            </button>
+          )}
         </div>
       </section>
 
+      {reservationsQuery.isPending && <ReservationsSkeleton />}
+      {Boolean(reservationsQuery.error) && (
+        <QueryError
+          title={t`Could not load reservations`}
+          error={reservationsQuery.error}
+        />
+      )}
       {Boolean(gamesQuery.error) && (
         <QueryError
           title={t`Could not load game names`}
           error={gamesQuery.error}
         />
       )}
-      <ListState
-        isPending={reservationsQuery.isPending}
-        error={reservationsQuery.error}
-        errorTitle={t`Could not load reservations`}
-        emptyMessage={
-          reservations.length === 0
-            ? t`There are no reservations yet.`
-            : filteredReservations.length === 0
-              ? t`No reservations match these filters.`
-              : undefined
-        }
-        pending={
-          <SkeletonGrid
-            count={6}
-            className="grid grid-cols-1 gap-3 @2xl/content:grid-cols-2"
-            itemClassName="h-36"
-          />
-        }
-      >
-        <div className="grid grid-cols-1 gap-3 @2xl/content:grid-cols-2">
-          {filteredReservations.map((reservation) => (
-            <ReservationResult
-              key={reservation.id}
-              reservation={reservation}
-              gameTitle={gameTitles.get(reservation.board_game_id)}
-              onView={() => setReservationToView(reservation)}
-            />
-          ))}
-        </div>
-      </ListState>
+
+      {!reservationsQuery.isPending &&
+        !reservationsQuery.error &&
+        reservations.length === 0 && (
+          <EmptyState message={t`There are no reservations yet.`} />
+        )}
+      {!reservationsQuery.isPending &&
+        !reservationsQuery.error &&
+        reservations.length > 0 &&
+        filteredReservations.length === 0 && (
+          <EmptyState message={t`No reservations match these filters.`} />
+        )}
+      {!reservationsQuery.isPending &&
+        !reservationsQuery.error &&
+        filteredReservations.length > 0 && (
+          <div className="grid grid-cols-1 gap-3 @2xl/content:grid-cols-2">
+            {filteredReservations.map((reservation) => (
+              <ReservationResult
+                key={reservation.id}
+                reservation={reservation}
+                gameTitle={gameTitles.get(reservation.board_game_id)}
+                onView={() => setReservationToView(reservation)}
+              />
+            ))}
+          </div>
+        )}
       {reservationToView && (
         <ReservationDetailsModal
           reservation={reservationToView}
@@ -247,75 +255,122 @@ function ReservationResult({
   gameTitle,
   onView,
 }: {
-  reservation: SchemaReservation;
+  reservation: SchemaReservationOut;
   gameTitle?: string;
   onView: () => void;
 }) {
   const { t, i18n } = useLingui();
-  const returnDate = reservation.return_date;
-  const telegram = telegramHandle(reservation.tg_alias);
-
+  const createdAt = new Date(reservation.created_at).toLocaleDateString(
+    i18n.locale,
+    { day: "numeric", month: "short", year: "numeric" },
+  );
   return (
-    <article
-      className="card card-border bg-base-100 hover:bg-base-200/60 min-w-0 cursor-pointer transition-colors"
-      onClick={onView}
-    >
-      <div className="card-body gap-3 p-4">
+    <article className="border-base-300 bg-base-100 rounded-box flex min-w-0 flex-col overflow-hidden border shadow-sm">
+      <div className="flex flex-1 flex-col gap-5 p-5">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h2 className="card-title truncate text-base">
-              {gameTitle ?? t`Unknown game`}
-            </h2>
-            <p className="text-sm text-neutral-500 dark:text-neutral-200">
-              {new Date(reservation.created_at).toLocaleString(i18n.locale)}
-            </p>
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="bg-primary/10 text-primary rounded-box flex h-10 w-10 shrink-0 items-center justify-center">
+              <span className="icon-[mdi--dice-multiple-outline] text-2xl" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="font-semibold wrap-break-word">
+                {gameTitle ?? t`Unknown game`}
+              </h2>
+              <p className="text-base-content/50 mt-1 text-xs">
+                <Trans>Reserved {createdAt}</Trans>
+              </p>
+            </div>
           </div>
-          <ReservationStatusBadge status={reservation.status} />
+          <div className="ml-auto flex shrink-0 flex-col items-end gap-1.5">
+            <ReservationStatusBadge status={reservation.status} />
+            <ReservationOverdueTag reservation={reservation} />
+          </div>
         </div>
 
-        <div className="grid min-w-0 grid-cols-1 gap-2 text-sm text-neutral-500 @sm/content:grid-cols-2 dark:text-neutral-200">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="icon-[mdi--telegram] text-primary shrink-0 text-xl" />
-            {telegram ? (
-              <a
-                className="link link-hover truncate"
-                href={`https://t.me/${telegram}`}
-                target="_blank"
-                rel="noreferrer"
-                onClick={(event) => event.stopPropagation()}
-              >
-                @{telegram}
-              </a>
-            ) : (
-              <span className="text-neutral-400">
-                <Trans>Telegram not provided</Trans>
-              </span>
-            )}
-          </div>
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="icon-[material-symbols--mail-outline] text-primary shrink-0 text-xl" />
-            <span className="truncate">{reservation.user_email}</span>
-          </div>
+        <div className="flex min-w-0 flex-col gap-1.5 text-sm">
+          <p className="text-base-content/50 text-xs font-medium uppercase">
+            <Trans>Borrower</Trans>
+          </p>
+          <p className="font-medium wrap-break-word">
+            {reservation.borrower_name || reservation.user_email}
+          </p>
           {reservation.borrower_name && (
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="icon-[material-symbols--person-outline] text-primary shrink-0 text-xl" />
-              <span className="truncate">{reservation.borrower_name}</span>
-            </div>
+            <p className="text-base-content/60 wrap-break-word">
+              {reservation.user_email}
+            </p>
           )}
-          {reservation.return_date && (
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="icon-[material-symbols--event-outline] text-primary shrink-0 text-xl" />
-              <span>
-                <Trans>
-                  Return by{" "}
-                  <span className="text-neutral-400">{returnDate}</span>
-                </Trans>
+          {reservation.tg_alias ? (
+            <a
+              className="link link-hover text-primary flex w-fit min-w-0 items-center gap-1.5"
+              href={`https://t.me/${reservation.tg_alias.replace(/^@/, "")}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span className="icon-[mdi--telegram] shrink-0 text-base" />
+              <span className="wrap-break-word">
+                @{reservation.tg_alias.replace(/^@/, "")}
               </span>
-            </div>
+            </a>
+          ) : (
+            <span className="text-base-content/50 text-xs">
+              <Trans>Telegram not provided</Trans>
+            </span>
           )}
         </div>
       </div>
+
+      <div className="border-base-300 bg-base-200/40 flex flex-wrap items-center justify-between gap-3 border-t px-5 py-3">
+        <div className="flex items-center gap-2.5">
+          <span className="icon-[material-symbols--event-outline] text-base-content/50 text-xl" />
+          <div>
+            <p className="text-base-content/50 text-xs">
+              <Trans>Return by</Trans>
+            </p>
+            <p className="text-sm font-semibold">
+              {formatReservationDate(reservation.return_date, i18n.locale) ??
+                t`Not set`}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm gap-1.5"
+          onClick={onView}
+        >
+          <Trans>Manage</Trans>
+          <span className="icon-[material-symbols--arrow-forward] text-lg" />
+        </button>
+      </div>
     </article>
+  );
+}
+function ReservationsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-3 @2xl/content:grid-cols-2">
+      {[0, 1, 2, 3, 4, 5].map((item) => (
+        <div key={item} className="skeleton rounded-box h-60" />
+      ))}
+    </div>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="border-base-300 text-base-content/60 border py-10 text-center">
+      {message}
+    </div>
+  );
+}
+
+function QueryError({ title, error }: { title: string; error: unknown }) {
+  return (
+    <div className="alert alert-error">
+      <span className="icon-[material-symbols--error-outline] shrink-0 text-xl" />
+      <div>
+        <p className="font-semibold">{title}</p>
+        <p className="text-sm">{formatApiErrorMessage(error)}</p>
+      </div>
+    </div>
   );
 }
 

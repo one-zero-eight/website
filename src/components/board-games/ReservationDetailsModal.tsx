@@ -1,35 +1,26 @@
+import { ReservationOverdueTag } from "./ReservationOverdueTag.tsx";
 import { $boardGames } from "@/api/board-games";
-import { msg } from "@lingui/core/macro";
-import { Trans, useLingui } from "@lingui/react/macro";
-import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   ReservationStatus,
-  type SchemaReservation,
+  type SchemaReservationOut,
 } from "@/api/board-games/types.ts";
-import {
-  boardGamesModalClassName,
-  InformationField,
-  getReservationStatusLabel,
-  ReservationStatusBadge,
-  telegramHandle,
-} from "@/components/board-games/shared.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/ui/cn";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useQueryClient } from "@tanstack/react-query";
-import { FormEvent, useState } from "react";
-
-const reservationStatuses = [
-  ReservationStatus.reserved,
-  ReservationStatus.taken,
-  ReservationStatus.returned,
-];
+import { useState } from "react";
+import { ReservationStatusBadge } from "./ReservationStatusBadge";
+import { reservationStatusOptions } from "./reservation-presentation";
 
 export function ReservationDetailsModal({
   reservation,
   gameTitle,
   onOpenChange,
 }: {
-  reservation: SchemaReservation;
+  reservation: SchemaReservationOut;
   gameTitle?: string;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -37,36 +28,51 @@ export function ReservationDetailsModal({
   const queryClient = useQueryClient();
   const { showConfirm, showError, showSuccess } = useToast();
   const [selectedStatus, setSelectedStatus] = useState(reservation.status);
-  const [isBorrowerModalOpen, setIsBorrowerModalOpen] = useState(false);
-  const telegram = telegramHandle(reservation.tg_alias);
+  const [returnDate, setReturnDate] = useState(reservation.return_date ?? "");
+  const [borrowerName, setBorrowerName] = useState(
+    reservation.borrower_name ?? "",
+  );
+  const createdAt = new Date(reservation.created_at).toLocaleString(
+    i18n.locale,
+  );
+  const isStatusChanged = selectedStatus !== reservation.status;
+  const isReturnDateChanged = returnDate !== (reservation.return_date ?? "");
+  const needsBorrowerName = selectedStatus === ReservationStatus.taken;
+  const isBorrowerNameChanged =
+    needsBorrowerName &&
+    borrowerName.trim() !== (reservation.borrower_name ?? "");
+  const hasChanges =
+    isStatusChanged || isReturnDateChanged || isBorrowerNameChanged;
+  const isBorrowerNameRequired =
+    needsBorrowerName && (isStatusChanged || isBorrowerNameChanged);
+  const isValid =
+    (!isReturnDateChanged || Boolean(returnDate)) &&
+    (!isBorrowerNameRequired || Boolean(borrowerName.trim()));
 
-  function invalidateAdminQueries() {
-    queryClient.invalidateQueries({
-      queryKey: $boardGames.queryOptions("get", "/admin/reservations").queryKey,
-    });
-    queryClient.invalidateQueries({
-      queryKey: $boardGames.queryOptions("get", "/admin/board-games").queryKey,
-    });
+  function invalidateReservationQueries() {
+    for (const path of [
+      "/admin/reservations",
+      "/admin/board-games",
+      "/users/me/reservations",
+      "/board-games",
+    ] as const) {
+      void queryClient.invalidateQueries({
+        queryKey: $boardGames.queryOptions("get", path).queryKey,
+      });
+    }
   }
 
-  const statusMutation = $boardGames.useMutation(
+  const updateMutation = $boardGames.useMutation(
     "patch",
     "/admin/reservations/{id}",
     {
       onSuccess: () => {
-        invalidateAdminQueries();
+        invalidateReservationQueries();
         showSuccess(
           msg`Reservation updated`,
-          msg`The new status has been saved.`,
+          msg`Your changes have been saved.`,
         );
-        setIsBorrowerModalOpen(false);
         onOpenChange(false);
-      },
-      onError: (error) => {
-        showError(
-          msg`Could not update reservation`,
-          formatApiErrorDescriptor(error),
-        );
       },
     },
   );
@@ -75,45 +81,40 @@ export function ReservationDetailsModal({
     "/admin/reservations/{id}",
     {
       onSuccess: () => {
-        invalidateAdminQueries();
+        invalidateReservationQueries();
         showSuccess(
           msg`Reservation deleted`,
           msg`The reservation was removed.`,
         );
         onOpenChange(false);
       },
-      onError: (error) => {
+      onError: (error) =>
         showError(
           msg`Could not delete reservation`,
-          formatApiErrorDescriptor(error),
-        );
-      },
+          formatApiErrorMessage(error),
+        ),
     },
   );
-  const isMutationPending =
-    statusMutation.isPending || deleteMutation.isPending;
+  const isPending = updateMutation.isPending || deleteMutation.isPending;
 
-  function updateStatus(borrowerName: string | null) {
-    if (!reservation.id) return;
-    statusMutation.mutate({
+  function handleSave() {
+    if (isPending || !reservation.id || !hasChanges || !isValid) return;
+    updateMutation.mutate({
       params: { path: { id: reservation.id } },
-      body: { status: selectedStatus, borrower_name: borrowerName },
+      body: {
+        ...(isStatusChanged && { status: selectedStatus }),
+        ...(isReturnDateChanged && { return_date: returnDate }),
+        ...(needsBorrowerName &&
+          (isStatusChanged || isBorrowerNameChanged) && {
+            status: selectedStatus,
+            borrower_name: borrowerName.trim(),
+          }),
+      },
     });
   }
 
-  function handleUpdateStatus() {
-    if (selectedStatus === reservation.status) return;
-    if (
-      selectedStatus === ReservationStatus.taken &&
-      reservation.status !== ReservationStatus.taken
-    ) {
-      setIsBorrowerModalOpen(true);
-      return;
-    }
-    updateStatus(reservation.borrower_name);
-  }
-
   async function handleDelete() {
+    if (isPending || !reservation.id) return;
     const confirmed = await showConfirm({
       title: msg`Delete reservation`,
       message: gameTitle
@@ -123,176 +124,188 @@ export function ReservationDetailsModal({
       type: "error",
     });
     if (!confirmed) return;
-    if (!reservation.id) return;
     deleteMutation.mutate({ params: { path: { id: reservation.id } } });
-  }
-
-  return (
-    <>
-      <Modal
-        open
-        onOpenChange={onOpenChange}
-        title={t`Reservation information`}
-        containerClassName={boardGamesModalClassName}
-        closeOnOutsidePress={!isMutationPending}
-      >
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 @sm/modal:grid-cols-2">
-          {gameTitle && (
-            <InformationField label={t`Game`} className="@sm/modal:col-span-2">
-              {gameTitle}
-            </InformationField>
-          )}
-          <InformationField label={t`User email`}>
-            {reservation.user_email}
-          </InformationField>
-          <InformationField label={t`Status`}>
-            <ReservationStatusBadge status={reservation.status} />
-          </InformationField>
-          <InformationField label={t`Telegram alias`}>
-            {telegram ? (
-              <a
-                href={`https://t.me/${telegram}`}
-                className="link link-hover"
-                target="_blank"
-                rel="noreferrer"
-              >
-                @{telegram}
-              </a>
-            ) : (
-              t`Not provided`
-            )}
-          </InformationField>
-          <InformationField label={t`Return date`}>
-            {reservation.return_date || t`Not provided`}
-          </InformationField>
-          <InformationField
-            label={t`When available`}
-            className="@sm/modal:col-span-2"
-          >
-            {reservation.when_available || t`Not provided`}
-          </InformationField>
-          <InformationField
-            label={t`Comments`}
-            className="@sm/modal:col-span-2"
-          >
-            {reservation.comments || t`Not provided`}
-          </InformationField>
-          <InformationField label={t`Borrower name`}>
-            {reservation.borrower_name || t`Not provided`}
-          </InformationField>
-          <InformationField label={t`Created at`}>
-            {new Date(reservation.created_at).toLocaleString(i18n.locale)}
-          </InformationField>
-        </div>
-
-        <div className="border-base-300 mt-2 flex flex-col gap-3 border-t pt-4">
-          <label className="fieldset">
-            <span className="fieldset-legend">
-              <Trans>Update status</Trans>
-            </span>
-            <select
-              className="select w-full"
-              value={selectedStatus}
-              onChange={(event) =>
-                setSelectedStatus(event.target.value as ReservationStatus)
-              }
-              disabled={isMutationPending}
-            >
-              {reservationStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {i18n._(getReservationStatusLabel(status))}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <div className="flex flex-wrap justify-between gap-2">
-            <button
-              type="button"
-              className="btn btn-error btn-outline"
-              onClick={() => void handleDelete()}
-              disabled={isMutationPending}
-            >
-              {deleteMutation.isPending ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : (
-                <span className="icon-[material-symbols--delete-outline] text-xl" />
-              )}
-              <Trans>Delete</Trans>
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleUpdateStatus}
-              disabled={
-                isMutationPending || selectedStatus === reservation.status
-              }
-            >
-              {statusMutation.isPending && (
-                <span className="loading loading-spinner loading-sm" />
-              )}
-              <Trans>Update status</Trans>
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      {isBorrowerModalOpen && (
-        <BorrowerNameModal
-          onOpenChange={setIsBorrowerModalOpen}
-          onSubmit={updateStatus}
-          isPending={statusMutation.isPending}
-        />
-      )}
-    </>
-  );
-}
-
-export function BorrowerNameModal({
-  onOpenChange,
-  onSubmit,
-  isPending,
-  confirmLabel,
-}: {
-  onOpenChange: (open: boolean) => void;
-  onSubmit: (borrowerName: string) => void;
-  isPending: boolean;
-  confirmLabel?: string;
-}) {
-  const { t } = useLingui();
-  const [borrowerName, setBorrowerName] = useState("");
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!borrowerName.trim()) return;
-    onSubmit(borrowerName.trim());
   }
 
   return (
     <Modal
       open
-      onOpenChange={onOpenChange}
-      title={t`Confirm borrower`}
-      containerClassName={boardGamesModalClassName}
+      title={t`Manage reservation`}
       closeOnOutsidePress={!isPending}
+      onOpenChange={(open) => {
+        if (!isPending) onOpenChange(open);
+      }}
+      containerClassName="bg-base-100 max-h-[calc(100dvh-2rem)] max-w-xl gap-5 overflow-y-auto p-5"
     >
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <label className="fieldset">
-          <span className="fieldset-legend">
-            <Trans>Borrower name</Trans>
-          </span>
-          <input
-            type="text"
-            className="input w-full"
-            value={borrowerName}
-            onChange={(event) => setBorrowerName(event.target.value)}
-            placeholder={t`Full name`}
-            disabled={isPending}
-            autoFocus
-            required
-          />
-        </label>
-        <div className="flex justify-end gap-2">
+      <div className="border-base-300 bg-base-200/40 rounded-box flex flex-col gap-4 border p-4">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="text-base-content/50 mb-1 text-xs font-medium uppercase">
+              <Trans>Board game</Trans>
+            </p>
+            <h2 className="text-lg font-semibold wrap-break-word">
+              {gameTitle ?? t`Unknown game`}
+            </h2>
+          </div>
+          <div className="ml-auto flex shrink-0 flex-col items-end gap-1.5">
+            <ReservationStatusBadge status={reservation.status} />
+            <ReservationOverdueTag reservation={reservation} />
+          </div>
+        </div>
+        <div className="flex flex-col gap-1 text-sm">
+          <p className="font-medium wrap-break-word">
+            {reservation.borrower_name || reservation.user_email}
+          </p>
+          {reservation.borrower_name && (
+            <p className="text-base-content/60 wrap-break-word">
+              {reservation.user_email}
+            </p>
+          )}
+          {reservation.tg_alias && (
+            <a
+              className="link link-hover text-primary w-fit"
+              href={`https://t.me/${reservation.tg_alias.replace(/^@/, "")}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              @{reservation.tg_alias.replace(/^@/, "")}
+            </a>
+          )}
+        </div>
+        <p className="text-base-content/50 text-xs">
+          <Trans>Created {createdAt}</Trans>
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <fieldset disabled={isPending} className="min-w-0">
+          <legend className="mb-2 text-sm font-semibold">
+            <Trans>Reservation status</Trans>
+          </legend>
+          <div className="grid grid-cols-1 gap-2 @sm/modal:grid-cols-3">
+            {reservationStatusOptions.map((option) => (
+              <label
+                key={option.value}
+                className={cn(
+                  "rounded-box flex cursor-pointer items-center gap-3 border p-3 transition-colors @sm/modal:flex-col @sm/modal:items-start @sm/modal:gap-2",
+                  selectedStatus === option.value
+                    ? "border-primary bg-primary/5"
+                    : "border-base-300 hover:bg-base-200/50",
+                  isPending && "cursor-default opacity-60",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="reservation-status"
+                  value={option.value}
+                  checked={selectedStatus === option.value}
+                  onChange={() => setSelectedStatus(option.value)}
+                  className="radio radio-primary radio-sm @sm/modal:order-last"
+                />
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="flex items-center gap-1.5 text-sm font-semibold">
+                    <span className={cn("text-lg", option.icon)} />
+                    {i18n._(option.label)}
+                  </span>
+                  <span className="text-base-content/60 text-xs">
+                    {i18n._(option.description)}
+                  </span>
+                </div>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-2">
+          <label className="flex min-w-0 flex-col gap-2">
+            <span className="text-sm font-semibold">
+              <Trans>Return date</Trans>
+            </span>
+            <input
+              type="date"
+              className="input w-full"
+              value={returnDate}
+              onChange={(event) => setReturnDate(event.target.value)}
+              disabled={isPending}
+            />
+            <span className="text-base-content/50 text-xs">
+              <Trans>When the game should be back.</Trans>
+            </span>
+            {isReturnDateChanged && !returnDate && (
+              <span className="text-error text-xs">
+                <Trans>Choose a return date.</Trans>
+              </span>
+            )}
+          </label>
+          {needsBorrowerName && (
+            <label className="flex min-w-0 flex-col gap-2">
+              <span className="text-sm font-semibold">
+                <Trans>
+                  Borrower name <span className="text-error">*</span>
+                </Trans>
+              </span>
+              <input
+                type="text"
+                className="input w-full"
+                value={borrowerName}
+                onChange={(event) => setBorrowerName(event.target.value)}
+                placeholder={t`Full name`}
+                disabled={isPending}
+              />
+              <span className="text-base-content/50 text-xs">
+                <Trans>Who picked up the game.</Trans>
+              </span>
+            </label>
+          )}
+        </div>
+      </div>
+
+      {(reservation.when_available?.trim() || reservation.comments?.trim()) && (
+        <div className="border-base-300 flex flex-col gap-3 border-t pt-4 text-sm">
+          {reservation.when_available?.trim() && (
+            <div>
+              <p className="text-base-content/50 mb-1 text-xs font-medium">
+                <Trans>Pickup availability</Trans>
+              </p>
+              <p className="wrap-break-word whitespace-pre-wrap">
+                {reservation.when_available}
+              </p>
+            </div>
+          )}
+          {reservation.comments?.trim() && (
+            <div>
+              <p className="text-base-content/50 mb-1 text-xs font-medium">
+                <Trans>Comments</Trans>
+              </p>
+              <p className="wrap-break-word whitespace-pre-wrap">
+                {reservation.comments}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {updateMutation.isError && (
+        <div className="alert alert-error text-sm">
+          <span className="icon-[material-symbols--error-outline] shrink-0 text-xl" />
+          <span>{formatApiErrorMessage(updateMutation.error)}</span>
+        </div>
+      )}
+      <div className="border-base-300 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+        <button
+          type="button"
+          className="btn btn-ghost text-error btn-sm"
+          onClick={() => void handleDelete()}
+          disabled={isPending}
+        >
+          {deleteMutation.isPending ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : (
+            <span className="icon-[material-symbols--delete-outline] text-lg" />
+          )}
+          <Trans>Delete</Trans>
+        </button>
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             className="btn btn-ghost"
@@ -302,17 +315,18 @@ export function BorrowerNameModal({
             <Trans>Cancel</Trans>
           </button>
           <button
-            type="submit"
+            type="button"
             className="btn btn-primary"
-            disabled={isPending || !borrowerName.trim()}
+            onClick={handleSave}
+            disabled={isPending || !hasChanges || !isValid}
           >
-            {isPending && (
+            {updateMutation.isPending && (
               <span className="loading loading-spinner loading-sm" />
             )}
-            {confirmLabel ?? t`Update status`}
+            <Trans>Save changes</Trans>
           </button>
         </div>
-      </form>
+      </div>
     </Modal>
   );
 }
