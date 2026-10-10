@@ -1,6 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocalStorage } from "usehooks-ts";
 
 export type PomodoroMode = "work" | "shortBreak" | "longBreak";
+
+export const POMODORO_MODE_LABELS: Record<PomodoroMode, string> = {
+  work: "Focus",
+  shortBreak: "Short break",
+  longBreak: "Long break",
+};
 
 export type PomodoroSettings = {
   workMinutes: number;
@@ -17,7 +24,27 @@ export const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
   sessionsBeforeLongBreak: 4,
 };
 
+const SETTINGS_STORAGE_KEY = "pomodoro-settings";
+const STATE_STORAGE_KEY = "pomodoro-state";
 const TICK_INTERVAL_MS = 250;
+
+type PomodoroState = {
+  mode: PomodoroMode;
+  completedWorkSessions: number;
+  targetEndTime: number | null;
+  pausedSecondsLeft: number | null;
+};
+
+const INITIAL_POMODORO_STATE: PomodoroState = {
+  mode: "work",
+  completedWorkSessions: 0,
+  targetEndTime: null,
+  pausedSecondsLeft: null,
+};
+
+function getRemainingSeconds(targetEndTime: number) {
+  return Math.max(0, Math.ceil((targetEndTime - Date.now()) / 1000));
+}
 
 function getModeSeconds(mode: PomodoroMode, settings: PomodoroSettings) {
   const minutesByMode: Record<PomodoroMode, number> = {
@@ -40,33 +67,57 @@ function getNextMode(
   return "shortBreak";
 }
 
-export function usePomodoro() {
-  const [settings, setSettings] = useState(DEFAULT_POMODORO_SETTINGS);
-  const [mode, setMode] = useState<PomodoroMode>("work");
-  const [secondsLeft, setSecondsLeft] = useState(
-    getModeSeconds("work", settings),
+export function usePomodoro({
+  onTimeUp,
+}: {
+  // Called with the upcoming mode when a period ends by itself (not when it is skipped)
+  onTimeUp?: (nextMode: PomodoroMode) => void;
+} = {}) {
+  const [storedSettings, setSettings] = useLocalStorage<
+    Partial<PomodoroSettings>
+  >(SETTINGS_STORAGE_KEY, DEFAULT_POMODORO_SETTINGS);
+  // Fill in missing keys, so older or broken stored values do not break the timer
+  const settings = useMemo(
+    () => ({ ...DEFAULT_POMODORO_SETTINGS, ...storedSettings }),
+    [storedSettings],
   );
-  const [completedWorkSessions, setCompletedWorkSessions] = useState(0);
-  // The timer is running if and only if the end time is set.
-  // Counting down to a fixed end time (not decrementing) keeps it accurate in background tabs.
-  const [targetEndTime, setTargetEndTime] = useState<number | null>(null);
+  const [storedState, setState] = useLocalStorage<Partial<PomodoroState>>(
+    STATE_STORAGE_KEY,
+    INITIAL_POMODORO_STATE,
+  );
+  const state = useMemo(
+    () => ({ ...INITIAL_POMODORO_STATE, ...storedState }),
+    [storedState],
+  );
+  const { mode, completedWorkSessions, targetEndTime } = state;
   const isRunning = targetEndTime !== null;
   const totalSeconds = getModeSeconds(mode, settings);
 
+  const [secondsLeft, setSecondsLeft] = useState(() => {
+    if (targetEndTime !== null) return getRemainingSeconds(targetEndTime);
+    return state.pausedSecondsLeft ?? totalSeconds;
+  });
+
   const selectMode = useCallback(
-    (newMode: PomodoroMode) => {
-      setMode(newMode);
+    (newMode: PomodoroMode, newCompletedWorkSessions: number) => {
+      setState({
+        mode: newMode,
+        completedWorkSessions: newCompletedWorkSessions,
+        targetEndTime: null,
+        pausedSecondsLeft: null,
+      });
       setSecondsLeft(getModeSeconds(newMode, settings));
-      setTargetEndTime(null);
     },
-    [settings],
+    [settings, setState],
   );
 
-  const start = () => setTargetEndTime(Date.now() + secondsLeft * 1000);
+  const start = () =>
+    setState({ ...state, targetEndTime: Date.now() + secondsLeft * 1000 });
 
-  const pause = () => setTargetEndTime(null);
+  const pause = () =>
+    setState({ ...state, targetEndTime: null, pausedSecondsLeft: secondsLeft });
 
-  const reset = () => selectMode(mode);
+  const reset = () => selectMode(mode, completedWorkSessions);
 
   const updateSettings = (newSettings: PomodoroSettings) => {
     setSettings(newSettings);
@@ -75,25 +126,28 @@ export function usePomodoro() {
     if (isUntouched) setSecondsLeft(getModeSeconds(mode, newSettings));
   };
 
+  const onTimeUpRef = useRef(onTimeUp);
+  useEffect(() => {
+    onTimeUpRef.current = onTimeUp;
+  });
+
   const completeCurrentMode = useCallback(() => {
     const newCompletedWorkSessions =
       mode === "work" ? completedWorkSessions + 1 : completedWorkSessions;
-    setCompletedWorkSessions(newCompletedWorkSessions);
-    selectMode(getNextMode(mode, newCompletedWorkSessions, settings));
+    const nextMode = getNextMode(mode, newCompletedWorkSessions, settings);
+    selectMode(nextMode, newCompletedWorkSessions);
+    return nextMode;
   }, [mode, completedWorkSessions, settings, selectMode]);
 
   useEffect(() => {
     if (targetEndTime === null) return;
 
     const intervalId = window.setInterval(() => {
-      const remainingSeconds = Math.max(
-        0,
-        Math.ceil((targetEndTime - Date.now()) / 1000),
-      );
+      const remainingSeconds = getRemainingSeconds(targetEndTime);
       setSecondsLeft(remainingSeconds);
       if (remainingSeconds > 0) return;
 
-      completeCurrentMode();
+      onTimeUpRef.current?.(completeCurrentMode());
     }, TICK_INTERVAL_MS);
 
     return () => clearInterval(intervalId);

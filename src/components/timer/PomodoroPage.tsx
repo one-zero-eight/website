@@ -1,14 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PomodoroControls } from "./components/PomodoroControls";
 import { PomodoroCycleDots } from "./components/PomodoroCycleDots";
 import { PomodoroSettingsModal } from "./components/PomodoroSettingsModal";
-import { PomodoroMode, usePomodoro } from "./lib/usePomodoro";
-
-const MODE_LABELS: Record<PomodoroMode, string> = {
-  work: "Focus",
-  shortBreak: "Short break",
-  longBreak: "Long break",
-};
+import { usePomodoroAlerts } from "./lib/usePomodoroAlerts";
+import { POMODORO_MODE_LABELS, usePomodoro } from "./lib/usePomodoro";
+import { useWakeLock } from "./lib/utils";
 
 function formatSeconds(totalSeconds: number) {
   const minutes = Math.floor(totalSeconds / 60);
@@ -18,8 +14,23 @@ function formatSeconds(totalSeconds: number) {
 
 export function PomodoroPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const pomodoro = usePomodoro();
+  const alerts = usePomodoroAlerts();
+  const wakeLock = useWakeLock();
+  const pomodoro = usePomodoro({ onTimeUp: alerts.notifyTimeUp });
   const { settings, mode, secondsLeft, totalSeconds, isRunning } = pomodoro;
+
+  useEffect(() => {
+    if (!isRunning) return;
+    wakeLock.request();
+    return () => {
+      wakeLock.release();
+    };
+  }, [isRunning, wakeLock]);
+
+  const handleStart = () => {
+    alerts.requestNotificationPermission();
+    pomodoro.start();
+  };
 
   const isPaused = !isRunning && secondsLeft < totalSeconds;
 
@@ -40,7 +51,7 @@ export function PomodoroPage() {
 
       <div className="flex w-full grow flex-col items-center justify-center gap-8">
         <div className="text-2xl font-bold sm:text-3xl">
-          {MODE_LABELS[mode]}
+          {POMODORO_MODE_LABELS[mode]}
         </div>
 
         <div className="text-primary text-7xl font-bold tabular-nums sm:text-8xl md:text-9xl lg:text-[150px]">
@@ -56,7 +67,7 @@ export function PomodoroPage() {
         <PomodoroControls
           isRunning={isRunning}
           isPaused={isPaused}
-          onStart={pomodoro.start}
+          onStart={handleStart}
           onPause={pomodoro.pause}
           onReset={pomodoro.reset}
           onSkip={pomodoro.skip}
