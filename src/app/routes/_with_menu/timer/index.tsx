@@ -1,9 +1,10 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import TimerPage from "@/components/timer/TimerPage.tsx";
+import { TimerPageTabs } from "@/components/timer/TimerPageTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
 
-export const Route = createFileRoute("/_with_menu/timer")({
+export const Route = createFileRoute("/_with_menu/timer/")({
   component: RouteComponent,
 });
 
@@ -19,6 +20,7 @@ function RouteComponent() {
       </Helmet>
 
       <Topbar title="Countdown Timer" />
+      <TimerPageTabs />
       <TimerPage />
     </>
   );
