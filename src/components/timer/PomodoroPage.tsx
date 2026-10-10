@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { PomodoroControls } from "./components/PomodoroControls";
 import { PomodoroCycleDots } from "./components/PomodoroCycleDots";
 import { PomodoroSettingsModal } from "./components/PomodoroSettingsModal";
-import { usePomodoroAlerts } from "./lib/usePomodoroAlerts";
-import { POMODORO_MODE_LABELS, usePomodoro } from "./lib/usePomodoro";
+import { useLastUsedTimer } from "./lib/useLastUsedTimer";
+import { usePomodoroContext } from "./lib/pomodoroContext";
+import { POMODORO_MODE_LABELS } from "./lib/usePomodoro";
 import { useWakeLock } from "./lib/utils";
 
 function formatSeconds(totalSeconds: number) {
@@ -14,9 +15,9 @@ function formatSeconds(totalSeconds: number) {
 
 export function PomodoroPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const alerts = usePomodoroAlerts();
   const wakeLock = useWakeLock();
-  const pomodoro = usePomodoro({ onTimeUp: alerts.notifyTimeUp });
+  useLastUsedTimer("pomodoro");
+  const pomodoro = usePomodoroContext();
   const { settings, mode, secondsLeft, totalSeconds, isRunning } = pomodoro;
 
   useEffect(() => {
@@ -26,11 +27,6 @@ export function PomodoroPage() {
       wakeLock.release();
     };
   }, [isRunning, wakeLock]);
-
-  const handleStart = () => {
-    alerts.requestNotificationPermission();
-    pomodoro.start();
-  };
 
   const isPaused = !isRunning && secondsLeft < totalSeconds;
 
@@ -67,7 +63,7 @@ export function PomodoroPage() {
         <PomodoroControls
           isRunning={isRunning}
           isPaused={isPaused}
-          onStart={handleStart}
+          onStart={pomodoro.start}
           onPause={pomodoro.pause}
           onReset={pomodoro.reset}
           onSkip={pomodoro.skip}

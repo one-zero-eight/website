@@ -1,5 +1,6 @@
 import { BottomNavigation } from "@/components/layout/BottomNavigation.tsx";
 import Sidebar from "@/components/layout/Sidebar.tsx";
+import { PomodoroProvider } from "@/components/timer/PomodoroProvider.tsx";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_with_menu")({
@@ -8,15 +9,17 @@ export const Route = createFileRoute("/_with_menu")({
 
 function RouteComponent() {
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex grow overflow-y-hidden">
-        <Sidebar />
-        <div className="@container/content flex min-h-full grow flex-col overflow-y-auto">
-          <Outlet />
+    <PomodoroProvider>
+      <div className="flex h-full flex-col">
+        <div className="flex grow overflow-y-hidden">
+          <Sidebar />
+          <div className="@container/content flex min-h-full grow flex-col overflow-y-auto">
+            <Outlet />
+          </div>
         </div>
-      </div>
 
-      <BottomNavigation />
-    </div>
+        <BottomNavigation />
+      </div>
+    </PomodoroProvider>
   );
 }

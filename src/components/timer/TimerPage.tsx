@@ -17,6 +17,8 @@ import { TimerInput } from "./components/TimerInput";
 import { StopDialog } from "./components/StopDialog";
 import CustomTimeModal from "./components/CustomTimeModal";
 import { useFullscreenCursor } from "./lib/useFullScreenCursor";
+import { useLastUsedTimer } from "./lib/useLastUsedTimer";
+
 const TimerPage = () => {
   const [title, setTitle] = useState<string>("");
   const [showStopDialog, setShowStopDialog] = useState<boolean>(false);
@@ -27,6 +29,7 @@ const TimerPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const wakeLock = useWakeLock();
+  useLastUsedTimer("countdown");
   const isFullscreen = useFullscreen();
   const timer = useTimer({ title, setShowStopDialog, setShowTimeUpMessage });
   const {

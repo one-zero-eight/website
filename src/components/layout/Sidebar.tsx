@@ -1,8 +1,8 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import { useImpersonatingUser } from "@/components/admin/useImpersonation.ts";
+import { useTimerMenuItems } from "@/components/timer/lib/useTimerMenuItems.ts";
 import {
-  items,
   isMenuItemVisible,
   LinkItemType,
 } from "@/components/layout/menu-links.tsx";
@@ -17,6 +17,7 @@ export default function Sidebar() {
     false,
   );
   const { me } = useMe();
+  const items = useTimerMenuItems();
   const [impersonatingUser] = useImpersonatingUser();
 
   return (

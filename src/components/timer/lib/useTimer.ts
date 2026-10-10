@@ -1,5 +1,6 @@
 import { useToast } from "@/components/toast";
 import { Dispatch, SetStateAction, useCallback, useRef, useState } from "react";
+import { useLastUsedTimer } from "./useLastUsedTimer";
 import { useSaveState, useWakeLock } from "./utils";
 interface UseTimerTypes {
   title: string;
@@ -23,6 +24,7 @@ export const useTimer = ({
   const [targetEndTime, setTargetEndTime] = useState<number | null>(null);
   const { showInfo, showSuccess, showError, showWarning } = useToast();
   const wakeLock = useWakeLock();
+  const { setLastUsedTimer } = useLastUsedTimer();
 
   const { saveState } = useSaveState({
     title,
@@ -454,6 +456,7 @@ export const useTimer = ({
     setInitialSeconds(0);
     setTargetEndTime(null);
     setShowTimeUpMessage(true);
+    setLastUsedTimer("countdown");
     hasAdjustedTimerRef.current = false; // Reset the adjustment flag
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -475,7 +478,7 @@ export const useTimer = ({
     }
 
     showSuccess("Time is up!");
-  }, [wakeLock, setShowTimeUpMessage, showSuccess]);
+  }, [wakeLock, setShowTimeUpMessage, setLastUsedTimer, showSuccess]);
 
   const formatTime = useCallback(
     (totalSeconds: number) => {
