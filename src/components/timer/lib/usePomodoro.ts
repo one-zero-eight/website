@@ -117,7 +117,7 @@ export function usePomodoro({
   const pause = () =>
     setState({ ...state, targetEndTime: null, pausedSecondsLeft: secondsLeft });
 
-  const reset = () => selectMode(mode, completedWorkSessions);
+  const reset = () => selectMode("work", 0);
 
   const updateSettings = (newSettings: PomodoroSettings) => {
     setSettings(newSettings);
