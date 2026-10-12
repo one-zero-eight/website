@@ -14,12 +14,5 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
-  const start = () => {
-    alerts.requestNotificationPermission();
-    pomodoro.start();
-  };
-
-  return (
-    <PomodoroContext value={{ ...pomodoro, start }}>{children}</PomodoroContext>
-  );
+  return <PomodoroContext value={pomodoro}>{children}</PomodoroContext>;
 }

@@ -98,10 +98,13 @@ export function PomodoroPage() {
           {formatSeconds(secondsLeft)}
         </div>
 
-        <progress
-          className="progress progress-primary h-4 w-full max-w-[900px]"
-          value={totalSeconds - secondsLeft}
+        <input
+          type="range"
+          className="range range-primary w-full max-w-[900px]"
+          min={0}
           max={totalSeconds}
+          value={totalSeconds - secondsLeft}
+          onChange={(e) => pomodoro.seek(totalSeconds - +e.target.value)}
         />
 
         <PomodoroControls

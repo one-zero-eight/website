@@ -119,6 +119,22 @@ export function usePomodoro({
 
   const reset = () => selectMode("work", 0);
 
+  const seek = (newSecondsLeft: number) => {
+    const clampedSecondsLeft = Math.min(
+      Math.max(newSecondsLeft, 1),
+      totalSeconds,
+    );
+    setSecondsLeft(clampedSecondsLeft);
+    if (isRunning) {
+      setState({
+        ...state,
+        targetEndTime: Date.now() + clampedSecondsLeft * 1000,
+      });
+      return;
+    }
+    setState({ ...state, pausedSecondsLeft: clampedSecondsLeft });
+  };
+
   const updateSettings = (newSettings: PomodoroSettings) => {
     setSettings(newSettings);
     // Apply new duration right away only if the current period has not been started yet
@@ -163,6 +179,7 @@ export function usePomodoro({
     start,
     pause,
     reset,
+    seek,
     skip: completeCurrentMode,
     updateSettings,
   };
