@@ -117,6 +117,7 @@ export function PomodoroPage() {
         />
 
         <PomodoroCycleDots
+          mode={mode}
           completedSessions={sessionsInCycle}
           totalSessions={settings.sessionsBeforeLongBreak}
         />
