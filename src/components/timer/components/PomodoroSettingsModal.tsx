@@ -58,9 +58,11 @@ export function PomodoroSettingsModal({
                 min={1}
                 className="input input-bordered w-24 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 value={draft[key]}
-                onChange={(e) =>
-                  setDraft({ ...draft, [key]: Math.floor(+e.target.value) })
-                }
+                onChange={(e) => {
+                  const value = Math.floor(+e.target.value);
+                  e.target.value = String(value);
+                  setDraft({ ...draft, [key]: value });
+                }}
               />
               <span className="text-base-content/60 w-16 text-sm">{unit}</span>
             </span>
