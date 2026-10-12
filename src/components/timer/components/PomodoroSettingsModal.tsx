@@ -1,6 +1,7 @@
 import { Modal } from "@/components/common/Modal.tsx";
 import { useEffect, useState } from "react";
 import { PomodoroSettings } from "../lib/usePomodoro";
+import { PomodoroPresetButtons } from "./PomodoroPresetButtons";
 
 const SETTINGS_FIELDS: {
   key: keyof PomodoroSettings;
@@ -43,7 +44,11 @@ export function PomodoroSettingsModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="Pomodoro settings">
-      <div className="flex flex-col gap-3">
+      <PomodoroPresetButtons
+        settings={draft}
+        onSelectPreset={(preset) => setDraft({ ...draft, ...preset })}
+      />
+      <div className="mt-4 flex flex-col gap-3">
         {SETTINGS_FIELDS.map(({ key, label, unit }) => (
           <label key={key} className="flex items-center justify-between gap-4">
             <span>{label}</span>

@@ -10,9 +10,11 @@ import { POMODORO_MODE_LABELS } from "./lib/usePomodoro";
 import { useFullscreen, useWakeLock } from "./lib/utils";
 
 function formatSeconds(totalSeconds: number) {
-  const minutes = Math.floor(totalSeconds / 60);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  const minutesAndSeconds = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  return hours > 0 ? `${hours}:${minutesAndSeconds}` : minutesAndSeconds;
 }
 
 export function PomodoroPage() {
@@ -85,7 +87,14 @@ export function PomodoroPage() {
           {POMODORO_MODE_LABELS[mode]}
         </div>
 
-        <div className="text-primary text-7xl font-bold tabular-nums sm:text-8xl md:text-9xl lg:text-[150px]">
+        <div
+          className={cn(
+            "text-primary font-bold tabular-nums",
+            secondsLeft >= 3600
+              ? "text-6xl sm:text-8xl md:text-9xl lg:text-[120px]"
+              : "text-7xl sm:text-8xl md:text-9xl lg:text-[150px]",
+          )}
+        >
           {formatSeconds(secondsLeft)}
         </div>
 
