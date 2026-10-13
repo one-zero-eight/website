@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { cn } from "@/lib/ui/cn";
 import {
   type BracketMatch,
@@ -6,8 +7,8 @@ import {
   roundLabel,
 } from "./bracket-utils";
 
-const CARD_W = 164;
-const CARD_H = 64;
+export const CARD_W = 164;
+export const CARD_H = 64;
 const COL_GAP = 36;
 const ROW_GAP = 14;
 const HEADER_H = 28;
@@ -128,11 +129,17 @@ export function BracketGraph({
   matches,
   getName,
   onSelect,
+  renderCard,
 }: {
   section: BracketSection;
   matches: Map<string, BracketMatch>;
   getName: (id: string) => string;
   onSelect?: (match: BracketMatch) => void;
+  /** replaces the default card; `style` positions it in the graph */
+  renderCard?: (
+    match: BracketMatch,
+    style: React.CSSProperties,
+  ) => React.ReactNode;
 }) {
   const rounds = section.matchIds.map((ids) =>
     ids.map((id) => matches.get(id)!),
@@ -203,16 +210,23 @@ export function BracketGraph({
                 ms.some((m) => m.status === "bye"),
               )}
             </div>
-            {ms.map((m, i) => (
-              <MatchCard
-                key={m.id}
-                match={m}
-                getName={getName}
-                onSelect={onSelect}
-                className="absolute"
-                style={{ left: colX(r), top: centerY(r, i) - CARD_H / 2 }}
-              />
-            ))}
+            {ms.map((m, i) => {
+              const style = { left: colX(r), top: centerY(r, i) - CARD_H / 2 };
+              return renderCard ? (
+                <Fragment key={m.id}>
+                  {renderCard(m, { position: "absolute", ...style })}
+                </Fragment>
+              ) : (
+                <MatchCard
+                  key={m.id}
+                  match={m}
+                  getName={getName}
+                  onSelect={onSelect}
+                  className="absolute"
+                  style={style}
+                />
+              );
+            })}
           </div>
         ))}
       </div>

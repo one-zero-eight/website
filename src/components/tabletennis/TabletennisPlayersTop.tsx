@@ -6,8 +6,12 @@ import {
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
 import { PlayerActionMenu } from "./PlayerActionMenu.tsx";
+import { GuestBadge } from "./PlayersField";
+import { BACKGROUND_REFETCH_MS } from "./useTabletennisRefresh";
 import { Pager } from "./Pager";
 import { pageSlice, rankByRating } from "./ranking";
+
+const PLAYERS_PAGE_SIZE = 25;
 
 type PlayerEntry = {
   place: number;
@@ -15,8 +19,10 @@ type PlayerEntry = {
   rating: number;
   status: string;
   visible: boolean;
+  isAdmin: boolean;
+  guest: boolean;
   innohassle_id: string;
-  raw: SchemaPlayer & { is_active: boolean };
+  raw: ListedPlayer;
 };
 
 type SortKey = "name" | "rating";
@@ -28,11 +34,14 @@ type Filters = {
   ratingMax: number;
   nameSearch: string;
   showHidden: boolean;
+  adminsOnly: boolean;
+  guestsOnly: boolean;
   sortKey: SortKey;
   sortDir: SortDir;
 };
 
 type SchemaPlayer = tabletennisTypes.SchemaPlayer;
+type ListedPlayer = SchemaPlayer & { is_active: boolean; is_admin?: boolean };
 
 function SortArrow({
   sortKey,
@@ -54,20 +63,21 @@ const INITIAL_FILTERS: Filters = {
   ratingMax: 9999,
   nameSearch: "",
   showHidden: false,
+  adminsOnly: false,
+  guestsOnly: false,
   sortKey: "rating",
   sortDir: "desc",
 };
 
-function toPlayerEntry(
-  p: SchemaPlayer & { is_active: boolean },
-  place: number,
-): PlayerEntry {
+function toPlayerEntry(p: ListedPlayer, place: number): PlayerEntry {
   return {
     place,
     name: p.nickname,
     rating: p.rating,
     status: p.status ?? "",
     visible: p.is_active,
+    isAdmin: p.is_admin ?? false,
+    guest: p.placeholder,
     innohassle_id: p.innohassle_id,
     raw: p,
   };
@@ -77,6 +87,8 @@ export function TabletennisPlayersTop() {
   const { data, isPending, isError, error } = $tabletennis.useQuery(
     "get",
     "/players",
+    undefined,
+    { refetchInterval: BACKGROUND_REFETCH_MS },
   );
 
   const { data: isAdminData } = $tabletennis.useQuery("get", "/isadmin");
@@ -104,7 +116,7 @@ export function TabletennisPlayersTop() {
     if (!data) return [];
     const raw = data as unknown as {
       total: number;
-      players: (SchemaPlayer & { is_active: boolean })[];
+      players: ListedPlayer[];
     };
     const pool = raw.players
       .filter((p) => debounced.showHidden || p.is_active)
@@ -113,10 +125,16 @@ export function TabletennisPlayersTop() {
           debounced.status === "all" ||
           (p.status ?? "").toLowerCase() === debounced.status,
       );
-    return rankByRating(pool).map(({ player, place }) =>
-      toPlayerEntry(player, place),
+    // guests have no place in the top; only admins see them, to link them to accounts
+    const ranked = rankByRating(pool.filter((p) => !p.placeholder)).map(
+      ({ player, place }) => toPlayerEntry(player, place),
     );
-  }, [data, debounced.showHidden, debounced.status]);
+    if (!isAdmin) return ranked;
+    const guests = pool
+      .filter((p) => p.placeholder)
+      .map((p) => toPlayerEntry(p, 0));
+    return [...ranked, ...guests];
+  }, [data, debounced.showHidden, debounced.status, isAdmin]);
 
   const results = useMemo(() => {
     const filtered = entries
@@ -126,7 +144,9 @@ export function TabletennisPlayersTop() {
       )
       .filter((p) =>
         p.name.toLowerCase().includes(debounced.nameSearch.toLowerCase()),
-      );
+      )
+      .filter((p) => !debounced.adminsOnly || p.isAdmin)
+      .filter((p) => !debounced.guestsOnly || p.guest);
 
     const sorted = [...filtered].sort((a, b) => {
       const mul = debounced.sortDir === "asc" ? 1 : -1;
@@ -138,7 +158,7 @@ export function TabletennisPlayersTop() {
     return sorted;
   }, [entries, debounced]);
 
-  const visibleResults = pageSlice(results, page);
+  const visibleResults = pageSlice(results, page, PLAYERS_PAGE_SIZE);
 
   function toggleSort(key: SortKey) {
     setFilters((prev) => ({
@@ -246,6 +266,33 @@ export function TabletennisPlayersTop() {
           />
           <span className="text-base-content/70">Show hidden</span>
         </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="toggle toggle-sm"
+            checked={filters.adminsOnly}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, adminsOnly: e.target.checked }))
+            }
+          />
+          <span className="text-base-content/70">Admins only</span>
+        </label>
+        {isAdmin && (
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="toggle toggle-sm"
+              checked={filters.guestsOnly}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  guestsOnly: e.target.checked,
+                }))
+              }
+            />
+            <span className="text-base-content/70">Guests only</span>
+          </label>
+        )}
       </div>
 
       {/* Results count */}
@@ -253,7 +300,12 @@ export function TabletennisPlayersTop() {
         {results.length} player{results.length === 1 ? "" : "s"}
       </p>
 
-      <Pager page={page} total={results.length} onChange={setPage} />
+      <Pager
+        page={page}
+        total={results.length}
+        onChange={setPage}
+        pageSize={PLAYERS_PAGE_SIZE}
+      />
 
       {/* Table */}
       <div className="bg-base-200 rounded-box overflow-x-auto">
@@ -294,20 +346,30 @@ export function TabletennisPlayersTop() {
                 key={p.innohassle_id}
                 className="border-base-300 border-b last:border-0"
               >
-                <td className="text-base-content/70 px-4 py-3">{p.place}</td>
+                <td className="text-base-content/70 px-4 py-3">
+                  {p.guest ? "—" : p.place}
+                </td>
                 <td className="px-4 py-3 font-medium">{p.name}</td>
                 <td className="px-4 py-3">{p.rating}</td>
                 <td className="px-4 py-3">
-                  <span
-                    className={cn(
-                      "badge badge-sm",
-                      p.status.toLowerCase() === "active"
-                        ? "badge-primary"
-                        : "badge-ghost",
+                  <div className="flex flex-wrap items-center gap-1">
+                    <span
+                      className={cn(
+                        "badge badge-sm",
+                        p.status.toLowerCase() === "active"
+                          ? "badge-primary"
+                          : "badge-ghost",
+                      )}
+                    >
+                      {p.status}
+                    </span>
+                    {p.isAdmin && (
+                      <span className="badge badge-sm border-[#712BB2] bg-transparent text-[#712BB2]">
+                        admin
+                      </span>
                     )}
-                  >
-                    {p.status}
-                  </span>
+                    {p.guest && <GuestBadge />}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <span

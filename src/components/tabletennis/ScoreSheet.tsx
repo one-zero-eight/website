@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/ui/cn";
 import { Modal } from "@/components/common/Modal.tsx";
 
+/** sets won by one player in a match, best of 7 at most (MAX_SCORE on the backend) */
+const MAX_SETS = 4;
+
 function Stepper({
   name,
   value,
@@ -40,7 +43,7 @@ function Stepper({
       <button
         type="button"
         aria-label={`Increase ${name} score`}
-        disabled={disabled || value >= 9}
+        disabled={disabled || value >= MAX_SETS}
         onClick={() => onChange(value + 1)}
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#712BB2] text-xl text-white disabled:opacity-30"
       >

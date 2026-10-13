@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/ui/cn";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
@@ -19,6 +19,19 @@ import {
 import { DROP_ATTR, useGroupDrag } from "./useGroupDrag";
 
 const UNASSIGNED = "?";
+/** groups are saved this long after the last change */
+const AUTOSAVE_MS = 800;
+
+/** same players in the same groups, regardless of the order inside a group */
+function sameGroups(a: Groups, b: Groups) {
+  const norm = (g: Groups) =>
+    JSON.stringify(
+      Object.entries(g)
+        .map(([name, members]) => [name, [...members].sort()])
+        .sort(),
+    );
+  return norm(a) === norm(b);
+}
 
 type OpenGame = { game_id: string; p1: string; p2: string };
 type Scoring = OpenGame & {
@@ -35,6 +48,7 @@ export function ValidationMatches({
   validationGames,
   isAdmin,
   onChanged,
+  onGoToQualification,
 }: {
   players: Player[];
   tourId: string;
@@ -44,6 +58,7 @@ export function ValidationMatches({
   validationGames: GameData[];
   isAdmin: boolean;
   onChanged: () => Promise<void>;
+  onGoToQualification?: () => void;
 }) {
   const names = useMemo(
     () => new Map(players.map((p) => [p.id, p.name])),
@@ -74,6 +89,7 @@ export function ValidationMatches({
       isAdmin={isAdmin}
       getName={getName}
       onChanged={onChanged}
+      onGoToQualification={onGoToQualification}
     />
   );
 }
@@ -95,7 +111,7 @@ function GroupSetup({
   getName: (id: string) => string;
   onChanged: () => Promise<void>;
 }) {
-  const { showError } = useToast();
+  const { showError, showConfirm } = useToast();
   const hasServerGroups = Object.keys(serverGroups).length > 0;
   const defaultCount = Math.max(1, Math.round(players.length / 4));
 
@@ -105,7 +121,22 @@ function GroupSetup({
   const [dirty, setDirty] = useState(!hasServerGroups);
   const [countPref, setCountPref] = useState<number | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<"lock" | "remove" | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
+  const editVersion = useRef(0);
+
+  const playerById = useMemo(
+    () => new Map(players.map((p) => [p.id, p])),
+    [players],
+  );
+  // members are kept in rating order: it is also the fixed row order of the group tables
+  function byRating(ids: string[]) {
+    const rating = (id: string) => playerById.get(id)?.rating ?? 0;
+    return [...ids].sort(
+      (a, b) => rating(b) - rating(a) || getName(a).localeCompare(getName(b)),
+    );
+  }
 
   // follow server groups (another admin, a refetch) unless there are local edits
   const serverKey = JSON.stringify(serverGroups);
@@ -141,20 +172,103 @@ function GroupSetup({
     "/reg-tour/lock-groups",
     { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
   );
+  const { mutateAsync: removePlayers } = $tabletennis.useMutation(
+    "post",
+    "/reg-tour/remove-players",
+    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+  );
 
   function edit(next: Groups) {
     setDraft(next);
     setDirty(true);
+    editVersion.current++;
   }
 
-  function changeCount(delta: number) {
+  function sortedDraft() {
+    return Object.fromEntries(
+      Object.entries(draft).map(([name, members]) => [name, byRating(members)]),
+    );
+  }
+
+  async function save() {
+    const version = editVersion.current;
+    setSaving(true);
+    try {
+      await setGroups({
+        params: { query: { tour_id: tourId } },
+        body: sortedDraft(),
+      });
+      setSaveFailed(false);
+      // edits made while saving are saved by the next round
+      if (editVersion.current === version) setDirty(false);
+      await onChanged();
+    } catch {
+      setSaveFailed(true);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // autosave: nothing is lost when the admin leaves without pressing anything
+  useEffect(() => {
+    if (!isAdmin || !dirty || busy || players.length === 0) return;
+    const timer = setTimeout(save, AUTOSAVE_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, dirty, busy, isAdmin, players.length]);
+
+  async function changeCount(delta: number) {
     const count = Math.min(
       Math.max(1, groupCount + delta),
       Math.max(1, Math.floor(players.length / 2)),
     );
+    if (!sameGroups(draft, snakeGroups(players, groupCount))) {
+      const ok = await showConfirm({
+        title: "Redistribute players",
+        message:
+          "Players are split by rating again, your manual moves are lost.",
+        confirmText: "Redistribute",
+        cancelText: "Keep",
+        type: "warning",
+      });
+      if (!ok) return;
+    }
     setCountPref(count);
     edit(snakeGroups(players, count));
     setSelected(null);
+  }
+
+  async function removeFromTournament(id: string) {
+    const ok = await showConfirm({
+      title: "Remove player",
+      message: `Remove ${getName(id)} from the tournament?`,
+      confirmText: "Remove",
+      cancelText: "Keep",
+      type: "warning",
+    });
+    if (!ok) return;
+    setBusy("remove");
+    try {
+      const res = (await removePlayers({
+        params: { query: { tour_id: tourId } },
+        body: { player_ids: [id] },
+      })) as { removed?: string[]; failed?: { reason: string }[] };
+      if (!res.removed?.includes(id)) {
+        showError("Not removed", res.failed?.[0]?.reason ?? getName(id));
+        return;
+      }
+      setSelected(null);
+      const next: Groups = {};
+      for (const [name, members] of Object.entries(draft)) {
+        next[name] = members.filter((m) => m !== id);
+      }
+      edit(next);
+      await onChanged();
+    } catch {
+      // toast shown by onError
+    } finally {
+      setBusy(null);
+    }
   }
 
   function movePlayer(id: string, target: string) {
@@ -168,7 +282,8 @@ function GroupSetup({
     for (const [name, members] of Object.entries(draft)) {
       next[name] = members.filter((m) => m !== id);
     }
-    if (target !== UNASSIGNED) next[target] = [...(next[target] ?? []), id];
+    if (target !== UNASSIGNED)
+      next[target] = byRating([...(next[target] ?? []), id]);
     edit(next);
   }
 
@@ -188,19 +303,20 @@ function GroupSetup({
     setSelected(selected === id ? null : id);
   }
 
-  async function run(action: "save" | "lock") {
-    setBusy(true);
+  async function lock() {
+    setBusy("lock");
     try {
-      await setGroups({ params: { query: { tour_id: tourId } }, body: draft });
-      if (action === "lock") {
-        await lockGroups({ params: { query: { tour_id: tourId } } });
-      }
+      await setGroups({
+        params: { query: { tour_id: tourId } },
+        body: sortedDraft(),
+      });
+      await lockGroups({ params: { query: { tour_id: tourId } } });
       setDirty(false);
       await onChanged();
     } catch {
       // toast shown by onError
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   }
 
@@ -223,6 +339,9 @@ function GroupSetup({
                       className="bg-base-200 rounded-lg px-3 py-1.5 text-sm"
                     >
                       {getName(id)}
+                      <span className="text-base-content/50 ml-1.5 text-xs tabular-nums">
+                        {playerById.get(id)?.rating}
+                      </span>
                     </span>
                   ))}
                 </div>
@@ -301,6 +420,8 @@ function GroupSetup({
                 <PlayerChip
                   key={id}
                   label={getName(id)}
+                  rating={playerById.get(id)?.rating}
+                  guest={playerById.get(id)?.guest}
                   active={selected === id}
                   dragging={drag?.id === id}
                   onClick={() => toggleSelected(id)}
@@ -328,6 +449,8 @@ function GroupSetup({
                 <PlayerChip
                   key={id}
                   label={getName(id)}
+                  rating={playerById.get(id)?.rating}
+                  guest={playerById.get(id)?.guest}
                   active={selected === id}
                   dragging={drag?.id === id}
                   onClick={() => toggleSelected(id)}
@@ -378,6 +501,21 @@ function GroupSetup({
           >
             + New group
           </button>
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={() => removeFromTournament(selected)}
+            className="text-error flex h-10 items-center gap-1 rounded-xl px-2 text-sm disabled:opacity-40"
+          >
+            {busy === "remove" ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              <>
+                <span className="icon-[mdi--account-remove-outline] text-base" />
+                Remove from tournament
+              </>
+            )}
+          </button>
         </div>
       )}
 
@@ -387,22 +525,40 @@ function GroupSetup({
         </p>
       )}
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+        <p className="text-base-content/50 flex min-h-6 items-center gap-1 text-xs">
+          {saving ? (
+            <>
+              <span className="loading loading-spinner loading-xs" />
+              Saving…
+            </>
+          ) : saveFailed ? (
+            <span className="text-error flex items-center gap-1">
+              Not saved
+              <button
+                type="button"
+                onClick={save}
+                className="h-8 px-1 font-medium underline"
+              >
+                Retry
+              </button>
+            </span>
+          ) : dirty ? (
+            "Unsaved changes"
+          ) : (
+            <>
+              <span className="icon-[mdi--check] text-[#712BB2]" />
+              Saved, other admins see these groups
+            </>
+          )}
+        </p>
         <button
           type="button"
-          disabled={busy}
-          onClick={() => run("save")}
-          className="border-base-content/20 h-12 rounded-xl border px-6 text-sm font-medium disabled:opacity-40"
-        >
-          Save draft
-        </button>
-        <button
-          type="button"
-          disabled={busy || !canLock}
-          onClick={() => run("lock")}
+          disabled={busy !== null || !canLock}
+          onClick={lock}
           className="flex h-12 items-center justify-center gap-2 rounded-xl bg-[#712BB2] px-6 text-sm font-medium text-white disabled:opacity-40"
         >
-          {busy ? (
+          {busy === "lock" ? (
             <span className="loading loading-spinner loading-sm" />
           ) : (
             <>
@@ -427,6 +583,7 @@ function GroupStage({
   isAdmin,
   getName,
   onChanged,
+  onGoToQualification,
 }: {
   players: Player[];
   tourId: string;
@@ -436,6 +593,7 @@ function GroupStage({
   isAdmin: boolean;
   getName: (id: string) => string;
   onChanged: () => Promise<void>;
+  onGoToQualification?: () => void;
 }) {
   const { showError, showConfirm } = useToast();
   const [scoring, setScoring] = useState<Scoring | null>(null);
@@ -479,6 +637,10 @@ function GroupStage({
   const finishedCount = validationGames.filter((g) => g.finished).length;
   const leftCount = Math.max(0, totalGames - finishedCount);
   const canPlay = isAdmin && !qualStarted;
+  const showNextStage =
+    !!onGoToQualification &&
+    (qualStarted ||
+      (leftCount === 0 && validationGames.every((g) => g.finished)));
   const suggestions = useMemo(
     () =>
       canPlay
@@ -558,7 +720,12 @@ function GroupStage({
   }
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-5 md:px-7">
+    <div
+      className={cn(
+        "flex flex-col gap-4 px-4 py-5 md:px-7",
+        showNextStage && "pb-24",
+      )}
+    >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-xl font-light">Group stage</h2>
@@ -673,6 +840,20 @@ function GroupStage({
             : undefined
         }
       />
+
+      {showNextStage && (
+        <button
+          type="button"
+          onClick={() => {
+            onGoToQualification?.();
+            window.scrollTo({ top: 0 });
+          }}
+          className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-10 flex h-14 items-center gap-2 rounded-2xl bg-[#712BB2] px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(113,43,178,0.45)]"
+        >
+          {qualStarted ? "Open bracket" : "Qualification"}
+          <span className="icon-[mdi--arrow-right] text-xl" />
+        </button>
+      )}
     </div>
   );
 }
@@ -715,10 +896,13 @@ function GroupCard({
     () => new Map(members.map((id) => [id, getName(id)])),
     [members, getName],
   );
-  const standings = useMemo(
-    () => groupStandings(name, members, groupGames, names),
-    [name, members, groupGames, names],
-  );
+  // rows keep the order the group was formed in (by rating), only the place column changes
+  const standings = useMemo(() => {
+    const byId = new Map(
+      groupStandings(name, members, groupGames, names).map((s) => [s.id, s]),
+    );
+    return members.map((id) => byId.get(id)!);
+  }, [name, members, groupGames, names]);
 
   const results = new Map<string, GameData>();
   const busyPlayers = new Set<string>();
@@ -779,7 +963,7 @@ function GroupCard({
               <thead>
                 <tr className="text-base-content/50">
                   <th className="bg-base-100 sticky left-0 z-[1] py-1.5 pr-2 text-left font-medium">
-                    #
+                    №
                   </th>
                   <th className="bg-base-100 sticky left-6 z-[1] py-1.5 pr-3 text-left font-medium">
                     Player
@@ -790,21 +974,24 @@ function GroupCard({
                   <th className="w-11 py-1.5 pr-1 text-center font-medium">
                     Sets
                   </th>
-                  {standings.map((s) => (
+                  <th className="w-9 py-1.5 pr-1 text-center font-medium">
+                    Pl
+                  </th>
+                  {standings.map((s, i) => (
                     <th
                       key={s.id}
                       className="w-10 py-1.5 text-center font-medium"
                     >
-                      {s.place}
+                      {i + 1}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {standings.map((row) => (
+                {standings.map((row, rowIndex) => (
                   <tr key={row.id}>
-                    <td className="bg-base-100 border-base-300 sticky left-0 z-[1] w-6 border-t py-2 pr-2 font-semibold tabular-nums">
-                      {row.place}
+                    <td className="bg-base-100 border-base-300 text-base-content/60 sticky left-0 z-[1] w-6 border-t py-2 pr-2 tabular-nums">
+                      {rowIndex + 1}
                     </td>
                     <td className="bg-base-100 border-base-300 sticky left-6 z-[1] max-w-[6.5rem] truncate border-t py-2 pr-3 font-medium">
                       {getName(row.id)}
@@ -814,6 +1001,9 @@ function GroupCard({
                     </td>
                     <td className="border-base-300 text-base-content/70 border-t py-2 pr-1 text-center tabular-nums">
                       {row.setsWon}:{row.setsLost}
+                    </td>
+                    <td className="border-base-300 border-t py-2 pr-1 text-center font-semibold text-[#712BB2] tabular-nums">
+                      {row.played > 0 ? row.place : "–"}
                     </td>
                     {standings.map((col) => {
                       if (col.id === row.id) {
@@ -1060,6 +1250,8 @@ function GroupShell({
 
 function PlayerChip({
   label,
+  rating,
+  guest,
   active,
   disabled,
   hint,
@@ -1069,6 +1261,8 @@ function PlayerChip({
   onContextMenu,
 }: {
   label: string;
+  rating?: number;
+  guest?: boolean;
   active: boolean;
   disabled?: boolean;
   hint?: string;
@@ -1098,6 +1292,17 @@ function PlayerChip({
       )}
     >
       {label}
+      {rating !== undefined && (
+        <span
+          className={cn(
+            "text-xs font-normal tabular-nums",
+            active ? "text-white/70" : "text-base-content/50",
+          )}
+        >
+          {rating}
+        </span>
+      )}
+      {guest && <span className="text-[10px] font-normal">· guest</span>}
       {hint && <span className="text-[10px] font-normal">· {hint}</span>}
     </button>
   );

@@ -7,6 +7,7 @@ import { SignInButton } from "@/components/common/SignInButton";
 import { Registration } from "./Registration";
 import { ScoreTable, type RatingPoint } from "./DrawTable";
 import { rankByRating } from "./ranking";
+import { BACKGROUND_REFETCH_MS } from "./useTabletennisRefresh";
 
 type SchemaPlayer = tabletennisTypes.SchemaPlayer;
 
@@ -14,6 +15,8 @@ export function TabletennisPage() {
   const { data, isPending, isError, error, refetch } = $tabletennis.useQuery(
     "get",
     "/get-player",
+    undefined,
+    { refetchInterval: BACKGROUND_REFETCH_MS },
   );
 
   if (isPending) return <div className="skeleton h-48 w-full" />;
@@ -134,14 +137,18 @@ function ProfileInfo({
 }
 
 function usePlace(player: SchemaPlayer): number | null {
-  const { data } = $tabletennis.useQuery("get", "/players");
+  const { data } = $tabletennis.useQuery("get", "/players", undefined, {
+    refetchInterval: BACKGROUND_REFETCH_MS,
+  });
   if (!data) return null;
   const { players } = data as unknown as {
     players: (SchemaPlayer & { is_active: boolean })[];
   };
   // same place as in the players top: counted among active players (plus yourself)
   const pool = players.filter(
-    (p) => p.is_active || p.innohassle_id === player.innohassle_id,
+    (p) =>
+      !p.placeholder &&
+      (p.is_active || p.innohassle_id === player.innohassle_id),
   );
   const me = rankByRating(pool).find(
     (r) => r.player.innohassle_id === player.innohassle_id,

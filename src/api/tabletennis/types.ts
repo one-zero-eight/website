@@ -167,6 +167,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/my-games": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get My Games
+     * @description Returns every game of the current player, in the same format as /get-games-by-id.
+     */
+    get: operations["table_tennis_get_my_games"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/ping": {
     parameters: {
       query?: never;
@@ -221,7 +241,8 @@ export interface paths {
     put?: never;
     /**
      * Set Status
-     * @description Sets a player's status by innohassle_id.
+     * @description Sets a player's status by innohassle_id. Works in both directions regardless of the rating;
+     *     the automatic promotion at ADVANCED_RATING only happens when the rating crosses it.
      */
     post: operations["table_tennis_set_status"];
     delete?: never;
@@ -241,10 +262,53 @@ export interface paths {
     put?: never;
     /**
      * Set Rating
-     * @description Admin endpoint to assign a player's starting RTTF rating, as the organizer does for a newcomer:
-     *     a multiple of 25 and at least 100. The change is added to the player's rating history.
+     * @description Admin endpoint to set a player's rating by hand to any value from 0. The change is added to
+     *     the player's rating history; reaching ADVANCED_RATING from below promotes a beginner.
      */
     post: operations["table_tennis_set_rating"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/guests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create Guest
+     * @description Admin endpoint to create a guest for someone who has no account yet. A guest can be added to any
+     *     tournament and plays like a registered player; /merge-guest later hands everything over to the account.
+     */
+    post: operations["table_tennis_create_guest"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/merge-guest": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Merge Guest
+     * @description Admin endpoint to hand a guest over to the registered player it stood for. The player replaces the
+     *     guest in every tournament and game, and the guest is deleted. A player who has not played yet takes
+     *     the guest's rating, status and history; otherwise the rating changes of the guest's games are added.
+     */
+    post: operations["table_tennis_merge_guest"];
     delete?: never;
     options?: never;
     head?: never;
@@ -264,7 +328,7 @@ export interface paths {
      * Register Tour
      * @description Creates a new tournament. Players can be specified either by innohassle_id (player_ids)
      *     or by email (emails) - both lists are optional and can be freely combined.
-     *     Requires at least 2 valid, registered (/reg) players to succeed.
+     *     Nothing is created unless every given player is found; the 400 response lists the missing ones.
      */
     post: operations["table_tennis_register_tour"];
     delete?: never;
@@ -286,7 +350,7 @@ export interface paths {
      * Add Player
      * @description Adds multiple players to an ACTIVE tournament, specified either by innohassle_id (player_ids)
      *     or by email (emails) - both lists are optional and can be freely combined.
-     *     Processes valid players and returns a report of skipped/failed ones without crashing.
+     *     Nobody is added unless every given player can be added; the 400 response lists the failed ones.
      */
     post: operations["table_tennis_add_player"];
     delete?: never;
@@ -465,6 +529,48 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/delete-tour": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Delete Tournament
+     * @description Admin endpoint to delete a tournament created by mistake. Only possible while no game in it
+     *     is finished, so ratings are never affected; unfinished games are deleted with it.
+     */
+    post: operations["table_tennis_delete_tournament"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/reopen-tour": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reopen Tournament
+     * @description Admin endpoint to make an archived tournament active again, so its games and standings can be corrected.
+     *     Bonuses are still granted at most once.
+     */
+    post: operations["table_tennis_reopen_tournament"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/reg-game": {
     parameters: {
       query?: never;
@@ -622,6 +728,11 @@ export interface components {
        * @default Beginner
        */
       status: string;
+      /**
+       * Placeholder
+       * @default false
+       */
+      placeholder: boolean;
     };
     /** @example 5eb7cf5a86d9755df3a6c593 */
     PydanticObjectId: string;
@@ -933,6 +1044,35 @@ export interface operations {
       };
     };
   };
+  table_tennis_get_my_games: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   table_tennis_ping: {
     parameters: {
       query?: never;
@@ -1058,7 +1198,7 @@ export interface operations {
           };
         };
       };
-      /** @description Starting rating must be a multiple of {RTTF_START_RATING_STEP} and at least {RTTF_MIN_START_RATING} */
+      /** @description Rating cannot be negative */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1073,6 +1213,110 @@ export interface operations {
         content?: never;
       };
       /** @description Player not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  table_tennis_create_guest: {
+    parameters: {
+      query: {
+        nickname: string;
+        rating?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Rating cannot be negative OR Nickname must be 2 to 20 characters long */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You are not a Table Tennis administrator/coach! */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  table_tennis_merge_guest: {
+    parameters: {
+      query: {
+        guest_id: string;
+        player_id?: string | null;
+        email?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description f"The guest and the player are in the same tournament: {', '.join((t.name for t in shared))}" */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You are not a Table Tennis administrator/coach! */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Registered player not found OR Guest or player not found OR Guest not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1117,7 +1361,7 @@ export interface operations {
           };
         };
       };
-      /** @description Bad Request */
+      /** @description Tournament name must be 1 to 100 characters long OR A tournament needs at least 2 players */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1293,13 +1537,6 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Tournament not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -1341,13 +1578,6 @@ export interface operations {
       };
       /** @description You are not a Table Tennis administrator/coach! */
       403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Tournament not found */
-      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -1446,7 +1676,7 @@ export interface operations {
           };
         };
       };
-      /** @description Every group needs at least 2 players: {small_groups} OR Create groups first */
+      /** @description Create groups first OR Every group needs at least 2 players: {small_groups} */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1455,13 +1685,6 @@ export interface operations {
       };
       /** @description You are not a Table Tennis administrator/coach! */
       403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Tournament not found */
-      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -1514,13 +1737,6 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Tournament not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -1558,7 +1774,7 @@ export interface operations {
           };
         };
       };
-      /** @description Seeding must contain every participant exactly once OR Qualification games have already started OR Lock the groups first OR At least 2 players are needed for qualification */
+      /** @description Lock the groups first OR At least 2 players are needed for qualification OR Qualification games have already started OR Seeding must contain every participant exactly once OR Finish or cancel the group games in progress first */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1567,13 +1783,6 @@ export interface operations {
       };
       /** @description You are not a Table Tennis administrator/coach! */
       403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Tournament not found */
-      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -1637,6 +1846,114 @@ export interface operations {
       };
     };
   };
+  table_tennis_delete_tournament: {
+    parameters: {
+      query: {
+        tour_id: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description A tournament with finished games cannot be deleted */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You are not a Table Tennis administrator/coach! */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Tournament not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  table_tennis_reopen_tournament: {
+    parameters: {
+      query: {
+        tour_id: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Tournament is already active */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You are not a Table Tennis administrator/coach! */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Tournament not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   table_tennis_register_game: {
     parameters: {
       query: {
@@ -1664,7 +1981,7 @@ export interface operations {
           };
         };
       };
-      /** @description Qualification has already started OR Lock the groups before starting validation games OR A player cannot play a match against themselves! OR Validation games are played only inside one group OR One or both players are not in this tournament's player list */
+      /** @description A player cannot play a match against themselves! OR Qualification has already started OR One or both players are not in this tournament's player list OR Validation games are played only inside one group OR Lock the groups before starting validation games */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1678,7 +1995,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Tournament not found OR One or both players are not registered in the system (/reg) */
+      /** @description One or both players are not registered in the system (/reg) */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1728,7 +2045,7 @@ export interface operations {
           };
         };
       };
-      /** @description This game has already been finished. Recalculating rating is not allowed. */
+      /** @description Group games cannot be finished after qualification started OR This game has already been finished. Recalculating rating is not allowed. */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1742,7 +2059,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description One or both players from this game are not registered (/reg) OR Tournament not found OR Game not found in this tournament */
+      /** @description Game not found in this tournament OR One or both players from this game are not registered (/reg) */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1785,7 +2102,7 @@ export interface operations {
           };
         };
       };
-      /** @description This game was finished before score corrections were supported OR Group games cannot be corrected after qualification started OR This game is not finished yet OR Cannot correct games of an inactive/archived tournament! */
+      /** @description The winner cannot change: the next qualification match of these players has already started OR This game is not finished yet OR This game was finished before score corrections were supported OR Group games cannot be corrected after qualification started OR Cannot correct games of an inactive/archived tournament! */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1799,7 +2116,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description One or both players from this game are not registered (/reg) OR Tournament not found OR Game not found in this tournament */
+      /** @description Game not found in this tournament OR One or both players from this game are not registered (/reg) OR Tournament not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1861,7 +2178,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Tournament not found OR Game not found in this tournament */
+      /** @description Game not found in this tournament */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1883,7 +2200,6 @@ export interface operations {
 export enum PathsSetStatusPostParametersQueryStatus {
   beginner = "beginner",
   advanced = "advanced",
-  admin = "admin",
 }
 export enum PathsRegGamePostParametersQueryTip {
   val = "val",

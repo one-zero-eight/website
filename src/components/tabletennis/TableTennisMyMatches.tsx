@@ -10,6 +10,7 @@ import { Registration } from "./Registration";
 import { Pager } from "./Pager";
 import { pageSlice } from "./ranking";
 import { formatDay, formatDayTime } from "./format";
+import { BACKGROUND_REFETCH_MS } from "./useTabletennisRefresh";
 
 type SchemaPlayer = tabletennisTypes.SchemaPlayer;
 
@@ -21,11 +22,6 @@ type TourData = {
   name: string;
   date: string;
   players: string[];
-  games: {
-    val_game_ids: string[] | null;
-    cval_game_ids: string[] | null;
-    total_count: number;
-  };
 };
 
 type GamePlayer = {
@@ -45,12 +41,6 @@ type GameData = {
   finished_at?: string | null;
   player1: GamePlayer;
   player2: GamePlayer;
-};
-
-type GetGamesByIdResponse = {
-  total_found: number;
-  games: GameData[];
-  missing_ids: string[];
 };
 
 function gameTime(g: GameData) {
@@ -102,6 +92,8 @@ function MatchesList({ playerId }: { playerId: string }) {
   const { data: toursData, isPending: toursPending } = $tabletennis.useQuery(
     "get",
     "/get-tours",
+    undefined,
+    { refetchInterval: BACKGROUND_REFETCH_MS },
   );
 
   const tours = useMemo(
@@ -109,34 +101,19 @@ function MatchesList({ playerId }: { playerId: string }) {
     [toursData],
   );
 
-  const allGameIds = useMemo(() => {
-    const ids: string[] = [];
-    for (const t of tours) {
-      if (t.games?.val_game_ids) ids.push(...t.games.val_game_ids);
-      if (t.games?.cval_game_ids) ids.push(...t.games.cval_game_ids);
-    }
-    return ids;
-  }, [tours]);
-
-  const { data: gamesByIdData, isPending: gamesPending } =
-    $tabletennis.useQuery(
-      "get",
-      "/get-games-by-id",
-      { params: { query: { ids: allGameIds } } },
-      { enabled: allGameIds.length > 0 },
-    );
+  const { data: myGamesData, isPending: gamesPending } = $tabletennis.useQuery(
+    "get",
+    "/my-games",
+    undefined,
+    { refetchInterval: BACKGROUND_REFETCH_MS },
+  );
 
   // grouped by tournament id (two tournaments may share a name), newest first
   const matchesByTournament = useMemo(() => {
-    if (!gamesByIdData) return [];
-    const games = (gamesByIdData as GetGamesByIdResponse).games ?? [];
-    const mine = games.filter(
-      (g) =>
-        g.player1.innohassle_id === playerId ||
-        g.player2.innohassle_id === playerId,
-    );
+    if (!myGamesData) return [];
+    const games = (myGamesData as { games?: GameData[] }).games ?? [];
     const byTour = new Map<string, GameData[]>();
-    for (const g of mine) {
+    for (const g of games) {
       if (!byTour.has(g.tour_id)) byTour.set(g.tour_id, []);
       byTour.get(g.tour_id)!.push(g);
     }
@@ -154,9 +131,9 @@ function MatchesList({ playerId }: { playerId: string }) {
         };
       })
       .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
-  }, [gamesByIdData, playerId, tours]);
+  }, [myGamesData, tours]);
 
-  if (toursPending || (allGameIds.length > 0 && gamesPending)) {
+  if (toursPending || gamesPending) {
     return <div className="skeleton h-48 w-full" />;
   }
 

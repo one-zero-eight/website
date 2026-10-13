@@ -1,4 +1,9 @@
-export type Player = { name: string; id: string; rating?: number };
+export type Player = {
+  name: string;
+  id: string;
+  rating?: number;
+  guest?: boolean;
+};
 
 export type GameData = {
   game_id: string;
