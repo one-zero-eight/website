@@ -8,6 +8,8 @@ import { SportsWidget } from "@/components/dashboard/SportsWidget.tsx";
 import { MusicRoomWidget } from "@/components/dashboard/MusicRoomWidget.tsx";
 import { TelegramReconnectWidget } from "@/components/dashboard/TelegramReconnectWidget.tsx";
 import { CalendarWidget } from "./CalendarWidget.tsx";
+import { CountdownWidget } from "./CountdownWidget.tsx";
+import { BookingsWidget } from "./BookingsWidget.tsx";
 import Links from "./links/Links.tsx";
 
 export function DashboardPage() {
@@ -29,12 +31,16 @@ export function DashboardPage() {
     <div className="flex flex-col gap-4 px-4 py-4">
       <AccountWidget />
       <TelegramReconnectWidget />
-      <div className="grid min-w-0 gap-4 @4xl/content:grid-cols-2 [&>section:only-child]:col-span-full">
+      <div className="grid min-w-0 gap-4 @3xl/content:grid-cols-2">
+        <CountdownWidget />
+        <AcademicCalendarWidget />
+      </div>
+      <div className="grid min-w-0 gap-4 @3xl/content:grid-cols-2 @6xl/content:grid-cols-3 @3xl/content:[&>section:last-child:nth-child(odd)]:col-span-2 @6xl/content:[&>section:last-child:nth-child(odd)]:col-span-1 [&>section:only-child]:col-span-full">
         <CalendarWidget />
         <SportsWidget />
+        <BookingsWidget />
       </div>
       <div className="grid min-w-0 gap-4 @4xl/content:grid-cols-2 @7xl/content:grid-cols-3">
-        <AcademicCalendarWidget />
         <MusicRoomWidget />
         <PwaWidget />
         <AdvWidget />

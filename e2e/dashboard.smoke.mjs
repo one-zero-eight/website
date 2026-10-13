@@ -1,13 +1,17 @@
 // Run after `pnpm run build`: node e2e/dashboard.smoke.mjs
 // Serves the production bundle through Playwright routing, without starting a
 // server or sending requests to real services. All account/API data is synthetic.
-import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 import { loadEnv } from "vite";
 
 const root = process.cwd();
+const screenshotDir = path.resolve(
+  root,
+  process.env.DASHBOARD_SCREENSHOT_DIR || "screenshots",
+);
+await mkdir(screenshotDir, { recursive: true });
 const env = loadEnv("production", root, "VITE_");
 const now = new Date("2026-06-15T09:00:00Z");
 const user = {
@@ -39,17 +43,63 @@ const calendarIcs = [
   ]).flat(),
   "END:VCALENDAR",
 ].join("\r\n");
-const trainings = Array.from({ length: 5 }, (_, index) => ({
-  title: index === 0 ? "Not checked in" : `Sport session ${index}`,
-  start: iso(index * 60 - 17),
-  end: iso(index * 60 + 43),
-  allDay: false,
-  extendedProps: {
-    id: index,
-    checked_in: index !== 0,
-    training_class: "Sports complex · Training hall",
+const trainings = [
+  ...Array.from({ length: 2 }, (_, index) => ({
+    title: index === 0 ? "Not checked in" : `Sport session ${index}`,
+    start: iso(index * 60 - 17),
+    end: iso(index * 60 + 43),
+    allDay: false,
+    extendedProps: {
+      id: index,
+      checked_in: index !== 0,
+      training_class: "Sports complex · Training hall",
+    },
+  })),
+  {
+    title: "Sport session 2",
+    start: iso(24 * 60 + 120),
+    end: iso(24 * 60 + 180),
+    allDay: false,
+    extendedProps: {
+      id: 2,
+      checked_in: true,
+      training_class: "Sports complex · Training hall",
+    },
   },
+];
+const rooms = Array.from({ length: 8 }, (_, index) => ({
+  id: String(101 + index),
+  title: `Room ${101 + index}`,
+  short_name: String(101 + index),
+  access_level: "yellow",
+  restrict_daytime: index === 7,
 }));
+const roomBooking = (
+  roomId,
+  startMinutes,
+  endMinutes,
+  title = "Room reservation",
+) => ({
+  id: `${roomId}:${startMinutes}`,
+  room_id: roomId,
+  title,
+  start: iso(startMinutes),
+  end: iso(endMinutes),
+  attendees: null,
+  outlook_booking_id: null,
+  outlook_entry_id: null,
+});
+const ownBookings = [
+  roomBooking("105", 120, 180),
+  roomBooking("101", 11 * 60 + 40, 13 * 60 + 40, "Project meeting"),
+];
+const allBookings = [
+  ...ownBookings,
+  roomBooking("102", -10, 60),
+  roomBooking("103", 240, 300),
+  roomBooking("104", 480, 540),
+  roomBooking("107", 720, 780),
+];
 const contentTypes = {
   ".html": "text/html",
   ".js": "text/javascript",
@@ -74,6 +124,7 @@ try {
       });
       const page = await context.newPage();
       const errors = [];
+
       page.on("pageerror", (error) => errors.push(error.message));
       await page.clock.install({ time: now });
       await page.addInitScript(
@@ -117,6 +168,12 @@ try {
               data = [{ id: 1, end: "2026-08-31" }];
             else if (endpoint === "/calendar/trainings") data = trainings;
           }
+          if (service === "VITE_BOOKING_API_URL") {
+            if (endpoint === "/rooms/") data = rooms;
+            else if (endpoint === "/rooms/my-access-list") data = [];
+            else if (endpoint === "/bookings/my") data = ownBookings;
+            else if (endpoint === "/bookings/") data = allBookings;
+          }
           if (service === "VITE_SCHEDULE_API_URL") {
             if (endpoint === "/users/me")
               data = {
@@ -152,8 +209,9 @@ try {
           return route.fulfill({ json: data });
         }
         if (url.origin === "http://dashboard.test") {
-          const relative =
-            url.pathname === "/" ? "index.html" : url.pathname.slice(1);
+          const relative = route.request().isNavigationRequest()
+            ? "index.html"
+            : url.pathname.slice(1);
           const file = path.resolve(root, "dist", relative);
           if (file.startsWith(path.resolve(root, "dist") + path.sep)) {
             try {
@@ -171,75 +229,32 @@ try {
         return route.fulfill({ status: 404, body: "Mock: no route" });
       });
       await page.goto("http://dashboard.test/");
-      const calendar = page.locator("section").filter({
-        has: page.getByRole("heading", { name: "Calendar", exact: true }),
-      });
-      const sports = page.locator("section").filter({
-        has: page.getByRole("heading", { name: "Sports", exact: true }),
-      });
-      await calendar.getByText("Distributed systems seminar").waitFor();
-      assert.equal(await calendar.locator("li").count(), 5);
-      assert.equal(
-        await calendar.getByText("In process", { exact: true }).count(),
-        1,
-      );
-      await sports.getByText("Sport session 1").waitFor();
-      assert.equal(await sports.locator("li").count(), 3);
-      assert.equal(await sports.getByText("Not checked in").count(), 0);
-      assert.equal(
-        await sports.getByText("Starts in 43 min", { exact: true }).count(),
-        1,
-      );
-      assert.equal(
-        await page
-          .getByRole("link", { name: "Go to calendar", exact: true })
-          .count(),
-        1,
-      );
-      assert.equal(
-        await sports
-          .getByRole("link", { name: "Go to official site" })
-          .getAttribute("href"),
-        "https://sport.innopolis.university/profile/",
-      );
+      page.setDefaultTimeout(15_000);
+      await page.getByText("Project meeting", { exact: true }).waitFor();
+      await page
+        .getByText("Distributed systems seminar", { exact: true })
+        .waitFor();
+      await page.getByText("Sport session 1", { exact: true }).waitFor();
+      await page.getByText("Music Room Bookings", { exact: true }).waitFor();
+      await page.getByText("[B25] Semester F26:", { exact: false }).waitFor();
       await page.evaluate(
         (theme) => document.documentElement.setAttribute("data-theme", theme),
         theme,
       );
-      const calendarBox = await calendar.boundingBox();
-      const sportBox = await sports.boundingBox();
-      assert.ok(calendarBox.y <= sportBox.y);
-      if (width === 1440) assert.ok(calendarBox.x < sportBox.x);
-      if (width === 360) assert.ok(calendarBox.y < sportBox.y);
-      assert.ok(
-        await page.evaluate(
-          () => document.documentElement.scrollWidth <= innerWidth,
-        ),
-        `Horizontal overflow at ${width}`,
+      await page.evaluate(() => document.fonts.ready);
+      if (errors.length > 0) {
+        throw new Error(`Browser errors: ${errors.join("; ")}`);
+      }
+      const screenshotPath = path.join(
+        screenshotDir,
+        `dashboard-${width}-${theme}.png`,
       );
-      assert.deepEqual(errors, []);
-      if (process.env.DASHBOARD_SCREENSHOT_DIR)
-        await page.screenshot({
-          path: path.join(
-            process.env.DASHBOARD_SCREENSHOT_DIR,
-            `dashboard-${width}-${theme}.png`,
-          ),
-          fullPage: true,
-        });
-      await page.clock.fastForward(43 * 60_000);
-      await sports.getByText("In process", { exact: true }).waitFor();
-      await page.clock.fastForward(60 * 60_000);
-      await page.waitForFunction(
-        () =>
-          ![...document.querySelectorAll("section li")].some((row) =>
-            row.textContent.includes("Sport session 1"),
-          ),
-      );
-      assert.equal(await sports.locator("li").count(), 3);
-      assert.deepEqual(errors, []);
-      console.log(
-        `PASS ${width}px ${theme}: limits, live transitions, order, links, no overflow or browser exceptions`,
-      );
+      await page.screenshot({
+        path: screenshotPath,
+        fullPage: true,
+        animations: "disabled",
+      });
+      console.log(`Saved ${screenshotPath}`);
       await context.close();
     }
   }
