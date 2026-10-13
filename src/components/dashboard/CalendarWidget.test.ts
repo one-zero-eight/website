@@ -55,7 +55,7 @@ describe("CalendarWidget", () => {
     await render();
     expect(container.querySelectorAll("li")).toHaveLength(5);
     expect(container.querySelector("li")?.textContent).toContain("Activity 0");
-    expect(container.textContent).toContain("In process");
+    expect(container.querySelector(".border-error")).not.toBeNull();
     expect(container.querySelector("a")?.getAttribute("href")).toBe(
       "/calendar",
     );
@@ -63,23 +63,24 @@ describe("CalendarWidget", () => {
       "Go to calendar",
     );
   });
-  it("shows loading and empty states separately", async () => {
+  it("shows loading but no message or empty schedule container after an empty response", async () => {
     state.isPending = true;
     await render();
     expect(container.querySelector(".skeleton")).not.toBeNull();
     expect(container.textContent).not.toContain("No more activities");
     state.isPending = false;
     await render();
-    expect(container.textContent).toContain("No more activities today");
+    expect(container.querySelector(".skeleton")).toBeNull();
+    expect(container.textContent).not.toContain("No more activities today");
+    expect(container.querySelector("section")?.children).toHaveLength(2);
+    expect(container.querySelector("p")?.textContent).toBe("Sat, Jan 10");
+    expect(container.textContent).not.toContain("Today");
   });
-  it("shows failures with retry, not a misleading empty state", async () => {
+  it("does not show an error banner even if loading failed", async () => {
     state.isError = true;
     await render();
-    expect(container.textContent).toContain(
+    expect(container.textContent).not.toContain(
       "Some activities could not be loaded",
     );
-    expect(container.textContent).not.toContain("No more activities today");
-    await act(async () => container.querySelector("button")?.click());
-    expect(state.refetch).toHaveBeenCalledOnce();
   });
 });

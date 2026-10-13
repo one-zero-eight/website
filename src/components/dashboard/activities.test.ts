@@ -75,12 +75,48 @@ describe("live activity status", () => {
     expect(getActivityStatus(item, now)).toBe("All day");
     expect(formatActivityTime(item)).toBe("All day");
   });
-  it("shows the end date when activities cross midnight", () => {
+  it("formats time as start–end even when activities cross midnight", () => {
     const item = {
       ...activity(0),
       start: new Date(2026, 0, 10, 23),
       end: new Date(2026, 0, 11, 1),
     };
-    expect(formatActivityTime(item)).toBe("23:00–Jan 11, 01:00");
+    expect(formatActivityTime(item)).toBe("23:00–01:00");
+  });
+});
+
+describe("schedule day headers", () => {
+  it("formats ordinal numbers accurately", async () => {
+    const { getOrdinalSuffix } = await import("./activities.ts");
+    expect(getOrdinalSuffix(1)).toBe("1st");
+    expect(getOrdinalSuffix(2)).toBe("2nd");
+    expect(getOrdinalSuffix(3)).toBe("3rd");
+    expect(getOrdinalSuffix(4)).toBe("4th");
+    expect(getOrdinalSuffix(11)).toBe("11th");
+    expect(getOrdinalSuffix(12)).toBe("12th");
+    expect(getOrdinalSuffix(13)).toBe("13th");
+    expect(getOrdinalSuffix(21)).toBe("21st");
+    expect(getOrdinalSuffix(22)).toBe("22nd");
+    expect(getOrdinalSuffix(23)).toBe("23rd");
+    expect(getOrdinalSuffix(24)).toBe("24th");
+    expect(getOrdinalSuffix(31)).toBe("31st");
+  });
+
+  it("formats Today, Tomorrow and other day headers with full month and ordinal", async () => {
+    const { formatScheduleDayHeader } = await import("./activities.ts");
+    const testNow = new Date(2026, 6, 24, 12).getTime(); // Monday, July 24, 2026
+    const todayDate = new Date(2026, 6, 24, 15);
+    const tomorrowDate = new Date(2026, 6, 25, 10);
+    const futureDate = new Date(2026, 6, 26, 10);
+
+    expect(formatScheduleDayHeader(todayDate, testNow)).toBe(
+      "Today, Fri, 24th of July",
+    );
+    expect(formatScheduleDayHeader(tomorrowDate, testNow)).toBe(
+      "Tomorrow, Sat, 25th of July",
+    );
+    expect(formatScheduleDayHeader(futureDate, testNow)).toBe(
+      "Sun, 26th of July",
+    );
   });
 });

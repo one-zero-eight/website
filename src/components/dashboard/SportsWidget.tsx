@@ -1,5 +1,6 @@
 import { useMySportAccessToken } from "@/api/helpers/sport-access-token.ts";
 import { $sport } from "@/api/sport";
+
 import { useNowMS } from "@/lib/utils/use-now.ts";
 import { ActivitySchedule } from "./ActivitySchedule.tsx";
 import { getUpcomingActivities } from "./activities.ts";
@@ -61,14 +62,30 @@ export function SportsWidget() {
 
   return (
     <section className="bg-base-200 rounded-box flex min-w-0 flex-col gap-4 p-4">
-      <div className="flex items-center gap-3">
-        <span className="icon-[material-symbols--exercise-outline] text-primary size-8 shrink-0" />
-        <div className="min-w-0">
-          <h2 className="text-lg font-semibold">Sports</h2>
-          <p className="text-base-content/60 text-sm">
-            Your check-ins · Next 7 days
-          </p>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="flex items-center gap-3">
+          <span className="icon-[material-symbols--exercise-outline] text-primary size-8 shrink-0" />
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold">Sports</h2>
+            {daysLeft !== undefined && (
+              <p className="text-base-content/60 text-sm">
+                {daysLeft} days left
+              </p>
+            )}
+          </div>
         </div>
+        {!profileQuery.isError &&
+          (hours ? (
+            <p className="ml-auto text-right text-sm tabular-nums">
+              <span className="font-semibold">
+                {earnedHours} / {hours.required_hours}
+                {hours.debt ? ` +${hours.debt} (debt)` : ""}
+              </span>{" "}
+              <span className="text-base-content/70">hours</span>
+            </p>
+          ) : hoursQuery.isPending ? (
+            <div className="skeleton ml-auto h-4 w-24" />
+          ) : null)}
       </div>
       {profileQuery.isError ? (
         <div className="text-error flex flex-wrap items-center gap-2 text-sm">
@@ -94,10 +111,8 @@ export function SportsWidget() {
             isPending={profileQuery.isPending || trainingsQuery.isPending}
             isError={trainingsQuery.isError}
             onRetry={() => trainingsQuery.refetch()}
-            emptyMessage="No upcoming check-ins in the next 7 days"
-            showDates
           />
-          <div className="border-base-content/10 flex flex-col gap-1 border-t pt-3 text-sm">
+          <div className="flex flex-col gap-1 text-sm">
             {hoursQuery.isError || semesterQuery.isError ? (
               <div className="text-error flex flex-wrap items-center gap-2">
                 <span>Sport hours or deadline could not be loaded.</span>
@@ -120,57 +135,18 @@ export function SportsWidget() {
                 </button>
               </div>
             ) : hoursQuery.isPending || semesterQuery.isPending ? (
-              <>
-                <div className="skeleton h-4 w-40" />
-                <div className="skeleton h-4 w-3/4" />
-              </>
-            ) : (
-              <>
-                {hours && (
-                  <p>
-                    <span className="font-semibold">
-                      {earnedHours} / {hours.required_hours}
-                      {hours.debt ? ` +${hours.debt} (debt)` : ""}
-                    </span>{" "}
-                    hours
-                  </p>
-                )}
-                <p className="text-base-content/70">
-                  {hasDeadline ? (
-                    <>
-                      Deadline:{" "}
-                      {deadline.toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      })}{" "}
-                      ({daysLeft} days left)
-                    </>
-                  ) : (
-                    "Semester deadline unavailable"
-                  )}
-                </p>
-              </>
-            )}
+              <div className="skeleton h-4 w-3/4" />
+            ) : null}
           </div>
         </>
       )}
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-1 text-sm">
-        <a
-          href="https://sport.innopolis.university/profile/"
-          className="text-primary flex w-fit items-center gap-1 font-medium hover:underline"
-        >
-          Go to official site
-          <span className="icon-[material-symbols--open-in-new-rounded] text-sm" />
-        </a>
-        <a
-          href="https://telegram.me/IUSportBot"
-          className="text-base-content/70 w-fit hover:underline"
-        >
-          Check in via <span className="text-primary">Sports bot</span>
-          <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-xs" />
-        </a>
-      </div>
+      <a
+        href="https://sport.innopolis.university/profile/"
+        className="text-primary mt-auto flex w-fit items-center gap-1 pt-1 text-sm font-medium hover:underline"
+      >
+        Go to Sports
+        <span className="icon-[material-symbols--arrow-forward] text-lg" />
+      </a>
     </section>
   );
 }

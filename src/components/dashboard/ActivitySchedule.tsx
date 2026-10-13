@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   type DashboardActivity,
   formatActivityTime,
-  getActivityStatus,
+  formatScheduleDayHeader,
 } from "./activities.ts";
 
 /** Shared presentation only: each widget owns its data and visible time range. */
@@ -11,23 +11,28 @@ export function ActivitySchedule({
   activities,
   nowMs,
   isPending,
-  isError,
+  isError = false,
   onRetry,
-  emptyMessage,
-  showDates = false,
 }: {
   activities: DashboardActivity[];
   nowMs: number;
   isPending: boolean;
-  isError: boolean;
-  onRetry: () => Promise<unknown>;
-  emptyMessage: string;
-  showDates?: boolean;
+  isError?: boolean;
+  onRetry?: () => Promise<unknown>;
 }) {
   const [isRetrying, setIsRetrying] = useState(false);
-  const nextActivity = activities[0];
+  const activityGroups = new Map<string, DashboardActivity[]>();
+  for (const activity of [...activities].sort(
+    (left, right) => left.start.getTime() - right.start.getTime(),
+  )) {
+    const day = activity.start.toDateString();
+    const group = activityGroups.get(day) ?? [];
+    group.push(activity);
+    activityGroups.set(day, group);
+  }
 
   async function handleRetry() {
+    if (!onRetry) return;
     setIsRetrying(true);
     try {
       await onRetry();
@@ -35,6 +40,8 @@ export function ActivitySchedule({
       setIsRetrying(false);
     }
   }
+
+  if (!isPending && !isError && activities.length === 0) return null;
 
   return (
     <div className="flex min-w-0 flex-col gap-3">
@@ -55,7 +62,7 @@ export function ActivitySchedule({
           </button>
         </div>
       )}
-      {isPending ? (
+      {isPending && activities.length === 0 ? (
         <div className="flex flex-col gap-3">
           <div className="skeleton h-6 w-32" />
           {[0, 1, 2].map((index) => (
@@ -65,62 +72,55 @@ export function ActivitySchedule({
             </div>
           ))}
         </div>
-      ) : nextActivity ? (
-        <>
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={cn(
-                "badge badge-soft h-auto py-1 text-xs font-medium",
-                nextActivity.start.getTime() <= nowMs
-                  ? "badge-success"
-                  : "badge-primary",
-              )}
-            >
-              {getActivityStatus(nextActivity, nowMs)}
-            </span>
-            {isError && (
-              <span className="text-base-content/60 text-xs">
-                Schedule may be incomplete
-              </span>
+      ) : (
+        [...activityGroups].map(([day, group], groupIndex) => (
+          <div
+            key={day}
+            className={cn(
+              "flex min-w-0 flex-col gap-2",
+              groupIndex > 0 && "pt-1",
             )}
+          >
+            <p className="text-base-content/60 border-base-content/20 border-b pb-2 text-sm">
+              {formatScheduleDayHeader(group[0].start, nowMs)}
+            </p>
+            <ul className="flex min-w-0 flex-col gap-3">
+              {group.map((activity) => {
+                const inProgress =
+                  activity.start.getTime() <= nowMs &&
+                  activity.end.getTime() > nowMs;
+                return (
+                  <li key={activity.id}>
+                    <div
+                      className={cn(
+                        "flex min-w-0 flex-col gap-0.5 border-l-2 pl-3",
+                        inProgress ? "border-error" : "border-primary",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "text-base font-semibold tabular-nums",
+                          inProgress && "text-error",
+                        )}
+                      >
+                        {formatActivityTime(activity)}
+                      </span>
+                      <span className="text-base-content/60 min-w-0 text-sm wrap-anywhere">
+                        {activity.title}
+                      </span>
+                      {activity.location && (
+                        <span className="text-base-content/60 min-w-0 text-sm wrap-anywhere">
+                          {activity.location}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-          <ul className="divide-base-content/10 flex min-w-0 flex-col divide-y">
-            {activities.map((activity) => {
-              const inProgress = activity.start.getTime() <= nowMs;
-              return (
-                <li
-                  key={activity.id}
-                  className="flex min-w-0 gap-3 py-3 first:pt-0 last:pb-0"
-                >
-                  <span
-                    className={cn(
-                      "mt-1.5 size-2 shrink-0 rounded-full",
-                      inProgress ? "bg-success" : "bg-primary/50",
-                    )}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium wrap-anywhere">
-                      {activity.title}
-                    </p>
-                    <p className="text-base-content/70 mt-0.5 text-sm tabular-nums">
-                      {showDates &&
-                        `${activity.start.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}, `}
-                      {formatActivityTime(activity)}
-                    </p>
-                    {activity.location && (
-                      <p className="text-base-content/60 mt-0.5 text-xs wrap-anywhere">
-                        {activity.location}
-                      </p>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      ) : !isError ? (
-        <p className="text-base-content/60 py-3 text-sm">{emptyMessage}</p>
-      ) : null}
+        ))
+      )}
     </div>
   );
 }

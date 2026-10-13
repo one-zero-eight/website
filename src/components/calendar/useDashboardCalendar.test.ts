@@ -23,7 +23,7 @@ vi.mock("@/api/schedule", () => ({
           id: 123,
           favorite_event_groups: [],
           hidden_event_groups: [],
-          music_room_hidden: true,
+          music_room_hidden: false,
           sports_hidden: false,
           moodle_hidden: true,
           linked_calendars: {},
@@ -63,7 +63,7 @@ const ics = [
   "VERSION:2.0",
   "BEGIN:VEVENT",
   "UID:day",
-  "SUMMARY:Workshop",
+  "SUMMARY:Music room",
   "DTSTART:20260615T100000",
   "DTEND:20260615T110000",
   "RRULE:FREQ=DAILY;COUNT=2",
@@ -107,7 +107,7 @@ beforeEach(() => {
   mocks.loadFeed
     .mockReset()
     .mockImplementation((path: string) =>
-      Promise.resolve(path.includes("events") ? ics : emptyIcs),
+      Promise.resolve(path.includes("music-room") ? ics : emptyIcs),
     );
   mocks.refetchMetadata.mockReset().mockResolvedValue(undefined);
   mocks.refetchMeetings.mockReset().mockResolvedValue(undefined);
@@ -171,7 +171,7 @@ describe("useDashboardCalendar", () => {
     ]);
   });
 
-  it("waits for selection before requesting typed text feeds, excluding sport", async () => {
+  it("waits for selection before requesting typed text feeds, excluding sport, workshops and room bookings", async () => {
     mocks.metadataPending = true;
     await render();
     expect(result.isPending).toBe(true);
@@ -184,12 +184,15 @@ describe("useDashboardCalendar", () => {
     expect(mocks.loadFeed).toHaveBeenCalledWith("/users/me/events.ics", {
       parseAs: "text",
     });
-    expect(mocks.loadFeed).toHaveBeenCalledWith("/users/me/room-bookings.ics", {
+    expect(mocks.loadFeed).toHaveBeenCalledWith("/users/me/music-room.ics", {
       parseAs: "text",
     });
     expect(
-      mocks.loadFeed.mock.calls.some(([path]) =>
-        String(path).includes("sport"),
+      mocks.loadFeed.mock.calls.some(
+        ([path]) =>
+          String(path).includes("sport") ||
+          String(path).includes("workshops") ||
+          String(path).includes("room-bookings"),
       ),
     ).toBe(false);
   });
@@ -215,7 +218,7 @@ describe("useDashboardCalendar", () => {
 
   it("retains successful data alongside HTTP, parse and meeting failures", async () => {
     mocks.loadFeed.mockImplementation((path: string) =>
-      path.includes("events")
+      path.includes("music-room")
         ? Promise.resolve(ics)
         : Promise.reject(new Error("HTTP failure")),
     );
@@ -225,7 +228,7 @@ describe("useDashboardCalendar", () => {
     expect(result.activities).toHaveLength(1);
     expect(result.isError).toBe(true);
     expect(result.errors.map((error) => error.sourceId)).toEqual([
-      "room-bookings",
+      "events",
       "when2meet:owned",
     ]);
     mocks.loadFeed.mockResolvedValue("not an ICS document");
@@ -233,7 +236,7 @@ describe("useDashboardCalendar", () => {
       await result.refetch();
     });
     await settled();
-    expect(result.errors.some((error) => error.sourceId === "events")).toBe(
+    expect(result.errors.some((error) => error.sourceId === "music-room")).toBe(
       true,
     );
   });

@@ -52,7 +52,7 @@ export function dashboardCalendarQueryOptions(source: CalendarSource) {
 /**
  * All selected non-sport activities overlapping today's local day. The caller
  * owns ticking nowMs, not-ended filtering, sorting, and the visible-item limit.
- * isError includes partial failures; successful activities remain available.
+ * Feed failures are non-blocking; only source-selection failures surface as errors.
  */
 export function useDashboardCalendar(nowMs: number) {
   const queryClient = useQueryClient();
@@ -68,6 +68,9 @@ export function useDashboardCalendar(nowMs: number) {
       predefinedQuery.data.event_groups,
       groupsQuery.data,
       { excludeSport: true },
+    ).filter(
+      (source) =>
+        source.kind !== "workshops" && source.kind !== "room-bookings",
     );
   }, [userQuery.data, groupsQuery.data, predefinedQuery.data]);
 

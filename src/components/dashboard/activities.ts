@@ -59,13 +59,38 @@ export function formatActivityTime(activity: DashboardActivity) {
   };
   const startTime = activity.start.toLocaleTimeString("en-GB", options);
   const endTime = activity.end.toLocaleTimeString("en-GB", options);
-  const crossesDay =
-    activity.start.toDateString() !== activity.end.toDateString();
-  const endDate = crossesDay
-    ? activity.end.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }) + ", "
-    : "";
-  return `${startTime}–${endDate}${endTime}`;
+  return `${startTime}–${endTime}`;
+}
+
+export function getOrdinalSuffix(day: number): string {
+  if (day >= 11 && day <= 13) return `${day}th`;
+  switch (day % 10) {
+    case 1:
+      return `${day}st`;
+    case 2:
+      return `${day}nd`;
+    case 3:
+      return `${day}rd`;
+    default:
+      return `${day}th`;
+  }
+}
+
+export function formatScheduleDayHeader(date: Date, nowMs: number): string {
+  const today = new Date(nowMs);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
+  const dayOrdinal = getOrdinalSuffix(date.getDate());
+  const month = date.toLocaleDateString("en-US", { month: "long" });
+  const formattedDate = `${weekday}, ${dayOrdinal} of ${month}`;
+
+  if (date.toDateString() === today.toDateString()) {
+    return `Today, ${formattedDate}`;
+  }
+  if (date.toDateString() === tomorrow.toDateString()) {
+    return `Tomorrow, ${formattedDate}`;
+  }
+  return formattedDate;
 }

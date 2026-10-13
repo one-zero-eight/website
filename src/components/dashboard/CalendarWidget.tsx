@@ -6,8 +6,7 @@ import { getUpcomingActivities } from "./activities.ts";
 
 export function CalendarWidget() {
   const nowMs = useNowMS(true);
-  const { activities, isPending, isError, refetch } =
-    useDashboardCalendar(nowMs);
+  const { activities, isPending, refetch } = useDashboardCalendar(nowMs);
   const upcoming = getUpcomingActivities(activities, nowMs, 5);
 
   return (
@@ -17,7 +16,6 @@ export function CalendarWidget() {
         <div className="min-w-0">
           <h2 className="text-lg font-semibold">Calendar</h2>
           <p className="text-base-content/60 text-sm">
-            Today ·{" "}
             {new Date(nowMs).toLocaleDateString("en-US", {
               weekday: "short",
               month: "short",
@@ -30,9 +28,7 @@ export function CalendarWidget() {
         activities={upcoming}
         nowMs={nowMs}
         isPending={isPending}
-        isError={isError}
         onRetry={refetch}
-        emptyMessage="No more activities today"
       />
       <Link
         to="/calendar"
