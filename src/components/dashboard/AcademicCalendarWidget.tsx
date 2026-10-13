@@ -2,8 +2,7 @@ import {
   AcademicCalendar,
   useMyAcademicCalendar,
 } from "@/components/dashboard/academic-calendar.tsx";
-import { useEffect } from "react";
-import { useLocalStorage } from "usehooks-ts";
+import { useState } from "react";
 
 export function AcademicCalendarCard({
   academicCalendar,
@@ -34,23 +33,61 @@ export function AcademicCalendarCard({
 }
 
 export function AcademicCalendarWidget() {
-  const [widgetShown, setWidgetShown] = useLocalStorage(
-    "widget-academic-calendar",
-    false,
-  );
+  const { academicCalendar, isPending, isError, refetch } =
+    useMyAcademicCalendar();
+  const [isRetrying, setIsRetrying] = useState(false);
 
-  const { academicCalendar, isPending } = useMyAcademicCalendar();
-
-  useEffect(() => {
-    setWidgetShown((v) => (v && isPending) || !!academicCalendar);
-  }, [setWidgetShown, isPending, academicCalendar]);
-
-  if (!academicCalendar) {
-    if (!widgetShown) return null;
-    return (
-      <div className="group skeleton flex min-h-32 flex-row gap-4 px-4 py-6" />
-    );
+  async function handleRetry() {
+    setIsRetrying(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRetrying(false);
+    }
   }
 
-  return <AcademicCalendarCard academicCalendar={academicCalendar} />;
+  if (academicCalendar) {
+    return <AcademicCalendarCard academicCalendar={academicCalendar} />;
+  }
+
+  if (isPending && !isError) {
+    return <div className="skeleton rounded-box min-h-32" />;
+  }
+
+  return (
+    <section className="bg-base-200 rounded-box flex min-w-0 gap-4 p-4">
+      <span className="icon-[ph--books] text-primary size-8 shrink-0" />
+      <div className="flex min-w-0 flex-col gap-2">
+        <h2 className="text-lg font-semibold">Academic calendar</h2>
+        {isError ? (
+          <div className="text-error flex flex-wrap items-center gap-2 text-sm">
+            <span>Could not load your academic calendar.</span>
+            <button
+              type="button"
+              className="btn btn-ghost btn-xs"
+              disabled={isRetrying}
+              onClick={() => void handleRetry()}
+            >
+              {isRetrying ? (
+                <span className="loading loading-spinner loading-xs" />
+              ) : (
+                "Retry"
+              )}
+            </button>
+          </div>
+        ) : (
+          <p className="text-base-content/60 text-sm">
+            No academic calendar found for your study group.
+          </p>
+        )}
+        <a
+          href="https://eduwiki.innopolis.university/index.php/AcademicCalendar"
+          className="text-primary w-fit text-sm hover:underline"
+        >
+          View academic calendar on Eduwiki
+          <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-xs" />
+        </a>
+      </div>
+    </section>
+  );
 }
