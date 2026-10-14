@@ -889,7 +889,9 @@ function renderEventDayGridMonth({
   backgroundColor,
   timeText,
 }: EventContentArg) {
-  return (
+  return event.id === "today" ? (
+    <div id="today"></div>
+  ) : (
     <div className="flex w-full flex-row items-center overflow-hidden">
       <div
         className="fc-daygrid-event-dot"
