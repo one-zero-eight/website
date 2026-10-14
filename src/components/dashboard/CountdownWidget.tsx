@@ -38,7 +38,7 @@ function getNextCountdownEvent(now: Date): CountdownEvent | undefined {
     .flatMap((template) => {
       const dates = template.dateTemplate.startsWith("*")
         ? [now.getFullYear(), now.getFullYear() + 1].map((year) =>
-            template.dateTemplate.replace("*", String(year)),
+            template.dateTemplate.replaceAll("*", String(year)),
           )
         : [template.dateTemplate];
       return dates.map((date) => ({ ...template, date: new Date(date) }));
