@@ -16,14 +16,14 @@ describe("MeetingMobileBar", () => {
     participantRowWidth = 200;
     participantTextWidth = 300;
     vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(
-      function () {
+      function (this: HTMLElement) {
         return this.hasAttribute("data-slot-participants-row")
           ? participantRowWidth
           : 0;
       },
     );
     vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockImplementation(
-      function () {
+      function (this: HTMLElement) {
         return this.hasAttribute("data-slot-participants-measure")
           ? participantTextWidth
           : 0;

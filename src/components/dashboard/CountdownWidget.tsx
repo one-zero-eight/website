@@ -1,5 +1,6 @@
-import { useNowMS } from "@/lib/utils/use-now.ts";
 import Logo108 from "@/components/icons/Logo108.tsx";
+import { cn } from "@/lib/ui/cn";
+import { useNowMS } from "@/lib/utils/use-now.ts";
 import type { ReactNode } from "react";
 
 type CountdownEventTemplate = {
@@ -7,19 +8,9 @@ type CountdownEventTemplate = {
   name: string | ReactNode;
   iconClass: string;
 };
+type CountdownEvent = CountdownEventTemplate & { date: Date };
 
-type CountdownEvent = CountdownEventTemplate & {
-  date: Date;
-};
-
-/**
- * Declaration of all events for countdown
- *
- * Format for dates is `YYYY-MM-DDTHH:MM:SS+TZ` (ISO 8601), but you can
- * use `*` instead of year to create an annual event.
- *
- * E.g. *-01-01T00:00:00+03:00 is a convenient declaration for a New Year in Moscow timezone.
- */
+// A leading * repeats the event annually, in the timestamp's timezone.
 const countdownEventTemplates: CountdownEventTemplate[] = [
   {
     dateTemplate: "*-01-01T00:00:00+03:00",
@@ -34,107 +25,60 @@ const countdownEventTemplates: CountdownEventTemplate[] = [
   {
     dateTemplate: "2026-02-06T19:00+03:00",
     name: (
-      <>
-        <span className="block sm:hidden">Introduction to 108 countdown</span>
-        <span className="hidden flex-row items-center gap-2 sm:flex">
-          <span>Introduction to</span>
-          <Logo108 className="size-8" />
-          <span>countdown</span>
-        </span>
-      </>
+      <span className="flex flex-wrap items-center gap-2">
+        Introduction to <Logo108 className="size-8" /> countdown
+      </span>
     ),
     iconClass: "icon-[twemoji--purple-heart]",
   },
 ];
 
-/**
- * Expands the list of events to include annual events, sorts them by date and returns the next event
- *
- * @param dateNow - Current date and time
- * @returns The next event from the list of events, or null if there are no events in the future
- */
-function getNextCountdownEvent(dateNow: Date): CountdownEvent | null {
-  const expandedEvents: CountdownEvent[] = [];
-
-  for (const template of countdownEventTemplates) {
-    const [y, _] = template.dateTemplate.split("-", 2);
-
-    if (y === "*") {
-      const fullYear = dateNow.getFullYear();
-      expandedEvents.push({
-        ...template,
-        date: new Date(template.dateTemplate.replace("*", fullYear.toString())),
-      });
-      expandedEvents.push({
-        ...template,
-        date: new Date(
-          template.dateTemplate.replace("*", (fullYear + 1).toString()),
-        ),
-      });
-    } else {
-      expandedEvents.push({
-        ...template,
-        date: new Date(template.dateTemplate),
-      });
-    }
-  }
-
-  const sortedEvents = expandedEvents.sort(
-    (a, b) => a.date.getTime() - b.date.getTime(),
-  );
-  for (const event of sortedEvents) {
-    if (event.date.getTime() > dateNow.getTime()) {
-      return event;
-    }
-  }
-  return null;
+function getNextCountdownEvent(now: Date): CountdownEvent | undefined {
+  return countdownEventTemplates
+    .flatMap((template) => {
+      const dates = template.dateTemplate.startsWith("*")
+        ? [now.getFullYear(), now.getFullYear() + 1].map((year) =>
+            template.dateTemplate.replaceAll("*", String(year)),
+          )
+        : [template.dateTemplate];
+      return dates.map((date) => ({ ...template, date: new Date(date) }));
+    })
+    .filter((event) => event.date > now)
+    .sort((left, right) => left.date.getTime() - right.date.getTime())[0];
 }
 
-/**
- * Formats the time left for the next event
- *
- * @param deltaTimeSeconds - The time left in seconds
- * @returns The formatted time left in days, hours, minutes and seconds
- */
-const formatCountdownTimeLeft = (deltaTimeSeconds: number): string => {
-  const seconds = Math.floor(deltaTimeSeconds % 60);
-  const minutes = Math.floor((deltaTimeSeconds / 60) % 60);
-  const hours = Math.floor((deltaTimeSeconds / 60 / 60) % 24);
-  const days = Math.floor(deltaTimeSeconds / 60 / 60 / 24);
-
-  return (
-    `${days} day${days > 1 ? "s" : ""}, ` +
-    `${hours} hour${hours > 1 ? "s" : ""}, ` +
-    `${minutes} minute${minutes > 1 ? "s" : ""}, ` +
-    `${seconds} second${seconds > 1 ? "s" : ""}`
-  );
-};
+function formatCountdown(secondsLeft: number) {
+  const units = [
+    [Math.floor(secondsLeft / 86_400), "day"],
+    [Math.floor((secondsLeft / 3600) % 24), "hour"],
+    [Math.floor((secondsLeft / 60) % 60), "minute"],
+    [Math.floor(secondsLeft % 60), "second"],
+  ] as const;
+  return units
+    .map(([value, unit]) => `${value} ${unit}${value === 1 ? "" : "s"}`)
+    .join(", ");
+}
 
 export function CountdownWidget() {
   const nowMs = useNowMS(true, 1000);
-
   const nextEvent = getNextCountdownEvent(new Date(nowMs));
-  if (!nextEvent) {
-    return null;
-  }
-
-  const deltaTimeSeconds = (nextEvent.date.getTime() - nowMs) / 1000;
+  if (!nextEvent) return null;
 
   return (
-    <div className="group bg-base-200 rounded-box flex flex-row gap-4 px-4 py-4">
+    <div className="bg-base-200 rounded-box flex min-w-0 gap-4 p-4">
       <span
-        className={`${nextEvent.iconClass} text-primary hidden w-12 shrink-0 text-5xl sm:block`}
+        className={cn(nextEvent.iconClass, "hidden size-12 shrink-0 sm:block")}
       />
-      <div className="flex flex-col">
-        <div className="flex text-lg font-semibold">
+      <div className="flex min-w-0 flex-col gap-1">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
           <span
-            className={`${nextEvent.iconClass} text-primary mr-2 shrink-0 text-3xl sm:hidden`}
+            className={cn(nextEvent.iconClass, "size-8 shrink-0 sm:hidden")}
           />
-          <span className="text-base sm:text-lg">{nextEvent.name}</span>
-        </div>
-        <div className="text-base-content/75 mt-1 line-clamp-1 text-sm break-all sm:text-base">
-          {formatCountdownTimeLeft(deltaTimeSeconds)}
-        </div>
+          {nextEvent.name}
+        </h2>
+        <p className="text-base-content/75 text-sm tabular-nums">
+          {formatCountdown((nextEvent.date.getTime() - nowMs) / 1000)}
+        </p>
       </div>
     </div>
   );

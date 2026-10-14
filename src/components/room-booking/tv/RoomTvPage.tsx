@@ -10,8 +10,8 @@ import { sanitizeBookingTitle } from "../utils.ts";
 import { TvCalendar } from "./TvCalendar.tsx";
 import { TvRoomQr } from "./TvRoomQr.tsx";
 
-function getTodayRange() {
-  const start = new Date();
+function getTodayRange(now: Date) {
+  const start = new Date(now.getTime());
   start.setHours(0, 0, 0, 0);
   const end = new Date(start.getTime() + 7 * T.Day);
   return { start, end };
@@ -45,7 +45,7 @@ function findCurrentBooking(
 export function RoomTvPage({ id }: { id: string }) {
   const calendarRef = useRef<FullCalendar>(null);
   const [now, setNow] = useState(() => new Date());
-  const { start, end } = useMemo(() => getTodayRange(), [now]);
+  const { start, end } = useMemo(() => getTodayRange(now), [now]);
 
   const {
     data: bookings,
