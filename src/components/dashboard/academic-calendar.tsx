@@ -93,18 +93,14 @@ export function findAcademicCalendarByGroups(
 }
 
 export function useMyAcademicCalendar() {
-  const {
-    data: eventGroups,
-    isPending: isPending1,
-    isError: isError1,
-    refetch: refetchGroups,
-  } = $schedule.useQuery("get", "/event-groups/");
-  const {
-    data: predefined,
-    isPending: isPending2,
-    isError: isError2,
-    refetch: refetchPredefined,
-  } = $schedule.useQuery("get", "/users/me/predefined");
+  const { data: eventGroups, isPending: isPending1 } = $schedule.useQuery(
+    "get",
+    "/event-groups/",
+  );
+  const { data: predefined, isPending: isPending2 } = $schedule.useQuery(
+    "get",
+    "/users/me/predefined",
+  );
 
   const groups = predefined?.event_groups
     ?.map(
@@ -114,10 +110,5 @@ export function useMyAcademicCalendar() {
     ?.filter((v) => v) as string[];
   const academicCalendar = findAcademicCalendarByGroups(groups || []);
 
-  return {
-    academicCalendar,
-    isPending: isPending1 || isPending2,
-    isError: isError1 || isError2,
-    refetch: () => Promise.all([refetchGroups(), refetchPredefined()]),
-  };
+  return { academicCalendar, isPending: isPending1 || isPending2 };
 }
