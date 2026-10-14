@@ -24,7 +24,8 @@ export function getSportCalendarRange(nowMs: number) {
   const start = new Date(nowMs);
   start.setHours(0, 0, 0, 0);
   const end = new Date(start);
-  end.setDate(end.getDate() + 7);
+  // Include the entire seventh day ahead while keeping the query day-stable.
+  end.setDate(end.getDate() + 8);
   // The API flags check-ins by training START within the query range, even for
   // overlapping sessions. Include yesterday to preserve overnight check-ins.
   start.setDate(start.getDate() - 1);

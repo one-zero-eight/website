@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import {
   getSlotAvailabilityRatio,
   getSlotHeatmapAppearance,
@@ -14,252 +15,258 @@ import {
   userHasExplicitAvailability,
 } from "./participants.ts";
 
-function assert(condition: boolean, message: string) {
-  if (!condition) {
-    throw new Error(message);
-  }
-}
+describe("getSlotAvailabilityRatio", () => {
+  it.each([
+    [0, 10, 0],
+    [4, 8, 0.5],
+    [10, 10, 1],
+    [12, 10, 1],
+  ])("returns ratio %s/%s clamped to %s", (count, maxCount, expectedRatio) => {
+    expect(getSlotAvailabilityRatio(count, maxCount)).toBe(expectedRatio);
+  });
+});
 
-function expectPercent(count: number, maxCount: number, percent: number) {
-  const appearance = getSlotHeatmapAppearance(count, maxCount);
+describe("getSlotHeatmapAppearance", () => {
+  it("keeps the base background without an inline style for empty slots", () => {
+    const emptyAppearance = getSlotHeatmapAppearance(0, 10);
 
-  assert(
-    appearance.style?.backgroundColor ===
+    expect(emptyAppearance.className).toBe("bg-base-100 hover:bg-primary/10");
+    expect(emptyAppearance.style).toBeUndefined();
+  });
+
+  it.each([
+    [1, 1, 75],
+    [1, 2, 38],
+    [1, 3, 25],
+    [1, 10, 8],
+    [3, 10, 23],
+    [5, 10, 38],
+    [7, 10, 53],
+    [10, 10, 75],
+    [3, 7, 32],
+    [50, 100, 38],
+    [99, 100, 74],
+  ])("mixes %s/%s availability at %s%% opacity", (count, maxCount, percent) => {
+    const appearance = getSlotHeatmapAppearance(count, maxCount);
+
+    expect(appearance.style?.backgroundColor).toBe(
       `color-mix(in oklch, var(--color-primary) ${percent}%, transparent)`,
-    `count=${count}/${maxCount}: expected ${percent}% mix, got ${appearance.style?.backgroundColor}`,
-  );
-}
+    );
+  });
 
-assert(getSlotAvailabilityRatio(0, 10) === 0, "zero count → ratio 0");
-assert(getSlotAvailabilityRatio(4, 8) === 0.5, "4/8 → ratio 0.5");
-assert(getSlotAvailabilityRatio(10, 10) === 1, "full availability → ratio 1");
-assert(
-  getSlotAvailabilityRatio(12, 10) === 1,
-  "count above max clamps to ratio 1",
-);
+  it("uses primary content text color for full availability", () => {
+    expect(getSlotHeatmapAppearance(25, 25).className).toBe(
+      "text-primary-content",
+    );
+  });
 
-const emptyAppearance = getSlotHeatmapAppearance(0, 10);
-assert(
-  emptyAppearance.className === "bg-base-100 hover:bg-primary/10",
-  "empty slot keeps base background class",
-);
-assert(!emptyAppearance.style, "empty slot has no inline style");
+  it("does not force primary content text color for partial availability", () => {
+    expect(getSlotHeatmapAppearance(12, 25).className).toBeUndefined();
+  });
+});
 
-expectPercent(1, 1, 75);
-expectPercent(1, 2, 38);
-expectPercent(1, 3, 25);
-expectPercent(1, 10, 8);
-expectPercent(3, 10, 23);
-expectPercent(5, 10, 38);
-expectPercent(7, 10, 53);
-expectPercent(10, 10, 75);
-expectPercent(3, 7, 32);
-expectPercent(50, 100, 38);
-expectPercent(99, 100, 74);
+describe("getSlotHeatmapAppearanceColorblindSafe", () => {
+  it("uses the base background without an inline style for empty slots", () => {
+    const emptyAppearance = getSlotHeatmapAppearanceColorblindSafe(0, 10);
 
-const fullAppearance = getSlotHeatmapAppearance(25, 25);
-assert(
-  fullAppearance.className === "text-primary-content",
-  "full availability uses primary content text color",
-);
+    expect(emptyAppearance.className).toBe("bg-base-100");
+    expect(emptyAppearance.style).toBeUndefined();
+  });
 
-const partialAppearance = getSlotHeatmapAppearance(12, 25);
-assert(
-  !partialAppearance.className,
-  "partial availability does not force primary content text color",
-);
+  it("uses a stepped class for low availability", () => {
+    expect(getSlotHeatmapAppearanceColorblindSafe(3, 10).className).toBe(
+      "bg-primary/20",
+    );
+  });
 
-assert(
-  getSlotHeatmapAppearanceColorblindSafe(0, 10).className === "bg-base-100",
-  "colorblind-safe empty slot uses base background",
-);
-assert(
-  !getSlotHeatmapAppearanceColorblindSafe(0, 10).style,
-  "colorblind-safe empty slot has no inline style",
-);
-assert(
-  getSlotHeatmapAppearanceColorblindSafe(3, 10).className === "bg-primary/20",
-  "colorblind-safe low availability uses stepped class",
-);
-assert(
-  getSlotHeatmapAppearanceColorblindSafe(10, 10).className ===
-    "bg-primary/75 text-primary-content",
-  "colorblind-safe full availability uses capped primary opacity",
-);
+  it("caps primary opacity for full availability", () => {
+    expect(getSlotHeatmapAppearanceColorblindSafe(10, 10).className).toBe(
+      "bg-primary/75 text-primary-content",
+    );
+  });
+});
 
-const users = [
-  { id: "a", name: "A", slots: new Set(["2026-07-16_09:00"]) },
-  {
-    id: "b",
-    name: "B",
-    slots: new Set(["2026-07-16_09:00", "2026-07-16_10:00"]),
-  },
-  { id: "c", name: "C", slots: new Set(["2026-07-16_10:00"]) },
-];
-const allowedSlots = new Set([
-  "2026-07-16_09:00",
-  "2026-07-16_09:30",
-  "2026-07-16_10:00",
-]);
-const viewedUserIds = new Set(["a", "b", "c"]);
-const bestIntersection = getBestIntersection(
-  users,
-  ["2026-07-16"],
-  ["09:00", "09:30", "10:00"],
-  allowedSlots,
-  viewedUserIds,
-);
-
-assert(bestIntersection.maxCount === 2, "best intersection count is 2");
-assert(
-  bestIntersection.slotKeys.has("2026-07-16_09:00"),
-  "09:00 is tied for best intersection",
-);
-assert(
-  bestIntersection.slotKeys.has("2026-07-16_10:00"),
-  "10:00 is tied for best intersection",
-);
-assert(
-  bestIntersection.slotKeys.size === 2,
-  "only tied slots are marked as best intersection",
-);
-
-const strictIntersection = getIntersectionAtMinParticipants(
-  users,
-  ["2026-07-16"],
-  ["09:00", "09:30", "10:00"],
-  allowedSlots,
-  viewedUserIds,
-  2,
-);
-assert(
-  strictIntersection.slotKeys.size === 2,
-  "maximum participant threshold keeps all tied best slots",
-);
-
-const allAvailableSlots = getIntersectionAtMinParticipants(
-  users,
-  ["2026-07-16"],
-  ["09:00", "09:30", "10:00"],
-  allowedSlots,
-  viewedUserIds,
-  1,
-);
-assert(
-  allAvailableSlots.slotKeys.has("2026-07-16_09:00") &&
-    allAvailableSlots.slotKeys.has("2026-07-16_10:00") &&
-    !allAvailableSlots.slotKeys.has("2026-07-16_09:30"),
-  "minimum participant threshold includes every non-empty slot",
-);
-
-const emptyIntersection = getIntersectionAtMinParticipants(
-  [],
-  ["2026-07-16"],
-  ["09:00"],
-  new Set(["2026-07-16_09:00"]),
-  new Set(),
-  1,
-);
-assert(
-  emptyIntersection.maxCount === 0 && emptyIntersection.slotKeys.size === 0,
-  "empty availability has no matching slots",
-);
-
-const usersWithNonResponder = [
-  ...users,
-  { id: "d", name: "D", slots: new Set<string>() },
-];
-const bestIntersectionWithoutNonResponder = getBestIntersection(
-  usersWithNonResponder,
-  ["2026-07-16"],
-  ["09:00", "09:30", "10:00"],
-  allowedSlots,
-  new Set(["a", "b", "c", "d"]),
-);
-
-assert(
-  bestIntersectionWithoutNonResponder.maxCount === bestIntersection.maxCount,
-  "participants without explicit slots do not increase intersection counts",
-);
-
-assert(
-  !userHasExplicitAvailability(
-    { id: "d", name: "D", slots: new Set() },
-    null,
-    new Set(),
-  ),
-  "empty availability is not explicit",
-);
-assert(
-  countExplicitSlotAvailability(
-    usersWithNonResponder,
-    new Set(["a", "b", "c", "d"]),
+describe("slot intersections and explicit availability", () => {
+  const users = [
+    { id: "a", name: "A", slots: new Set(["2026-07-16_09:00"]) },
+    {
+      id: "b",
+      name: "B",
+      slots: new Set(["2026-07-16_09:00", "2026-07-16_10:00"]),
+    },
+    { id: "c", name: "C", slots: new Set(["2026-07-16_10:00"]) },
+  ];
+  const allowedSlots = new Set([
     "2026-07-16_09:00",
-    null,
-    new Set(),
-  ) === 2,
-  "slot count ignores participants without explicit availability",
-);
+    "2026-07-16_09:30",
+    "2026-07-16_10:00",
+  ]);
+  const viewedUserIds = new Set(["a", "b", "c"]);
+  const usersWithNonResponder = [
+    ...users,
+    { id: "d", name: "D", slots: new Set<string>() },
+  ];
 
-assert(
-  countExplicitSlotAvailability(
-    usersWithNonResponder,
-    new Set(["a", "b", "c", "d"]),
-    "2026-07-16_09:00",
-    "a",
-    new Set(["2026-07-16_09:00"]),
-    "a",
-  ) === 1,
-  "slot count can exclude the participant whose availability is being edited",
-);
+  it("marks only the tied slots with the best intersection count", () => {
+    const bestIntersection = getBestIntersection(
+      users,
+      ["2026-07-16"],
+      ["09:00", "09:30", "10:00"],
+      allowedSlots,
+      viewedUserIds,
+    );
 
-const explicitParticipants = getParticipantsWithExplicitSlot(
-  usersWithNonResponder,
-  "2026-07-16_09:00",
-  null,
-  new Set(),
-);
-assert(
-  explicitParticipants.length === 2,
-  "slot detail includes only participants with explicit availability",
-);
-assert(
-  explicitParticipants.every((user) => user.id === "a" || user.id === "b"),
-  "slot detail lists the correct participant names",
-);
+    expect(bestIntersection.maxCount).toBe(2);
+    expect(bestIntersection.slotKeys).toEqual(
+      new Set(["2026-07-16_09:00", "2026-07-16_10:00"]),
+    );
+  });
 
-const dates = ["2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19"];
-const times = ["09:00", "09:30", "10:00", "10:30"];
+  it("keeps all tied best slots at the maximum participant threshold", () => {
+    const strictIntersection = getIntersectionAtMinParticipants(
+      users,
+      ["2026-07-16"],
+      ["09:00", "09:30", "10:00"],
+      allowedSlots,
+      viewedUserIds,
+      2,
+    );
 
-assert(
-  getSlotKeysBetween("2026-07-16_09:00", "2026-07-16_09:00", dates, times).join(
-    ",",
-  ) === "2026-07-16_09:00",
-  "same slot returns itself",
-);
+    expect(strictIntersection.slotKeys).toEqual(
+      new Set(["2026-07-16_09:00", "2026-07-16_10:00"]),
+    );
+  });
 
-assert(
-  getSlotKeysBetween("2026-07-16_09:00", "2026-07-18_09:00", dates, times).join(
-    ",",
-  ) === "2026-07-16_09:00,2026-07-17_09:00,2026-07-18_09:00",
-  "horizontal drag fills skipped date cells",
-);
+  it("includes every non-empty slot at the minimum participant threshold", () => {
+    const allAvailableSlots = getIntersectionAtMinParticipants(
+      users,
+      ["2026-07-16"],
+      ["09:00", "09:30", "10:00"],
+      allowedSlots,
+      viewedUserIds,
+      1,
+    );
 
-assert(
-  getSlotKeysBetween("2026-07-16_09:00", "2026-07-16_10:30", dates, times).join(
-    ",",
-  ) === "2026-07-16_09:00,2026-07-16_09:30,2026-07-16_10:00,2026-07-16_10:30",
-  "vertical drag fills skipped time cells",
-);
+    expect(allAvailableSlots.slotKeys).toEqual(
+      new Set(["2026-07-16_09:00", "2026-07-16_10:00"]),
+    );
+  });
 
-assert(
-  getSlotKeysBetween(
-    "2026-07-16_09:00",
-    "2026-07-18_10:30",
-    dates,
-    times,
-  ).includes("2026-07-17_09:30"),
-  "diagonal drag fills intermediate cells",
-);
+  it("returns no matching slots for empty availability", () => {
+    const emptyIntersection = getIntersectionAtMinParticipants(
+      [],
+      ["2026-07-16"],
+      ["09:00"],
+      new Set(["2026-07-16_09:00"]),
+      new Set(),
+      1,
+    );
 
-console.log("when2meet heatmap opacity tests passed");
+    expect(emptyIntersection.maxCount).toBe(0);
+    expect(emptyIntersection.slotKeys.size).toBe(0);
+  });
+
+  it("does not increase intersection counts for participants without explicit slots", () => {
+    const bestIntersection = getBestIntersection(
+      users,
+      ["2026-07-16"],
+      ["09:00", "09:30", "10:00"],
+      allowedSlots,
+      viewedUserIds,
+    );
+    const bestIntersectionWithoutNonResponder = getBestIntersection(
+      usersWithNonResponder,
+      ["2026-07-16"],
+      ["09:00", "09:30", "10:00"],
+      allowedSlots,
+      new Set(["a", "b", "c", "d"]),
+    );
+
+    expect(bestIntersectionWithoutNonResponder.maxCount).toBe(
+      bestIntersection.maxCount,
+    );
+  });
+
+  it("does not treat empty availability as explicit", () => {
+    expect(
+      userHasExplicitAvailability(
+        { id: "d", name: "D", slots: new Set() },
+        null,
+        new Set(),
+      ),
+    ).toBe(false);
+  });
+
+  it("ignores participants without explicit availability in slot counts", () => {
+    expect(
+      countExplicitSlotAvailability(
+        usersWithNonResponder,
+        new Set(["a", "b", "c", "d"]),
+        "2026-07-16_09:00",
+        null,
+        new Set(),
+      ),
+    ).toBe(2);
+  });
+
+  it("can exclude the participant whose availability is being edited", () => {
+    expect(
+      countExplicitSlotAvailability(
+        usersWithNonResponder,
+        new Set(["a", "b", "c", "d"]),
+        "2026-07-16_09:00",
+        "a",
+        new Set(["2026-07-16_09:00"]),
+        "a",
+      ),
+    ).toBe(1);
+  });
+
+  it("includes only the correct participants with explicit availability in slot details", () => {
+    const explicitParticipants = getParticipantsWithExplicitSlot(
+      usersWithNonResponder,
+      "2026-07-16_09:00",
+      null,
+      new Set(),
+    );
+
+    expect(explicitParticipants).toHaveLength(2);
+    expect(
+      explicitParticipants.every((user) => user.id === "a" || user.id === "b"),
+    ).toBe(true);
+  });
+});
+
+describe("getSlotKeysBetween", () => {
+  const dates = ["2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19"];
+  const times = ["09:00", "09:30", "10:00", "10:30"];
+
+  it("returns the same slot itself", () => {
+    expect(
+      getSlotKeysBetween("2026-07-16_09:00", "2026-07-16_09:00", dates, times),
+    ).toEqual(["2026-07-16_09:00"]);
+  });
+
+  it("fills skipped date cells during a horizontal drag", () => {
+    expect(
+      getSlotKeysBetween("2026-07-16_09:00", "2026-07-18_09:00", dates, times),
+    ).toEqual(["2026-07-16_09:00", "2026-07-17_09:00", "2026-07-18_09:00"]);
+  });
+
+  it("fills skipped time cells during a vertical drag", () => {
+    expect(
+      getSlotKeysBetween("2026-07-16_09:00", "2026-07-16_10:30", dates, times),
+    ).toEqual([
+      "2026-07-16_09:00",
+      "2026-07-16_09:30",
+      "2026-07-16_10:00",
+      "2026-07-16_10:30",
+    ]);
+  });
+
+  it("fills intermediate cells during a diagonal drag", () => {
+    expect(
+      getSlotKeysBetween("2026-07-16_09:00", "2026-07-18_10:30", dates, times),
+    ).toContain("2026-07-17_09:30");
+  });
+});

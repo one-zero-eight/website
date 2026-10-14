@@ -1,4 +1,5 @@
 import type { roomBookingTypes } from "@/api/room-booking";
+import { BookingStatus } from "@/api/room-booking/types.ts";
 
 export type BookingRecommendation =
   | {
@@ -130,10 +131,11 @@ export function buildBookingRecommendations({
   const occupancy = new Map<string, RoomOccupancy>();
   function addBooking(booking: roomBookingTypes.SchemaBooking, mine: boolean) {
     if (
+      booking.room_response === BookingStatus.Decline ||
       booking.attendees?.some(
         (attendee) =>
           attendee.assosiated_room_id === booking.room_id &&
-          attendee.status === "Decline",
+          attendee.status === BookingStatus.Decline,
       )
     ) {
       return;
@@ -183,10 +185,11 @@ export function buildBookingRecommendations({
 
   for (const booking of myBookings) {
     if (
+      booking.room_response === BookingStatus.Decline ||
       booking.attendees?.some(
         (attendee) =>
           attendee.assosiated_room_id === booking.room_id &&
-          attendee.status === "Decline",
+          attendee.status === BookingStatus.Decline,
       )
     ) {
       continue;

@@ -69,8 +69,7 @@ export function useDashboardCalendar(nowMs: number) {
       groupsQuery.data,
       { excludeSport: true },
     ).filter(
-      (source) =>
-        source.kind !== "workshops" && source.kind !== "room-bookings",
+      (source) => source.kind !== "events" && source.kind !== "room-bookings",
     );
   }, [userQuery.data, groupsQuery.data, predefinedQuery.data]);
 
@@ -84,8 +83,21 @@ export function useDashboardCalendar(nowMs: number) {
           staleTime: 60_000,
           // Stable selectors avoid re-expanding old recurring series on every tick.
           // TanStack exposes parser failures as query errors alongside HTTP errors.
-          select: (ics: string) =>
-            normalizeDashboardIcs(ics, source.id, dayStartMs),
+          select: (ics: string) => {
+            const activities = normalizeDashboardIcs(
+              ics,
+              source.id,
+              dayStartMs,
+            );
+            if (source.kind !== "group" || !source.excludeEnglish)
+              return activities;
+            return activities.filter((activity) => {
+              const summary = activity.title.trim().toLowerCase();
+              return !["english", "foreign language", "иностранный язык"].some(
+                (name) => summary.includes(name),
+              );
+            });
+          },
         };
       }),
     [sources, dayStartMs],

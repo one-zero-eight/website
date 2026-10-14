@@ -6,7 +6,8 @@ import { getUpcomingActivities } from "./activities.ts";
 
 export function CalendarWidget() {
   const nowMs = useNowMS(true);
-  const { activities, isPending, refetch } = useDashboardCalendar(nowMs);
+  const { activities, isPending, isError, refetch } =
+    useDashboardCalendar(nowMs);
   const upcoming = getUpcomingActivities(activities, nowMs, 5);
 
   return (
@@ -28,6 +29,7 @@ export function CalendarWidget() {
         activities={upcoming}
         nowMs={nowMs}
         isPending={isPending}
+        isError={isError}
         onRetry={refetch}
       />
       <Link

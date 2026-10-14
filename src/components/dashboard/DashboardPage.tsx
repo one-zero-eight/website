@@ -35,7 +35,7 @@ export function DashboardPage() {
         <CountdownWidget />
         <AcademicCalendarWidget />
       </div>
-      <div className="grid min-w-0 gap-4 @3xl/content:grid-cols-2 @6xl/content:grid-cols-3 @3xl/content:[&>section:last-child:nth-child(odd)]:col-span-2 @6xl/content:[&>section:last-child:nth-child(odd)]:col-span-1 [&>section:only-child]:col-span-full">
+      <div className="grid min-w-0 gap-4 @3xl/content:grid-cols-2 @6xl/content:has-[>section:nth-child(3)]:grid-cols-3 @3xl/content:[&>section:last-child:nth-child(odd)]:col-span-2 @6xl/content:[&>section:last-child:nth-child(odd)]:col-span-1 [&>section:only-child]:col-span-full">
         <CalendarWidget />
         <SportsWidget />
         <BookingsWidget />
