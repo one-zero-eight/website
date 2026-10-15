@@ -6,11 +6,14 @@ import {
   type Selection,
 } from "./timetableViewerModel.ts";
 
+const EMPTY_PERSONAL_GROUPS = new Set<string>();
+
 export type SelectionStore = {
   subscribe: (cb: () => void) => () => void;
   getSelection: () => Selection;
   setSelection: (next: Selection) => void;
   isPersonalGroup: (groupId: string) => boolean;
+  getPersonalGroups: () => ReadonlySet<string>;
   setPersonalGroups: (groups: readonly string[]) => void;
 };
 
@@ -21,6 +24,9 @@ export function createSelectionStore(): SelectionStore {
   return {
     isPersonalGroup(groupId) {
       return personalGroups.has(groupId);
+    },
+    getPersonalGroups() {
+      return personalGroups;
     },
     setPersonalGroups(groups) {
       const next = new Set(groups);
@@ -80,6 +86,15 @@ export function usePersonalGroup(groupId: string): boolean {
     store.subscribe,
     () => store.isPersonalGroup(groupId),
     () => false,
+  );
+}
+
+export function usePersonalGroupSet(): ReadonlySet<string> {
+  const store = useSelectionStore();
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.getPersonalGroups(),
+    () => EMPTY_PERSONAL_GROUPS,
   );
 }
 

@@ -4,7 +4,9 @@ import {
   type SchemaPublicTimetable,
 } from "@/api/schedule-assistant/types.ts";
 import { publicTimetableConfig } from "./publicTimetableConfig.ts";
+import { personalColumnRailStyle } from "./timetableGroupsGridLayout.ts";
 import {
+  listPersonalMeetingsByDay,
   nearestPersonalMeeting,
   personalTimetableGroups,
   shouldAutoNavigatePersonalGroups,
@@ -122,6 +124,42 @@ describe("personal timetable navigation", () => {
       ),
     ).toBe(next);
   });
+  it("groups personal meetings by day within the selected week", () => {
+    const monEarly = {
+      ...meeting,
+      date: "2026-09-07",
+      start: "09:00",
+      instance_id: "mon-early",
+    };
+    const monLate = {
+      ...meeting,
+      date: "2026-09-07",
+      start: "11:00",
+      instance_id: "mon-late",
+    };
+    const wed = { ...meeting, date: "2026-09-09", instance_id: "wed" };
+    const nextWeek = {
+      ...meeting,
+      date: "2026-09-14",
+      instance_id: "next-week",
+    };
+    const otherGroup = {
+      ...meeting,
+      date: "2026-09-08",
+      groups: ["A"],
+      instance_id: "other",
+    };
+    expect(
+      listPersonalMeetingsByDay(
+        [wed, monLate, nextWeek, otherGroup, monEarly],
+        ["B"],
+        "2026-09-07",
+      ).map((day) => [day.date, day.meetings.map((item) => item.instance_id)]),
+    ).toEqual([
+      ["2026-09-07", ["mon-early", "mon-late"]],
+      ["2026-09-09", ["wed"]],
+    ]);
+  });
   it("auto-navigates once, after readiness, without overriding users or deep links", () => {
     const options = {
       ready: true,
@@ -142,6 +180,34 @@ describe("personal timetable navigation", () => {
       ).toBe(false);
     }
   });
+});
+
+describe("personal column rail alignment", () => {
+  it("uses compact column widths for merged cells and headers", () => {
+    expect(personalColumnRailStyle(11, [5], 2, 100)?.backgroundPosition).toBe(
+      "500px 0, 598px 0",
+    );
+    expect(personalColumnRailStyle(1, [0], 4, 100)?.backgroundPosition).toBe(
+      "0px 0, 96px 0",
+    );
+  });
+  it.each([
+    { groupCount: 1, index: 0, railPx: 4 },
+    { groupCount: 2, index: 0, railPx: 2 },
+    { groupCount: 11, index: 0, railPx: 2 },
+    { groupCount: 11, index: 5, railPx: 2 },
+    { groupCount: 11, index: 10, railPx: 2 },
+  ])(
+    "aligns $railPx px rails for group $index of $groupCount",
+    ({ groupCount, index, railPx }) => {
+      const style = personalColumnRailStyle(groupCount, [index], railPx)!;
+      expect(style.backgroundPosition).toBe(
+        `${index * 135}px 0, ${(index + 1) * 135 - railPx}px 0`,
+      );
+      expect(style.backgroundOrigin).toBe("border-box");
+      expect(style.backgroundClip).toBe("border-box");
+    },
+  );
 });
 
 describe("independent personal highlighting", () => {

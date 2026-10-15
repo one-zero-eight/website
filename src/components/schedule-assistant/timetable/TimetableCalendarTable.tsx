@@ -68,7 +68,6 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
       className={cn(
         "meeting block w-full min-w-0 truncate rounded border px-1 py-px text-left text-[0.6875rem] leading-tight text-[#1a2332]",
         disableSelect && "pointer-events-none",
-        (bits & 4) !== 0 && "!border-l-4 !border-l-emerald-600",
         isSelected &&
           "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2)] outline-2 outline-[#1d3f70]",
         !isSelected &&

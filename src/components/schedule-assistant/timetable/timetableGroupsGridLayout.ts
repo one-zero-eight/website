@@ -32,6 +32,42 @@ export const GROUPS_TABLE_CLASS =
 /** Stronger right border between adjacent programs in «По группам». */
 export const GROUPS_PROGRAM_SEPARATOR = "border-r-2 border-r-[#1d3f70]";
 
+/** Personal column rails — same 2px weight as program separators, distinct color. */
+export const PERSONAL_COLUMN_RAIL_COLOR = "#ec4899";
+
+/** Paint rails on a separate fixed-width layer aligned with group columns. */
+export function personalColumnRailStyle(
+  groupCount: number,
+  personalIndexes: readonly number[],
+  railPx = 2,
+  columnPx = GROUPS_COL_PX,
+): CSSProperties | undefined {
+  if (!personalIndexes.length || groupCount <= 0) return undefined;
+  const images: string[] = [];
+  const sizes: string[] = [];
+  const positions: string[] = [];
+  const swatch = `linear-gradient(${PERSONAL_COLUMN_RAIL_COLOR},${PERSONAL_COLUMN_RAIL_COLOR})`;
+  const size = `${railPx}px 100%`;
+  for (const index of personalIndexes) {
+    images.push(swatch, swatch);
+    sizes.push(size, size);
+    // Use the colgroup's fixed column width, not the merged cell's background
+    // positioning area, which can exclude its program separator border.
+    positions.push(
+      `${index * columnPx}px 0`,
+      `${(index + 1) * columnPx - railPx}px 0`,
+    );
+  }
+  return {
+    backgroundImage: images.join(", "),
+    backgroundSize: sizes.join(", "),
+    backgroundPosition: positions.join(", "),
+    backgroundOrigin: "border-box",
+    backgroundClip: "border-box",
+    backgroundRepeat: "no-repeat",
+  };
+}
+
 /** Program title stays visible while scrolling through its group columns. */
 export const GROUPS_PROGRAM_TITLE_STICKY_CLASS =
   "sticky z-[24] mx-auto block w-max max-w-full bg-[#1f5fae] px-2";

@@ -54,7 +54,7 @@ import {
 
 export function DetailSection({ title }: { title: string }) {
   return (
-    <div className="text-base-content/55 mt-3 mb-1.5 text-xs font-semibold tracking-wide uppercase first:mt-0">
+    <div className="text-base-content/55 mt-6 mb-1.5 text-xs font-semibold tracking-wide uppercase first:mt-0">
       {title}
     </div>
   );
@@ -324,7 +324,7 @@ export function SeriesScheduleItemsList({
       {currentOffscreen === "above" ? (
         <button
           type="button"
-          className="bg-primary/45 pointer-events-auto absolute top-0 right-3 z-10 size-5 cursor-pointer rounded-bl-full border-0 p-0"
+          className="text-primary pointer-events-auto absolute top-0.5 right-2 z-10 inline-flex size-7 cursor-pointer items-center justify-center border-0 bg-transparent p-0"
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -332,12 +332,14 @@ export function SeriesScheduleItemsList({
           }}
           onMouseDown={(event) => event.stopPropagation()}
           title="К выбранному выше"
-        />
+        >
+          <span className="icon-[material-symbols--arrow-upward-rounded] text-2xl" />
+        </button>
       ) : null}
       {currentOffscreen === "below" ? (
         <button
           type="button"
-          className="bg-primary/45 pointer-events-auto absolute right-3 bottom-0 z-10 size-5 cursor-pointer rounded-tl-full border-0 p-0"
+          className="text-primary pointer-events-auto absolute right-2 bottom-0.5 z-10 inline-flex size-7 cursor-pointer items-center justify-center border-0 bg-transparent p-0"
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -345,7 +347,9 @@ export function SeriesScheduleItemsList({
           }}
           onMouseDown={(event) => event.stopPropagation()}
           title="К выбранному ниже"
-        />
+        >
+          <span className="icon-[material-symbols--arrow-downward-rounded] text-2xl" />
+        </button>
       ) : null}
     </div>
   );

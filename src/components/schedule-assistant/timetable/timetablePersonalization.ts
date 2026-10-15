@@ -89,3 +89,41 @@ export function shouldAutoNavigatePersonalGroups({
     ready && !handled && !userNavigated && !focusMeetingId && groups.length > 0
   );
 }
+
+export type PersonalMeetingsDay = {
+  date: string;
+  meetings: Meeting[];
+};
+
+/** Personal meetings for one teaching week, grouped by calendar day. */
+export function listPersonalMeetingsByDay(
+  meetings: readonly Meeting[],
+  groupIds: readonly string[],
+  weekStart: string,
+): PersonalMeetingsDay[] {
+  if (!groupIds.length || !weekStart) return [];
+  const own = new Set(groupIds);
+  const weekStartMs = new Date(`${weekStart}T00:00:00Z`).getTime();
+  if (Number.isNaN(weekStartMs)) return [];
+  const weekEndMs = weekStartMs + 7 * 86_400_000;
+  const byDate = new Map<string, Meeting[]>();
+  for (const meeting of meetings) {
+    if (meeting.cancelled) continue;
+    if (!meeting.groups.some((groupId) => own.has(groupId))) continue;
+    const time = new Date(`${meeting.date}T00:00:00Z`).getTime();
+    if (time < weekStartMs || time >= weekEndMs) continue;
+    const day = byDate.get(meeting.date);
+    if (day) day.push(meeting);
+    else byDate.set(meeting.date, [meeting]);
+  }
+  return [...byDate.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, dayMeetings]) => ({
+      date,
+      meetings: dayMeetings.sort(
+        (a, b) =>
+          a.start.localeCompare(b.start) ||
+          a.instance_id.localeCompare(b.instance_id),
+      ),
+    }));
+}

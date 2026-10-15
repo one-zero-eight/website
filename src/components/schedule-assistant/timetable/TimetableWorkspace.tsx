@@ -45,6 +45,7 @@ import {
   useSelectionSnapshot,
   useSelectionStore,
   usePersonalGroup,
+  usePersonalGroupSet,
 } from "./timetableSelectionStore.ts";
 import {
   buildMeetingPickerIndex,
@@ -96,6 +97,7 @@ import {
   GROUPS_PROGRAM_SEPARATOR,
   GROUPS_PROGRAM_TITLE_STICKY_CLASS,
   GROUPS_PROGRAM_TITLE_STICKY_STYLE,
+  personalColumnRailStyle,
   GROUPS_SLOT_ROW_CLASS,
   GROUPS_SLOT_TIME_PAD,
   GROUPS_TABLE_CLASS,
@@ -1106,8 +1108,10 @@ export function TimetableViewer(props: TimetableViewerProps) {
         });
       };
 
-      // Same week/tab: scroll in the click handler before selection fan-out
-      // (~370 useSyncExternalStore subscribers) blocks the main thread.
+      // Defer selection: sync store updates re-render the detail panel and can
+      // unmount the click target before document's click listener runs; that
+      // listener then fails closest(".detail") and clears the new selection.
+      // Also avoids ~370 useSyncExternalStore subscribers blocking scroll.
       if (!weekChanged && !tabChanged && !layoutChanged && !programChanged) {
         const scrolled = scrollMeetingIntoCenter(
           gridWrapRef.current,
@@ -1127,7 +1131,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
         setWeekIndex(nextWeek);
       }
       applySectionView(nextTab);
-      applySelection();
+      requestAnimationFrame(applySelection);
       setScrollToMeetingId(meeting.instance_id);
     },
     [
@@ -1466,23 +1470,28 @@ export function TimetableViewer(props: TimetableViewerProps) {
   ]);
 
   useEffect(() => {
+    const clearIgnoreSelectors = [
+      ".meeting",
+      ".year-head",
+      ".group-head",
+      ".clickable",
+      ".detail",
+      ".schedule-assistant-toolbar",
+      "button",
+      "input",
+      "select",
+      "summary",
+      "details",
+    ];
     const onDocClick = (ev: MouseEvent) => {
-      const t = ev.target;
-      if (!(t instanceof Element)) return;
-      if (
-        t.closest(".meeting") ||
-        t.closest(".year-head") ||
-        t.closest(".group-head") ||
-        t.closest(".clickable") ||
-        t.closest(".detail") ||
-        t.closest(".schedule-assistant-toolbar") ||
-        t.closest("button") ||
-        t.closest("input") ||
-        t.closest("select") ||
-        t.closest("summary") ||
-        t.closest("details")
-      ) {
-        return;
+      // Prefer composedPath: a sync re-render can detach ev.target mid-click,
+      // so closest() on the target alone misses ancestors that were in the path.
+      const path = ev.composedPath();
+      for (const node of path) {
+        if (!(node instanceof Element)) continue;
+        if (clearIgnoreSelectors.some((selector) => node.matches(selector))) {
+          return;
+        }
       }
       selectionStore.setSelection(null);
     };
@@ -1810,7 +1819,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
                       }
                       personalLessons={personalLessons}
                       ownGroups={ownGroups}
-                      onSelectPersonalGroup={navigateToPersonalGroup}
+                      courseColors={courseColors}
                       sidebarAction={sidebarAction}
                     />
                   </div>
@@ -1840,7 +1849,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
             }
             personalLessons={personalLessons}
             ownGroups={ownGroups}
-            onSelectPersonalGroup={navigateToPersonalGroup}
+            courseColors={courseColors}
             sidebarAction={sidebarAction}
           />
         ) : null}
@@ -1870,10 +1879,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
               }
               personalLessons={personalLessons}
               ownGroups={ownGroups}
-              onSelectPersonalGroup={(group) => {
-                setMobileMenuOpen(false);
-                navigateToPersonalGroup(group);
-              }}
+              courseColors={courseColors}
               sidebarAction={sidebarAction}
             />
           </DetailFullscreenModal>
@@ -2313,7 +2319,7 @@ type TimetableDetailPanelProps = {
   showUnarranged?: boolean;
   personalLessons?: PersonalLessonsState;
   ownGroups?: PersonalTimetableGroup[];
-  onSelectPersonalGroup?: (group: PersonalTimetableGroup) => void;
+  courseColors?: Record<string, { bg: string; border: string }>;
   sidebarAction?: "composer" | "student";
 };
 
@@ -2339,7 +2345,7 @@ function timetableDetailPanelPropsEqual(
     prev.showUnarranged === next.showUnarranged &&
     prev.personalLessons === next.personalLessons &&
     prev.ownGroups === next.ownGroups &&
-    prev.onSelectPersonalGroup === next.onSelectPersonalGroup &&
+    prev.courseColors === next.courseColors &&
     prev.sidebarAction === next.sidebarAction
   );
 }
@@ -2387,7 +2393,7 @@ function TimetableMobileDetailModal({
   showUnarranged = false,
   personalLessons,
   ownGroups = [],
-  onSelectPersonalGroup,
+  courseColors = {},
   sidebarAction,
 }: {
   allMeetings: Meeting[];
@@ -2405,7 +2411,7 @@ function TimetableMobileDetailModal({
   showUnarranged?: boolean;
   personalLessons?: PersonalLessonsState;
   ownGroups?: PersonalTimetableGroup[];
-  onSelectPersonalGroup?: (group: PersonalTimetableGroup) => void;
+  courseColors?: Record<string, { bg: string; border: string }>;
   sidebarAction?: "composer" | "student";
 }) {
   const selection = useSelectionSnapshot();
@@ -2443,7 +2449,7 @@ function TimetableMobileDetailModal({
         showUnarranged={showUnarranged}
         personalLessons={personalLessons}
         ownGroups={ownGroups}
-        onSelectPersonalGroup={onSelectPersonalGroup}
+        courseColors={courseColors}
         sidebarAction={sidebarAction}
       />
     </DetailFullscreenModal>
@@ -2468,7 +2474,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   showUnarranged = false,
   personalLessons,
   ownGroups = [],
-  onSelectPersonalGroup,
+  courseColors = {},
   sidebarAction,
 }: TimetableDetailPanelProps) {
   const editConfig = useContext(TimetableEditConfigContext);
@@ -2549,7 +2555,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
           showUnarranged={showUnarranged}
           personalLessons={personalLessons}
           ownGroups={ownGroups}
-          onSelectPersonalGroup={onSelectPersonalGroup}
+          courseColors={courseColors}
           sidebarAction={sidebarAction}
         />
       ) : selection ? (
@@ -2647,28 +2653,25 @@ const CoreGroupHeadCell = memo(function CoreGroupHeadCell({
   return (
     <th
       className={clsx(
-        "group-head z-[8] cursor-pointer border-b bg-[#2d77cc] text-center align-top font-semibold text-white",
+        "group-head relative z-[8] cursor-pointer border-b bg-[#2d77cc] text-center align-top font-semibold text-white",
         programSeparator
           ? GROUPS_PROGRAM_SEPARATOR
           : "border-r border-[#d8dfeb]",
         compact ? COMPACT_GROUPS_COL_WIDTH : GROUPS_COL_WIDTH,
         GROUPS_HEAD_PAD,
         highlight && "shadow-[inset_0_-3px_0_#ffd54f]",
-        personal && "!border-t-4 !border-t-emerald-400",
         dimmed && "opacity-35 saturate-50",
       )}
       data-group-id={groupId}
       onClick={() => onSelectGroup(groupId)}
     >
+      {personal ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-[#ec4899]" />
+      ) : null}
       <span
         className="block w-full"
-        title={scheduleAssistantDetailTooltips.group}
+        title={personal ? "Моя группа" : scheduleAssistantDetailTooltips.group}
       >
-        {personal ? (
-          <span className="mr-1 text-emerald-200" title="Моя группа">
-            ●
-          </span>
-        ) : null}
         {groupLabel}
       </span>
     </th>
@@ -2988,6 +2991,7 @@ function CoreGroupsTable({
   onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 }) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
+  const personalGroups = usePersonalGroupSet();
   const termRange = useMemo(() => termSemesterRange(config), [config]);
 
   const visibleColumns = useMemo(
@@ -3135,7 +3139,8 @@ function CoreGroupsTable({
           </td>
           {yearLabels.map((yearLabel, yearIndex) => {
             const timeCols = prepared.showProgramTimeColumn[yearLabel] ? 1 : 0;
-            const yearCols = prepared.columnsByYear[yearLabel]?.length || 0;
+            const yearColumns = prepared.columnsByYear[yearLabel] || [];
+            const yearCols = yearColumns.length;
             const programSeparator = yearIndex < yearLabels.length - 1;
             const isInactive =
               !!activeWeek &&
@@ -3149,6 +3154,17 @@ function CoreGroupsTable({
                 const range = programRanges.get(yearLabel)!;
                 return date < range.start_date || date > range.end_date;
               })();
+            const personalRailIndexes = isInactive
+              ? []
+              : yearColumns.flatMap((col, index) =>
+                  personalGroups.has(col.groupId) ? [index] : [],
+                );
+            const personalRails = personalColumnRailStyle(
+              yearCols,
+              personalRailIndexes,
+              2,
+              compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX,
+            );
             return (
               <td
                 key={`${preparedRow.key}-${yearLabel}`}
@@ -3166,6 +3182,18 @@ function CoreGroupsTable({
                 style={GROUPS_DAY_ROW_STICKY_STYLE}
                 colSpan={Math.max(1, timeCols + yearCols)}
               >
+                {personalRails ? (
+                  <div
+                    className="pointer-events-none absolute inset-y-0"
+                    style={{
+                      left: timeCols * GROUPS_TIME_COL_PX,
+                      width:
+                        yearCols *
+                        (compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX),
+                      ...personalRails,
+                    }}
+                  />
+                ) : null}
                 &nbsp;
               </td>
             );
@@ -3257,6 +3285,21 @@ function CoreGroupsTable({
           !!focusGroupSet?.has(cell.groupId) &&
           !cell.mergedRows.length;
         const showGhost = placeTargetCell && !!ghostColors && rowHovered;
+        const personalRailIndexes = isInactive
+          ? []
+          : cell.groupIds.flatMap((groupId, index) =>
+              personalGroups.has(groupId) ? [index] : [],
+            );
+        const personalRails = personalColumnRailStyle(
+          cell.groupIds.length,
+          personalRailIndexes,
+          2,
+          compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX,
+        );
+        const spanSize =
+          cell.span > 1
+            ? cell.span * (compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX)
+            : undefined;
 
         rowCells.push(
           <td
@@ -3281,17 +3324,11 @@ function CoreGroupsTable({
             )}
             colSpan={cell.span > 1 ? cell.span : undefined}
             style={
-              cell.span > 1
+              spanSize != null
                 ? {
-                    width:
-                      cell.span *
-                      (compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX),
-                    maxWidth:
-                      cell.span *
-                      (compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX),
-                    minWidth:
-                      cell.span *
-                      (compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX),
+                    width: spanSize,
+                    maxWidth: spanSize,
+                    minWidth: spanSize,
                   }
                 : undefined
             }
@@ -3306,13 +3343,12 @@ function CoreGroupsTable({
                     <button
                       type="button"
                       className={clsx(
-                        "block h-full w-full rounded bg-[#fafcff]",
-                        isInactive && "bg-transparent",
+                        "block h-full w-full rounded bg-transparent",
                         !placeTarget &&
                           onEmptyCellClick &&
                           activeWeek &&
                           programLabel &&
-                          "cursor-pointer hover:bg-[#eef4ff]",
+                          "cursor-pointer hover:bg-[#eef4ff]/80",
                       )}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -3328,6 +3364,17 @@ function CoreGroupsTable({
                 ))}
               </div>
             )}
+            {personalRails ? (
+              <div
+                className="pointer-events-none absolute inset-y-0 left-0 z-[3]"
+                style={{
+                  width:
+                    cell.span *
+                    (compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX),
+                  ...personalRails,
+                }}
+              />
+            ) : null}
             {!cell.mergedRows.length ? (
               <div
                 className={clsx(
@@ -3627,7 +3674,6 @@ const MeetingCard = memo(function MeetingCard({
   );
 
   const meetingHighlightClass = clsx(
-    (bits & 4) !== 0 && "!border-l-4 !border-l-emerald-600",
     isSelected &&
       isRelated &&
       "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2),0_2px_10px_rgba(0,0,0,0.12)] ring-2 ring-inset ring-[#1d3f70]",
@@ -3643,13 +3689,14 @@ const MeetingCard = memo(function MeetingCard({
     <div
       className={clsx(
         GROUPS_MEETING_BODY_CLASS,
-        isWideCell && "w-max max-w-full",
+        isWideCell && "overflow-visible!",
       )}
     >
       <div
         className={clsx(
           "subject flex min-h-0 min-w-0 gap-1 overflow-hidden",
-          isWideCell && "w-max max-w-full",
+          isWideCell &&
+            "sticky left-[calc(var(--sa-time-col-width,100px)+8px)] z-[4] w-fit max-w-full self-start",
         )}
       >
         <div
@@ -3659,7 +3706,10 @@ const MeetingCard = memo(function MeetingCard({
           )}
         >
           <div
-            className={GROUPS_MEETING_TITLE_CLASS}
+            className={clsx(
+              GROUPS_MEETING_TITLE_CLASS,
+              isWideCell && "w-fit bg-(--meeting-sticky-background)",
+            )}
             title={`${fullCourseTitle} (${m.tag})${count > 1 ? ` x${count}` : ""}`}
           >
             {courseTitle}
@@ -3684,7 +3734,13 @@ const MeetingCard = memo(function MeetingCard({
           {m.end ? `–${m.end}` : ""}
         </div>
       ) : null}
-      <div className={GROUPS_MEETING_FOOTER_CLASS}>
+      <div
+        className={clsx(
+          GROUPS_MEETING_FOOTER_CLASS,
+          isWideCell &&
+            "sticky left-[calc(var(--sa-time-col-width,100px)+8px)] z-[1] w-fit max-w-full self-start bg-(--meeting-sticky-background)",
+        )}
+      >
         <div
           className={clsx(
             GROUPS_MEETING_LINE_CLASS,
@@ -3808,10 +3864,10 @@ const MeetingCard = memo(function MeetingCard({
       ref={meetingRef}
       data-meeting-id={m.instance_id}
       className={clsx(
-        "meeting relative z-[2] rounded-lg",
+        "meeting relative rounded-lg",
         GROUPS_MEETING_CLASS,
         spansMultipleRows && "w-auto!",
-        isWideCell ? "overflow-visible" : "overflow-hidden",
+        isWideCell ? "overflow-visible" : "z-[2] overflow-hidden",
         meetingHighlightClass,
       )}
       style={{
@@ -3841,19 +3897,7 @@ const MeetingCard = memo(function MeetingCard({
           : undefined
       }
     >
-      {isWideCell ? (
-        <div
-          className="sticky z-[1] inline-flex h-full max-h-full w-max max-w-full flex-col gap-0.5 self-start overflow-hidden"
-          style={{
-            left: "calc(var(--sa-time-col-width, 100px) + 8px)",
-            backgroundColor: "var(--meeting-sticky-background)",
-          }}
-        >
-          {body}
-        </div>
-      ) : (
-        body
-      )}
+      {body}
     </div>
   );
 }, meetingCardPropsEqual);
@@ -4115,7 +4159,6 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
       className={clsx(
         "meeting relative z-[2] overflow-hidden rounded-lg",
         GROUPS_MEETING_CLASS,
-        (bits & 4) !== 0 && "!border-l-4 !border-l-emerald-600",
         isSelected &&
           isRelated &&
           "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2),0_2px_10px_rgba(0,0,0,0.12)] ring-2 ring-[#1d3f70] ring-inset",

@@ -91,7 +91,7 @@ describe("read-only calendar capability boundary", () => {
         (button) => button.textContent?.trim() === "+",
       ),
     ).toBe(false);
-    expect(card.className).toContain("border-l-emerald-600");
+    expect(card.className).not.toContain("border-l-emerald-600");
     expect(card.textContent).toContain(meeting.notes);
     expect(container.querySelector("script")).toBeNull();
   });

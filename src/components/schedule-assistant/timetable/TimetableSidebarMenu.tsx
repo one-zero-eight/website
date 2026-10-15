@@ -30,18 +30,29 @@ import {
   meetingMetadataSubgridClass,
   meetingMetadataTextClass,
 } from "./MeetingMetadata.tsx";
-import { UnarrangedLessonsPanel } from "./UnarrangedLessonsPanel.tsx";
+import { meetingColorStyle } from "./timetableGroupsGridLayout.ts";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
+import { UnarrangedLessonsPanel } from "./UnarrangedLessonsPanel.tsx";
 import {
   countUnarrangedSessions,
   type UnarrangedComponentGroup,
   type UnarrangedLessonItem,
 } from "./unarrangedLessons.ts";
-import type { PersonalTimetableGroup } from "./timetablePersonalization.ts";
+import {
+  listPersonalMeetingsByDay,
+  type PersonalTimetableGroup,
+} from "./timetablePersonalization.ts";
+import { useSelectionStore } from "./timetableSelectionStore.ts";
 import {
   buildInstructorLabelById,
+  colorBySubject,
+  resolveInstructorLabel,
+  todayIsoDate,
   type Meeting,
 } from "./timetableViewerModel.ts";
+
+const personalLinkClass =
+  "cursor-pointer text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid";
 
 import {
   buildTimetableSearchEntries,
@@ -460,18 +471,250 @@ function TimetableEventSearch({
   );
 }
 
+const personalDayFormatter = new Intl.DateTimeFormat("ru-RU", {
+  weekday: "long",
+  day: "numeric",
+  month: "short",
+});
+
+function personalDayHeading(date: string) {
+  return personalDayFormatter
+    .format(new Date(`${date}T12:00:00`))
+    .replace(/^./u, (letter) => letter.toUpperCase());
+}
+
+function addDaysIso(date: string, days: number) {
+  const value = new Date(`${date}T00:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + days);
+  return value.toISOString().slice(0, 10);
+}
+
+function localNowTimeHm() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}
+
+function isPersonalMeetingPast(meeting: Meeting, today: string, nowHm: string) {
+  if (meeting.date < today) return true;
+  if (meeting.date > today) return false;
+  const end = meeting.end || meeting.start;
+  return Boolean(end && end <= nowHm);
+}
+
+function PersonalMeetingCard({
+  meeting,
+  courseColors,
+  instructorLabels,
+  muted = false,
+  onSelect,
+}: {
+  meeting: Meeting;
+  courseColors: Record<string, { bg: string; border: string }>;
+  instructorLabels: Record<string, string>;
+  muted?: boolean;
+  onSelect: (meeting: Meeting) => void;
+}) {
+  const selectionStore = useSelectionStore();
+  const colors = colorBySubject(meeting.course, courseColors);
+  const timeRange = meeting.end
+    ? `${meeting.start}–${meeting.end}`
+    : meeting.start;
+  const instructorIds = (
+    typeof meeting.instructors === "string"
+      ? meeting.instructors
+        ? [meeting.instructors]
+        : []
+      : (meeting.instructors ?? [])
+  ).filter(Boolean);
+  const room = String(meeting.room || "").trim();
+  const title = `${meeting.course}${meeting.tag ? ` (${meeting.tag})` : ""}`;
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={cn(
+        "border-base-300/80 w-full cursor-pointer rounded-lg border px-2 py-1.5 text-left transition-[filter] hover:brightness-[0.98]",
+        muted && "opacity-50 grayscale-[0.45]",
+      )}
+      style={meetingColorStyle(colors)}
+      title={title}
+      onClick={() => onSelect(meeting)}
+      onKeyDown={(event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        onSelect(meeting);
+      }}
+    >
+      <div className="text-base-content truncate text-xs leading-snug font-medium">
+        {title}
+      </div>
+      <div className="text-base-content/70 mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 text-[0.6875rem] leading-tight">
+        <span className="font-semibold tabular-nums">{timeRange}</span>
+        {room ? (
+          <>
+            <span className="text-base-content/35">·</span>
+            <span
+              className={personalLinkClass}
+              title={room}
+              onClick={(event) => {
+                event.stopPropagation();
+                selectionStore.setSelection({ type: "room", value: room });
+              }}
+            >
+              {room}
+            </span>
+          </>
+        ) : null}
+        {instructorIds.map((id) => {
+          const label = resolveInstructorLabel(id, instructorLabels);
+          return (
+            <span
+              key={id}
+              className="inline-flex min-w-0 items-center gap-x-1.5"
+            >
+              <span className="text-base-content/35">·</span>
+              <span
+                className={cn(personalLinkClass, "truncate")}
+                title={label}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  selectionStore.setSelection({
+                    type: "instructor",
+                    value: id,
+                  });
+                }}
+              >
+                {label}
+              </span>
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function PersonalWeekDays({
+  days,
+  courseColors,
+  instructorLabels,
+  today,
+  nowHm,
+  onNavigateToMeeting,
+}: {
+  days: ReturnType<typeof listPersonalMeetingsByDay>;
+  courseColors: Record<string, { bg: string; border: string }>;
+  instructorLabels: Record<string, string>;
+  today: string;
+  nowHm: string;
+  onNavigateToMeeting: (meeting: Meeting) => void;
+}) {
+  return (
+    <>
+      {days.map((day) => {
+        const isToday = day.date === today;
+        const isPastDay = day.date < today;
+        return (
+          <div
+            key={day.date}
+            className={cn("flex flex-col gap-1.5", isPastDay && "opacity-70")}
+          >
+            <div
+              className={cn(
+                "text-[0.6875rem] leading-tight font-semibold tracking-wide uppercase",
+                isToday
+                  ? "text-[#f5a623]"
+                  : isPastDay
+                    ? "text-base-content/40"
+                    : "text-base-content/70",
+              )}
+            >
+              {isToday ? "Сегодня · " : null}
+              {personalDayHeading(day.date)}
+            </div>
+            <ul className="flex flex-col gap-1.5">
+              {day.meetings.map((meeting) => (
+                <li key={meeting.instance_id}>
+                  <PersonalMeetingCard
+                    meeting={meeting}
+                    courseColors={courseColors}
+                    instructorLabels={instructorLabels}
+                    muted={isPersonalMeetingPast(meeting, today, nowHm)}
+                    onSelect={onNavigateToMeeting}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 function PersonalLessonsSection({
   state,
   ownGroups,
-  onSelectGroup,
+  meetings,
+  weekStart,
+  courseColors,
+  config,
+  onNavigateToMeeting,
 }: {
   state: PersonalLessonsState;
   ownGroups: PersonalTimetableGroup[];
-  onSelectGroup?: (group: PersonalTimetableGroup) => void;
+  meetings: Meeting[];
+  weekStart: string;
+  courseColors: Record<string, { bg: string; border: string }>;
+  config: SchemaScheduleConfig;
+  onNavigateToMeeting: (meeting: Meeting) => void;
 }) {
+  const instructorLabels = useMemo(
+    () => buildInstructorLabelById(config),
+    [config],
+  );
+  const groupIds = useMemo(
+    () => ownGroups.map((group) => group.groupId),
+    [ownGroups],
+  );
+  const today = todayIsoDate();
+  const nowHm = localNowTimeHm();
+  const nextWeekStart = useMemo(
+    () => (weekStart ? addDaysIso(weekStart, 7) : ""),
+    [weekStart],
+  );
+  const days = useMemo(
+    () =>
+      state.kind === "ready"
+        ? listPersonalMeetingsByDay(meetings, groupIds, weekStart)
+        : [],
+    [state.kind, meetings, groupIds, weekStart],
+  );
+  const nextWeekDays = useMemo(
+    () =>
+      state.kind === "ready"
+        ? listPersonalMeetingsByDay(meetings, groupIds, nextWeekStart)
+        : [],
+    [state.kind, meetings, groupIds, nextWeekStart],
+  );
+  const [nextWeekOpen, setNextWeekOpen] = useState(false);
+  const weekCount = days.reduce((count, day) => count + day.meetings.length, 0);
+  const nextWeekCount = nextWeekDays.reduce(
+    (count, day) => count + day.meetings.length,
+    0,
+  );
+
   return (
-    <section className="flex flex-col gap-2">
-      <h3 className="text-sm font-semibold">Ваши занятия</h3>
+    <section className="flex min-h-0 flex-1 flex-col gap-2">
+      <h3 className="flex shrink-0 items-baseline justify-between gap-2 text-sm font-semibold">
+        <span>Ваши занятия</span>
+        {state.kind === "ready" ? (
+          <span className="text-base-content/45 text-xs font-medium tabular-nums">
+            {weekCount}
+          </span>
+        ) : null}
+      </h3>
       {state.kind === "guest" ? (
         <div className="flex flex-col gap-2">
           <p className="text-base-content/65 text-sm leading-relaxed">
@@ -486,7 +729,10 @@ function PersonalLessonsSection({
           </button>
         </div>
       ) : state.kind === "pending" ? (
-        <span className="skeleton h-5 w-full" />
+        <div className="flex flex-col gap-1.5">
+          <span className="skeleton h-10 w-full" />
+          <span className="skeleton h-10 w-full" />
+        </div>
       ) : state.kind === "error" ? (
         <div className="flex flex-col gap-2">
           <p className="text-error text-sm leading-relaxed">
@@ -504,23 +750,57 @@ function PersonalLessonsSection({
         <p className="text-base-content/65 text-sm leading-relaxed">
           Ваши группы пока не найдены. Можно просматривать всё расписание.
         </p>
-      ) : ownGroups.length ? (
-        <div className="flex flex-wrap gap-1.5">
-          {ownGroups.map((group) => (
-            <button
-              type="button"
-              key={group.groupId}
-              className="btn btn-xs btn-ghost text-emerald-700"
-              onClick={() => onSelectGroup?.(group)}
-            >
-              {group.label}
-            </button>
-          ))}
-        </div>
       ) : (
-        <p className="text-base-content/65 text-sm leading-relaxed">
-          Ваши группы пока не найдены. Можно просматривать всё расписание.
-        </p>
+        <div className="flex min-h-0 flex-1 [scrollbar-width:thin] flex-col gap-3 overflow-y-auto">
+          {!days.length ? (
+            <p className="text-base-content/65 text-sm leading-relaxed">
+              На этой неделе занятий нет.
+            </p>
+          ) : (
+            <PersonalWeekDays
+              days={days}
+              courseColors={courseColors}
+              instructorLabels={instructorLabels}
+              today={today}
+              nowHm={nowHm}
+              onNavigateToMeeting={onNavigateToMeeting}
+            />
+          )}
+          <button
+            type="button"
+            className="text-base-content/75 hover:text-base-content inline-flex items-center gap-1 self-start text-xs font-medium"
+            onClick={() => setNextWeekOpen((open) => !open)}
+          >
+            <span
+              className={cn(
+                "icon-[material-symbols--expand-more-rounded] text-base transition-transform",
+                nextWeekOpen && "rotate-180",
+              )}
+            />
+            Следующая неделя
+            {nextWeekCount ? (
+              <span className="text-base-content/45 tabular-nums">
+                {nextWeekCount}
+              </span>
+            ) : null}
+          </button>
+          {nextWeekOpen ? (
+            !nextWeekDays.length ? (
+              <p className="text-base-content/55 text-sm leading-relaxed">
+                На следующей неделе занятий нет.
+              </p>
+            ) : (
+              <PersonalWeekDays
+                days={nextWeekDays}
+                courseColors={courseColors}
+                instructorLabels={instructorLabels}
+                today={today}
+                nowHm={nowHm}
+                onNavigateToMeeting={onNavigateToMeeting}
+              />
+            )
+          ) : null}
+        </div>
       )}
     </section>
   );
@@ -539,7 +819,7 @@ export function TimetableSidebarMenu({
   showUnarranged,
   personalLessons,
   ownGroups = [],
-  onSelectPersonalGroup,
+  courseColors = {},
   sidebarAction,
 }: {
   meetings: Meeting[];
@@ -554,7 +834,7 @@ export function TimetableSidebarMenu({
   showUnarranged: boolean;
   personalLessons?: PersonalLessonsState;
   ownGroups?: PersonalTimetableGroup[];
-  onSelectPersonalGroup?: (group: PersonalTimetableGroup) => void;
+  courseColors?: Record<string, { bg: string; border: string }>;
   sidebarAction?: "composer" | "student";
 }) {
   const [page, setPage] = useState<"menu" | "unarranged">("menu");
@@ -600,7 +880,11 @@ export function TimetableSidebarMenu({
         <PersonalLessonsSection
           state={personalLessons}
           ownGroups={ownGroups}
-          onSelectGroup={onSelectPersonalGroup}
+          meetings={meetings}
+          weekStart={activeDate}
+          courseColors={courseColors}
+          config={config}
+          onNavigateToMeeting={onNavigateToMeeting}
         />
       ) : null}
       {canShowUnarranged ? (
