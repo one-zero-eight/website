@@ -3,20 +3,20 @@ import { cn } from "@/lib/ui/cn";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
-import { BracketGraph, MatchCard } from "./BracketGraph";
+import { BracketGraph, CARD_H, CARD_W, MatchCard } from "./BracketGraph";
 import { ScoreSheet } from "./ScoreSheet";
 import {
   type BracketMatch,
   type GameData,
   type Groups,
   type Player,
-  bracketSize,
+  type SeedEntry,
+  type Side,
   buildSeeding,
   groupGamesTotal,
   ordinal,
   resolveBracket,
   roundLabel,
-  seedOrder,
   standingsToTop,
   topsEqual,
   visibleSections,
@@ -106,7 +106,25 @@ function SeedingPreview({
 }) {
   const { showError } = useToast();
   const [busy, setBusy] = useState(false);
-  const [manualOrder, setManualOrder] = useState<string[] | null>(null);
+  // kept for this browser tab until qualification starts, so leaving the page loses nothing
+  const storageKey = `tabletennis-seeding-${tourId}`;
+  const [manualOrder, setManualOrderState] = useState<string[] | null>(() => {
+    try {
+      const saved = sessionStorage.getItem(storageKey);
+      return saved ? (JSON.parse(saved) as string[]) : null;
+    } catch {
+      return null;
+    }
+  });
+  function setManualOrder(next: string[] | null) {
+    setManualOrderState(next);
+    try {
+      if (next) sessionStorage.setItem(storageKey, JSON.stringify(next));
+      else sessionStorage.removeItem(storageKey);
+    } catch {
+      // storage unavailable, the order lives until the page is left
+    }
+  }
   const { mutateAsync: setSeeding } = $tabletennis.useMutation(
     "post",
     "/reg-tour/set-qual-seeding",
@@ -129,30 +147,42 @@ function SeedingPreview({
       : computedOrder;
   const edited = order.join() !== computedOrder.join();
 
-  function moveSeed(id: string, toIndex: number) {
-    const from = order.indexOf(id);
-    if (from < 0 || from === toIndex) return;
-    if (toIndex < 0 || toIndex >= order.length) return;
+  const [selected, setSelected] = useState<string | null>(null);
+
+  function swap(a: string, b: string) {
     const next = [...order];
-    next.splice(from, 1);
-    next.splice(toIndex, 0, id);
+    const i = next.indexOf(a);
+    const j = next.indexOf(b);
+    if (i < 0 || j < 0 || i === j) return;
+    [next[i], next[j]] = [next[j]!, next[i]!];
     setManualOrder(next);
   }
 
-  const { drag, chipProps } = useGroupDrag((id, target) =>
-    moveSeed(id, Number(target)),
-  );
+  const { drag, chipProps, consumeClick } = useGroupDrag((id, target) => {
+    const other = order[Number(target)];
+    if (other) swap(id, other);
+    setSelected(null);
+  });
 
-  // first-round opponent of every seed, to warn about same-group pairs after manual edits
-  const opponentOf = useMemo(() => {
-    const positions = seedOrder(bracketSize(order.length));
-    const map = new Map<number, number>();
-    for (let i = 0; i < positions.length; i += 2) {
-      map.set(positions[i]!, positions[i + 1]!);
-      map.set(positions[i + 1]!, positions[i]!);
+  function handleTap(id: string) {
+    if (consumeClick()) return;
+    if (!selected || selected === id) {
+      setSelected(selected === id ? null : id);
+      return;
     }
-    return map;
-  }, [order.length]);
+    swap(selected, id);
+    setSelected(null);
+  }
+
+  const preview = useMemo(() => resolveBracket(order, []), [order]);
+  const mainSection = visibleSections(preview, order.length)[0];
+  const selectedEntry = selected ? byId.get(selected) : undefined;
+  const sameGroupPairs = (mainSection?.matchIds[0] ?? []).filter((id) => {
+    const m = preview.matches.get(id)!;
+    if (m.side1.kind !== "player" || m.side2.kind !== "player") return false;
+    const g1 = byId.get(m.side1.id)?.group ?? null;
+    return g1 !== null && g1 === byId.get(m.side2.id)?.group;
+  }).length;
 
   const totalGroupGames = Object.values(groups).reduce(
     (s, m) => s + groupGamesTotal(m.length),
@@ -174,6 +204,7 @@ function SeedingPreview({
         params: { query: { tour_id: tourId } },
         body: order,
       });
+      setManualOrder(null);
       await onChanged();
     } catch {
       // toast shown by onError
@@ -191,7 +222,7 @@ function SeedingPreview({
           so on. 1st seed meets the last one, players from the same group are
           kept apart in the first round.
           {isAdmin &&
-            " Hold the handle and drag, or use the arrows, to change the order by hand."}
+            " Tap two players to swap them, or hold one and drag it onto another."}
         </p>
       </div>
 
@@ -216,86 +247,34 @@ function SeedingPreview({
         </Notice>
       )}
 
-      <ol className="bg-base-100 border-base-300 flex flex-col overflow-hidden rounded-2xl border">
-        {order.map((id, index) => {
-          const s = byId.get(id)!;
-          const seed = index + 1;
-          const oppSeed = opponentOf.get(seed);
-          const opp =
-            oppSeed && oppSeed <= order.length
-              ? byId.get(order[oppSeed - 1]!)
-              : undefined;
-          const sameGroup = !!opp && s.group !== null && opp.group === s.group;
-          const isOver = drag?.over === String(index) && drag.id !== id;
-          return (
-            <li
-              key={id}
-              {...{ [DROP_ATTR]: String(index) }}
-              className={cn(
-                "border-base-300 flex min-h-14 items-center gap-2 border-t px-3 py-2 transition-colors first:border-t-0",
-                drag?.id === id && "opacity-40",
-                isOver && "bg-[#712BB2]/10 shadow-[inset_0_3px_0_#712BB2]",
-              )}
-            >
-              {isAdmin && (
-                <button
-                  type="button"
-                  aria-label={`Drag ${getName(id)}`}
-                  {...chipProps(id)}
-                  className="text-base-content/40 flex h-10 w-7 shrink-0 cursor-grab touch-manipulation items-center justify-center select-none [-webkit-touch-callout:none]"
-                >
-                  <span className="icon-[mdi--drag] text-xl" />
-                </button>
-              )}
-              <span className="w-6 shrink-0 text-sm font-semibold text-[#712BB2] tabular-nums">
-                {seed}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium">
-                  {getName(id)}
-                </span>
-                <span className="text-base-content/50 block text-[11px] tabular-nums">
-                  {s.points} pts · sets {s.setsWon}:{s.setsLost}
-                  {sameGroup && (
-                    <span className="text-[#712BB2]">
-                      {" "}
-                      · same group as #{oppSeed} in round 1
-                    </span>
-                  )}
-                </span>
-              </span>
-              {s.group !== null && s.groupPlace !== null && (
-                <span className="bg-base-200 shrink-0 rounded-lg px-2 py-0.5 text-[11px] font-medium tabular-nums">
-                  {s.group}
-                  {s.groupPlace}
-                </span>
-              )}
-              {isAdmin && (
-                <span className="flex shrink-0 flex-col">
-                  <button
-                    type="button"
-                    aria-label={`Move ${getName(id)} up`}
-                    disabled={index === 0}
-                    onClick={() => moveSeed(id, index - 1)}
-                    className="flex h-6 w-8 items-center justify-center disabled:opacity-20"
-                  >
-                    <span className="icon-[mdi--chevron-up] text-lg" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Move ${getName(id)} down`}
-                    disabled={index === order.length - 1}
-                    onClick={() => moveSeed(id, index + 1)}
-                    className="flex h-6 w-8 items-center justify-center disabled:opacity-20"
-                  >
-                    <span className="icon-[mdi--chevron-down] text-lg" />
-                  </button>
-                </span>
-              )}
-            </li>
-          );
-        })}
-      </ol>
+      {mainSection && (
+        <div className="bg-base-200/60 border-base-300 rounded-2xl border p-4">
+          <BracketGraph
+            section={mainSection}
+            matches={preview.matches}
+            getName={getName}
+            renderCard={(match, style) =>
+              match.round === 0 ? (
+                <SeedCard
+                  match={match}
+                  style={style}
+                  order={order}
+                  entries={byId}
+                  getName={getName}
+                  editable={isAdmin}
+                  selected={selected}
+                  dragId={drag?.id ?? null}
+                  dragOver={drag?.over ?? null}
+                  onTap={handleTap}
+                  dragProps={chipProps}
+                />
+              ) : (
+                <MatchCard match={match} getName={getName} style={style} />
+              )
+            }
+          />
+        </div>
+      )}
 
       {drag && (
         <div
@@ -303,8 +282,42 @@ function SeedingPreview({
           className="pointer-events-none fixed z-50 flex min-h-10 -translate-x-1/2 -translate-y-[130%] scale-105 items-center gap-1 rounded-xl border-2 border-[#712BB2] bg-[#712BB2] px-3 text-sm font-medium whitespace-nowrap text-white shadow-[0_12px_32px_rgba(113,43,178,0.45)]"
           style={{ left: drag.x, top: drag.y }}
         >
-          <span className="icon-[mdi--drag] text-base" />
+          <span className="icon-[mdi--swap-vertical] text-base" />
           {getName(drag.id)}
+        </div>
+      )}
+
+      {sameGroupPairs > 0 && (
+        <Notice soft>
+          {sameGroupPairs} first-round pair
+          {sameGroupPairs === 1 ? " is" : "s are"} from the same group
+          (highlighted).
+        </Notice>
+      )}
+
+      {isAdmin && selected && selectedEntry && (
+        <div className="bg-base-100/95 border-base-300 sticky bottom-0 z-[1] -mx-4 flex items-center gap-2 border-t px-4 py-3 backdrop-blur md:mx-0 md:rounded-xl md:border">
+          <span className="min-w-0 flex-1 text-sm">
+            <b>{getName(selected)}</b>
+            <span className="text-base-content/60">
+              {" "}
+              · seed {order.indexOf(selected) + 1}
+              {selectedEntry.group !== null &&
+                ` · ${selectedEntry.group}${selectedEntry.groupPlace ?? ""}`}{" "}
+              · {selectedEntry.points} pts · sets {selectedEntry.setsWon}:
+              {selectedEntry.setsLost}
+            </span>
+            <span className="block text-xs text-[#712BB2]">
+              Tap another player to swap them
+            </span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelected(null)}
+            className="h-10 shrink-0 rounded-xl px-3 text-sm text-[#712BB2]"
+          >
+            Cancel
+          </button>
         </div>
       )}
 
@@ -315,7 +328,10 @@ function SeedingPreview({
           </span>
           <button
             type="button"
-            onClick={() => setManualOrder(null)}
+            onClick={() => {
+              setManualOrder(null);
+              setSelected(null);
+            }}
             className="h-9 rounded-xl px-2 font-medium text-[#712BB2]"
           >
             Reset to results
@@ -683,6 +699,107 @@ function Bracket({
             : null
         }
       />
+    </div>
+  );
+}
+
+function SeedCard({
+  match,
+  style,
+  order,
+  entries,
+  getName,
+  editable,
+  selected,
+  dragId,
+  dragOver,
+  onTap,
+  dragProps,
+}: {
+  match: BracketMatch;
+  style: React.CSSProperties;
+  order: string[];
+  entries: Map<string, SeedEntry>;
+  getName: (id: string) => string;
+  editable: boolean;
+  selected: string | null;
+  dragId: string | null;
+  dragOver: string | null;
+  onTap: (id: string) => void;
+  dragProps: ReturnType<typeof useGroupDrag>["chipProps"];
+}) {
+  const group = (side: Side) =>
+    side.kind === "player" ? (entries.get(side.id)?.group ?? null) : null;
+  const sameGroup =
+    group(match.side1) !== null && group(match.side1) === group(match.side2);
+
+  function renderSide(side: Side) {
+    if (side.kind !== "player") {
+      return (
+        <div className="text-base-content/35 flex h-1/2 items-center px-2.5 text-xs">
+          bye
+        </div>
+      );
+    }
+    const index = order.indexOf(side.id);
+    const entry = entries.get(side.id);
+    const isSelected = selected === side.id;
+    const isOver =
+      dragOver === String(index) && dragId !== null && dragId !== side.id;
+    return (
+      <button
+        type="button"
+        disabled={!editable}
+        onClick={() => onTap(side.id)}
+        {...(editable ? dragProps(side.id) : {})}
+        {...{ [DROP_ATTR]: String(index) }}
+        className={cn(
+          "flex h-1/2 w-full items-center gap-1.5 px-2 text-left transition-colors disabled:cursor-default",
+          editable &&
+            "touch-manipulation select-none [-webkit-touch-callout:none]",
+          isSelected && "bg-[#712BB2] text-white",
+          isOver && "bg-[#712BB2]/20",
+          dragId === side.id && "opacity-40",
+          editable && selected && !isSelected && "hover:bg-[#712BB2]/10",
+        )}
+      >
+        <span
+          className={cn(
+            "w-4 shrink-0 text-[10px] font-semibold tabular-nums",
+            isSelected ? "text-white/80" : "text-[#712BB2]",
+          )}
+        >
+          {index + 1}
+        </span>
+        <span className="min-w-0 flex-1 truncate text-xs font-medium">
+          {getName(side.id)}
+        </span>
+        {entry?.group !== null && entry?.groupPlace !== null && entry && (
+          <span
+            className={cn(
+              "shrink-0 text-[10px] tabular-nums",
+              isSelected ? "text-white/80" : "text-base-content/50",
+            )}
+          >
+            {entry.group}
+            {entry.groupPlace}
+          </span>
+        )}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      style={{ width: CARD_W, height: CARD_H, ...style }}
+      className={cn(
+        "bg-base-100 flex flex-col overflow-hidden rounded-xl border",
+        sameGroup ? "border-warning border-2" : "border-base-300",
+      )}
+    >
+      {renderSide(match.side1)}
+      <div className="bg-base-300 h-px w-full shrink-0" />
+      {renderSide(match.side2)}
     </div>
   );
 }
