@@ -117,16 +117,13 @@ export function PrintPage() {
     "/print/cancel",
   );
 
-  const getPrinterStatus = useCallback(
-    (cupsName: string) =>
-      rawStatuses?.find((status) => status.printer.cups_name === cupsName),
-    [rawStatuses],
-  );
+  function getPrinterStatus(cupsName: string) {
+    return rawStatuses?.find((status) => status.printer.cups_name === cupsName);
+  }
 
-  const isPrinterOffline = useCallback(
-    (cupsName: string) => getPrinterStatus(cupsName)?.offline === true,
-    [getPrinterStatus],
-  );
+  function isPrinterOffline(cupsName: string) {
+    return getPrinterStatus(cupsName)?.offline === true;
+  }
 
   useEffect(() => {
     if (!rawPrinters?.length) return;
@@ -144,7 +141,7 @@ export function PrintPage() {
     setSession({
       printerName: (firstOnline ?? rawPrinters[0]).cups_name,
     });
-  }, [rawPrinters, isPrinterOffline, printerName, setSession]);
+  }, [rawPrinters, rawStatuses, printerName, setSession]);
 
   const actualPapersCount = preparedFilePagesCount
     ? calcPrintJobActualPapersCount(

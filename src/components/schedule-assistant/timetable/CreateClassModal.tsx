@@ -533,12 +533,6 @@ export function CreateClassModal({
     selectedCourse?.section_code,
   ]);
 
-  const draftWeeklyStartTime = weeklySlots[seriesBaselineWeekly]?.start_time;
-  const draftWeeklyWeekday = weeklySlots[seriesBaselineWeekly]?.weekday;
-  const draftOccurrenceDate = occurrences[seriesBaselineOccurrences]?.date;
-  const draftOccurrenceStartTime =
-    occurrences[seriesBaselineOccurrences]?.start_time;
-
   useEffect(() => {
     if (!open || !audienceValue.length) return;
     const draftIndex =
@@ -689,10 +683,10 @@ export function CreateClassModal({
     selectedCourse?.instructors,
     seriesBaselineOccurrences,
     seriesBaselineWeekly,
-    draftWeeklyStartTime,
-    draftWeeklyWeekday,
-    draftOccurrenceDate,
-    draftOccurrenceStartTime,
+    weeklySlots[seriesBaselineWeekly]?.start_time,
+    weeklySlots[seriesBaselineWeekly]?.weekday,
+    occurrences[seriesBaselineOccurrences]?.date,
+    occurrences[seriesBaselineOccurrences]?.start_time,
   ]);
 
   function handleClose() {

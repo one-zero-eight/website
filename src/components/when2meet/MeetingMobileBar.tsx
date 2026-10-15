@@ -66,7 +66,7 @@ export function MeetingMobileBar({
       return;
     }
 
-    const updateOverflowMeasurement = () => {
+    function updateOverflowMeasurement() {
       const isOverflowing =
         participantMeasure.scrollWidth > participantRow.clientWidth;
 
@@ -80,7 +80,7 @@ export function MeetingMobileBar({
 
         return { key: participantMeasurementKey, isOverflowing };
       });
-    };
+    }
 
     updateOverflowMeasurement();
 

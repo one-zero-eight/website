@@ -1,14 +1,23 @@
-import { $schedule } from "@/api/schedule";
+import { $schedule, scheduleTypes } from "@/api/schedule";
 import { $sport } from "@/api/sport";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
+import { URLType } from "@/components/calendar/CalendarViewer.tsx";
 import {
   filterUpcomingCheckedInSchedule,
   fromCalendarSpace,
   trainingScheduleToCalendarEvent,
 } from "@/components/sport/sport-calendar-events.ts";
 import { toScheduleApiDateTime } from "@/components/sport/sport-week-utils.ts";
-import { calendarSourceToUrl, getCalendarSources } from "./calendar-sources.ts";
-import { useWhen2MeetCalendarEvents } from "./useWhen2MeetCalendarEvents.ts";
+import { useWhen2MeetCalendarEvents } from "@/components/calendar/useWhen2MeetCalendarEvents.ts";
+import {
+  getImportedLink,
+  getICSLink,
+  getMyMoodleLink,
+  getMyMusicRoomLink,
+  getMyRoomBookingsLink,
+  getMyEventsLink,
+} from "@/api/schedule/links.ts";
+import { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 import type { EventInput } from "@fullcalendar/core";
 import { useMemo, useRef, useState } from "react";
 
@@ -72,15 +81,21 @@ export function CalendarPage() {
       <Calendar
         extraEvents={when2MeetEvents}
         urls={
-          !scheduleUser || !predefined || !eventGroups
+          scheduleUser?.favorite_event_groups === undefined ||
+          scheduleUser?.hidden_event_groups === undefined ||
+          predefined === undefined ||
+          eventGroups === undefined
             ? []
-            : getCalendarSources(
-                scheduleUser,
+            : getCalendarsToShow(
+                scheduleUser.favorite_event_groups,
+                scheduleUser.hidden_event_groups,
                 predefined.event_groups,
                 eventGroups,
-                // Sport trainings come from the sport API as extra events below.
-                { excludeSport: true },
-              ).map(calendarSourceToUrl)
+                scheduleUser.id,
+                scheduleUser.music_room_hidden,
+                scheduleUser.moodle_hidden,
+                Object.values(scheduleUser.linked_calendars || {}),
+              )
         }
         sportEvents={sportEvents}
         onVisibleRangeChange={setVisibleRange}
@@ -98,4 +113,87 @@ export function CalendarPage() {
       />
     </div>
   );
+}
+
+function getCalendarsToShow(
+  favorites: string[],
+  hidden: string[],
+  predefined: string[],
+  eventGroups: scheduleTypes.SchemaListEventGroupsResponse,
+  userId: number | undefined,
+  music_room_hidden: boolean,
+  moodle_hidden: boolean,
+  imported: SchemaLinkedCalendarView[],
+): URLType[] {
+  const visibleAliases = new Set(
+    favorites.concat(predefined).filter((alias) => !hidden.includes(alias)),
+  );
+  const hasAssistantEnglish = [...visibleAliases].some((alias) =>
+    alias.startsWith("english-"),
+  );
+
+  // Remove hidden calendars
+  const toShow: URLType[] = [...visibleAliases].flatMap((alias) => {
+    const group = eventGroups.event_groups.find(
+      (eventGroup) => eventGroup.alias === alias,
+    );
+    if (!group) return [];
+    const isCoreCourses = group.tags?.some(
+      (tag) => tag.type === "core-courses",
+    );
+    return [
+      {
+        url: getICSLink(group.alias, userId),
+        eventGroup: group,
+        excludeEnglish: hasAssistantEnglish && isCoreCourses,
+      },
+    ];
+  });
+
+  // Add personal calendars
+  if (!music_room_hidden) {
+    toShow.push({
+      url: getMyMusicRoomLink(),
+      color: "seagreen",
+      sourceLink: "https://telegram.me/InnoMusicRoomBot",
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  if (!moodle_hidden) {
+    toShow.push({
+      url: getMyMoodleLink(),
+      color: "seagreen",
+      sourceLink:
+        "https://moodle.innopolis.university/calendar/view.php?view=month",
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  toShow.push({
+    url: getMyEventsLink(),
+    color: "seagreen",
+    sourceLink: "https://innohassle.ru/events",
+    updatedAt: new Date().toISOString(),
+  });
+
+  toShow.push({
+    url: getMyRoomBookingsLink(),
+    color: "seagreen",
+    sourceLink: "https://innohassle.ru/room-booking",
+    updatedAt: new Date().toISOString(),
+  });
+
+  // Add imported calendars
+  imported.forEach((v) => {
+    if (v.is_active)
+      toShow.push({
+        url: getImportedLink(userId, v.alias),
+        color: v.color || undefined,
+        updatedAt: new Date().toISOString(),
+      });
+  });
+
+  // Return unique items
+  return toShow.filter((value, index, array) => array.indexOf(value) === index);
 }

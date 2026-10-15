@@ -136,7 +136,7 @@
 
   input::placeholder,
   textarea::placeholder {
-    @apply text-base-content/50;
+    color: var(--color-base/50); /* Make input placeholder gray */
   }
 }
 

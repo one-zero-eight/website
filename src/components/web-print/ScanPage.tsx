@@ -17,7 +17,7 @@ import {
   ScanningOptionsSides,
 } from "@/api/printers/types.ts";
 import { cn } from "@/lib/ui/cn";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 /** Fake scan duration: ~6.5s per 100 dpi + optional warmup. */
 const SCAN_FAKE_MS_PER_100_DPI = 6500;
@@ -85,12 +85,12 @@ export function ScanPage() {
     "/scan/manual/delete_file",
   );
 
-  const isScannerOffline = useCallback(
-    (name: string) =>
+  function isScannerOffline(name: string) {
+    return (
       rawStatuses?.find((status) => status.scanner.name === name)?.offline ===
-      true,
-    [rawStatuses],
-  );
+      true
+    );
+  }
 
   useEffect(() => {
     if (!rawScanners?.length) return;
@@ -106,7 +106,7 @@ export function ScanPage() {
       (scanner) => !isScannerOffline(scanner.name),
     );
     setSession({ scannerName: (firstOnline ?? rawScanners[0]).name });
-  }, [rawScanners, isScannerOffline, scannerName, setSession]);
+  }, [rawScanners, rawStatuses, scannerName, setSession]);
 
   const selectedScannerOffline = !!scannerName && isScannerOffline(scannerName);
 
