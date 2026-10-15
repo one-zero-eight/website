@@ -29,6 +29,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Link } from "@tanstack/react-router";
 import { useMediaQuery } from "usehooks-ts";
 
 import { CalendarCourseLegendPanel } from "./CalendarCourseLegendPanel.tsx";
@@ -106,7 +107,10 @@ import {
   TimetableLayoutSelector,
   type TimetableLayoutMode,
 } from "./TimetableLayoutSelector.tsx";
-import { TimetableSidebarMenu } from "./TimetableSidebarMenu.tsx";
+import {
+  TimetableSidebarMenu,
+  type PersonalLessonsState,
+} from "./TimetableSidebarMenu.tsx";
 import {
   buildUnarrangedComponentGroups,
   flattenUnarrangedGroups,
@@ -314,6 +318,9 @@ type TimetableViewerProps = {
   onFocusMeetingHandled?: () => void;
   returnFromChecks?: boolean;
   personalGroups?: string[];
+  personalLessons?: PersonalLessonsState;
+  sidebarAction?: "composer" | "student";
+  showDashboardBack?: boolean;
 } & (
   | { mode: "view"; config: SchemaScheduleConfig }
   | { mode: "edit"; config: EditableScheduleConfig | null }
@@ -331,6 +338,9 @@ export function TimetableViewer(props: TimetableViewerProps) {
     onFocusMeetingHandled,
     returnFromChecks,
     personalGroups = EMPTY_PERSONAL_GROUPS,
+    personalLessons,
+    sidebarAction,
+    showDashboardBack = false,
   } = props;
   const editConfig = props.mode === "edit" ? props.config : null;
   const storageKey =
@@ -1513,9 +1523,9 @@ export function TimetableViewer(props: TimetableViewerProps) {
           onWheelCapture={handleUserNavigation}
           onTouchMoveCapture={handleUserNavigation}
         >
-          <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-3 p-4">
+          <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-3 px-4 pt-4 pb-0">
             <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[minmax(0,1fr)]">
-              <div className="-mt-2 -ml-4 flex min-h-0 min-w-0 flex-col overflow-hidden">
+              <div className="-ml-4 flex min-h-0 min-w-0 flex-col overflow-hidden">
                 {msg ? (
                   <div
                     className={cn(
@@ -1534,7 +1544,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
                   data-theme="light"
                   className="rounded-tr-box relative flex min-h-0 flex-1 flex-col overflow-hidden border border-[#d8dfeb] bg-white"
                 >
-                  {ownGroups.length ? (
+                  {!personalLessons && ownGroups.length ? (
                     <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[#d8dfeb] px-2 py-1 text-xs">
                       <span className="font-semibold text-emerald-700">
                         Мои группы
@@ -1552,6 +1562,15 @@ export function TimetableViewer(props: TimetableViewerProps) {
                     </div>
                   ) : null}
                   <div className="schedule-assistant-toolbar flex shrink-0 flex-wrap items-center gap-2 border-b border-[#d8dfeb] px-2 py-1 text-sm">
+                    {showDashboardBack ? (
+                      <Link
+                        to="/dashboard"
+                        className="btn btn-xs btn-ghost btn-circle"
+                        title="InNoHassle"
+                      >
+                        <span className="icon-[material-symbols--arrow-back-rounded] text-lg" />
+                      </Link>
+                    ) : null}
                     {returnFromChecks ? <ReturnToChecksLink /> : null}
                     {layoutMode === "calendar" &&
                     activeSectionPrograms.length > 1 ? (
@@ -1764,7 +1783,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
               </div>
 
               <aside
-                className="detail border-base-300 bg-base-100 rounded-box sticky top-4 hidden max-h-[calc(100vh-2rem)] min-h-0 w-full flex-col self-start overflow-hidden border lg:col-start-2 lg:flex lg:h-[calc(100vh-2rem)]"
+                className="detail border-base-300 bg-base-100 rounded-box hidden min-h-0 w-full flex-col overflow-hidden border lg:col-start-2 lg:mb-4 lg:flex lg:h-[calc(100%-1rem)]"
                 id="detail"
               >
                 {isLgUp ? (
@@ -1789,6 +1808,10 @@ export function TimetableViewer(props: TimetableViewerProps) {
                         !isUtilizationTab &&
                         layoutMode !== "compact_groups"
                       }
+                      personalLessons={personalLessons}
+                      ownGroups={ownGroups}
+                      onSelectPersonalGroup={navigateToPersonalGroup}
+                      sidebarAction={sidebarAction}
                     />
                   </div>
                 ) : null}
@@ -1815,6 +1838,10 @@ export function TimetableViewer(props: TimetableViewerProps) {
               !isUtilizationTab &&
               layoutMode !== "compact_groups"
             }
+            personalLessons={personalLessons}
+            ownGroups={ownGroups}
+            onSelectPersonalGroup={navigateToPersonalGroup}
+            sidebarAction={sidebarAction}
           />
         ) : null}
         {!isLgUp ? (
@@ -1841,6 +1868,13 @@ export function TimetableViewer(props: TimetableViewerProps) {
                 !isUtilizationTab &&
                 layoutMode !== "compact_groups"
               }
+              personalLessons={personalLessons}
+              ownGroups={ownGroups}
+              onSelectPersonalGroup={(group) => {
+                setMobileMenuOpen(false);
+                navigateToPersonalGroup(group);
+              }}
+              sidebarAction={sidebarAction}
             />
           </DetailFullscreenModal>
         ) : null}
@@ -1892,6 +1926,7 @@ export function TimetableWorkspace({
       focusMeetingId={focusMeetingId}
       onFocusMeetingHandled={onFocusMeetingHandled}
       returnFromChecks={returnFromChecks}
+      sidebarAction="student"
     />
   );
 }
@@ -2276,6 +2311,10 @@ type TimetableDetailPanelProps = {
   onCancelPlace?: () => void;
   placePending?: boolean;
   showUnarranged?: boolean;
+  personalLessons?: PersonalLessonsState;
+  ownGroups?: PersonalTimetableGroup[];
+  onSelectPersonalGroup?: (group: PersonalTimetableGroup) => void;
+  sidebarAction?: "composer" | "student";
 };
 
 function timetableDetailPanelPropsEqual(
@@ -2297,7 +2336,11 @@ function timetableDetailPanelPropsEqual(
     prev.onSelectUnarranged === next.onSelectUnarranged &&
     prev.onCancelPlace === next.onCancelPlace &&
     prev.placePending === next.placePending &&
-    prev.showUnarranged === next.showUnarranged
+    prev.showUnarranged === next.showUnarranged &&
+    prev.personalLessons === next.personalLessons &&
+    prev.ownGroups === next.ownGroups &&
+    prev.onSelectPersonalGroup === next.onSelectPersonalGroup &&
+    prev.sidebarAction === next.sidebarAction
   );
 }
 
@@ -2342,6 +2385,10 @@ function TimetableMobileDetailModal({
   onCancelPlace,
   placePending = false,
   showUnarranged = false,
+  personalLessons,
+  ownGroups = [],
+  onSelectPersonalGroup,
+  sidebarAction,
 }: {
   allMeetings: Meeting[];
   meetingPickerIndex: MeetingPickerIndex;
@@ -2356,6 +2403,10 @@ function TimetableMobileDetailModal({
   onCancelPlace?: () => void;
   placePending?: boolean;
   showUnarranged?: boolean;
+  personalLessons?: PersonalLessonsState;
+  ownGroups?: PersonalTimetableGroup[];
+  onSelectPersonalGroup?: (group: PersonalTimetableGroup) => void;
+  sidebarAction?: "composer" | "student";
 }) {
   const selection = useSelectionSnapshot();
 
@@ -2390,6 +2441,10 @@ function TimetableMobileDetailModal({
         onCancelPlace={onCancelPlace}
         placePending={placePending}
         showUnarranged={showUnarranged}
+        personalLessons={personalLessons}
+        ownGroups={ownGroups}
+        onSelectPersonalGroup={onSelectPersonalGroup}
+        sidebarAction={sidebarAction}
       />
     </DetailFullscreenModal>
   );
@@ -2411,6 +2466,10 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   onCancelPlace,
   placePending = false,
   showUnarranged = false,
+  personalLessons,
+  ownGroups = [],
+  onSelectPersonalGroup,
+  sidebarAction,
 }: TimetableDetailPanelProps) {
   const editConfig = useContext(TimetableEditConfigContext);
   const selection = useSelectionSnapshot();
@@ -2488,6 +2547,10 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
           onCancelPlace={onCancelPlace}
           placing={placePending}
           showUnarranged={showUnarranged}
+          personalLessons={personalLessons}
+          ownGroups={ownGroups}
+          onSelectPersonalGroup={onSelectPersonalGroup}
+          sidebarAction={sidebarAction}
         />
       ) : selection ? (
         <p className="text-base-content/60 text-sm leading-relaxed">

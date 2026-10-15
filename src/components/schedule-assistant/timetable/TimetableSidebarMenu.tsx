@@ -11,6 +11,7 @@ import {
   useFloating,
   useInteractions,
 } from "@floating-ui/react";
+import { Link } from "@tanstack/react-router";
 import {
   useDeferredValue,
   useMemo,
@@ -36,6 +37,7 @@ import {
   type UnarrangedComponentGroup,
   type UnarrangedLessonItem,
 } from "./unarrangedLessons.ts";
+import type { PersonalTimetableGroup } from "./timetablePersonalization.ts";
 import {
   buildInstructorLabelById,
   type Meeting,
@@ -47,6 +49,13 @@ import {
   timetableOccurrenceDifferences,
   searchTimetableEntries,
 } from "./timetableSearch.ts";
+
+export type PersonalLessonsState =
+  | { kind: "guest"; onSignIn: () => void }
+  | { kind: "pending" }
+  | { kind: "error"; message: string; onRetry: () => void }
+  | { kind: "empty" }
+  | { kind: "ready" };
 
 function TimetableEventSearch({
   meetings,
@@ -451,6 +460,72 @@ function TimetableEventSearch({
   );
 }
 
+function PersonalLessonsSection({
+  state,
+  ownGroups,
+  onSelectGroup,
+}: {
+  state: PersonalLessonsState;
+  ownGroups: PersonalTimetableGroup[];
+  onSelectGroup?: (group: PersonalTimetableGroup) => void;
+}) {
+  return (
+    <section className="flex flex-col gap-2">
+      <h3 className="text-sm font-semibold">Ваши занятия</h3>
+      {state.kind === "guest" ? (
+        <div className="flex flex-col gap-2">
+          <p className="text-base-content/65 text-sm leading-relaxed">
+            Войдите, чтобы подсветить свои группы.
+          </p>
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost self-start"
+            onClick={state.onSignIn}
+          >
+            Войти
+          </button>
+        </div>
+      ) : state.kind === "pending" ? (
+        <span className="skeleton h-5 w-full" />
+      ) : state.kind === "error" ? (
+        <div className="flex flex-col gap-2">
+          <p className="text-error text-sm leading-relaxed">
+            Не удалось загрузить ваши группы: {state.message}
+          </p>
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost self-start"
+            onClick={state.onRetry}
+          >
+            Повторить
+          </button>
+        </div>
+      ) : state.kind === "empty" ? (
+        <p className="text-base-content/65 text-sm leading-relaxed">
+          Ваши группы пока не найдены. Можно просматривать всё расписание.
+        </p>
+      ) : ownGroups.length ? (
+        <div className="flex flex-wrap gap-1.5">
+          {ownGroups.map((group) => (
+            <button
+              type="button"
+              key={group.groupId}
+              className="btn btn-xs btn-ghost text-emerald-700"
+              onClick={() => onSelectGroup?.(group)}
+            >
+              {group.label}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="text-base-content/65 text-sm leading-relaxed">
+          Ваши группы пока не найдены. Можно просматривать всё расписание.
+        </p>
+      )}
+    </section>
+  );
+}
+
 export function TimetableSidebarMenu({
   meetings,
   config,
@@ -462,6 +537,10 @@ export function TimetableSidebarMenu({
   onCancelPlace,
   placing = false,
   showUnarranged,
+  personalLessons,
+  ownGroups = [],
+  onSelectPersonalGroup,
+  sidebarAction,
 }: {
   meetings: Meeting[];
   config: SchemaScheduleConfig;
@@ -473,6 +552,10 @@ export function TimetableSidebarMenu({
   onCancelPlace?: () => void;
   placing?: boolean;
   showUnarranged: boolean;
+  personalLessons?: PersonalLessonsState;
+  ownGroups?: PersonalTimetableGroup[];
+  onSelectPersonalGroup?: (group: PersonalTimetableGroup) => void;
+  sidebarAction?: "composer" | "student";
 }) {
   const [page, setPage] = useState<"menu" | "unarranged">("menu");
   const canShowUnarranged =
@@ -513,6 +596,13 @@ export function TimetableSidebarMenu({
         onSelect={onNavigateToMeeting}
         activeDate={activeDate}
       />
+      {personalLessons ? (
+        <PersonalLessonsSection
+          state={personalLessons}
+          ownGroups={ownGroups}
+          onSelectGroup={onSelectPersonalGroup}
+        />
+      ) : null}
       {canShowUnarranged ? (
         <button
           type="button"
@@ -529,6 +619,26 @@ export function TimetableSidebarMenu({
           </span>
           <span className="icon-[material-symbols--chevron-right-rounded] shrink-0 text-xl" />
         </button>
+      ) : null}
+      {sidebarAction === "composer" ? (
+        <Link
+          to="/schedule-assistant"
+          className="btn btn-ghost mt-auto h-auto min-h-12 w-full shrink-0 justify-start gap-2 px-3 py-3 text-left normal-case"
+        >
+          <span className="icon-[mdi--calendar-edit-outline] shrink-0 text-xl" />
+          <span className="flex-1">Составление расписания</span>
+          <span className="icon-[material-symbols--chevron-right-rounded] shrink-0 text-xl" />
+        </Link>
+      ) : null}
+      {sidebarAction === "student" ? (
+        <Link
+          to="/timetable"
+          className="btn btn-ghost mt-auto h-auto min-h-12 w-full shrink-0 justify-start gap-2 px-3 py-3 text-left normal-case"
+        >
+          <span className="icon-[mdi--account-school-outline] shrink-0 text-xl" />
+          <span className="flex-1">Посмотреть как студент</span>
+          <span className="icon-[material-symbols--chevron-right-rounded] shrink-0 text-xl" />
+        </Link>
       ) : null}
     </div>
   );

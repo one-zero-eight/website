@@ -6,8 +6,7 @@ export const Route = createFileRoute("/schedule-assistant/")({
   // Redirect immediately
   beforeLoad: () => {
     throw redirect({
-      to: "/schedule-assistant/settings/$settingsTab",
-      params: { settingsTab: "courses" },
+      to: "/schedule-assistant/timetable",
     });
   },
 });
