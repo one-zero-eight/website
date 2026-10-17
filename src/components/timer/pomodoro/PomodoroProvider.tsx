@@ -1,5 +1,5 @@
 import { PomodoroContext } from "./lib/pomodoroContext";
-import { useLastUsedTimer } from "./lib/useLastUsedTimer";
+import { useLastUsedTimer } from "@/components/timer/lib/useLastUsedTimer";
 import { usePomodoro } from "./lib/usePomodoro";
 import { usePomodoroAlerts } from "./lib/usePomodoroAlerts";
 

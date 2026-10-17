@@ -1,5 +1,5 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import TimerPage from "@/components/timer/TimerPage.tsx";
+import TimerPage from "@/components/timer/countdown/TimerPage.tsx";
 import { TimerPageTabs } from "@/components/timer/TimerPageTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";

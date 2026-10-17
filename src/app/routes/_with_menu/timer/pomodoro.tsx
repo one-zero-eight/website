@@ -1,5 +1,5 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import { PomodoroPage } from "@/components/timer/PomodoroPage.tsx";
+import { PomodoroPage } from "@/components/timer/pomodoro/PomodoroPage.tsx";
 import { TimerPageTabs } from "@/components/timer/TimerPageTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";

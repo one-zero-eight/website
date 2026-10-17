@@ -1,7 +1,7 @@
 import { useToast } from "@/components/toast";
 import { Dispatch, SetStateAction, useCallback, useRef, useState } from "react";
-import { useLastUsedTimer } from "./useLastUsedTimer";
-import { useSaveState, useWakeLock } from "./utils";
+import { useLastUsedTimer } from "@/components/timer/lib/useLastUsedTimer";
+import { useSaveState, useWakeLock } from "@/components/timer/lib/utils";
 interface UseTimerTypes {
   title: string;
   setShowStopDialog: Dispatch<SetStateAction<boolean>>;

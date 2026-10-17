@@ -3,11 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { PomodoroControls } from "./components/PomodoroControls";
 import { PomodoroCycleDots } from "./components/PomodoroCycleDots";
 import { PomodoroSettingsModal } from "./components/PomodoroSettingsModal";
-import { useFullscreenCursor } from "./lib/useFullScreenCursor";
-import { useLastUsedTimer } from "./lib/useLastUsedTimer";
+import { useFullscreenCursor } from "@/components/timer/lib/useFullScreenCursor";
+import { useLastUsedTimer } from "@/components/timer/lib/useLastUsedTimer";
 import { usePomodoroContext } from "./lib/pomodoroContext";
 import { POMODORO_MODE_LABELS } from "./lib/usePomodoro";
-import { useFullscreen, useWakeLock } from "./lib/utils";
+import { useFullscreen, useWakeLock } from "@/components/timer/lib/utils";
 
 function formatSeconds(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600);

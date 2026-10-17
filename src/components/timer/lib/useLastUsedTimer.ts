@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
-// All timer sections. New timer mode TBD
+// All timer sections
 export const TIMER_PATHS = {
   countdown: "/timer",
   pomodoro: "/timer/pomodoro",
+  hackaton: "/timer/hackaton-timer",
 } as const;
 
 export type TimerType = keyof typeof TIMER_PATHS;

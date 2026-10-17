@@ -1,6 +1,6 @@
 import { BottomNavigation } from "@/components/layout/BottomNavigation.tsx";
 import Sidebar from "@/components/layout/Sidebar.tsx";
-import { PomodoroProvider } from "@/components/timer/PomodoroProvider.tsx";
+import { PomodoroProvider } from "@/components/timer/pomodoro/PomodoroProvider.tsx";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_with_menu")({

@@ -54,6 +54,7 @@ import { Route as With_menuAccountIndexRouteImport } from "./routes/_with_menu/a
 import { Route as ScheduleAssistantSettingsSettingsTabRouteImport } from "./routes/schedule-assistant/settings/$settingsTab";
 import { Route as With_menuWhen2meetNewRouteImport } from "./routes/_with_menu/when2meet/new";
 import { Route as With_menuTimerPomodoroRouteImport } from "./routes/_with_menu/timer/pomodoro";
+import { Route as With_menuTimerHackatonTimerRouteImport } from "./routes/_with_menu/timer/hackaton-timer";
 import { Route as With_menuTabletennisTournamentsRouteImport } from "./routes/_with_menu/tabletennis/tournaments";
 import { Route as With_menuTabletennisPlayersRouteImport } from "./routes/_with_menu/tabletennis/players";
 import { Route as With_menuTabletennisMatchesRouteImport } from "./routes/_with_menu/tabletennis/matches";
@@ -338,6 +339,12 @@ const With_menuTimerPomodoroRoute = With_menuTimerPomodoroRouteImport.update({
   path: "/timer/pomodoro",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
+const With_menuTimerHackatonTimerRoute =
+  With_menuTimerHackatonTimerRouteImport.update({
+    id: "/timer/hackaton-timer",
+    path: "/timer/hackaton-timer",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
 const With_menuTabletennisTournamentsRoute =
   With_menuTabletennisTournamentsRouteImport.update({
     id: "/tabletennis/tournaments",
@@ -666,6 +673,7 @@ export interface FileRoutesByFullPath {
   "/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
   "/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
+  "/timer/hackaton-timer": typeof With_menuTimerHackatonTimerRoute;
   "/timer/pomodoro": typeof With_menuTimerPomodoroRoute;
   "/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
@@ -758,6 +766,7 @@ export interface FileRoutesByTo {
   "/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
   "/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
+  "/timer/hackaton-timer": typeof With_menuTimerHackatonTimerRoute;
   "/timer/pomodoro": typeof With_menuTimerPomodoroRoute;
   "/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
@@ -855,6 +864,7 @@ export interface FileRoutesById {
   "/_with_menu/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
   "/_with_menu/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/_with_menu/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
+  "/_with_menu/timer/hackaton-timer": typeof With_menuTimerHackatonTimerRoute;
   "/_with_menu/timer/pomodoro": typeof With_menuTimerPomodoroRoute;
   "/_with_menu/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
@@ -952,6 +962,7 @@ export interface FileRouteTypes {
     | "/tabletennis/matches"
     | "/tabletennis/players"
     | "/tabletennis/tournaments"
+    | "/timer/hackaton-timer"
     | "/timer/pomodoro"
     | "/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
@@ -1044,6 +1055,7 @@ export interface FileRouteTypes {
     | "/tabletennis/matches"
     | "/tabletennis/players"
     | "/tabletennis/tournaments"
+    | "/timer/hackaton-timer"
     | "/timer/pomodoro"
     | "/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
@@ -1140,6 +1152,7 @@ export interface FileRouteTypes {
     | "/_with_menu/tabletennis/matches"
     | "/_with_menu/tabletennis/players"
     | "/_with_menu/tabletennis/tournaments"
+    | "/_with_menu/timer/hackaton-timer"
     | "/_with_menu/timer/pomodoro"
     | "/_with_menu/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
@@ -1508,6 +1521,13 @@ declare module "@tanstack/react-router" {
       path: "/timer/pomodoro";
       fullPath: "/timer/pomodoro";
       preLoaderRoute: typeof With_menuTimerPomodoroRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/timer/hackaton-timer": {
+      id: "/_with_menu/timer/hackaton-timer";
+      path: "/timer/hackaton-timer";
+      fullPath: "/timer/hackaton-timer";
+      preLoaderRoute: typeof With_menuTimerHackatonTimerRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/tabletennis/tournaments": {
@@ -1916,6 +1936,7 @@ interface With_menuRouteRouteChildren {
   With_menuTabletennisMatchesRoute: typeof With_menuTabletennisMatchesRoute;
   With_menuTabletennisPlayersRoute: typeof With_menuTabletennisPlayersRoute;
   With_menuTabletennisTournamentsRoute: typeof With_menuTabletennisTournamentsRoute;
+  With_menuTimerHackatonTimerRoute: typeof With_menuTimerHackatonTimerRoute;
   With_menuTimerPomodoroRoute: typeof With_menuTimerPomodoroRoute;
   With_menuWhen2meetNewRoute: typeof With_menuWhen2meetNewRoute;
   With_menuAccountIndexRoute: typeof With_menuAccountIndexRoute;
@@ -1995,6 +2016,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuTabletennisMatchesRoute: With_menuTabletennisMatchesRoute,
   With_menuTabletennisPlayersRoute: With_menuTabletennisPlayersRoute,
   With_menuTabletennisTournamentsRoute: With_menuTabletennisTournamentsRoute,
+  With_menuTimerHackatonTimerRoute: With_menuTimerHackatonTimerRoute,
   With_menuTimerPomodoroRoute: With_menuTimerPomodoroRoute,
   With_menuWhen2meetNewRoute: With_menuWhen2meetNewRoute,
   With_menuAccountIndexRoute: With_menuAccountIndexRoute,
