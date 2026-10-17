@@ -16,7 +16,9 @@ import { PresetButtons } from "./components/PresetButtons";
 import { TimerInput } from "./components/TimerInput";
 import { StopDialog } from "./components/StopDialog";
 import CustomTimeModal from "./components/CustomTimeModal";
-import { useFullscreenCursor } from "./lib/useFullScreenCursor";
+import { useFullscreenCursor } from "@/components/timer/lib/useFullScreenCursor";
+import { useLastUsedTimer } from "@/components/timer/lib/useLastUsedTimer";
+
 const TimerPage = () => {
   const [title, setTitle] = useState<string>("");
   const [showStopDialog, setShowStopDialog] = useState<boolean>(false);
@@ -27,6 +29,7 @@ const TimerPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const wakeLock = useWakeLock();
+  useLastUsedTimer("countdown");
   const isFullscreen = useFullscreen();
   const timer = useTimer({ title, setShowStopDialog, setShowTimeUpMessage });
   const {
@@ -63,6 +66,7 @@ const TimerPage = () => {
     handleStartUntilTime,
   } = timer.handlers;
   const { formatTime } = timer.utils;
+  const showHours = !isRunning || secondsLeft >= 3600;
 
   const { saveState } = useSaveState({
     title,
@@ -211,18 +215,22 @@ const TimerPage = () => {
 
       <div className="flex w-full grow items-center justify-center">
         <div className="wc">
-          <div className="text-primary flex w-full max-w-[90vw] shrink-0 items-center justify-center gap-1 text-5xl sm:gap-2 sm:text-6xl md:w-[800px] md:text-7xl lg:text-[150px]">
-            <TimerInput
-              ref={hoursRef}
-              value={hours}
-              onChange={(value) => handleSetTime(value, "H")}
-              onKeyDown={(e) => handleKeyDown(e, "H")}
-              onFocus={handleInputFocus}
-              onBlur={handleTimeBlur}
-              disabled={isRunning}
-              type="H"
-            />
-            <span>:</span>
+          <div className="text-primary flex w-full max-w-[90vw] shrink-0 items-center justify-center gap-1 text-5xl font-bold tabular-nums sm:gap-2 sm:text-6xl md:w-[800px] md:text-7xl lg:text-[150px]">
+            {showHours && (
+              <>
+                <TimerInput
+                  ref={hoursRef}
+                  value={hours}
+                  onChange={(value) => handleSetTime(value, "H")}
+                  onKeyDown={(e) => handleKeyDown(e, "H")}
+                  onFocus={handleInputFocus}
+                  onBlur={handleTimeBlur}
+                  disabled={isRunning}
+                  type="H"
+                />
+                <span>:</span>
+              </>
+            )}
             <TimerInput
               ref={minutesRef}
               value={minutes}
