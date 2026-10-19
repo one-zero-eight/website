@@ -3,6 +3,7 @@ import { Topbar } from "@/components/layout/Topbar.tsx";
 import { CreationPage } from "@/components/when2meet/CreationPage";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/when2meet/$meetingId/edit")({
   component: RouteComponent,
@@ -21,7 +22,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="When2Meet" hideOnMobile={true} />
+      <Topbar title={<Trans>When2Meet</Trans>} hideOnMobile={true} />
       <RequireAuth>
         <CreationPage meetingId={meetingId} />
       </RequireAuth>

@@ -3,6 +3,7 @@ import { FormsPage } from "@/components/forms";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/forms")({
   component: RouteComponent,
@@ -28,7 +29,7 @@ function RouteComponent() {
         <title>Forms</title>
       </Helmet>
 
-      <Topbar title="Forms" />
+      <Topbar title={<Trans>Forms</Trans>} />
       <FormsPage />
     </>
   );

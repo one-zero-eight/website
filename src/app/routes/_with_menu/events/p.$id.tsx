@@ -3,6 +3,7 @@ import { EventPage } from "@/components/events/event/EventPage";
 import { EventsTabs } from "@/components/events/EventsTabs";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/events/p/$id")({
   component: RouteComponent,
@@ -18,7 +19,7 @@ function RouteComponent() {
         <meta name="description" content="University event details." />
       </Helmet>
 
-      <Topbar title="Events" hideOnMobile={true} />
+      <Topbar title={<Trans>Events</Trans>} hideOnMobile={true} />
       <EventsTabs />
       <EventPage id={id} />
     </>

@@ -1,4 +1,5 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
+import { Trans } from "@lingui/react/macro";
 import {
   createFileRoute,
   type SearchSchemaInput,
@@ -33,7 +34,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="When2Meet" hideOnMobile={true} />
+      <Topbar title={<Trans>When2Meet</Trans>} hideOnMobile={true} />
       <MeetingsTabs />
       <MeetingsLandingPage status={status} />
     </>

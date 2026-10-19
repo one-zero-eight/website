@@ -5,6 +5,7 @@ import { SportSchedulePage } from "@/components/sport/SportSchedulePage.tsx";
 import { SportTabs } from "@/components/sport/SportTabs.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/sport/")({
   component: RouteComponent,
@@ -21,7 +22,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="Sport" hideOnMobile />
+      <Topbar title={<Trans>Sport</Trans>} hideOnMobile />
       <SportTabs />
       <RequireAuth>
         <SportPageShell>

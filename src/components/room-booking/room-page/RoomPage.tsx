@@ -10,6 +10,7 @@ import { Link } from "@tanstack/react-router";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { useCopyToClipboard } from "usehooks-ts";
+import { Trans } from "@lingui/react/macro";
 
 const ViewOnMapButton = memo(function ViewOnMapButton({
   sceneId,
@@ -226,7 +227,7 @@ export function RoomPage({ id }: { id: string }) {
   }, [room, copyToClipboard]);
 
   if (!room) {
-    return <Topbar title="Room" />;
+    return <Topbar title={<Trans>Room</Trans>} />;
   }
 
   return (
@@ -236,7 +237,7 @@ export function RoomPage({ id }: { id: string }) {
         <meta name="description" content={room.title ?? undefined} />
       </Helmet>
 
-      <Topbar title="Room details" />
+      <Topbar title={<Trans>Room details</Trans>} />
       <BookingPageTabs />
 
       <RoomDetails

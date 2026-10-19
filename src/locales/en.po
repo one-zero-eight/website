@@ -7,118 +7,308 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
 
-#: src/components/layout/MorePage.tsx:76
-#: src/components/layout/Sidebar.tsx:105
+#: src/components/layout/MorePage.tsx:75
+#: src/components/layout/Sidebar.tsx:104
 msgid "About us"
 msgstr "About us"
 
-#: src/components/layout/menu-links.tsx:256
+#: src/components/admin/AdminTabs.tsx:20
+msgid "Academic calendars"
+msgstr "Academic calendars"
+
+#: src/components/when2meet/MeetingsTabs.tsx:7
+msgid "Active"
+msgstr "Active"
+
+#: src/app/routes/_with_menu/admin/academic-calendars.tsx:21
+#: src/app/routes/_with_menu/admin/index.tsx:22
+#: src/app/routes/_with_menu/admin/predefined.tsx:21
+#: src/app/routes/_with_menu/admin/rooms.tsx:28
+#: src/app/routes/_with_menu/admin/users.$id.tsx:23
+#: src/app/routes/_with_menu/admin/users.index.tsx:28
+#: src/components/board-games/BoardGamesTabs.tsx:24
+#: src/components/clubs/ClubsTabs.tsx:22
+#: src/components/sport/SportTabs.tsx:39
 msgid "Admin"
 msgstr "Admin"
 
-#: src/components/layout/menu-links.tsx:281
-msgid "Baam"
-msgstr "Baam"
+#: src/components/when2meet/MeetingsTabs.tsx:8
+msgid "Archived"
+msgstr "Archived"
 
-#: src/components/layout/menu-links.tsx:195
-msgid "Board games"
-msgstr "Board games"
+#: src/app/routes/_with_menu/board-games/admin.tsx:17
+#: src/app/routes/_with_menu/board-games/index.tsx:24
+msgid "Board Games"
+msgstr "Board Games"
 
 #: src/components/layout/BottomNavigation.tsx:57
 msgid "Booking"
 msgstr "Booking"
 
+#: src/components/sport/SportTabs.tsx:34
+msgid "Bot"
+msgstr "Bot"
+
+#: src/app/routes/_with_menu/extension.tsx:22
+msgid "Browser extension"
+msgstr "Browser extension"
+
+#: src/app/routes/_with_menu/calendar.tsx:20
+#: src/components/events/EventsTabs.tsx:11
 #: src/components/layout/BottomNavigation.tsx:43
-#: src/components/layout/menu-links.tsx:104
+#: src/components/music-room/MusicRoomPageTabs.tsx:8
+#: src/components/sport/SportTabs.tsx:15
 msgid "Calendar"
 msgstr "Calendar"
 
-#: src/components/layout/menu-links.tsx:171
-msgid "Clubs"
-msgstr "Clubs"
+#: src/app/routes/_with_menu/42.tsx:18
+msgid "Club Fest"
+msgstr "Club Fest"
 
+#: src/components/clubs/ClubsTabs.tsx:17
+msgid "Club league"
+msgstr "Club league"
+
+#: src/components/guard/GuardTabs.tsx:14
+msgid "Copy Sheet"
+msgstr "Copy Sheet"
+
+#: src/app/routes/_with_menu/timer.tsx:22
+msgid "Countdown Timer"
+msgstr "Countdown Timer"
+
+#: src/components/clubs/ClubsTabs.tsx:14
+msgid "Create new"
+msgstr "Create new"
+
+#: src/components/guard/GuardTabs.tsx:11
+msgid "Create Sheet"
+msgstr "Create Sheet"
+
+#: src/app/routes/_with_menu/dashboard.tsx:22
 #: src/components/layout/BottomNavigation.tsx:36
-#: src/components/layout/menu-links.tsx:97
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: src/components/layout/menu-links.tsx:223
+#: src/app/routes/_with_menu/dorms.tsx:22
 msgid "Dorms"
 msgstr "Dorms"
 
-#: src/components/layout/menu-links.tsx:165
+#: src/app/routes/_with_menu/events/drafts/$id.tsx:23
+#: src/app/routes/_with_menu/events/drafts/index.tsx:21
+#: src/app/routes/_with_menu/events/index.tsx:20
+#: src/app/routes/_with_menu/events/p.$id.tsx:22
+#: src/app/routes/_with_menu/events/submissions/$id.tsx:23
+#: src/app/routes/_with_menu/events/submissions/index.tsx:21
 msgid "Events"
 msgstr "Events"
 
-#: src/components/layout/menu-links.tsx:237
-msgid "Extension"
-msgstr "Extension"
+#: src/components/sport/SportTabs.tsx:29
+msgid "FAQ"
+msgstr "FAQ"
 
-#: src/components/layout/menu-links.tsx:244
+#: src/app/routes/_with_menu/forms.tsx:32
 msgid "Forms"
 msgstr "Forms"
+
+#: src/components/board-games/BoardGamesTabs.tsx:17
+msgid "Games"
+msgstr "Games"
+
+#: src/app/routes/_with_menu/start.tsx:39
+msgid "Get started"
+msgstr "Get started"
+
+#: src/components/schedule/EventGroupPage.tsx:29
+#: src/components/schedule/EventGroupPage.tsx:35
+#: src/components/schedule/EventGroupPage.tsx:61
+msgid "Group"
+msgstr "Group"
+
+#: src/app/routes/_with_menu/guard/copy.tsx:24
+#: src/app/routes/_with_menu/guard/create.tsx:24
+#: src/app/routes/_with_menu/guard/files.tsx:24
+#: src/app/routes/_with_menu/guard/index.tsx:23
+msgid "Guard"
+msgstr "Guard"
+
+#: src/components/sport/SportTabs.tsx:18
+msgid "History"
+msgstr "History"
+
+#: src/components/admin/AdminTabs.tsx:8
+msgid "Home"
+msgstr "Home"
+
+#: src/components/guard/GuardTabs.tsx:8
+#: src/components/web-print/WebPrintTabs.tsx:8
+msgid "Info"
+msgstr "Info"
+
+#: src/components/music-room/MusicRoomPageTabs.tsx:11
+msgid "Instructions"
+msgstr "Instructions"
 
 #: src/components/layout/LeaveFeedbackButton.tsx:26
 msgid "Leave feedback"
 msgstr "Leave feedback"
 
+#: src/components/clubs/ClubsTabs.tsx:11
+msgid "List"
+msgstr "List"
+
+#: src/components/events/EventsTabs.tsx:15
+msgid "Manage Events"
+msgstr "Manage Events"
+
+#: src/app/routes/_with_menu/maps.tsx:38
 #: src/components/layout/BottomNavigation.tsx:50
-#: src/components/layout/menu-links.tsx:126
 msgid "Maps"
 msgstr "Maps"
-
-#: src/components/layout/menu-links.tsx:275
-msgid "Moodle"
-msgstr "Moodle"
 
 #: src/components/layout/BottomNavigation.tsx:64
 msgid "More"
 msgstr "More"
 
-#: src/components/layout/menu-links.tsx:231
+#: src/app/routes/_with_menu/music-room.index.tsx:20
+#: src/app/routes/_with_menu/music-room.instructions.tsx:20
 msgid "Music room"
 msgstr "Music room"
 
-#: src/components/layout/menu-links.tsx:287
-msgid "My University"
-msgstr "My University"
+#: src/app/routes/_with_menu/account/connect-telegram.tsx:26
+#: src/app/routes/_with_menu/account/token.tsx:25
+msgid "My account"
+msgstr "My account"
 
-#: src/components/layout/menu-links.tsx:177
+#: src/components/room-booking/BookingPageTabs.tsx:11
+msgid "My bookings"
+msgstr "My bookings"
+
+#: src/components/tabletennis/TabletennisTabs.tsx:14
+msgid "My matches"
+msgstr "My matches"
+
+#: src/components/tabletennis/TabletennisTabs.tsx:11
+msgid "Players"
+msgstr "Players"
+
+#: src/components/admin/AdminTabs.tsx:14
+msgid "Predefined"
+msgstr "Predefined"
+
+#: src/components/web-print/WebPrintTabs.tsx:11
+msgid "Print"
+msgstr "Print"
+
+#: src/app/routes/_with_menu/printers/index.tsx:23
+#: src/app/routes/_with_menu/printers/print.tsx:24
+#: src/app/routes/_with_menu/printers/scan.tsx:24
 msgid "Printers"
 msgstr "Printers"
 
-#: src/components/layout/menu-links.tsx:133
+#: src/components/sport/SportTabs.tsx:21
+#: src/components/tabletennis/TabletennisTabs.tsx:8
+msgid "Profile"
+msgstr "Profile"
+
+#: src/components/clubs/ClubsTabs.tsx:25
+msgid "Review Changes"
+msgstr "Review Changes"
+
+#: src/components/events/EventsTabs.tsx:20
+msgid "Review Events"
+msgstr "Review Events"
+
+#: src/components/room-booking/room-page/RoomPage.tsx:230
+msgid "Room"
+msgstr "Room"
+
+#: src/app/routes/_with_menu/room-booking/index.tsx:41
+#: src/app/routes/_with_menu/room-booking/list.tsx:24
+#: src/app/routes/_with_menu/room-booking/rooms.index.tsx:24
+#: src/app/routes/_with_menu/room-booking/rules.tsx:23
 msgid "Room booking"
 msgstr "Room booking"
 
-#: src/components/layout/menu-links.tsx:159
+#: src/components/room-booking/room-page/RoomPage.tsx:240
+msgid "Room details"
+msgstr "Room details"
+
+#: src/components/admin/AdminTabs.tsx:17
+#: src/components/room-booking/BookingPageTabs.tsx:17
+msgid "Rooms"
+msgstr "Rooms"
+
+#: src/components/room-booking/BookingPageTabs.tsx:20
+msgid "Rules"
+msgstr "Rules"
+
+#: src/components/web-print/WebPrintTabs.tsx:14
+msgid "Scan"
+msgstr "Scan"
+
+#: src/app/routes/_with_menu/schedule/$category.tsx:33
+#: src/app/routes/_with_menu/schedule/index.tsx:25
 msgid "Schedule"
 msgstr "Schedule"
 
-#: src/components/layout/menu-links.tsx:215
+#: src/app/routes/_with_menu/scholarship.tsx:25
 msgid "Scholarship"
 msgstr "Scholarship"
 
-#: src/components/layout/menu-links.tsx:90
-msgid "Search"
-msgstr "Search"
+#: src/components/maps/MapsPageTabs.tsx:37
+msgid "Search any place"
+msgstr "Search any place"
 
-#: src/components/layout/menu-links.tsx:114
+#: src/app/routes/_with_menu/sport/faq.tsx:25
+#: src/app/routes/_with_menu/sport/history.tsx:25
+#: src/app/routes/_with_menu/sport/index.tsx:25
+#: src/app/routes/_with_menu/sport/profile.tsx:25
+#: src/app/routes/_with_menu/sport/trainer.tsx:25
 msgid "Sport"
 msgstr "Sport"
 
-#: src/components/layout/menu-links.tsx:265
-msgid "Student Affairs"
-msgstr "Student Affairs"
+#: src/app/routes/_with_menu/clubs/$slug.edit.tsx:23
+#: src/app/routes/_with_menu/clubs/$slug.index.tsx:22
+#: src/app/routes/_with_menu/clubs/$slug.review.tsx:26
+#: src/app/routes/_with_menu/clubs/admin.tsx:21
+#: src/app/routes/_with_menu/clubs/index.tsx:20
+#: src/app/routes/_with_menu/clubs/league.tsx:23
+#: src/app/routes/_with_menu/clubs/new.tsx:23
+#: src/app/routes/_with_menu/clubs/review.index.tsx:24
+msgid "Student Clubs"
+msgstr "Student Clubs"
 
-#: src/components/layout/menu-links.tsx:209
-msgid "Timer"
-msgstr "Timer"
+#: src/app/routes/_with_menu/tabletennis/index.tsx:58
+#: src/app/routes/_with_menu/tabletennis/matches.tsx:20
+#: src/app/routes/_with_menu/tabletennis/players.tsx:20
+#: src/app/routes/_with_menu/tabletennis/tournaments.tsx:33
+msgid "Table tennis club"
+msgstr "Table tennis club"
 
-#: src/components/layout/menu-links.tsx:145
-msgid "Timetable"
-msgstr "Timetable"
+#: src/components/room-booking/BookingPageTabs.tsx:8
+msgid "Timeline"
+msgstr "Timeline"
 
-#: src/components/layout/menu-links.tsx:183
-msgid "When2meet"
-msgstr "When2meet"
+#: src/components/tabletennis/TabletennisTabs.tsx:17
+msgid "Tournaments"
+msgstr "Tournaments"
+
+#: src/components/sport/SportTabs.tsx:25
+msgid "Trainer"
+msgstr "Trainer"
+
+#: src/components/admin/AdminTabs.tsx:11
+msgid "Users"
+msgstr "Users"
+
+#: src/app/routes/_with_menu/when2meet/$meetingId.edit.tsx:25
+#: src/app/routes/_with_menu/when2meet/$meetingId.index.tsx:36
+#: src/app/routes/_with_menu/when2meet/index.tsx:37
+#: src/app/routes/_with_menu/when2meet/new.tsx:22
+msgid "When2Meet"
+msgstr "When2Meet"
+
+#: src/components/guard/GuardTabs.tsx:17
+msgid "Your Sheets"
+msgstr "Your Sheets"

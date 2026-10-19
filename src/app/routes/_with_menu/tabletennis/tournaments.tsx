@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { TabletennisTabs } from "@/components/tabletennis/TabletennisTabs";
+import { Trans } from "@lingui/react/macro";
 import {
   type TournamentStage,
   TabletennisTournaments,
@@ -29,7 +30,7 @@ function RouteComponent() {
         <meta name="description" content="Table tennis site" />
       </Helmet>
 
-      <Topbar title="Table tennis club" />
+      <Topbar title={<Trans>Table tennis club</Trans>} />
       <TabletennisTabs />
       <TabletennisTournaments tourId={tour} stage={stage ?? "validation"} />
     </>

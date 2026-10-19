@@ -6,7 +6,6 @@ import {
   isMenuItemVisible,
   LinkItemType,
 } from "@/components/layout/menu-links.tsx";
-import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
@@ -124,13 +123,12 @@ function SidebarLink({
 }: LinkItemType & {
   isMinimized: boolean;
 }) {
-  const { i18n } = useLingui();
   const children = (
     <>
       {icon}
       {!isMinimized && (
         <div className="in-[.is-active]:selected text-base-content/50 ml-2 flex w-fit items-center text-base font-normal whitespace-nowrap in-[.is-active]:font-medium">
-          {i18n._(title)}
+          {title}
         </div>
       )}
       {!isMinimized && (props.type === "external" || !!badge) && (

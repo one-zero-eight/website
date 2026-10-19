@@ -3,6 +3,7 @@ import { MusicRoomInstructions } from "@/components/music-room/MusicRoomInstruct
 import { MusicRoomPageTabs } from "@/components/music-room/MusicRoomPageTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/music-room/instructions")({
   component: RouteComponent,
@@ -16,7 +17,7 @@ function RouteComponent() {
         <meta name="description" content="Book the Music room in Innopolis." />
       </Helmet>
 
-      <Topbar title="Music room" />
+      <Topbar title={<Trans>Music room</Trans>} />
       <MusicRoomPageTabs />
       <MusicRoomInstructions />
     </>

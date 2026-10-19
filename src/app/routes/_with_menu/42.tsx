@@ -2,6 +2,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { createFileRoute } from "@tanstack/react-router";
 import Confetti from "react-confetti-boom";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/42")({
   component: RouteComponent,
@@ -14,7 +15,7 @@ function RouteComponent() {
         <title>Club Fest</title>
         <meta name="description" content="Club Fest page." />
       </Helmet>
-      <Topbar title="Club Fest" />
+      <Topbar title={<Trans>Club Fest</Trans>} />
       <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Confetti
           mode="boom"

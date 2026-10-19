@@ -1,4 +1,5 @@
 import { useSportProfile } from "@/components/sport/sport-profile.ts";
+import { Trans } from "@lingui/react/macro";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
@@ -10,19 +11,33 @@ export function SportTabs() {
 
   return (
     <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
-      <TabLink to="/sport">Calendar</TabLink>
-      <TabLink to="/sport/history">History</TabLink>
-      <TabLink to="/sport/profile">Profile</TabLink>
-      {isTrainer ? <TabLink to="/sport/trainer">Trainer</TabLink> : null}
-      <TabLink to="/sport/faq">FAQ</TabLink>
+      <TabLink to="/sport">
+        <Trans>Calendar</Trans>
+      </TabLink>
+      <TabLink to="/sport/history">
+        <Trans>History</Trans>
+      </TabLink>
+      <TabLink to="/sport/profile">
+        <Trans>Profile</Trans>
+      </TabLink>
+      {isTrainer ? (
+        <TabLink to="/sport/trainer">
+          <Trans>Trainer</Trans>
+        </TabLink>
+      ) : null}
+      <TabLink to="/sport/faq">
+        <Trans>FAQ</Trans>
+      </TabLink>
       <ExternalTabLink href={SPORT_BOT_URL}>
         <span className="inline-flex items-center gap-1">
           <span className="icon-[ic--baseline-telegram] text-base" />
-          Bot
+          <Trans>Bot</Trans>
         </span>
       </ExternalTabLink>
       {isAdmin ? (
-        <ExternalTabLink href={SPORT_ADMIN_URL}>Admin</ExternalTabLink>
+        <ExternalTabLink href={SPORT_ADMIN_URL}>
+          <Trans>Admin</Trans>
+        </ExternalTabLink>
       ) : null}
     </div>
   );

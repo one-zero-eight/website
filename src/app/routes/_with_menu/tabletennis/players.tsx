@@ -3,6 +3,7 @@ import { Helmet } from "@dr.pogodin/react-helmet";
 import { TabletennisTabs } from "@/components/tabletennis/TabletennisTabs";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { TabletennisPlayersTop } from "@/components/tabletennis/TabletennisPlayersTop";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/tabletennis/players")({
   component: RouteComponent,
@@ -16,7 +17,7 @@ function RouteComponent() {
         <meta name="description" content="Table tennis site" />
       </Helmet>
 
-      <Topbar title="Table tennis club" />
+      <Topbar title={<Trans>Table tennis club</Trans>} />
       <TabletennisTabs />
       <TabletennisPlayersTop />
     </>

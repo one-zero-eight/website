@@ -4,6 +4,7 @@ import { RequireInnohassleAdmin } from "@/components/admin/RequireInnohassleAdmi
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/admin/rooms")({
   component: RouteComponent,
@@ -24,7 +25,7 @@ function RouteComponent() {
         <meta name="robots" content="noindex, follow" />
       </Helmet>
 
-      <Topbar title="Admin" />
+      <Topbar title={<Trans>Admin</Trans>} />
       <RequireInnohassleAdmin>
         <AdminTabs />
         <AdminRoomsPage initialCode={code} />

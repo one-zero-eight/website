@@ -1,9 +1,11 @@
 import { $maps } from "@/api/maps";
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
+import { useLingui } from "@lingui/react/macro";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 export function MapsPageTabs() {
+  const { t } = useLingui();
   const navigate = useNavigate();
   const { data: scenes } = $maps.useQuery("get", "/scenes/");
   const { scene: sceneId, q } = useLocation({ select: ({ search }) => search });
@@ -32,7 +34,7 @@ export function MapsPageTabs() {
       >
         <input
           ref={inputRef}
-          placeholder="Search any place"
+          placeholder={t`Search any place`}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           className="min-w-0 grow bg-transparent px-3 py-2.5 outline-hidden"

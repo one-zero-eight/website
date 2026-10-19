@@ -10,7 +10,6 @@ import {
   isMenuItemVisible,
   LinkItemType,
 } from "@/components/layout/menu-links.tsx";
-import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
@@ -84,12 +83,11 @@ export function MorePage() {
 }
 
 function MenuLink({ icon, title, badge, ...props }: LinkItemType) {
-  const { i18n } = useLingui();
   const children = (
     <>
       {icon}
       <div className="in-[.is-active]:selected text-base-content/70 ml-2 flex w-fit items-center text-base font-normal whitespace-nowrap">
-        {i18n._(title)}
+        {title}
       </div>
       {(props.type === "external" || !!badge) && (
         <div className="flex w-min grow items-center">

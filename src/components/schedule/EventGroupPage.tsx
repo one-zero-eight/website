@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { useWindowSize } from "usehooks-ts";
 import { Link } from "@tanstack/react-router";
+import { Trans } from "@lingui/react/macro";
 
 export function EventGroupPage({ alias }: { alias: string }) {
   const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
@@ -25,13 +26,13 @@ export function EventGroupPage({ alias }: { alias: string }) {
   const [exportModalOpen, setExportModalOpen] = useState(false);
 
   if (isLoading) {
-    return <Topbar title="Group" />;
+    return <Topbar title={<Trans>Group</Trans>} />;
   }
 
   if (isError || !group) {
     return (
       <>
-        <Topbar title="Group" />
+        <Topbar title={<Trans>Group</Trans>} />
         <div className="flex flex-col items-center justify-center gap-4 p-16 text-center">
           <h1 className="text-4xl font-bold">404</h1>
           <p className="text-base-content/75 text-lg">
@@ -57,7 +58,7 @@ export function EventGroupPage({ alias }: { alias: string }) {
         <meta name="description" content={group.description ?? undefined} />
       </Helmet>
 
-      <Topbar title="Group" />
+      <Topbar title={<Trans>Group</Trans>} />
       <div
         style={{ backgroundImage: "url(/background-pattern.svg)" }}
         className="bg-base-200 min-h-64 bg-repeat p-4"

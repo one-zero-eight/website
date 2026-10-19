@@ -3,6 +3,7 @@ import { MapsPage } from "@/components/maps/MapsPage.tsx";
 import { MapsPageTabs } from "@/components/maps/MapsPageTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/maps")({
   validateSearch: (
@@ -34,7 +35,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="Maps" hideOnMobile />
+      <Topbar title={<Trans>Maps</Trans>} hideOnMobile />
       <MapsPageTabs />
       <MapsPage sceneId={scene} areaId={area} q={q} />
     </>

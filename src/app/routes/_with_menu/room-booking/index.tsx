@@ -4,6 +4,7 @@ import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
 import { RoomBookingPage } from "@/components/room-booking/timeline/RoomBookingPage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 type RoomBookingSearch = {
   d?: number;
@@ -37,7 +38,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="Room booking" hideOnMobile />
+      <Topbar title={<Trans>Room booking</Trans>} hideOnMobile />
       <BookingPageTabs />
       <RequireAuth>
         <RoomBookingPage />

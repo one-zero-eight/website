@@ -1,12 +1,21 @@
+import { Trans } from "@lingui/react/macro";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 
 export function GuardTabs() {
   return (
     <div className="border-base-300 flex shrink-0 flex-row gap-2 overflow-x-auto border-b px-1 whitespace-nowrap">
-      <TabLink to="/guard">Info</TabLink>
-      <TabLink to="/guard/create">Create Sheet</TabLink>
-      <TabLink to="/guard/copy">Copy Sheet</TabLink>
-      <TabLink to="/guard/files">Your Sheets</TabLink>
+      <TabLink to="/guard">
+        <Trans>Info</Trans>
+      </TabLink>
+      <TabLink to="/guard/create">
+        <Trans>Create Sheet</Trans>
+      </TabLink>
+      <TabLink to="/guard/copy">
+        <Trans>Copy Sheet</Trans>
+      </TabLink>
+      <TabLink to="/guard/files">
+        <Trans>Your Sheets</Trans>
+      </TabLink>
     </div>
   );
 }

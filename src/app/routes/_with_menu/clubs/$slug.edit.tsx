@@ -4,6 +4,7 @@ import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/clubs/$slug/edit")({
   component: RouteComponent,
@@ -19,7 +20,7 @@ function RouteComponent() {
         <meta name="description" content="List of Innopolis student clubs." />
       </Helmet>
 
-      <Topbar title="Student Clubs" />
+      <Topbar title={<Trans>Student Clubs</Trans>} />
       <ClubsTabs />
       <RequireAuth>
         <EditClubPage clubSlug={slug} />

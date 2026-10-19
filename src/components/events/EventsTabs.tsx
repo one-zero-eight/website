@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 import { useEventsAuth } from "./hooks";
 
@@ -7,16 +8,16 @@ export function EventsTabs() {
   return (
     <div className="border-base-300 flex shrink-0 flex-row gap-2 overflow-x-auto border-b px-1 whitespace-nowrap">
       <TabLink to="/events" exact>
-        Calendar
+        <Trans>Calendar</Trans>
       </TabLink>
       {canManage && (
         <TabLink to="/events/drafts" exact={false}>
-          Manage Events
+          <Trans>Manage Events</Trans>
         </TabLink>
       )}
       {isModerator && (
         <TabLink to="/events/submissions" exact={false}>
-          Review Events
+          <Trans>Review Events</Trans>
         </TabLink>
       )}
     </div>

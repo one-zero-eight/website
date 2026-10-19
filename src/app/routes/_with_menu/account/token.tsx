@@ -2,6 +2,7 @@ import { MyTokenPage } from "@/components/account/MyTokenPage.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/account/token")({
   component: RouteComponent,
@@ -21,7 +22,7 @@ function RouteComponent() {
         <meta name="robots" content="noindex, follow" />
       </Helmet>
 
-      <Topbar title="My account" />
+      <Topbar title={<Trans>My account</Trans>} />
       <div className="flex w-full flex-row justify-center">
         <div className="bg-base-200 rounded-box @container/account m-4 flex w-full max-w-md flex-col gap-4 px-4 py-6">
           <MyTokenPage />

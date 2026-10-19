@@ -4,6 +4,7 @@ import { TabletennisPage } from "@/components/tabletennis/TabletennisPage";
 import { TabletennisTabs } from "@/components/tabletennis/TabletennisTabs";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { $tabletennis } from "@/api/tabletennis";
+import { Trans } from "@lingui/react/macro";
 import {
   isApiHttpError,
   formatApiErrorMessage,
@@ -54,7 +55,7 @@ function RouteComponent() {
         <meta name="description" content="Table tennis site" />
       </Helmet>
 
-      <Topbar title="Table tennis club" />
+      <Topbar title={<Trans>Table tennis club</Trans>} />
       <TabletennisTabs />
       <TabletennisPage />
     </>

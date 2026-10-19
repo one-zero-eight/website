@@ -4,6 +4,7 @@ import { SubmissionPage } from "@/components/events/submissions/SubmissionPage";
 import { EventsTabs } from "@/components/events/EventsTabs";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/events/submissions/$id")({
   component: RouteComponent,
@@ -19,7 +20,7 @@ function RouteComponent() {
         <meta name="description" content="Review an event submission." />
       </Helmet>
 
-      <Topbar title="Events" hideOnMobile={true} />
+      <Topbar title={<Trans>Events</Trans>} hideOnMobile={true} />
       <EventsTabs />
       <RequireAuth>
         <SubmissionPage id={id} />

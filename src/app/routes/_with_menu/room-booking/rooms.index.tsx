@@ -4,6 +4,7 @@ import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
 import { RoomsList } from "@/components/room-booking/rooms-list/RoomsList.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/room-booking/rooms/")({
   component: RouteComponent,
@@ -20,7 +21,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="Room booking" hideOnMobile />
+      <Topbar title={<Trans>Room booking</Trans>} hideOnMobile />
       <BookingPageTabs />
       <RequireAuth>
         <RoomsList />

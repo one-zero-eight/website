@@ -3,6 +3,7 @@ import { HowToCreateClubPage } from "@/components/clubs/HowToCreateClubPage.tsx"
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/clubs/new")({
   component: RouteComponent,
@@ -19,7 +20,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="Student Clubs" />
+      <Topbar title={<Trans>Student Clubs</Trans>} />
       <ClubsTabs />
       <HowToCreateClubPage />
     </>

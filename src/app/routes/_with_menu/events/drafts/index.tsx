@@ -4,6 +4,7 @@ import { DraftsPage } from "@/components/events/drafts/DraftsPage";
 import { EventsTabs } from "@/components/events/EventsTabs";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/events/drafts/")({
   component: RouteComponent,
@@ -17,7 +18,7 @@ function RouteComponent() {
         <meta name="description" content="Manage your event drafts." />
       </Helmet>
 
-      <Topbar title="Events" hideOnMobile={true} />
+      <Topbar title={<Trans>Events</Trans>} hideOnMobile={true} />
       <EventsTabs />
       <RequireAuth>
         <DraftsPage />

@@ -3,6 +3,7 @@ import SchedulePage from "@/components/schedule/SchedulePage.tsx";
 import { getCategoryInfoBySlug } from "@/components/schedule/view-config.ts";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/schedule/$category")({
   component: RouteComponent,
@@ -29,7 +30,7 @@ function RouteComponent() {
         <meta name="description" content={categoryInfo.shortDescription} />
       </Helmet>
 
-      <Topbar title="Schedule" />
+      <Topbar title={<Trans>Schedule</Trans>} />
       <SchedulePage category={category} />
     </>
   );

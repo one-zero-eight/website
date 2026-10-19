@@ -1,5 +1,6 @@
 import { $boardGames } from "@/api/board-games";
 import { QueryError } from "@/components/board-games/shared.tsx";
+import { Trans } from "@lingui/react/macro";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
@@ -12,13 +13,15 @@ export function BoardGamesTabs() {
 
   return (
     <div className="border-base-300 flex shrink-0 gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
-      <TabLink to="/board-games">Games</TabLink>
+      <TabLink to="/board-games">
+        <Trans>Games</Trans>
+      </TabLink>
       {user?.role === "admin" && (
         <TabLink
           to="/board-games/admin"
           activeOptions={{ exact: false, includeSearch: false }}
         >
-          Admin
+          <Trans>Admin</Trans>
         </TabLink>
       )}
     </div>

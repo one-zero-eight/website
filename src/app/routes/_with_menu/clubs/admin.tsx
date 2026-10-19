@@ -4,6 +4,7 @@ import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { ClubsAdminPage } from "@/components/clubs/ClubsAdminPage";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/clubs/admin")({
   component: RouteComponent,
@@ -17,7 +18,7 @@ function RouteComponent() {
         <meta name="description" content="Manage a list of student clubs." />
       </Helmet>
 
-      <Topbar title="Student Clubs" />
+      <Topbar title={<Trans>Student Clubs</Trans>} />
       <ClubsTabs />
       <RequireAuth>
         <ClubsAdminPage />

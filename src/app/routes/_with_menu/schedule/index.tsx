@@ -2,6 +2,7 @@ import { Topbar } from "@/components/layout/Topbar.tsx";
 import SchedulePage from "@/components/schedule/SchedulePage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/schedule/")({
   component: RouteComponent,
@@ -21,7 +22,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="Schedule" />
+      <Topbar title={<Trans>Schedule</Trans>} />
       <SchedulePage category={null} />
     </>
   );

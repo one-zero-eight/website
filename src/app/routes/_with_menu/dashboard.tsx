@@ -2,6 +2,7 @@ import { DashboardPage } from "@/components/dashboard/DashboardPage.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/dashboard")({
   component: RouteComponent,
@@ -18,7 +19,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="Dashboard" hideOnMobile />
+      <Topbar title={<Trans>Dashboard</Trans>} hideOnMobile />
       <DashboardPage />
     </>
   );

@@ -1,4 +1,5 @@
 import { $clubs } from "@/api/clubs";
+import { Trans } from "@lingui/react/macro";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 
 export function ClubsTabs() {
@@ -6,13 +7,23 @@ export function ClubsTabs() {
 
   return (
     <div className="border-base-300 flex shrink-0 flex-row gap-2 overflow-x-auto border-b px-1 whitespace-nowrap">
-      <TabLink to="/clubs">List</TabLink>
-      <TabLink to="/clubs/new">Create new</TabLink>
-      <TabLink to="/clubs/league">Club league</TabLink>
+      <TabLink to="/clubs">
+        <Trans>List</Trans>
+      </TabLink>
+      <TabLink to="/clubs/new">
+        <Trans>Create new</Trans>
+      </TabLink>
+      <TabLink to="/clubs/league">
+        <Trans>Club league</Trans>
+      </TabLink>
       {clubsUser?.role === "admin" && (
         <>
-          <TabLink to="/clubs/admin">Admin</TabLink>
-          <TabLink to="/clubs/review">Review Changes</TabLink>
+          <TabLink to="/clubs/admin">
+            <Trans>Admin</Trans>
+          </TabLink>
+          <TabLink to="/clubs/review">
+            <Trans>Review Changes</Trans>
+          </TabLink>
         </>
       )}
     </div>

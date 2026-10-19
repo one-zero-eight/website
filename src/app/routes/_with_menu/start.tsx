@@ -2,6 +2,7 @@ import { Topbar } from "@/components/layout/Topbar.tsx";
 import { OnboardingPage } from "@/components/onboarding/OnboardingPage.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/start")({
   component: RouteComponent,
@@ -35,7 +36,7 @@ function RouteComponent() {
         <meta name="robots" content="noindex, follow" />
       </Helmet>
 
-      <Topbar title="Get started" />
+      <Topbar title={<Trans>Get started</Trans>} />
       <OnboardingPage step={step} />
     </>
   );

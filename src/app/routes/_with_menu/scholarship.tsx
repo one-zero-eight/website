@@ -2,6 +2,7 @@ import { Topbar } from "@/components/layout/Topbar.tsx";
 import { ScholarshipPage } from "@/components/scholarship/ScholarshipPage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/scholarship")({
   component: RouteComponent,
@@ -21,7 +22,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="Scholarship" />
+      <Topbar title={<Trans>Scholarship</Trans>} />
       <ScholarshipPage />
     </>
   );

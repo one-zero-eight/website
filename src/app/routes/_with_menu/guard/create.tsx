@@ -4,6 +4,7 @@ import { GuardTabs } from "@/components/guard/GuardTabs.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
+import { Trans } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/guard/create")({
   component: RouteComponent,
@@ -20,7 +21,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="Guard" />
+      <Topbar title={<Trans>Guard</Trans>} />
       <GuardTabs />
       <RequireAuth>
         <CreateSheetPage />

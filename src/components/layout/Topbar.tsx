@@ -3,13 +3,14 @@ import { SwitchLocaleButton } from "@/components/layout/SwitchLocaleButton";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
 import { cn } from "@/lib/ui/cn";
+import type { ReactNode } from "react";
 
 export function Topbar({
   title,
   hideOnMobile = false,
   hideBorder = false,
 }: {
-  title: string;
+  title: ReactNode;
   hideOnMobile?: boolean;
   hideBorder?: boolean;
 }) {
