@@ -8,7 +8,6 @@ const adminLinks = [
   "https://innohassle.ru/account/connect-telegram?reconnect=true",
   "https://storage.innohassle.ru/minio/ui",
   "https://sport.innopolis.university/admin/",
-  "https://uptime.dofi4ka.ru",
 ];
 
 export function AdminPage() {
