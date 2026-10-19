@@ -6,6 +6,10 @@ import { getRouter } from "./router.ts";
 import "./styles.css";
 import SnowfallComponent from "@/components/snow/Snowfall.tsx";
 import { SnowVisibilityProvider } from "@/components/snow/SnowContext.tsx";
+import { initializeI18n } from "@/locales/lib";
+
+// Init internationalization
+initializeI18n();
 
 // Init service worker
 registerServiceWorker();

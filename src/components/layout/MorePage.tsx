@@ -1,6 +1,7 @@
 import { useMe } from "@/api/accounts/user.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
+import { SwitchLocaleButton } from "@/components/layout/SwitchLocaleButton.tsx";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton.tsx";
 import UserMenu from "@/components/layout/UserMenu.tsx";
 import { useImpersonatingUser } from "@/components/admin/useImpersonation.ts";
@@ -9,6 +10,8 @@ import {
   isMenuItemVisible,
   LinkItemType,
 } from "@/components/layout/menu-links.tsx";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 
@@ -42,6 +45,7 @@ export function MorePage() {
         </Tooltip>
         <div className="flex grow"></div>
         {/* <ToggleSnowButton /> // Disable snow */}
+        <SwitchLocaleButton />
         <SwitchThemeButton />
         <div className="py-2 pr-2">
           <UserMenu isMobile={false} isSidebar={false} />
@@ -69,7 +73,7 @@ export function MorePage() {
           className="hover:bg-base-300 flex rounded-xl px-4 py-2 transition-colors"
         >
           <span className="in-[.is-active]:selected in-[.is-active]:text-primary text-base-content/50 flex w-fit items-center text-base font-normal whitespace-nowrap in-[.is-active]:font-medium">
-            About us
+            <Trans>About us</Trans>
           </span>
         </Link>
       </div>
@@ -80,11 +84,12 @@ export function MorePage() {
 }
 
 function MenuLink({ icon, title, badge, ...props }: LinkItemType) {
+  const { i18n } = useLingui();
   const children = (
     <>
       {icon}
       <div className="in-[.is-active]:selected text-base-content/70 ml-2 flex w-fit items-center text-base font-normal whitespace-nowrap">
-        {title}
+        {i18n._(title)}
       </div>
       {(props.type === "external" || !!badge) && (
         <div className="flex w-min grow items-center">

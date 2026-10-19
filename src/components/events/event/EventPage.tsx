@@ -9,6 +9,7 @@ import { SignInButton } from "@/components/common/SignInButton.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
+import { useAppLocale } from "@/locales/lib";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -18,6 +19,7 @@ import { PublicHostsList } from "../shared/HostLink";
 import { LocationLink } from "../shared/LocationLink";
 import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
 import { parseDescriptionContent } from "../utils/description";
+import { pickPreferredEventLocale } from "../utils/locale";
 import { getEventImageUrl, getLinkDisplayLabel } from "../utils/links";
 import { EnrolledListModal } from "./EnrolledListModal";
 
@@ -27,6 +29,7 @@ export function EventPage({ id }: { id: string }) {
   const { isModerator } = useEventsAuth();
   const { showError, showConfirm } = useToast();
   const queryClient = useQueryClient();
+  const [appLocale] = useAppLocale();
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
   const [enrolledOpen, setEnrolledOpen] = useState(false);
 
@@ -48,9 +51,9 @@ export function EventPage({ id }: { id: string }) {
     }
 
     if (!selectedLocale || !locales.includes(selectedLocale)) {
-      setSelectedLocale(locales[0] ?? null);
+      setSelectedLocale(pickPreferredEventLocale(locales, appLocale));
     }
-  }, [locales, selectedLocale]);
+  }, [locales, selectedLocale, appLocale]);
 
   const invalidateEvent = () => {
     queryClient.invalidateQueries({

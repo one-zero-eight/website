@@ -14,7 +14,7 @@
  *   ...((import.meta.env.VITE_PRODUCTION && []) || [
  *     {
  *       type: "local",
- *       title: "Events",
+ *       title: msg`Events`,
  *       to: "/events",
  *       badge: (
  *         <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
@@ -26,18 +26,20 @@
  *   ]),
  */
 import { accountsTypes } from "@/api/accounts";
+import { msg } from "@lingui/core/macro";
+import type { MessageDescriptor } from "@lingui/core";
 import { ValidateLinkOptions } from "@tanstack/react-router";
 
 export type LocalLink = {
   type: "local";
-  title: string;
+  title: MessageDescriptor;
   icon: React.ReactNode;
   badge?: React.ReactNode;
 } & ValidateLinkOptions;
 
 export type ExternalLink = {
   type: "external";
-  title: string;
+  title: MessageDescriptor;
   icon: React.ReactNode;
   badge?: React.ReactNode;
   href: string;
@@ -85,21 +87,21 @@ export const items: ItemType[] = [
   // Our flagman services:
   {
     type: "local",
-    title: "Search",
+    title: msg`Search`,
     to: "/search",
     icon: <span className="icon-[material-symbols--search]" />,
   },
   { type: "separator" },
   {
     type: "local",
-    title: "Dashboard",
+    title: msg`Dashboard`,
     to: "/dashboard",
     icon: <span className="icon-[material-symbols--space-dashboard-outline]" />,
     hideOnMore: true,
   },
   {
     type: "local",
-    title: "Calendar",
+    title: msg`Calendar`,
     to: "/calendar",
     icon: (
       <span className="icon-[material-symbols--calendar-month-outline-rounded]" />
@@ -109,7 +111,7 @@ export const items: ItemType[] = [
   ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
-      title: "Sport",
+      title: msg`Sport`,
       to: "/sport",
       badge: (
         <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
@@ -121,14 +123,14 @@ export const items: ItemType[] = [
   ]),
   {
     type: "local",
-    title: "Maps",
+    title: msg`Maps`,
     to: "/maps",
     icon: <span className="icon-[material-symbols--map-outline-rounded]" />,
     hideOnMore: true,
   },
   {
     type: "local",
-    title: "Room booking",
+    title: msg`Room booking`,
     to: "/room-booking",
     icon: (
       <span className="icon-[material-symbols--door-open-outline-rounded]" />
@@ -140,7 +142,7 @@ export const items: ItemType[] = [
   ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
-      title: "Timetable",
+      title: msg`Timetable`,
       to: "/timetable",
       badge: (
         <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
@@ -154,31 +156,31 @@ export const items: ItemType[] = [
   ]),
   {
     type: "local",
-    title: "Schedule",
+    title: msg`Schedule`,
     to: "/schedule",
     icon: <span className="icon-[mdi--calendars]" />,
   },
   {
     type: "local",
-    title: "Events",
+    title: msg`Events`,
     to: "/events",
     icon: <span className="icon-[material-symbols--campaign-rounded]" />,
   },
   {
     type: "local",
-    title: "Clubs",
+    title: msg`Clubs`,
     to: "/clubs",
     icon: <span className="icon-[material-symbols--diversity-1-rounded]" />,
   },
   {
     type: "local",
-    title: "Printers",
+    title: msg`Printers`,
     to: "/printers",
     icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
   },
   {
     type: "local",
-    title: "When2meet",
+    title: msg`When2meet`,
     to: "/when2meet",
     badge: (
       <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
@@ -190,7 +192,7 @@ export const items: ItemType[] = [
   ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
-      title: "Board games",
+      title: msg`Board games`,
       to: "/board-games",
       badge: (
         <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
@@ -204,13 +206,13 @@ export const items: ItemType[] = [
   ]),
   {
     type: "local",
-    title: "Timer",
+    title: msg`Timer`,
     to: "/timer",
     icon: <span className="icon-[material-symbols--timer-outline-rounded]" />,
   },
   {
     type: "local",
-    title: "Scholarship",
+    title: msg`Scholarship`,
     to: "/scholarship",
     icon: <span className="icon-[material-symbols--credit-card-outline]" />,
   },
@@ -218,7 +220,7 @@ export const items: ItemType[] = [
   // Informational pages about our services on external platforms: bots, extensions, etc.:
   {
     type: "local",
-    title: "Dorms",
+    title: msg`Dorms`,
     to: "/dorms",
     icon: (
       <span className="icon-[material-symbols--nest-multi-room-outline-rounded]" />
@@ -226,20 +228,20 @@ export const items: ItemType[] = [
   },
   {
     type: "local",
-    title: "Music room",
+    title: msg`Music room`,
     to: "/music-room",
     icon: <span className="icon-[material-symbols--piano]" />,
   },
   {
     type: "local",
-    title: "Extension",
+    title: msg`Extension`,
     to: "/extension",
     icon: <span className="icon-[material-symbols--extension-outline]" />,
   },
   // Services for small audience:
   {
     type: "local",
-    title: "Forms",
+    title: msg`Forms`,
     to: "/forms",
     icon: <span className="icon-[material-symbols--description-outline]" />,
     staff_only: true,
@@ -251,7 +253,7 @@ export const items: ItemType[] = [
   },
   {
     type: "local",
-    title: "Admin",
+    title: msg`Admin`,
     to: "/admin",
     icon: (
       <span className="icon-[material-symbols--admin-panel-settings-outline-rounded]" />
@@ -260,7 +262,7 @@ export const items: ItemType[] = [
   },
   {
     type: "local",
-    title: "Student Affairs",
+    title: msg`Student Affairs`,
     to: "/student-affairs",
     icon: (
       <span className="icon-[material-symbols--live-help-outline-rounded]" />
@@ -270,19 +272,19 @@ export const items: ItemType[] = [
   // External services:
   {
     type: "external",
-    title: "Moodle",
+    title: msg`Moodle`,
     href: "https://moodle.innopolis.university",
     icon: <span className="icon-[material-symbols--school-outline-rounded]" />,
   },
   {
     type: "external",
-    title: "Baam",
+    title: msg`Baam`,
     href: "https://baam.tatar/s",
     icon: <span className="icon-[material-symbols--qr-code-rounded]" />,
   },
   {
     type: "external",
-    title: "My University",
+    title: msg`My University`,
     href: "https://my.innopolis.university",
     icon: <span className="icon-[material-symbols--account-circle-outline]" />,
   },

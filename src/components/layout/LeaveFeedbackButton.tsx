@@ -1,4 +1,5 @@
 import { cn } from "@/lib/ui/cn";
+import { Trans } from "@lingui/react/macro";
 
 export function LeaveFeedbackButton({
   isMinimized = false,
@@ -21,7 +22,9 @@ export function LeaveFeedbackButton({
       )}
     >
       {!isMinimized ? (
-        <span>Leave feedback</span>
+        <span>
+          <Trans>Leave feedback</Trans>
+        </span>
       ) : (
         <span className="icon-[material-symbols--maps-ugc-outline-rounded] text-base-content/70 text-2xl" />
       )}

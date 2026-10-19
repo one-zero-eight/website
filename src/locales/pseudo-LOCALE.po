@@ -1,0 +1,124 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-10-19 15:38+0300\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: pseudo-LOCALE\n"
+
+#: src/components/layout/MorePage.tsx:76
+#: src/components/layout/Sidebar.tsx:105
+msgid "About us"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:256
+msgid "Admin"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:281
+msgid "Baam"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:195
+msgid "Board games"
+msgstr ""
+
+#: src/components/layout/BottomNavigation.tsx:57
+msgid "Booking"
+msgstr ""
+
+#: src/components/layout/BottomNavigation.tsx:43
+#: src/components/layout/menu-links.tsx:104
+msgid "Calendar"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:171
+msgid "Clubs"
+msgstr ""
+
+#: src/components/layout/BottomNavigation.tsx:36
+#: src/components/layout/menu-links.tsx:97
+msgid "Dashboard"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:223
+msgid "Dorms"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:165
+msgid "Events"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:237
+msgid "Extension"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:244
+msgid "Forms"
+msgstr ""
+
+#: src/components/layout/LeaveFeedbackButton.tsx:26
+msgid "Leave feedback"
+msgstr ""
+
+#: src/components/layout/BottomNavigation.tsx:50
+#: src/components/layout/menu-links.tsx:126
+msgid "Maps"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:275
+msgid "Moodle"
+msgstr ""
+
+#: src/components/layout/BottomNavigation.tsx:64
+msgid "More"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:231
+msgid "Music room"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:287
+msgid "My University"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:177
+msgid "Printers"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:133
+msgid "Room booking"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:159
+msgid "Schedule"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:215
+msgid "Scholarship"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:90
+msgid "Search"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:114
+msgid "Sport"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:265
+msgid "Student Affairs"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:209
+msgid "Timer"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:145
+msgid "Timetable"
+msgstr ""
+
+#: src/components/layout/menu-links.tsx:183
+msgid "When2meet"
+msgstr ""

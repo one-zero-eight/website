@@ -24,7 +24,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "lingui:extract": "lingui extract",
+    "lingui:extract:watch": "lingui extract --watch"
   },
   "dependencies": {
     "@codemirror/lang-yaml": "^6.1.3",
@@ -48,6 +50,8 @@
     "@iconify/json": "^2.2.474",
     "@iconify/tailwind4": "^1.2.3",
     "@lezer/highlight": "^1.2.3",
+    "@lingui/core": "^6.10.0",
+    "@lingui/react": "^6.10.0",
     "@mdx-js/mdx": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@mdx-js/rollup": "^3.1.1",
@@ -140,7 +144,10 @@
     "**/*.+(json|css|md|ya?ml|mdx)": "prettier --write --ignore-unknown"
   },
   "devDependencies": {
+    "@lingui/cli": "^6.10.0",
+    "@lingui/vite-plugin": "^6.10.0",
     "@playwright/test": "^1.61.1",
+    "eslint-plugin-lingui": "^0.16.0",
     "jsdom": "^29.1.1",
     "vitest": "^4.1.9"
   }

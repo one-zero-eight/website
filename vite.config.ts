@@ -1,4 +1,5 @@
 import mdx from "@mdx-js/rollup";
+import { lingui } from "@lingui/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
@@ -35,6 +36,9 @@ export default defineConfig({
 
     // React Fast Refresh, including components compiled from MDX
     react({ include: /\.(mdx|js|jsx|ts|tsx)$/ }),
+
+    // Lingui catalogs (.po) + native macro transform
+    lingui({ macroTransform: true }),
 
     // Offline mode via PWA
     VitePWA({

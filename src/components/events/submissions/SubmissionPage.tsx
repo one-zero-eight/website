@@ -9,6 +9,7 @@ import Tooltip from "@/components/common/Tooltip.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
+import { useAppLocale } from "@/locales/lib";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import moment from "moment";
@@ -20,6 +21,7 @@ import { LocationLink } from "../shared/LocationLink";
 import { eventFieldClass } from "../shared/formStyles";
 import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
 import { parseDescriptionContent } from "../utils/description";
+import { pickPreferredEventLocale } from "../utils/locale";
 import { getLinkDisplayLabel, getSubmissionImageUrl } from "../utils/links";
 
 export function SubmissionPage({ id }: { id: string }) {
@@ -27,6 +29,7 @@ export function SubmissionPage({ id }: { id: string }) {
   const queryClient = useQueryClient();
   const { showError, showConfirm } = useToast();
   const { isModerator, clubs, isPending: isAuthPending } = useEventsAuth();
+  const [appLocale] = useAppLocale();
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
   const [feedback, setFeedback] = useState("");
 
@@ -55,9 +58,9 @@ export function SubmissionPage({ id }: { id: string }) {
     }
 
     if (!selectedLocale || !locales.includes(selectedLocale)) {
-      setSelectedLocale(locales[0] ?? null);
+      setSelectedLocale(pickPreferredEventLocale(locales, appLocale));
     }
-  }, [locales, selectedLocale]);
+  }, [locales, selectedLocale, appLocale]);
 
   const invalidate = () => {
     queryClient.invalidateQueries({
