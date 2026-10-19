@@ -5,7 +5,9 @@ export function TimerPageTabs() {
     <div className="border-base-300 flex shrink-0 flex-row gap-2 overflow-x-auto border-b px-1 whitespace-nowrap">
       <TabLink to="/timer">Countdown</TabLink>
       <TabLink to="/timer/pomodoro">Pomodoro</TabLink>
-      <TabLink to="/timer/hackaton-timer">Hackaton</TabLink>
+      <TabLink to="/timer/hackathon" activeOptions={{ exact: false }}>
+        Hackathon
+      </TabLink>
     </div>
   );
 }

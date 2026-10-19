@@ -5,7 +5,7 @@ import { useLocalStorage } from "usehooks-ts";
 export const TIMER_PATHS = {
   countdown: "/timer",
   pomodoro: "/timer/pomodoro",
-  hackaton: "/timer/hackaton-timer",
+  hackathon: "/timer/hackathon",
 } as const;
 
 export type TimerType = keyof typeof TIMER_PATHS;

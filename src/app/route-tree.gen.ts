@@ -54,7 +54,6 @@ import { Route as With_menuAccountIndexRouteImport } from "./routes/_with_menu/a
 import { Route as ScheduleAssistantSettingsSettingsTabRouteImport } from "./routes/schedule-assistant/settings/$settingsTab";
 import { Route as With_menuWhen2meetNewRouteImport } from "./routes/_with_menu/when2meet/new";
 import { Route as With_menuTimerPomodoroRouteImport } from "./routes/_with_menu/timer/pomodoro";
-import { Route as With_menuTimerHackatonTimerRouteImport } from "./routes/_with_menu/timer/hackaton-timer";
 import { Route as With_menuTabletennisTournamentsRouteImport } from "./routes/_with_menu/tabletennis/tournaments";
 import { Route as With_menuTabletennisPlayersRouteImport } from "./routes/_with_menu/tabletennis/players";
 import { Route as With_menuTabletennisMatchesRouteImport } from "./routes/_with_menu/tabletennis/matches";
@@ -86,6 +85,7 @@ import { Route as With_menuAdminAcademicCalendarsRouteImport } from "./routes/_w
 import { Route as With_menuAccountTokenRouteImport } from "./routes/_with_menu/account/token";
 import { Route as With_menuAccountConnectTelegramRouteImport } from "./routes/_with_menu/account/connect-telegram";
 import { Route as With_menuWhen2meetMeetingIdIndexRouteImport } from "./routes/_with_menu/when2meet/$meetingId.index";
+import { Route as With_menuTimerHackathonIndexRouteImport } from "./routes/_with_menu/timer/hackathon/index";
 import { Route as With_menuRoomBookingRoomsIndexRouteImport } from "./routes/_with_menu/room-booking/rooms.index";
 import { Route as With_menuEventsSubmissionsIndexRouteImport } from "./routes/_with_menu/events/submissions/index";
 import { Route as With_menuEventsDraftsIndexRouteImport } from "./routes/_with_menu/events/drafts/index";
@@ -94,6 +94,7 @@ import { Route as With_menuClubsSlugIndexRouteImport } from "./routes/_with_menu
 import { Route as With_menuBoardGamesAdminIndexRouteImport } from "./routes/_with_menu/board-games/admin/index";
 import { Route as With_menuAdminUsersIndexRouteImport } from "./routes/_with_menu/admin/users.index";
 import { Route as With_menuWhen2meetMeetingIdEditRouteImport } from "./routes/_with_menu/when2meet/$meetingId.edit";
+import { Route as With_menuTimerHackathonIdRouteImport } from "./routes/_with_menu/timer/hackathon/$id";
 import { Route as With_menuScheduleEventGroupsAliasRouteImport } from "./routes/_with_menu/schedule/event-groups.$alias";
 import { Route as With_menuRoomBookingRoomsRoomRouteImport } from "./routes/_with_menu/room-booking/rooms.$room";
 import { Route as With_menuEventsSubmissionsIdRouteImport } from "./routes/_with_menu/events/submissions/$id";
@@ -339,12 +340,6 @@ const With_menuTimerPomodoroRoute = With_menuTimerPomodoroRouteImport.update({
   path: "/timer/pomodoro",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
-const With_menuTimerHackatonTimerRoute =
-  With_menuTimerHackatonTimerRouteImport.update({
-    id: "/timer/hackaton-timer",
-    path: "/timer/hackaton-timer",
-    getParentRoute: () => With_menuRouteRoute,
-  } as any);
 const With_menuTabletennisTournamentsRoute =
   With_menuTabletennisTournamentsRouteImport.update({
     id: "/tabletennis/tournaments",
@@ -515,6 +510,12 @@ const With_menuWhen2meetMeetingIdIndexRoute =
     path: "/when2meet/$meetingId/",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
+const With_menuTimerHackathonIndexRoute =
+  With_menuTimerHackathonIndexRouteImport.update({
+    id: "/timer/hackathon/",
+    path: "/timer/hackathon/",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
 const With_menuRoomBookingRoomsIndexRoute =
   With_menuRoomBookingRoomsIndexRouteImport.update({
     id: "/room-booking/rooms/",
@@ -560,6 +561,12 @@ const With_menuWhen2meetMeetingIdEditRoute =
   With_menuWhen2meetMeetingIdEditRouteImport.update({
     id: "/when2meet/$meetingId/edit",
     path: "/when2meet/$meetingId/edit",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
+const With_menuTimerHackathonIdRoute =
+  With_menuTimerHackathonIdRouteImport.update({
+    id: "/timer/hackathon/$id",
+    path: "/timer/hackathon/$id",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
 const With_menuScheduleEventGroupsAliasRoute =
@@ -673,7 +680,6 @@ export interface FileRoutesByFullPath {
   "/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
   "/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
-  "/timer/hackaton-timer": typeof With_menuTimerHackatonTimerRoute;
   "/timer/pomodoro": typeof With_menuTimerPomodoroRoute;
   "/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
@@ -704,6 +710,7 @@ export interface FileRoutesByFullPath {
   "/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
+  "/timer/hackathon/$id": typeof With_menuTimerHackathonIdRoute;
   "/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/admin/users/": typeof With_menuAdminUsersIndexRoute;
   "/board-games/admin/": typeof With_menuBoardGamesAdminIndexRoute;
@@ -712,6 +719,7 @@ export interface FileRoutesByFullPath {
   "/events/drafts/": typeof With_menuEventsDraftsIndexRoute;
   "/events/submissions/": typeof With_menuEventsSubmissionsIndexRoute;
   "/room-booking/rooms/": typeof With_menuRoomBookingRoomsIndexRoute;
+  "/timer/hackathon/": typeof With_menuTimerHackathonIndexRoute;
   "/when2meet/$meetingId/": typeof With_menuWhen2meetMeetingIdIndexRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
 }
@@ -766,7 +774,6 @@ export interface FileRoutesByTo {
   "/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
   "/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
-  "/timer/hackaton-timer": typeof With_menuTimerHackatonTimerRoute;
   "/timer/pomodoro": typeof With_menuTimerPomodoroRoute;
   "/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
@@ -797,6 +804,7 @@ export interface FileRoutesByTo {
   "/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
+  "/timer/hackathon/$id": typeof With_menuTimerHackathonIdRoute;
   "/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/admin/users": typeof With_menuAdminUsersIndexRoute;
   "/board-games/admin": typeof With_menuBoardGamesAdminIndexRoute;
@@ -805,6 +813,7 @@ export interface FileRoutesByTo {
   "/events/drafts": typeof With_menuEventsDraftsIndexRoute;
   "/events/submissions": typeof With_menuEventsSubmissionsIndexRoute;
   "/room-booking/rooms": typeof With_menuRoomBookingRoomsIndexRoute;
+  "/timer/hackathon": typeof With_menuTimerHackathonIndexRoute;
   "/when2meet/$meetingId": typeof With_menuWhen2meetMeetingIdIndexRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
 }
@@ -864,7 +873,6 @@ export interface FileRoutesById {
   "/_with_menu/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
   "/_with_menu/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/_with_menu/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
-  "/_with_menu/timer/hackaton-timer": typeof With_menuTimerHackatonTimerRoute;
   "/_with_menu/timer/pomodoro": typeof With_menuTimerPomodoroRoute;
   "/_with_menu/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
@@ -895,6 +903,7 @@ export interface FileRoutesById {
   "/_with_menu/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
   "/_with_menu/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/_with_menu/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
+  "/_with_menu/timer/hackathon/$id": typeof With_menuTimerHackathonIdRoute;
   "/_with_menu/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/_with_menu/admin/users/": typeof With_menuAdminUsersIndexRoute;
   "/_with_menu/board-games/admin/": typeof With_menuBoardGamesAdminIndexRoute;
@@ -903,6 +912,7 @@ export interface FileRoutesById {
   "/_with_menu/events/drafts/": typeof With_menuEventsDraftsIndexRoute;
   "/_with_menu/events/submissions/": typeof With_menuEventsSubmissionsIndexRoute;
   "/_with_menu/room-booking/rooms/": typeof With_menuRoomBookingRoomsIndexRoute;
+  "/_with_menu/timer/hackathon/": typeof With_menuTimerHackathonIndexRoute;
   "/_with_menu/when2meet/$meetingId/": typeof With_menuWhen2meetMeetingIdIndexRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
 }
@@ -962,7 +972,6 @@ export interface FileRouteTypes {
     | "/tabletennis/matches"
     | "/tabletennis/players"
     | "/tabletennis/tournaments"
-    | "/timer/hackaton-timer"
     | "/timer/pomodoro"
     | "/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
@@ -993,6 +1002,7 @@ export interface FileRouteTypes {
     | "/events/submissions/$id"
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
+    | "/timer/hackathon/$id"
     | "/when2meet/$meetingId/edit"
     | "/admin/users/"
     | "/board-games/admin/"
@@ -1001,6 +1011,7 @@ export interface FileRouteTypes {
     | "/events/drafts/"
     | "/events/submissions/"
     | "/room-booking/rooms/"
+    | "/timer/hackathon/"
     | "/when2meet/$meetingId/"
     | "/guard/google/files/$slug/join";
   fileRoutesByTo: FileRoutesByTo;
@@ -1055,7 +1066,6 @@ export interface FileRouteTypes {
     | "/tabletennis/matches"
     | "/tabletennis/players"
     | "/tabletennis/tournaments"
-    | "/timer/hackaton-timer"
     | "/timer/pomodoro"
     | "/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
@@ -1086,6 +1096,7 @@ export interface FileRouteTypes {
     | "/events/submissions/$id"
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
+    | "/timer/hackathon/$id"
     | "/when2meet/$meetingId/edit"
     | "/admin/users"
     | "/board-games/admin"
@@ -1094,6 +1105,7 @@ export interface FileRouteTypes {
     | "/events/drafts"
     | "/events/submissions"
     | "/room-booking/rooms"
+    | "/timer/hackathon"
     | "/when2meet/$meetingId"
     | "/guard/google/files/$slug/join";
   id:
@@ -1152,7 +1164,6 @@ export interface FileRouteTypes {
     | "/_with_menu/tabletennis/matches"
     | "/_with_menu/tabletennis/players"
     | "/_with_menu/tabletennis/tournaments"
-    | "/_with_menu/timer/hackaton-timer"
     | "/_with_menu/timer/pomodoro"
     | "/_with_menu/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
@@ -1183,6 +1194,7 @@ export interface FileRouteTypes {
     | "/_with_menu/events/submissions/$id"
     | "/_with_menu/room-booking/rooms/$room"
     | "/_with_menu/schedule/event-groups/$alias"
+    | "/_with_menu/timer/hackathon/$id"
     | "/_with_menu/when2meet/$meetingId/edit"
     | "/_with_menu/admin/users/"
     | "/_with_menu/board-games/admin/"
@@ -1191,6 +1203,7 @@ export interface FileRouteTypes {
     | "/_with_menu/events/drafts/"
     | "/_with_menu/events/submissions/"
     | "/_with_menu/room-booking/rooms/"
+    | "/_with_menu/timer/hackathon/"
     | "/_with_menu/when2meet/$meetingId/"
     | "/guard/google/files/$slug/join";
   fileRoutesById: FileRoutesById;
@@ -1523,13 +1536,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuTimerPomodoroRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/timer/hackaton-timer": {
-      id: "/_with_menu/timer/hackaton-timer";
-      path: "/timer/hackaton-timer";
-      fullPath: "/timer/hackaton-timer";
-      preLoaderRoute: typeof With_menuTimerHackatonTimerRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
     "/_with_menu/tabletennis/tournaments": {
       id: "/_with_menu/tabletennis/tournaments";
       path: "/tabletennis/tournaments";
@@ -1747,6 +1753,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuWhen2meetMeetingIdIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/timer/hackathon/": {
+      id: "/_with_menu/timer/hackathon/";
+      path: "/timer/hackathon";
+      fullPath: "/timer/hackathon/";
+      preLoaderRoute: typeof With_menuTimerHackathonIndexRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/room-booking/rooms/": {
       id: "/_with_menu/room-booking/rooms/";
       path: "/room-booking/rooms";
@@ -1801,6 +1814,13 @@ declare module "@tanstack/react-router" {
       path: "/when2meet/$meetingId/edit";
       fullPath: "/when2meet/$meetingId/edit";
       preLoaderRoute: typeof With_menuWhen2meetMeetingIdEditRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/timer/hackathon/$id": {
+      id: "/_with_menu/timer/hackathon/$id";
+      path: "/timer/hackathon/$id";
+      fullPath: "/timer/hackathon/$id";
+      preLoaderRoute: typeof With_menuTimerHackathonIdRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/schedule/event-groups/$alias": {
@@ -1936,7 +1956,6 @@ interface With_menuRouteRouteChildren {
   With_menuTabletennisMatchesRoute: typeof With_menuTabletennisMatchesRoute;
   With_menuTabletennisPlayersRoute: typeof With_menuTabletennisPlayersRoute;
   With_menuTabletennisTournamentsRoute: typeof With_menuTabletennisTournamentsRoute;
-  With_menuTimerHackatonTimerRoute: typeof With_menuTimerHackatonTimerRoute;
   With_menuTimerPomodoroRoute: typeof With_menuTimerPomodoroRoute;
   With_menuWhen2meetNewRoute: typeof With_menuWhen2meetNewRoute;
   With_menuAccountIndexRoute: typeof With_menuAccountIndexRoute;
@@ -1963,6 +1982,7 @@ interface With_menuRouteRouteChildren {
   With_menuEventsSubmissionsIdRoute: typeof With_menuEventsSubmissionsIdRoute;
   With_menuRoomBookingRoomsRoomRoute: typeof With_menuRoomBookingRoomsRoomRoute;
   With_menuScheduleEventGroupsAliasRoute: typeof With_menuScheduleEventGroupsAliasRoute;
+  With_menuTimerHackathonIdRoute: typeof With_menuTimerHackathonIdRoute;
   With_menuWhen2meetMeetingIdEditRoute: typeof With_menuWhen2meetMeetingIdEditRoute;
   With_menuAdminUsersIndexRoute: typeof With_menuAdminUsersIndexRoute;
   With_menuClubsSlugIndexRoute: typeof With_menuClubsSlugIndexRoute;
@@ -1970,6 +1990,7 @@ interface With_menuRouteRouteChildren {
   With_menuEventsDraftsIndexRoute: typeof With_menuEventsDraftsIndexRoute;
   With_menuEventsSubmissionsIndexRoute: typeof With_menuEventsSubmissionsIndexRoute;
   With_menuRoomBookingRoomsIndexRoute: typeof With_menuRoomBookingRoomsIndexRoute;
+  With_menuTimerHackathonIndexRoute: typeof With_menuTimerHackathonIndexRoute;
   With_menuWhen2meetMeetingIdIndexRoute: typeof With_menuWhen2meetMeetingIdIndexRoute;
 }
 
@@ -2016,7 +2037,6 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuTabletennisMatchesRoute: With_menuTabletennisMatchesRoute,
   With_menuTabletennisPlayersRoute: With_menuTabletennisPlayersRoute,
   With_menuTabletennisTournamentsRoute: With_menuTabletennisTournamentsRoute,
-  With_menuTimerHackatonTimerRoute: With_menuTimerHackatonTimerRoute,
   With_menuTimerPomodoroRoute: With_menuTimerPomodoroRoute,
   With_menuWhen2meetNewRoute: With_menuWhen2meetNewRoute,
   With_menuAccountIndexRoute: With_menuAccountIndexRoute,
@@ -2044,6 +2064,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuRoomBookingRoomsRoomRoute: With_menuRoomBookingRoomsRoomRoute,
   With_menuScheduleEventGroupsAliasRoute:
     With_menuScheduleEventGroupsAliasRoute,
+  With_menuTimerHackathonIdRoute: With_menuTimerHackathonIdRoute,
   With_menuWhen2meetMeetingIdEditRoute: With_menuWhen2meetMeetingIdEditRoute,
   With_menuAdminUsersIndexRoute: With_menuAdminUsersIndexRoute,
   With_menuClubsSlugIndexRoute: With_menuClubsSlugIndexRoute,
@@ -2051,6 +2072,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuEventsDraftsIndexRoute: With_menuEventsDraftsIndexRoute,
   With_menuEventsSubmissionsIndexRoute: With_menuEventsSubmissionsIndexRoute,
   With_menuRoomBookingRoomsIndexRoute: With_menuRoomBookingRoomsIndexRoute,
+  With_menuTimerHackathonIndexRoute: With_menuTimerHackathonIndexRoute,
   With_menuWhen2meetMeetingIdIndexRoute: With_menuWhen2meetMeetingIdIndexRoute,
 };
 

@@ -1,6 +1,12 @@
 import { cn } from "@/lib/ui/cn";
-import { useEventListener } from "usehooks-ts";
-import { formatDateTime, Milestone } from "./utils";
+import { useEventListener, useMediaQuery } from "usehooks-ts";
+import { formatDateTime, Milestone } from "../utils";
+
+// Desktop shows one passed milestone, the next one and two after it.
+// Mobile shows only the current milestone.
+const DESKTOP_SLOTS = { visible: 4, passed: 1 };
+const MOBILE_SLOTS = { visible: 1, passed: 0 };
+const PASSED_ITEM_SCALE = 0.8;
 
 export function TimelineWheel({
   milestones,
@@ -13,6 +19,11 @@ export function TimelineWheel({
   nextIndex: number;
   onFocusedIndexChange: (index: number) => void;
 }) {
+  const isMobile = useMediaQuery("(max-width: 767px)");
+  const { visible: visibleSlots, passed: passedSlots } = isMobile
+    ? MOBILE_SLOTS
+    : DESKTOP_SLOTS;
+
   function moveFocus(step: number) {
     const clampedIndex = Math.min(
       Math.max(focusedIndex + step, 0),
@@ -41,9 +52,11 @@ export function TimelineWheel({
       <div className="relative h-32 min-w-0 grow overflow-hidden">
         <div className="bg-base-content/40 absolute top-4 right-0 left-0 h-1.5 -translate-y-1/2 rounded-full" />
         {milestones.map((milestone, index) => {
-          const distance = index - focusedIndex;
-          if (Math.abs(distance) > 2) return null;
-          const isVisible = Math.abs(distance) <= 1;
+          const slot = index - focusedIndex + passedSlots;
+          // One extra slot on each side lets items fade in and out while moving
+          if (slot < -1 || slot > visibleSlots) return null;
+          const isVisible = slot >= 0 && slot < visibleSlots;
+          const scale = slot < passedSlots ? PASSED_ITEM_SCALE : 1;
           const isNext = index === nextIndex;
           const isPast = index < nextIndex;
 
@@ -51,10 +64,13 @@ export function TimelineWheel({
             <div
               key={milestone.id}
               className={cn(
-                "pointer-events-none absolute top-0 left-1/2 flex w-1/3 flex-col items-center transition-[transform,opacity] duration-300 ease-out",
+                "pointer-events-none absolute top-0 left-0 flex origin-[50%_1rem] flex-col items-center transition-[transform,opacity] duration-300 ease-out",
                 isVisible ? "opacity-100" : "opacity-0",
               )}
-              style={{ transform: `translateX(${distance * 100 - 50}%)` }}
+              style={{
+                width: `${100 / visibleSlots}%`,
+                transform: `translateX(${slot * 100}%) scale(${scale})`,
+              }}
             >
               <div className="flex h-8 items-center">
                 <span
