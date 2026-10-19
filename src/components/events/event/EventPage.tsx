@@ -9,7 +9,7 @@ import { SignInButton } from "@/components/common/SignInButton.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
-import { useAppLocale } from "@/locales/lib";
+import { getLocaleLabel, useAppLocale } from "@/locales/lib";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -202,14 +202,14 @@ export function EventPage({ id }: { id: string }) {
                   key={locale}
                   type="button"
                   className={cn(
-                    "btn btn-sm uppercase",
+                    "btn btn-sm",
                     selectedLocale === locale
                       ? "btn-primary"
                       : "btn-ghost border border-dashed",
                   )}
                   onClick={() => setSelectedLocale(locale)}
                 >
-                  {locale}
+                  {getLocaleLabel(locale)}
                 </button>
               ))}
               <h1 className="min-w-0 flex-1 text-xl font-medium wrap-anywhere @min-[700px]/content:text-2xl">

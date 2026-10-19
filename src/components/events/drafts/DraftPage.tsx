@@ -6,6 +6,7 @@ import { Modal } from "@/components/common/Modal.tsx";
 import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
+import { getLocaleLabel } from "@/locales/lib";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -519,11 +520,11 @@ export function DraftPage({ id }: { id: string }) {
                               <button
                                 key={locale}
                                 type="button"
-                                className="btn btn-ghost btn-sm justify-start uppercase"
+                                className="btn btn-ghost btn-sm justify-start"
                                 disabled={isSavingLocale}
                                 onClick={() => handleAddLocale(locale)}
                               >
-                                {locale}
+                                {getLocaleLabel(locale)}
                               </button>
                             ))}
                           </div>
@@ -717,7 +718,10 @@ export function DraftPage({ id }: { id: string }) {
       >
         <p className="mb-4 text-sm">
           Delete language{" "}
-          <span className="font-medium uppercase">{selectedLocale}</span>?
+          <span className="font-medium">
+            {selectedLocale ? getLocaleLabel(selectedLocale) : selectedLocale}
+          </span>
+          ?
         </p>
         <div className="flex justify-end gap-2">
           <button

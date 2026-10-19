@@ -9,7 +9,7 @@ import Tooltip from "@/components/common/Tooltip.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
-import { useAppLocale } from "@/locales/lib";
+import { getLocaleLabel, useAppLocale } from "@/locales/lib";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import moment from "moment";
@@ -238,14 +238,14 @@ export function SubmissionPage({ id }: { id: string }) {
                 key={locale}
                 type="button"
                 className={cn(
-                  "btn btn-sm uppercase",
+                  "btn btn-sm",
                   selectedLocale === locale
                     ? "btn-primary"
                     : "btn-ghost border border-dashed",
                 )}
                 onClick={() => setSelectedLocale(locale)}
               >
-                {locale}
+                {getLocaleLabel(locale)}
               </button>
             ))}
             <h1 className="text-xl font-medium wrap-anywhere @min-[700px]/content:text-2xl">

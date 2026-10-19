@@ -11,16 +11,29 @@ export const SUPPORTED_LOCALES = ["en", "ru"] as const;
 
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 
+export const isLocale = (value: string | null): value is Locale => {
+  return !!value && SUPPORTED_LOCALES.includes(value as Locale);
+};
+
+export const LOCALE_LABELS: Record<Locale, string> = {
+  en: "EN",
+  ru: "Русѣ",
+};
+
+export const getLocaleLabel = (locale: string): string => {
+  if (isLocale(locale)) {
+    return LOCALE_LABELS[locale];
+  }
+
+  return locale.toUpperCase();
+};
+
 let isI18nLoaded = false;
 
 const catalogs: Record<string, Messages> = {
   en: enMessages,
   ru: ruMessages,
   "pseudo-LOCALE": pseudoLocaleMessages,
-};
-
-const isLocale = (value: string | null): value is Locale => {
-  return !!value && SUPPORTED_LOCALES.includes(value as Locale);
 };
 
 export const getInitialLocale = (): Locale => {

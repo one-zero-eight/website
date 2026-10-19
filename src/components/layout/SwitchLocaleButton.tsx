@@ -1,5 +1,5 @@
 import Tooltip from "@/components/common/Tooltip.tsx";
-import { useAppLocale } from "@/locales/lib";
+import { LOCALE_LABELS, useAppLocale } from "@/locales/lib";
 
 export function SwitchLocaleButton() {
   const [locale, setLocale] = useAppLocale();
@@ -11,7 +11,7 @@ export function SwitchLocaleButton() {
         className="hover:bg-base-300 text-base-content/70 hover:text-base-content flex size-12 items-center justify-center rounded-xl pt-1 text-sm font-semibold tracking-wide"
         onClick={() => setLocale(locale === "en" ? "ru" : "en")}
       >
-        {locale === "en" ? "EN" : "RU"}
+        {LOCALE_LABELS[locale]}
       </button>
     </Tooltip>
   );

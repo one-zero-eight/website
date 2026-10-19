@@ -2,6 +2,7 @@ import { DescriptionEditor } from "@/components/editor/DescriptionEditor.tsx";
 import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { cn } from "@/lib/ui/cn";
+import { getLocaleLabel } from "@/locales/lib";
 import { RefObject } from "react";
 import {
   parseDescriptionContent,
@@ -42,7 +43,7 @@ export function LocaleContentSection({
             key={locale}
             type="button"
             className={cn(
-              "btn btn-sm uppercase",
+              "btn btn-sm",
               selectedLocale === locale
                 ? "btn-primary"
                 : "btn-ghost border border-dashed",
@@ -50,7 +51,7 @@ export function LocaleContentSection({
             onClick={() => onSelectLocale(locale)}
             disabled={editing && selectedLocale !== locale}
           >
-            {locale}
+            {getLocaleLabel(locale)}
           </button>
         ))}
         {toolbar}

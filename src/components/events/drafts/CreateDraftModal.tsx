@@ -3,6 +3,7 @@ import { $events } from "@/api/events";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
+import { getLocaleLabel } from "@/locales/lib";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
@@ -149,7 +150,7 @@ export function CreateDraftModal({
                   type="button"
                   disabled={isPending}
                   className={cn(
-                    "btn btn-sm uppercase",
+                    "btn btn-sm",
                     selected ? "btn-primary" : "btn-ghost border",
                   )}
                   onClick={() =>
@@ -160,7 +161,7 @@ export function CreateDraftModal({
                     )
                   }
                 >
-                  {locale}
+                  {getLocaleLabel(locale)}
                 </button>
               );
             })}
