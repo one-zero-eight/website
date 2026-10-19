@@ -34,6 +34,18 @@ export default tseslint.config(
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/purity": "off",
       "react-hooks/refs": "off", // floating-ui refs give too much false positives
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@lingui/macro",
+              message:
+                "Use @lingui/react/macro (JSX) or @lingui/core/macro (JS) instead.",
+            },
+          ],
+        },
+      ],
     },
   },
 );

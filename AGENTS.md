@@ -266,6 +266,20 @@ If user asks you to find a suitable icon, use the following instruction:
 - Search: `https://api.iconify.design/search?query=<keyword>&prefix=<prefix>`
 - Icon data: `https://api.iconify.design/<prefix>.json?icons=<name1>,<name2>,...`
 
+### Internationalization via Lingui
+
+- Locale `en` is default and is used in source code. `ru` is translated in `src/locales/ru.po`.
+- Macros: JSX from `@lingui/react/macro` (`Trans`, `useLingui` / `t`); JS/`msg` from `@lingui/core/macro`.
+- Runtime helpers: `@/locales/lib` (`useAppLocale`, `getLocaleLabel`).
+- On new pages use i18n. When the English and Russian texts should match, do not split msgid into several.
+- Do not i18n sidebar `menu-links` titles (use plain English strings). Do not i18n raw API content.
+- After adding/changing extractable strings: run `pnpm lingui:extract`, fill `msgstr` in `ru.po`, add `.po` to commit with the code.
+- Interpolate values with ICU placeholders:
+  - JSX: `<Trans>Hello, {name}</Trans>`
+  - strings: `const { t } = useLingui(); t\`Hello, ${name}\``
+  - plurals: `<Plural value={count} one="# message" other="# messages" />` (from `@lingui/react/macro`)
+  - In `ru.po` keep the same placeholders, e.g. `msgstr "Привет, {name}"`.
+
 ## React data fetching
 
 Fetch data in the component that owns the feature logic.
