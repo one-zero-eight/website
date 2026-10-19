@@ -4,8 +4,8 @@ import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton.tsx";
 import UserMenu from "@/components/layout/UserMenu.tsx";
 import { useImpersonatingUser } from "@/components/admin/useImpersonation.ts";
+import { useTimerMenuItems } from "@/components/timer/lib/useTimerMenuItems.ts";
 import {
-  items,
   isMenuItemVisible,
   LinkItemType,
 } from "@/components/layout/menu-links.tsx";
@@ -14,6 +14,7 @@ import { cn } from "@/lib/ui/cn";
 
 export function MorePage() {
   const { me } = useMe();
+  const items = useTimerMenuItems();
   const [impersonatingUser] = useImpersonatingUser();
 
   return (
