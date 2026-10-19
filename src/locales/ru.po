@@ -10,11 +10,11 @@ msgstr ""
 #: src/components/layout/MorePage.tsx:76
 #: src/components/layout/Sidebar.tsx:105
 msgid "About us"
-msgstr "О нас"
+msgstr "About us"
 
 #: src/components/layout/menu-links.tsx:256
 msgid "Admin"
-msgstr "Админка"
+msgstr "Admin"
 
 #: src/components/layout/menu-links.tsx:281
 msgid "Baam"
@@ -22,50 +22,50 @@ msgstr "Baam"
 
 #: src/components/layout/menu-links.tsx:195
 msgid "Board games"
-msgstr "Настолки"
+msgstr "Board games"
 
 #: src/components/layout/BottomNavigation.tsx:57
 msgid "Booking"
-msgstr "Бронирование"
+msgstr "Booking"
 
 #: src/components/layout/BottomNavigation.tsx:43
 #: src/components/layout/menu-links.tsx:104
 msgid "Calendar"
-msgstr "Календарь"
+msgstr "Calendar"
 
 #: src/components/layout/menu-links.tsx:171
 msgid "Clubs"
-msgstr "Клубы"
+msgstr "Clubs"
 
 #: src/components/layout/BottomNavigation.tsx:36
 #: src/components/layout/menu-links.tsx:97
 msgid "Dashboard"
-msgstr "Главная"
+msgstr "Dashboard"
 
 #: src/components/layout/menu-links.tsx:223
 msgid "Dorms"
-msgstr "Дормы"
+msgstr "Dorms"
 
 #: src/components/layout/menu-links.tsx:165
 msgid "Events"
-msgstr "Мероприятия"
+msgstr "Events"
 
 #: src/components/layout/menu-links.tsx:237
 msgid "Extension"
-msgstr "Расширение"
+msgstr "Extension"
 
 #: src/components/layout/menu-links.tsx:244
 msgid "Forms"
-msgstr "Формы"
+msgstr "Forms"
 
 #: src/components/layout/LeaveFeedbackButton.tsx:26
 msgid "Leave feedback"
-msgstr "Оставить отзыв"
+msgstr "Leave feedback"
 
 #: src/components/layout/BottomNavigation.tsx:50
 #: src/components/layout/menu-links.tsx:126
 msgid "Maps"
-msgstr "Карты"
+msgstr "Maps"
 
 #: src/components/layout/menu-links.tsx:275
 msgid "Moodle"
@@ -73,11 +73,11 @@ msgstr "Moodle"
 
 #: src/components/layout/BottomNavigation.tsx:64
 msgid "More"
-msgstr "Сервисы"
+msgstr "More"
 
 #: src/components/layout/menu-links.tsx:231
 msgid "Music room"
-msgstr "Музкомната"
+msgstr "Music room"
 
 #: src/components/layout/menu-links.tsx:287
 msgid "My University"
@@ -85,39 +85,39 @@ msgstr "My University"
 
 #: src/components/layout/menu-links.tsx:177
 msgid "Printers"
-msgstr "Принтеры"
+msgstr "Printers"
 
 #: src/components/layout/menu-links.tsx:133
 msgid "Room booking"
-msgstr "Бронирование"
+msgstr "Room booking"
 
 #: src/components/layout/menu-links.tsx:159
 msgid "Schedule"
-msgstr "Календари"
+msgstr "Schedule"
 
 #: src/components/layout/menu-links.tsx:215
 msgid "Scholarship"
-msgstr "Стипендия"
+msgstr "Scholarship"
 
 #: src/components/layout/menu-links.tsx:90
 msgid "Search"
-msgstr "Поиск"
+msgstr "Search"
 
 #: src/components/layout/menu-links.tsx:114
 msgid "Sport"
-msgstr "Спорт"
+msgstr "Sport"
 
 #: src/components/layout/menu-links.tsx:265
 msgid "Student Affairs"
-msgstr "Запрос в 319"
+msgstr "Student Affairs"
 
 #: src/components/layout/menu-links.tsx:209
 msgid "Timer"
-msgstr "Таймер"
+msgstr "Timer"
 
 #: src/components/layout/menu-links.tsx:145
 msgid "Timetable"
-msgstr "Расписание"
+msgstr "Timetable"
 
 #: src/components/layout/menu-links.tsx:183
 msgid "When2meet"

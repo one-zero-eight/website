@@ -17,7 +17,7 @@ export const isLocale = (value: string | null): value is Locale => {
 
 export const LOCALE_LABELS: Record<Locale, string> = {
   en: "EN",
-  ru: "Русѣ",
+  ru: "RU",
 };
 
 export const getLocaleLabel = (locale: string): string => {
