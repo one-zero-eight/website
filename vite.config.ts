@@ -72,7 +72,8 @@ export default defineConfig({
               ) ||
               /\/when2meet\/v\d+\/meetings\/(participating)?$/.test(
                 url.pathname,
-              ),
+              ) ||
+              /\/accounts\/v\d+\/\w*/.test(url.pathname),
             handler: "NetworkFirst",
             options: {
               cacheName: CALENDAR_FEEDS_CACHE,
