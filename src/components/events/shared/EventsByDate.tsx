@@ -36,10 +36,10 @@ export function EventsByDate<T extends { id: string }>({
     if (key === NO_DATE_KEY) {
       return t`No date`;
     }
-    const day = moment(key, "YYYY-MM-DD");
+    const day = moment(key, "YYYY-MM-DD").locale(i18n.locale);
     return day.year() === moment().year()
-      ? day.format("Do MMMM")
-      : day.format("Do MMMM YYYY");
+      ? day.format("MMMM D, dddd")
+      : day.format("YYYY, MMMM D");
   }
 
   const { future, past } = useMemo(() => {
@@ -104,7 +104,7 @@ export function EventsByDate<T extends { id: string }>({
           {groups.map((group) => (
             <details key={group.key} className="collapse-arrow collapse" open>
               <summary className="collapse-title text-base-content/70 flex items-center gap-2 py-1.5 pr-6 pl-0 text-sm font-medium after:end-3">
-                {group.label}
+                <span className="capitalize">{group.label}</span>
                 <span className="badge badge-ghost">{group.items.length}</span>
               </summary>
               <div className="collapse-content px-0 py-1.5">

@@ -498,9 +498,10 @@ export function CalendarViewer({
           calculateAcademicWeek(academicCalendarRef.current, d)
         } // Display academic week numbers
         weekNumberContent={(arg) => {
+          const week = arg.num;
           return (
             <span className="whitespace-pre-wrap sm:whitespace-normal">
-              {arg.text.replace(" ", "\n")}
+              {t`Week ${week}`.replace(" ", "\n")}
             </span>
           );
         }}

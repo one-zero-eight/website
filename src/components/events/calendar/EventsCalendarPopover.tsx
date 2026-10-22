@@ -34,7 +34,7 @@ export function EventsCalendarPopover({
   setIsOpen: (open: boolean, event?: Event) => void;
   eventElement: HTMLElement;
 }) {
-  useLingui();
+  const { i18n } = useLingui();
   const eventId = extractEventIdFromUrl(event.url);
 
   const { data: eventData } = $events.useQuery(
@@ -118,7 +118,9 @@ export function EventsCalendarPopover({
                   <span className="icon-[material-symbols--today-outline] text-2xl" />
                 </div>
                 <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
-                  {moment(event.startStr).format("dddd, D MMMM; HH:mm")}
+                  {moment(event.startStr)
+                    .locale(i18n.locale)
+                    .format("dddd, D MMMM; HH:mm")}
                 </p>
               </div>
 

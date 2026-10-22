@@ -420,7 +420,8 @@ export const resourcesList: ResourceType[] = [
     titleRu: null,
     description:
       "Read the student handbook, learn about opportunities and events.",
-    descriptionRu: "Студенческий handbook, возможности и мероприятия.",
+    descriptionRu:
+      "Возможности для студентов, мероприятия кампуса и памятка студента.",
     icon: "icon-[material-symbols--groups-outline]",
     category: "Extracurricular",
     frequency: 17,
@@ -442,11 +443,10 @@ export const resourcesList: ResourceType[] = [
     resource: "Campus life",
     resourceRu: "Campus Life",
     title: "Handbook",
-    titleRu: "Handbook",
+    titleRu: "Памятка студента",
     description:
       "Access the official student handbook for campus rules, policies, and guidelines.",
-    descriptionRu:
-      "Официальный студенческий handbook: правила и политики кампуса.",
+    descriptionRu: "Официальная памятка студента: правила и политики кампуса.",
     icon: "icon-[material-symbols--menu-book-outline]",
     category: "Extracurricular",
     frequency: 0,

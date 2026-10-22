@@ -177,7 +177,7 @@
   }
 
   .fc-list-day-text {
-    @apply font-medium;
+    @apply font-medium capitalize;
   }
 
   .fc-list-sticky .fc-list-day > * {

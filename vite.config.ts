@@ -74,9 +74,19 @@ export default defineConfig({
   },
 
   resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-    },
+    alias: [
+      {
+        find: "@",
+        replacement: fileURLToPath(new URL("./src", import.meta.url)),
+      },
+      {
+        // Moment's locale files register on its CommonJS entry, not its ESM entry.
+        find: /^moment$/,
+        replacement: fileURLToPath(
+          new URL("./node_modules/moment/moment.js", import.meta.url),
+        ),
+      },
+    ],
   },
 
   define: {
