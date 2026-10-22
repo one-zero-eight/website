@@ -1,3 +1,5 @@
+import { Trans, useLingui } from "@lingui/react/macro";
+import { plural } from "@lingui/core/macro";
 import {
   useCallback,
   useEffect,
@@ -208,6 +210,7 @@ export function AvailabilitySelector({
   currentTime?: number;
   timeZone?: string;
 }) {
+  const { t } = useLingui();
   const daysPerPage = isPhone ? 3 : 7;
   const [dateOffset, setDateOffset] = useState(0);
   const isDraggingRef = useRef(false);
@@ -1148,6 +1151,8 @@ export function AvailabilitySelector({
               calendarOverlayVisible && calendarSlotEvents?.has(slotKey)
                 ? calendarSlotEvents.get(slotKey)
                 : undefined;
+            const monthDay = date.monthDay;
+            const calendarEventSummary = calendarEventTitles?.join(", ") ?? "";
             const hasCalendarEvent = !!calendarEventTitles?.length;
             const calendarEventTitle = calendarEventTitles?.[0] ?? "";
             const additionalCalendarEventCount =
@@ -1234,16 +1239,18 @@ export function AvailabilitySelector({
                 )}
                 title={
                   !slotAllowed
-                    ? `${date.monthDay}, ${time}: ${getUnavailableSlotHint?.(slotKey) ?? "not available for this meeting"}`
+                    ? `${date.monthDay}, ${time}: ${getUnavailableSlotHint?.(slotKey) ?? t`not available for this meeting`}`
                     : isIntervalSelected
-                      ? `${date.monthDay}, ${time}: selecting meeting time`
+                      ? t`${monthDay}, ${time}: selecting meeting time`
                       : isSelectedMeetingSlot
-                        ? `${date.monthDay}, ${time}: selected meeting time`
+                        ? t`${monthDay}, ${time}: selected meeting time`
                         : showAvailabilityEditing
-                          ? `${date.monthDay}, ${time}: ${isSelected ? "your availability is selected" : "your availability is not selected"}`
+                          ? isSelected
+                            ? t`${monthDay}, ${time}: your availability is selected`
+                            : t`${monthDay}, ${time}: your availability is not selected`
                           : calendarEventTitles?.length
-                            ? `${date.monthDay}, ${time}: ${availableCount} available · ${calendarEventTitles.join(", ")}`
-                            : `${date.monthDay}, ${time}: ${availableCount} available`
+                            ? t`${monthDay}, ${time}: ${plural(availableCount, { one: "# available", other: "# available" })} · ${calendarEventSummary}`
+                            : t`${monthDay}, ${time}: ${plural(availableCount, { one: "# available", other: "# available" })}`
                 }
                 onMouseEnter={() =>
                   handleSlotMouseEnter(slotKey, date.id, time)
@@ -1404,15 +1411,19 @@ export function AvailabilitySelector({
 
       {!hideHint && intervalSelectionMode && (
         <p className="text-base-content/60 mb-3 text-sm">
-          Tap a slot or hold and drag to select the meeting time. Swipe to
-          scroll.
+          <Trans>
+            Tap a slot or hold and drag to select the meeting time. Swipe to
+            scroll.
+          </Trans>
         </p>
       )}
 
       {!hideHint && isEditing && !intervalSelectionMode && (
         <p className="text-base-content/60 mb-3 text-sm">
-          Tap a slot or hold and drag to mark your availability. Swipe to
-          scroll.
+          <Trans>
+            Tap a slot or hold and drag to mark your availability. Swipe to
+            scroll.
+          </Trans>
         </p>
       )}
 
@@ -1426,13 +1437,17 @@ export function AvailabilitySelector({
                   "border-primary",
                 )}
               />
-              Your
+              <Trans>Your</Trans>
             </span>
           )}
           {showAvailabilityEditing ? (
             <button
               type="button"
-              title={`${showOtherParticipantsAvailability ? "Hide" : "Show"} other participants' availability`}
+              title={
+                showOtherParticipantsAvailability
+                  ? t`Hide other participants' availability`
+                  : t`Show other participants' availability`
+              }
               className={cn(
                 "hover:text-base-content inline-flex items-center gap-1.5 transition-opacity",
                 !showOtherParticipantsAvailability && "opacity-40",
@@ -1445,20 +1460,24 @@ export function AvailabilitySelector({
             >
               <span className="bg-primary/50 border-base-300 h-3 w-5 rounded-sm border" />
               <span className="underline underline-offset-2">
-                Other participants
+                <Trans>Other participants</Trans>
               </span>
             </button>
           ) : (
             <span className="inline-flex items-center gap-1.5">
               <span className="bg-primary/50 border-base-300 h-3 w-5 rounded-sm border" />
-              Availability
+              <Trans>Availability</Trans>
             </span>
           )}
           {showCalendarOverlay &&
             (showAvailabilityEditing ? (
               <button
                 type="button"
-                title={`${showCalendarEvents ? "Hide" : "Show"} calendar events`}
+                title={
+                  showCalendarEvents
+                    ? t`Hide calendar events`
+                    : t`Show calendar events`
+                }
                 className={cn(
                   "hover:text-base-content inline-flex items-center gap-1.5 transition-opacity",
                   !showCalendarEvents && "opacity-40",
@@ -1474,7 +1493,7 @@ export function AvailabilitySelector({
                   )}
                 />
                 <span className="underline underline-offset-2">
-                  Calendar events
+                  <Trans>Calendar events</Trans>
                 </span>
               </button>
             ) : (
@@ -1485,14 +1504,18 @@ export function AvailabilitySelector({
                     CALENDAR_EVENT_PATTERN_CLASS_NAME,
                   )}
                 />
-                Calendar events
+                <Trans>Calendar events</Trans>
               </span>
             ))}
           {(selectedMeetingSlotKeys?.size || intervalSelectionMode) &&
             (showAvailabilityEditing ? (
               <button
                 type="button"
-                title={`${showSelectedMeetingTime ? "Hide" : "Show"} final meeting time`}
+                title={
+                  showSelectedMeetingTime
+                    ? t`Hide final meeting time`
+                    : t`Show final meeting time`
+                }
                 className={cn(
                   "hover:text-base-content inline-flex items-center gap-1.5 transition-opacity",
                   !showSelectedMeetingTime && "opacity-40",
@@ -1502,12 +1525,14 @@ export function AvailabilitySelector({
                 }
               >
                 <span className="border-secondary bg-secondary/15 h-3 w-5 rounded-sm border-[3px]" />
-                <span className="underline underline-offset-2">Final time</span>
+                <span className="underline underline-offset-2">
+                  <Trans>Final time</Trans>
+                </span>
               </button>
             ) : (
               <span className="inline-flex items-center gap-1.5">
                 <span className="border-secondary bg-secondary/15 h-3 w-5 rounded-sm border-[3px]" />
-                Final time
+                <Trans>Final time</Trans>
               </span>
             ))}
         </div>

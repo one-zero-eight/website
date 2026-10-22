@@ -1,4 +1,5 @@
 import { $when2meet } from "@/api/when2meet";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { MeetingStatus } from "@/api/when2meet/types.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
@@ -14,12 +15,13 @@ function MeetingsSearchBar({
   search: string;
   onSearchChange: (value: string) => void;
 }) {
+  const { t } = useLingui();
   return (
     <label className="input input-primary w-full focus:outline-none">
       <span className="icon-[material-symbols--search] text-base-content/50" />
       <input
         type="text"
-        placeholder="Search meeting name..."
+        placeholder={t`Search meeting name...`}
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
         className="grow"
@@ -55,6 +57,7 @@ function MeetingsSkeletonGrid() {
 }
 
 export function MeetingsLandingPage({ status }: { status: MeetingStatus }) {
+  const { t } = useLingui();
   const [search, setSearch] = useState("");
 
   const {
@@ -99,9 +102,11 @@ export function MeetingsLandingPage({ status }: { status: MeetingStatus }) {
 
           <section className="mb-8">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-xl font-semibold">My meetings</h2>
+              <h2 className="text-xl font-semibold">
+                <Trans>My meetings</Trans>
+              </h2>
               <CreateMeetingButton className="hidden md:inline-flex">
-                Create meeting
+                <Trans>Create meeting</Trans>
               </CreateMeetingButton>
             </div>
 
@@ -113,7 +118,7 @@ export function MeetingsLandingPage({ status }: { status: MeetingStatus }) {
                   className="btn btn-sm"
                   onClick={() => refetchOwned()}
                 >
-                  Retry
+                  <Trans>Retry</Trans>
                 </button>
               </div>
             )}
@@ -123,10 +128,10 @@ export function MeetingsLandingPage({ status }: { status: MeetingStatus }) {
             ) : filteredOwnedMeetings.length === 0 ? (
               <div className="text-base-content/50 py-8 text-center text-sm">
                 {search.trim()
-                  ? "No meetings match your search."
+                  ? t`No meetings match your search.`
                   : isArchived
-                    ? "You have no archived meetings."
-                    : "You have no active meetings."}
+                    ? t`You have no archived meetings.`
+                    : t`You have no active meetings.`}
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -138,7 +143,9 @@ export function MeetingsLandingPage({ status }: { status: MeetingStatus }) {
           </section>
 
           <section>
-            <h2 className="mb-4 text-xl font-semibold">Participating in</h2>
+            <h2 className="mb-4 text-xl font-semibold">
+              <Trans>Participating in</Trans>
+            </h2>
 
             {isParticipatingError && (
               <div className="alert alert-error mb-4">
@@ -148,7 +155,7 @@ export function MeetingsLandingPage({ status }: { status: MeetingStatus }) {
                   className="btn btn-sm"
                   onClick={() => refetchParticipating()}
                 >
-                  Retry
+                  <Trans>Retry</Trans>
                 </button>
               </div>
             )}
@@ -158,10 +165,10 @@ export function MeetingsLandingPage({ status }: { status: MeetingStatus }) {
             ) : filteredParticipatingMeetings.length === 0 ? (
               <div className="text-base-content/50 py-8 text-center text-sm">
                 {search.trim()
-                  ? "No meetings match your search."
+                  ? t`No meetings match your search.`
                   : isArchived
-                    ? "You have no archived meetings you participated in."
-                    : "You are not participating in any active meetings."}
+                    ? t`You have no archived meetings you participated in.`
+                    : t`You are not participating in any active meetings.`}
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

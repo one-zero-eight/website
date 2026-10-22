@@ -1,12 +1,15 @@
 import { Modal } from "@/components/common/Modal.tsx";
 import { cn } from "@/lib/ui/cn";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
+import type { ToastText } from "./types.ts";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
-  title: string;
-  message: string;
-  confirmText?: string;
-  cancelText?: string;
+  title: ToastText;
+  message: ToastText;
+  confirmText?: ToastText;
+  cancelText?: ToastText;
   onConfirm: () => void;
   onCancel: () => void;
   type?: "warning" | "error" | "info";
@@ -16,12 +19,14 @@ export function ConfirmDialog({
   isOpen,
   title,
   message,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText = msg`Confirm`,
+  cancelText = msg`Cancel`,
   onConfirm,
   onCancel,
   type = "warning",
 }: ConfirmDialogProps) {
+  const { i18n } = useLingui();
+
   if (!isOpen) {
     return null;
   }
@@ -106,21 +111,23 @@ export function ConfirmDialog({
       title={
         <div className="flex items-center gap-3">
           {getIcon()}
-          {title}
+          {typeof title === "string" ? title : i18n._(title)}
         </div>
       }
     >
-      <p className="text-base-content/75 mb-6 leading-relaxed">{message}</p>
+      <p className="text-base-content/75 mb-6 leading-relaxed">
+        {typeof message === "string" ? message : i18n._(message)}
+      </p>
       <div className="flex justify-end gap-3">
         <button type="button" onClick={onCancel} className="btn">
-          {cancelText}
+          {typeof cancelText === "string" ? cancelText : i18n._(cancelText)}
         </button>
         <button
           type="button"
           onClick={onConfirm}
           className={cn("btn", typeStyles.buttonColor)}
         >
-          {confirmText}
+          {typeof confirmText === "string" ? confirmText : i18n._(confirmText)}
         </button>
       </div>
     </Modal>

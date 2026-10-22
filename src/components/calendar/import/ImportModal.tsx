@@ -1,11 +1,13 @@
 import { $schedule } from "@/api/schedule";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { useState } from "react";
 import ScheduleLinkInput from "@/components/calendar/ScheduleLinkInput.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 import { ImportColorsPalette } from "@/components/calendar/import/ColorsPalette.tsx";
 import { useToast } from "@/components/toast";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client.ts";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client.ts";
 import { queryClient } from "@/app/query-client.ts";
 import type { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 
@@ -30,6 +32,7 @@ export function ImportModal({
   prevLinkedCalendar?: SchemaLinkedCalendarView;
   aboveModal?: boolean;
 }) {
+  const { t } = useLingui();
   const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
   const { mutate: postLinkedCalendar } = $schedule.useMutation(
     "post",
@@ -67,7 +70,10 @@ export function ImportModal({
           {
             onSuccess,
             onError: (error) => {
-              showError("Calendar update failed", formatApiErrorMessage(error));
+              showError(
+                msg`Calendar update failed`,
+                formatApiErrorDescriptor(error),
+              );
             },
           },
         )
@@ -85,7 +91,7 @@ export function ImportModal({
           {
             onSuccess,
             onError: (error) => {
-              showError("Import failed", formatApiErrorMessage(error));
+              showError(msg`Import failed`, formatApiErrorDescriptor(error));
             },
           },
         );
@@ -97,10 +103,10 @@ export function ImportModal({
     if (!prevLinkedCalendar) return;
 
     const confirmed = await showConfirm({
-      title: "Delete calendar",
-      message: `Delete "${calendarName}"? This cannot be undone.`,
-      confirmText: "Delete",
-      cancelText: "Cancel",
+      title: msg`Delete calendar`,
+      message: msg`Delete "${calendarName}"? This cannot be undone.`,
+      confirmText: msg`Delete`,
+      cancelText: msg`Cancel`,
       type: "error",
     });
     if (!confirmed) return;
@@ -110,7 +116,10 @@ export function ImportModal({
       {
         onSuccess,
         onError: (error) => {
-          showError("Calendar deletion failed", formatApiErrorMessage(error));
+          showError(
+            msg`Calendar deletion failed`,
+            formatApiErrorDescriptor(error),
+          );
         },
       },
     );
@@ -139,28 +148,30 @@ export function ImportModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Import your calendar to InNoHassle"
+      title={t`Import your calendar to InNoHassle`}
       overlayClassName={aboveModal ? "bg-black/50 items-start" : ""}
       containerClassName="max-w-full xl:max-w-[75%] bg-base-100"
     >
       <div className="text-base-content/75 mb-3">
-        You can add your schedule to InNoHassle and it will be updated on
-        schedule changes.
+        <Trans>
+          You can add your schedule to InNoHassle and it will be updated on
+          schedule changes.
+        </Trans>
       </div>
       <form onSubmit={handleSubmit} className="text-base-content/75">
         <label htmlFor="calendarName" className="ml-1">
-          Name
+          <Trans>Name</Trans>
         </label>
         <input
           id="calendarName"
           value={calendarName}
           onChange={(e) => setCalendarName(e.target.value)}
-          placeholder="Name for your calendar..."
+          placeholder={t`Name for your calendar...`}
           className="input bg-base-200 mb-3 w-full grow rounded-xl border-0 p-2 text-base outline-none"
           disabled={!!prevLinkedCalendar}
         />
         <label htmlFor="calendarURL" className="ml-1">
-          Calendar URL
+          <Trans>Calendar URL</Trans>
         </label>
         <ScheduleLinkInput
           id="calendarURL"
@@ -171,7 +182,7 @@ export function ImportModal({
           }}
         />
         <label htmlFor="description" className="ml-1">
-          Description
+          <Trans>Description</Trans>
         </label>
         <textarea
           id="description"
@@ -179,7 +190,7 @@ export function ImportModal({
           onChange={(e) => setCalendarDescription(e.target.value)}
           rows={2}
           className="textarea bg-base-200 mb-3 w-full rounded-xl border-none text-base focus:outline-none"
-          placeholder="Description for your calendar..."
+          placeholder={t`Description for your calendar...`}
         />
         <div className="relative">
           <ImportColorsPalette
@@ -196,7 +207,11 @@ export function ImportModal({
               className="link link-primary text-md no-underline hover:underline"
               onClick={() => setShowPreview(!showPreview)}
             >
-              {showPreview ? "Hide preview" : "Show preview"}
+              {showPreview ? (
+                <Trans>Hide preview</Trans>
+              ) : (
+                <Trans>Show preview</Trans>
+              )}
             </button>
             <div className="flex gap-2">
               {prevLinkedCalendar && (
@@ -209,7 +224,7 @@ export function ImportModal({
                   {isDeleting && (
                     <span className="loading loading-spinner loading-sm" />
                   )}
-                  Delete
+                  <Trans>Delete</Trans>
                 </button>
               )}
               <button
@@ -223,7 +238,7 @@ export function ImportModal({
                     calendarColor === (prevLinkedCalendar.color ?? "#9747ff"))
                 }
               >
-                Submit
+                <Trans>Submit</Trans>
               </button>
             </div>
           </div>

@@ -1,5 +1,7 @@
 import { $boardGames } from "@/api/board-games";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import {
   ReservationStatus,
   type SchemaBoardGameWithStorageAvailability,
@@ -67,6 +69,8 @@ function ReservationsSection({
   isPending: boolean;
   error: unknown;
 }) {
+  const { t } = useLingui();
+  const reservationCount = reservations.length;
   const carouselRef = useRef<HTMLDivElement>(null);
   const [reservationToView, setReservationToView] =
     useState<Reservation | null>(null);
@@ -87,10 +91,12 @@ function ReservationsSection({
     <section className="flex min-w-0 flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Current reservations</h1>
+          <h1 className="text-2xl font-semibold">
+            <Trans>Current reservations</Trans>
+          </h1>
           {!isPending && !error && (
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
-              {reservations.length} active
+              <Trans>Active reservations: {reservationCount}</Trans>
             </p>
           )}
         </div>
@@ -99,7 +105,7 @@ function ReservationsSection({
             to="/board-games/admin/reservations"
             className="btn btn-ghost btn-sm gap-3"
           >
-            Search reservations
+            <Trans>Search reservations</Trans>
             <span className="icon-[material-symbols--search] text-lg" />
           </Link>
           <button
@@ -107,7 +113,7 @@ function ReservationsSection({
             className="btn btn-square btn-ghost"
             onClick={() => handleScroll(-1)}
             disabled={reservations.length < 2}
-            title="Previous reservations"
+            title={t`Previous reservations`}
           >
             <span className="icon-[material-symbols--chevron-left] text-2xl" />
           </button>
@@ -116,7 +122,7 @@ function ReservationsSection({
             className="btn btn-square btn-ghost"
             onClick={() => handleScroll(1)}
             disabled={reservations.length < 2}
-            title="Next reservations"
+            title={t`Next reservations`}
           >
             <span className="icon-[material-symbols--chevron-right] text-2xl" />
           </button>
@@ -126,10 +132,10 @@ function ReservationsSection({
       <ListState
         isPending={isPending}
         error={error}
-        errorTitle="Could not load reservations"
+        errorTitle={t`Could not load reservations`}
         emptyMessage={
           reservations.length === 0
-            ? "There are no active reservations."
+            ? t`There are no active reservations.`
             : undefined
         }
         pending={
@@ -175,7 +181,7 @@ function ReservationsSection({
             )
           }
           isPending={pendingReservationId === reservationToTake.id}
-          confirmLabel="Mark as taken"
+          confirmLabel={t`Mark as taken`}
         />
       )}
       {reservationToView && (
@@ -204,6 +210,7 @@ function ReservationCard({
   onTake: () => void;
   onReturn: () => void;
 }) {
+  const { t, i18n } = useLingui();
   const isReserved = reservation.status === ReservationStatus.reserved;
   const telegram = telegramHandle(reservation.tg_alias);
 
@@ -216,10 +223,10 @@ function ReservationCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="card-title truncate text-lg">
-              {gameTitle ?? "Unknown game"}
+              {gameTitle ?? t`Unknown game`}
             </h2>
             <p className="text-sm text-neutral-500 dark:text-neutral-200">
-              {new Date(reservation.created_at).toLocaleString()}
+              {new Date(reservation.created_at).toLocaleString(i18n.locale)}
             </p>
           </div>
           <ReservationStatusBadge status={reservation.status} />
@@ -237,7 +244,9 @@ function ReservationCard({
                 @{telegram}
               </a>
             ) : (
-              <span className="text-neutral-400">Telegram not provided</span>
+              <span className="text-neutral-400">
+                <Trans>Telegram not provided</Trans>
+              </span>
             )}
           </div>
           {!isReserved && reservation.borrower_name && (
@@ -267,7 +276,7 @@ function ReservationCard({
           {isUpdating && (
             <span className="loading loading-spinner loading-sm" />
           )}
-          {isReserved ? "Mark as taken" : "Mark as returned"}
+          {isReserved ? t`Mark as taken` : t`Mark as returned`}
         </button>
       </div>
     </article>
@@ -290,11 +299,17 @@ function useReservationStatusMutation(onSuccess?: () => void) {
           queryKey: $boardGames.queryOptions("get", "/admin/board-games")
             .queryKey,
         });
-        showSuccess("Reservation updated", "The new status has been saved.");
+        showSuccess(
+          msg`Reservation updated`,
+          msg`The new status has been saved.`,
+        );
         onSuccess?.();
       },
       onError: (error) => {
-        showError("Could not update reservation", formatApiErrorMessage(error));
+        showError(
+          msg`Could not update reservation`,
+          formatApiErrorDescriptor(error),
+        );
       },
     },
   );
@@ -327,16 +342,20 @@ function GamesInventorySection({
   isPending: boolean;
   error: unknown;
 }) {
+  const { t } = useLingui();
   const queryClient = useQueryClient();
   const { showConfirm, showError, showSuccess } = useToast();
   const [isAddGameModalOpen, setIsAddGameModalOpen] = useState(false);
   const [gameToView, setGameToView] = useState<BoardGame | null>(null);
   const [gameToEdit, setGameToEdit] = useState<BoardGame | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
+  const trimmedSearchQuery = searchQuery.trim();
+  const normalizedSearchQuery = trimmedSearchQuery.toLocaleLowerCase();
   const filteredGames = games.filter((game) =>
     game.title.toLocaleLowerCase().includes(normalizedSearchQuery),
   );
+  const visibleGameCount = filteredGames.length;
+  const gameCount = games.length;
   const deleteMutation = $boardGames.useMutation(
     "delete",
     "/admin/board-games/{id}",
@@ -346,10 +365,11 @@ function GamesInventorySection({
     : null;
 
   async function handleDeleteGame(game: BoardGame) {
+    const gameTitle = game.title;
     const confirmed = await showConfirm({
-      title: "Delete board game",
-      message: `Delete ${game.title} from the inventory? This action cannot be undone.`,
-      confirmText: "Delete game",
+      title: msg`Delete board game`,
+      message: msg`Delete ${gameTitle} from the inventory? This action cannot be undone.`,
+      confirmText: msg`Delete game`,
       type: "error",
     });
     if (!confirmed) return;
@@ -367,10 +387,13 @@ function GamesInventorySection({
               .queryKey,
           });
           if (gameToEdit?.id === game.id) setGameToEdit(null);
-          showSuccess("Game deleted", `${game.title} has been removed.`);
+          showSuccess(msg`Game deleted`, msg`${gameTitle} has been removed.`);
         },
         onError: (error) => {
-          showError("Could not delete game", formatApiErrorMessage(error));
+          showError(
+            msg`Could not delete game`,
+            formatApiErrorDescriptor(error),
+          );
         },
       },
     );
@@ -380,12 +403,14 @@ function GamesInventorySection({
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-semibold">Games in storage</h2>
+          <h2 className="text-2xl font-semibold">
+            <Trans>Games in storage</Trans>
+          </h2>
           {!isPending && !error && (
             <p className="text-base-content/70 text-sm">
               {normalizedSearchQuery
-                ? `${filteredGames.length} of ${games.length} titles`
-                : `${games.length} titles`}
+                ? t`Games: ${visibleGameCount} of ${gameCount}`
+                : t`Games: ${gameCount}`}
             </p>
           )}
         </div>
@@ -395,7 +420,7 @@ function GamesInventorySection({
           onClick={() => setIsAddGameModalOpen(true)}
         >
           <span className="icon-[material-symbols--add] text-xl" />
-          Add game
+          <Trans>Add game</Trans>
         </button>
       </div>
 
@@ -403,19 +428,19 @@ function GamesInventorySection({
         className="@md/content:max-w-md"
         value={searchQuery}
         onValueChange={setSearchQuery}
-        placeholder="Search games by name"
+        placeholder={t`Search games by name`}
         disabled={isPending || Boolean(error)}
       />
 
       <ListState
         isPending={isPending}
         error={error}
-        errorTitle="Could not load games"
+        errorTitle={t`Could not load games`}
         emptyMessage={
           games.length === 0
-            ? "No games have been added yet."
+            ? t`No games have been added yet.`
             : filteredGames.length === 0
-              ? `No games match "${searchQuery.trim()}".`
+              ? t`No games match "${trimmedSearchQuery}".`
               : undefined
         }
         pending={
@@ -477,6 +502,11 @@ function StorageGameRow({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useLingui();
+  const gameTitle = game.title;
+  const inStorageCopies = game.available_in_storage;
+  const availableCopies = game.available_copies;
+  const totalCopies = game.total_copies;
   return (
     <article
       className="bg-base-200 hover:bg-base-300 rounded-field flex cursor-pointer items-center gap-3 px-3 py-2 transition-colors"
@@ -490,13 +520,16 @@ function StorageGameRow({
       <div className="min-w-0 grow">
         <h3 className="truncate font-medium">{game.title}</h3>
         <p className="text-base-content/70 text-sm">
-          <span className="text-base-content font-medium tabular-nums">
-            {game.available_in_storage}
-          </span>
-          {" in storage"}
-          <span className="text-base-content/50">
-            {` · ${game.available_copies} available · ${game.total_copies} copies`}
-          </span>
+          <Trans>
+            <span className="text-base-content font-medium tabular-nums">
+              {inStorageCopies}
+            </span>{" "}
+            in storage
+            <span className="text-base-content/50">
+              {" "}
+              · {availableCopies} available · {totalCopies} copies
+            </span>
+          </Trans>
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-1">
@@ -507,7 +540,7 @@ function StorageGameRow({
             event.stopPropagation();
             onEdit();
           }}
-          title={`Edit ${game.title}`}
+          title={t`Edit ${gameTitle}`}
           disabled={isDeleting}
         >
           <span className="icon-[material-symbols--edit-outline] text-xl" />
@@ -519,7 +552,7 @@ function StorageGameRow({
             event.stopPropagation();
             onDelete();
           }}
-          title={`Delete ${game.title}`}
+          title={t`Delete ${gameTitle}`}
           disabled={deleteDisabled}
         >
           {isDeleting ? (
@@ -540,11 +573,12 @@ function BoardGameDetailsModal({
   game: BoardGame;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useLingui();
   return (
     <Modal
       open
       onOpenChange={onOpenChange}
-      title="Game information"
+      title={t`Game information`}
       containerClassName={boardGamesModalClassName}
     >
       <GameInfoBody
@@ -558,9 +592,13 @@ function BoardGameDetailsModal({
         title={game.title}
         description={game.description}
         stats={[
-          { label: "Total", value: game.total_copies },
-          { label: "Available", value: game.available_copies, accent: true },
-          { label: "In storage", value: game.available_in_storage },
+          { label: t`Total`, value: game.total_copies },
+          {
+            label: t`Available`,
+            value: game.available_copies,
+            accent: true,
+          },
+          { label: t`In storage`, value: game.available_in_storage },
         ]}
         action={
           <Link
@@ -568,7 +606,7 @@ function BoardGameDetailsModal({
             search={{ gameId: game.id }}
             className="btn btn-primary"
           >
-            View reservations
+            <Trans>View reservations</Trans>
             <span className="icon-[material-symbols--arrow-forward] text-xl" />
           </Link>
         }
@@ -586,6 +624,7 @@ function BoardGameFormModal({
   onOpenChange: (open: boolean) => void;
   game?: BoardGame;
 }) {
+  const { t } = useLingui();
   const queryClient = useQueryClient();
   const { showError, showSuccess } = useToast();
   const [title, setTitle] = useState(game?.title ?? "");
@@ -609,11 +648,12 @@ function BoardGameFormModal({
     queryClient.invalidateQueries({
       queryKey: $boardGames.queryOptions("get", "/admin/board-games").queryKey,
     });
+    const gameTitle = title.trim();
     showSuccess(
-      isEditing ? "Game updated" : "Game added",
+      isEditing ? msg`Game updated` : msg`Game added`,
       isEditing
-        ? `${title.trim()} has been updated.`
-        : `${title.trim()} is now in the inventory.`,
+        ? msg`${gameTitle} has been updated.`
+        : msg`${gameTitle} is now in the inventory.`,
     );
     resetForm();
     onOpenChange(false);
@@ -621,8 +661,8 @@ function BoardGameFormModal({
 
   function handleMutationError(error: unknown) {
     showError(
-      isEditing ? "Could not update game" : "Could not add game",
-      formatApiErrorMessage(error),
+      isEditing ? msg`Could not update game` : msg`Could not add game`,
+      formatApiErrorDescriptor(error),
     );
   }
 
@@ -703,19 +743,21 @@ function BoardGameFormModal({
     <Modal
       open={open}
       onOpenChange={handleOpenChange}
-      title={isEditing ? "Edit board game" : "Add board game"}
+      title={isEditing ? t`Edit board game` : t`Add board game`}
       containerClassName={boardGamesModalClassName}
       closeOnOutsidePress={!isMutationPending}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <label className="fieldset">
-          <span className="fieldset-legend">Title</span>
+          <span className="fieldset-legend">
+            <Trans>Title</Trans>
+          </span>
           <input
             type="text"
             className="input w-full"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            placeholder="Catan"
+            placeholder={t`Catan`}
             disabled={isMutationPending}
             autoFocus
             required
@@ -723,12 +765,14 @@ function BoardGameFormModal({
         </label>
 
         <label className="fieldset">
-          <span className="fieldset-legend">Description</span>
+          <span className="fieldset-legend">
+            <Trans>Description</Trans>
+          </span>
           <textarea
             className="textarea min-h-24 w-full resize-y"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="Short game description"
+            placeholder={t`Short game description`}
             disabled={isMutationPending}
           />
         </label>
@@ -736,7 +780,7 @@ function BoardGameFormModal({
         <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-[1fr_8rem]">
           <label className="fieldset min-w-0">
             <span className="fieldset-legend">
-              {isEditing ? "Replace photo" : "Photo"}
+              {isEditing ? t`Replace photo` : t`Photo`}
             </span>
             <input
               type="file"
@@ -750,7 +794,9 @@ function BoardGameFormModal({
           </label>
 
           <label className="fieldset">
-            <span className="fieldset-legend">Total copies</span>
+            <span className="fieldset-legend">
+              <Trans>Total copies</Trans>
+            </span>
             <input
               type="number"
               className="input w-full"
@@ -788,7 +834,7 @@ function BoardGameFormModal({
             onClick={() => handleOpenChange(false)}
             disabled={isMutationPending}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="submit"
@@ -798,7 +844,7 @@ function BoardGameFormModal({
             {isMutationPending && (
               <span className="loading loading-spinner loading-sm" />
             )}
-            {isEditing ? "Save changes" : "Add game"}
+            {isEditing ? t`Save changes` : t`Add game`}
           </button>
         </div>
       </form>

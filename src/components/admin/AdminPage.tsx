@@ -1,4 +1,5 @@
 import { ImpersonateCard } from "@/components/admin/ImpersonateCard.tsx";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useNavigate } from "@tanstack/react-router";
 
 const adminLinks = [
@@ -12,17 +13,20 @@ const adminLinks = [
 ];
 
 export function AdminPage() {
+  const { t } = useLingui();
   const navigate = useNavigate();
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4">
       <section className="bg-base-200 rounded-box flex min-w-0 flex-col gap-4 p-4">
-        <h2 className="text-xl font-medium">Search users</h2>
+        <h2 className="text-xl font-medium">
+          <Trans>Search users</Trans>
+        </h2>
         <input
           autoComplete="off"
           spellCheck={false}
           className="input input-bordered w-full"
-          placeholder="Name or email..."
+          placeholder={t`Name or email...`}
           onChange={(event) => {
             const q = event.target.value;
             if (!q) return;
@@ -32,7 +36,9 @@ export function AdminPage() {
       </section>
       <ImpersonateCard />
       <section className="bg-base-200 rounded-box flex min-w-0 flex-col gap-3 p-4">
-        <h2 className="text-xl font-medium">Links</h2>
+        <h2 className="text-xl font-medium">
+          <Trans>Links</Trans>
+        </h2>
         <ul className="flex min-w-0 flex-col gap-2">
           {adminLinks.map((href) => (
             <li key={href} className="min-w-0">

@@ -10,19 +10,20 @@ import {
   isMenuItemVisible,
   LinkItemType,
 } from "@/components/layout/menu-links.tsx";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 
 export function MorePage() {
   const { me } = useMe();
   const [impersonatingUser] = useImpersonatingUser();
+  const { t } = useLingui();
 
   return (
     <div className="flex min-h-full flex-col items-start justify-start">
       {/* Social links */}
       <div className="flex w-full gap-2 px-2">
-        <Tooltip content="GitHub">
+        <Tooltip content={t`GitHub`}>
           <a
             href="https://github.com/one-zero-eight"
             target="_blank"
@@ -32,7 +33,7 @@ export function MorePage() {
             <span className="icon-[mdi--github] text-base-content/70 text-3xl" />
           </a>
         </Tooltip>
-        <Tooltip content="Telegram">
+        <Tooltip content={t`Telegram`}>
           <a
             href="https://telegram.me/one_zero_eight"
             target="_blank"

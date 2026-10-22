@@ -1,6 +1,6 @@
 import { $boardGames } from "@/api/board-games";
 import { QueryError } from "@/components/board-games/shared.tsx";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
@@ -29,6 +29,7 @@ export function BoardGamesTabs() {
 }
 
 export function RequireBoardGamesAdmin({ children }: { children: ReactNode }) {
+  const { t } = useLingui();
   const {
     data: user,
     isPending,
@@ -47,7 +48,7 @@ export function RequireBoardGamesAdmin({ children }: { children: ReactNode }) {
   if (isError) {
     return (
       <div className="mx-auto w-full max-w-6xl p-4">
-        <QueryError title="Could not check access" error={error} />
+        <QueryError title={t`Could not check access`} error={error} />
       </div>
     );
   }
@@ -55,7 +56,7 @@ export function RequireBoardGamesAdmin({ children }: { children: ReactNode }) {
   if (user.role !== "admin") {
     return (
       <p className="text-base-content/60 mx-auto w-full max-w-6xl p-4">
-        You do not have access to board games admin.
+        <Trans>You do not have access to board games admin.</Trans>
       </p>
     );
   }

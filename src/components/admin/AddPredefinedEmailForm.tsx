@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Trans } from "@lingui/react/macro";
 
 export function AddPredefinedEmailForm({
   placeholder,
@@ -43,7 +44,7 @@ export function AddPredefinedEmailForm({
         {isPending ? (
           <span className="loading loading-spinner loading-sm" />
         ) : (
-          "Add email"
+          <Trans>Add email</Trans>
         )}
       </button>
     </div>

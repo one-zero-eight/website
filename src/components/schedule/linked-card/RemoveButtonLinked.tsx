@@ -1,9 +1,11 @@
 import Tooltip from "@/components/common/Tooltip.tsx";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { $schedule } from "@/api/schedule";
 import { queryClient } from "@/app/query-client.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useState } from "react";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client.ts";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client.ts";
 import { useToast } from "@/components/toast";
 
 export default function RemoveButtonLinked({
@@ -13,6 +15,7 @@ export default function RemoveButtonLinked({
   alias: string;
   calendarName: string;
 }) {
+  const { t } = useLingui();
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
 
   const onSettled = () =>
@@ -48,14 +51,14 @@ export default function RemoveButtonLinked({
       },
       {
         onError: (error) => {
-          showError("Import failed", formatApiErrorMessage(error));
+          showError(msg`Import failed`, formatApiErrorDescriptor(error));
         },
       },
     );
   };
 
   return (
-    <Tooltip content={"Remove this calendar"}>
+    <Tooltip content={t`Remove this calendar`}>
       <button
         type="button"
         onClick={(e) => {
@@ -70,7 +73,7 @@ export default function RemoveButtonLinked({
       <Modal
         open={removeModalOpen}
         onOpenChange={setRemoveModalOpen}
-        title={`Remove calendar ${calendarName}?`}
+        title={t`Remove calendar ${calendarName}?`}
         overlayClassName={"bg-black/50"}
         containerClassName="bg-base-100"
       >
@@ -80,7 +83,7 @@ export default function RemoveButtonLinked({
             onClick={() => setRemoveModalOpen(false)}
             className="btn text-md"
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="button"
@@ -91,7 +94,7 @@ export default function RemoveButtonLinked({
             }}
             className="btn btn-error text-md"
           >
-            Remove
+            <Trans>Remove</Trans>
           </button>
         </div>
       </Modal>

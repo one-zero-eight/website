@@ -1,14 +1,19 @@
+import { i18n } from "@lingui/core";
 import { DescriptionEditor } from "@/components/editor/DescriptionEditor.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { JSONContent } from "@tiptap/core";
+import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor.tsx";
 
 export function TiptapPlayground() {
   const [content, setContent] = useState<JSONContent | null>(null);
+  const editorRef = useRef<TiptapEditorRef>(null);
 
   useEffect(() => {
     window.__tiptapPlayground = {
       setContent: (next) => setContent(next),
+      setLocale: (locale) => i18n.activate(locale),
+      getContent: () => editorRef.current?.getJSON(),
     };
 
     return () => {
@@ -22,7 +27,10 @@ export function TiptapPlayground() {
 
       <section data-testid="tiptap-editor" className="min-h-96">
         <h2 className="mb-2 text-lg font-medium">Editor</h2>
-        <DescriptionEditor initialContent={content ?? undefined} />
+        <DescriptionEditor
+          ref={editorRef}
+          initialContent={content ?? undefined}
+        />
       </section>
 
       <section data-testid="tiptap-viewer">
@@ -37,6 +45,8 @@ declare global {
   interface Window {
     __tiptapPlayground?: {
       setContent: (content: JSONContent) => void;
+      setLocale: (locale: "en" | "ru") => void;
+      getContent: () => JSONContent | undefined;
     };
   }
 }

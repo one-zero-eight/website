@@ -1,4 +1,13 @@
 import { T } from "@/lib/utils/dates";
+import { t } from "@lingui/core/macro";
+
+export function formatBookingDuration(durationMs: number): string {
+  const hours = Math.floor(durationMs / T.Hour);
+  const minutes = Math.floor((durationMs % T.Hour) / T.Min);
+  return [hours > 0 ? t`${hours}h` : "", minutes > 0 ? t`${minutes}m` : ""]
+    .filter(Boolean)
+    .join(" ");
+}
 
 export const getTimeRangeForWeek = (
   daysBefore: number = 7,

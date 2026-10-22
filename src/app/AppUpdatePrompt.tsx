@@ -1,4 +1,5 @@
 import { appUpdateAvailableEvent } from "@/app/register-sw.ts";
+import { Trans } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 import { useEffect, useState } from "react";
 
@@ -38,8 +39,12 @@ export function AppUpdatePrompt() {
       >
         <span className="icon-[material-symbols--info-outline] text-primary content-justify-center shrink-0 text-2xl" />
         <div className="min-w-0 flex-1">
-          <h4 className="font-bold">The website is updated.</h4>
-          <p className="text-xs">Please, reload the page.</p>
+          <h4 className="font-bold">
+            <Trans>The website is updated.</Trans>
+          </h4>
+          <p className="text-xs">
+            <Trans>Please, reload the page.</Trans>
+          </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <button
@@ -54,7 +59,7 @@ export function AppUpdatePrompt() {
             {isReloading && (
               <span className="loading loading-spinner loading-sm" />
             )}
-            Reload
+            <Trans>Reload</Trans>
           </button>
           <button
             type="button"

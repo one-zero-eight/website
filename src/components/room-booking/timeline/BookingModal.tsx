@@ -1,15 +1,15 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { BookingStatus, SchemaAttendee } from "@/api/room-booking/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
-import { sanitizeBookingTitle } from "@/components/room-booking/utils.ts";
+import { capacityOptionSuffix } from "@/components/room-booking/access-level-label.ts";
 import {
-  clockTime,
-  durationFormatted,
-  msBetween,
-  T,
-} from "@/lib/utils/dates.ts";
+  formatBookingDuration,
+  sanitizeBookingTitle,
+} from "@/components/room-booking/utils.ts";
+import { clockTime, msBetween, T } from "@/lib/utils/dates.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -22,13 +22,29 @@ type NewBookingSlot = Omit<Slot, "room"> & {
 const StatusBadge = ({ status }: { status: BookingStatus }) => {
   switch (status) {
     case BookingStatus.Accept:
-      return <div className="badge badge-success">Accepted</div>;
+      return (
+        <div className="badge badge-success">
+          <Trans>Accepted</Trans>
+        </div>
+      );
     case BookingStatus.Tentative:
-      return <div className="badge badge-warning">Tentative</div>;
+      return (
+        <div className="badge badge-warning">
+          <Trans>Tentative</Trans>
+        </div>
+      );
     case BookingStatus.Decline:
-      return <div className="badge badge-error">Declined</div>;
+      return (
+        <div className="badge badge-error">
+          <Trans>Declined</Trans>
+        </div>
+      );
     case BookingStatus.Unknown:
-      return <div className="badge badge-neutral">Unknown</div>;
+      return (
+        <div className="badge badge-neutral">
+          <Trans>Unknown</Trans>
+        </div>
+      );
   }
 };
 
@@ -39,6 +55,7 @@ function Attendee({
   attendee: SchemaAttendee;
   bookingId: string;
 }) {
+  const { t } = useLingui();
   const { data: attendeeDetails } = $roomBooking.useQuery(
     "get",
     "/bookings/{outlook_booking_id}/get-attendee-details",
@@ -93,7 +110,7 @@ function Attendee({
           >
             {attendeeDetails.telegram_username
               ? `@${attendeeDetails.telegram_username}`
-              : "No Telegram alias"}
+              : t`No Telegram alias`}
           </a>
         </div>
       </div>
@@ -149,6 +166,7 @@ export function BookingModal({
   isNewBookingSubmitting?: boolean;
   newBookingSubmitError?: unknown;
 }) {
+  const { i18n, t } = useLingui();
   const queryClient = useQueryClient();
   const { me } = useMe();
 
@@ -499,7 +517,7 @@ export function BookingModal({
         {roomOptions.map((option) => (
           <option key={option.id} value={option.id}>
             {option.title}
-            {option.capacity ? ` (capacity: ${option.capacity} people)` : ""}
+            {option.capacity ? capacityOptionSuffix(option.capacity) : ""}
           </option>
         ))}
       </select>
@@ -532,7 +550,11 @@ export function BookingModal({
     return date;
   };
   const formatBookingDate = (date: Date) =>
-    `${date.toLocaleString("en-US", { day: "2-digit", month: "long" })}, ${date.toLocaleString("en-US", { weekday: "long" })}`;
+    date.toLocaleDateString(i18n.locale, {
+      day: "2-digit",
+      month: "long",
+      weekday: "long",
+    });
   // Show end date only if start and end dates differ
   const showEndDate =
     start &&
@@ -542,7 +564,7 @@ export function BookingModal({
   const BookingDateTime = fixedSchedule ? null : (
     <div className="my-1">
       <label htmlFor="start" className="text-base-content/75 text-base">
-        Start
+        <Trans>Start</Trans>
       </label>
       <input
         id="start"
@@ -555,7 +577,7 @@ export function BookingModal({
         className="bg-base-300 focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
       />
       <label htmlFor="end" className="text-base-content/75 text-base">
-        End
+        <Trans>End</Trans>
       </label>
       <input
         id="end"
@@ -573,7 +595,9 @@ export function BookingModal({
   const NoRoomsWarning =
     newSlot && roomOptions && roomOptions.length === 0 ? (
       <div className="alert alert-warning px-4 py-2 text-base">
-        <span>No rooms are free for the selected time.</span>
+        <span>
+          <Trans>No rooms are free for the selected time.</Trans>
+        </span>
       </div>
     ) : null;
 
@@ -596,7 +620,7 @@ export function BookingModal({
       </div>
       {start && end && (
         <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
-          {`${clockTime(start)} – ${clockTime(end)} (${durationFormatted(msBetween(start, end))})`}
+          {`${clockTime(start)} – ${clockTime(end)} (${formatBookingDuration(msBetween(start, end))})`}
         </p>
       )}
     </div>
@@ -614,7 +638,9 @@ export function BookingModal({
 
   const NewBookingWarning = canBookPending ? (
     <div className="alert alert-info alert-soft px-4 py-2 text-base">
-      <span>Checking rules...</span>
+      <span>
+        <Trans>Checking rules...</Trans>
+      </span>
     </div>
   ) : !canBookData ? null : canBookData.can_book ? (
     <></>
@@ -651,7 +677,9 @@ export function BookingModal({
 
   const NewBookingButtons = isNewBookingPending ? (
     <>
-      <p className="text-base-content/75 text-lg">Creating new booking...</p>
+      <p className="text-base-content/75 text-lg">
+        <Trans>Creating new booking...</Trans>
+      </p>
       <div className="flex items-center justify-center">
         <div className="bg-base-100 h-4 w-full overflow-hidden rounded-xl">
           <div className="animate-booking-fake-progress bg-primary h-full"></div>
@@ -665,7 +693,7 @@ export function BookingModal({
         className="btn grow"
         onClick={() => onOpenChange(false)}
       >
-        Cancel
+        <Trans>Cancel</Trans>
       </button>
       <button
         type="submit"
@@ -676,14 +704,16 @@ export function BookingModal({
           (roomOptions !== undefined && roomOptions.length === 0)
         }
       >
-        Confirm
+        <Trans>Confirm</Trans>
       </button>
     </div>
   );
 
   const MyBookingButtons = isBookingUpdatePending ? (
     <>
-      <p className="text-base-content/75 text-lg">Updating booking...</p>
+      <p className="text-base-content/75 text-lg">
+        <Trans>Updating booking...</Trans>
+      </p>
       <div className="flex items-center justify-center">
         <div className="bg-base-100 h-4 w-full overflow-hidden rounded-xl">
           <div className="animate-booking-fake-progress bg-primary h-full"></div>
@@ -697,19 +727,21 @@ export function BookingModal({
         className="btn grow"
         onClick={() => setIsEditing(false)}
       >
-        Cancel
+        <Trans>Cancel</Trans>
       </button>
       <button
         type="submit"
         className="btn btn-primary grow"
         disabled={isBookingUpdatePending}
       >
-        Confirm
+        <Trans>Confirm</Trans>
       </button>
     </div>
   ) : isBookingDeletionPending ? (
     <>
-      <p className="text-base-content/75 text-lg">Deleting booking...</p>
+      <p className="text-base-content/75 text-lg">
+        <Trans>Deleting booking...</Trans>
+      </p>
       <div className="flex items-center justify-center">
         <div className="bg-base-100 h-4 w-full overflow-hidden rounded-xl">
           <div className="animate-booking-fake-progress-fast bg-primary h-full"></div>
@@ -718,7 +750,9 @@ export function BookingModal({
     </>
   ) : isBookingUpdatePending ? (
     <>
-      <p className="text-base-content/75 text-lg">Stopping booking...</p>
+      <p className="text-base-content/75 text-lg">
+        <Trans>Stopping booking...</Trans>
+      </p>
       <div className="flex items-center justify-center">
         <div className="bg-base-100 h-4 w-full overflow-hidden rounded-xl">
           <div className="animate-booking-fake-progress-fast bg-primary h-full"></div>
@@ -735,7 +769,7 @@ export function BookingModal({
           deleteBooking();
         }}
       >
-        Delete
+        <Trans>Delete</Trans>
       </button>
       <button
         type="button"
@@ -745,7 +779,7 @@ export function BookingModal({
           setIsEditing(true);
         }}
       >
-        Edit
+        <Trans>Edit</Trans>
       </button>
     </div>
   ) : canFinish ? (
@@ -755,7 +789,7 @@ export function BookingModal({
         className="btn btn-warning grow"
         onClick={() => finishBooking()}
       >
-        Finish now
+        <Trans>Finish now</Trans>
       </button>
     </div>
   ) : (
@@ -766,7 +800,7 @@ export function BookingModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={newSlot ? "New booking" : "Booking details"}
+      title={newSlot ? t`New booking` : t`Booking details`}
       containerClassName="p-4"
     >
       {newSlot ? (
@@ -787,7 +821,7 @@ export function BookingModal({
               ref={titleInputRef}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter title..."
+              placeholder={t`Enter title...`}
               className="bg-base-300 focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
             />
 
@@ -824,7 +858,7 @@ export function BookingModal({
                   ref={titleInputRef}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter title..."
+                  placeholder={t`Enter title...`}
                   className="bg-base-300 focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
                 />
               ) : (

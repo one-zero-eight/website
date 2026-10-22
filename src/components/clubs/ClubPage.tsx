@@ -1,4 +1,6 @@
 import { $clubs } from "@/api/clubs";
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
 import { getDescriptionImageUrl } from "@/api/clubs/links.ts";
 import { $events } from "@/api/events";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
@@ -19,6 +21,7 @@ import {
 import { canUserEditClub } from "./permissions.ts";
 
 export function ClubPage({ clubSlug }: { clubSlug: string }) {
+  useLingui();
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const { data: club, isPending: clubPending } = $clubs.useQuery(
     "get",
@@ -57,7 +60,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-base-content/30 text-lg">
-          Loading club information...
+          <Trans>Loading club information...</Trans>
         </div>
       </div>
     );
@@ -66,7 +69,9 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
   if (!club) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-base-content/30 text-lg">Club not found</div>
+        <div className="text-base-content/30 text-lg">
+          <Trans>Club not found</Trans>
+        </div>
       </div>
     );
   }
@@ -84,14 +89,14 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
         <div className="alert alert-info items-start">
           <span className="icon-[mdi--clock-outline] size-5" />
           <span>
-            This club has changes waiting for admin review.{" "}
+            <Trans>This club has changes waiting for admin review.</Trans>{" "}
             {clubsUser?.role === "admin" ? (
               <Link
                 to="/clubs/$slug/review"
                 params={{ slug: clubSlug }}
                 className="link link-primary"
               >
-                Review changes
+                <Trans>Review changes</Trans>
               </Link>
             ) : (
               <Link
@@ -99,7 +104,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                 params={{ slug: clubSlug }}
                 className="link link-primary"
               >
-                View your submitted changes
+                <Trans>View your submitted changes</Trans>
               </Link>
             )}
           </span>
@@ -124,7 +129,9 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
             <h1 className="card-title text-3xl font-bold">{club.title}</h1>
             <div className="flex shrink-0 items-center gap-2">
               {!club.is_active && (
-                <span className="badge badge-error">Inactive</span>
+                <span className="badge badge-error">
+                  <Trans>Inactive</Trans>
+                </span>
               )}
               {canEditClub && (
                 <Link
@@ -133,7 +140,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                   className="btn btn-primary btn-soft"
                 >
                   <span className="icon-[mynaui--pencil] size-5" />
-                  Edit club
+                  <Trans>Edit club</Trans>
                 </Link>
               )}
             </div>
@@ -155,7 +162,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
             <div className="card-body">
               <h2 className="card-title">
                 <span className="icon-[material-symbols--article-outline-rounded] size-6" />
-                About
+                <Trans>About</Trans>
               </h2>
 
               <div className="-mx-6 -mb-6">
@@ -174,11 +181,11 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
               <div className="flex items-center justify-between gap-2">
                 <h2 className="card-title">
                   <span className="icon-[mdi--calendar] size-6" />
-                  Upcoming Events
+                  <Trans>Upcoming Events</Trans>
                 </h2>
                 {clubsUser?.leader_in_clubs.some((c) => c.id === club.id) && (
                   <Link to="/events/drafts" className="btn btn-primary btn-sm">
-                    Manage events
+                    <Trans>Manage events</Trans>
                   </Link>
                 )}
               </div>
@@ -189,7 +196,9 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                     <div className="skeleton h-48 rounded-2xl" />
                   </div>
                 ) : clubEvents.length === 0 ? (
-                  <p className="text-base-content/50 italic">No events yet.</p>
+                  <p className="text-base-content/50 italic">
+                    <Trans>No events yet.</Trans>
+                  </p>
                 ) : (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {clubEvents.map((event) => (
@@ -221,7 +230,9 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
           {club.links && club.links.length > 0 && (
             <div className="card card-border">
               <div className="card-body">
-                <h2 className="card-title">Resources & Links</h2>
+                <h2 className="card-title">
+                  <Trans>Resources & Links</Trans>
+                </h2>
                 <ul className="menu w-full p-0">
                   {club.links.map((link, index) => (
                     <li key={index}>
@@ -255,7 +266,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
             <div className="card-body">
               <h2 className="card-title">
                 <span className="icon-[mdi--account] size-6" />
-                Club Leader
+                <Trans>Club Leader</Trans>
               </h2>
               {clubLeader ? (
                 <div className="space-y-3">
@@ -263,7 +274,9 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                     <div className="flex items-start gap-3">
                       <span className="icon-[mdi--account] text-base-content/50 mt-0.5 size-5" />
                       <div>
-                        <div className="text-base-content/50 text-sm">Name</div>
+                        <div className="text-base-content/50 text-sm">
+                          <Trans>Name</Trans>
+                        </div>
                         <div className="text-base-content font-medium">
                           {clubLeader.name}
                         </div>
@@ -297,24 +310,26 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                       <div className="alert alert-warning items-start">
                         <span className="icon-[mdi--alert] size-4" />
                         <span>
-                          The club leader should connect their Telegram account
-                          to InNoHassle using the{" "}
-                          <a
-                            href="https://innohassle.ru/account/connect-telegram"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="link link-primary"
-                          >
-                            link
-                          </a>
-                          .
+                          <Trans>
+                            The club leader should connect their Telegram
+                            account to InNoHassle using the{" "}
+                            <a
+                              href="https://innohassle.ru/account/connect-telegram"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="link link-primary"
+                            >
+                              link
+                            </a>
+                            .
+                          </Trans>
                         </span>
                       </div>
                     )}
                 </div>
               ) : (
                 <p className="text-base-content/50 italic">
-                  No leader information available.
+                  <Trans>No leader information available.</Trans>
                 </p>
               )}
             </div>

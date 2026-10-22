@@ -1,18 +1,9 @@
 import { ReactNode, useMemo } from "react";
 import moment from "moment";
 import { Fragment } from "react";
+import { useLingui } from "@lingui/react/macro";
 
 const NO_DATE_KEY = "no-date";
-
-function formatDayLabel(key: string) {
-  if (key === NO_DATE_KEY) {
-    return "No date";
-  }
-  const day = moment(key, "YYYY-MM-DD");
-  return day.year() === moment().year()
-    ? day.format("Do MMMM")
-    : day.format("Do MMMM YYYY");
-}
 
 type DayGroup<T> = {
   key: string;
@@ -39,6 +30,18 @@ export function EventsByDate<T extends { id: string }>({
   renderCard: (event: T) => ReactNode;
   gridClassName?: string;
 }) {
+  const { t, i18n } = useLingui();
+
+  function formatDayLabel(key: string) {
+    if (key === NO_DATE_KEY) {
+      return t`No date`;
+    }
+    const day = moment(key, "YYYY-MM-DD");
+    return day.year() === moment().year()
+      ? day.format("Do MMMM")
+      : day.format("Do MMMM YYYY");
+  }
+
   const { future, past } = useMemo(() => {
     const today = moment().startOf("day");
     const futureMap = new Map<string, T[]>();
@@ -82,7 +85,7 @@ export function EventsByDate<T extends { id: string }>({
       past: toSortedGroups(pastMap, false),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events]);
+  }, [events, i18n.locale, t]);
 
   const renderSection = (title: string, groups: DayGroup<T>[]) => {
     if (groups.length === 0) {
@@ -120,8 +123,8 @@ export function EventsByDate<T extends { id: string }>({
 
   return (
     <div className="flex flex-col gap-2">
-      {renderSection("Future", future)}
-      {renderSection("Past", past)}
+      {renderSection(t`Future`, future)}
+      {renderSection(t`Past`, past)}
     </div>
   );
 }

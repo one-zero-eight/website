@@ -1,4 +1,5 @@
 import { searchTypes } from "@/api/search";
+import { useLingui } from "@lingui/react/macro";
 import PreviewBottomButton from "./PreviewBottomButton";
 
 export declare type MoodleUnknownPreviewProps = {
@@ -8,12 +9,13 @@ export declare type MoodleUnknownPreviewProps = {
 export default function MoodleUnknownPreview({
   source,
 }: MoodleUnknownPreviewProps) {
+  const { t } = useLingui();
   return (
     <>
       <div className="mt-2 mb-4 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
         <PreviewBottomButton
           icon={<span className="icon-[material-symbols--open-in-new]" />}
-          text="To source"
+          text={t`To source`}
           href={source.link}
           target="_blank"
         />

@@ -1,5 +1,6 @@
 import { $accounts, accountsTypes } from "@/api/accounts";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { msg } from "@lingui/core/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useMyAccessToken } from "@/api/helpers/access-token.ts";
 import { invalidateMySportAccessToken } from "@/api/helpers/sport-access-token.ts";
 import { getViewUserEmail, getViewUserName } from "@/components/admin/utils.ts";
@@ -66,12 +67,12 @@ export function useImpersonation(
 
   async function impersonate() {
     if (!targetUser) {
-      showError("Error", "Select a user to impersonate.");
+      showError(msg`Error`, msg`Select a user to impersonate.`);
       return;
     }
 
     if (!email) {
-      showError("Error", "User email is required for impersonation.");
+      showError(msg`Error`, msg`User email is required for impersonation.`);
       return;
     }
 
@@ -80,12 +81,12 @@ export function useImpersonation(
     setIsImpersonating(false);
 
     if (result.isError) {
-      showError("Error", formatApiErrorMessage(result.error));
+      showError(msg`Error`, formatApiErrorDescriptor(result.error));
       return;
     }
 
     if (!result.data?.access_token) {
-      showError("Error", "Impersonation token was not returned.");
+      showError(msg`Error`, msg`Impersonation token was not returned.`);
       return;
     }
 
@@ -97,7 +98,10 @@ export function useImpersonation(
     setToken(result.data.access_token);
     invalidateMySportAccessToken();
     queryClient.clear();
-    showSuccess("Success", `Now impersonating ${getViewUserName(targetUser)}`);
+    showSuccess(
+      msg`Success`,
+      msg`Now impersonating ${getViewUserName(targetUser)}`,
+    );
     window.location.assign("/");
   }
 
@@ -107,7 +111,7 @@ export function useImpersonation(
     setIsDepersonating(false);
 
     if (result.isError) {
-      showError("Error", formatApiErrorMessage(result.error));
+      showError(msg`Error`, formatApiErrorDescriptor(result.error));
       return;
     }
 
@@ -116,7 +120,7 @@ export function useImpersonation(
     setToken(null);
     invalidateMySportAccessToken();
     queryClient.clear();
-    showSuccess("Success", "Impersonation cleared");
+    showSuccess(msg`Success`, msg`Impersonation cleared`);
     window.location.assign("/admin");
   }
 

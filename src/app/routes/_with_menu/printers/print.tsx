@@ -4,20 +4,21 @@ import { PrintPage } from "@/components/web-print/PrintPage.tsx";
 import { WebPrintTabs } from "@/components/web-print/WebPrintTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/printers/print")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   return (
     <>
       <Helmet>
-        <title>Print — Printers</title>
+        <title>{t`Print — Printers`}</title>
         <meta
           name="description"
-          content="Print documents on Innopolis University printers from your browser."
+          content={t`Print documents on Innopolis University printers from your browser.`}
         />
       </Helmet>
 

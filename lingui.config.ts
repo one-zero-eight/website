@@ -11,6 +11,11 @@ export default defineConfig({
     {
       path: "<rootDir>/src/locales/{locale}",
       include: ["src"],
+      exclude: [
+        "src/components/schedule-assistant/**",
+        "src/app/routes/schedule-assistant/**",
+        "src/app/routes/timetable.tsx",
+      ],
     },
   ],
 });

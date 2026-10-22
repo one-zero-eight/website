@@ -5,6 +5,7 @@ export { ConfirmDialog } from "./ConfirmDialog.tsx";
 export type {
   Toast,
   ToastType,
+  ToastText,
   ToastContextType,
   ConfirmOptions,
 } from "./types.ts";

@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
@@ -17,6 +18,7 @@ import type { PlayerOption } from "./PlayersField";
 import { Pager } from "./Pager";
 import { pageSlice } from "./ranking";
 import { formatDay } from "./format";
+import { t } from "@lingui/core/macro";
 
 export type { TournamentStage };
 
@@ -34,25 +36,18 @@ function getPlacementData(tour: TourData):
   const qualTop = tour.qual_top;
   if (!qualTop || Object.keys(qualTop).length === 0) return null;
 
-  function ordinal(n: number): string {
-    if (n === 1) return "1st";
-    if (n === 2) return "2nd";
-    if (n === 3) return "3rd";
-    return `${n}th`;
-  }
-
   return Object.entries(qualTop)
     .sort(([a], [b]) => Number(a) - Number(b))
     .map(([place, playerId]) => ({
       playerId,
-      placeLabel: ordinal(Number(place)),
+      placeLabel: t`Place ${Number(place)}`,
     }));
 }
 
 function stageLabel(tour: TourData): string {
-  if ((tour.qual_seeding ?? []).length > 0) return "Qualification";
-  if (tour.groups_locked) return "Group stage";
-  return "Forming groups";
+  if ((tour.qual_seeding ?? []).length > 0) return t`Qualification`;
+  if (tour.groups_locked) return t`Group stage`;
+  return t`Forming groups`;
 }
 
 export function TabletennisTournaments({
@@ -62,6 +57,7 @@ export function TabletennisTournaments({
   tourId?: string;
   stage: TournamentStage;
 }) {
+  const { t, i18n } = useLingui();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [completedPage, setCompletedPage] = useState(0);
   const [expandedTours, setExpandedTours] = useState<Set<string>>(new Set());
@@ -184,13 +180,15 @@ export function TabletennisTournaments({
     }
     return (
       <div className="flex flex-col items-center gap-4 px-7 py-16 text-center">
-        <p className="text-base-content/60">Tournament not found.</p>
+        <p className="text-base-content/60">
+          <Trans>Tournament not found.</Trans>
+        </p>
         <button
           type="button"
           onClick={() => openTour(undefined)}
           className="h-11 rounded-xl border border-[#712BB2] px-5 text-sm font-medium text-[#712BB2]"
         >
-          All tournaments
+          <Trans>All tournaments</Trans>
         </button>
       </div>
     );
@@ -214,7 +212,9 @@ export function TabletennisTournaments({
     <>
       <div className="flex flex-col gap-4 px-4 py-6 md:px-7">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-xl font-light">Active tournaments</h2>
+          <h2 className="text-xl font-light">
+            <Trans>Active tournaments</Trans>
+          </h2>
           {isAdmin && (
             <button
               type="button"
@@ -222,7 +222,7 @@ export function TabletennisTournaments({
               onClick={() => setShowCreateForm(true)}
             >
               <span className="icon-[mdi--plus] text-lg" />
-              Create
+              <Trans>Create</Trans>
             </button>
           )}
         </div>
@@ -232,8 +232,8 @@ export function TabletennisTournaments({
             <span className="icon-[mdi--trophy-outline] text-6xl text-[#712BB2]/30" />
             <p className="text-base-content/50 max-w-sm text-sm">
               {isAdmin
-                ? "No active tournaments. Create one to start managing groups and the qualification bracket."
-                : "No active tournament at the moment."}
+                ? t`No active tournaments. Create one to start managing groups and the qualification bracket.`
+                : t`No active tournament at the moment.`}
             </p>
           </div>
         ) : (
@@ -251,8 +251,9 @@ export function TabletennisTournaments({
                     {tour.name}
                   </span>
                   <span className="text-base-content/50 block text-xs tabular-nums">
-                    {tour.date && `${formatDay(tour.date)} · `}
-                    {tour.players.length} players · {stageLabel(tour)}
+                    {tour.date && `${formatDay(tour.date, i18n.locale)} · `}
+                    <Trans>{tour.players.length} players</Trans> ·{" "}
+                    {stageLabel(tour)}
                   </span>
                 </span>
                 <span className="icon-[mdi--chevron-right] text-base-content/40 shrink-0 text-2xl" />
@@ -265,7 +266,7 @@ export function TabletennisTournaments({
       {completedTours.length > 0 && (
         <div className="mt-4 border-t px-2 pt-6">
           <h2 className="text-base-content mb-4 px-5 text-lg font-light">
-            Completed tournaments
+            <Trans>Completed tournaments</Trans>
           </h2>
           <Pager
             page={completedPage}
@@ -290,7 +291,7 @@ export function TabletennisTournaments({
                     </span>
                     {tour.date && (
                       <span className="text-base-content/40 shrink-0 text-[11px] tabular-nums">
-                        {formatDay(tour.date)}
+                        {formatDay(tour.date, i18n.locale)}
                       </span>
                     )}
                   </div>
@@ -329,15 +330,17 @@ export function TabletennisTournaments({
                                 : "icon-[mdi--chevron-down] text-base"
                             }
                           />
-                          {expanded
-                            ? "Show top 3 only"
-                            : `Show all ${placements!.length} places`}
+                          {expanded ? (
+                            <Trans>Show top 3 only</Trans>
+                          ) : (
+                            <Trans>Show all {placements!.length} places</Trans>
+                          )}
                         </button>
                       )}
                     </div>
                   ) : (
                     <p className="text-base-content/50 text-xs">
-                      No placement data
+                      <Trans>No placement data</Trans>
                     </p>
                   )}
                   {(tour.games.total_count > 0 || isAdmin) && (
@@ -347,7 +350,11 @@ export function TabletennisTournaments({
                       className="mt-3 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-[#712BB2] text-sm font-medium text-[#712BB2] transition-colors hover:bg-[#712BB2]/10"
                     >
                       <span className="icon-[mdi--tournament] text-base" />
-                      {tour.games.total_count > 0 ? "View games" : "Open"}
+                      {tour.games.total_count > 0 ? (
+                        <Trans>View games</Trans>
+                      ) : (
+                        <Trans>Open</Trans>
+                      )}
                     </button>
                   )}
                 </div>

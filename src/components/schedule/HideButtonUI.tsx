@@ -1,5 +1,6 @@
 import Tooltip from "@/components/common/Tooltip";
 import { MouseEventHandler } from "react";
+import { useLingui } from "@lingui/react/macro";
 
 export default function HideButtonUI({
   isHidden,
@@ -8,8 +9,11 @@ export default function HideButtonUI({
   isHidden: boolean;
   onClick: MouseEventHandler;
 }) {
+  const { t } = useLingui();
   return (
-    <Tooltip content={isHidden ? "Hidden from calendar" : "Hide from calendar"}>
+    <Tooltip
+      content={isHidden ? t`Hidden from calendar` : t`Hide from calendar`}
+    >
       <button
         type="button"
         onClick={onClick}

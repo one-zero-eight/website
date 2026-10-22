@@ -18,6 +18,7 @@ import {
 } from "@floating-ui/react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useState } from "react";
 import { ConfigCalendarDialog } from "@/components/calendar/ConfigCalendarDialog.tsx";
 
@@ -28,6 +29,7 @@ type UserMenuProps = {
 
 function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   const { me } = useMe();
+  const { t } = useLingui();
   const [isOpen, setIsOpen] = useState(false);
 
   const { refs, floatingStyles, context } = useFloating({
@@ -64,7 +66,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
 
   return (
     <>
-      <Tooltip content="User profile">
+      <Tooltip content={t`User profile`}>
         <button
           ref={refs.setReference}
           {...getReferenceProps()}
@@ -95,7 +97,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                   {me.telegram_info?.photo_url ? (
                     <img
                       src={getMyAvatarUrl()}
-                      alt="Your avatar"
+                      alt={t`Your avatar`}
                       className="border-base-content/50 rounded-full border-2"
                     />
                   ) : (
@@ -115,7 +117,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                         (me.telegram_info.username ? (
                           <>@{me.telegram_info.username}</>
                         ) : (
-                          "no Telegram alias"
+                          <Trans>no Telegram alias</Trans>
                         ))}
                     </p>
                   </div>
@@ -125,7 +127,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                     className="bg-base-200 text-base-content/75 hover:bg-base-300 rounded-box flex w-full flex-row items-center justify-center gap-2 px-6 py-2 text-center whitespace-nowrap"
                   >
                     <span className="icon-[material-symbols--account-circle] text-2xl" />
-                    My dashboard
+                    <Trans>My dashboard</Trans>
                   </Link>
                   <button
                     type="button"
@@ -133,7 +135,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                     className="bg-base-200 text-base-content/75 hover:bg-base-300 rounded-box flex w-full flex-row items-center justify-center gap-2 px-6 py-2 text-center whitespace-nowrap"
                   >
                     <span className="icon-[material-symbols--settings-outline] text-2xl" />
-                    Config & Export
+                    <Trans>Config & Export</Trans>
                   </button>
                   <button
                     type="button"
@@ -144,7 +146,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                     className="bg-base-200 text-base-content/75 hover:bg-base-300 rounded-box flex w-full cursor-pointer flex-row items-center justify-center gap-2 px-6 py-2 text-center whitespace-nowrap"
                   >
                     <span className="icon-[material-symbols--logout] text-2xl" />
-                    Sign out
+                    <Trans>Sign out</Trans>
                   </button>
                 </div>
               </div>

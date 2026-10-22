@@ -5,6 +5,7 @@ import {
 } from "@/api/helpers/create-query-client";
 import { queryClient } from "@/app/query-client.ts";
 import { T } from "@/lib/utils/dates";
+import { useLingui } from "@lingui/react";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
@@ -48,6 +49,7 @@ export function useTvRoomId() {
 }
 
 export function useRoomTvAuth() {
+  useLingui();
   const [accessToken, setAccessToken] = useRoomTvAccessToken();
   const [roomId, setRoomId] = useTvRoomId();
   const [deviceFlowCode, setDeviceFlowCode] = useLocalStorage<string | null>(

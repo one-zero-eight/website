@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { AskPage } from "@/components/search/ask/AskPage";
 import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
@@ -19,14 +20,15 @@ export const Route = createFileRoute("/_with_menu/search/ask")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { q } = Route.useSearch();
   return (
     <Suspense>
       <Helmet>
-        <title>Ask</title>
+        <title>{t`Ask`}</title>
         <meta
           name="description"
-          content="Ask questions or find answers at Innopolis University."
+          content={t`Ask questions or find answers at Innopolis University.`}
         />
       </Helmet>
 

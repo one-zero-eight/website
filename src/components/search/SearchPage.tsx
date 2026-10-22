@@ -1,4 +1,6 @@
 import { $search, searchTypes } from "@/api/search";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   InfoSources,
@@ -13,6 +15,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import IframePreviewCard from "./IframePreviewCard";
 
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
+  useLingui();
   const navigate = useNavigate();
 
   const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
@@ -161,6 +164,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     }
   };
 
+  const searchedFor = searchResult?.searched_for;
+
   return (
     <div className="flex grow flex-col gap-2 p-4">
       <SearchField
@@ -173,15 +178,17 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       />
       {!(isLoading || isFetching) && searchResult && (
         <p className="text-base-content py-4 text-xl font-semibold">
-          {filteredResponses.length > 0
-            ? `Results for: ${searchResult.searched_for}`
-            : `No matched results for: ${searchResult.searched_for}`}
+          {filteredResponses.length > 0 ? (
+            <Trans>Results for: {searchedFor}</Trans>
+          ) : (
+            <Trans>No matched results for: {searchedFor}</Trans>
+          )}
         </p>
       )}
       {(isLoading || isFetching) && (
         <>
           <p className="text-base-content py-4 text-xl font-semibold">
-            Loading search results...
+            <Trans>Loading search results...</Trans>
           </p>
           <div className="flex w-full flex-row gap-6">
             <div className="flex flex-col gap-4 md:w-1/2">
@@ -239,7 +246,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       {error && (
         <div>
           <p className="text-base-content py-4 text-xl font-semibold">
-            Sorry, something gone wrong.
+            <Trans>Sorry, something gone wrong.</Trans>
           </p>
           <p className="text-base-content/75">{formatApiErrorMessage(error)}</p>
         </div>

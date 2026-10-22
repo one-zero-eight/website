@@ -1,4 +1,5 @@
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export function TvStartupPage({
   code,
@@ -7,10 +8,11 @@ export function TvStartupPage({
   code?: string;
   error?: string;
 }) {
+  const { t } = useLingui();
   return (
     <>
       <Helmet>
-        <title>TV Startup</title>
+        <title>{t`TV Startup`}</title>
         <meta name="robots" content="noindex" />
       </Helmet>
       <div
@@ -20,12 +22,16 @@ export function TvStartupPage({
         <div className="max-w-2xl text-center">
           {!code ? (
             <div className="space-y-4">
-              <p className="text-2xl">Initializing TV...</p>
+              <p className="text-2xl">
+                <Trans>Initializing TV...</Trans>
+              </p>
               <span className="loading loading-spinner loading-lg" />
             </div>
           ) : (
             <>
-              <p className="text-2xl">Startup password</p>
+              <p className="text-2xl">
+                <Trans>Startup password</Trans>
+              </p>
               <p className="text-primary mt-2 text-7xl font-bold tracking-[0.2em]">
                 {code}
               </p>

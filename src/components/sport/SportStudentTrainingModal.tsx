@@ -1,9 +1,13 @@
 import { $clubs } from "@/api/clubs";
+import { Trans, useLingui } from "@lingui/react/macro";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
 import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import {
   canShowCheckInButton,
+  CHECK_IN_UNAVAILABLE_REASON,
   getCheckInUnavailableReason,
   invalidateSportCheckinQueries,
 } from "@/components/sport/sport-checkin-utils.ts";
@@ -37,8 +41,9 @@ export function SportStudentTrainingModal({
   onAttendance?: () => void;
   readOnly?: boolean;
 }) {
+  const { i18n, t } = useLingui();
   const [checkinFeedback, setCheckinFeedback] = useState<{
-    message: string;
+    message: MessageDescriptor;
     isError: boolean;
   } | null>(null);
   useEffect(() => {
@@ -71,8 +76,8 @@ export function SportStudentTrainingModal({
       onError: (_error, vars) => {
         setCheckinFeedback({
           message: vars.params.query.checkin
-            ? "Check-in failed · Retry"
-            : "Check-out failed · Retry",
+            ? msg`Check-in failed · Retry`
+            : msg`Check-out failed · Retry`,
           isError: true,
         });
       },
@@ -147,7 +152,7 @@ export function SportStudentTrainingModal({
     year: "numeric",
     timeZone: "Europe/Moscow",
   });
-  const dateStr = when.toLocaleDateString("ru-RU", {
+  const dateStr = when.toLocaleDateString(i18n.locale, {
     day: "2-digit",
     month: "2-digit",
     ...(moscowYear.format(when) === moscowYear.format(new Date())
@@ -155,7 +160,7 @@ export function SportStudentTrainingModal({
       : { year: "numeric" as const }),
     timeZone: "Europe/Moscow",
   });
-  const weekdayStr = when.toLocaleDateString("en-US", {
+  const weekdayStr = when.toLocaleDateString(i18n.locale, {
     weekday: "long",
     timeZone: "Europe/Moscow",
   });
@@ -180,8 +185,7 @@ export function SportStudentTrainingModal({
   );
   const isCheckingDailyLimit = needsDailySchedule && dailySchedulePending;
   const showUnavailableReason =
-    unavailableReason !== "Check-in is not available for this training." ||
-    !isCheckingDailyLimit;
+    unavailableReason !== CHECK_IN_UNAVAILABLE_REASON || !isCheckingDailyLimit;
 
   return (
     <SportTrainingModalShell
@@ -193,16 +197,27 @@ export function SportStudentTrainingModal({
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         <dl className="flex flex-col gap-3 text-sm">
           <div>
-            <dt className="text-base-content/60 font-semibold">Time & date</dt>
+            <dt className="text-base-content/60 font-semibold">
+              <Trans>Time & date</Trans>
+            </dt>
             <dd>
               {timeStr}, {dateStr}, {weekdayStr}
             </dd>
           </div>
           <div>
-            <dt className="text-base-content/60 font-semibold">Places</dt>
+            <dt className="text-base-content/60 font-semibold">
+              <Trans>Places</Trans>
+            </dt>
             <dd>
-              {placesFree} / {training.max_checkins} free
-              {isFull ? " (no places left)" : ""}
+              <Trans>
+                {placesFree} / {training.max_checkins} free
+              </Trans>
+              {isFull ? (
+                <>
+                  {" "}
+                  <Trans>(no places left)</Trans>
+                </>
+              ) : null}
             </dd>
           </div>
           {!readOnly &&
@@ -222,16 +237,18 @@ export function SportStudentTrainingModal({
           !row.checked_in &&
           !isTrainer ? (
             <div className="text-error">
-              Training eligibility could not be fully loaded.
+              <Trans>Training eligibility could not be fully loaded.</Trans>
             </div>
           ) : null}
           {!readOnly && !canShowCheckIn && !isTrainer && row.checked_in ? (
             <div>
               <dt className="text-base-content/60 font-semibold">
-                Cannot check out
+                <Trans>Cannot check out</Trans>
               </dt>
               <dd className="text-error">
-                This training has already {hasEnded ? "ended" : "started"}.
+                {hasEnded
+                  ? t`This training has already ended.`
+                  : t`This training has already started.`}
               </dd>
             </div>
           ) : !readOnly &&
@@ -241,14 +258,16 @@ export function SportStudentTrainingModal({
             showUnavailableReason ? (
             <div>
               <dt className="text-base-content/60 font-semibold">
-                Cannot check in
+                <Trans>Cannot check in</Trans>
               </dt>
-              <dd className="text-error">{unavailableReason}</dd>
+              <dd className="text-error">{i18n._(unavailableReason)}</dd>
             </div>
           ) : null}
           {training.training_location ? (
             <div>
-              <dt className="text-base-content/60 font-semibold">Location</dt>
+              <dt className="text-base-content/60 font-semibold">
+                <Trans>Location</Trans>
+              </dt>
               <dd>
                 <Link
                   to="/maps"
@@ -264,23 +283,25 @@ export function SportStudentTrainingModal({
             <div className="skeleton h-10 w-full" />
           ) : hasEnded && historyError ? (
             <div className="text-error">
-              Earned sport hours could not be loaded.
+              <Trans>Earned sport hours could not be loaded.</Trans>
             </div>
           ) : earnedHours != null && earnedHours > 0 ? (
             <div>
               <dt className="text-base-content/60 font-semibold">
-                Sport hours earned
+                <Trans>Sport hours earned</Trans>
               </dt>
               <dd>
                 <span className="badge badge-success badge-sm">
-                  {earnedHours}h
+                  <Trans>{earnedHours}h</Trans>
                 </span>
               </dd>
             </div>
           ) : null}
           {club ? (
             <div>
-              <dt className="text-base-content/60 font-semibold">Club</dt>
+              <dt className="text-base-content/60 font-semibold">
+                <Trans>Club</Trans>
+              </dt>
               <dd>
                 <Link
                   to="/clubs/$slug"
@@ -297,26 +318,30 @@ export function SportStudentTrainingModal({
               </dd>
             </div>
           ) : clubsError ? (
-            <div className="text-error">Club could not be loaded.</div>
+            <div className="text-error">
+              <Trans>Club could not be loaded.</Trans>
+            </div>
           ) : null}
           {groupPending && !description ? (
             <div>
               <dt className="text-base-content/60 font-semibold">
-                Description
+                <Trans>Description</Trans>
               </dt>
               <dd className="skeleton h-12 w-full" />
             </div>
           ) : groupError && !description ? (
             <div>
               <dt className="text-base-content/60 font-semibold">
-                Description
+                <Trans>Description</Trans>
               </dt>
-              <dd className="text-error">Description could not be loaded.</dd>
+              <dd className="text-error">
+                <Trans>Description could not be loaded.</Trans>
+              </dd>
             </div>
           ) : description ? (
             <div>
               <dt className="text-base-content/60 font-semibold">
-                Description
+                <Trans>Description</Trans>
               </dt>
               <dd
                 className="prose prose-sm text-base-content max-w-none"
@@ -334,7 +359,7 @@ export function SportStudentTrainingModal({
           disabled={isPending}
           onClick={() => onOpenChange(false)}
         >
-          Close
+          <Trans>Close</Trans>
         </button>
         {isTrainer && onAttendance ? (
           <button
@@ -342,7 +367,7 @@ export function SportStudentTrainingModal({
             className="btn btn-primary"
             onClick={onAttendance}
           >
-            To attendance
+            <Trans>To attendance</Trans>
           </button>
         ) : null}
         {!readOnly && canShowCheckIn ? (
@@ -362,7 +387,9 @@ export function SportStudentTrainingModal({
                 (checkinFeedback !== null && !checkinFeedback.isError)
               }
               title={
-                checkinFeedback?.isError ? checkinFeedback.message : undefined
+                checkinFeedback?.isError
+                  ? i18n._(checkinFeedback.message)
+                  : undefined
               }
               onClick={() => {
                 setCheckinFeedback(null);
@@ -376,19 +403,19 @@ export function SportStudentTrainingModal({
             >
               <span className="grid place-items-center">
                 <span className="invisible col-start-1 row-start-1 whitespace-nowrap">
-                  Check out
+                  <Trans>Check out</Trans>
                 </span>
                 <span className="col-start-1 row-start-1">
                   {isPending ? (
                     <span className="loading loading-spinner loading-sm" />
                   ) : checkinFeedback ? (
                     checkinFeedback.isError ? (
-                      "Retry"
+                      <Trans>Retry</Trans>
                     ) : (
                       <span className="icon-[material-symbols--check] text-xl" />
                     )
                   ) : (
-                    "Check out"
+                    <Trans>Check out</Trans>
                   )}
                 </span>
               </span>
@@ -409,7 +436,9 @@ export function SportStudentTrainingModal({
                 (checkinFeedback !== null && !checkinFeedback.isError)
               }
               title={
-                checkinFeedback?.isError ? checkinFeedback.message : undefined
+                checkinFeedback?.isError
+                  ? i18n._(checkinFeedback.message)
+                  : undefined
               }
               onClick={() => {
                 setCheckinFeedback(null);
@@ -423,19 +452,19 @@ export function SportStudentTrainingModal({
             >
               <span className="grid place-items-center">
                 <span className="invisible col-start-1 row-start-1 whitespace-nowrap">
-                  Check out
+                  <Trans>Check out</Trans>
                 </span>
                 <span className="col-start-1 row-start-1">
                   {isPending ? (
                     <span className="loading loading-spinner loading-sm" />
                   ) : checkinFeedback ? (
                     checkinFeedback.isError ? (
-                      "Retry"
+                      <Trans>Retry</Trans>
                     ) : (
                       <span className="icon-[material-symbols--check] text-xl" />
                     )
                   ) : (
-                    "Check in"
+                    <Trans>Check in</Trans>
                   )}
                 </span>
               </span>

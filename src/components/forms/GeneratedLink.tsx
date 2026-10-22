@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 interface GeneratedLinkProps {
   generatedUrl: string;
   copied: boolean;
@@ -12,7 +13,7 @@ export function GeneratedLink({
   return (
     <div className="border-base-content/10 bg-base-content/5 rounded-field mt-6 border p-4">
       <h3 className="text-base-content mb-2 text-sm font-medium">
-        Generated Link
+        <Trans>Generated Link</Trans>
       </h3>
       <div className="flex items-center gap-2">
         <input
@@ -29,12 +30,12 @@ export function GeneratedLink({
           {copied ? (
             <>
               <span className="icon-[material-symbols--check] h-4 w-4" />
-              Copied!
+              <Trans>Copied!</Trans>
             </>
           ) : (
             <>
               <span className="icon-[material-symbols--content-copy] h-4 w-4" />
-              Copy
+              <Trans>Copy</Trans>
             </>
           )}
         </button>

@@ -1,4 +1,5 @@
 import { accountsTypes } from "@/api/accounts";
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   getInnohassleWebvisorUrl,
   getSportAdminStudentUrl,
@@ -12,14 +13,17 @@ import { scheduleTypes } from "@/api/schedule";
 import { cn } from "@/lib/ui/cn";
 import { ReactNode } from "react";
 
-function formatDateTime(value: string | number | null | undefined) {
+function formatDateTime(
+  value: string | number | null | undefined,
+  locale: string,
+) {
   if (value == null || value === "") return undefined;
 
   const date =
     typeof value === "number" ? new Date(value * 1000) : new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
 
-  return date.toLocaleString("ru-RU", {
+  return date.toLocaleString(locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -31,7 +35,7 @@ function formatDateTime(value: string | number | null | undefined) {
 
 function formatBoolean(value: boolean | null | undefined) {
   if (value == null) return undefined;
-  return value ? "Yes" : "No";
+  return value ? <Trans>Yes</Trans> : <Trans>No</Trans>;
 }
 
 function InfoSection({
@@ -144,6 +148,7 @@ export function AdminUserDetails({
   isPredefinedPending: boolean;
   eventGroupsByAlias: Map<string, scheduleTypes.SchemaViewEventGroup>;
 }) {
+  const { t, i18n } = useLingui();
   const telegramName = [
     user.telegram_info?.first_name,
     user.telegram_info?.last_name,
@@ -198,9 +203,9 @@ export function AdminUserDetails({
         </div>
 
         <dl className="grid gap-2">
-          <InfoRow label="ID" value={user.id} mono />
+          <InfoRow label={t`ID`} value={user.id} mono />
           <InfoRow
-            label="InNoHassle admin"
+            label={t`InNoHassle admin`}
             value={formatBoolean(user.innohassle_admin)}
           />
         </dl>
@@ -208,7 +213,9 @@ export function AdminUserDetails({
 
       {email && (
         <section className="bg-base-200 rounded-box flex min-w-0 flex-col gap-3 p-4">
-          <h3 className="text-xl font-medium">Analytics</h3>
+          <h3 className="text-xl font-medium">
+            <Trans>Analytics</Trans>
+          </h3>
           <ul className="flex min-w-0 flex-col gap-2">
             <li className="min-w-0">
               <a
@@ -217,7 +224,7 @@ export function AdminUserDetails({
                 rel="noreferrer"
                 className="link text-primary block truncate"
               >
-                Webvisor (innohassle.ru)
+                <Trans>Webvisor (innohassle.ru)</Trans>
               </a>
             </li>
             <li className="min-w-0">
@@ -227,7 +234,7 @@ export function AdminUserDetails({
                 rel="noreferrer"
                 className="link text-primary block truncate"
               >
-                Webvisor (sport.innopolis.university)
+                <Trans>Webvisor (sport.innopolis.university)</Trans>
               </a>
             </li>
             <li className="min-w-0">
@@ -237,50 +244,52 @@ export function AdminUserDetails({
                 rel="noreferrer"
                 className="link text-primary block truncate"
               >
-                Sport admin
+                <Trans>Sport admin</Trans>
               </a>
             </li>
           </ul>
         </section>
       )}
 
-      <InfoSection title="Innopolis">
-        <InfoRow label="Email" value={user.innopolis_info?.email} />
-        <InfoRow label="Name" value={user.innopolis_info?.name} />
+      <InfoSection title={t`Innopolis`}>
+        <InfoRow label={t`Email`} value={user.innopolis_info?.email} />
+        <InfoRow label={t`Name`} value={user.innopolis_info?.name} />
         <InfoRow
-          label="Student"
+          label={t`Student`}
           value={formatBoolean(user.innopolis_info?.is_student)}
         />
         <InfoRow
-          label="Staff"
+          label={t`Staff`}
           value={formatBoolean(user.innopolis_info?.is_staff)}
         />
         <InfoRow
-          label="College"
+          label={t`College`}
           value={formatBoolean(user.innopolis_info?.is_college)}
         />
         <InfoRow
-          label="Updated at"
-          value={formatDateTime(user.innopolis_info?.updated_at)}
+          label={t`Updated at`}
+          value={formatDateTime(user.innopolis_info?.updated_at, i18n.locale)}
         />
       </InfoSection>
 
-      <InfoSection title="Preferences">
+      <InfoSection title={t`Preferences`}>
         {Object.entries(user.preferences ?? {}).length > 0 ? (
           Object.entries(user.preferences ?? {}).map(([key, value]) => (
             <InfoRow key={key} label={key} value={JSON.stringify(value)} mono />
           ))
         ) : (
-          <p className="text-base-content/75 text-sm">No preferences.</p>
+          <p className="text-base-content/75 text-sm">
+            <Trans>No preferences.</Trans>
+          </p>
         )}
       </InfoSection>
 
-      <InfoSection title="Telegram">
-        <InfoRow label="ID" value={user.telegram_info?.id} mono />
-        <InfoRow label="First name" value={user.telegram_info?.first_name} />
-        <InfoRow label="Last name" value={user.telegram_info?.last_name} />
+      <InfoSection title={t`Telegram`}>
+        <InfoRow label={t`ID`} value={user.telegram_info?.id} mono />
+        <InfoRow label={t`First name`} value={user.telegram_info?.first_name} />
+        <InfoRow label={t`Last name`} value={user.telegram_info?.last_name} />
         <InfoRow
-          label="Username"
+          label={t`Username`}
           value={
             user.telegram_info?.username ? (
               <TelegramLink username={user.telegram_info.username}>
@@ -290,7 +299,7 @@ export function AdminUserDetails({
           }
         />
         <InfoRow
-          label="Photo URL"
+          label={t`Photo URL`}
           value={
             user.telegram_info?.photo_url ? (
               <a
@@ -305,46 +314,51 @@ export function AdminUserDetails({
           }
         />
         <InfoRow
-          label="Updated at"
-          value={formatDateTime(user.telegram_info?.updated_at)}
+          label={t`Updated at`}
+          value={formatDateTime(user.telegram_info?.updated_at, i18n.locale)}
         />
         <InfoRow
-          label="Sync success"
+          label={t`Sync success`}
           value={formatBoolean(user.telegram_update_data?.success)}
         />
         <InfoRow
-          label="Sync status code"
+          label={t`Sync status code`}
           value={user.telegram_update_data?.status_code}
         />
         <InfoRow
-          label="Sync error"
+          label={t`Sync error`}
           value={user.telegram_update_data?.error_message}
         />
         <InfoRow
-          label="Sync updated at"
-          value={formatDateTime(user.telegram_update_data?.updated_at)}
+          label={t`Sync updated at`}
+          value={formatDateTime(
+            user.telegram_update_data?.updated_at,
+            i18n.locale,
+          )}
         />
       </InfoSection>
 
       <section className="bg-base-200 rounded-box flex min-w-0 flex-col gap-3 p-4">
-        <h3 className="text-xl font-medium">Predefined groups</h3>
+        <h3 className="text-xl font-medium">
+          <Trans>Predefined groups</Trans>
+        </h3>
         {isPredefinedPending ? (
           <div className="skeleton h-20 w-full rounded-xl" />
         ) : (
           <>
             <GroupList
-              title="User groups"
+              title={t`User groups`}
               items={userGroups}
               eventGroupsByAlias={eventGroupsByAlias}
             />
             <GroupList
-              title="Academic groups"
+              title={t`Academic groups`}
               items={academicGroups}
               eventGroupsByAlias={eventGroupsByAlias}
             />
             {userGroups.length === 0 && academicGroups.length === 0 && (
               <p className="text-base-content/75 text-sm">
-                No predefined groups for this user.
+                <Trans>No predefined groups for this user.</Trans>
               </p>
             )}
           </>

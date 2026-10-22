@@ -6,7 +6,11 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  pluginLingui.configs["flat/recommended"],
+  { ignores: ["dist/**", "build/**", "coverage/**"] },
+  {
+    ...pluginLingui.configs["flat/recommended"],
+    files: ["src/**/*.{js,jsx,ts,tsx}"],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {

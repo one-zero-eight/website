@@ -1,4 +1,6 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { $clubs } from "@/api/clubs";
 import { $events } from "@/api/events";
 import { HostType, SchemaDraftOut, SchemaHost } from "@/api/events/types";
@@ -18,6 +20,7 @@ export function DraftHostsSection({
   draft: SchemaDraftOut;
   canEdit: boolean;
 }) {
+  const { t } = useLingui();
   const { showError } = useToast();
   const queryClient = useQueryClient();
   const { clubs, isClubLeader, isEventManager } = useEventsAuth();
@@ -127,7 +130,7 @@ export function DraftHostsSection({
   }
 
   const onError = (error: unknown) => {
-    showError("Error", formatApiErrorMessage(error));
+    showError(msg`Error`, formatApiErrorDescriptor(error));
   };
 
   const { mutate: addClubHost, isPending: isAddingClub } = $events.useMutation(
@@ -237,7 +240,7 @@ export function DraftHostsSection({
   function handleSaveExternal() {
     const name = externalName.trim();
     if (!name) {
-      showError("Invalid host", "External host name is required.");
+      showError(msg`Invalid host`, msg`External host name is required.`);
       return;
     }
 
@@ -268,7 +271,9 @@ export function DraftHostsSection({
             !expanded && "-rotate-90",
           )}
         />
-        <h3 className="font-medium">Hosts</h3>
+        <h3 className="font-medium">
+          <Trans>Hosts</Trans>
+        </h3>
         {!expanded && (
           <span className="text-base-content/50 text-sm">
             {hosts.length + invitations.length}
@@ -277,7 +282,9 @@ export function DraftHostsSection({
       </button>
 
       {expanded && hosts.length === 0 ? (
-        <p className="text-base-content/70 mt-3 mb-3 text-sm">No hosts yet.</p>
+        <p className="text-base-content/70 mt-3 mb-3 text-sm">
+          <Trans>No hosts yet.</Trans>
+        </p>
       ) : null}
 
       {expanded && hosts.length > 0 ? (
@@ -372,7 +379,9 @@ export function DraftHostsSection({
 
       {expanded && invitations.length > 0 && (
         <div className="mb-3">
-          <p className="mb-2 text-sm font-medium">Pending invitations</p>
+          <p className="mb-2 text-sm font-medium">
+            <Trans>Pending invitations</Trans>
+          </p>
           <ul className="flex flex-col gap-2">
             {invitations.map((clubId) => (
               <li
@@ -393,7 +402,7 @@ export function DraftHostsSection({
                       })
                     }
                   >
-                    Cancel
+                    <Trans>Cancel</Trans>
                   </button>
                 )}
               </li>
@@ -407,7 +416,9 @@ export function DraftHostsSection({
           {isClubLeader && ownClubsToAdd.length > 0 && (
             <div className="flex flex-wrap items-end gap-2">
               <label className="flex min-w-40 grow flex-col gap-1 text-sm">
-                <span>Add your club</span>
+                <span>
+                  <Trans>Add your club</Trans>
+                </span>
                 <select
                   className={eventFieldClass()}
                   disabled={busy}
@@ -435,7 +446,7 @@ export function DraftHostsSection({
                 {isAddingClub && (
                   <span className="loading loading-spinner loading-sm" />
                 )}
-                Add club
+                <Trans>Add club</Trans>
               </button>
             </div>
           )}
@@ -452,7 +463,7 @@ export function DraftHostsSection({
                     setInviteOpen(true);
                   }}
                 >
-                  Invite club
+                  <Trans>Invite club</Trans>
                 </button>
               )}
               {isEventManager && (
@@ -467,7 +478,7 @@ export function DraftHostsSection({
                     setExternalOpen(true);
                   }}
                 >
-                  Add external host
+                  <Trans>Add external host</Trans>
                 </button>
               )}
             </div>
@@ -483,13 +494,13 @@ export function DraftHostsSection({
             setInviteQuery("");
           }
         }}
-        title="Invite club"
+        title={t`Invite club`}
       >
         <div className="@container/modal flex flex-col gap-3">
           <input
             type="search"
             className={eventFieldClass()}
-            placeholder="Search clubs..."
+            placeholder={t`Search clubs...`}
             value={inviteQuery}
             disabled={isInviting}
             onChange={(e) => setInviteQuery(e.target.value)}
@@ -498,8 +509,8 @@ export function DraftHostsSection({
             {filteredInviteableClubs.length === 0 ? (
               <p className="text-base-content/70 text-sm">
                 {inviteableClubs.length === 0
-                  ? "No clubs available to invite."
-                  : "No matches."}
+                  ? t`No clubs available to invite.`
+                  : t`No matches.`}
               </p>
             ) : (
               <ul className="divide-base-300 divide-y">
@@ -523,7 +534,7 @@ export function DraftHostsSection({
                       {invitingClubId === club.id && isInviting && (
                         <span className="loading loading-spinner loading-sm" />
                       )}
-                      Invite
+                      <Trans>Invite</Trans>
                     </button>
                   </li>
                 ))}
@@ -541,11 +552,13 @@ export function DraftHostsSection({
             setEditHost(null);
           }
         }}
-        title={editHost ? "Edit external host" : "Add external host"}
+        title={editHost ? t`Edit external host` : t`Add external host`}
       >
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm">
-            <span>Name</span>
+            <span>
+              <Trans>Name</Trans>
+            </span>
             <input
               type="text"
               className={eventFieldClass()}
@@ -555,7 +568,9 @@ export function DraftHostsSection({
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
-            <span>URL (optional)</span>
+            <span>
+              <Trans>URL (optional)</Trans>
+            </span>
             <input
               type="url"
               className={eventFieldClass()}
@@ -573,7 +588,7 @@ export function DraftHostsSection({
                 setEditHost(null);
               }}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
             <button
               type="button"
@@ -584,7 +599,7 @@ export function DraftHostsSection({
               {(isAddingExternal || isPatchingExternal) && (
                 <span className="loading loading-spinner loading-sm" />
               )}
-              Save
+              <Trans>Save</Trans>
             </button>
           </div>
         </div>

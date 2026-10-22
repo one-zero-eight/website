@@ -1,22 +1,27 @@
 import { Link } from "@tanstack/react-router";
+import { Trans } from "@lingui/react/macro";
 
 export function WebPrintLandingPage() {
   return (
     <div className="@container/content mx-auto flex w-full max-w-[720px] flex-col gap-8 px-4 py-8">
       <section className="flex flex-col gap-3">
         <p className="text-base leading-relaxed">
-          Print and scan on university printers from your browser — upload a
-          file or place a document on the glass, choose a device, and go.
+          <Trans>
+            Print and scan on university printers from your browser — upload a
+            file or place a document on the glass, choose a device, and go.
+          </Trans>
         </p>
         <ul className="text-base-content/70 flex flex-col gap-2 text-base leading-relaxed">
           <li className="flex gap-2">
             <span className="icon-[material-symbols--sync-rounded] text-primary mt-0.5 shrink-0 text-xl" />
-            Automatic conversion of PDF, Word, Excel, images, and more for
-            printing
+            <Trans>
+              Automatic conversion of PDF, Word, Excel, images, and more for
+              printing
+            </Trans>
           </li>
           <li className="flex gap-2">
             <span className="icon-[material-symbols--crop-rounded] text-primary mt-0.5 shrink-0 text-xl" />
-            Smart crop that detects document edges when scanning
+            <Trans>Smart crop that detects document edges when scanning</Trans>
           </li>
         </ul>
       </section>
@@ -28,9 +33,11 @@ export function WebPrintLandingPage() {
         >
           <span className="icon-[material-symbols--upload-file-rounded] text-primary shrink-0 text-3xl" />
           <div className="min-w-0">
-            <p className="text-base font-medium">Print</p>
+            <p className="text-base font-medium">
+              <Trans>Print</Trans>
+            </p>
             <p className="text-base-content/60 text-base">
-              Upload a file, pick a printer, send the job
+              <Trans>Upload a file, pick a printer, send the job</Trans>
             </p>
           </div>
         </Link>
@@ -41,40 +48,52 @@ export function WebPrintLandingPage() {
         >
           <span className="icon-[material-symbols--adf-scanner-rounded] text-primary shrink-0 text-3xl" />
           <div className="min-w-0">
-            <p className="text-base font-medium">Scan</p>
+            <p className="text-base font-medium">
+              <Trans>Scan</Trans>
+            </p>
             <p className="text-base-content/60 text-base">
-              Scan pages and download a PDF
+              <Trans>Scan pages and download a PDF</Trans>
             </p>
           </div>
         </Link>
       </div>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base-content text-xl font-semibold">Locations</h2>
+        <h2 className="text-base-content text-xl font-semibold">
+          <Trans>Locations</Trans>
+        </h2>
         <p className="text-base-content/70 text-base leading-relaxed">
-          Two printers are available on campus right now:
+          <Trans>Two printers are available on campus right now:</Trans>
         </p>
         <ul className="text-base-content/70 flex flex-col gap-2 text-base leading-relaxed">
           <li>
             <span className="text-base-content">319</span>
-            <span className="text-base-content/70"> — 3rd floor · </span>
+            <span className="text-base-content/70">
+              {" "}
+              — <Trans>3rd floor</Trans> ·{" "}
+            </span>
             <Link
               to="/maps"
               search={{ scene: "university-floor-3", area: "printer-319" }}
               className="text-primary hover:underline"
             >
-              Show on map
+              <Trans>Show on map</Trans>
             </Link>
           </li>
           <li>
-            <span className="text-base-content">VK Zone</span>
-            <span className="text-base-content/70"> — 5th floor · </span>
+            <span className="text-base-content">
+              <Trans>VK Zone</Trans>
+            </span>
+            <span className="text-base-content/70">
+              {" "}
+              — <Trans>5th floor</Trans> ·{" "}
+            </span>
             <Link
               to="/maps"
               search={{ scene: "university-floor-5", area: "printer-5f" }}
               className="text-primary hover:underline"
             >
-              Show on map
+              <Trans>Show on map</Trans>
             </Link>
           </li>
         </ul>
@@ -89,11 +108,11 @@ export function WebPrintLandingPage() {
         <span className="icon-[mdi--robot-excited-outline] text-primary shrink-0 text-3xl" />
         <div className="min-w-0">
           <p className="flex items-center gap-1 text-base font-medium">
-            Telegram bot
+            <Trans>Telegram bot</Trans>
             <span className="icon-[material-symbols--open-in-new-rounded] text-base-content/50 text-base" />
           </p>
           <p className="text-base-content/60 text-base">
-            Print and scan via @InnoPrintBot
+            <Trans>Print and scan via @InnoPrintBot</Trans>
           </p>
         </div>
       </a>

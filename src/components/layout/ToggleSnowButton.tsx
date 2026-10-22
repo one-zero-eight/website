@@ -1,11 +1,13 @@
+import { useLingui } from "@lingui/react/macro";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { cn } from "@/lib/ui/cn";
 import { useSnowVisibility } from "../snow/SnowContext";
 
 export default function ToggleSnowButton() {
+  const { t } = useLingui();
   const { isSnowVisible, toggleSnowVisibility } = useSnowVisibility();
   return (
-    <Tooltip content="Snow">
+    <Tooltip content={t`Snow`}>
       <button
         onClick={toggleSnowVisibility}
         type="button"

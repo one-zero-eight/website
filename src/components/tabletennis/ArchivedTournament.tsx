@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { cn } from "@/lib/ui/cn";
 import { $tabletennis } from "@/api/tabletennis";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { ValidationMatches } from "./ValidationMatches";
 import { QualificationMatches } from "./QualificationMatches";
@@ -45,21 +47,22 @@ export function ArchivedTournament({
   onReopened: () => Promise<void>;
   onDeleted: () => void;
 }) {
+  const { t, i18n } = useLingui();
   const [mode, setMode] = useState<"validation" | "qualification">(
     "validation",
   );
   const { showError, showConfirm } = useToast();
   const { mutateAsync: reopenTour, isPending: reopening } =
     $tabletennis.useMutation("post", "/reopen-tour", {
-      onError: (e) => showError("Error", formatApiErrorMessage(e)),
+      onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)),
     });
 
   async function handleReopen() {
     const ok = await showConfirm({
-      title: "Reopen tournament",
-      message: `${tour.name} becomes active again, so its games and standings can be corrected. Finish it again when you are done.`,
-      confirmText: "Reopen",
-      cancelText: "Cancel",
+      title: msg`Reopen tournament`,
+      message: msg`${tour.name} becomes active again, so its games and standings can be corrected. Finish it again when you are done.`,
+      confirmText: msg`Reopen`,
+      cancelText: msg`Cancel`,
       type: "warning",
     });
     if (!ok) return;
@@ -109,7 +112,7 @@ export function ArchivedTournament({
       <div className="flex items-center gap-2 px-2 pt-3 pb-2">
         <button
           type="button"
-          aria-label="Back to tournaments"
+          aria-label={t`Back to tournaments`}
           onClick={onBack}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[#712BB2] hover:bg-[#712BB2]/10"
         >
@@ -119,7 +122,10 @@ export function ArchivedTournament({
           <h2 className="truncate text-lg font-light">{tour.name}</h2>
           {tour.date && (
             <p className="text-base-content/50 text-xs tabular-nums">
-              {formatDay(tour.date)} · {tour.players.length} players
+              <Trans>
+                {formatDay(tour.date, i18n.locale)} · {tour.players.length}{" "}
+                players
+              </Trans>
             </p>
           )}
         </div>
@@ -140,7 +146,7 @@ export function ArchivedTournament({
             ) : (
               <>
                 <span className="icon-[mdi--pencil-outline] text-base" />
-                Reopen
+                <Trans>Reopen</Trans>
               </>
             )}
           </button>
@@ -160,7 +166,11 @@ export function ArchivedTournament({
             )}
             onClick={() => setMode(m)}
           >
-            {m === "validation" ? "Validation" : "Qualification"}
+            {m === "validation" ? (
+              <Trans>Validation</Trans>
+            ) : (
+              <Trans>Qualification</Trans>
+            )}
           </button>
         ))}
       </div>
@@ -182,7 +192,7 @@ export function ArchivedTournament({
         ) : (
           <PlainGames
             games={validationGames}
-            empty="No group stage was played in this tournament."
+            empty={t`No group stage was played in this tournament.`}
           />
         )
       ) : seeding.length > 0 ? (
@@ -201,7 +211,7 @@ export function ArchivedTournament({
       ) : (
         <PlainGames
           games={qualificationGames}
-          empty="No qualification was played in this tournament."
+          empty={t`No qualification was played in this tournament.`}
         />
       )}
     </div>

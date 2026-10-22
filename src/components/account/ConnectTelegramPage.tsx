@@ -1,4 +1,5 @@
 import { $accounts } from "@/api/accounts";
+import { Trans } from "@lingui/react/macro";
 import { useMe } from "@/api/accounts/user.ts";
 import TelegramLoginButton, {
   TelegramUser,
@@ -50,12 +51,14 @@ export function ConnectTelegramPage() {
     return (
       <>
         <h1 className="text-center text-2xl font-medium wrap-break-word">
-          Sign in to get access
+          <Trans>Sign in to get access</Trans>
         </h1>
         <p className="text-base-content/75 text-center">
-          Use your Innopolis account
-          <br />
-          to access InNoHassle services.
+          <Trans>
+            Use your Innopolis account
+            <br />
+            to access InNoHassle services.
+          </Trans>
         </p>
         <div className="flex items-center justify-center">
           <SignInButton />
@@ -68,23 +71,32 @@ export function ConnectTelegramPage() {
     return (
       <>
         <h1 className="text-center text-2xl font-medium wrap-break-word">
-          {reconnect ? "Reconnect " : "Connect "} your Telegram
+          {reconnect ? (
+            <Trans>Reconnect your Telegram</Trans>
+          ) : (
+            <Trans>Connect your Telegram</Trans>
+          )}
         </h1>
         {reconnect && (
           <div className="text-base-content/60 flex flex-col items-start font-light">
             <div className="px-3">
-              We cannot synchronize your profile without your approval consent.
+              <Trans>
+                We cannot synchronize your profile without your approval
+                consent.
+              </Trans>
             </div>
             <div className="flex px-3 py-2 text-base">
               <span className="icon-[mdi--tick-outline] my-0.5 mr-2 shrink-0 text-xl text-green-500" />
               <div>
-                Allow <span className="text-primary">InNoHassle</span> to
-                message you on Telegram.
+                <Trans>
+                  Allow <span className="text-primary">InNoHassle</span> to
+                  message you on Telegram.
+                </Trans>
               </div>
             </div>
             <div className="flex px-3 py-2 text-base">
               <span className="icon-[mdi--close-outline] my-0.5 mr-2 shrink-0 text-xl text-red-500" />
-              Do not block the bot.
+              <Trans>Do not block the bot.</Trans>
             </div>
           </div>
         )}
@@ -108,7 +120,7 @@ export function ConnectTelegramPage() {
   return (
     <>
       <h1 className="text-center text-2xl font-medium wrap-break-word">
-        Success!
+        <Trans>Success!</Trans>
       </h1>
       <div className="flex flex-col justify-center overflow-x-hidden text-center">
         <p className="text-xl wrap-break-word">{me.innopolis_info?.name}</p>
@@ -133,7 +145,7 @@ export function ConnectTelegramPage() {
             }
           }}
         >
-          Continue
+          <Trans>Continue</Trans>
         </button>
       </div>
     </>

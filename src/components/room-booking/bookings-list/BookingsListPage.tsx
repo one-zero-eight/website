@@ -1,7 +1,9 @@
+import { formatBookingDuration } from "@/components/room-booking/utils.ts";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
+import { Trans, useLingui } from "@lingui/react/macro";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { OutlookDownScreen } from "@/components/room-booking/timeline/OutlookDownScreen.tsx";
-import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
+import { clockTime, msBetween } from "@/lib/utils/dates.ts";
 import { useNowMS } from "@/lib/utils/use-now.ts";
 import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
@@ -44,7 +46,9 @@ export function BookingsListPage() {
     <OutlookDownScreen />
   ) : bookings.length === 0 ? (
     <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
-      <h2 className="text-base-content/70 text-2xl">You have no bookings</h2>
+      <h2 className="text-base-content/70 text-2xl">
+        <Trans>You have no bookings</Trans>
+      </h2>
     </div>
   ) : (
     <div className="flex w-full max-w-lg flex-col gap-4 self-center p-4">
@@ -53,7 +57,9 @@ export function BookingsListPage() {
       ))}
       {finishedBookings.length > 0 && (
         <>
-          <h2 className="text-base-content/70 text-lg">Finished bookings:</h2>
+          <h2 className="text-base-content/70 text-lg">
+            <Trans>Finished bookings:</Trans>
+          </h2>
           {finishedBookings.map((v) => (
             <BookingCard booking={v} key={v.id} />
           ))}
@@ -68,6 +74,7 @@ export function BookingCard({
 }: {
   booking: roomBookingTypes.SchemaBooking;
 }) {
+  const { i18n, t } = useLingui();
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
     params: { query: { include_red: true } },
   });
@@ -86,27 +93,28 @@ export function BookingCard({
           <p className="text-base-content/70">{room?.title}</p>
           <p className="text-base-content/70">
             <span>
-              {start.toLocaleString("en-US", {
+              {start.toLocaleString(i18n.locale, {
                 day: "numeric",
                 month: "short",
               })}
-              , {start.toLocaleString("en-US", { weekday: "short" })}
+              , {start.toLocaleString(i18n.locale, { weekday: "short" })}
             </span>{" "}
             <span>
-              {`${clockTime(start)}–${clockTime(end)} (${durationFormatted(msBetween(start, end))})`}
+              {`${clockTime(start)}–${clockTime(end)} (${formatBookingDuration(msBetween(start, end))})`}
             </span>
           </p>
         </div>
         <div className="flex flex-row items-center gap-2">
-          <Tooltip content="Open details">
+          <Tooltip content={t`Open details`}>
             <button
+              type="button"
               onClick={() => setBookingModalOpen(true)}
               className="text-base-content/50 hover:bg-base-300 flex h-8 w-8 items-center justify-center rounded-md"
             >
               <span className="icon-[material-symbols--notes] text-3xl" />
             </button>
           </Tooltip>
-          <Tooltip content="Show on timeline">
+          <Tooltip content={t`Show on timeline`}>
             <Link
               to="/room-booking"
               search={{ d: new Date(booking.start).getTime() }}

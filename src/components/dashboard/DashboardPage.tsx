@@ -1,4 +1,5 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { Trans } from "@lingui/react/macro";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { AcademicCalendarWidget } from "@/components/dashboard/AcademicCalendarWidget.tsx";
 import { AccountWidget } from "@/components/dashboard/AccountWidget.tsx";
@@ -44,7 +45,7 @@ export function DashboardPage() {
         className="text-primary flex w-fit items-center font-medium hover:underline"
       >
         <span className="icon-[material-symbols--arrow-forward] mr-1 text-xl" />
-        Go to calendar
+        <Trans>Go to calendar</Trans>
       </Link>
 
       <Links />

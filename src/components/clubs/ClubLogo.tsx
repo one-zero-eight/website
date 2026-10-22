@@ -1,5 +1,6 @@
 import { getLogoURLById } from "@/api/clubs/links.ts";
 import { cn } from "@/lib/ui/cn";
+import { useLingui } from "@lingui/react/macro";
 
 export function ClubLogo({
   clubId,
@@ -10,6 +11,7 @@ export function ClubLogo({
   logoFileId?: string | null;
   className?: string;
 }) {
+  const { t } = useLingui();
   return (
     <div
       className={cn(
@@ -20,7 +22,7 @@ export function ClubLogo({
       <span className="icon-[mdi--account-group] absolute size-8 text-white md:size-12" />
       <img
         src={clubId !== null ? getLogoURLById(clubId, logoFileId) : undefined}
-        alt="Club logo"
+        alt={t`Club logo`}
         className="bg-base-200 absolute inset-0 size-full object-contain"
         loading="lazy"
         onError={(e) => (e.currentTarget.style.display = "none")}

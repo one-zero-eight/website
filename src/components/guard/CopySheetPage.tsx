@@ -1,20 +1,24 @@
 import { guardTypes } from "@/api/guard";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useEffect, useState } from "react";
 import { CopyInstructions } from "./Instructions";
 import { RolesSwitch } from "./JoinsList";
 import { SetupResult } from "./SetupResult";
 import { FileRole, useGuardMutations, useServiceAccountEmail } from "./hooks";
 import { extractSpreadsheetId, loadGmail, saveGmail } from "./utils";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
 
 export function CopySheetPage() {
+  const { i18n } = useLingui();
   const { serviceEmail, isPending: isEmailPending } = useServiceAccountEmail();
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [gmail, setGmail] = useState("");
   const [respondentRole, setRespondentRole] = useState<FileRole>(
     FileRole.writer,
   );
-  const [error, setError] = useState("");
+  const [error, setError] = useState<MessageDescriptor | string>("");
   const [setupResult, setSetupResult] = useState<{
     title: string;
     fileId: string;
@@ -33,17 +37,17 @@ export function CopySheetPage() {
     }
   }, []);
 
-  const validateSpreadsheetId = (input: string): string => {
+  const validateSpreadsheetId = (input: string): MessageDescriptor | string => {
     if (!input.trim()) return "";
 
     const extractedId = extractSpreadsheetId(input);
 
     if (!extractedId) {
-      return "Invalid Google Spreadsheet URL";
+      return msg`Invalid Google Spreadsheet URL`;
     }
 
     if (extractedId.length < 10) {
-      return "Spreadsheet ID seems too short";
+      return msg`Spreadsheet ID seems too short`;
     }
 
     return "";
@@ -59,18 +63,18 @@ export function CopySheetPage() {
     setError("");
 
     if (!gmail.trim()) {
-      setError("Gmail is required");
+      setError(msg`Gmail is required`);
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(gmail.trim())) {
-      setError("Please enter a valid Gmail address");
+      setError(msg`Please enter a valid Gmail address`);
       return;
     }
 
     if (!spreadsheetId.trim()) {
-      setError("Spreadsheet URL is required");
+      setError(msg`Spreadsheet URL is required`);
       return;
     }
 
@@ -82,7 +86,7 @@ export function CopySheetPage() {
 
     const extractedId = extractSpreadsheetId(spreadsheetId);
     if (!extractedId) {
-      setError("Failed to extract Spreadsheet ID");
+      setError(msg`Failed to extract Spreadsheet ID`);
       return;
     }
 
@@ -115,7 +119,7 @@ export function CopySheetPage() {
           mutations.invalidateFiles();
         },
         onError: (err) => {
-          setError(formatApiErrorMessage(err));
+          setError(formatApiErrorDescriptor(err));
         },
       },
     );
@@ -139,7 +143,9 @@ export function CopySheetPage() {
         }}
       >
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Spreadsheet URL</legend>
+          <legend className="fieldset-legend">
+            <Trans>Spreadsheet URL</Trans>
+          </legend>
           <input
             type="text"
             id="spreadsheet_id"
@@ -155,7 +161,9 @@ export function CopySheetPage() {
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Owner Gmail</legend>
+          <legend className="fieldset-legend">
+            <Trans>Owner Gmail</Trans>
+          </legend>
           <input
             type="email"
             id="gmail"
@@ -170,7 +178,9 @@ export function CopySheetPage() {
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Guests Role</legend>
+          <legend className="fieldset-legend">
+            <Trans>Guests Role</Trans>
+          </legend>
           <RolesSwitch
             currentRole={respondentRole}
             onSwitch={setRespondentRole}
@@ -179,7 +189,7 @@ export function CopySheetPage() {
 
         {error && (
           <div className="alert alert-error alert-soft">
-            <span>{error}</span>
+            <span>{typeof error === "string" ? error : i18n._(error)}</span>
           </div>
         )}
 
@@ -191,10 +201,10 @@ export function CopySheetPage() {
           {isSubmitting ? (
             <>
               <span className="loading loading-spinner loading-sm" />
-              Copying...
+              <Trans>Copying...</Trans>
             </>
           ) : (
-            "Copy sheet"
+            <Trans>Copy sheet</Trans>
           )}
         </button>
       </form>

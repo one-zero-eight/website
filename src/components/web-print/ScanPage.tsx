@@ -1,4 +1,8 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { plural } from "@lingui/core/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { Trans as LocalizedMessage } from "@lingui/react";
+import { type MessageDescriptor } from "@lingui/core";
 import { $printers } from "@/api/printers";
 import { Modal } from "@/components/common/Modal.tsx";
 import Tooltip from "@/components/common/Tooltip.tsx";
@@ -35,18 +39,40 @@ function estimateScanDurationMs(
 }
 
 export function ScanPage() {
+  const { t } = useLingui();
   const [alert, setAlert] = useState<ReactNode>();
-  const [scanError, setScanError] = useState<string>();
+  const [scanError, setScanError] = useState<ReactNode>();
   const [showResultPanel, setShowResultPanel] = useState(true);
   const [scanProgress, setScanProgress] = useState(0);
   const [previewToolbarHost, setPreviewToolbarHost] =
     useState<HTMLDivElement | null>(null);
   const [removeLastPageModalOpen, setRemoveLastPageModalOpen] = useState(false);
 
-  function showPopupWithExceptionDetail(prefix: string, exception: unknown) {
+  function renderApiError(error: unknown) {
+    const message = formatApiErrorDescriptor(error);
+    if (typeof message === "string") return message;
+
+    return (
+      <LocalizedMessage
+        id={message.id}
+        message={message.message}
+        values={message.values}
+      />
+    );
+  }
+
+  function showPopupWithExceptionDetail(
+    prefix: MessageDescriptor,
+    exception: unknown,
+  ) {
     setAlert(
       <p>
-        {prefix}: {formatApiErrorMessage(exception)}
+        <LocalizedMessage
+          id={prefix.id}
+          message={prefix.message}
+          values={prefix.values}
+        />
+        : {renderApiError(exception)}
       </p>,
     );
   }
@@ -127,7 +153,7 @@ export function ScanPage() {
 
   async function scanAndWait(startNewScan: boolean) {
     if (isScannerOffline(scannerName)) {
-      setScanError("Selected scanner is offline");
+      setScanError(<Trans>Selected scanner is offline</Trans>);
       return;
     }
 
@@ -154,7 +180,7 @@ export function ScanPage() {
         },
       });
     } catch (exception: unknown) {
-      setScanError(formatApiErrorMessage(exception));
+      setScanError(renderApiError(exception));
       setSession({ isScanning: false });
       return;
     }
@@ -193,7 +219,7 @@ export function ScanPage() {
     while (performance.now() - startTime < 60 * 1000) {
       if (scanWasResolved) {
         if (waitError) {
-          setScanError(formatApiErrorMessage(waitError));
+          setScanError(renderApiError(waitError));
           try {
             await cancelScan({
               params: { query: { scanner_name: scannerName, job_id: jobId } },
@@ -208,7 +234,9 @@ export function ScanPage() {
         const scanResult = await promisedScan;
         if (!scanResult) {
           setScanError(
-            "The scanner returned nothing. Please try to scan again.",
+            <Trans>
+              The scanner returned nothing. Please try to scan again.
+            </Trans>,
           );
           await cancelScan({
             params: { query: { scanner_name: scannerName, job_id: jobId } },
@@ -240,7 +268,9 @@ export function ScanPage() {
     }
 
     setScanError(
-      "The job has timed out. Probably, the scanner is busy — try to reboot it.",
+      <Trans>
+        The job has timed out. Probably, the scanner is busy — try to reboot it.
+      </Trans>,
     );
     await cancelScan({
       params: { query: { scanner_name: scannerName, job_id: jobId } },
@@ -336,9 +366,10 @@ export function ScanPage() {
     return () => cancelAnimationFrame(frameId);
   }, [scanInProgress, quality]);
 
+  const pageCount = preparedFilePagesCount ?? 0;
   const fileMeta = [
-    preparedFilePagesCount
-      ? `${preparedFilePagesCount} page${preparedFilePagesCount !== 1 ? "s" : ""}`
+    pageCount
+      ? t`${plural(pageCount, { one: "# page", other: "# pages" })}`
       : null,
     preparedFile?.size ? formatFileSize(preparedFile.size) : null,
   ]
@@ -366,14 +397,14 @@ export function ScanPage() {
             <div className="card-body flex flex-col gap-4">
               <h2 className="card-title shrink-0 text-base">
                 <span className="icon-[material-symbols--picture-as-pdf-rounded]" />
-                Preview
+                <Trans>Preview</Trans>
                 <div
                   ref={setPreviewToolbarHost}
                   className="ml-auto flex items-center"
                 >
                   {!fileBlob && !scanInProgress && (
                     <span className="badge badge-ghost badge-sm font-normal">
-                      Waiting
+                      <Trans>Waiting</Trans>
                     </span>
                   )}
                 </div>
@@ -382,7 +413,7 @@ export function ScanPage() {
                 variant="scan"
                 fileProcess={() => {}}
                 isFileProcessing={isFileProcessing || scanInProgress}
-                loadingLabel={scanInProgress ? "Scanning…" : "Processing…"}
+                loadingLabel={scanInProgress ? t`Scanning…` : t`Processing…`}
                 loadingProgress={scanInProgress ? scanProgress : undefined}
                 blobPreviewURL={fileBlob}
                 downloadFileName={downloadFileName}
@@ -402,7 +433,7 @@ export function ScanPage() {
             <div className="card-body gap-4">
               <h2 className="card-title text-base">
                 <span className="icon-[material-symbols--adf-scanner-rounded]" />
-                {showResultView ? "Scan result" : "Scan settings"}
+                {showResultView ? t`Scan result` : t`Scan settings`}
               </h2>
 
               {showResultView ? (
@@ -414,7 +445,7 @@ export function ScanPage() {
                         <input
                           type="text"
                           className="text-base-content placeholder:text-base-content/40 field-sizing-content max-w-full min-w-0 bg-transparent p-0 text-base outline-none"
-                          placeholder="document"
+                          placeholder={t`document`}
                           value={documentName}
                           size={Math.max(documentName.length, 1)}
                           onChange={(e) =>
@@ -445,7 +476,7 @@ export function ScanPage() {
                     disabled={!fileBlob}
                     onClick={handleDownloadAndFinish}
                   >
-                    Download & Finish
+                    <Trans>Download & Finish</Trans>
                   </button>
 
                   <button
@@ -454,7 +485,7 @@ export function ScanPage() {
                     disabled={selectedScannerOffline}
                     onClick={() => setShowResultPanel(false)}
                   >
-                    Scan next page
+                    <Trans>Scan next page</Trans>
                   </button>
 
                   {(preparedFilePagesCount ?? 0) > 1 && (
@@ -464,7 +495,7 @@ export function ScanPage() {
                       disabled={!preparedFile || isFileProcessing}
                       onClick={() => setRemoveLastPageModalOpen(true)}
                     >
-                      Remove last page
+                      <Trans>Remove last page</Trans>
                     </button>
                   )}
                 </div>
@@ -473,7 +504,7 @@ export function ScanPage() {
                   className="flex flex-col gap-4"
                   disabled={scanInProgress}
                 >
-                  <DeviceOptionList label="Scanner">
+                  <DeviceOptionList label={t`Scanner`}>
                     {rawScanners ? (
                       rawScanners.map((scanner) => {
                         const offline = isScannerOffline(scanner.name);
@@ -494,11 +525,11 @@ export function ScanPage() {
                                     offline ? "text-error" : "text-success",
                                   )}
                                 >
-                                  {offline ? "Offline" : "Online"}
+                                  {offline ? t`Offline` : t`Online`}
                                 </span>
                               ) : (
                                 <span className="text-base-content/50">
-                                  Status unknown
+                                  <Trans>Status unknown</Trans>
                                 </span>
                               )
                             }
@@ -515,13 +546,17 @@ export function ScanPage() {
 
                   {selectedScannerOffline && (
                     <div className="alert alert-warning alert-soft text-sm">
-                      Selected scanner is offline. Choose another one.
+                      <Trans>
+                        Selected scanner is offline. Choose another one.
+                      </Trans>
                     </div>
                   )}
 
-                  <FormField label="Mode">
+                  <FormField label={t`Mode`}>
                     <div className="grid grid-cols-2 gap-2">
-                      <Tooltip content="Scan one page at a time on the glass">
+                      <Tooltip
+                        content={t`Scan one page at a time on the glass`}
+                      >
                         <button
                           type="button"
                           className={cn(
@@ -536,13 +571,15 @@ export function ScanPage() {
                             })
                           }
                         >
-                          Manual
+                          <Trans>Manual</Trans>
                           <span className="text-base-content/50 mt-0.5 block text-xs">
-                            Glass
+                            <Trans>Glass</Trans>
                           </span>
                         </button>
                       </Tooltip>
-                      <Tooltip content="Scan documents from the automatic feeder on top of the printer">
+                      <Tooltip
+                        content={t`Scan documents from the automatic feeder on top of the printer`}
+                      >
                         <button
                           type="button"
                           className={cn(
@@ -557,9 +594,9 @@ export function ScanPage() {
                             })
                           }
                         >
-                          Automatic
+                          <Trans>Automatic</Trans>
                           <span className="text-base-content/50 mt-0.5 block text-xs">
-                            Feeder
+                            <Trans>Feeder</Trans>
                           </span>
                         </button>
                       </Tooltip>
@@ -567,8 +604,8 @@ export function ScanPage() {
                   </FormField>
 
                   {mode === ScanningOptionsInput_source.Adf && (
-                    <FormField label="Scan from both sides">
-                      <Tooltip content="Applicable only for automatic mode">
+                    <FormField label={t`Scan from both sides`}>
+                      <Tooltip content={t`Applicable only for automatic mode`}>
                         <input
                           type="checkbox"
                           className="toggle toggle-primary"
@@ -585,7 +622,7 @@ export function ScanPage() {
                     </FormField>
                   )}
 
-                  <FormField label={`Quality · ${quality} dpi`}>
+                  <FormField label={t`Quality · ${quality} dpi`}>
                     <input
                       type="range"
                       className="range range-primary w-full"
@@ -612,8 +649,10 @@ export function ScanPage() {
                   <FormField
                     label={
                       <>
-                        Smart crop
-                        <Tooltip content="Automatically detects the document edges and crops the PDF to match.">
+                        <Trans>Smart crop</Trans>
+                        <Tooltip
+                          content={t`Automatically detects the document edges and crops the PDF to match.`}
+                        >
                           <span className="icon-[material-symbols--help-outline] text-base-content/40 hover:text-base-content/70 size-[1em]" />
                         </Tooltip>
                       </>
@@ -646,7 +685,7 @@ export function ScanPage() {
                         disabled={scanInProgress}
                         onClick={() => setShowResultPanel(true)}
                       >
-                        Cancel
+                        <Trans>Cancel</Trans>
                       </button>
                     )}
                     <button
@@ -660,7 +699,11 @@ export function ScanPage() {
                       }
                       onClick={() => scanAndWait(!hasScanResult)}
                     >
-                      {hasScanResult ? "Scan next page" : "Scan"}
+                      {hasScanResult ? (
+                        <Trans>Scan next page</Trans>
+                      ) : (
+                        <Trans>Scan</Trans>
+                      )}
                     </button>
                   </div>
 
@@ -679,7 +722,7 @@ export function ScanPage() {
       <Modal
         open={!!alert}
         onOpenChange={() => setAlert(undefined)}
-        title="Warning"
+        title={t`Warning`}
       >
         {alert}
       </Modal>
@@ -690,13 +733,15 @@ export function ScanPage() {
         title={
           <div className="flex items-center gap-3">
             <span className="icon-[material-symbols--warning-rounded] text-warning text-2xl" />
-            Remove last page?
+            <Trans>Remove last page?</Trans>
           </div>
         }
       >
         <p className="text-base-content/75 mb-6 leading-relaxed">
-          This will permanently remove the last scanned page from the document.
-          Are you sure?
+          <Trans>
+            This will permanently remove the last scanned page from the
+            document. Are you sure?
+          </Trans>
         </p>
         <div className="flex flex-wrap justify-end gap-2">
           <button
@@ -704,7 +749,7 @@ export function ScanPage() {
             className="btn"
             onClick={() => setRemoveLastPageModalOpen(false)}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="button"
@@ -719,7 +764,7 @@ export function ScanPage() {
               await reloadScanPreview(await removeLastPage());
             }}
           >
-            Remove
+            <Trans>Remove</Trans>
           </button>
         </div>
       </Modal>

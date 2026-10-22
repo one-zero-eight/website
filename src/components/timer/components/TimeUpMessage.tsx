@@ -1,4 +1,5 @@
 import { Modal } from "@/components/common/Modal.tsx";
+import { Trans } from "@lingui/react/macro";
 
 interface TimeUpMessageProps {
   isOpen: boolean;
@@ -19,14 +20,14 @@ export const TimeUpMessage = ({ isOpen, onDismiss }: TimeUpMessageProps) => {
         ⏰
       </div>
       <h2 className="text-primary mb-3 text-3xl font-bold sm:text-4xl md:mb-4 md:text-5xl lg:text-6xl">
-        Time's Up!
+        <Trans>Time's Up!</Trans>
       </h2>
       <button
         type="button"
         onClick={onDismiss}
         className="btn btn-primary btn-lg"
       >
-        OK
+        <Trans>OK</Trans>
       </button>
     </Modal>
   );

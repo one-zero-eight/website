@@ -1,7 +1,9 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { getDescriptionImageUrl, getLogoURLById } from "@/api/clubs/links.ts";
 import { usePendingLogoUrl } from "@/api/clubs/use-pending-logo.ts";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
@@ -40,13 +42,13 @@ function DiffBlock({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <div className="text-base-content/40 mb-2 text-xs uppercase">
-              Current
+              <Trans>Current</Trans>
             </div>
             {current}
           </div>
           <div>
             <div className="text-primary/70 mb-2 text-xs uppercase">
-              Proposed
+              <Trans>Proposed</Trans>
             </div>
             {proposed}
           </div>
@@ -79,7 +81,11 @@ function renderDiffFields(fields: DiffField[]) {
 
 function renderLinks(links: clubsTypes.SchemaLinkSchema[]) {
   if (links.length === 0) {
-    return <span className="text-base-content/50 italic">No links</span>;
+    return (
+      <span className="text-base-content/50 italic">
+        <Trans>No links</Trans>
+      </span>
+    );
   }
 
   return (
@@ -111,6 +117,7 @@ function renderLinks(links: clubsTypes.SchemaLinkSchema[]) {
 }
 
 export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
+  const { t } = useLingui();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { showError, showConfirm } = useToast();
@@ -161,7 +168,8 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
         invalidate(updated.id);
         navigate({ to: "/clubs/review" });
       },
-      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+      onError: (error) =>
+        showError(msg`Error`, formatApiErrorDescriptor(error)),
     },
   );
 
@@ -173,7 +181,8 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
         invalidate(updated.id);
         navigate({ to: "/clubs/review" });
       },
-      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+      onError: (error) =>
+        showError(msg`Error`, formatApiErrorDescriptor(error)),
     },
   );
 
@@ -184,7 +193,9 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
   if (isPending) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-base-content/50 text-lg">Loading...</div>
+        <div className="text-base-content/50 text-lg">
+          <Trans>Loading...</Trans>
+        </div>
       </div>
     );
   }
@@ -193,17 +204,17 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-8 text-center">
         <p className="text-base-content/50 mb-4 text-lg">
-          No changes to review for this club.
+          <Trans>No changes to review for this club.</Trans>
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           {club && (
             <Link to="/clubs/$slug" params={{ slug }} className="btn btn-ghost">
-              View club
+              <Trans>View club</Trans>
             </Link>
           )}
           <Link to="/clubs/review" className="btn btn-ghost">
             <span className="icon-[mdi--arrow-left] size-5" />
-            Back to review changes
+            <Trans>Back to review changes</Trans>
           </Link>
         </div>
       </div>
@@ -211,13 +222,14 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
   }
 
   const pending = club.pending_update;
+  const clubTitle = club.title;
 
   async function handleApprove() {
     const confirmed = await showConfirm({
-      title: "Approve changes",
-      message: `Apply these proposed changes to "${club!.title}"? This cannot be undone from here.`,
-      confirmText: "Approve",
-      cancelText: "Cancel",
+      title: msg`Approve changes`,
+      message: msg`Apply these proposed changes to "${clubTitle}"? This cannot be undone from here.`,
+      confirmText: msg`Approve`,
+      cancelText: msg`Cancel`,
       type: "info",
     });
     if (!confirmed) return;
@@ -226,10 +238,10 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
 
   async function handleReject() {
     const confirmed = await showConfirm({
-      title: "Reject changes",
-      message: `Discard the proposed changes to "${club!.title}"? The leader will need to resubmit.`,
-      confirmText: "Reject",
-      cancelText: "Cancel",
+      title: msg`Reject changes`,
+      message: msg`Discard the proposed changes to "${clubTitle}"? The leader will need to resubmit.`,
+      confirmText: msg`Reject`,
+      cancelText: msg`Cancel`,
       type: "error",
     });
     if (!confirmed) return;
@@ -245,14 +257,14 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
   const blocks = renderDiffFields([
     {
       key: "title",
-      label: "Title",
+      label: t`Title`,
       changed: pending.title != null && pending.title !== club.title,
       current: club.title,
       proposed: pending.title,
     },
     {
       key: "short_description",
-      label: "Short description",
+      label: t`Short description`,
       changed:
         pending.short_description != null &&
         pending.short_description !== club.short_description,
@@ -261,7 +273,7 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
     },
     {
       key: "type",
-      label: "Type",
+      label: t`Type`,
       changed: pending.type != null && pending.type !== club.type,
       current: (
         <span className={cn("badge", getClubTypeColor(club.type))}>
@@ -276,24 +288,24 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
     },
     {
       key: "sport_id",
-      label: "Sport ID",
+      label: t`Sport ID`,
       changed:
         pending.sport_id !== undefined && pending.sport_id !== club.sport_id,
-      current: club.sport_id || "Not a sport club",
-      proposed: pending.sport_id || "Not a sport club",
+      current: club.sport_id || t`Not a sport club`,
+      proposed: pending.sport_id || t`Not a sport club`,
     },
     {
       key: "leader",
-      label: "Leader",
+      label: t`Leader`,
       changed:
         pending.leader_innohassle_id !== undefined &&
         pending.leader_innohassle_id !== club.leader_innohassle_id,
-      current: currentLeader?.name || currentLeader?.email || "None",
-      proposed: proposedLeader?.name || proposedLeader?.email || "None",
+      current: currentLeader?.name || currentLeader?.email || t`None`,
+      proposed: proposedLeader?.name || proposedLeader?.email || t`None`,
     },
     {
       key: "links",
-      label: "Links",
+      label: t`Links`,
       changed:
         pending.links != null &&
         JSON.stringify(pending.links) !== JSON.stringify(club.links),
@@ -302,24 +314,26 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
     },
     {
       key: "logo",
-      label: "Logo",
+      label: t`Logo`,
       changed:
         pending.logo_file_id != null &&
         pending.logo_file_id !== club.logo_file_id,
       current: club.logo_file_id ? (
         <img
           src={getLogoURLById(club.id!, club.logo_file_id)}
-          alt="Current logo"
+          alt={t`Current logo`}
           className="rounded-field bg-base-200 size-24 object-contain"
         />
       ) : (
-        <span className="text-base-content/70 italic">No logo</span>
+        <span className="text-base-content/70 italic">
+          <Trans>No logo</Trans>
+        </span>
       ),
       proposed: pending.logo_file_id && (
         <>
           <img
             src={pendingLogoUrl ?? undefined}
-            alt="Proposed logo"
+            alt={t`Proposed logo`}
             className="rounded-field bg-base-200 size-24 object-contain"
             onError={(e) => {
               e.currentTarget.style.display = "none";
@@ -327,14 +341,14 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
             }}
           />
           <span className="text-base-content/70 hidden italic">
-            New logo submitted (preview failed to load)
+            <Trans>New logo submitted (preview failed to load)</Trans>
           </span>
         </>
       ),
     },
     {
       key: "description",
-      label: "Description",
+      label: t`Description`,
       changed:
         pending.description != null &&
         JSON.stringify(pending.description) !==
@@ -359,7 +373,7 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
       <div className="space-y-2">
         <div className="mb-2 flex items-start justify-between gap-2">
           <h1 className="min-w-0 text-2xl font-bold wrap-break-word">
-            Review changes — {club.title}
+            <Trans>Review changes — {clubTitle}</Trans>
           </h1>
           <div className="flex shrink-0 items-center gap-2">
             <Link
@@ -367,29 +381,31 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
               params={{ slug }}
               className="btn btn-ghost btn-sm"
             >
-              View club
+              <Trans>View club</Trans>
             </Link>
             <Link to="/clubs/review" className="btn btn-ghost btn-sm">
               <span className="icon-[mdi--arrow-left] size-4" />
-              Back
+              <Trans>Back</Trans>
             </Link>
           </div>
         </div>
         <p className="text-base-content/70 text-sm">
-          Proposed by the club leader, waiting for your review.
+          <Trans>Proposed by the club leader, waiting for your review.</Trans>
         </p>
         <p className="text-base-content/70 text-sm">
-          Submitted:{" "}
-          <time dateTime={pending.submitted_at}>
-            {moment(pending.submitted_at).format("D MMM YYYY, HH:mm")}
-          </time>
+          <Trans>
+            Submitted:{" "}
+            <time dateTime={pending.submitted_at}>
+              {moment(pending.submitted_at).format("D MMM YYYY, HH:mm")}
+            </time>
+          </Trans>
         </p>
       </div>
 
       {blocks.length === 0 ? (
         <div className="card card-border">
           <div className="card-body text-base-content/50">
-            No detectable field changes.
+            <Trans>No detectable field changes.</Trans>
           </div>
         </div>
       ) : (
@@ -406,7 +422,7 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
           {isRejecting && (
             <span className="loading loading-spinner loading-sm" />
           )}
-          Reject
+          <Trans>Reject</Trans>
         </button>
         <button
           type="button"
@@ -417,7 +433,7 @@ export function ClubReviewChangeDetailPage({ slug }: { slug: string }) {
           {isApproving && (
             <span className="loading loading-spinner loading-sm" />
           )}
-          Approve
+          <Trans>Approve</Trans>
         </button>
       </div>
     </div>

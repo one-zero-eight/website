@@ -1,5 +1,7 @@
 import { $boardGames } from "@/api/board-games";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import {
   type SchemaBoardGameWithAvailability,
   type SchemaReservation,
@@ -70,6 +72,8 @@ function UserReservationsSection({
   isPending: boolean;
   error: unknown;
 }) {
+  const { t } = useLingui();
+  const reservationCount = reservations.length;
   const carouselRef = useRef<HTMLDivElement>(null);
   const [reservationToView, setReservationToView] =
     useState<SchemaReservation | null>(null);
@@ -85,10 +89,12 @@ function UserReservationsSection({
     <section className="flex min-w-0 flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Your reservations</h1>
+          <h1 className="text-2xl font-semibold">
+            <Trans>Your reservations</Trans>
+          </h1>
           {!isPending && !error && (
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
-              {reservations.length} total
+              {t`Reservations: ${reservationCount}`}
             </p>
           )}
         </div>
@@ -98,7 +104,7 @@ function UserReservationsSection({
             className="btn btn-square btn-ghost"
             onClick={() => handleScroll(-1)}
             disabled={reservations.length < 2}
-            title="Previous reservations"
+            title={t`Previous reservations`}
           >
             <span className="icon-[material-symbols--chevron-left] text-2xl" />
           </button>
@@ -107,7 +113,7 @@ function UserReservationsSection({
             className="btn btn-square btn-ghost"
             onClick={() => handleScroll(1)}
             disabled={reservations.length < 2}
-            title="Next reservations"
+            title={t`Next reservations`}
           >
             <span className="icon-[material-symbols--chevron-right] text-2xl" />
           </button>
@@ -117,10 +123,10 @@ function UserReservationsSection({
       <ListState
         isPending={isPending}
         error={error}
-        errorTitle="Could not load reservations"
+        errorTitle={t`Could not load reservations`}
         emptyMessage={
           reservations.length === 0
-            ? "You have no reservations yet."
+            ? t`You have no reservations yet.`
             : undefined
         }
         pending={
@@ -166,6 +172,8 @@ function UserReservationCard({
   gameTitle?: string;
   onView: () => void;
 }) {
+  const { t, i18n } = useLingui();
+  const returnDate = reservation.return_date;
   const telegram = telegramHandle(reservation.tg_alias);
 
   return (
@@ -177,10 +185,10 @@ function UserReservationCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="card-title truncate text-lg">
-              {gameTitle ?? "Unknown game"}
+              {gameTitle ?? t`Unknown game`}
             </h2>
             <p className="text-sm text-neutral-500 dark:text-neutral-200">
-              {new Date(reservation.created_at).toLocaleString()}
+              {new Date(reservation.created_at).toLocaleString(i18n.locale)}
             </p>
           </div>
           <ReservationStatusBadge status={reservation.status} />
@@ -188,22 +196,22 @@ function UserReservationCard({
         <div className="flex flex-col gap-2 text-sm text-neutral-500 dark:text-neutral-200">
           <div className="flex items-center gap-2">
             <span className="icon-[mdi--telegram] text-primary text-xl" />
-            <span>{telegram ? `@${telegram}` : "Telegram not provided"}</span>
+            <span>{telegram ? `@${telegram}` : t`Telegram not provided`}</span>
           </div>
           {reservation.return_date && (
             <div className="flex items-center gap-2">
               <span className="icon-[material-symbols--event-outline] text-primary text-xl" />
               <span>
-                Return by{" "}
-                <span className="text-neutral-400">
-                  {reservation.return_date}
-                </span>
+                <Trans>
+                  Return by{" "}
+                  <span className="text-neutral-400">{returnDate}</span>
+                </Trans>
               </span>
             </div>
           )}
         </div>
         <span className="text-primary mt-auto inline-flex items-center gap-1 text-sm font-medium">
-          View information
+          <Trans>View information</Trans>
           <span className="icon-[lucide--move-right] text-lg" />
         </span>
       </div>
@@ -220,23 +228,29 @@ function GamesCatalogueSection({
   isPending: boolean;
   error: unknown;
 }) {
+  const { t } = useLingui();
   const [gameToReserve, setGameToReserve] = useState<BoardGame | null>(null);
   const [gameToView, setGameToView] = useState<BoardGame | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
+  const trimmedSearchQuery = searchQuery.trim();
+  const normalizedSearchQuery = trimmedSearchQuery.toLocaleLowerCase();
   const filteredGames = games.filter((game) =>
     game.title.toLocaleLowerCase().includes(normalizedSearchQuery),
   );
+  const visibleGameCount = filteredGames.length;
+  const gameCount = games.length;
 
   return (
     <section className="flex flex-col gap-3">
       <div>
-        <h2 className="text-2xl font-semibold">All games</h2>
+        <h2 className="text-2xl font-semibold">
+          <Trans>All games</Trans>
+        </h2>
         {!isPending && !error && (
           <p className="text-sm text-neutral-500 dark:text-neutral-400">
             {normalizedSearchQuery
-              ? `${filteredGames.length} of ${games.length} titles`
-              : `${games.length} titles`}
+              ? t`Games: ${visibleGameCount} of ${gameCount}`
+              : t`Games: ${gameCount}`}
           </p>
         )}
       </div>
@@ -245,19 +259,19 @@ function GamesCatalogueSection({
         className="@md/content:max-w-md"
         value={searchQuery}
         onValueChange={setSearchQuery}
-        placeholder="Search games by name"
+        placeholder={t`Search games by name`}
         disabled={isPending || Boolean(error)}
       />
 
       <ListState
         isPending={isPending}
         error={error}
-        errorTitle="Could not load games"
+        errorTitle={t`Could not load games`}
         emptyMessage={
           games.length === 0
-            ? "No games are available yet."
+            ? t`No games are available yet.`
             : filteredGames.length === 0
-              ? `No games match "${searchQuery.trim()}".`
+              ? t`No games match "${trimmedSearchQuery}".`
               : undefined
         }
         pending={
@@ -309,6 +323,8 @@ function CatalogueGameCard({
   onView: () => void;
   onReserve: () => void;
 }) {
+  const availableCopies = game.available_copies;
+  const totalCopies = game.total_copies;
   return (
     <article
       className="card card-border bg-base-100 min-w-0 cursor-pointer"
@@ -335,12 +351,15 @@ function CatalogueGameCard({
         />
         <div className="mt-3 flex items-center justify-between gap-2">
           <p className="text-sm text-neutral-500 dark:text-neutral-200">
-            <span className="text-base-content font-semibold tabular-nums">
-              {game.available_copies}
-            </span>
-            <span className="text-neutral-400">
-              {` of ${game.total_copies} available`}
-            </span>
+            <Trans>
+              <span className="text-base-content font-semibold tabular-nums">
+                {availableCopies}
+              </span>
+              <span className="text-neutral-400">
+                {" "}
+                of {totalCopies} available
+              </span>
+            </Trans>
           </p>
           <button
             type="button"
@@ -351,7 +370,7 @@ function CatalogueGameCard({
             }}
             disabled={game.available_copies < 1}
           >
-            Reserve
+            <Trans>Reserve</Trans>
             <span className="icon-[lucide--move-right] text-lg" />
           </button>
         </div>
@@ -369,11 +388,12 @@ function UserGameDetailsModal({
   onOpenChange: (open: boolean) => void;
   onReserve: () => void;
 }) {
+  const { t } = useLingui();
   return (
     <Modal
       open
       onOpenChange={onOpenChange}
-      title="Game information"
+      title={t`Game information`}
       containerClassName={boardGamesModalClassName}
     >
       <GameInfoBody
@@ -387,9 +407,9 @@ function UserGameDetailsModal({
         title={game.title}
         description={game.description}
         stats={[
-          { label: "Total copies", value: game.total_copies },
+          { label: t`Total copies`, value: game.total_copies },
           {
-            label: "Available",
+            label: t`Available`,
             value: game.available_copies,
             accent: true,
           },
@@ -401,7 +421,7 @@ function UserGameDetailsModal({
             onClick={onReserve}
             disabled={game.available_copies < 1}
           >
-            Reserve game
+            <Trans>Reserve game</Trans>
           </button>
         }
       />
@@ -416,6 +436,8 @@ function MakeReservationModal({
   game: BoardGame;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useLingui();
+  const gameTitle = game.title;
   const queryClient = useQueryClient();
   const { showError, showSuccess } = useToast();
   const [telegramAlias, setTelegramAlias] = useState("");
@@ -438,11 +460,11 @@ function MakeReservationModal({
         queryClient.invalidateQueries({
           queryKey: $boardGames.queryOptions("get", "/board-games").queryKey,
         });
-        showSuccess("Game reserved", `${game.title} has been reserved.`);
+        showSuccess(msg`Game reserved`, msg`${gameTitle} has been reserved.`);
         onOpenChange(false);
       },
       onError: (error) => {
-        showError("Could not reserve game", formatReservationError(error));
+        showError(msg`Could not reserve game`, formatReservationError(error));
       },
     },
   );
@@ -466,7 +488,7 @@ function MakeReservationModal({
     <Modal
       open
       onOpenChange={onOpenChange}
-      title={`Reserve ${game.title}`}
+      title={t`Reserve ${gameTitle}`}
       containerClassName={boardGamesModalClassName}
       closeOnOutsidePress={!mutation.isPending}
     >
@@ -490,7 +512,7 @@ function MakeReservationModal({
             onClick={() => onOpenChange(false)}
             disabled={mutation.isPending}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="submit"
@@ -500,7 +522,7 @@ function MakeReservationModal({
             {mutation.isPending && (
               <span className="loading loading-spinner loading-sm" />
             )}
-            Reserve game
+            <Trans>Reserve game</Trans>
           </button>
         </div>
       </form>
@@ -519,11 +541,11 @@ function formatReservationError(error: unknown) {
 
   // 409 covers both "already reserved" and "no copies left"; the API uses one message for both.
   if (httpCode === 409) {
-    return "This game cannot be reserved right now. You may already have an active reservation, or no copies may be available.";
+    return msg`This game cannot be reserved right now. You may already have an active reservation, or no copies may be available.`;
   }
   if (httpCode === 404) {
-    return "This game is no longer available. Refresh the page and choose another game.";
+    return msg`This game is no longer available. Refresh the page and choose another game.`;
   }
 
-  return formatApiErrorMessage(error);
+  return formatApiErrorDescriptor(error);
 }

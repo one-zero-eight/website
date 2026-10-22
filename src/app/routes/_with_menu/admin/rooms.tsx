@@ -4,7 +4,7 @@ import { RequireInnohassleAdmin } from "@/components/admin/RequireInnohassleAdmi
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/admin/rooms")({
   component: RouteComponent,
@@ -16,12 +16,13 @@ export const Route = createFileRoute("/_with_menu/admin/rooms")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { code } = Route.useSearch();
 
   return (
     <>
       <Helmet>
-        <title>Admin rooms</title>
+        <title>{t`Admin rooms`}</title>
         <meta name="robots" content="noindex, follow" />
       </Helmet>
 

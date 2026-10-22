@@ -1,4 +1,6 @@
 import { $accounts, accountsTypes } from "@/api/accounts";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { useLingui as useLinguiRuntime } from "@lingui/react";
 import { $schedule } from "@/api/schedule";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
@@ -21,6 +23,7 @@ import { cn } from "@/lib/ui/cn";
 import { useMemo, useState } from "react";
 
 export function AdminPredefinedPage() {
+  useLinguiRuntime();
   const {
     data: predefined,
     isPending,
@@ -80,7 +83,7 @@ export function AdminPredefinedPage() {
           className="btn btn-outline"
           onClick={() => refetch()}
         >
-          Retry
+          <Trans>Retry</Trans>
         </button>
       </div>
     );
@@ -89,9 +92,13 @@ export function AdminPredefinedPage() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 p-4">
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-medium">Predefined users</h2>
+        <h2 className="text-xl font-medium">
+          <Trans>Predefined users</Trans>
+        </h2>
         {!predefined.users?.length ? (
-          <p className="text-base-content/75">No predefined users.</p>
+          <p className="text-base-content/75">
+            <Trans>No predefined users.</Trans>
+          </p>
         ) : isPredefinedUsersPending ? (
           <UserListSkeleton count={predefined.users.length} />
         ) : (
@@ -116,9 +123,13 @@ export function AdminPredefinedPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-medium">Academic groups</h2>
+        <h2 className="text-xl font-medium">
+          <Trans>Academic groups</Trans>
+        </h2>
         {!predefined.academic_groups?.length ? (
-          <p className="text-base-content/75">No academic groups.</p>
+          <p className="text-base-content/75">
+            <Trans>No academic groups.</Trans>
+          </p>
         ) : (
           <ul className="divide-base-300 border-base-300 divide-y rounded-xl border">
             {predefined.academic_groups.map((group, groupIndex) => (
@@ -192,7 +203,7 @@ function PredefinedUserItem({
                 expanded && "rotate-90",
               )}
             />
-            {groups!.length} groups
+            <Trans>{groups!.length} groups</Trans>
           </button>
         )}
         <div className="mt-2 mr-2">
@@ -236,6 +247,7 @@ function AcademicGroupItem({
   onRemoveEmail: (email: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useLingui();
   const emails = group.user_emails ?? [];
   const emailCount = emails.length;
 
@@ -279,13 +291,13 @@ function AcademicGroupItem({
       {expanded && (
         <div className="flex flex-col gap-3 pl-5">
           <AddPredefinedEmailForm
-            placeholder="Add email to this group..."
+            placeholder={t`Add email to this group...`}
             isPending={isSaving}
             onAdd={onAddEmail}
           />
           {emailCount === 0 ? (
             <p className="text-base-content/75 text-sm">
-              No users in this group.
+              <Trans>No users in this group.</Trans>
             </p>
           ) : isUsersPending ? (
             <UserListSkeleton count={emailCount} />

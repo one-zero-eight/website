@@ -1,4 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 import { TargetForExport } from "@/api/schedule/types.ts";
 import HideButtonPersonal from "@/components/schedule/personal-card/HideButtonPersonal.tsx";
 import SimpleExportButton from "@/components/schedule/group-card/SimpleExportButton.tsx";
@@ -22,6 +25,7 @@ export function PersonalCard({
   exportButtonOnClick,
   canHide = true,
 }: PersonalCardProps) {
+  const { i18n } = useLingui();
   const navigate = useNavigate();
   return (
     <div
@@ -38,7 +42,7 @@ export function PersonalCard({
         <LinkIconButton
           href={targetTypes[targetType].href}
           icon={<span className={targetTypes[targetType].iconClassName} />}
-          tooltip={targetTypes[targetType].tooltip}
+          tooltip={i18n._(targetTypes[targetType].tooltip)}
         />
       </div>
     </div>
@@ -47,36 +51,36 @@ export function PersonalCard({
 
 const targetTypes: Record<
   TargetForExport,
-  { href: string; iconClassName: string; tooltip: string }
+  { href: string; iconClassName: string; tooltip: MessageDescriptor }
 > = {
   [TargetForExport.sport]: {
     href: "https://telegram.me/IUSportBot",
     iconClassName:
       "icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70 mb-1",
-    tooltip: "Open Telegram bot",
+    tooltip: msg`Open Telegram bot`,
   },
   [TargetForExport.music_room]: {
     href: "https://telegram.me/InnoMusicRoomBot",
     iconClassName:
       "icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70 mb-1",
-    tooltip: "Open Telegram bot",
+    tooltip: msg`Open Telegram bot`,
   },
   [TargetForExport.moodle]: {
     href: "/extension",
     iconClassName:
       "icon-[material-symbols--extension-outline] text-[#F0B132] dark:text-[#F0B132]/70",
-    tooltip: "Install the browser extension to sync Moodle calendar",
+    tooltip: msg`Install the browser extension to sync Moodle calendar`,
   },
   [TargetForExport.room_bookings]: {
     href: "/room-booking",
     iconClassName:
       "icon-[material-symbols--door-open-outline-rounded] text-[#F0B132] dark:text-[#F0B132]/70",
-    tooltip: "Navigate to room booking page",
+    tooltip: msg`Navigate to room booking page`,
   },
   [TargetForExport.events]: {
     href: "/events",
     iconClassName:
       "icon-[material-symbols--campaign-rounded] text-[#F0B132] dark:text-[#F0B132]/70",
-    tooltip: "Open Telegram bot",
+    tooltip: msg`Open Telegram bot`,
   },
 };

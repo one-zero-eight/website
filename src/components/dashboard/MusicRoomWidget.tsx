@@ -1,4 +1,7 @@
 import { useMyMusicRoom } from "@/api/schedule/event-group.ts";
+import { i18n } from "@lingui/core";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
 import { IcalExpander } from "@/components/calendar/iCalendarPlugin/ical-expander/IcalExpander.js";
 import { useNowMS } from "@/lib/utils/use-now.ts";
 import ICAL from "ical.js";
@@ -11,6 +14,7 @@ type MusicRoomBooking = {
 };
 
 export function MusicRoomWidget() {
+  useLingui();
   const [widgetShown, setWidgetShown] = useLocalStorage(
     "widget-music-room",
     false,
@@ -39,7 +43,9 @@ export function MusicRoomWidget() {
       <div className="flex flex-col">
         <p className="text-base-content flex items-center text-lg font-semibold">
           <span className="icon-[material-symbols--piano] text-primary mr-2 shrink-0 text-3xl sm:hidden" />
-          <span>Music Room Bookings</span>
+          <span>
+            <Trans>Music Room Bookings</Trans>
+          </span>
         </p>
         {bookings.length ? (
           bookings.map((booking) => (
@@ -52,14 +58,16 @@ export function MusicRoomWidget() {
           ))
         ) : (
           <span className="text-base-content/75">
-            You don't have any bookings now.
+            <Trans>You don't have any bookings now.</Trans>
           </span>
         )}
         <a
           href="https://telegram.me/InnoMusicRoomBot"
           className="text-base-content/75 w-fit hover:underline"
         >
-          Book more in <span className="text-primary">Music Room bot</span>
+          <Trans>
+            Book more in <span className="text-primary">Music Room bot</span>
+          </Trans>
           <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-xs" />
         </a>
       </div>
@@ -104,8 +112,12 @@ function getUpcomingMusicRoomBookings(
   }
 }
 
+function localeTag() {
+  return i18n.locale === "ru" ? "ru-RU" : "en-US";
+}
+
 function formatMusicRoomBooking({ start, end }: MusicRoomBooking) {
-  const date = start.toLocaleDateString("en-US", {
+  const date = start.toLocaleDateString(localeTag(), {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -117,7 +129,7 @@ function formatMusicRoomBooking({ start, end }: MusicRoomBooking) {
 }
 
 function formatTime(date: Date) {
-  return date.toLocaleTimeString("en-US", {
+  return date.toLocaleTimeString(localeTag(), {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,

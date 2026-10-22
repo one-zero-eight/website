@@ -1,5 +1,6 @@
 import { cn } from "@/lib/ui/cn";
 import { useState } from "react";
+import { useLingui } from "@lingui/react/macro";
 
 interface SectionHeaderProps {
   id: string;
@@ -8,6 +9,7 @@ interface SectionHeaderProps {
 }
 
 export const SectionHeader = ({ id, title, className }: SectionHeaderProps) => {
+  const { t } = useLingui();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (e: React.MouseEvent) => {
@@ -39,7 +41,7 @@ export const SectionHeader = ({ id, title, className }: SectionHeaderProps) => {
           href={`#${id}`}
           onClick={handleCopy}
           className="hover:text-base-content/50 absolute left-full ml-2 cursor-pointer opacity-0 transition-opacity group-hover:opacity-100"
-          aria-label={`Link to ${title}`}
+          aria-label={t`Link to ${title}`}
         >
           <span
             className={cn(

@@ -1,4 +1,8 @@
+import { Trans, useLingui } from "@lingui/react/macro";
+
 export function DormsPage() {
+  const { t } = useLingui();
+
   return (
     <div className="grid grid-cols-1 gap-4 p-4">
       <div className="flex flex-col gap-4">
@@ -8,32 +12,30 @@ export function DormsPage() {
           </div>
           <div className="flex flex-col gap-2">
             <p className="text-base-content flex items-center text-2xl font-semibold">
-              What is it?
+              <Trans>What is it?</Trans>
             </p>
             <p className="text-base-content/75 text-lg">
-              InNoHassle Dorms bot is a tool for managing tasks, duties, and
-              rules in your dormitory room. It helps you to split duties between
-              roommates and track them.
+              {t`InNoHassle Dorms bot is a tool for managing tasks, duties, and rules in your dormitory room. It helps you to split duties between roommates and track them.`}
             </p>
             <p className="text-base-content flex items-center text-2xl font-semibold">
-              Features:
+              <Trans>Features:</Trans>
             </p>
             <p className="text-base-content text-lg">
               ✉️{" "}
               <span className="text-base-content/75">
-                Invite your roommates to join the room
+                <Trans>Invite your roommates to join the room</Trans>
               </span>
             </p>
             <p className="text-base-content text-lg">
               📅{" "}
               <span className="text-base-content/75">
-                Create regular or manual tasks
+                <Trans>Create regular or manual tasks</Trans>
               </span>
             </p>
             <p className="text-base-content text-lg">
               📜{" "}
               <span className="text-base-content/75">
-                Define rules for your room
+                <Trans>Define rules for your room</Trans>
               </span>
             </p>
           </div>
@@ -48,11 +50,13 @@ export function DormsPage() {
           </div>
           <div className="flex flex-col gap-2">
             <p className="text-base-content flex items-center text-2xl font-semibold">
-              Telegram bot
+              <Trans>Telegram bot</Trans>
               <span className="icon-[material-symbols--open-in-new-rounded] ml-1" />
             </p>
             <p className="text-base-content/75 text-lg">
-              Create your room in the bot and invite your roommates to join.
+              <Trans>
+                Create your room in the bot and invite your roommates to join.
+              </Trans>
             </p>
           </div>
         </a>
@@ -66,12 +70,11 @@ export function DormsPage() {
           </div>
           <div className="flex flex-col gap-2">
             <p className="text-base-content flex items-center text-2xl font-semibold">
-              Contact us
+              <Trans>Contact us</Trans>
               <span className="icon-[material-symbols--open-in-new-rounded] ml-1" />
             </p>
             <p className="text-base-content/75 text-lg">
-              If you have any questions or suggestions, feel free to contact the
-              developers.
+              {t`If you have any questions or suggestions, feel free to contact the developers.`}
             </p>
           </div>
         </a>

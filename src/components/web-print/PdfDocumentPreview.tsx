@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Trans } from "@lingui/react/macro";
 import { createPortal } from "react-dom";
 import { Document, Page, pdfjs } from "react-pdf";
 import PdfJsWorker from "pdfjs-dist/build/pdf.worker.min.mjs?worker";
@@ -121,7 +122,9 @@ export function PdfDocumentPreview({
       </button>
 
       <div className="flex items-center gap-1.5">
-        <span className="text-base-content/70 text-sm">Page</span>
+        <span className="text-base-content/70 text-sm">
+          <Trans>Page</Trans>
+        </span>
         <input
           type="number"
           className="input input-bordered input-sm w-14 [appearance:textfield] text-center tabular-nums [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
@@ -142,7 +145,7 @@ export function PdfDocumentPreview({
         </span>
         {isFiltered ? (
           <span className="text-base-content/40 text-xs">
-            (p. {currentDocumentPage} in file)
+            <Trans>(p. {currentDocumentPage} in file)</Trans>
           </span>
         ) : null}
       </div>
@@ -182,9 +185,10 @@ export function PdfDocumentPreview({
               <span className="loading loading-spinner loading-lg text-primary" />
             </div>
           }
+          noData={<Trans>No document specified</Trans>}
           error={
             <div className="text-base-content/50 flex min-h-48 w-full items-center justify-center text-sm">
-              Could not load preview
+              <Trans>Could not load preview</Trans>
             </div>
           }
         >
@@ -196,6 +200,8 @@ export function PdfDocumentPreview({
                 width={pageWidth}
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
+                error={<Trans>Could not load page</Trans>}
+                noData={<Trans>No page specified</Trans>}
                 loading={
                   <div
                     className="skeleton rounded-box"

@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { Trans } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { $tabletennis } from "@/api/tabletennis";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 
 export function Registration({ onRegistered }: { onRegistered: () => void }) {
@@ -8,7 +10,7 @@ export function Registration({ onRegistered }: { onRegistered: () => void }) {
   const { showError } = useToast();
   const { mutate, isPending } = $tabletennis.useMutation("post", "/reg", {
     onSuccess: () => onRegistered(),
-    onError: (error) => showError("Error", formatApiErrorMessage(error)),
+    onError: (error) => showError(msg`Error`, formatApiErrorDescriptor(error)),
   });
 
   function handleSubmit(e: React.FormEvent) {
@@ -21,10 +23,14 @@ export function Registration({ onRegistered }: { onRegistered: () => void }) {
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="bg-base-200 mx-4 w-full max-w-md rounded-lg p-8">
-        <h1 className="mb-2 text-2xl font-semibold">Table Tennis Club</h1>
+        <h1 className="mb-2 text-2xl font-semibold">
+          <Trans>Table Tennis Club</Trans>
+        </h1>
         <p className="text-base-content/70 mb-6 text-sm">
-          Register to start playing and tracking your rating. Your results will
-          be visible on the leaderboard.
+          <Trans>
+            Register to start playing and tracking your rating. Your results
+            will be visible on the leaderboard.
+          </Trans>
         </p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label className="flex items-start gap-3 text-sm">
@@ -35,8 +41,10 @@ export function Registration({ onRegistered }: { onRegistered: () => void }) {
               className="checkbox checkbox-sm mt-0.5"
             />
             <span className="text-base-content/70 leading-snug">
-              By clicking the button, you agree to be displayed in the overall
-              player chart
+              <Trans>
+                By clicking the button, you agree to be displayed in the overall
+                player chart
+              </Trans>
             </span>
           </label>
           <button
@@ -47,7 +55,7 @@ export function Registration({ onRegistered }: { onRegistered: () => void }) {
             {isPending ? (
               <span className="loading loading-spinner loading-sm" />
             ) : (
-              "Register"
+              <Trans>Register</Trans>
             )}
           </button>
         </form>

@@ -1,5 +1,6 @@
 import { searchTypes } from "@/api/search";
 import { useMemo } from "react";
+import { useLingui } from "@lingui/react/macro";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -22,6 +23,7 @@ const TruncatableMarkdown = ({
     | searchTypes.ResourcesSourceType;
   isSelected: boolean;
 }) => {
+  const { t } = useLingui();
   const shouldTruncate = sourse_type !== "maps";
 
   const processedText = useMemo(() => {
@@ -29,7 +31,8 @@ const TruncatableMarkdown = ({
     const processed = text.replace(
       /\[Phone number\s*([^\]]+)\]\(tel:([^)]+)\)/gi,
       (match, displayText, _phoneNumber) => {
-        return `Tel: ${displayText.trim()}`;
+        const phoneNumber = displayText.trim();
+        return t`Tel: ${phoneNumber}`;
       },
     );
 
@@ -47,7 +50,7 @@ const TruncatableMarkdown = ({
       .find((line) => line.trim() && !line.trim().startsWith("#"));
 
     return fallbackLine ? fallbackLine.trim() : processed;
-  }, [text, shouldTruncate]);
+  }, [text, shouldTruncate, t]);
 
   return (
     <div

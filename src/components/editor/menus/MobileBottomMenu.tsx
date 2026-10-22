@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { moveBlock } from "@/components/editor/utils/moveBlock";
 import { cn } from "@/lib/ui/cn";
 import { Editor } from "@tiptap/react";
@@ -12,6 +13,7 @@ export function MobileBottomMenu({
   editor: Editor;
   className?: string;
 }) {
+  const { t } = useLingui();
   const editorState = useEditorMenuState(editor);
 
   return (
@@ -28,14 +30,14 @@ export function MobileBottomMenu({
             isDisabled={!editorState.canMoveUp}
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => moveBlock(editor, "up")}
-            title="Move up"
+            title={t`Move up`}
             iconClassName="icon-[mdi--arrow-collapse-up]"
           />
           <BubbleMenuButton
             isDisabled={!editorState.canMoveDown}
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => moveBlock(editor, "down")}
-            title="Move down"
+            title={t`Move down`}
             iconClassName="icon-[mdi--arrow-collapse-up] rotate-180"
           />
 

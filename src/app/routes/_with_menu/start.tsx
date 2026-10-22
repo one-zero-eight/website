@@ -2,7 +2,7 @@ import { Topbar } from "@/components/layout/Topbar.tsx";
 import { OnboardingPage } from "@/components/onboarding/OnboardingPage.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/start")({
   component: RouteComponent,
@@ -23,15 +23,16 @@ export const Route = createFileRoute("/_with_menu/start")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { step } = Route.useSearch();
 
   return (
     <>
       <Helmet>
-        <title>Get started</title>
+        <title>{t`Get started`}</title>
         <meta
           name="description"
-          content="Sign in and connect Telegram to start using InNoHassle."
+          content={t`Sign in and connect Telegram to start using InNoHassle.`}
         />
         <meta name="robots" content="noindex, follow" />
       </Helmet>

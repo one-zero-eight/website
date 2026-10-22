@@ -1,4 +1,6 @@
+import { plural } from "@lingui/core/macro";
 import { $clubs } from "@/api/clubs";
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   createFuseInstance,
   searchClubs,
@@ -8,6 +10,7 @@ import { AddClubDialog } from "./AddClubDialog";
 import { ClubAdminCard } from "./ClubAdminCard";
 
 export function ClubsAdminPage() {
+  const { t } = useLingui();
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const { data: clubs, isPending } = $clubs.useQuery("get", "/clubs/");
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
@@ -38,7 +41,9 @@ export function ClubsAdminPage() {
   if (isPending) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-base-content/50 text-lg">Loading clubs...</div>
+        <div className="text-base-content/50 text-lg">
+          <Trans>Loading clubs...</Trans>
+        </div>
       </div>
     );
   }
@@ -46,19 +51,31 @@ export function ClubsAdminPage() {
   if (!clubs || clubs.length === 0) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
-        <div className="text-base-content/50 text-lg">No clubs found</div>
+        <div className="text-base-content/50 text-lg">
+          <Trans>No clubs found</Trans>
+        </div>
         <button
           type="button"
           onClick={() => setShowAddDialog(true)}
           className="btn btn-primary"
         >
           <span className="icon-[mdi--plus] size-5" />
-          <span>Add New Club</span>
+          <span>
+            <Trans>Add New Club</Trans>
+          </span>
         </button>
         <AddClubDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
       </div>
     );
   }
+
+  const count = filteredClubs.length;
+  const countLabel = search
+    ? t`${plural(count, {
+        one: "# club found",
+        other: "# clubs found",
+      })}`
+    : t`${plural(count, { one: "# club", other: "# clubs" })}`;
 
   return (
     <>
@@ -68,7 +85,7 @@ export function ClubsAdminPage() {
             <div className="border-base-300 focus-within:border-b-primary flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0">
               <input
                 type="text"
-                placeholder="Search clubs..."
+                placeholder={t`Search clubs...`}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="min-w-0 grow bg-transparent px-2 py-1 outline-hidden"
@@ -83,20 +100,18 @@ export function ClubsAdminPage() {
             className="btn btn-primary"
           >
             <span className="icon-[mdi--plus] size-5" />
-            <span>Add New Club</span>
+            <span>
+              <Trans>Add New Club</Trans>
+            </span>
           </button>
         </div>
 
-        <div className="text-base-content/70 text-sm">
-          <span className="font-semibold">{filteredClubs.length}</span>{" "}
-          {filteredClubs.length === 1 ? "club" : "clubs"}
-          {search && " found"}
-        </div>
+        <div className="text-base-content/70 text-sm">{countLabel}</div>
 
         {filteredClubs.length === 0 ? (
           <div className="flex min-h-[400px] items-center justify-center">
             <div className="text-base-content/30 text-lg">
-              No clubs match your search
+              <Trans>No clubs match your search</Trans>
             </div>
           </div>
         ) : (

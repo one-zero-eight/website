@@ -2,18 +2,19 @@ import { Topbar } from "@/components/layout/Topbar";
 import { createFileRoute } from "@tanstack/react-router";
 import Confetti from "react-confetti-boom";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/42")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   return (
     <>
       <Helmet>
-        <title>Club Fest</title>
-        <meta name="description" content="Club Fest page." />
+        <title>{t`Club Fest`}</title>
+        <meta name="description" content={t`Club Fest page.`} />
       </Helmet>
       <Topbar title={<Trans>Club Fest</Trans>} />
       <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -30,20 +31,22 @@ function RouteComponent() {
               </div>
 
               <div className="min-w-0 grow items-center text-xl leading-tight font-semibold wrap-break-word sm:text-2xl md:text-3xl lg:text-4xl">
-                Congratulations! You've Unlocked a Special Link!
+                <Trans>Congratulations! You've Unlocked a Special Link!</Trans>
               </div>
             </div>
 
             <div className="md:text-md text-base-content/80 mb-2 sm:text-sm lg:text-lg">
-              Amazing discovery! You've found the exclusive Ryan Gosling
-              resource link. And the correct answer is{" "}
-              <span className="text-primary">108</span>, not 42.
+              <Trans>
+                Amazing discovery! You've found the exclusive Ryan Gosling
+                resource link. And the correct answer is{" "}
+                <span className="text-primary">108</span>, not 42.
+              </Trans>
             </div>
 
             <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-black/10">
               <img
                 src="/tenor2.gif"
-                alt="Ryan Gosling winks"
+                alt={t`Ryan Gosling winks`}
                 className="block h-auto w-full"
                 loading="lazy"
               />

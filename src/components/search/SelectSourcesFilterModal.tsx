@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { DefaultButton } from "@/components/search/DefaultButton";
 
 type Filter = {
@@ -22,6 +23,7 @@ const SelectSourcesFilterModal = ({
   onApply,
   onClose,
 }: Props) => {
+  const { t } = useLingui();
   if (!open) return null;
 
   return (
@@ -49,7 +51,7 @@ const SelectSourcesFilterModal = ({
 
       <div className="flex justify-center">
         <DefaultButton
-          content="Done"
+          content={t`Done`}
           onClick={() => {
             onApply();
             onClose();

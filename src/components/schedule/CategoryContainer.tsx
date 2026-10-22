@@ -1,5 +1,10 @@
 import { CategoryCard } from "@/components/schedule/CategoryCard";
-import { viewConfig } from "@/components/schedule/view-config.ts";
+import {
+  getCategoryShortDescription,
+  getCategoryTitle,
+  viewConfig,
+} from "@/components/schedule/view-config.ts";
+import { useAppLocale } from "@/locales/lib";
 
 const categoriesIcons: {
   [key: string]: React.ReactNode;
@@ -15,6 +20,8 @@ const categoriesIcons: {
 };
 
 export function CategoryContainer() {
+  const [locale] = useAppLocale();
+
   return (
     <div className="flex flex-col gap-4 px-4 py-4">
       {Object.entries(viewConfig.categories)
@@ -24,8 +31,8 @@ export function CategoryContainer() {
             key={v.alias}
             icon={categoriesIcons[v.alias] || categoriesIcons["core-courses"]}
             slug={v.alias}
-            title={v.title}
-            shortDescription={v.shortDescription}
+            title={getCategoryTitle(v, locale)}
+            shortDescription={getCategoryShortDescription(v, locale)}
             outdated={v.outdated}
           />
         ))}

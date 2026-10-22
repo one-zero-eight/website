@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 interface GenerateButtonProps {
   disabled: boolean;
   isGenerating: boolean;
@@ -19,12 +20,12 @@ export function GenerateButton({
       {isGenerating ? (
         <>
           <span className="loading loading-spinner loading-xs" />
-          Generating...
+          <Trans>Generating...</Trans>
         </>
       ) : (
         <>
           <span className="icon-[material-symbols--link-rounded] h-4 w-4" />
-          Generate Link
+          <Trans>Generate Link</Trans>
         </>
       )}
     </button>

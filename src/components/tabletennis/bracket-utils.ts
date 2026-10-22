@@ -1,3 +1,6 @@
+import { i18n } from "@lingui/core";
+import { t } from "@lingui/core/macro";
+
 export type Player = {
   name: string;
   id: string;
@@ -33,6 +36,7 @@ export function pairKey(a: string, b: string) {
 }
 
 export function ordinal(n: number): string {
+  if (i18n.locale === "ru") return `${n}-е`;
   const mod100 = n % 100;
   if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
   if (n % 10 === 1) return `${n}st`;
@@ -648,11 +652,11 @@ export function roundLabel(
 ): string {
   const left = section.rounds - round;
   // a first round padded with byes is not a real 1/8 or 1/4
-  if (round === 0 && hasByes && left > 1) return "Round 1";
+  if (round === 0 && hasByes && left > 1) return t`Round 1`;
   if (left === 1) {
     return section.placeFrom === 1
-      ? "Final"
-      : `${ordinal(section.placeFrom)} place`;
+      ? t`Final`
+      : t`${ordinal(section.placeFrom)} place`;
   }
   return `1/${2 ** (left - 1)}`;
 }

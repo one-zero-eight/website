@@ -3,13 +3,14 @@ import { FormsPage } from "@/components/forms";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/forms")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { me } = useMe();
 
   // Check staff status and throw error for non-staff users
@@ -26,7 +27,7 @@ function RouteComponent() {
   return (
     <>
       <Helmet>
-        <title>Forms</title>
+        <title>{t`Forms`}</title>
       </Helmet>
 
       <Topbar title={<Trans>Forms</Trans>} />

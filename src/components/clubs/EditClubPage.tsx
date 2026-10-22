@@ -1,4 +1,6 @@
+import { msg } from "@lingui/core/macro";
 import { $clubs, clubsTypes } from "@/api/clubs";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { getDescriptionImageUrl } from "@/api/clubs/links.ts";
 import { usePendingLogoUrl } from "@/api/clubs/use-pending-logo.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
@@ -35,6 +37,7 @@ function parseDescription(description: unknown): any {
 }
 
 export function EditClubPage({ clubSlug }: { clubSlug: string }) {
+  const { t } = useLingui();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -235,7 +238,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     shouldBlockFn: () => {
       if (hasUnsavedChanges()) {
         return !confirm(
-          "You have unsaved changes. Are you sure you want to leave?",
+          t`You have unsaved changes. Are you sure you want to leave?`,
         );
       }
       return false;
@@ -403,8 +406,8 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
 
     if (!isAdmin) {
       showSuccess(
-        "Submitted for review",
-        "An admin needs to review your changes before they go live.",
+        msg`Submitted for review`,
+        msg`An admin needs to review your changes before they go live.`,
       );
     }
     // Navigate to new slug if it changed, otherwise stay on current slug
@@ -546,7 +549,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-base-content/30 text-lg">
-          Loading club information...
+          <Trans>Loading club information...</Trans>
         </div>
       </div>
     );
@@ -555,7 +558,9 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   if (!club) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-base-content/30 text-lg">Club not found</div>
+        <div className="text-base-content/30 text-lg">
+          <Trans>Club not found</Trans>
+        </div>
       </div>
     );
   }
@@ -563,28 +568,30 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-4">
       <Helmet>
-        <title>Edit {club.title}</title>
+        <title>{t`Edit ${club.title}`}</title>
         <meta name="description" content={club.short_description} />
       </Helmet>
 
       {/* Header Section */}
       <div className="space-y-2">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Edit Club</h1>
+          <h1 className="text-3xl font-bold">
+            <Trans>Edit Club</Trans>
+          </h1>
           <Link
             to="/clubs/$slug"
             params={{ slug: clubSlug }}
             className="btn btn-ghost"
           >
             <span className="icon-[mdi--arrow-left] size-5" />
-            Back to Club
+            <Trans>Back to Club</Trans>
           </Link>
         </div>
         <p className="text-base-content/80 text-base leading-relaxed">
-          Update the club information below
+          <Trans>Update the club information below</Trans>
         </p>
         <p className="text-base-content/80 text-base leading-relaxed">
-          Club: {club.title}
+          <Trans>Club: {club.title}</Trans>
         </p>
       </div>
 
@@ -595,13 +602,13 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
             <div>
               <p className="text-base-content font-medium">
                 {isAdmin
-                  ? "This club has changes waiting for review"
-                  : "You have changes waiting for review"}
+                  ? t`This club has changes waiting for review`
+                  : t`You have changes waiting for review`}
               </p>
               <p className="text-base-content/70 text-sm">
                 {isAdmin
-                  ? "The form below shows the leader's submitted changes. Saving will apply your edits directly to the club."
-                  : "The form below shows what you submitted, not what is published yet. Keep editing and save again to update the request."}
+                  ? t`The form below shows the leader's submitted changes. Saving will apply your edits directly to the club.`
+                  : t`The form below shows what you submitted, not what is published yet. Keep editing and save again to update the request.`}
               </p>
             </div>
           </div>
@@ -615,7 +622,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
             <div className="flex items-center justify-between gap-2">
               <h2 className="card-title">
                 <span className="icon-[mdi--image] size-6" />
-                Club Logo
+                <Trans>Club Logo</Trans>
                 {modifiedSections.logo && <ModifiedBadge />}
               </h2>
               <RevertSectionButton
@@ -628,7 +635,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               {/* Current Logo */}
               <div>
                 <h3 className="text-base-content mb-3 text-sm font-medium">
-                  Current logo
+                  <Trans>Current logo</Trans>
                 </h3>
                 <div className="flex items-center justify-center">
                   <ClubLogo
@@ -642,14 +649,14 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               {/* Upload New Logo */}
               <div>
                 <h3 className="text-base-content mb-3 text-sm font-medium">
-                  Upload new logo
+                  <Trans>Upload new logo</Trans>
                 </h3>
                 <div className="space-y-3">
                   {logoPreview ? (
                     <div className="flex items-center justify-center">
                       <img
                         src={logoPreview}
-                        alt="Logo preview"
+                        alt={t`Logo preview`}
                         className="rounded-field max-h-48 max-w-full object-contain"
                       />
                     </div>
@@ -658,33 +665,37 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                       {pendingLogoUrl ? (
                         <img
                           src={pendingLogoUrl}
-                          alt="Submitted logo"
+                          alt={t`Submitted logo`}
                           className="rounded-field max-h-48 max-w-full object-contain"
                         />
                       ) : (
                         <div className="bg-base-200 border-base-300 rounded-field flex w-full items-center justify-center border p-4">
                           <div className="text-base-content/30 flex flex-col items-center gap-2 py-8">
                             <span className="icon-[mdi--image-check] size-12" />
-                            <span className="text-sm">Preview unavailable</span>
+                            <span className="text-sm">
+                              <Trans>Preview unavailable</Trans>
+                            </span>
                           </div>
                         </div>
                       )}
                       {cancelPendingLogo ? (
                         <>
                           <p className="text-base-content/70 text-sm">
-                            This logo change will be cancelled when you save.
+                            <Trans>
+                              This logo change will be cancelled when you save.
+                            </Trans>
                           </p>
                           <button
                             type="button"
                             onClick={() => setCancelPendingLogo(false)}
                             className="btn btn-ghost btn-sm w-full"
                           >
-                            Keep submitted logo
+                            <Trans>Keep submitted logo</Trans>
                           </button>
                         </>
                       ) : (
                         <p className="text-primary/70 text-sm">
-                          Submitted, waiting for review
+                          <Trans>Submitted, waiting for review</Trans>
                         </p>
                       )}
                     </div>
@@ -693,7 +704,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                       <div className="text-base-content/30 flex flex-col items-center gap-2 py-8">
                         <span className="icon-[mdi--image-plus] size-12" />
                         <span className="text-sm">
-                          Select a file to preview
+                          <Trans>Select a file to preview</Trans>
                         </span>
                       </div>
                     </div>
@@ -715,17 +726,19 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                       onClick={() => logoInputRef.current?.click()}
                       className="btn btn-primary btn-sm"
                     >
-                      Choose file
+                      <Trans>Choose file</Trans>
                     </button>
                     <span className="text-base-content/70 truncate text-sm">
-                      {logoFile ? logoFile.name : "No file selected"}
+                      {logoFile ? logoFile.name : t`No file selected`}
                     </span>
                   </div>
 
                   {logoFile && (
                     <>
                       <p className="text-base-content/50 text-sm">
-                        This will be uploaded when you save changes below.
+                        <Trans>
+                          This will be uploaded when you save changes below.
+                        </Trans>
                       </p>
                       <button
                         type="button"
@@ -738,7 +751,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                         }}
                         className="btn btn-ghost btn-sm w-full"
                       >
-                        Clear selection
+                        <Trans>Clear selection</Trans>
                       </button>
                     </>
                   )}
@@ -747,8 +760,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
             </div>
 
             <p className="text-base-content/50 mt-4 text-sm">
-              Recommended: Square image, at least 400x400px, PNG, JPG or WEBP
-              format
+              <Trans>
+                Recommended: Square image, at least 400x400px, PNG, JPG or WEBP
+                format
+              </Trans>
             </p>
           </div>
         </div>
@@ -758,7 +773,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
           <div className="card-body">
             <div className="flex items-center justify-between gap-2">
               <h2 className="card-title">
-                Basic information
+                <Trans>Basic information</Trans>
                 {modifiedSections.basicInfo && <ModifiedBadge />}
               </h2>
               <RevertSectionButton
@@ -778,10 +793,12 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                     className="checkbox checkbox-primary"
                   />
                   <span className="label-text text-base-content font-medium">
-                    Club is active{" "}
-                    <span className="text-xs font-normal">
-                      (show in the list of clubs)
-                    </span>
+                    <Trans>
+                      Club is active{" "}
+                      <span className="text-xs font-normal">
+                        (show in the list of clubs)
+                      </span>
+                    </Trans>
                   </span>
                 </label>
               </div>
@@ -794,7 +811,8 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 <div className="form-control">
                   <label className="label">
                     <span className="label-text text-base-content font-medium">
-                      Title <span className="text-red-500">*</span>
+                      <Trans>Title</Trans>{" "}
+                      <span className="text-red-500">*</span>
                     </span>
                   </label>
                   <input
@@ -809,7 +827,8 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 <div className="form-control">
                   <label className="label">
                     <span className="label-text text-base-content font-medium">
-                      Slug <span className="text-red-500">*</span>
+                      <Trans>Slug</Trans>{" "}
+                      <span className="text-red-500">*</span>
                     </span>
                   </label>
                   <input
@@ -818,11 +837,11 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                     onChange={(e) => setSlug(e.target.value)}
                     required
                     className="input input-bordered w-full"
-                    placeholder="club-slug"
+                    placeholder={t`club-slug`}
                   />
                   <label className="label">
                     <span className="label-text-alt text-base-content/50">
-                      URL-friendly identifier for the club
+                      <Trans>URL-friendly identifier for the club</Trans>
                     </span>
                   </label>
                 </div>
@@ -830,7 +849,8 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 <div className="form-control">
                   <label className="label">
                     <span className="label-text text-base-content font-medium">
-                      Type <span className="text-red-500">*</span>
+                      <Trans>Type</Trans>{" "}
+                      <span className="text-red-500">*</span>
                     </span>
                   </label>
                   <select
@@ -855,7 +875,8 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
             <div className="form-control">
               <label className="label">
                 <span className="label-text text-base-content font-medium">
-                  Short Description <span className="text-red-500">*</span>
+                  <Trans>Short Description</Trans>{" "}
+                  <span className="text-red-500">*</span>
                 </span>
               </label>
               <textarea
@@ -864,7 +885,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 required
                 rows={3}
                 className="textarea textarea-bordered w-full"
-                placeholder="Brief description for cards"
+                placeholder={t`Brief description for cards`}
               />
             </div>
           </div>
@@ -876,7 +897,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="card-title">
                 <span className="icon-[material-symbols--article-outline-rounded] size-6" />
-                About
+                <Trans>About</Trans>
                 {modifiedSections.description && <ModifiedBadge />}
               </h2>
               <div className="flex items-center gap-2">
@@ -890,7 +911,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                   className="btn btn-outline btn-primary btn-sm"
                 >
                   <span className="icon-[mdi--eye] size-5" />
-                  Preview
+                  <Trans>Preview</Trans>
                 </button>
               </div>
             </div>
@@ -922,7 +943,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               <div className="flex items-center justify-between gap-2">
                 <h2 className="card-title">
                   <span className="icon-[mdi--account] size-6" />
-                  Club Leader
+                  <Trans>Club Leader</Trans>
                   {modifiedSections.leader && <ModifiedBadge />}
                 </h2>
                 <RevertSectionButton
@@ -938,7 +959,9 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                     <div className="flex items-start gap-3">
                       <span className="icon-[mdi--account] text-base-content/50 mt-0.5 size-5" />
                       <div>
-                        <div className="text-base-content/50 text-sm">Name</div>
+                        <div className="text-base-content/50 text-sm">
+                          <Trans>Name</Trans>
+                        </div>
                         <div className="text-base-content font-medium">
                           {clubLeader.name}
                         </div>
@@ -950,7 +973,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                       <span className="icon-[mdi--email] text-base-content/50 mt-0.5 size-5" />
                       <div>
                         <div className="text-base-content/50 text-sm">
-                          Email
+                          <Trans>Email</Trans>
                         </div>
                         <div className="text-base-content font-medium">
                           {clubLeader.email}
@@ -987,7 +1010,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                   className="btn btn-outline btn-primary w-full"
                 >
                   <span className="icon-[mdi--account-edit] size-5" />
-                  Change Leader
+                  <Trans>Change Leader</Trans>
                 </button>
               )}
 
@@ -997,7 +1020,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                   <div className="mb-2 flex items-center justify-between">
                     <label className="label">
                       <span className="label-text text-base-content font-medium">
-                        Set New Leader (Innopolis Email)
+                        <Trans>Set New Leader (Innopolis Email)</Trans>
                       </span>
                     </label>
                     <button
@@ -1008,7 +1031,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                       }}
                       className="btn btn-ghost btn-sm"
                     >
-                      Cancel
+                      <Trans>Cancel</Trans>
                     </button>
                   </div>
                   <input
@@ -1020,7 +1043,9 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                   />
                   <label className="label">
                     <span className="label-text-alt text-base-content/50">
-                      Enter Innopolis email to set as new club leader
+                      <Trans>
+                        Enter Innopolis email to set as new club leader
+                      </Trans>
                     </span>
                   </label>
                 </div>
@@ -1037,7 +1062,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               <div className="flex items-center justify-between gap-2">
                 <h2 className="card-title">
                   <span className="icon-[mdi--dumbbell] size-6" />
-                  Sport Information
+                  <Trans>Sport Information</Trans>
                   {modifiedSections.sport && <ModifiedBadge />}
                 </h2>
                 <RevertSectionButton
@@ -1061,7 +1086,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                     className="checkbox checkbox-primary"
                   />
                   <span className="label-text text-base-content font-medium">
-                    Is InnoSport club
+                    <Trans>Is InnoSport club</Trans>
                   </span>
                 </label>
               </div>
@@ -1071,7 +1096,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 <div className="form-control">
                   <label className="label">
                     <span className="label-text text-base-content font-medium">
-                      Sport ID
+                      <Trans>Sport ID</Trans>
                     </span>
                   </label>
                   <input
@@ -1079,11 +1104,11 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                     value={sportId}
                     onChange={(e) => setSportId(e.target.value)}
                     className="input input-bordered w-full"
-                    placeholder="ID from InnoSport system"
+                    placeholder={t`ID from InnoSport system`}
                   />
                   <label className="label">
                     <span className="label-text-alt text-base-content/50">
-                      Sport type ID from InnoSport system
+                      <Trans>Sport type ID from InnoSport system</Trans>
                     </span>
                   </label>
                 </div>
@@ -1098,7 +1123,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="card-title">
                 <span className="icon-[mdi--link] size-6" />
-                Resources & Links
+                <Trans>Resources & Links</Trans>
                 {modifiedSections.links && <ModifiedBadge />}
               </h2>
               <div className="flex items-center gap-2">
@@ -1112,7 +1137,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                   className="btn btn-primary btn-sm"
                 >
                   <span className="icon-[mdi--plus] size-5" />
-                  Add Link
+                  <Trans>Add Link</Trans>
                 </button>
               </div>
             </div>
@@ -1121,7 +1146,9 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               <div className="border-base-300 rounded-field flex flex-col items-center justify-center border-2 border-dashed p-8">
                 <span className="icon-[mdi--link-variant-off] text-base-content/30 mb-2 size-12" />
                 <p className="text-base-content/50 text-sm">
-                  No links added yet. Click "Add Link" to add resources.
+                  <Trans>
+                    No links added yet. Click "Add Link" to add resources.
+                  </Trans>
                 </p>
               </div>
             ) : (
@@ -1135,14 +1162,14 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                       <div className="flex items-center gap-2">
                         <span className="icon-[mdi--link] text-primary size-5" />
                         <span className="text-base-content font-semibold">
-                          Link {index + 1}
+                          <Trans>Link {index + 1}</Trans>
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleRemoveLink(index)}
                         className="btn btn-ghost btn-sm btn-error"
-                        title="Remove link"
+                        title={t`Remove link`}
                       >
                         <span className="icon-[mdi--delete] size-5" />
                       </button>
@@ -1152,7 +1179,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                       <div className="form-control md:col-span-1">
                         <label className="label pb-1">
                           <span className="label-text text-base-content text-xs font-medium tracking-wide uppercase">
-                            Type
+                            <Trans>Type</Trans>
                           </span>
                         </label>
                         <select
@@ -1167,16 +1194,16 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                           className="select select-bordered w-full"
                         >
                           <option value={clubsTypes.LinkType.telegram_channel}>
-                            Telegram Channel
+                            <Trans>Telegram Channel</Trans>
                           </option>
                           <option value={clubsTypes.LinkType.telegram_chat}>
-                            Telegram Chat
+                            <Trans>Telegram Chat</Trans>
                           </option>
                           <option value={clubsTypes.LinkType.telegram_user}>
-                            Telegram User
+                            <Trans>Telegram User</Trans>
                           </option>
                           <option value={clubsTypes.LinkType.external_url}>
-                            External URL
+                            <Trans>External URL</Trans>
                           </option>
                         </select>
                       </div>
@@ -1184,7 +1211,9 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                       <div className="form-control md:col-span-2">
                         <label className="label pb-1">
                           <span className="label-text text-base-content text-xs font-medium tracking-wide uppercase">
-                            URL <span className="text-red-500">*</span>
+                            <Trans>
+                              URL <span className="text-red-500">*</span>
+                            </Trans>
                           </span>
                         </label>
                         <input
@@ -1203,7 +1232,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                     <div className="form-control mt-4">
                       <label className="label pb-1">
                         <span className="label-text text-base-content text-xs font-medium tracking-wide uppercase">
-                          Label (Optional)
+                          <Trans>Label (Optional)</Trans>
                         </span>
                       </label>
                       <input
@@ -1213,7 +1242,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                           handleLinkChange(index, "label", e.target.value)
                         }
                         className="input input-bordered w-full"
-                        placeholder="Custom display label"
+                        placeholder={t`Custom display label`}
                       />
                     </div>
                   </div>
@@ -1232,7 +1261,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
             }
             className="btn btn-ghost"
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="submit"
@@ -1246,10 +1275,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               <span className="loading loading-spinner loading-sm" />
             )}
             {isUpdating
-              ? "Saving..."
+              ? t`Saving...`
               : isUploadingLogo
-                ? "Uploading logo..."
-                : "Save Changes"}
+                ? t`Uploading logo...`
+                : t`Save Changes`}
           </button>
         </div>
       </form>
@@ -1258,7 +1287,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       <Modal
         open={showPreview}
         onOpenChange={setShowPreview}
-        title="Description Preview"
+        title={t`Description Preview`}
         containerClassName="bg-base-100 max-w-4xl"
       >
         <div className="max-h-[70vh] overflow-y-auto">
@@ -1274,7 +1303,11 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
 
 /** Tag marking a section that already has changes waiting for review. */
 function ModifiedBadge() {
-  return <span className="badge badge-primary badge-soft">Modified</span>;
+  return (
+    <span className="badge badge-primary badge-soft">
+      <Trans>Modified</Trans>
+    </span>
+  );
 }
 
 /** Undo control shown in a section header while it differs from the club. */
@@ -1285,6 +1318,7 @@ function RevertSectionButton({
   changed: boolean;
   onRevert: () => void;
 }) {
+  const { t } = useLingui();
   if (!changed) {
     return null;
   }
@@ -1294,10 +1328,10 @@ function RevertSectionButton({
       type="button"
       onClick={onRevert}
       className="btn btn-ghost btn-sm shrink-0"
-      title="Revert this section to the published values"
+      title={t`Revert this section to the published values`}
     >
       <span className="icon-[mdi--undo] size-4" />
-      Revert changes
+      <Trans>Revert changes</Trans>
     </button>
   );
 }

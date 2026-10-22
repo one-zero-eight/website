@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
 import { useTabletennisRefresh } from "./useTabletennisRefresh";
@@ -17,6 +19,7 @@ export function MergeGuestModal({
   onOpenChange: (open: boolean) => void;
   guest: SchemaPlayer;
 }) {
+  const { t } = useLingui();
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<SchemaPlayer | null>(null);
   const refresh = useTabletennisRefresh();
@@ -48,13 +51,13 @@ export function MergeGuestModal({
       onSuccess: (res) => {
         const tours = (res as { tournaments?: number }).tournaments ?? 0;
         showSuccess(
-          "Guest linked",
-          `${guest.nickname} → ${picked?.nickname ?? query.trim()}, ${tours} tournament${tours === 1 ? "" : "s"} moved`,
+          msg`Guest linked`,
+          msg`${guest.nickname} → ${picked?.nickname ?? query.trim()}: ${tours} tournaments moved`,
         );
         refresh();
         handleOpenChange(false);
       },
-      onError: (e) => showError("Error", formatApiErrorMessage(e)),
+      onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)),
     },
   );
 
@@ -81,13 +84,16 @@ export function MergeGuestModal({
     <Modal
       open={open}
       onOpenChange={handleOpenChange}
-      title="Link guest to account"
+      title={t`Link guest to account`}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <p className="text-base-content/70 text-sm">
-          Pick the registered player who played as{" "}
-          <strong>{guest.nickname}</strong>. They get the guest's games in every
-          tournament and the rating ({guest.rating}); the guest is deleted.
+          <Trans>
+            Pick the registered player who played as{" "}
+            <strong>{guest.nickname}</strong>. They get the guest's games in
+            every tournament and the rating ({guest.rating}); the guest is
+            deleted.
+          </Trans>
         </p>
         <div className="relative">
           <input
@@ -98,7 +104,7 @@ export function MergeGuestModal({
               setPicked(null);
               setQuery(e.target.value);
             }}
-            placeholder="Nickname or email"
+            placeholder={t`Nickname or email`}
             className="input input-bordered h-12 w-full"
           />
           {suggestions.length > 0 && (
@@ -122,7 +128,7 @@ export function MergeGuestModal({
           )}
         </div>
         <p className="text-base-content/50 text-xs">
-          The person has to register in table tennis first.
+          <Trans>The person has to register in table tennis first.</Trans>
         </p>
         <div className="mt-2 flex justify-end gap-2">
           <button
@@ -130,7 +136,7 @@ export function MergeGuestModal({
             className="btn btn-ghost"
             onClick={() => handleOpenChange(false)}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="submit"
@@ -140,7 +146,7 @@ export function MergeGuestModal({
             {isPending ? (
               <span className="loading loading-spinner loading-sm" />
             ) : (
-              "Link"
+              <Trans>Link</Trans>
             )}
           </button>
         </div>

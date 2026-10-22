@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { useEffect, useState } from "react";
 
 export function EditTitleButton({
@@ -7,6 +8,7 @@ export function EditTitleButton({
   currentTitle: string;
   onSave: (newTitle: string) => Promise<void>;
 }) {
+  const { t } = useLingui();
   const [title, setTitle] = useState(currentTitle);
   const [isPending, setIsPending] = useState(false);
 
@@ -49,7 +51,7 @@ export function EditTitleButton({
         }}
         disabled={isPending}
         size={Math.max(title.length, 1)}
-        placeholder="Untitled"
+        placeholder={t`Untitled`}
         className="text-base-content placeholder:text-base-content/40 field-sizing-content max-w-full min-w-0 bg-transparent p-0 text-lg font-semibold outline-none disabled:opacity-50"
       />
       {isPending && (

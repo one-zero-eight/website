@@ -1,4 +1,5 @@
 import { cn } from "@/lib/ui/cn";
+import { Trans } from "@lingui/react/macro";
 import { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { EditorImageHandlers } from "@/components/editor/types";
@@ -27,7 +28,7 @@ export function DescriptionViewer({
   if (!jsonContent) {
     return (
       <div className={cn("text-base-content/50 italic", className)}>
-        No description available.
+        <Trans>No description available.</Trans>
       </div>
     );
   }
@@ -36,7 +37,9 @@ export function DescriptionViewer({
     <ErrorBoundary
       fallback={
         <div className={className}>
-          <i>Some error occurred</i>
+          <i>
+            <Trans>Some error occurred</Trans>
+          </i>
         </div>
       }
     >

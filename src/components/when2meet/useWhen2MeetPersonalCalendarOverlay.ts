@@ -1,4 +1,5 @@
 import { $schedule } from "@/api/schedule";
+import { useLingui } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { getPersonalCalendarIcsUrls } from "./utils/personal-calendar-urls.ts";
@@ -20,6 +21,7 @@ export function useWhen2MeetPersonalCalendarOverlay({
   allowedSlots?: Set<string>;
   enabled: boolean;
 }) {
+  const { t } = useLingui();
   const { data: eventsUser } = $schedule.useQuery(
     "get",
     "/users/me",
@@ -85,20 +87,30 @@ export function useWhen2MeetPersonalCalendarOverlay({
     staleTime: 5 * 60 * 1000,
   });
 
+  const busyLabel = t`Busy`;
+  const localizedCalendarEvents = useMemo(
+    () =>
+      calendarEvents.map((event) => ({
+        ...event,
+        title: event.title || busyLabel,
+      })),
+    [calendarEvents, busyLabel],
+  );
+
   const slotEvents = useMemo(
     () =>
       buildCalendarSlotOverlay(
-        calendarEvents,
+        localizedCalendarEvents,
         dateIds,
         timeSlots,
         allowedSlots,
       ),
-    [calendarEvents, dateIds, timeSlots, allowedSlots],
+    [localizedCalendarEvents, dateIds, timeSlots, allowedSlots],
   );
 
   const allDayEvents = useMemo(
-    () => buildCalendarAllDayOverlay(calendarEvents, dateIds),
-    [calendarEvents, dateIds],
+    () => buildCalendarAllDayOverlay(localizedCalendarEvents, dateIds),
+    [localizedCalendarEvents, dateIds],
   );
 
   return {

@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react/macro";
+import { useEffect, useState } from "react";
 import { SearchExample } from "./SearchExample";
 import SelectSourcesFilter from "./SelectSourcesFilter";
 import SearchIcon from "./icons/Search";
@@ -6,22 +8,16 @@ import AskIcon from "./icons/Ask";
 import ActIcon from "./icons/Act";
 import { PageActionButton } from "./PageActionButton";
 
-const searchQueryExamples = [
-  "Innopolis clubs",
-  "Innopolis University",
-  "Innopolis University courses",
-  "Innopolis University professors",
-  "Innopolis University events",
-];
+const searchQueryExampleMessages = [
+  msg`Innopolis clubs`,
+  msg`Innopolis University`,
+  msg`Innopolis University courses`,
+  msg`Innopolis University professors`,
+  msg`Innopolis University events`,
+] as const;
 
 type PageType = "search" | "ask" | "act";
 type Option = PageType[number];
-
-const contentMap: Record<PageType, string> = {
-  search: "Search",
-  ask: "Ask",
-  act: "Act",
-};
 
 const iconsMap: Record<Option, React.JSX.Element> = {
   search: <SearchIcon />,
@@ -46,7 +42,14 @@ export default function SearchField({
   pageType: PageType;
   setCurrentQuery?: (value: string) => void;
 }) {
+  const { i18n, t } = useLingui();
   const [text, setText] = useState(currentQuery);
+
+  const searchQueryExamples = searchQueryExampleMessages.map((message) =>
+    i18n._(message),
+  );
+  const pageActionLabel =
+    pageType === "ask" ? t`Ask` : pageType === "act" ? t`Act` : t`Search`;
 
   useEffect(() => {
     setText(currentQuery);
@@ -75,7 +78,7 @@ export default function SearchField({
             autoComplete="off"
             spellCheck={false}
             className="border-primary bg-base-100 caret-primary sm:rounded-field inset-0 h-10 resize-none rounded-l-lg border-2 border-r-0 pl-3 text-base outline-hidden sm:border-r-2 dark:text-white"
-            placeholder="Enter query..."
+            placeholder={t`Enter query...`}
             onChange={(e) => setText(e.target.value)}
             value={text}
             autoFocus={true}
@@ -98,7 +101,7 @@ export default function SearchField({
       </form>
       <div className="flex justify-between gap-4 md:min-w-0 md:basis-1/2">
         <PageActionButton
-          content={contentMap[pageType]}
+          content={pageActionLabel}
           onClick={handleSearch}
           icon={iconsMap[pageType]}
           border

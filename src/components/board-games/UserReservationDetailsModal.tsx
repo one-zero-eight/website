@@ -1,5 +1,8 @@
 import { $boardGames } from "@/api/board-games";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { msg } from "@lingui/core/macro";
+import type { MessageDescriptor } from "@lingui/core";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import {
   ReservationStatus,
   type SchemaReservation,
@@ -24,6 +27,7 @@ export function UserReservationDetailsModal({
   gameTitle?: string;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t, i18n } = useLingui();
   const queryClient = useQueryClient();
   const { showConfirm, showError, showSuccess } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -46,20 +50,28 @@ export function UserReservationDetailsModal({
     {
       onSuccess: () => {
         invalidateUserBoardGameQueries();
-        showSuccess("Reservation deleted", "Your reservation was removed.");
+        showSuccess(
+          msg`Reservation deleted`,
+          msg`Your reservation was removed.`,
+        );
         onOpenChange(false);
       },
       onError: (error) => {
-        showError("Could not delete reservation", formatApiErrorMessage(error));
+        showError(
+          msg`Could not delete reservation`,
+          formatApiErrorDescriptor(error),
+        );
       },
     },
   );
 
   async function handleDelete() {
     const confirmed = await showConfirm({
-      title: "Delete reservation",
-      message: `Delete your reservation for ${gameTitle ?? "this game"}? This action cannot be undone.`,
-      confirmText: "Delete reservation",
+      title: msg`Delete reservation`,
+      message: gameTitle
+        ? msg`Delete your reservation for ${gameTitle}? This action cannot be undone.`
+        : msg`Delete this reservation? This action cannot be undone.`,
+      confirmText: msg`Delete reservation`,
       type: "error",
     });
     if (!confirmed) return;
@@ -72,40 +84,43 @@ export function UserReservationDetailsModal({
       <Modal
         open
         onOpenChange={onOpenChange}
-        title="Reservation information"
+        title={t`Reservation information`}
         containerClassName={boardGamesModalClassName}
         closeOnOutsidePress={!deleteMutation.isPending}
       >
         <div className="grid grid-cols-1 gap-x-6 gap-y-4 @sm/modal:grid-cols-2">
           {gameTitle && (
-            <InformationField label="Game" className="@sm/modal:col-span-2">
+            <InformationField label={t`Game`} className="@sm/modal:col-span-2">
               {gameTitle}
             </InformationField>
           )}
-          <InformationField label="Status">
+          <InformationField label={t`Status`}>
             <ReservationStatusBadge status={reservation.status} />
           </InformationField>
-          <InformationField label="Telegram alias">
-            {telegram ? `@${telegram}` : "Not provided"}
+          <InformationField label={t`Telegram alias`}>
+            {telegram ? `@${telegram}` : t`Not provided`}
           </InformationField>
-          <InformationField label="Return date">
-            {reservation.return_date || "Not provided"}
+          <InformationField label={t`Return date`}>
+            {reservation.return_date || t`Not provided`}
           </InformationField>
-          <InformationField label="Created at">
-            {new Date(reservation.created_at).toLocaleString()}
+          <InformationField label={t`Created at`}>
+            {new Date(reservation.created_at).toLocaleString(i18n.locale)}
           </InformationField>
           <InformationField
-            label="When available"
+            label={t`When available`}
             className="@sm/modal:col-span-2"
           >
-            {reservation.when_available || "Not provided"}
+            {reservation.when_available || t`Not provided`}
           </InformationField>
-          <InformationField label="Comments" className="@sm/modal:col-span-2">
-            {reservation.comments || "Not provided"}
+          <InformationField
+            label={t`Comments`}
+            className="@sm/modal:col-span-2"
+          >
+            {reservation.comments || t`Not provided`}
           </InformationField>
           {reservation.borrower_name && (
             <InformationField
-              label="Borrower name"
+              label={t`Borrower name`}
               className="@sm/modal:col-span-2"
             >
               {reservation.borrower_name}
@@ -126,7 +141,7 @@ export function UserReservationDetailsModal({
               ) : (
                 <span className="icon-[material-symbols--delete-outline] text-xl" />
               )}
-              Delete
+              <Trans>Delete</Trans>
             </button>
             <button
               type="button"
@@ -135,7 +150,7 @@ export function UserReservationDetailsModal({
               disabled={deleteMutation.isPending}
             >
               <span className="icon-[material-symbols--edit-outline] text-xl" />
-              Edit
+              <Trans>Edit</Trans>
             </button>
           </div>
         )}
@@ -165,6 +180,7 @@ function EditReservationModal({
   reservation: SchemaReservation;
   onSuccess: () => void;
 }) {
+  const { t } = useLingui();
   const { showError, showSuccess } = useToast();
   const [telegramAlias, setTelegramAlias] = useState(
     reservation.tg_alias ?? "",
@@ -183,11 +199,17 @@ function EditReservationModal({
     "/users/me/reservations/{id}",
     {
       onSuccess: () => {
-        showSuccess("Reservation updated", "Your changes have been saved.");
+        showSuccess(
+          msg`Reservation updated`,
+          msg`Your changes have been saved.`,
+        );
         onSuccess();
       },
       onError: (error) => {
-        showError("Could not update reservation", formatApiErrorMessage(error));
+        showError(
+          msg`Could not update reservation`,
+          formatApiErrorDescriptor(error),
+        );
       },
     },
   );
@@ -226,7 +248,7 @@ function EditReservationModal({
     <Modal
       open={open}
       onOpenChange={handleOpenChange}
-      title="Edit reservation"
+      title={t`Edit reservation`}
       containerClassName={boardGamesModalClassName}
       closeOnOutsidePress={!mutation.isPending}
     >
@@ -250,7 +272,7 @@ function EditReservationModal({
             onClick={() => handleOpenChange(false)}
             disabled={mutation.isPending}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="submit"
@@ -260,7 +282,7 @@ function EditReservationModal({
             {mutation.isPending && (
               <span className="loading loading-spinner loading-sm" />
             )}
-            Save changes
+            <Trans>Save changes</Trans>
           </button>
         </div>
       </form>
@@ -289,19 +311,22 @@ export function ReservationFormFields({
   comments: string;
   onCommentsChange: (value: string) => void;
   disabled: boolean;
-  validationError?: string | null;
+  validationError?: MessageDescriptor | null;
 }) {
+  const { t, i18n } = useLingui();
   return (
     <>
       {validationError && (
         <div className="alert alert-error py-2 text-sm">
           <span className="icon-[material-symbols--error-outline] shrink-0 text-xl" />
-          <span>{validationError}</span>
+          <span>{i18n._(validationError)}</span>
         </div>
       )}
       <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-2">
         <label className="fieldset">
-          <span className="fieldset-legend">Telegram alias*</span>
+          <span className="fieldset-legend">
+            <Trans>Telegram alias*</Trans>
+          </span>
           <input
             type="text"
             className="input w-full"
@@ -313,7 +338,9 @@ export function ReservationFormFields({
           />
         </label>
         <label className="fieldset">
-          <span className="fieldset-legend">Return date*</span>
+          <span className="fieldset-legend">
+            <Trans>Return date*</Trans>
+          </span>
           <input
             type="date"
             className="input w-full"
@@ -325,23 +352,27 @@ export function ReservationFormFields({
         </label>
       </div>
       <label className="fieldset">
-        <span className="fieldset-legend">When available</span>
+        <span className="fieldset-legend">
+          <Trans>When available</Trans>
+        </span>
         <input
           type="text"
           className="input w-full"
           value={whenAvailable}
           onChange={(event) => onWhenAvailableChange(event.target.value)}
-          placeholder="Preferred pickup time"
+          placeholder={t`Preferred pickup time`}
           disabled={disabled}
         />
       </label>
       <label className="fieldset">
-        <span className="fieldset-legend">Comments</span>
+        <span className="fieldset-legend">
+          <Trans>Comments</Trans>
+        </span>
         <textarea
           className="textarea min-h-24 w-full resize-y"
           value={comments}
           onChange={(event) => onCommentsChange(event.target.value)}
-          placeholder="Additional information"
+          placeholder={t`Additional information`}
           disabled={disabled}
         />
       </label>
@@ -353,12 +384,14 @@ export function getReservationValidationError(
   telegramAlias: string,
   returnDate: string,
 ) {
-  const missingFields = [
-    !telegramAlias.trim() && "Telegram alias",
-    !returnDate && "return date",
-  ].filter(Boolean);
-
-  if (missingFields.length === 0) return null;
-  if (missingFields.length === 1) return `${missingFields[0]} is required.`;
-  return "Telegram alias and return date are required.";
+  if (!telegramAlias.trim() && !returnDate) {
+    return msg`Telegram alias and return date are required.`;
+  }
+  if (!telegramAlias.trim()) {
+    return msg`Telegram alias is required.`;
+  }
+  if (!returnDate) {
+    return msg`Return date is required.`;
+  }
+  return null;
 }

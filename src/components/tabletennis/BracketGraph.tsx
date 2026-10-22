@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { useLingui as useLinguiRuntime } from "@lingui/react";
 import { cn } from "@/lib/ui/cn";
 import {
   type BracketMatch,
@@ -141,6 +142,7 @@ export function BracketGraph({
     style: React.CSSProperties,
   ) => React.ReactNode;
 }) {
+  useLinguiRuntime();
   const rounds = section.matchIds.map((ids) =>
     ids.map((id) => matches.get(id)!),
   );

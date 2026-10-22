@@ -6,6 +6,8 @@ import {
 import { parseIcsHostDescription } from "@/components/events/utils/host";
 import { extractEventIdFromUrl } from "@/components/events/utils/links";
 import { LocationLink } from "@/components/events/shared/LocationLink";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
 import {
   autoUpdate,
   flip,
@@ -37,6 +39,7 @@ export function CalendarEventPopover({
   setIsOpen,
   eventElement,
 }: ScheduleDialogProps) {
+  const { i18n } = useLingui();
   const eventId = extractEventIdFromUrl(event.url);
   const icsHosts = parseIcsHostDescription(
     event.extendedProps?.description as string | undefined,
@@ -87,7 +90,9 @@ export function CalendarEventPopover({
   const resolvedLocation = eventData?.data.location;
   const icsLocation = event.extendedProps?.location as string | undefined;
   const locations =
-    !isEventFromEvents && icsLocation ? icsLocation.split("/") : undefined;
+    !isEventFromEvents && icsLocation
+      ? icsLocation.split("/").map((part) => part.trim())
+      : undefined;
   const hosts = eventData?.data.hosts;
   const showHosts = (hosts && hosts.length > 0) || icsHosts.length > 0;
   const showRawDescription =
@@ -125,9 +130,13 @@ export function CalendarEventPopover({
                 </div>
                 <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
                   {!event.allDay
-                    ? moment(event.startStr).format("dddd, D MMMM; HH:mm—") +
+                    ? moment(event.startStr)
+                        .locale(i18n.locale)
+                        .format("dddd, D MMMM; HH:mm—") +
                       moment(event.endStr).format("HH:mm")
-                    : moment(event.startStr).format("dddd, D MMMM")}
+                    : moment(event.startStr)
+                        .locale(i18n.locale)
+                        .format("dddd, D MMMM")}
                 </p>
               </div>
 
@@ -239,7 +248,7 @@ export function CalendarEventPopover({
                     className="flex w-full py-1 underline underline-offset-2"
                     onClick={() => setIsOpen(false)}
                   >
-                    Open event page
+                    <Trans>Open event page</Trans>
                   </Link>
                 </div>
               )}
@@ -250,10 +259,12 @@ export function CalendarEventPopover({
                     <span className="icon-[material-symbols--update] text-2xl" />
                   </div>
                   <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
-                    Calendar updated at:{" "}
-                    {moment(event.extendedProps.updatedAt).format(
-                      "DD.MM HH:mm",
-                    )}
+                    <Trans>
+                      Calendar updated at:{" "}
+                      {moment(event.extendedProps.updatedAt).format(
+                        "DD.MM HH:mm",
+                      )}
+                    </Trans>
                   </p>
                 </div>
               )}
@@ -267,7 +278,7 @@ export function CalendarEventPopover({
                     target="_blank"
                     className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap underline underline-offset-2"
                   >
-                    Go to source
+                    <Trans>Go to source</Trans>
                   </a>
                 </div>
               )}

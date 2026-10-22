@@ -1,6 +1,6 @@
+import { useLingui } from "@lingui/react/macro";
 import { $maps } from "@/api/maps";
 import { cn } from "@/lib/ui/cn";
-import { useLingui } from "@lingui/react/macro";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 

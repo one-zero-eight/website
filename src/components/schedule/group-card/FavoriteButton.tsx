@@ -3,8 +3,10 @@ import { SignInModal } from "@/components/account/SignInModal.tsx";
 import Tooltip from "@/components/common/Tooltip";
 import { useEventGroup } from "@/api/schedule/event-group.ts";
 import { useState } from "react";
+import { useLingui } from "@lingui/react/macro";
 
 export default function FavoriteButton({ groupAlias }: { groupAlias: string }) {
+  const { t } = useLingui();
   const { switchFavorite, isFavorite, isPredefined } =
     useEventGroup(groupAlias);
   const { me } = useMe();
@@ -15,10 +17,10 @@ export default function FavoriteButton({ groupAlias }: { groupAlias: string }) {
       <Tooltip
         content={
           isPredefined
-            ? "Your group from official lists"
+            ? t`Your group from official lists`
             : isFavorite
-              ? "In favorites"
-              : "Add to favorites"
+              ? t`In favorites`
+              : t`Add to favorites`
         }
       >
         <button

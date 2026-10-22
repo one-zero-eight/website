@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useMe } from "@/api/accounts/user.ts";
 import { $guard } from "@/api/guard";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/guard/google/files/$slug/join")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { slug } = Route.useParams();
   const { me } = useMe();
   const [gmail, setGmail] = useState("");
@@ -68,7 +70,7 @@ function RouteComponent() {
     return (
       <>
         <Helmet>
-          <title>Sign In - Join InNoHassle Guard File</title>
+          <title>{t`Sign In - Join InNoHassle Guard File`}</title>
           <meta name="robots" content="noindex, follow" />
         </Helmet>
         <div className="flex h-full items-center justify-center">
@@ -81,21 +83,25 @@ function RouteComponent() {
   return (
     <div className="flex grow items-center justify-center p-5">
       <Helmet>
-        <title>Join InNoHassle Guard File</title>
+        <title>{t`Join InNoHassle Guard File`}</title>
         <meta name="robots" content="noindex, follow" />
       </Helmet>
       <div className="bg-base-200 rounded-box w-full max-w-xl p-8 sm:p-10">
         <h1 className="mb-2 text-center text-3xl font-bold">
-          Join InNoHassle Guard File
+          <Trans>Join InNoHassle Guard File</Trans>
         </h1>
         <p className="text-base-content/70 mb-8 text-center text-sm">
-          Enter your Gmail address to get access to the Google Spreadsheet
+          <Trans>
+            Enter your Gmail address to get access to the Google Spreadsheet
+          </Trans>
         </p>
 
         {!isSuccess ? (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <fieldset className="fieldset">
-              <legend className="fieldset-legend">Gmail Address</legend>
+              <legend className="fieldset-legend">
+                <Trans>Gmail address</Trans>
+              </legend>
               <input
                 type="email"
                 id="gmail"
@@ -117,10 +123,10 @@ function RouteComponent() {
               {isPending ? (
                 <>
                   <span className="loading loading-spinner loading-sm" />
-                  Adding you to the file...
+                  <Trans>Adding you to the file...</Trans>
                 </>
               ) : (
-                "Join File"
+                <Trans>Join file</Trans>
               )}
             </button>
           </form>
@@ -129,13 +135,19 @@ function RouteComponent() {
         {isSuccess && (
           <div className="alert alert-success alert-soft mt-5">
             <div className="w-full text-center">
-              <p className="font-semibold">Success!</p>
+              <p className="font-semibold">
+                <Trans>Success!</Trans>
+              </p>
               <p className="mt-1">
-                <strong>{gmail}</strong> has been added to the spreadsheet.
+                <Trans>
+                  <strong>{gmail}</strong> has been added to the spreadsheet.
+                </Trans>
               </p>
               <p className="mt-3">
-                Redirecting to spreadsheet in{" "}
-                <strong className="text-xl">{countdown}</strong> seconds...
+                <Trans>
+                  Redirecting to spreadsheet in{" "}
+                  <strong className="text-xl">{countdown}</strong> seconds...
+                </Trans>
               </p>
             </div>
           </div>
@@ -144,7 +156,10 @@ function RouteComponent() {
         {error && (
           <div className="alert alert-error alert-soft mt-5">
             <span>
-              <strong>Error:</strong> {errorMessage}
+              <strong>
+                <Trans>Error:</Trans>
+              </strong>{" "}
+              {errorMessage}
             </span>
           </div>
         )}

@@ -1,4 +1,6 @@
 import { $printers } from "@/api/printers";
+import { type MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
 import {
   getPrintSessionState,
   setPrintSessionState,
@@ -8,7 +10,10 @@ import {
 import { useCallback, useSyncExternalStore } from "react";
 
 export function usePrintSession(
-  showPopupWithExceptionDetail: (prefix: string, exception: unknown) => void,
+  showPopupWithExceptionDetail: (
+    prefix: MessageDescriptor,
+    exception: unknown,
+  ) => void,
 ) {
   const session = useSyncExternalStore(
     subscribePrintSession,
@@ -43,7 +48,10 @@ export function usePrintSession(
       });
       return preparationResponse.filename;
     } catch (exception: unknown) {
-      showPopupWithExceptionDetail("Documents processing problem", exception);
+      showPopupWithExceptionDetail(
+        msg`Documents processing problem`,
+        exception,
+      );
       throw exception;
     }
   }
@@ -65,7 +73,10 @@ export function usePrintSession(
         fileBlob: URL.createObjectURL(newFile),
       });
     } catch (exception: unknown) {
-      showPopupWithExceptionDetail("Documents processing problem", exception);
+      showPopupWithExceptionDetail(
+        msg`Documents processing problem`,
+        exception,
+      );
       throw exception;
     }
   }

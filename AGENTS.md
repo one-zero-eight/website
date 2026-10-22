@@ -270,6 +270,7 @@ If user asks you to find a suitable icon, use the following instruction:
 
 - Locale `en` is default and is used in source code. `ru` is translated in `src/locales/ru.po`.
 - Macros: JSX from `@lingui/react/macro` (`Trans`, `useLingui` / `t`); JS/`msg` from `@lingui/core/macro`.
+- Prefer `Trans` or `t` for strings; use `msg` only for deferred translation (e.g. constants outside components).
 - Runtime helpers: `@/locales/lib` (`useAppLocale`, `getLocaleLabel`).
 - On new pages use i18n. When the English and Russian texts should match, do not split msgid into several.
 - Do not i18n sidebar `menu-links` titles (use plain English strings). Do not i18n raw API content.

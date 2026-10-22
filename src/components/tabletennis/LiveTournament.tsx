@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { keepPreviousData } from "@tanstack/react-query";
 import { cn } from "@/lib/ui/cn";
 import { $tabletennis } from "@/api/tabletennis";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { Modal } from "@/components/common/Modal.tsx";
 import { ValidationMatches } from "./ValidationMatches";
@@ -63,6 +65,7 @@ export function LiveTournament({
   onDeleted: () => void;
   onChanged: () => Promise<void>;
 }) {
+  const { t, i18n } = useLingui();
   const [showAddPlayers, setShowAddPlayers] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const addField = usePlayersField(allPlayers);
@@ -93,7 +96,8 @@ export function LiveTournament({
     "/finish-tour",
     {
       onSuccess: onFinished,
-      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+      onError: (error) =>
+        showError(msg`Error`, formatApiErrorDescriptor(error)),
     },
   );
 
@@ -107,14 +111,17 @@ export function LiveTournament({
       onError: (error) => {
         const failed = failedPlayersOf(error);
         if (failed) addField.applyFailed(failed);
-        else showError("Error", formatApiErrorMessage(error));
+        else showError(msg`Error`, formatApiErrorDescriptor(error));
       },
     });
 
   const { mutateAsync: changeQualTop } = $tabletennis.useMutation(
     "post",
     "/reg-tour/change-qual-top",
-    { onError: (error) => showError("Error", formatApiErrorMessage(error)) },
+    {
+      onError: (error) =>
+        showError(msg`Error`, formatApiErrorDescriptor(error)),
+    },
   );
 
   const tourPlayers = useMemo(() => {
@@ -177,7 +184,7 @@ export function LiveTournament({
         <div className="flex items-center gap-2 px-2 pt-3 pb-2">
           <button
             type="button"
-            aria-label="Back to tournaments"
+            aria-label={t`Back to tournaments`}
             onClick={onBack}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[#712BB2] hover:bg-[#712BB2]/10"
           >
@@ -186,8 +193,8 @@ export function LiveTournament({
           <div className="min-w-0 flex-1">
             <h2 className="truncate text-lg font-light">{tour.name}</h2>
             <p className="text-base-content/50 text-xs tabular-nums">
-              {tour.date && `${formatDay(tour.date)} · `}
-              {tour.players.length} players
+              {tour.date && `${formatDay(tour.date, i18n.locale)} · `}
+              <Trans>{tour.players.length} players</Trans>
             </p>
           </div>
           {isAdmin && !groupsLocked && (
@@ -196,7 +203,7 @@ export function LiveTournament({
               className="border-base-content/30 text-base-content/70 hover:bg-base-content/10 h-10 shrink-0 rounded-xl border px-3 text-xs transition-colors"
               onClick={() => setShowAddPlayers((v) => !v)}
             >
-              Add players
+              <Trans>Add players</Trans>
             </button>
           )}
           {isAdmin && canDelete && (
@@ -212,7 +219,7 @@ export function LiveTournament({
               {finishing ? (
                 <span className="loading loading-spinner loading-sm" />
               ) : (
-                "End"
+                <Trans>End</Trans>
               )}
             </button>
           )}
@@ -231,7 +238,11 @@ export function LiveTournament({
               )}
               onClick={() => onStageChange(s)}
             >
-              {s === "validation" ? "Validation" : "Qualification"}
+              {s === "validation" ? (
+                <Trans>Validation</Trans>
+              ) : (
+                <Trans>Qualification</Trans>
+              )}
             </button>
           ))}
         </div>
@@ -248,7 +259,7 @@ export function LiveTournament({
                   addField.reset();
                 }}
               >
-                Cancel
+                <Trans>Cancel</Trans>
               </button>
               <button
                 type="button"
@@ -266,7 +277,7 @@ export function LiveTournament({
                 {addingPlayers ? (
                   <span className="loading loading-spinner loading-sm" />
                 ) : (
-                  "Add"
+                  <Trans>Add</Trans>
                 )}
               </button>
             </div>
@@ -307,23 +318,29 @@ export function LiveTournament({
       <Modal
         open={showEndConfirm}
         onOpenChange={setShowEndConfirm}
-        title="Finish tournament"
+        title={t`Finish tournament`}
       >
         <p className="text-base-content/80">
-          Are you sure you want to finish <strong>{tour.name}</strong>? It can
-          be reopened from the archive later.
+          <Trans>
+            Are you sure you want to finish <strong>{tour.name}</strong>? It can
+            be reopened from the archive later.
+          </Trans>
         </p>
         {!qualProgress && (
           <p className="mt-3 rounded-xl border border-[#712BB2]/40 bg-[#712BB2]/10 px-3 py-2 text-sm">
-            Qualification has not started, no final standings will be saved.
+            <Trans>
+              Qualification has not started, no final standings will be saved.
+            </Trans>
           </p>
         )}
         {qualProgress && !qualProgress.bracket.complete && (
           <p className="mt-3 rounded-xl border border-[#712BB2]/40 bg-[#712BB2]/10 px-3 py-2 text-sm">
-            Qualification is not finished: {qualProgress.left} match
-            {qualProgress.left === 1 ? "" : "es"} left. Only the places decided
-            so far ({qualProgress.bracket.places.length} of {seeding.length})
-            will be saved, and no bonuses are granted.
+            <Trans>
+              Qualification is not finished. Matches left: {qualProgress.left}.
+              Only the places decided so far (
+              {qualProgress.bracket.places.length} of {seeding.length}) will be
+              saved, and no bonuses are granted.
+            </Trans>
           </p>
         )}
         <div className="mt-4 flex justify-end gap-2">
@@ -332,7 +349,7 @@ export function LiveTournament({
             className="btn btn-ghost"
             onClick={() => setShowEndConfirm(false)}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="button"
@@ -346,7 +363,7 @@ export function LiveTournament({
             {finishing ? (
               <span className="loading loading-spinner loading-sm" />
             ) : (
-              "Confirm"
+              <Trans>Confirm</Trans>
             )}
           </button>
         </div>
@@ -363,19 +380,20 @@ export function DeleteTourButton({
   tour: { id: string; name: string };
   onDeleted: () => void;
 }) {
+  const { t } = useLingui();
   const { showError, showConfirm } = useToast();
   const { mutateAsync: deleteTour, isPending } = $tabletennis.useMutation(
     "post",
     "/delete-tour",
-    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+    { onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)) },
   );
 
   async function handleDelete() {
     const ok = await showConfirm({
-      title: "Delete tournament",
-      message: `Delete ${tour.name}? No game has been played yet, so no rating changes. This cannot be undone.`,
-      confirmText: "Delete",
-      cancelText: "Keep",
+      title: msg`Delete tournament`,
+      message: msg`Delete ${tour.name}? No game has been played yet, so no rating changes. This cannot be undone.`,
+      confirmText: msg`Delete`,
+      cancelText: msg`Keep`,
       type: "warning",
     });
     if (!ok) return;
@@ -390,7 +408,7 @@ export function DeleteTourButton({
   return (
     <button
       type="button"
-      aria-label="Delete tournament"
+      aria-label={t`Delete tournament`}
       disabled={isPending}
       onClick={handleDelete}
       className="text-error hover:bg-error/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors disabled:opacity-40"

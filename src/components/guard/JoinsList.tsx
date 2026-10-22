@@ -1,4 +1,6 @@
 import { useToast } from "@/components/toast";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 import { useMemo, useState } from "react";
 import { FileRole } from "./hooks";
@@ -32,8 +34,12 @@ export function JoinsList({
     return (
       <div className="bg-base-200/50 text-base-content/60 rounded-box flex flex-col items-center gap-2 px-4 py-10 text-center">
         <span className="icon-[material-symbols--group-outline-rounded] text-3xl" />
-        <p>No one has joined yet</p>
-        <p className="text-sm">Share the join link to grant access</p>
+        <p>
+          <Trans>No one has joined yet</Trans>
+        </p>
+        <p className="text-sm">
+          <Trans>Share the join link to grant access</Trans>
+        </p>
       </div>
     );
   }
@@ -41,7 +47,7 @@ export function JoinsList({
   if (filtered.length === 0) {
     return (
       <p className="text-base-content/60 py-6 text-center text-sm">
-        No joins match your search
+        <Trans>No joins match your search</Trans>
       </p>
     );
   }
@@ -130,7 +136,7 @@ export function RolesSwitch({
         onClick={() => handleSwitch(FileRole.writer)}
         disabled={pending}
       >
-        Writer
+        <Trans>Writer</Trans>
       </button>
       <button
         type="button"
@@ -141,7 +147,7 @@ export function RolesSwitch({
         onClick={() => handleSwitch(FileRole.reader)}
         disabled={pending}
       >
-        Reader
+        <Trans>Reader</Trans>
       </button>
     </div>
   );
@@ -154,15 +160,16 @@ function BanButton({
   onClick: () => Promise<void>;
   email: string;
 }) {
+  const { t } = useLingui();
   const { showConfirm } = useToast();
   const [pending, setPending] = useState(false);
 
   const handleClick = async () => {
     const confirmed = await showConfirm({
-      title: "Ban user",
-      message: `Ban ${email}? They will lose access to this sheet and will not be able to join again until unbanned.`,
-      confirmText: "Ban",
-      cancelText: "Cancel",
+      title: msg`Ban user`,
+      message: msg`Ban ${email}? They will lose access to this sheet and will not be able to join again until unbanned.`,
+      confirmText: msg`Ban`,
+      cancelText: msg`Cancel`,
       type: "error",
     });
     if (!confirmed) return;
@@ -181,6 +188,7 @@ function BanButton({
       onClick={handleClick}
       disabled={pending}
       className="btn btn-ghost btn-error btn-sm btn-square"
+      title={t`Ban user`}
     >
       {pending ? (
         <span className="loading loading-spinner loading-sm" />

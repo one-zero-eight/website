@@ -1,4 +1,5 @@
 import { $boardGames } from "@/api/board-games";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { type SchemaReservation } from "@/api/board-games/types.ts";
 import {
   byCreatedAtDesc,
@@ -15,6 +16,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
+  const { t } = useLingui();
   const navigate = useNavigate();
   const reservationsQuery = $boardGames.useQuery("get", "/admin/reservations", {
     params: { query: { how: "all" } },
@@ -69,11 +71,13 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
     }
     return true;
   });
+  const visibleReservationCount = filteredReservations.length;
+  const reservationCount = reservations.length;
   const hasFilters = Boolean(
     gameId || telegramQuery || gameQuery || createdFrom || createdTo,
   );
   const selectedGameTitle = gameId
-    ? (gameTitles.get(gameId) ?? "Unknown game")
+    ? (gameTitles.get(gameId) ?? t`Unknown game`)
     : null;
 
   function handleClearFilters() {
@@ -100,18 +104,20 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
     <main className="@container/content mx-auto flex w-full max-w-6xl flex-col gap-5 p-4 @md/content:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">All reservations</h1>
+          <h1 className="text-2xl font-semibold">
+            <Trans>All reservations</Trans>
+          </h1>
           {!reservationsQuery.isPending && !reservationsQuery.error && (
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
               {hasFilters
-                ? `${filteredReservations.length} of ${reservations.length} reservations`
-                : `${reservations.length} reservations`}
+                ? t`Reservations: ${visibleReservationCount} of ${reservationCount}`
+                : t`Reservations: ${reservationCount}`}
             </p>
           )}
         </div>
         <Link to="/board-games/admin" className="btn btn-ghost btn-sm">
           <span className="icon-[material-symbols--arrow-back] text-lg" />
-          Board games admin
+          <Trans>Board games admin</Trans>
         </Link>
       </div>
 
@@ -120,7 +126,7 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
           {selectedGameTitle && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm text-neutral-500 dark:text-neutral-400">
-                Game filter:
+                <Trans>Game filter:</Trans>
               </span>
               <span className="badge badge-primary badge-outline gap-1">
                 {selectedGameTitle}
@@ -128,7 +134,7 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
                   type="button"
                   className="flex items-center"
                   onClick={handleClearGameFilter}
-                  title="Clear game filter"
+                  title={t`Clear game filter`}
                 >
                   <span className="icon-[material-symbols--close] text-base" />
                 </button>
@@ -139,20 +145,22 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
             <SearchInput
               value={gameQuery}
               onValueChange={setGameQuery}
-              placeholder="Search by game name"
+              placeholder={t`Search by game name`}
               disabled={gamesQuery.isPending || Boolean(gamesQuery.error)}
             />
             <SearchInput
               value={telegramQuery}
               onValueChange={setTelegramQuery}
-              placeholder="Search by Telegram alias"
+              placeholder={t`Search by Telegram alias`}
               iconClassName="icon-[mdi--telegram]"
             />
           </div>
 
           <div className="flex flex-col gap-3 @md/content:flex-row @md/content:items-end">
             <label className="fieldset grow">
-              <span className="fieldset-legend">Created from</span>
+              <span className="fieldset-legend">
+                <Trans>Created from</Trans>
+              </span>
               <input
                 type="date"
                 className="input w-full"
@@ -162,7 +170,9 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
               />
             </label>
             <label className="fieldset grow">
-              <span className="fieldset-legend">Created to</span>
+              <span className="fieldset-legend">
+                <Trans>Created to</Trans>
+              </span>
               <input
                 type="date"
                 className="input w-full"
@@ -178,7 +188,7 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
                 onClick={handleClearFilters}
               >
                 <span className="icon-[material-symbols--filter-alt-off-outline] text-xl" />
-                Clear filters
+                <Trans>Clear filters</Trans>
               </button>
             )}
           </div>
@@ -187,19 +197,19 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
 
       {Boolean(gamesQuery.error) && (
         <QueryError
-          title="Could not load game names"
+          title={t`Could not load game names`}
           error={gamesQuery.error}
         />
       )}
       <ListState
         isPending={reservationsQuery.isPending}
         error={reservationsQuery.error}
-        errorTitle="Could not load reservations"
+        errorTitle={t`Could not load reservations`}
         emptyMessage={
           reservations.length === 0
-            ? "There are no reservations yet."
+            ? t`There are no reservations yet.`
             : filteredReservations.length === 0
-              ? "No reservations match these filters."
+              ? t`No reservations match these filters.`
               : undefined
         }
         pending={
@@ -241,6 +251,8 @@ function ReservationResult({
   gameTitle?: string;
   onView: () => void;
 }) {
+  const { t, i18n } = useLingui();
+  const returnDate = reservation.return_date;
   const telegram = telegramHandle(reservation.tg_alias);
 
   return (
@@ -252,10 +264,10 @@ function ReservationResult({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="card-title truncate text-base">
-              {gameTitle ?? "Unknown game"}
+              {gameTitle ?? t`Unknown game`}
             </h2>
             <p className="text-sm text-neutral-500 dark:text-neutral-200">
-              {new Date(reservation.created_at).toLocaleString()}
+              {new Date(reservation.created_at).toLocaleString(i18n.locale)}
             </p>
           </div>
           <ReservationStatusBadge status={reservation.status} />
@@ -275,7 +287,9 @@ function ReservationResult({
                 @{telegram}
               </a>
             ) : (
-              <span className="text-neutral-400">Telegram not provided</span>
+              <span className="text-neutral-400">
+                <Trans>Telegram not provided</Trans>
+              </span>
             )}
           </div>
           <div className="flex min-w-0 items-center gap-2">
@@ -292,10 +306,10 @@ function ReservationResult({
             <div className="flex min-w-0 items-center gap-2">
               <span className="icon-[material-symbols--event-outline] text-primary shrink-0 text-xl" />
               <span>
-                Return by{" "}
-                <span className="text-neutral-400">
-                  {reservation.return_date}
-                </span>
+                <Trans>
+                  Return by{" "}
+                  <span className="text-neutral-400">{returnDate}</span>
+                </Trans>
               </span>
             </div>
           )}

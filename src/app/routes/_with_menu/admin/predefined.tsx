@@ -4,17 +4,18 @@ import { RequireInnohassleAdmin } from "@/components/admin/RequireInnohassleAdmi
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/admin/predefined")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   return (
     <>
       <Helmet>
-        <title>Predefined groups</title>
+        <title>{t`Predefined groups`}</title>
         <meta name="robots" content="noindex, follow" />
       </Helmet>
 

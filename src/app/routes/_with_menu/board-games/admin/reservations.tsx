@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { ReservationsAdminPage } from "@/components/board-games/ReservationsAdminPage.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
@@ -12,15 +13,16 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { gameId } = Route.useSearch();
 
   return (
     <>
       <Helmet>
-        <title>Board game reservations</title>
+        <title>{t`Board game reservations`}</title>
         <meta
           name="description"
-          content="Search and review all board game reservations."
+          content={t`Search and review all board game reservations.`}
         />
       </Helmet>
       <ReservationsAdminPage gameId={gameId} />

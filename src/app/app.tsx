@@ -1,3 +1,4 @@
+import "@/locales/lib";
 import { useMe } from "@/api/accounts/user.ts";
 import { AppUpdatePrompt } from "@/app/AppUpdatePrompt.tsx";
 import { AuthManager } from "@/api/helpers/AuthManager.tsx";

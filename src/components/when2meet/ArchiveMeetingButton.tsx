@@ -1,5 +1,7 @@
 import { $when2meet, type when2meetTypes } from "@/api/when2meet";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { msg } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 
 export function ArchiveMeetingButton({
@@ -21,20 +23,21 @@ export function ArchiveMeetingButton({
       onSuccess: (meeting) => {
         onMeetingUpdated(meeting);
         showSuccess(
-          "Meeting archived",
-          `"${meetingName}" was moved to the archive.`,
+          msg`Meeting archived`,
+          msg`"${meetingName}" was moved to the archive.`,
         );
       },
-      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+      onError: (error) =>
+        showError(msg`Error`, formatApiErrorDescriptor(error)),
     },
   );
 
   async function handleArchive() {
     const confirmed = await showConfirm({
-      title: "Archive meeting",
-      message: `Archive "${meetingName}"? Participants will still be able to view it, but changes will no longer be allowed.`,
-      confirmText: "Archive",
-      cancelText: "Cancel",
+      title: msg`Archive meeting`,
+      message: msg`Archive "${meetingName}"? Participants will still be able to view it, but changes will no longer be allowed.`,
+      confirmText: msg`Archive`,
+      cancelText: msg`Cancel`,
       type: "warning",
     });
     if (!confirmed) {
@@ -55,7 +58,7 @@ export function ArchiveMeetingButton({
       ) : (
         <span className="icon-[mdi--archive-outline] text-lg" />
       )}
-      Archive event
+      <Trans>Archive event</Trans>
     </button>
   );
 }

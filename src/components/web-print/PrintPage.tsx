@@ -1,4 +1,8 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { msg, plural } from "@lingui/core/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { Trans as LocalizedMessage } from "@lingui/react";
+import { type MessageDescriptor } from "@lingui/core";
 import { $printers } from "@/api/printers";
 import { Modal } from "@/components/common/Modal.tsx";
 import {
@@ -34,31 +38,26 @@ import {
   type ReactNode,
 } from "react";
 
-const PRINTER_MAP_LINKS: Record<
-  string,
-  { scene: string; area: string; label: string }
-> = {
-  "319": {
-    scene: "university-floor-3",
-    area: "printer-319",
-    label: "Show 319 on map",
-  },
-  "vk-zone": {
-    scene: "university-floor-5",
-    area: "printer-5f",
-    label: "Show VK Zone on map",
-  },
-};
-
 function resolvePrinterMapLink(cupsName: string, displayName?: string) {
   const haystack = `${cupsName} ${displayName ?? ""}`.toLowerCase();
-  if (haystack.includes("319")) return PRINTER_MAP_LINKS["319"];
+  if (haystack.includes("319")) {
+    return {
+      scene: "university-floor-3",
+      area: "printer-319",
+      label: msg`Show 319 on map`,
+    };
+  }
   if (
     haystack.includes("vk") ||
     haystack.includes("5f") ||
     haystack.includes("5-f")
-  )
-    return PRINTER_MAP_LINKS["vk-zone"];
+  ) {
+    return {
+      scene: "university-floor-5",
+      area: "printer-5f",
+      label: msg`Show VK Zone on map`,
+    };
+  }
   return null;
 }
 
@@ -69,10 +68,30 @@ export function PrintPage() {
     useState<HTMLDivElement | null>(null);
   const filePickerRef = useRef<HTMLInputElement>(null);
 
-  function showPopupWithExceptionDetail(prefix: string, exception: unknown) {
+  const { t } = useLingui();
+
+  function showPopupWithExceptionDetail(
+    prefix: MessageDescriptor,
+    exception: unknown,
+  ) {
+    const errorMessage = formatApiErrorDescriptor(exception);
     setAlert(
       <p>
-        {prefix}: {formatApiErrorMessage(exception)}
+        <LocalizedMessage
+          id={prefix.id}
+          message={prefix.message}
+          values={prefix.values}
+        />
+        :{" "}
+        {typeof errorMessage === "string" ? (
+          errorMessage
+        ) : (
+          <LocalizedMessage
+            id={errorMessage.id}
+            message={errorMessage.message}
+            values={errorMessage.values}
+          />
+        )}
       </p>,
     );
   }
@@ -164,9 +183,11 @@ export function PrintPage() {
     ) {
       setPageRangesError(
         <>
-          <p>Incorrect page range format.</p>
+          <p>
+            <Trans>Incorrect page range format.</Trans>
+          </p>
           <p className="text-base-content/50 mt-2 text-sm">
-            Leave empty for all pages. Example: 1-5,8,16-20
+            <Trans>Leave empty for all pages. Example: 1-5,8,16-20</Trans>
           </p>
         </>,
       );
@@ -178,7 +199,11 @@ export function PrintPage() {
 
   const handleStartPrint = useCallback(async () => {
     if (!preparedFileName) {
-      setAlert(<p>There is no file to be printed!</p>);
+      setAlert(
+        <p>
+          <Trans>There is no file to be printed!</Trans>
+        </p>,
+      );
       return;
     }
     try {
@@ -205,7 +230,7 @@ export function PrintPage() {
         printResultPrinterName: undefined,
       });
     } catch (exception: unknown) {
-      showPopupWithExceptionDetail("Start problem", exception);
+      showPopupWithExceptionDetail(msg`Start problem`, exception);
     }
   }, [
     copiesCount,
@@ -301,8 +326,12 @@ export function PrintPage() {
       if (!shouldStopPrintJobPolling()) {
         setAlert(
           <>
-            <p className="font-bold">The job has timed out!</p>
-            <p>Probably, the printer is busy — try to reboot it.</p>
+            <p className="font-bold">
+              <Trans>The job has timed out!</Trans>
+            </p>
+            <p>
+              <Trans>Probably, the printer is busy — try to reboot it.</Trans>
+            </p>
           </>,
         );
       }
@@ -358,8 +387,10 @@ export function PrintPage() {
     if (value !== parsed) {
       setAlert(
         <p>
-          You can print at most <span className="font-bold">50 copies</span>{" "}
-          (and not less than 1).
+          <Trans>
+            You can print at most <span className="font-bold">50 copies</span>{" "}
+            (and not less than 1).
+          </Trans>
         </p>,
       );
     }
@@ -382,8 +413,8 @@ export function PrintPage() {
   const fileMeta = [
     previewPageCount
       ? preparedFilePagesCount && previewPageCount < preparedFilePagesCount
-        ? `${previewPageCount} of ${preparedFilePagesCount} pages`
-        : `${previewPageCount} page${previewPageCount !== 1 ? "s" : ""}`
+        ? t`${previewPageCount} of ${preparedFilePagesCount} pages`
+        : t`${plural(previewPageCount, { one: "# page", other: "# pages" })}`
       : null,
     preparedFile?.size ? formatFileSize(preparedFile.size) : null,
   ]
@@ -391,6 +422,12 @@ export function PrintPage() {
     .join(" · ");
 
   const selectedPrinterOffline = !!printerName && isPrinterOffline(printerName);
+
+  const printSheetsCount = actualPapersCount || 1;
+  const printButtonLabel = t`${plural(printSheetsCount, {
+    one: "Print # sheet",
+    other: "Print # sheets",
+  })}`;
 
   return (
     <>
@@ -405,14 +442,14 @@ export function PrintPage() {
             <div className="card-body flex flex-col gap-4">
               <h2 className="card-title shrink-0 text-base">
                 <span className="icon-[material-symbols--picture-as-pdf-rounded]" />
-                Preview
+                <Trans>Preview</Trans>
                 <div
                   ref={setPreviewToolbarHost}
                   className="ml-auto flex items-center"
                 >
                   {!fileBlob && !isFileProcessing && (
                     <span className="badge badge-ghost badge-sm font-normal">
-                      Required
+                      <Trans>Required</Trans>
                     </span>
                   )}
                 </div>
@@ -439,17 +476,17 @@ export function PrintPage() {
               <h2 className="card-title text-base">
                 <span className="icon-[material-symbols--print-rounded]" />
                 {printResultPrinterName
-                  ? "Print result"
+                  ? t`Print result`
                   : isPrinting
-                    ? "Printing"
-                    : "Print settings"}
+                    ? t`Printing`
+                    : t`Print settings`}
                 {printResultPrinterName && (
                   <button
                     type="button"
                     className="btn btn-ghost btn-sm ml-auto"
                     onClick={handleDismissPrintResult}
                   >
-                    Done
+                    <Trans>Done</Trans>
                   </button>
                 )}
               </h2>
@@ -457,13 +494,15 @@ export function PrintPage() {
               {isPrinting ? (
                 <div className="flex flex-col items-center gap-4 py-8">
                   <span className="loading loading-spinner loading-lg text-primary" />
-                  <p className="text-base-content/50">Printing in progress…</p>
+                  <p className="text-base-content/50">
+                    <Trans>Printing in progress…</Trans>
+                  </p>
                   <button
                     type="button"
                     className="btn btn-outline btn-sm"
                     onClick={handleCancelPrint}
                   >
-                    Cancel
+                    <Trans>Cancel</Trans>
                   </button>
                 </div>
               ) : printResultPrinterName ? (
@@ -484,7 +523,7 @@ export function PrintPage() {
                       <span className="icon-[material-symbols--picture-as-pdf-rounded] text-primary shrink-0 text-4xl" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-base">
-                          {fileLabel || "Document"}
+                          {fileLabel || t`Document`}
                         </p>
                         {fileMeta && (
                           <p className="text-base-content/50 text-xs">
@@ -496,7 +535,7 @@ export function PrintPage() {
                         type="button"
                         className="btn btn-ghost btn-square shrink-0"
                         disabled={isFileProcessing}
-                        title="Remove file"
+                        title={t`Remove file`}
                         onClick={handleResetPrint}
                       >
                         <span className="icon-[material-symbols--close-rounded] text-2xl" />
@@ -504,7 +543,7 @@ export function PrintPage() {
                     </div>
                   )}
 
-                  <DeviceOptionList label="Printer">
+                  <DeviceOptionList label={t`Printer`}>
                     {rawPrinters ? (
                       rawPrinters.map((printer) => {
                         const status = getPrinterStatus(printer.cups_name);
@@ -528,22 +567,22 @@ export function PrintPage() {
                                       offline ? "text-error" : "text-success",
                                     )}
                                   >
-                                    {offline ? "Offline" : "Online"}
+                                    {offline ? t`Offline` : t`Online`}
                                   </span>
                                   {!offline && (
                                     <>
                                       {" · "}
                                       {status.paper_percentage != null
-                                        ? `Paper ${status.paper_percentage}%`
-                                        : "Paper unknown"}
+                                        ? t`Paper ${status.paper_percentage}%`
+                                        : t`Paper unknown`}
                                       {status.toner_percentage != null &&
-                                        ` · Toner ${status.toner_percentage}%`}
+                                        t` · Toner ${status.toner_percentage}%`}
                                     </>
                                   )}
                                 </span>
                               ) : (
                                 <span className="text-base-content/50">
-                                  Status unknown
+                                  <Trans>Status unknown</Trans>
                                 </span>
                               )
                             }
@@ -558,7 +597,7 @@ export function PrintPage() {
                     )}
                   </DeviceOptionList>
 
-                  <FormField label="Copies">
+                  <FormField label={t`Copies`}>
                     <input
                       type="number"
                       className="input input-bordered w-full"
@@ -569,7 +608,7 @@ export function PrintPage() {
                     />
                   </FormField>
 
-                  <FormField label="Print on both sides">
+                  <FormField label={t`Print on both sides`}>
                     <input
                       type="checkbox"
                       className="toggle toggle-primary"
@@ -586,11 +625,11 @@ export function PrintPage() {
                     />
                   </FormField>
 
-                  <FormField label="Specific pages">
+                  <FormField label={t`Specific pages`}>
                     <input
                       type="text"
                       className="input input-bordered w-full"
-                      placeholder="e.g. 1-5,8,16-20 (empty = all)"
+                      placeholder={t`e.g. 1-5,8,16-20 (empty = all)`}
                       value={pageRangesInput}
                       onChange={(e) =>
                         setSession({ pageRangesInput: e.target.value })
@@ -601,7 +640,7 @@ export function PrintPage() {
 
                   {/* Layout selector is hidden for now: number-up currently works
                       unintuitively / doesn't work reliably for users.
-                  <FormField label="Layout">
+                  <FormField label={t`Layout`}>
                     <LayoutSelector
                       value={numberUp}
                       onChange={(value) => setSession({ numberUp: value })}
@@ -622,7 +661,7 @@ export function PrintPage() {
                     {isPrintStarting ? (
                       <span className="loading loading-spinner loading-sm" />
                     ) : (
-                      `Print ${actualPapersCount || 1} sheet${(actualPapersCount || 1) === 1 ? "" : "s"}`
+                      printButtonLabel
                     )}
                   </button>
                 </div>
@@ -635,7 +674,7 @@ export function PrintPage() {
       <Modal
         open={!!alert}
         onOpenChange={() => setAlert(undefined)}
-        title="Warning"
+        title={t`Warning`}
       >
         {alert}
       </Modal>
@@ -643,7 +682,7 @@ export function PrintPage() {
       <Modal
         open={!!pageRangesError}
         onOpenChange={() => setPageRangesError(undefined)}
-        title="Warning"
+        title={t`Warning`}
       >
         {pageRangesError}
       </Modal>
@@ -662,6 +701,7 @@ function PrintResultPanel({
   fileLabel?: string;
   onPrintAnother: () => void;
 }) {
+  const { t, i18n } = useLingui();
   const mapLink = resolvePrinterMapLink(printerCupsName, printerDisplayName);
   const printerLabel = printerDisplayName || printerCupsName;
 
@@ -670,17 +710,21 @@ function PrintResultPanel({
       <div className="bg-success/10 text-success rounded-box flex items-start gap-3 px-3 py-3">
         <span className="icon-[material-symbols--check-circle-rounded] shrink-0 text-3xl" />
         <div className="min-w-0">
-          <p className="text-base">Printed successfully</p>
+          <p className="text-base">
+            <Trans>Printed successfully</Trans>
+          </p>
           <p className="text-success/80 mt-0.5 text-sm">
             {fileLabel
-              ? `${fileLabel} was sent to the printer`
-              : "Your document was sent to the printer"}
+              ? t`${fileLabel} was sent to the printer`
+              : t`Your document was sent to the printer`}
           </p>
         </div>
       </div>
 
       <div className="bg-base-200 rounded-box flex flex-col gap-1 px-3 py-2.5">
-        <p className="text-base-content/50 text-sm">Printer</p>
+        <p className="text-base-content/50 text-sm">
+          <Trans>Printer</Trans>
+        </p>
         <p className="text-base">{printerLabel}</p>
         {mapLink && (
           <Link
@@ -689,7 +733,7 @@ function PrintResultPanel({
             className="text-primary mt-1 inline-flex items-center gap-1 text-sm hover:underline"
           >
             <span className="icon-[material-symbols--map-rounded] text-base" />
-            {mapLink.label}
+            {i18n._(mapLink.label)}
           </Link>
         )}
       </div>
@@ -699,7 +743,7 @@ function PrintResultPanel({
         className="btn btn-primary w-full"
         onClick={onPrintAnother}
       >
-        Print another
+        <Trans>Print another</Trans>
       </button>
     </div>
   );

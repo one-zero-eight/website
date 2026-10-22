@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Trans } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 import { useTeamMembers, type TeamMember } from "./hooks/useTeamMembers";
 import { MemberAvatar } from "./cards/MemberAvatar.tsx";
@@ -102,7 +103,7 @@ function TeamMemberCard({
             </h3>
             {leaderRoles[member.fullName] && (
               <span className="text-primary animate-in fade-in zoom-in slide-in-from-top-1 block text-[10px] font-semibold tracking-wider uppercase duration-300">
-                {leaderRoles[member.fullName]}
+                {isMainLeader ? <Trans>Leader</Trans> : <Trans>Founder</Trans>}
               </span>
             )}
           </div>
@@ -213,7 +214,9 @@ export function TeamMembers() {
               ></div>
             ))}
           </div>
-          <span className="text-gray-500 dark:text-gray-400">Loading...</span>
+          <span className="text-gray-500 dark:text-gray-400">
+            <Trans>Loading...</Trans>
+          </span>
         </div>
       </div>
     );
@@ -223,7 +226,7 @@ export function TeamMembers() {
     return (
       <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
         <p className="text-red-600 dark:text-red-400">
-          Unable to load team members. Please try again later.
+          <Trans>Unable to load team members. Please try again later.</Trans>
         </p>
       </div>
     );
@@ -233,7 +236,7 @@ export function TeamMembers() {
     return (
       <div className="mt-8 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
         <p className="text-gray-500 dark:text-gray-400">
-          No team members found.
+          <Trans>No team members found.</Trans>
         </p>
       </div>
     );

@@ -1,7 +1,10 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg, plural } from "@lingui/core/macro";
 import { $roomBooking } from "@/api/room-booking";
 import { $when2meet, type when2meetTypes } from "@/api/when2meet";
 import {
+  formatApiErrorDescriptor,
   formatApiErrorMessage,
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
@@ -69,6 +72,7 @@ export function MeetingPage({
   initialName?: string;
   setupSlots?: boolean;
 }) {
+  const { t, i18n } = useLingui();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { me } = useMe();
@@ -143,7 +147,7 @@ export function MeetingPage({
         });
       },
       onError: (saveError) => {
-        showError("Error", formatApiErrorMessage(saveError));
+        showError(msg`Error`, formatApiErrorDescriptor(saveError));
       },
     });
 
@@ -158,10 +162,10 @@ export function MeetingPage({
             queryKey: $when2meet.queryOptions("get", "/meetings/participating")
               .queryKey,
           });
-          showSuccess("Participant removed", "Participant was removed.");
+          showSuccess(msg`Participant removed`, msg`Participant was removed.`);
         },
         onError: (deleteError) => {
-          showError("Error", formatApiErrorMessage(deleteError));
+          showError(msg`Error`, formatApiErrorDescriptor(deleteError));
         },
       },
     );
@@ -174,11 +178,11 @@ export function MeetingPage({
           queryKey: $when2meet.queryOptions("get", "/meetings/").queryKey,
         });
         queryClient.removeQueries({ queryKey: meetingQueryKey });
-        showSuccess("Meeting deleted", `"${meetingName}" was removed.`);
+        showSuccess(msg`Meeting deleted`, msg`"${meetingName}" was removed.`);
         navigate({ to: "/when2meet" });
       },
       onError: (deleteError) => {
-        showError("Error", formatApiErrorMessage(deleteError));
+        showError(msg`Error`, formatApiErrorDescriptor(deleteError));
       },
     });
 
@@ -197,7 +201,7 @@ export function MeetingPage({
           handlePastMeetingTimeAttempt();
           return;
         }
-        showError("Error", formatApiErrorMessage(updateError));
+        showError(msg`Error`, formatApiErrorDescriptor(updateError));
       },
     });
 
@@ -212,8 +216,8 @@ export function MeetingPage({
   );
 
   const formattedDates = useMemo(
-    () => formatMeetingDates(parsedSlots?.dates ?? []),
-    [parsedSlots],
+    () => formatMeetingDates(parsedSlots?.dates ?? [], i18n.locale),
+    [parsedSlots, i18n.locale],
   );
 
   const fullDayTimeSlots = useMemo(() => getFullDayTimeSlots(), []);
@@ -359,11 +363,14 @@ export function MeetingPage({
     [event, currentUserId],
   );
 
-  const meetingName = event?.name ?? initialName ?? "Meeting";
+  const meetingName = event?.name ?? initialName ?? t`Meeting`;
   const meetingDescription = event?.description;
   const meetingSlug = event?.slug ?? meetingId;
 
-  const selectedTimeLabel = formatMeetingTimeRange(event?.selected_time);
+  const selectedTimeLabel = formatMeetingTimeRange(
+    event?.selected_time,
+    i18n.locale,
+  );
   const hasBookedRoom = !!event?.booked_room?.room_id;
   const canChangeMeetingTime = isOwner && !isArchived && !hasBookedRoom;
 
@@ -451,12 +458,12 @@ export function MeetingPage({
       setBookingDetailsOpen(false);
       handleMeetingUpdated(updatedMeeting);
       showWarning(
-        "Room booking removed",
-        "The booking no longer exists in Room Booking, so it was removed from the meeting.",
+        msg`Room booking removed`,
+        msg`The booking no longer exists in Room Booking, so it was removed from the meeting.`,
       );
     },
     onError: (reconciliationError) => {
-      showError("Error", formatApiErrorMessage(reconciliationError));
+      showError(msg`Error`, formatApiErrorDescriptor(reconciliationError));
     },
   });
 
@@ -525,13 +532,17 @@ export function MeetingPage({
     );
   }, [event?.selected_time, parsedSlots, timeSlots, allowedSlots]);
 
-  const pendingMeetingTimeLabel = formatMeetingTimeRange(pendingMeetingTime);
+  const pendingMeetingTimeLabel = formatMeetingTimeRange(
+    pendingMeetingTime,
+    i18n.locale,
+  );
 
   const currentUser = useMemo(
     () => users.find((user) => user.id === currentUserId),
     [users, currentUserId],
   );
 
+  const anonymousAccountName = t`You`;
   const listUsers = useMemo(() => {
     if (!currentUserId || currentUser) {
       return users;
@@ -539,12 +550,12 @@ export function MeetingPage({
 
     const draftUser: MeetingUser = {
       id: currentUserId,
-      name: getAccountDisplayName(me),
+      name: getAccountDisplayName(me) ?? anonymousAccountName,
       slots: new Set(),
     };
 
     return [draftUser, ...users];
-  }, [users, currentUserId, currentUser, me]);
+  }, [users, currentUserId, currentUser, me, anonymousAccountName]);
 
   const activeViewedUserIds = useMemo(
     () =>
@@ -938,11 +949,14 @@ export function MeetingPage({
 
     if (isOwner && userId !== currentUserId) {
       const participant = listUsers.find((user) => user.id === userId);
+      const participantName = participant?.name;
       const confirmed = await showConfirm({
-        title: "Remove participant",
-        message: `Remove ${participant?.name ?? "this participant"} from the meeting?`,
-        confirmText: "Remove",
-        cancelText: "Cancel",
+        title: msg`Remove participant`,
+        message: participantName
+          ? msg`Remove ${participantName} from the meeting?`
+          : msg`Remove this participant from the meeting?`,
+        confirmText: msg`Remove`,
+        cancelText: msg`Cancel`,
         type: "warning",
       });
 
@@ -970,7 +984,7 @@ export function MeetingPage({
 
   function handleSaveSetup() {
     if (draftSlots.size === 0) {
-      showError("Error", "Choose at least one timeslot.");
+      showError(msg`Error`, msg`Choose at least one timeslot.`);
       return;
     }
 
@@ -993,8 +1007,8 @@ export function MeetingPage({
           setEditingUserId(null);
           setDraftSlots(new Set());
           showSuccess(
-            "Timeslots saved",
-            "Participants can now add their availability.",
+            msg`Timeslots saved`,
+            msg`Participants can now add their availability.`,
           );
           navigate({
             to: "/when2meet/$meetingId",
@@ -1036,8 +1050,8 @@ export function MeetingPage({
 
   function handlePastMeetingTimeAttempt() {
     showWarning(
-      "Cannot select a past time",
-      "Choose a meeting start time in the future.",
+      msg`Cannot select a past time`,
+      msg`Choose a meeting start time in the future.`,
     );
   }
 
@@ -1066,7 +1080,7 @@ export function MeetingPage({
     }
 
     if (!pendingMeetingTime) {
-      showError("Error", "Choose a meeting time on the grid first.");
+      showError(msg`Error`, msg`Choose a meeting time on the grid first.`);
       return;
     }
 
@@ -1097,8 +1111,8 @@ export function MeetingPage({
           });
           handleCancelChoosingMeetingTime();
           showSuccess(
-            "Meeting time saved",
-            "Everyone can now see the final meeting time.",
+            msg`Meeting time saved`,
+            msg`Everyone can now see the final meeting time.`,
           );
         },
       },
@@ -1123,7 +1137,7 @@ export function MeetingPage({
         shareLinkCopiedTimerRef.current = null;
       }, 3000);
     } catch {
-      showError("Error", "Could not copy link to clipboard.");
+      showError(msg`Error`, msg`Could not copy link to clipboard.`);
     }
   }
 
@@ -1137,10 +1151,10 @@ export function MeetingPage({
 
   async function handleDeleteMeeting() {
     const confirmed = await showConfirm({
-      title: "Delete meeting",
-      message: `Are you sure you want to delete "${meetingName}"? It will be removed from your meetings list.`,
-      confirmText: "Delete",
-      cancelText: "Cancel",
+      title: msg`Delete meeting`,
+      message: msg`Are you sure you want to delete "${meetingName}"? It will be removed from your meetings list.`,
+      confirmText: msg`Delete`,
+      cancelText: msg`Cancel`,
       type: "error",
     });
 
@@ -1178,7 +1192,9 @@ export function MeetingPage({
     return (
       <div className="mx-auto w-full max-w-[1400px] px-4 py-8">
         <div className="alert alert-error">
-          <span>Meeting not found or has no configured dates.</span>
+          <span>
+            <Trans>Meeting not found or has no configured dates.</Trans>
+          </span>
         </div>
       </div>
     );
@@ -1205,8 +1221,8 @@ export function MeetingPage({
     getUnavailableSlotHint: isChoosingMeetingTime
       ? (slotKey: string) =>
           allowedSlots.has(slotKey)
-            ? "Meeting start time must be in the future"
-            : "Not available for this meeting"
+            ? t`Meeting start time must be in the future`
+            : t`Not available for this meeting`
       : undefined,
     selectionOnly: needsSetup,
     hideHint: !!currentUser && (isEditingSelf || !isOwner),
@@ -1235,6 +1251,17 @@ export function MeetingPage({
     timeZone: event.timezone,
   };
 
+  const responsesCount = users.length;
+  const responsesLabel = t`${plural(responsesCount, {
+    one: "# response",
+    other: "# responses",
+  })}`;
+  const hoveredAvailableCount = hoveredSlotParticipants.length;
+  const hoveredAvailableLabel = t` — ${plural(hoveredAvailableCount, {
+    one: "# available",
+    other: "# available",
+  })}`;
+
   return (
     <RequireAuth>
       <>
@@ -1244,7 +1271,7 @@ export function MeetingPage({
             className="text-base-content/70 hover:text-base-content inline-flex w-fit items-center gap-1 text-sm font-medium"
           >
             <span className="icon-[material-symbols--arrow-back] text-lg" />
-            All meetings
+            <Trans>All meetings</Trans>
           </Link>
 
           <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -1260,9 +1287,11 @@ export function MeetingPage({
                 )}
                 <div className="text-base-content/70 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                   <span>{formatDateRangeLabel(formattedDates)}</span>
-                  <span>{users.length} responses</span>
+                  <span>{responsesLabel}</span>
                   {isArchived ? (
-                    <span>Archived</span>
+                    <span>
+                      <Trans>Archived</Trans>
+                    </span>
                   ) : selectedTimeLabel ? (
                     <span className="text-secondary inline-flex items-center gap-1">
                       <span className="icon-[material-symbols--schedule-outline] shrink-0 text-base" />
@@ -1271,7 +1300,7 @@ export function MeetingPage({
                   ) : null}
                   {bookedRoomTitle && (
                     <span className="text-primary">
-                      Room: {bookedRoomTitle}
+                      <Trans>Room: {bookedRoomTitle}</Trans>
                     </span>
                   )}
                 </div>
@@ -1314,7 +1343,7 @@ export function MeetingPage({
                       disabled={draftSlots.size === 0 || isUpdatingMeeting}
                       onClick={handleClearSetupSlots}
                     >
-                      Clear all
+                      <Trans>Clear all</Trans>
                     </button>
                     <button
                       type="button"
@@ -1325,7 +1354,7 @@ export function MeetingPage({
                       {isUpdatingMeeting ? (
                         <span className="loading loading-spinner loading-sm" />
                       ) : (
-                        "Save timeslots"
+                        t`Save timeslots`
                       )}
                     </button>
                   </div>
@@ -1351,7 +1380,7 @@ export function MeetingPage({
                           )}
                         >
                           <span className="icon-[material-symbols--share-outline] text-lg" />
-                          Share link
+                          <Trans>Share link</Trans>
                         </span>
                         <span
                           className={cn(
@@ -1362,7 +1391,7 @@ export function MeetingPage({
                           )}
                         >
                           <span className="icon-[material-symbols--check-rounded] text-lg" />
-                          Copied
+                          <Trans>Copied</Trans>
                         </span>
                       </span>
                     </button>
@@ -1377,7 +1406,7 @@ export function MeetingPage({
                             disabled={isSaving}
                             onClick={handleCancelEditing}
                           >
-                            Cancel
+                            <Trans>Cancel</Trans>
                           </button>
                           <button
                             type="button"
@@ -1388,7 +1417,7 @@ export function MeetingPage({
                             {isSaving ? (
                               <span className="loading loading-spinner loading-sm" />
                             ) : (
-                              "Save timeslots"
+                              t`Save timeslots`
                             )}
                           </button>
                         </>
@@ -1399,7 +1428,7 @@ export function MeetingPage({
                           disabled={isChoosingMeetingTime}
                           onClick={handleToggleAvailability}
                         >
-                          Change my availability
+                          <Trans>Change my availability</Trans>
                         </button>
                       )}
                     </div>
@@ -1412,8 +1441,10 @@ export function MeetingPage({
           {needsSetup && (
             <div className="alert alert-warning">
               <span>
-                Select the timeslots that participants can choose, then click
-                Save timeslots.
+                <Trans>
+                  Select the timeslots that participants can choose, then click
+                  Save timeslots.
+                </Trans>
               </span>
             </div>
           )}
@@ -1438,7 +1469,9 @@ export function MeetingPage({
             {!needsSetup && (
               <aside className="grid h-fit w-full min-w-0 gap-3">
                 <div className="bg-base-100 border-base-300 rounded-box flex h-fit w-full min-w-0 flex-col border p-4">
-                  <h2 className="mb-3 text-lg font-semibold">Options</h2>
+                  <h2 className="mb-3 text-lg font-semibold">
+                    <Trans>Options</Trans>
+                  </h2>
                   {showMeetingResults && (
                     <>
                       <button
@@ -1452,8 +1485,8 @@ export function MeetingPage({
                       >
                         <span>
                           {isBestTimeEnabled
-                            ? "Hide best time"
-                            : "Show best time"}
+                            ? t`Hide best time`
+                            : t`Show best time`}
                         </span>
                         <span
                           className={cn(
@@ -1467,7 +1500,7 @@ export function MeetingPage({
                         <div className="mb-3 grid gap-2">
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-base font-medium">
-                              Minimum participants
+                              <Trans>Minimum participants</Trans>
                             </span>
                             <span className="text-base-content/70 text-base tabular-nums">
                               {minParticipants}+
@@ -1516,7 +1549,7 @@ export function MeetingPage({
                       <div className="border-base-300 bg-primary/5 rounded-box flex items-center gap-3 border p-3 text-sm">
                         <div className="min-w-0 grow">
                           <div className="text-base-content/60">
-                            Booked room
+                            <Trans>Booked room</Trans>
                           </div>
                           <div className="truncate font-semibold">
                             {bookedRoomTitle}
@@ -1524,12 +1557,12 @@ export function MeetingPage({
                           {bookedRoomBookingError &&
                             !isBookedRoomBookingMissing && (
                               <div className="text-error mt-1 text-xs">
-                                Unable to load booking details.
+                                <Trans>Unable to load booking details.</Trans>
                               </div>
                             )}
                           {isBookedRoomBookingMissing && !isOwner && (
                             <div className="text-error mt-1 text-xs">
-                              This room booking no longer exists.
+                              <Trans>This room booking no longer exists.</Trans>
                             </div>
                           )}
                         </div>
@@ -1537,7 +1570,7 @@ export function MeetingPage({
                         isReconcilingMissingBooking ? (
                           <span className="loading loading-spinner loading-sm text-primary shrink-0" />
                         ) : bookedRoomBooking ? (
-                          <Tooltip content="Open details">
+                          <Tooltip content={t`Open details`}>
                             <button
                               type="button"
                               className="text-base-content/50 hover:bg-base-300 flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
@@ -1551,7 +1584,10 @@ export function MeetingPage({
                       {hasBookedRoomTimeMismatch && (
                         <div className="alert alert-warning px-4 py-2 text-sm">
                           <span>
-                            Booking time differs from the selected meeting time.
+                            <Trans>
+                              Booking time differs from the selected meeting
+                              time.
+                            </Trans>
                           </span>
                         </div>
                       )}
@@ -1564,12 +1600,12 @@ export function MeetingPage({
                         <>
                           {pendingMeetingTimeLabel && (
                             <div className="text-base-content/70 text-sm">
-                              Selected: {pendingMeetingTimeLabel}
+                              <Trans>Selected: {pendingMeetingTimeLabel}</Trans>
                             </div>
                           )}
                           {hasPastMeetingTime && (
                             <p className="text-error text-sm">
-                              {PAST_MEETING_TIME_MESSAGE}
+                              {i18n._(PAST_MEETING_TIME_MESSAGE)}
                             </p>
                           )}
                           <button
@@ -1588,7 +1624,7 @@ export function MeetingPage({
                             ) : (
                               <>
                                 <span className="icon-[material-symbols--schedule-outline] text-lg" />
-                                Save meeting time
+                                <Trans>Save meeting time</Trans>
                               </>
                             )}
                           </button>
@@ -1598,7 +1634,7 @@ export function MeetingPage({
                             disabled={isUpdatingMeeting}
                             onClick={handleCancelChoosingMeetingTime}
                           >
-                            Cancel
+                            <Trans>Cancel</Trans>
                           </button>
                         </>
                       ) : !isEditingSelf ? (
@@ -1610,13 +1646,15 @@ export function MeetingPage({
                               onClick={handleStartChoosingMeetingTime}
                             >
                               <span className="icon-[material-symbols--schedule-outline] text-lg" />
-                              Choose meeting time
+                              <Trans>Choose meeting time</Trans>
                             </button>
                           )}
                           {hasBookedRoom && !isArchived && (
                             <p className="text-base-content/60 text-xs">
-                              Cancel the room booking before changing the
-                              meeting time.
+                              <Trans>
+                                Cancel the room booking before changing the
+                                meeting time.
+                              </Trans>
                             </p>
                           )}
                           {event.selected_time && !isArchived && (
@@ -1626,7 +1664,11 @@ export function MeetingPage({
                               onClick={() => setRoomModalOpen(true)}
                             >
                               <span className="icon-[mdi--door-open] text-lg" />
-                              {hasBookedRoom ? "Change room" : "Book room"}
+                              {hasBookedRoom ? (
+                                <Trans>Change room</Trans>
+                              ) : (
+                                <Trans>Book room</Trans>
+                              )}
                             </button>
                           )}
                         </>
@@ -1644,7 +1686,7 @@ export function MeetingPage({
                             className="btn grow gap-2"
                           >
                             <span className="icon-[material-symbols--edit-outline] text-lg" />
-                            Edit event
+                            <Trans>Edit event</Trans>
                           </Link>
                           {!needsSetup && (
                             <ArchiveMeetingButton
@@ -1675,7 +1717,7 @@ export function MeetingPage({
                         ) : (
                           <>
                             <span className="icon-[material-symbols--delete-outline] text-lg" />
-                            Delete event
+                            <Trans>Delete event</Trans>
                           </>
                         )}
                       </button>
@@ -1685,14 +1727,16 @@ export function MeetingPage({
 
                 <div className="bg-base-100 border-base-300 rounded-box flex min-w-0 flex-col overflow-hidden border p-4">
                   <div className="mb-3 flex items-center justify-between gap-2">
-                    <h2 className="text-lg font-semibold">Responses</h2>
+                    <h2 className="text-lg font-semibold">
+                      <Trans>Responses</Trans>
+                    </h2>
                     {listUsers.length > 1 && (
                       <button
                         type="button"
                         className="btn btn-link"
                         onClick={handleToggleViewAllUsers}
                       >
-                        {allUsersViewed ? "Hide all" : "View all"}
+                        {allUsersViewed ? t`Hide all` : t`View all`}
                       </button>
                     )}
                   </div>
@@ -1707,10 +1751,10 @@ export function MeetingPage({
                       <span className="block">
                         {hoveredSlotLabel}
                         {isHoveredSlotDisabled
-                          ? " — No one is allowed here"
+                          ? t` — No one is allowed here`
                           : hoveredSlotParticipants.length === 0
-                            ? " — No one is available"
-                            : ` — ${hoveredSlotParticipants.length} available`}
+                            ? t` — No one is available`
+                            : hoveredAvailableLabel}
                       </span>
                     ) : isHoveringCalendarSlot ? (
                       <>
@@ -1722,7 +1766,9 @@ export function MeetingPage({
                         )}
                       </>
                     ) : (
-                      <span className="block">No slot selected</span>
+                      <span className="block">
+                        <Trans>No slot selected</Trans>
+                      </span>
                     )}
                   </div>
 
@@ -1731,7 +1777,7 @@ export function MeetingPage({
                     <input
                       type="text"
                       className="grow"
-                      placeholder="Search participants..."
+                      placeholder={t`Search participants...`}
                       value={participantSearch}
                       onChange={(searchEvent) =>
                         setParticipantSearch(searchEvent.target.value)
@@ -1742,7 +1788,7 @@ export function MeetingPage({
                   <div className="grid max-h-[min(50vh,420px)] gap-0.5 overflow-y-auto pr-1">
                     {filteredUsers.length === 0 ? (
                       <div className="text-base-content/50 py-6 text-center text-sm">
-                        No participants found.
+                        <Trans>No participants found.</Trans>
                       </div>
                     ) : (
                       filteredUsers.map((user) => {
@@ -1786,13 +1832,13 @@ export function MeetingPage({
                                 {user.name}
                                 {isCurrentUser && (
                                   <span className="text-base-content/60 ml-1 font-normal">
-                                    (you)
+                                    <Trans>(you)</Trans>
                                   </span>
                                 )}
                               </span>
                               {isMeetingOwner && (
                                 <span className="badge badge-primary badge-outline badge-sm shrink-0 border-[1px]">
-                                  Owner
+                                  <Trans>Owner</Trans>
                                 </span>
                               )}
                             </button>
@@ -1849,9 +1895,9 @@ export function MeetingPage({
                 ? {
                     label: hoveredSlotLabel,
                     unavailableMessage: isHoveredSlotDisabled
-                      ? "No one is allowed here"
+                      ? t`No one is allowed here`
                       : hoveredSlotParticipants.length === 0
-                        ? "No one is available"
+                        ? t`No one is available`
                         : undefined,
                     participantNames: hoveredSlotParticipants.map(
                       (participant) => participant.name,

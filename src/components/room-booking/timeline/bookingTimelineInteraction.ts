@@ -1,8 +1,9 @@
 import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types";
+import { accessLevelTooltipLabel } from "@/components/room-booking/access-level-label.ts";
+import { formatBookingDuration } from "@/components/room-booking/utils.ts";
 import type { CSSProperties } from "react";
 import {
   clockTime,
-  durationFormatted,
   msBetween as msBetweenDates,
   T,
 } from "@/lib/utils/dates.ts";
@@ -91,8 +92,8 @@ export function msBetween(
   return msBetweenDates(a, b);
 }
 
-export function dayTitle(d: Date) {
-  return d.toLocaleDateString("en-US", {
+export function dayTitle(d: Date, locale: string) {
+  return d.toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
     weekday: "short",
@@ -122,13 +123,7 @@ export function timeGridNeighbors(
 export function accessLevelTooltip(
   accessLevel?: RoomAccess_levelAnyOf0 | null,
 ) {
-  if (!accessLevel) return undefined;
-
-  return accessLevel === RoomAccess_levelAnyOf0.yellow
-    ? "Yellow access level (for students)"
-    : accessLevel === RoomAccess_levelAnyOf0.red
-      ? "Red access level (for employees)"
-      : "Special rules apply";
+  return accessLevelTooltipLabel(accessLevel);
 }
 
 export function rangeIntersectingBookings(
@@ -694,7 +689,7 @@ export function buildNewBookingData(
 
   return {
     duration,
-    durationText: durationFormatted(duration),
+    durationText: formatBookingDuration(duration),
     startTime: clockTime(slot.start),
     endTime: clockTime(slot.end),
     cssVars: {

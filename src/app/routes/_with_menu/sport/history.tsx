@@ -5,20 +5,21 @@ import { SportPageShell } from "@/components/sport/SportPageShell.tsx";
 import { SportTabs } from "@/components/sport/SportTabs.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/sport/history")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   return (
     <>
       <Helmet>
-        <title>Sport history</title>
+        <title>{t`Sport history`}</title>
         <meta
           name="description"
-          content="View your sport hours history across past semesters."
+          content={t`View your sport hours history across past semesters.`}
         />
       </Helmet>
 

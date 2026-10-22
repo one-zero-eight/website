@@ -1,4 +1,9 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  formatApiErrorDescriptor,
+  formatApiErrorMessage,
+} from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { $events } from "@/api/events";
 import {
   EnrollmentType,
@@ -27,6 +32,7 @@ import { getLinkDisplayLabel, getSubmissionImageUrl } from "../utils/links";
 export function SubmissionPage({ id }: { id: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useLingui();
   const { showError, showConfirm } = useToast();
   const { isModerator, clubs, isPending: isAuthPending } = useEventsAuth();
   const [appLocale] = useAppLocale();
@@ -82,7 +88,7 @@ export function SubmissionPage({ id }: { id: string }) {
         navigate({ to: "/events/submissions" });
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -96,7 +102,7 @@ export function SubmissionPage({ id }: { id: string }) {
         navigate({ to: "/events/submissions" });
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -110,7 +116,7 @@ export function SubmissionPage({ id }: { id: string }) {
         navigate({ to: "/events/submissions" });
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -138,14 +144,14 @@ export function SubmissionPage({ id }: { id: string }) {
     return (
       <div className="px-4 py-4">
         <p className="text-error mb-2">
-          {formatApiErrorMessage(error) || "Failed to load submission."}
+          {formatApiErrorMessage(error) || t`Failed to load submission.`}
         </p>
         <button
           type="button"
           className="btn btn-ghost"
           onClick={() => refetch()}
         >
-          Retry
+          <Trans>Retry</Trans>
         </button>
       </div>
     );
@@ -164,24 +170,24 @@ export function SubmissionPage({ id }: { id: string }) {
   const declineDisabled = !feedbackTrimmed || isDeclining || isApproving;
   const visibleLinks = (event.links ?? []).filter((link) => link.url.trim());
   const endsAt = getEventEndsAt(event.starts_at, event.duration_hours);
-  const title = localeContent?.name?.trim() || "Untitled event";
+  const title = localeContent?.name?.trim() || t`Untitled event`;
   const enrollment = event.enrollment;
   const isExternal = enrollment?.type === EnrollmentType.external;
   const capacity = enrollment?.capacity;
   const enrollmentLabel = !enrollment
     ? null
     : isExternal
-      ? "External"
+      ? t`External`
       : capacity !== null && capacity !== undefined
-        ? `On InNoHassle · ${capacity} participants`
-        : "On InNoHassle · unlimited";
+        ? t`On InNoHassle · ${capacity} participants`
+        : t`On InNoHassle · unlimited`;
 
   async function handleApprove() {
     const confirmed = await showConfirm({
-      title: "Approve submission",
-      message: "Publish this event? This cannot be undone from here.",
-      confirmText: "Approve",
-      cancelText: "Cancel",
+      title: msg`Approve submission`,
+      message: msg`Publish this event? This cannot be undone from here.`,
+      confirmText: msg`Approve`,
+      cancelText: msg`Cancel`,
       type: "info",
     });
     if (!confirmed) {
@@ -196,10 +202,10 @@ export function SubmissionPage({ id }: { id: string }) {
 
   async function handleDecline() {
     const confirmed = await showConfirm({
-      title: "Decline submission",
-      message: "Decline this submission with the feedback you entered?",
-      confirmText: "Decline",
-      cancelText: "Cancel",
+      title: msg`Decline submission`,
+      message: msg`Decline this submission with the feedback you entered?`,
+      confirmText: msg`Decline`,
+      cancelText: msg`Cancel`,
       type: "error",
     });
     if (!confirmed) {
@@ -214,11 +220,10 @@ export function SubmissionPage({ id }: { id: string }) {
 
   async function handleUnpublish() {
     const confirmed = await showConfirm({
-      title: "Unpublish event",
-      message:
-        "Remove this event from the public calendar? This cannot be undone from here.",
-      confirmText: "Unpublish",
-      cancelText: "Cancel",
+      title: msg`Unpublish event`,
+      message: msg`Remove this event from the public calendar? This cannot be undone from here.`,
+      confirmText: msg`Unpublish`,
+      cancelText: msg`Cancel`,
       type: "error",
     });
     if (!confirmed) {
@@ -226,6 +231,20 @@ export function SubmissionPage({ id }: { id: string }) {
     }
 
     unpublish({ params: { path: { id } } });
+  }
+
+  function moderationStatusText() {
+    if (isUnpublished) {
+      return t`Unpublished`;
+    }
+    const date = moment(moderation.updated_at).format("D MMM YYYY, HH:mm");
+    if (moderation.status === ModerationStatus.approved) {
+      return t`approved at ${date}`;
+    }
+    if (moderation.status === ModerationStatus.declined) {
+      return t`declined at ${date}`;
+    }
+    return date;
   }
 
   return (
@@ -299,9 +318,13 @@ export function SubmissionPage({ id }: { id: string }) {
           />
 
           <div className="border-base-300 rounded-2xl border p-4">
-            <h2 className="mb-3 font-medium">Links</h2>
+            <h2 className="mb-3 font-medium">
+              <Trans>Links</Trans>
+            </h2>
             {visibleLinks.length === 0 ? (
-              <p className="text-base-content/70 text-sm">No links.</p>
+              <p className="text-base-content/70 text-sm">
+                <Trans>No links.</Trans>
+              </p>
             ) : (
               <ul className="flex flex-col gap-2 text-sm">
                 {visibleLinks.map((link) => (
@@ -325,24 +348,24 @@ export function SubmissionPage({ id }: { id: string }) {
             {isPendingReview ? (
               <>
                 <p className="mb-2 text-sm font-medium">
-                  Leave your feedback and judge
+                  <Trans>Leave your feedback and judge</Trans>
                 </p>
                 <textarea
                   className={eventFieldClass("mb-3 min-h-28 resize-y")}
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
-                  placeholder="Feedback"
+                  placeholder={t`Feedback`}
                 />
                 <div className="flex flex-wrap justify-end gap-2">
                   {declineDisabled && !feedbackTrimmed ? (
-                    <Tooltip content="Cannot decline without feedback">
+                    <Tooltip content={t`Cannot decline without feedback`}>
                       <span className="inline-flex">
                         <button
                           type="button"
                           className="btn btn-error btn-sm btn-disabled pointer-events-none"
                           disabled
                         >
-                          Decline
+                          <Trans>Decline</Trans>
                         </button>
                       </span>
                     </Tooltip>
@@ -356,7 +379,7 @@ export function SubmissionPage({ id }: { id: string }) {
                       {isDeclining && (
                         <span className="loading loading-spinner loading-sm" />
                       )}
-                      Decline
+                      <Trans>Decline</Trans>
                     </button>
                   )}
                   <button
@@ -368,23 +391,21 @@ export function SubmissionPage({ id }: { id: string }) {
                     {isApproving && (
                       <span className="loading loading-spinner loading-sm" />
                     )}
-                    Approve
+                    <Trans>Approve</Trans>
                   </button>
                 </div>
               </>
             ) : (
               <div className="flex flex-col gap-3 text-sm">
-                <p className="font-medium capitalize">
-                  {isUnpublished
-                    ? "Unpublished"
-                    : `${moderation.status} at ${moment(moderation.updated_at).format("D MMM YYYY, HH:mm")}`}
-                </p>
+                <p className="font-medium">{moderationStatusText()}</p>
                 {moderation.feedback?.trim() ? (
                   <p className="text-base-content/80 whitespace-pre-wrap">
                     {moderation.feedback}
                   </p>
                 ) : (
-                  <p className="text-base-content/70">No feedback.</p>
+                  <p className="text-base-content/70">
+                    <Trans>No feedback.</Trans>
+                  </p>
                 )}
                 {moderation.status === ModerationStatus.approved &&
                   !isUnpublished && (
@@ -395,7 +416,7 @@ export function SubmissionPage({ id }: { id: string }) {
                           params={{ id }}
                           className="btn btn-primary btn-sm"
                         >
-                          Open
+                          <Trans>Open</Trans>
                         </Link>
                       )}
                       <button
@@ -407,7 +428,7 @@ export function SubmissionPage({ id }: { id: string }) {
                         {isUnpublishing && (
                           <span className="loading loading-spinner loading-sm" />
                         )}
-                        Unpublish
+                        <Trans>Unpublish</Trans>
                       </button>
                     </div>
                   )}

@@ -1,4 +1,5 @@
 import { accountsTypes } from "@/api/accounts";
+import { t } from "@lingui/core/macro";
 import { scheduleTypes } from "@/api/schedule";
 
 export function isInnohassleAdmin(
@@ -21,17 +22,17 @@ export function getViewUserTelegramLabel(user: accountsTypes.SchemaViewUser) {
   }
 
   if (user.telegram_info) {
-    return `Telegram ID ${user.telegram_info.id}`;
+    return t`Telegram ID ${user.telegram_info.id}`;
   }
 
-  return "No Telegram";
+  return t`No Telegram`;
 }
 
 export function getViewUserRoleBadges(user: accountsTypes.SchemaViewUser) {
   return [
-    user.innopolis_info?.is_staff && "Staff",
-    user.innopolis_info?.is_student && "Student",
-    user.innopolis_info?.is_college && "College",
+    user.innopolis_info?.is_staff && t`Staff`,
+    user.innopolis_info?.is_student && t`Student`,
+    user.innopolis_info?.is_college && t`College`,
   ].filter((role): role is string => !!role);
 }
 
@@ -44,10 +45,10 @@ export function getViewUserContactLine(user: accountsTypes.SchemaViewUser) {
 
 export function getViewUserRoles(user: accountsTypes.SchemaViewUser) {
   return [
-    user.innopolis_info?.is_staff && "Staff",
-    user.innopolis_info?.is_student && "Student",
-    user.innopolis_info?.is_college && "College",
-    user.innohassle_admin && "InNoHassle admin",
+    user.innopolis_info?.is_staff && t`Staff`,
+    user.innopolis_info?.is_student && t`Student`,
+    user.innopolis_info?.is_college && t`College`,
+    user.innohassle_admin && t`InNoHassle admin`,
   ]
     .filter(Boolean)
     .join(", ");

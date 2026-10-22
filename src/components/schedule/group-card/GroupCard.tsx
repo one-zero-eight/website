@@ -1,4 +1,5 @@
 import { scheduleTypes } from "@/api/schedule";
+import { Trans } from "@lingui/react/macro";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
 import HideButtonGroup from "@/components/schedule/group-card/HideButtonGroup.tsx";
 import {
@@ -55,7 +56,7 @@ export function GroupCard({
           })}
         {outdated && (
           <p className="blur-0 mt-1 w-fit rounded-xl border border-dashed border-red-500 px-2 py-1 text-sm text-red-500">
-            Outdated
+            <Trans>Outdated</Trans>
           </p>
         )}
       </div>

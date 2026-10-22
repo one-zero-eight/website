@@ -1,4 +1,8 @@
+import { t as coreT } from "@lingui/core/macro";
+import ruLocale from "@fullcalendar/core/locales/ru";
+import { formatBookingDuration } from "@/components/room-booking/utils.ts";
 import { $roomBooking } from "@/api/room-booking";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
 import {
@@ -118,15 +122,7 @@ function hasBookingsOverlap(
 }
 
 function formatDuration(start: Date, end: Date) {
-  const totalMinutes = Math.max(
-    0,
-    Math.round((end.getTime() - start.getTime()) / 60000),
-  );
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  if (hours === 0) return `${minutes}m`;
-  if (minutes === 0) return `${hours}h`;
-  return `${hours}h ${minutes}m`;
+  return formatBookingDuration(end.getTime() - start.getTime());
 }
 
 const NowIndicator = memo(function NowIndicator({
@@ -161,23 +157,26 @@ function renderNowIndicator(arg: NowIndicatorContentArg) {
   return <NowIndicator date={arg.date} />;
 }
 
-function calendarTitleFormat(arg: { date: { year: number } }) {
+function calendarTitleFormat(arg: { date: { year: number } }, locale: string) {
   if (arg.date.year === new Date().getFullYear()) {
     // Show only month if current year
-    return moment(arg.date).format("MMMM");
+    return moment(arg.date).locale(locale).format("MMMM");
   } else {
     // Show month and year otherwise
-    return moment(arg.date).format("MMMM YYYY");
+    return moment(arg.date).locale(locale).format("MMMM YYYY");
   }
 }
 
-function calendarListDayFormat(arg: { date: { year: number } }) {
+function calendarListDayFormat(
+  arg: { date: { year: number } },
+  locale: string,
+) {
   if (arg.date.year === new Date().getFullYear()) {
     // Show month, day, weekday
-    return moment(arg.date).format("MMMM D, dddd");
+    return moment(arg.date).locale(locale).format("MMMM D, dddd");
   } else {
     // Add year if not current year
-    return moment(arg.date).format("YYYY, MMMM D");
+    return moment(arg.date).locale(locale).format("YYYY, MMMM D");
   }
 }
 
@@ -226,14 +225,6 @@ const HEADER_TOOLBAR = {
   center: undefined,
   right: "timeGrid3 timeGridWeek dayGridMonth listMonth",
 } as const;
-const BUTTON_TEXT = {
-  today: "Today",
-  listMonth: "List",
-  timeGrid3: "3 days",
-  timeGridWeek: "Week",
-  dayGridMonth: "Month",
-} as const;
-
 interface MemoizedCalendarProps {
   calendarRef: React.RefObject<FullCalendar | null>;
   calendarView: string;
@@ -259,11 +250,13 @@ const MemoizedCalendar = memo(function MemoizedCalendar({
   renderTimeGridEvent,
   renderDayHeader,
 }: MemoizedCalendarProps) {
+  const { i18n, t } = useLingui();
   const views = useMemo(
     () => ({
       listMonth: {
         eventContent: renderEventListMonth,
-        listDayFormat: calendarListDayFormat,
+        listDayFormat: (arg: { date: { year: number } }) =>
+          calendarListDayFormat(arg, i18n.locale),
       },
       timeGridWeek: {
         eventContent: renderTimeGridEvent,
@@ -281,12 +274,14 @@ const MemoizedCalendar = memo(function MemoizedCalendar({
         eventContent: renderEventDayGridMonth,
       },
     }),
-    [renderTimeGridEvent, renderDayHeader],
+    [renderTimeGridEvent, renderDayHeader, i18n.locale],
   );
 
   return (
     <FullCalendar
       ref={calendarRef}
+      locale={i18n.locale}
+      locales={[ruLocale]}
       eventsSet={handleEventsSet}
       progressiveEventRendering={true}
       timeZone="Europe/Moscow"
@@ -298,8 +293,14 @@ const MemoizedCalendar = memo(function MemoizedCalendar({
       headerToolbar={HEADER_TOOLBAR}
       height="auto"
       contentHeight="auto"
-      buttonText={BUTTON_TEXT}
-      titleFormat={calendarTitleFormat}
+      buttonText={{
+        today: t`Today`,
+        listMonth: t`List`,
+        timeGrid3: t`3 days`,
+        timeGridWeek: t`Week`,
+        dayGridMonth: t`Month`,
+      }}
+      titleFormat={(arg) => calendarTitleFormat(arg, i18n.locale)}
       views={views}
       allDayText=""
       nowIndicator={true}
@@ -328,6 +329,7 @@ const MemoizedCalendar = memo(function MemoizedCalendar({
 });
 
 export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
+  const { i18n, t } = useLingui();
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<Slot | undefined>(undefined);
   const [selectedBookingDetails, setSelectedBookingDetails] = useState<
@@ -415,6 +417,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     const durationLabel = formatDuration(draft.start, draft.end);
     const draftEvent = api.getEventById(DRAFT_SLOT_EVENT_ID);
     if (draftEvent) {
+      draftEvent.setProp("title", t`New booking`);
       draftEvent.setDates(draft.start, draft.end);
       draftEvent.setExtendedProp("durationLabel", durationLabel);
       return;
@@ -422,7 +425,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
 
     api.addEvent({
       id: DRAFT_SLOT_EVENT_ID,
-      title: "New booking",
+      title: t`New booking`,
       start: draft.start,
       end: draft.end,
       display: "block",
@@ -432,7 +435,11 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       },
       color: "#9A2EFF",
     });
-  }, [room]);
+  }, [room, t]);
+
+  useEffect(() => {
+    syncDraftToCalendar();
+  }, [syncDraftToCalendar]);
 
   const clearBookingDraft = useCallback(() => {
     bookingDraftRef.current = null;
@@ -603,6 +610,11 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     }
   }, []);
 
+  const renderLocalizedDayHeader = useCallback(
+    (arg: DayHeaderContentArg) => renderDayHeader(arg, i18n.locale),
+    [i18n.locale],
+  );
+
   const renderTimeGridEvent = useCallback(
     (arg: EventContentArg) => {
       if (arg.event.extendedProps.isDraft) {
@@ -637,7 +649,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
             <button
               type="button"
               data-draft-anchor="top"
-              aria-label="Adjust booking start by dragging top edge"
+              aria-label={t`Adjust booking start by dragging top edge`}
               className="absolute top-0 right-0 left-0 z-10 h-1/2 cursor-ns-resize touch-none bg-transparent"
               style={{ touchAction: "none" }}
               onPointerDown={(event) => handleDraftPointerDown("top", event)}
@@ -645,14 +657,14 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
             <button
               type="button"
               data-draft-anchor="bottom"
-              aria-label="Adjust booking end by dragging bottom edge"
+              aria-label={t`Adjust booking end by dragging bottom edge`}
               className="absolute right-0 bottom-0 left-0 z-10 h-1/2 cursor-ns-resize touch-none bg-transparent"
               style={{ touchAction: "none" }}
               onPointerDown={(event) => handleDraftPointerDown("bottom", event)}
             />
             {!is30m && (
               <span className="text-base-content pointer-events-none px-2 text-xs font-semibold">
-                {durationLabel || "30m"}
+                {durationLabel || formatBookingDuration(DRAFT_SLOT_MS)}
               </span>
             )}
           </div>
@@ -661,7 +673,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
 
       return renderEventTimeGridWeekRegular(arg);
     },
-    [handleDraftPointerDown],
+    [handleDraftPointerDown, t],
   );
 
   useEffect(() => {
@@ -963,12 +975,12 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         onEventClick={handleEventClick}
         onDatesSet={handleDatesSet}
         renderTimeGridEvent={renderTimeGridEvent}
-        renderDayHeader={renderDayHeader}
+        renderDayHeader={renderLocalizedDayHeader}
       />
       {pastBookingPopupVisible && !draftPhase && (
         <div className="pointer-events-none fixed right-3 bottom-14 left-3 z-30 flex justify-center @md/content:justify-end">
           <div className="rounded-xs border border-red-600 bg-red-400 px-3 py-1 text-sm font-medium text-red-900 shadow-sm dark:border-red-700 dark:bg-red-900 dark:text-red-500">
-            You cannot book in the past.
+            <Trans>You cannot book in the past.</Trans>
           </div>
         </div>
       )}
@@ -977,7 +989,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           {pastBookingPopupVisible && (
             <div className="pointer-events-none absolute right-3 bottom-full left-3 z-30 mb-2 flex justify-center @md/content:justify-end">
               <div className="rounded-xs border border-red-600 bg-red-400 px-3 py-1 text-sm font-medium text-red-900 shadow-sm dark:border-red-700 dark:bg-red-900 dark:text-red-500">
-                You cannot book in the past.
+                <Trans>You cannot book in the past.</Trans>
               </div>
             </div>
           )}
@@ -987,14 +999,14 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
               className="btn btn-outline grow"
               onClick={clearBookingDraft}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
             <button
               type="button"
               className="btn btn-primary grow"
               onClick={handleDraftBook}
             >
-              Book
+              <Trans>Book</Trans>
             </button>
           </div>
         </div>
@@ -1014,7 +1026,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
 }
 
 function renderNoEventsContent() {
-  return "No events this month";
+  return coreT`No events this month`;
 }
 
 function renderEventListMonth({ event }: EventContentArg) {
@@ -1065,18 +1077,18 @@ function renderEventTimeGridWeekRegular({
         <button
           type="button"
           data-draft-anchor="top"
-          aria-label="Adjust booking start by dragging top edge"
+          aria-label={coreT`Adjust booking start by dragging top edge`}
           className="absolute top-0 right-0 left-0 z-10 h-1/2 cursor-ns-resize touch-none bg-transparent"
         />
         <button
           type="button"
           data-draft-anchor="bottom"
-          aria-label="Adjust booking end by dragging bottom edge"
+          aria-label={coreT`Adjust booking end by dragging bottom edge`}
           className="absolute right-0 bottom-0 left-0 z-10 h-1/2 cursor-ns-resize touch-none bg-transparent"
         />
         {!is30m && (
           <span className="text-base-content pointer-events-none px-2 text-xs font-semibold">
-            {durationLabel || "30m"}
+            {durationLabel || formatBookingDuration(DRAFT_SLOT_MS)}
           </span>
         )}
       </div>
@@ -1154,14 +1166,14 @@ function renderEventDayGridMonth({
   );
 }
 
-function renderDayHeader({ date }: DayHeaderContentArg) {
+function renderDayHeader({ date }: DayHeaderContentArg, locale: string) {
   // Show weekday and day number in the day header
   // The day number is highlighted with a red background if it is today
   return (
     <>
-      {moment(date).format("ddd")}{" "}
+      {moment(date).locale(locale).format("ddd")}{" "}
       <div className="inline-flex w-fit items-center justify-center rounded-md in-[.fc-day-today]:bg-red-500 in-[.fc-day-today]:px-1 in-[.fc-day-today]:text-white">
-        {moment(date).format("D")}
+        {moment(date).locale(locale).format("D")}
       </div>
     </>
   );

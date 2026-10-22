@@ -5,30 +5,10 @@ import {
   SchemaPublicHost,
   SchemaResolvedLocation,
 } from "@/api/events/types";
+import { useLingui } from "@lingui/react/macro";
 import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
 import { PublicHostsList, StoredHostsList } from "./HostLink";
 import { LocationLink } from "./LocationLink";
-
-function formatEnrollment(enrollment?: SchemaEnrollment | null) {
-  if (!enrollment) {
-    return null;
-  }
-
-  if (enrollment.type === EnrollmentType.external) {
-    return enrollment.url?.trim()
-      ? { label: "External", url: enrollment.url.trim() }
-      : { label: "External", url: null };
-  }
-
-  if (enrollment.capacity === null || enrollment.capacity === undefined) {
-    return { label: "On InNoHassle · unlimited", url: null };
-  }
-
-  return {
-    label: `On InNoHassle · ${enrollment.capacity} participants`,
-    url: null,
-  };
-}
 
 export function EventInfoCard({
   hosts,
@@ -49,7 +29,31 @@ export function EventInfoCard({
   enrollment?: SchemaEnrollment | null;
   actions?: React.ReactNode;
 }) {
+  const { t } = useLingui();
   const endsAt = getEventEndsAt(startsAt, durationHours);
+
+  function formatEnrollment(value?: SchemaEnrollment | null) {
+    if (!value) {
+      return null;
+    }
+
+    if (value.type === EnrollmentType.external) {
+      return value.url?.trim()
+        ? { label: t`External`, url: value.url.trim() }
+        : { label: t`External`, url: null };
+    }
+
+    const capacity = value.capacity;
+    if (capacity === null || capacity === undefined) {
+      return { label: t`On InNoHassle · unlimited`, url: null };
+    }
+
+    return {
+      label: t`On InNoHassle · ${capacity} participants`,
+      url: null,
+    };
+  }
+
   const enrollmentInfo = formatEnrollment(enrollment);
 
   return (

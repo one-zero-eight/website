@@ -1,12 +1,18 @@
 import { $accounts } from "@/api/accounts";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { $roomBooking } from "@/api/room-booking";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  formatApiErrorDescriptor,
+  formatApiErrorMessage,
+} from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
 export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
+  const { t, i18n } = useLingui();
   const { showError, showSuccess } = useToast();
   const [code, setCode] = useState(initialCode ?? "");
   const [roomSearch, setRoomSearch] = useState("");
@@ -51,7 +57,10 @@ export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
     {
       onSuccess: (data) => {
         if (!data.room_id) {
-          showError("Error", "Device flow was approved without a room id.");
+          showError(
+            msg`Error`,
+            msg`Device flow was approved without a room id.`,
+          );
           return;
         }
 
@@ -59,13 +68,13 @@ export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
           roomId: data.room_id,
           at: data.at,
         });
-        showSuccess("Success", `TV linked to ${data.room_id}`);
+        showSuccess(msg`Success`, msg`TV linked to ${data.room_id}`);
         setCode("");
         setSelectedRoomId(null);
         setRoomSearch("");
       },
       onError: (error) => {
-        showError("Error", formatApiErrorMessage(error));
+        showError(msg`Error`, formatApiErrorDescriptor(error));
       },
     },
   );
@@ -73,12 +82,12 @@ export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
   function handleApprove() {
     const trimmedCode = code.trim();
     if (!trimmedCode) {
-      showError("Error", "Enter the code from the TV screen.");
+      showError(msg`Error`, msg`Enter the code from the TV screen.`);
       return;
     }
 
     if (!selectedRoomId) {
-      showError("Error", "Select a room.");
+      showError(msg`Error`, msg`Select a room.`);
       return;
     }
 
@@ -95,23 +104,29 @@ export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4">
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-medium">Link TV to room</h2>
+        <h2 className="text-xl font-medium">
+          <Trans>Link TV to room</Trans>
+        </h2>
         <p className="text-base-content/75 text-sm">
-          Open{" "}
-          <Link to="/tv" className="link text-primary">
-            /tv
-          </Link>{" "}
-          on the display, enter the startup password below, and approve it for
-          the selected room.
+          <Trans>
+            Open{" "}
+            <Link to="/tv" className="link text-primary">
+              /tv
+            </Link>{" "}
+            on the display, enter the startup password below, and approve it for
+            the selected room.
+          </Trans>
         </p>
 
         <label className="flex flex-col gap-2">
-          <span className="font-medium">Startup password</span>
+          <span className="font-medium">
+            <Trans>Startup password</Trans>
+          </span>
           <input
             autoComplete="off"
             spellCheck={false}
             className="input input-bordered w-full font-mono tracking-[0.2em]"
-            placeholder="Code from TV"
+            placeholder={t`Code from TV`}
             value={code}
             onChange={(event) => setCode(event.target.value.toUpperCase())}
           />
@@ -120,12 +135,14 @@ export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
 
       <section className="flex flex-col gap-3">
         <label className="flex flex-col gap-2">
-          <span className="font-medium">Room</span>
+          <span className="font-medium">
+            <Trans>Room</Trans>
+          </span>
           <input
             autoComplete="off"
             spellCheck={false}
             className="input input-bordered w-full"
-            placeholder="Search by name or id..."
+            placeholder={t`Search by name or id...`}
             value={roomSearch}
             onChange={(event) => setRoomSearch(event.target.value)}
           />
@@ -148,13 +165,15 @@ export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
               className="btn btn-outline"
               onClick={() => refetchRooms()}
             >
-              Retry
+              <Trans>Retry</Trans>
             </button>
           </div>
         )}
 
         {!isRoomsPending && !isRoomsError && filteredRooms.length === 0 && (
-          <p className="text-base-content/75 text-sm">No rooms found.</p>
+          <p className="text-base-content/75 text-sm">
+            <Trans>No rooms found.</Trans>
+          </p>
         )}
 
         {!isRoomsPending && !isRoomsError && filteredRooms.length > 0 && (
@@ -183,7 +202,9 @@ export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
 
         {selectedRoom && (
           <p className="text-base-content/75 text-sm">
-            Selected: {selectedRoom.title} ({selectedRoom.id})
+            <Trans>
+              Selected: {selectedRoom.title} ({selectedRoom.id})
+            </Trans>
           </p>
         )}
       </section>
@@ -197,29 +218,31 @@ export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
         {isApproving ? (
           <span className="loading loading-spinner loading-sm" />
         ) : (
-          "Approve device flow"
+          <Trans>Approve device flow</Trans>
         )}
       </button>
 
       {lastApproval && (
         <div className="alert alert-success">
           <span>
-            TV approved for room{" "}
-            <Link
-              to="/room-booking/rooms/$room"
-              params={{ room: lastApproval.roomId }}
-              className="link font-medium"
-            >
-              {lastApproval.roomId}
-            </Link>{" "}
-            at{" "}
-            {new Date(lastApproval.at).toLocaleString("ru-RU", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            <Trans>
+              TV approved for room{" "}
+              <Link
+                to="/room-booking/rooms/$room"
+                params={{ room: lastApproval.roomId }}
+                className="link font-medium"
+              >
+                {lastApproval.roomId}
+              </Link>{" "}
+              at{" "}
+              {new Date(lastApproval.at).toLocaleString(i18n.locale, {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </Trans>
           </span>
         </div>
       )}

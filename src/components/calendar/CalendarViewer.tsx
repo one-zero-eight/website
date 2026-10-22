@@ -1,4 +1,7 @@
 import { scheduleTypes } from "@/api/schedule";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   CALENDAR_LIST_EVENT_CLASS_NAMES,
   CALENDAR_LIST_EVENT_TIME_FORMAT,
@@ -17,6 +20,7 @@ import {
   EventInput,
   ViewApi,
 } from "@fullcalendar/core";
+import ruLocale from "@fullcalendar/core/locales/ru";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
@@ -67,6 +71,14 @@ const defaultViews: CalendarView[] = [
   { id: "listMonth", displayName: "List" },
 ];
 
+const VIEW_LABELS: Record<string, MessageDescriptor> = {
+  timeGrid3: msg`3 days`,
+  timeGridWeek: msg`Week`,
+  dayGridMonth: msg`Month`,
+  listMonth: msg`List`,
+  eventsCards: msg`Cards`,
+};
+
 export type URLType =
   | string
   | {
@@ -116,8 +128,17 @@ export function CalendarViewer({
   sportEvents?: EventInput[];
   onVisibleRangeChange?: (range: { start: Date; end: Date }) => void;
 }) {
+  const { t, i18n } = useLingui();
   const { academicCalendar } = useMyAcademicCalendar();
   const isMobile = useMediaQuery("(max-width: 767px)");
+
+  function getViewDisplayName(view: CalendarView) {
+    const descriptor = VIEW_LABELS[view.id];
+    if (descriptor) {
+      return i18n._(descriptor);
+    }
+    return view.displayName;
+  }
   const academicCalendarRef = useRef(academicCalendar);
   useEffect(() => {
     academicCalendarRef.current = academicCalendar;
@@ -265,6 +286,8 @@ export function CalendarViewer({
   const calendarComponent = useMemo(
     () => (
       <FullCalendar
+        locale={i18n.locale}
+        locales={[ruLocale]}
         weekends={true}
         ref={calendarRef}
         eventsSet={(events) => {
@@ -393,13 +416,11 @@ export function CalendarViewer({
         headerToolbar={false}
         titleFormat={(arg) => {
           if (arg.date.year === new Date().getFullYear()) {
-            // Show only month if current year, show short month name if width is small
-            return moment(arg.date).format(
-              calendarView === "listMonth" ? "MMM" : "MMMM",
-            );
+            // Show the full month name for the current year
+            return moment(arg.date).locale(i18n.locale).format("MMMM");
           } else {
             // Show month and year otherwise
-            return moment(arg.date).format("MMMM YYYY");
+            return moment(arg.date).locale(i18n.locale).format("MMMM YYYY");
           }
         }}
         views={{
@@ -408,25 +429,34 @@ export function CalendarViewer({
             listDayFormat: (arg) => {
               if (arg.date.year === new Date().getFullYear()) {
                 // Show month, day, weekday
-                return moment(arg.date).format("MMMM D, dddd");
+                return moment(arg.date)
+                  .locale(i18n.locale)
+                  .format("MMMM D, dddd");
               } else {
                 // Add year if not current year
-                return moment(arg.date).format("YYYY, MMMM D");
+                return moment(arg.date)
+                  .locale(i18n.locale)
+                  .format("YYYY, MMMM D");
               }
             },
-            listDaySideFormat: (arg) =>
-              `Week ${calculateAcademicWeek(academicCalendarRef.current, moment(arg.date).toDate())}`,
+            listDaySideFormat: (arg) => {
+              const week = calculateAcademicWeek(
+                academicCalendarRef.current,
+                moment(arg.date).toDate(),
+              );
+              return t`Week ${week}`;
+            },
           },
           timeGridWeek: {
             eventContent: renderEventTimeGridWeek,
-            dayHeaderContent: renderDayHeader,
+            dayHeaderContent: (arg) => renderDayHeader(arg, i18n.locale),
             weekNumbers: !isMobile,
           },
           timeGrid3: {
             type: "timeGrid",
             dayCount: 3,
             eventContent: renderEventTimeGridWeek,
-            dayHeaderContent: renderDayHeader,
+            dayHeaderContent: (arg) => renderDayHeader(arg, i18n.locale),
             weekNumbers: !isMobile,
           },
           dayGridMonth: {
@@ -492,13 +522,13 @@ export function CalendarViewer({
         // slotMinTime="07:00:00" // Cut everything earlier than 7am
         scrollTime="07:30:00" // Scroll to 7:30am on launch
         scrollTimeReset={false} // Do not reset scroll on date switch
-        noEventsContent={() => "No events this month"} // Custom message
+        noEventsContent={() => t`No events this month`} // Custom message
         datesSet={handleDatesSet}
         loading={setIsLoading}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isFullPage, handleDatesSet, isMobile],
+    [isFullPage, handleDatesSet, isMobile, i18n.locale, calendarView, t],
   );
 
   useEffect(() => {
@@ -638,14 +668,14 @@ export function CalendarViewer({
           >
             <span className="icon-[material-symbols--chevron-left] text-xl" />
           </button>
-          <h2 className="min-w-32 text-center text-base font-normal">
-            {moment(currentDate).format(
-              currentDate.getFullYear() === new Date().getFullYear()
-                ? calendarView === "listMonth"
-                  ? "MMM"
-                  : "MMMM"
-                : "MMMM YYYY",
-            )}
+          <h2 className="min-w-32 text-center text-base font-normal first-letter:uppercase">
+            {moment(currentDate)
+              .locale(i18n.locale)
+              .format(
+                currentDate.getFullYear() === new Date().getFullYear()
+                  ? "MMMM"
+                  : "MMMM YYYY",
+              )}
           </h2>
           <button
             type="button"
@@ -659,7 +689,7 @@ export function CalendarViewer({
             className="btn btn-sm hidden rounded-xl sm:inline-flex"
             onClick={handleToday}
           >
-            Today
+            <Trans>Today</Trans>
           </button>
         </div>
         <div className="hidden shrink-0 items-center gap-2 sm:flex">
@@ -674,7 +704,7 @@ export function CalendarViewer({
                 )}
                 onClick={() => handleChangeView(view.id)}
               >
-                {view.displayName}
+                {getViewDisplayName(view)}
               </button>
             ))}
           </div>
@@ -685,7 +715,7 @@ export function CalendarViewer({
               onClick={() => setSourcesDialogOpen(true)}
             >
               <span className="icon-[material-symbols--settings-outline] text-xl" />
-              Config & Export
+              <Trans>Config & Export</Trans>
             </button>
           )}
         </div>
@@ -738,6 +768,7 @@ function CalendarControlMenu({
   showConfig: boolean;
   className?: string;
 }) {
+  const { i18n } = useLingui();
   const [isOpen, setIsOpen] = useState(false);
 
   const { refs, floatingStyles, context } = useFloating({
@@ -757,6 +788,14 @@ function CalendarControlMenu({
     click,
     dismiss,
   ]);
+
+  function getViewDisplayName(view: CalendarView) {
+    const descriptor = VIEW_LABELS[view.id];
+    if (descriptor) {
+      return i18n._(descriptor);
+    }
+    return view.displayName;
+  }
 
   return (
     <>
@@ -785,7 +824,7 @@ function CalendarControlMenu({
                 setIsOpen(false);
               }}
             >
-              Go today
+              <Trans>Go today</Trans>
             </button>
 
             <div className="bg-base-300 my-1 h-px" />
@@ -803,7 +842,7 @@ function CalendarControlMenu({
                   setIsOpen(false);
                 }}
               >
-                {view.displayName}
+                {getViewDisplayName(view)}
               </button>
             ))}
 
@@ -819,7 +858,7 @@ function CalendarControlMenu({
                   }}
                 >
                   <span className="icon-[material-symbols--settings-outline] text-lg" />
-                  Config & Export
+                  <Trans>Config & Export</Trans>
                 </button>
               </>
             )}
@@ -909,15 +948,15 @@ function renderEventDayGridMonth({
   );
 }
 
-function renderDayHeader({ date }: DayHeaderContentArg) {
+function renderDayHeader({ date }: DayHeaderContentArg, locale: string) {
   // Show weekday and day number in the day header
   // The day number is highlighted with a red background if it is today
   return (
     <>
-      {moment(date).format("ddd")}{" "}
+      {moment(date).locale(locale).format("ddd")}{" "}
       <span className="whitespace-pre-wrap sm:hidden">{"\n"}</span>
       <span className="inline-flex w-fit items-center justify-center rounded-md in-[.fc-day-today]:bg-red-500 in-[.fc-day-today]:px-1 in-[.fc-day-today]:text-white">
-        {moment(date).format("D")}
+        {moment(date).locale(locale).format("D")}
       </span>
     </>
   );

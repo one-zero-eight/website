@@ -1,4 +1,6 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { $events } from "@/api/events";
 import { SchemaDraftOut } from "@/api/events/types";
 import { Modal } from "@/components/common/Modal.tsx";
@@ -30,6 +32,7 @@ export function EditDraftInfoModal({
   onOpenChange: (open: boolean) => void;
   draft: SchemaDraftOut;
 }) {
+  const { t } = useLingui();
   const { showError } = useToast();
   const queryClient = useQueryClient();
 
@@ -73,7 +76,7 @@ export function EditDraftInfoModal({
       onOpenChange(false);
     },
     onError: (error) => {
-      showError("Error", formatApiErrorMessage(error));
+      showError(msg`Error`, formatApiErrorDescriptor(error));
     },
   });
 
@@ -85,10 +88,10 @@ export function EditDraftInfoModal({
     const apiEnrollment = enrollmentFormToApi(enrollment);
     if (!apiEnrollment) {
       showError(
-        "Invalid enrollment",
+        msg`Invalid enrollment`,
         enrollment.type === "external"
-          ? "Enrollment URL is required for external enrollment."
-          : "Capacity must be empty or at least 1.",
+          ? msg`Enrollment URL is required for external enrollment.`
+          : msg`Capacity must be empty or at least 1.`,
       );
       return;
     }
@@ -105,7 +108,7 @@ export function EditDraftInfoModal({
   }
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Edit info">
+    <Modal open={open} onOpenChange={onOpenChange} title={t`Edit info`}>
       <form
         className="@container/modal flex flex-col gap-4"
         onSubmit={(e) => {
@@ -115,7 +118,9 @@ export function EditDraftInfoModal({
       >
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-1 text-sm">
-            <span>Starts at</span>
+            <span>
+              <Trans>Starts at</Trans>
+            </span>
             <input
               type="datetime-local"
               className={eventFieldClass()}
@@ -126,7 +131,9 @@ export function EditDraftInfoModal({
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
-            <span>Ends at</span>
+            <span>
+              <Trans>Ends at</Trans>
+            </span>
             <input
               type="datetime-local"
               className={eventFieldClass()}
@@ -159,7 +166,7 @@ export function EditDraftInfoModal({
             disabled={isPending}
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="submit"
@@ -169,7 +176,7 @@ export function EditDraftInfoModal({
             {isPending && (
               <span className="loading loading-spinner loading-sm" />
             )}
-            Save
+            <Trans>Save</Trans>
           </button>
         </div>
       </form>

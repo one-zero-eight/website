@@ -1,4 +1,6 @@
+import { plural } from "@lingui/core/macro";
 import { clubsTypes } from "@/api/clubs";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { clubTypesOrder, getClubTypeLabel } from "./constants.ts";
 import { cn } from "@/lib/ui/cn";
 
@@ -19,14 +21,26 @@ export function ClubsSidebar({
   mobileFiltersOpen: boolean;
   setMobileFiltersOpen: (open: boolean) => void;
 }) {
+  const { t } = useLingui();
+
+  const count = totalCount;
+  const countLabel = search
+    ? t`${plural(count, {
+        one: "# club found",
+        other: "# clubs found",
+      })}`
+    : t`${plural(count, { one: "# club", other: "# clubs" })}`;
+
   const sidebarContent = (
     <div className="card-body bg-base-100 rounded-box flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h3 className="text-base-content text-sm font-semibold">Search</h3>
+        <h3 className="text-base-content text-sm font-semibold">
+          <Trans>Search</Trans>
+        </h3>
         <div className="border-base-300 focus-within:border-b-primary flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0">
           <input
             type="text"
-            placeholder="Search clubs..."
+            placeholder={t`Search clubs...`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="min-w-0 grow bg-transparent px-2 py-1 outline-hidden"
@@ -36,7 +50,9 @@ export function ClubsSidebar({
       </div>
 
       <div className="flex flex-col gap-2">
-        <h3 className="text-base-content text-sm font-semibold">Filters</h3>
+        <h3 className="text-base-content text-sm font-semibold">
+          <Trans>Filters</Trans>
+        </h3>
         <div className="flex flex-col gap-2">
           {clubTypesOrder.map((type) => (
             <label
@@ -56,11 +72,7 @@ export function ClubsSidebar({
       </div>
 
       <div className="border-t-base-300 border-t pt-4">
-        <div className="text-base-content/70 text-sm">
-          <span className="font-semibold">{totalCount}</span>{" "}
-          {totalCount === 1 ? "club" : "clubs"}
-          {search && " found"}
-        </div>
+        <div className="text-base-content/70 text-sm">{countLabel}</div>
       </div>
     </div>
   );
@@ -69,11 +81,7 @@ export function ClubsSidebar({
     <>
       <div className="mb-6 flex flex-col gap-4 lg:hidden">
         <div className="flex items-center justify-between">
-          <div className="text-base-content/70 text-sm">
-            <span className="font-semibold">{totalCount}</span>{" "}
-            {totalCount === 1 ? "club" : "clubs"}
-            {search && " found"}
-          </div>
+          <div className="text-base-content/70 text-sm">{countLabel}</div>
           <button
             type="button"
             onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
@@ -85,7 +93,9 @@ export function ClubsSidebar({
                 mobileFiltersOpen && "rotate-180",
               )}
             />
-            <span>Filters</span>
+            <span>
+              <Trans>Filters</Trans>
+            </span>
           </button>
         </div>
 

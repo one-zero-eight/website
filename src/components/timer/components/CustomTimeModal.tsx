@@ -1,4 +1,7 @@
+import { msg } from "@lingui/core/macro";
+import { type MessageDescriptor } from "@lingui/core";
 import { Modal } from "@/components/common/Modal.tsx";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo, useState } from "react";
 
 interface CustomTimeModalProps {
@@ -13,7 +16,8 @@ const CustomTimeModal = ({
   onStart,
 }: CustomTimeModalProps) => {
   const [selectedDateTime, setSelectedDateTime] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const { t, i18n } = useLingui();
+  const [error, setError] = useState<MessageDescriptor | null>(null);
   const [previewTime, setPreviewTime] = useState<string | null>(null);
 
   const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99;
@@ -77,33 +81,39 @@ const CustomTimeModal = ({
     const totalSeconds = Math.round((targetDate.getTime() - now) / 1000);
 
     if (totalSeconds <= 0) {
-      setError("The selected time must be in the future");
+      setError(msg`The selected time must be in the future`);
       return;
     }
 
     if (totalSeconds > MAX_SECONDS) {
-      setError("The maximum countdown duration is 99:99:99");
+      setError(msg`The maximum countdown duration is 99:99:99`);
       return;
     }
 
     onStart(targetDate);
     setSelectedDateTime("");
-    setError("");
+    setError(null);
     onOpenChange(false);
   };
 
   return (
-    <Modal open={open} title="Select Target Time" onOpenChange={onOpenChange}>
+    <Modal
+      open={open}
+      title={t`Select Target Time`}
+      onOpenChange={onOpenChange}
+    >
       <div className="flex flex-col gap-2">
         <p className="text-base-content/70 text-sm">
-          Select a specific date and time in the future. The timer will count
-          down until that moment.
+          <Trans>
+            Select a specific date and time in the future. The timer will count
+            down until that moment.
+          </Trans>
         </p>
 
         <div className="form-control w-full">
           <label className="label">
             <span className="label-text py-2 font-bold">
-              Target Date & Time
+              <Trans>Target Date & Time</Trans>
             </span>
           </label>
           <input
@@ -112,7 +122,7 @@ const CustomTimeModal = ({
             value={selectedDateTime}
             onChange={(e) => {
               setSelectedDateTime(e.target.value);
-              setError("");
+              setError(null);
             }}
             min={minDateTime}
             max={maxDateTime}
@@ -120,14 +130,14 @@ const CustomTimeModal = ({
           {error ? (
             <label className="label">
               <span className="label-text-alt text-error py-2 font-medium text-wrap">
-                {error}
+                {i18n._(error)}
               </span>
             </label>
           ) : (
             previewTime && (
               <div className="mt-2 flex flex-col items-start gap-1 rounded-lg py-1.5 transition-all">
                 <span className="text-base-content/50 text-xs font-medium">
-                  Time you will have
+                  <Trans>Time you will have</Trans>
                 </span>
                 <span className="text-primary font-mono text-3xl font-bold tracking-tight">
                   {previewTime}
@@ -143,7 +153,7 @@ const CustomTimeModal = ({
             className="btn btn-ghost w-full sm:w-auto"
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="button"
@@ -154,7 +164,7 @@ const CustomTimeModal = ({
               new Date(selectedDateTime).getTime() <= Date.now()
             }
           >
-            Start Timer
+            <Trans>Start Timer</Trans>
           </button>
         </div>
       </div>

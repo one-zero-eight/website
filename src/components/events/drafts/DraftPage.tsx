@@ -1,4 +1,9 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  formatApiErrorDescriptor,
+  formatApiErrorMessage,
+} from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { useMe } from "@/api/accounts/user.ts";
 import { $events } from "@/api/events";
 import { DraftStatus, RestoreBodyFrom } from "@/api/events/types";
@@ -26,6 +31,7 @@ import { EditDraftInfoModal } from "./EditDraftInfoModal";
 import { RestoreDraftModal } from "./RestoreDraftModal";
 
 export function DraftPage({ id }: { id: string }) {
+  const { t } = useLingui();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { me } = useMe();
@@ -110,7 +116,7 @@ export function DraftPage({ id }: { id: string }) {
     "/drafts/{id}/locales/{locale}",
     {
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -123,7 +129,7 @@ export function DraftPage({ id }: { id: string }) {
         invalidateDraft();
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     });
 
@@ -134,7 +140,7 @@ export function DraftPage({ id }: { id: string }) {
         invalidateDraft();
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     });
 
@@ -146,7 +152,7 @@ export function DraftPage({ id }: { id: string }) {
         invalidateDraft();
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -165,7 +171,7 @@ export function DraftPage({ id }: { id: string }) {
         invalidateDraft();
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -181,7 +187,7 @@ export function DraftPage({ id }: { id: string }) {
         });
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -195,7 +201,7 @@ export function DraftPage({ id }: { id: string }) {
         navigate({ to: "/events/drafts" });
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     });
 
@@ -205,7 +211,7 @@ export function DraftPage({ id }: { id: string }) {
         invalidateDraft();
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     });
 
@@ -224,7 +230,7 @@ export function DraftPage({ id }: { id: string }) {
         invalidateDraft();
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -256,14 +262,14 @@ export function DraftPage({ id }: { id: string }) {
     return (
       <div className="px-4 py-4">
         <p className="text-error mb-2">
-          {formatApiErrorMessage(error) || "Failed to load draft."}
+          {formatApiErrorMessage(error) || t`Failed to load draft.`}
         </p>
         <button
           type="button"
           className="btn btn-ghost"
           onClick={() => refetch()}
         >
-          Retry
+          <Trans>Retry</Trans>
         </button>
       </div>
     );
@@ -288,10 +294,10 @@ export function DraftPage({ id }: { id: string }) {
 
   async function handleDeleteDraft() {
     const confirmed = await showConfirm({
-      title: "Delete draft",
-      message: "Delete this draft permanently? This cannot be undone.",
-      confirmText: "Delete",
-      cancelText: "Cancel",
+      title: msg`Delete draft`,
+      message: msg`Delete this draft permanently? This cannot be undone.`,
+      confirmText: msg`Delete`,
+      cancelText: msg`Cancel`,
       type: "error",
     });
     if (!confirmed) {
@@ -303,10 +309,10 @@ export function DraftPage({ id }: { id: string }) {
 
   async function handleCancelSubmission() {
     const confirmed = await showConfirm({
-      title: "Cancel submission",
-      message: "Cancel the pending submission? The draft will stay.",
-      confirmText: "Cancel submission",
-      cancelText: "Keep",
+      title: msg`Cancel submission`,
+      message: msg`Cancel the pending submission? The draft will stay.`,
+      confirmText: msg`Cancel submission`,
+      cancelText: msg`Keep`,
       type: "warning",
     });
     if (!confirmed) {
@@ -317,13 +323,14 @@ export function DraftPage({ id }: { id: string }) {
   }
 
   async function handleRestore(from: RestoreBodyFrom) {
-    const sourceLabel =
-      from === RestoreBodyFrom.public ? "public event" : "submission";
     const confirmed = await showConfirm({
-      title: "Restore draft",
-      message: `Replace the current draft with the ${sourceLabel} version? Unsaved draft changes will be lost.`,
-      confirmText: "Restore",
-      cancelText: "Cancel",
+      title: msg`Restore draft`,
+      message:
+        from === RestoreBodyFrom.public
+          ? msg`Replace the current draft with the public event version? Unsaved draft changes will be lost.`
+          : msg`Replace the current draft with the submission version? Unsaved draft changes will be lost.`,
+      confirmText: msg`Restore`,
+      cancelText: msg`Cancel`,
       type: "warning",
     });
     if (!confirmed) {
@@ -433,7 +440,7 @@ export function DraftPage({ id }: { id: string }) {
             {hasPendingInvite && (
               <div className="border-info/40 bg-info/10 rounded-2xl border p-4">
                 <p className="mb-3 text-sm">
-                  Your club was invited as a host for this draft.
+                  <Trans>Your club was invited as a host for this draft.</Trans>
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -445,7 +452,7 @@ export function DraftPage({ id }: { id: string }) {
                     {isDeclining && (
                       <span className="loading loading-spinner loading-sm" />
                     )}
-                    Decline
+                    <Trans>Decline</Trans>
                   </button>
                   <button
                     type="button"
@@ -456,7 +463,7 @@ export function DraftPage({ id }: { id: string }) {
                     {isAccepting && (
                       <span className="loading loading-spinner loading-sm" />
                     )}
-                    Accept
+                    <Trans>Accept</Trans>
                   </button>
                 </div>
               </div>
@@ -477,7 +484,7 @@ export function DraftPage({ id }: { id: string }) {
                     disabled={controlsDisabled}
                     onClick={() => setEditInfoOpen(true)}
                   >
-                    Edit info
+                    <Trans>Edit info</Trans>
                   </button>
                 ) : undefined
               }
@@ -540,7 +547,7 @@ export function DraftPage({ id }: { id: string }) {
                             disabled={isSavingLocale}
                             onClick={handleCancelEditLocale}
                           >
-                            Cancel
+                            <Trans>Cancel</Trans>
                           </button>
                           <button
                             type="button"
@@ -551,7 +558,7 @@ export function DraftPage({ id }: { id: string }) {
                             {isSavingLocale && (
                               <span className="loading loading-spinner loading-sm" />
                             )}
-                            Save
+                            <Trans>Save</Trans>
                           </button>
                         </>
                       ) : (
@@ -562,7 +569,7 @@ export function DraftPage({ id }: { id: string }) {
                             disabled={!selectedLocale || isSavingLocale}
                             onClick={() => setDeleteLocaleOpen(true)}
                           >
-                            Delete language
+                            <Trans>Delete language</Trans>
                           </button>
                           <button
                             type="button"
@@ -570,7 +577,7 @@ export function DraftPage({ id }: { id: string }) {
                             disabled={!selectedLocale || isSavingLocale}
                             onClick={handleStartEditLocale}
                           >
-                            Edit
+                            <Trans>Edit</Trans>
                           </button>
                         </>
                       )}
@@ -650,7 +657,9 @@ export function DraftPage({ id }: { id: string }) {
 
             {showManageActions && (
               <div className="border-base-300 flex flex-wrap items-center justify-between gap-2 rounded-2xl border p-4">
-                <p className="text-sm font-medium">Manage</p>
+                <p className="text-sm font-medium">
+                  <Trans>Manage</Trans>
+                </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   {canRestore && (
                     <button
@@ -659,7 +668,7 @@ export function DraftPage({ id }: { id: string }) {
                       disabled={isRestoring}
                       onClick={() => setRestoreOpen(true)}
                     >
-                      Restore
+                      <Trans>Restore</Trans>
                     </button>
                   )}
                   {canCancelSubmission && (
@@ -672,7 +681,7 @@ export function DraftPage({ id }: { id: string }) {
                       {isCancelingSubmission && (
                         <span className="loading loading-spinner loading-sm" />
                       )}
-                      Cancel submission
+                      <Trans>Cancel submission</Trans>
                     </button>
                   )}
                   {canDeleteDraft && (
@@ -685,7 +694,7 @@ export function DraftPage({ id }: { id: string }) {
                       {isDeletingDraft && (
                         <span className="loading loading-spinner loading-sm" />
                       )}
-                      Delete draft
+                      <Trans>Delete draft</Trans>
                     </button>
                   )}
                 </div>
@@ -714,14 +723,16 @@ export function DraftPage({ id }: { id: string }) {
       <Modal
         open={deleteLocaleOpen}
         onOpenChange={setDeleteLocaleOpen}
-        title="Delete language"
+        title={t`Delete language`}
       >
         <p className="mb-4 text-sm">
-          Delete language{" "}
-          <span className="font-medium">
-            {selectedLocale ? getLocaleLabel(selectedLocale) : selectedLocale}
-          </span>
-          ?
+          <Trans>
+            Delete language{" "}
+            <span className="font-medium">
+              {selectedLocale ? getLocaleLabel(selectedLocale) : selectedLocale}
+            </span>
+            ?
+          </Trans>
         </p>
         <div className="flex justify-end gap-2">
           <button
@@ -729,7 +740,7 @@ export function DraftPage({ id }: { id: string }) {
             className="btn btn-ghost"
             onClick={() => setDeleteLocaleOpen(false)}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="button"
@@ -747,7 +758,7 @@ export function DraftPage({ id }: { id: string }) {
             {isDeletingLocale && (
               <span className="loading loading-spinner loading-sm" />
             )}
-            Delete
+            <Trans>Delete</Trans>
           </button>
         </div>
       </Modal>
@@ -777,7 +788,7 @@ function DraftSubmissionCard({
   if (status === DraftStatus.pending) {
     return (
       <div className="border-base-300 rounded-2xl border p-4 text-sm">
-        Draft submitted on review
+        <Trans>Draft submitted on review</Trans>
       </div>
     );
   }
@@ -785,7 +796,9 @@ function DraftSubmissionCard({
   if (status === DraftStatus.declined) {
     return (
       <div className="border-base-300 rounded-2xl border p-4 text-sm">
-        <p className="font-medium">Draft declined</p>
+        <p className="font-medium">
+          <Trans>Draft declined</Trans>
+        </p>
         {feedback?.trim() && (
           <p className="text-base-content/80 mt-2 whitespace-pre-wrap">
             {feedback}
@@ -798,13 +811,15 @@ function DraftSubmissionCard({
   if (status === DraftStatus.published) {
     return (
       <div className="border-base-300 flex flex-wrap items-center justify-between gap-2 rounded-2xl border p-4 text-sm">
-        <p className="font-medium">Draft published</p>
+        <p className="font-medium">
+          <Trans>Draft published</Trans>
+        </p>
         <Link
           to="/events/p/$id"
           params={{ id }}
           className="btn btn-primary btn-sm"
         >
-          Open
+          <Trans>Open</Trans>
         </Link>
       </div>
     );
@@ -813,7 +828,7 @@ function DraftSubmissionCard({
   if (status === DraftStatus.unpublished) {
     return (
       <div className="border-base-300 rounded-2xl border p-4 text-sm">
-        Draft removed from publication
+        <Trans>Draft removed from publication</Trans>
       </div>
     );
   }
@@ -821,7 +836,10 @@ function DraftSubmissionCard({
   if (!canEdit) {
     return (
       <div className="border-base-300 rounded-2xl border p-4 text-sm">
-        You can view this draft. Accept the host invitation to edit and submit.
+        <Trans>
+          You can view this draft. Accept the host invitation to edit and
+          submit.
+        </Trans>
       </div>
     );
   }
@@ -830,15 +848,21 @@ function DraftSubmissionCard({
     <div className="border-base-300 rounded-2xl border p-4">
       {feedback?.trim() && (
         <div className="mb-3 text-sm">
-          <p className="mb-1 font-medium">Moderator feedback</p>
+          <p className="mb-1 font-medium">
+            <Trans>Moderator feedback</Trans>
+          </p>
           <p className="text-base-content/80 whitespace-pre-wrap">{feedback}</p>
         </div>
       )}
       {canSubmit ? (
-        <p className="mb-3 text-sm">Draft is ready for publication.</p>
+        <p className="mb-3 text-sm">
+          <Trans>Draft is ready for publication.</Trans>
+        </p>
       ) : (
         <div className="mb-3 text-sm">
-          <p className="mb-2">Draft cannot be submitted on review:</p>
+          <p className="mb-2">
+            <Trans>Draft cannot be submitted on review:</Trans>
+          </p>
           <ul className="text-base-content/80 list-disc space-y-1 pl-5">
             {cannotSubmitReasons.map((reason) => (
               <li key={reason}>{reason}</li>
@@ -859,7 +883,7 @@ function DraftSubmissionCard({
           {isSubmitting && (
             <span className="loading loading-spinner loading-sm" />
           )}
-          Submit on review
+          <Trans>Submit on review</Trans>
         </button>
       </div>
     </div>

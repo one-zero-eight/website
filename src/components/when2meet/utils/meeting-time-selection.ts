@@ -1,9 +1,9 @@
+import { msg } from "@lingui/core/macro";
 import { slotKeyToDateRange } from "./api-slots.ts";
 import { getSlotKey, getSlotKeysBetween, parseSlotKey } from "./slots.ts";
 import type { MeetingTimeRange } from "./meeting-time.ts";
 
-export const PAST_MEETING_TIME_MESSAGE =
-  "The selected start time has passed. Choose another time.";
+export const PAST_MEETING_TIME_MESSAGE = msg`The selected start time has passed. Choose another time.`;
 
 export function isMeetingTimeInFuture(
   meetingTime: MeetingTimeRange,

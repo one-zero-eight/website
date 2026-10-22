@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 import { Modal } from "@/components/common/Modal.tsx";
 
@@ -18,6 +19,7 @@ function Stepper({
   disabled: boolean;
   leading: boolean;
 }) {
+  const { t } = useLingui();
   return (
     <div
       className={cn(
@@ -30,7 +32,7 @@ function Stepper({
       </span>
       <button
         type="button"
-        aria-label={`Decrease ${name} score`}
+        aria-label={t`Decrease ${name} score`}
         disabled={disabled || value === 0}
         onClick={() => onChange(value - 1)}
         className="border-base-content/20 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-xl disabled:opacity-30"
@@ -42,7 +44,7 @@ function Stepper({
       </span>
       <button
         type="button"
-        aria-label={`Increase ${name} score`}
+        aria-label={t`Increase ${name} score`}
         disabled={disabled || value >= MAX_SETS}
         onClick={() => onChange(value + 1)}
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#712BB2] text-xl text-white disabled:opacity-30"
@@ -62,7 +64,7 @@ export function ScoreSheet({
   player2,
   onSubmit,
   initial,
-  submitLabel = "Finish match",
+  submitLabel,
   note,
   validate,
   secondaryAction,
@@ -81,6 +83,7 @@ export function ScoreSheet({
   validate?: (s1: number, s2: number) => string | null;
   secondaryAction?: { label: string; onClick: () => Promise<void> };
 }) {
+  const { t } = useLingui();
   const [s1, setS1] = useState(0);
   const [s2, setS2] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -95,7 +98,7 @@ export function ScoreSheet({
 
   const unchanged = !!initial && initial[0] === s1 && initial[1] === s2;
   const error =
-    s1 === s2 ? "Draws are not allowed" : (validate?.(s1, s2) ?? null);
+    s1 === s2 ? t`Draws are not allowed` : (validate?.(s1, s2) ?? null);
 
   async function run(action: () => Promise<void>) {
     setSaving(true);
@@ -117,7 +120,9 @@ export function ScoreSheet({
       overlayClassName="items-end justify-items-stretch p-0 md:place-items-center md:p-4"
       containerClassName="max-w-none rounded-b-none pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-md md:rounded-box"
     >
-      <p className="text-base-content/50 -mt-1 text-xs">Sets won</p>
+      <p className="text-base-content/50 -mt-1 text-xs">
+        <Trans>Sets won</Trans>
+      </p>
       {note && (
         <p className="rounded-xl border border-[#712BB2]/40 bg-[#712BB2]/10 px-3 py-2 text-xs">
           {note}
@@ -148,7 +153,7 @@ export function ScoreSheet({
         {saving ? (
           <span className="loading loading-spinner loading-sm" />
         ) : (
-          (error ?? submitLabel)
+          (error ?? submitLabel ?? t`Finish match`)
         )}
       </button>
       {secondaryAction && (

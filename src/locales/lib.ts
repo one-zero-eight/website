@@ -1,4 +1,6 @@
 import { i18n, type Messages } from "@lingui/core";
+import moment from "moment";
+import "moment/locale/ru.js";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { messages as enMessages } from "./en.po";
@@ -53,8 +55,9 @@ export const getInitialLocale = (): Locale => {
 };
 
 export const activateLocale = (locale: Locale) => {
-  i18n.activate(locale);
+  moment.locale(locale);
   document.documentElement.lang = locale;
+  i18n.activate(locale);
 };
 
 const loadCatalogs = () => {
@@ -62,10 +65,17 @@ const loadCatalogs = () => {
 };
 
 export const useAppLocale = () => {
-  const [locale, setLocale] = useLocalStorage<Locale>(
+  const [locale, setLocaleState] = useLocalStorage<Locale>(
     LOCALE_STORAGE_KEY,
     DEFAULT_LOCALE,
   );
+
+  const setLocale = (next: Locale) => {
+    // Activate before React re-renders so moment/i18n match the new locale
+    // in the same paint as components that format dates.
+    activateLocale(next);
+    setLocaleState(next);
+  };
 
   useEffect(() => {
     activateLocale(locale);
@@ -84,6 +94,10 @@ export const initializeI18n = (): Locale => {
   activateLocale(initialLocale);
   return initialLocale;
 };
+
+// Activate during module evaluation so ESM imports that call `i18n._` at
+// module scope (before entry-client body runs) already have a locale.
+initializeI18n();
 
 if (import.meta.hot) {
   import.meta.hot.accept(

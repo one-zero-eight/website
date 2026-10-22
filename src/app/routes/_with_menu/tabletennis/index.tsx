@@ -4,7 +4,7 @@ import { TabletennisPage } from "@/components/tabletennis/TabletennisPage";
 import { TabletennisTabs } from "@/components/tabletennis/TabletennisTabs";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { $tabletennis } from "@/api/tabletennis";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   isApiHttpError,
   formatApiErrorMessage,
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/_with_menu/tabletennis/")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { isPending, isError, error, refetch } = $tabletennis.useQuery(
     "get",
     "/get-player",
@@ -27,9 +28,13 @@ function RouteComponent() {
   if (isError && isApiHttpError(error) && error.httpCode === 401) {
     return (
       <div className="px-4 py-12">
-        <h2 className="mb-4 text-3xl font-medium">Sign in to get access</h2>
+        <h2 className="mb-4 text-3xl font-medium">
+          <Trans>Sign in to get access</Trans>
+        </h2>
         <p className="text-base-content/75 mb-4 text-lg">
-          Use your Innopolis account to access table tennis features.
+          <Trans>
+            Use your Innopolis account to access InNoHassle services.
+          </Trans>
         </p>
         <SignInButton />
       </div>
@@ -51,8 +56,8 @@ function RouteComponent() {
   return (
     <>
       <Helmet>
-        <title>Table tennis</title>
-        <meta name="description" content="Table tennis site" />
+        <title>{t`Table tennis`}</title>
+        <meta name="description" content={t`Table tennis site`} />
       </Helmet>
 
       <Topbar title={<Trans>Table tennis club</Trans>} />

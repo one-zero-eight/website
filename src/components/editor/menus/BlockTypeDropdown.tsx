@@ -16,9 +16,13 @@ import { useEditorState } from "@tiptap/react";
 import { cn } from "@/lib/ui/cn";
 import { useMemo, useRef, useState } from "react";
 
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
+
 type BlockType = {
   id: string;
-  label: string;
+  label: MessageDescriptor;
   icon: string;
   action: (editor: Editor) => void;
   isActive: (editor: Editor) => boolean;
@@ -27,63 +31,63 @@ type BlockType = {
 const blockTypes: BlockType[] = [
   {
     id: "paragraph",
-    label: "Text",
+    label: msg`Text`,
     icon: "icon-[material-symbols--text-fields]",
     action: (ed) => ed.chain().focus().setParagraph().run(),
     isActive: (ed) => ed.isActive("paragraph") ?? false,
   },
   {
     id: "heading1",
-    label: "Heading 1",
+    label: msg`Heading 1`,
     icon: "icon-[material-symbols--format-h1]",
     action: (ed) => ed.chain().focus().toggleHeading({ level: 1 }).run(),
     isActive: (ed) => ed.isActive("heading", { level: 1 }) ?? false,
   },
   {
     id: "heading2",
-    label: "Heading 2",
+    label: msg`Heading 2`,
     icon: "icon-[material-symbols--format-h2]",
     action: (ed) => ed.chain().focus().toggleHeading({ level: 2 }).run(),
     isActive: (ed) => ed.isActive("heading", { level: 2 }) ?? false,
   },
   {
     id: "heading3",
-    label: "Heading 3",
+    label: msg`Heading 3`,
     icon: "icon-[material-symbols--format-h3]",
     action: (ed) => ed.chain().focus().toggleHeading({ level: 3 }).run(),
     isActive: (ed) => ed.isActive("heading", { level: 3 }) ?? false,
   },
   {
     id: "blockquote",
-    label: "Quote",
+    label: msg`Quote`,
     icon: "icon-[material-symbols--format-quote]",
     action: (ed) => ed.chain().focus().toggleBlockquote().run(),
     isActive: (ed) => ed.isActive("blockquote") ?? false,
   },
   {
     id: "codeBlock",
-    label: "Code",
+    label: msg`Code`,
     icon: "icon-[material-symbols--code-blocks]",
     action: (ed) => ed.chain().focus().toggleCodeBlock().run(),
     isActive: (ed) => ed.isActive("codeBlock") ?? false,
   },
   {
     id: "bulletList",
-    label: "Bullet list",
+    label: msg`Bullet list`,
     icon: "icon-[material-symbols--format-list-bulleted]",
     action: (ed) => ed.chain().focus().toggleBulletList().run(),
     isActive: (ed) => ed.isActive("bulletList") ?? false,
   },
   {
     id: "orderedList",
-    label: "Number list",
+    label: msg`Numbered list`,
     icon: "icon-[material-symbols--format-list-numbered]",
     action: (ed) => ed.chain().focus().toggleOrderedList().run(),
     isActive: (ed) => ed.isActive("orderedList") ?? false,
   },
   {
     id: "details",
-    label: "Toggle",
+    label: msg`Toggle`,
     icon: "icon-[material-symbols--expand-more]",
     action: (ed) => {
       if (ed.isActive("details")) {
@@ -96,7 +100,7 @@ const blockTypes: BlockType[] = [
   },
   {
     id: "callout",
-    label: "Callout",
+    label: msg`Callout`,
     icon: "icon-[material-symbols--info-outline-rounded]",
     action: (ed) => {
       if (ed.isActive("callout")) {
@@ -109,7 +113,7 @@ const blockTypes: BlockType[] = [
   },
   {
     id: "table",
-    label: "Table",
+    label: msg`Table`,
     icon: "icon-[material-symbols--table]",
     action: (ed) => {
       if (ed.isActive("table")) {
@@ -124,7 +128,7 @@ const blockTypes: BlockType[] = [
   },
   {
     id: "image",
-    label: "Image",
+    label: msg`Image`,
     icon: "icon-[material-symbols--image]",
     action: (ed) => {
       ed.chain()
@@ -137,6 +141,7 @@ const blockTypes: BlockType[] = [
 ];
 
 export function BlockTypeDropdown({ editor }: { editor: Editor }) {
+  const { i18n } = useLingui();
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const availableBlockTypes = useMemo(
@@ -197,7 +202,7 @@ export function BlockTypeDropdown({ editor }: { editor: Editor }) {
         )}
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <span className="line-clamp-1">{activeBlockType?.label || "Text"}</span>
+        <span className="line-clamp-1">{i18n._(activeBlockType.label)}</span>
         <span
           className={cn(
             "shrink-0 text-lg transition-transform",
@@ -244,7 +249,9 @@ export function BlockTypeDropdown({ editor }: { editor: Editor }) {
                   })}
                 >
                   <span className={cn("shrink-0 text-lg", type.icon)} />
-                  <span className="whitespace-nowrap">{type.label}</span>
+                  <span className="whitespace-nowrap">
+                    {i18n._(type.label)}
+                  </span>
                 </div>
               ))}
             </div>

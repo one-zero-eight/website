@@ -5,20 +5,21 @@ import { SportTabs } from "@/components/sport/SportTabs.tsx";
 import { SportTrainerPage } from "@/components/sport/SportTrainerPage.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/sport/trainer")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   return (
     <>
       <Helmet>
-        <title>Sport trainer</title>
+        <title>{t`Sport trainer`}</title>
         <meta
           name="description"
-          content="Trainer tools for sport groups at Innopolis University."
+          content={t`Trainer tools for sport groups at Innopolis University.`}
         />
       </Helmet>
 

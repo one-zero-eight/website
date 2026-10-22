@@ -1,4 +1,8 @@
 import { $clubs } from "@/api/clubs";
+import { Trans, useLingui } from "@lingui/react/macro";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import ruLocale from "@fullcalendar/core/locales/ru";
 import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
 import "@/components/calendar/styles-calendar.css";
@@ -38,6 +42,7 @@ export function SportTrainingsCalendarList({
   onSelect: (row: SchemaTrainingInfoPersonalSchema) => void;
   onCheckinSuccess: () => void;
 }) {
+  const { i18n, t } = useLingui();
   const { academicCalendar } = useMyAcademicCalendar();
   const { data: clubs, isError: clubsError } = $clubs.useQuery(
     "get",
@@ -91,7 +96,7 @@ export function SportTrainingsCalendarList({
   );
   const [checkinFeedback, setCheckinFeedback] = useState<{
     trainingId: number;
-    message: string;
+    message: MessageDescriptor;
     isError: boolean;
   } | null>(null);
 
@@ -109,7 +114,9 @@ export function SportTrainingsCalendarList({
       onSuccess: (_, vars) => {
         setCheckinFeedback({
           trainingId: vars.params.path.training_id,
-          message: vars.params.query.checkin ? "Checked in" : "Checked out",
+          message: vars.params.query.checkin
+            ? msg`Checked in`
+            : msg`Checked out`,
           isError: false,
         });
         invalidateSportCheckinQueries(studentId);
@@ -119,8 +126,8 @@ export function SportTrainingsCalendarList({
         setCheckinFeedback({
           trainingId: vars.params.path.training_id,
           message: vars.params.query.checkin
-            ? "Check-in failed · Retry"
-            : "Check-out failed · Retry",
+            ? msg`Check-in failed · Retry`
+            : msg`Check-out failed · Retry`,
           isError: true,
         });
       },
@@ -193,16 +200,24 @@ export function SportTrainingsCalendarList({
             {arg.event.title}
           </span>
           {row.training.is_paid || group?.is_paid ? (
-            <span className="badge badge-warning badge-xs">Paid</span>
+            <span className="badge badge-warning badge-xs">
+              <Trans>Paid</Trans>
+            </span>
           ) : null}
           {group?.allowed_education_level === 2 ? (
-            <span className="badge badge-secondary badge-xs">College only</span>
+            <span className="badge badge-secondary badge-xs">
+              <Trans>College only</Trans>
+            </span>
           ) : null}
           {isTrainerTraining(row, trainerGroupIds) ? (
-            <span className="badge badge-info badge-xs">Trainer</span>
+            <span className="badge badge-info badge-xs">
+              <Trans>Trainer</Trans>
+            </span>
           ) : null}
           {earnedHours != null && earnedHours > 0 ? (
-            <span className="badge badge-success badge-xs">{earnedHours}h</span>
+            <span className="badge badge-success badge-xs">
+              <Trans>{earnedHours}h</Trans>
+            </span>
           ) : null}
         </div>
         {showCheckInButton && !checkedIn ? (
@@ -230,7 +245,7 @@ export function SportTrainingsCalendarList({
             disabled={
               checkinPending || (feedback !== null && !feedback.isError)
             }
-            title={feedback?.isError ? feedback.message : undefined}
+            title={feedback?.isError ? i18n._(feedback.message) : undefined}
             onClick={(event) => {
               event.stopPropagation();
               handleCheckin(row, !checkedIn);
@@ -238,21 +253,21 @@ export function SportTrainingsCalendarList({
           >
             <span className="grid place-items-center">
               <span className="invisible col-start-1 row-start-1 whitespace-nowrap">
-                Check out
+                <Trans>Check out</Trans>
               </span>
               <span className="col-start-1 row-start-1">
                 {isPending ? (
                   <span className="loading loading-spinner loading-xs" />
                 ) : feedback ? (
                   feedback.isError ? (
-                    "Retry"
+                    <Trans>Retry</Trans>
                   ) : (
                     <span className="icon-[material-symbols--check] text-xl" />
                   )
                 ) : checkedIn ? (
-                  "Check out"
+                  <Trans>Check out</Trans>
                 ) : (
-                  "Check in"
+                  <Trans>Check in</Trans>
                 )}
               </span>
             </span>
@@ -262,7 +277,7 @@ export function SportTrainingsCalendarList({
     );
   }
 
-  const events = useMemo(() => rows.map(trainingRowToListEvent), [rows]);
+  const events = rows.map(trainingRowToListEvent);
 
   // The list view only renders events inside its own active date range
   // (defaults to "today's month"), regardless of what's passed via `events`.
@@ -290,17 +305,21 @@ export function SportTrainingsCalendarList({
     <div className="[&_.fc-list-event-dot]:hidden [&_.fc-list-event-graphic]:hidden [&_.fc-list-event-time]:px-2! [&_.fc-list-event-title]:p-0!">
       {clubsError || sportsError ? (
         <div className="alert alert-error mb-2">
-          Club logos or training restrictions could not be loaded.
+          <Trans>
+            Club logos or training restrictions could not be loaded.
+          </Trans>
         </div>
       ) : null}
       {historyError ? (
         <div className="alert alert-error mb-2">
-          Earned sport hours could not be loaded.
+          <Trans>Earned sport hours could not be loaded.</Trans>
         </div>
       ) : null}
       <FullCalendar
         key={`${viewStart.getTime()}-${viewDays}`}
         plugins={[listPlugin]}
+        locales={[ruLocale]}
+        locale={i18n.locale}
         initialView="listMonth"
         initialDate={viewStart}
         dateAlignment="day"
@@ -330,14 +349,23 @@ export function SportTrainingsCalendarList({
             listDayFormat: (arg) => {
               if (arg.date.year === new Date().getFullYear()) {
                 // Show month, day, weekday
-                return moment(arg.date).format("MMMM D, dddd");
+                return moment(arg.date)
+                  .locale(i18n.locale)
+                  .format("MMMM D, dddd");
               } else {
                 // Add year if not current year
-                return moment(arg.date).format("YYYY, MMMM D");
+                return moment(arg.date)
+                  .locale(i18n.locale)
+                  .format("YYYY, MMMM D");
               }
             },
-            listDaySideFormat: (arg) =>
-              `Week ${calculateAcademicWeek(academicCalendar, moment(arg.date).toDate())}`,
+            listDaySideFormat: (arg) => {
+              const week = calculateAcademicWeek(
+                academicCalendar,
+                moment(arg.date).toDate(),
+              );
+              return t`Week ${week}`;
+            },
           },
         }}
         eventClick={(info) => {

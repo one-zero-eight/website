@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg, t } from "@lingui/core/macro";
 import { cn } from "@/lib/ui/cn";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { BracketGraph, CARD_H, CARD_W, MatchCard } from "./BracketGraph";
 import { ScoreSheet } from "./ScoreSheet";
@@ -50,7 +52,8 @@ export function QualificationMatches({
     () => new Map(players.map((p) => [p.id, p.name])),
     [players],
   );
-  const getName = (id: string) => names.get(id) ?? "Unknown";
+  const { t } = useLingui();
+  const getName = (id: string) => names.get(id) ?? t`Unknown`;
 
   if (qualSeeding.length === 0) {
     return (
@@ -128,7 +131,7 @@ function SeedingPreview({
   const { mutateAsync: setSeeding } = $tabletennis.useMutation(
     "post",
     "/reg-tour/set-qual-seeding",
-    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+    { onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)) },
   );
 
   const hasGroups = Object.keys(groups).length > 0;
@@ -216,34 +219,47 @@ function SeedingPreview({
   return (
     <div className="flex flex-col gap-4 px-4 py-5 md:px-7">
       <div>
-        <h2 className="text-xl font-light">Qualification seeding</h2>
+        <h2 className="text-xl font-light">
+          <Trans>Qualification seeding</Trans>
+        </h2>
         <p className="text-base-content/50 mt-0.5 text-xs">
-          Everyone plays. Group winners are seeded first, then second places and
-          so on. 1st seed meets the last one, players from the same group are
-          kept apart in the first round.
-          {isAdmin &&
-            " Tap two players to swap them, or hold one and drag it onto another."}
+          <Trans>
+            Everyone plays. Group winners are seeded first, then second places
+            and so on. 1st seed meets the last one, players from the same group
+            are kept apart in the first round.
+          </Trans>
+          {isAdmin && (
+            <>
+              {" "}
+              <Trans>
+                Tap two players to swap them, or hold one and drag it onto
+                another.
+              </Trans>
+            </>
+          )}
         </p>
       </div>
 
       {hasGroups && !groupsLocked && (
-        <Notice>Lock the groups on the Validation tab first.</Notice>
+        <Notice>
+          <Trans>Lock the groups on the Validation tab first.</Trans>
+        </Notice>
       )}
       {legacyGames && (
         <Notice>
-          This tournament already has games in the old bracket format.
+          <Trans>
+            This tournament already has games in the old bracket format.
+          </Trans>
         </Notice>
       )}
       {unfinished > 0 && (
         <Notice>
-          {unfinished} group match{unfinished === 1 ? " is" : "es are"} still in
-          progress.
+          <Trans>Group matches still in progress: {unfinished}.</Trans>
         </Notice>
       )}
       {unfinished === 0 && missing > 0 && groupsLocked && (
         <Notice soft>
-          {missing} group game{missing === 1 ? " was" : "s were"} not played.
-          You can still start.
+          <Trans>Group games not played: {missing}. You can still start.</Trans>
         </Notice>
       )}
 
@@ -289,9 +305,10 @@ function SeedingPreview({
 
       {sameGroupPairs > 0 && (
         <Notice soft>
-          {sameGroupPairs} first-round pair
-          {sameGroupPairs === 1 ? " is" : "s are"} from the same group
-          (highlighted).
+          <Trans>
+            First-round pairs from the same group (highlighted):{" "}
+            {sameGroupPairs}.
+          </Trans>
         </Notice>
       )}
 
@@ -301,14 +318,17 @@ function SeedingPreview({
             <b>{getName(selected)}</b>
             <span className="text-base-content/60">
               {" "}
-              · seed {order.indexOf(selected) + 1}
+              · <Trans>seed {order.indexOf(selected) + 1}</Trans>
               {selectedEntry.group !== null &&
                 ` · ${selectedEntry.group}${selectedEntry.groupPlace ?? ""}`}{" "}
-              · {selectedEntry.points} pts · sets {selectedEntry.setsWon}:
-              {selectedEntry.setsLost}
+              ·{" "}
+              <Trans>
+                {selectedEntry.points} pts · sets {selectedEntry.setsWon}:
+                {selectedEntry.setsLost}
+              </Trans>
             </span>
             <span className="block text-xs text-[#712BB2]">
-              Tap another player to swap them
+              <Trans>Tap another player to swap them</Trans>
             </span>
           </span>
           <button
@@ -316,7 +336,7 @@ function SeedingPreview({
             onClick={() => setSelected(null)}
             className="h-10 shrink-0 rounded-xl px-3 text-sm text-[#712BB2]"
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
         </div>
       )}
@@ -324,7 +344,7 @@ function SeedingPreview({
       {isAdmin && edited && (
         <div className="flex items-center justify-between gap-2 text-xs">
           <span className="text-base-content/60">
-            The order was changed by hand.
+            <Trans>The order was changed by hand.</Trans>
           </span>
           <button
             type="button"
@@ -334,7 +354,7 @@ function SeedingPreview({
             }}
             className="h-9 rounded-xl px-2 font-medium text-[#712BB2]"
           >
-            Reset to results
+            <Trans>Reset to results</Trans>
           </button>
         </div>
       )}
@@ -351,13 +371,15 @@ function SeedingPreview({
           ) : (
             <>
               <span className="icon-[mdi--tournament]" />
-              Start qualification
+              <Trans>Start qualification</Trans>
             </>
           )}
         </button>
       ) : (
         <p className="text-base-content/50 text-center text-sm">
-          The bracket appears when the organiser starts qualification.
+          <Trans>
+            The bracket appears when the organiser starts qualification.
+          </Trans>
         </p>
       )}
     </div>
@@ -367,8 +389,8 @@ function SeedingPreview({
 // ── bracket ──────────────────────────────────────────────────
 
 function sectionLabel(s: { labelFrom: number; labelTo: number }) {
-  if (s.labelTo - s.labelFrom === 1) return `${ordinal(s.labelFrom)} place`;
-  return `Places ${s.labelFrom}–${s.labelTo}`;
+  if (s.labelTo - s.labelFrom === 1) return t`${ordinal(s.labelFrom)} place`;
+  return t`Places ${s.labelFrom}–${s.labelTo}`;
 }
 
 function Bracket({
@@ -388,6 +410,7 @@ function Bracket({
   getName: (id: string) => string;
   onChanged: () => Promise<void>;
 }) {
+  const { t } = useLingui();
   const { showError } = useToast();
   const [scoring, setScoring] = useState<BracketMatch | null>(null);
 
@@ -395,25 +418,25 @@ function Bracket({
     "post",
     "/reg-game",
     {
-      onError: (e) => showError("Error", formatApiErrorMessage(e)),
+      onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)),
     },
   );
   const { mutateAsync: finishGame } = $tabletennis.useMutation(
     "post",
     "/finish-game",
     {
-      onError: (e) => showError("Error", formatApiErrorMessage(e)),
+      onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)),
     },
   );
   const { mutateAsync: changeQualTop } = $tabletennis.useMutation(
     "post",
     "/reg-tour/change-qual-top",
-    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+    { onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)) },
   );
   const { mutateAsync: fixGame } = $tabletennis.useMutation(
     "post",
     "/fix-game",
-    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+    { onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)) },
   );
 
   const bracket = useMemo(
@@ -441,24 +464,20 @@ function Bracket({
     return false;
   }
 
-  const ready = useMemo(
-    () =>
-      sections.flatMap((s) =>
-        s.matchIds.flatMap((ids, round) =>
-          ids
-            .map((id) => bracket.matches.get(id)!)
-            .filter((m) => m.status === "ready")
-            .map((m) => ({
-              match: m,
-              label: `${roundLabel(
-                s,
-                round,
-                ids.some((id) => bracket.matches.get(id)!.status === "bye"),
-              )} · ${sectionLabel(s)}`,
-            })),
-        ),
-      ),
-    [sections, bracket],
+  const ready = sections.flatMap((s) =>
+    s.matchIds.flatMap((ids, round) =>
+      ids
+        .map((id) => bracket.matches.get(id)!)
+        .filter((match) => match.status === "ready")
+        .map((match) => ({
+          match,
+          label: `${roundLabel(
+            s,
+            round,
+            ids.some((id) => bracket.matches.get(id)!.status === "bye"),
+          )} · ${sectionLabel(s)}`,
+        })),
+    ),
   );
 
   const placeById = new Map(bracket.places.map((p) => [p.place, p.id]));
@@ -528,9 +547,13 @@ function Bracket({
   return (
     <div className="flex flex-col gap-5 px-4 py-5 md:px-7">
       <div>
-        <h2 className="text-xl font-light">Qualification</h2>
+        <h2 className="text-xl font-light">
+          <Trans>Qualification</Trans>
+        </h2>
         <p className="text-base-content/50 text-xs">
-          {doneCount} of {realCount} matches played · {seeding.length} players
+          <Trans>
+            {doneCount} of {realCount} matches played · {seeding.length} players
+          </Trans>
         </p>
       </div>
 
@@ -541,7 +564,7 @@ function Bracket({
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#712BB2] opacity-60" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[#712BB2]" />
             </span>
-            Can be played now
+            <Trans>Can be played now</Trans>
             <span className="text-base-content/40 font-normal">
               {ready.length}
             </span>
@@ -565,7 +588,7 @@ function Bracket({
           </div>
           {!isAdmin && (
             <p className="text-base-content/40 text-[11px]">
-              Scores are entered by the organiser.
+              <Trans>Scores are entered by the organiser.</Trans>
             </p>
           )}
         </div>
@@ -613,10 +636,10 @@ function Bracket({
       <div>
         <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
           <span className="icon-[mdi--trophy-outline] text-lg text-[#712BB2]" />
-          Standings
+          <Trans>Standings</Trans>
           {bracket.complete && (
             <span className="rounded-full bg-[#712BB2] px-2 py-0.5 text-[10px] font-medium text-white">
-              Final
+              <Trans>Final</Trans>
             </span>
           )}
         </h3>
@@ -662,9 +685,9 @@ function Bracket({
                 const s = sections.find((x) => x.id === scoring.sectionId);
                 const label = s
                   ? `${roundLabel(s, scoring.round, roundHasByes(s.matchIds[scoring.round] ?? []))} · ${sectionLabel(s)}`
-                  : "Match";
+                  : t`Match`;
                 return scoring.status === "done"
-                  ? `Correct score · ${label}`
+                  ? t`Correct score · ${label}`
                   : label;
               })()
             : ""
@@ -682,20 +705,20 @@ function Bracket({
             : undefined
         }
         submitLabel={
-          scoring?.status === "done" ? "Save correction" : "Finish match"
+          scoring?.status === "done" ? t`Save correction` : t`Finish match`
         }
         note={
           scoring?.status === "done"
             ? nextMatchStarted(scoring)
-              ? "The next match already started, so only the score can change, not the winner."
-              : "The old result's rating change is rolled back and recalculated."
+              ? t`The next match already started, so only the score can change, not the winner.`
+              : t`The old result's rating change is rolled back and recalculated.`
             : undefined
         }
         validate={(s1, s2) =>
           scoring?.status === "done" &&
           nextMatchStarted(scoring) &&
           s1 > s2 !== scoring.score1 > scoring.score2
-            ? "Winner can't change now"
+            ? t`Winner can't change now`
             : null
         }
       />
@@ -737,7 +760,7 @@ function SeedCard({
     if (side.kind !== "player") {
       return (
         <div className="text-base-content/35 flex h-1/2 items-center px-2.5 text-xs">
-          bye
+          <Trans>bye</Trans>
         </div>
       );
     }

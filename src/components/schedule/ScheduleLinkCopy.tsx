@@ -1,4 +1,5 @@
 import { ymEvent } from "@/app/tracking/YandexMetrika";
+import { Trans } from "@lingui/react/macro";
 import React, { useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 
@@ -11,7 +12,7 @@ export default function ScheduleLinkCopy({
 }) {
   const [_, _copy] = useCopyToClipboard();
   const [copied, setCopied] = useState(false);
-  const [timer, setTimer] = useState<any>();
+  const [timer, setTimer] = useState<ReturnType<typeof setTimeout>>();
 
   const copy = () => {
     ymEvent("button-copy");
@@ -36,11 +37,12 @@ export default function ScheduleLinkCopy({
         className="bg-base-300 w-full grow rounded-xl p-2"
       />
       <button
+        type="button"
         className="text-primary hover:bg-base-300 w-fit rounded-xl p-2"
         ref={copyButtonRef}
         onClick={copy}
       >
-        {copied ? "Copied!" : "Copy"}
+        {copied ? <Trans>Copied!</Trans> : <Trans>Copy</Trans>}
       </button>
     </div>
   );

@@ -10,9 +10,13 @@ import {
   getFilteredResources,
 } from "@/components/dashboard/links/searchUtils.ts";
 import { cn } from "@/lib/ui/cn";
+import { useAppLocale } from "@/locales/lib";
+import { Trans } from "@lingui/react/macro";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const Links = () => {
+  const [locale] = useAppLocale();
+  const isRu = locale === "ru";
   const [activeGroup, setActiveGroup] = useState("All");
   const [visibleItems, setVisibleItems] = useState<number[]>([]);
   const timeoutRef = useRef<number>(null);
@@ -70,6 +74,16 @@ const Links = () => {
     if (searchQuery || showAll) return filteredResources;
     return filteredResources.slice(0, 6);
   }, [filteredResources, searchQuery, showAll]);
+  const resourceCount = filteredResources.length;
+
+  const selectOptions = useMemo(
+    () =>
+      groups.map(({ value, labelRu }) => ({
+        value,
+        label: isRu ? labelRu : value,
+      })),
+    [isRu],
+  );
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -103,11 +117,11 @@ const Links = () => {
     <div>
       <div className="flex flex-col gap-4 pb-4 lg:flex-row">
         <h3 className="text-2xl font-medium sm:text-3xl lg:flex-4">
-          All University Services
+          <Trans>All University Services</Trans>
         </h3>
         <div className="grid items-center gap-4 md:grid-cols-2 md:gap-6 lg:flex lg:flex-1">
           <CustomSelect
-            options={groups}
+            options={selectOptions}
             selectedValue={activeGroup}
             onChange={setActiveGroup}
             className="sm:block lg:hidden"
@@ -123,9 +137,11 @@ const Links = () => {
       <div className="flex min-h-[500px] flex-row-reverse items-start gap-6">
         {/* Category List */}
         <div className="hidden flex-1 lg:block">
-          <h3 className="text-base-content text-lg font-semibold">Filter</h3>
+          <h3 className="text-base-content text-lg font-semibold">
+            <Trans>Filter</Trans>
+          </h3>
           <div>
-            {groups.map(({ value }) => (
+            {groups.map(({ value, labelRu }) => (
               <button
                 type="button"
                 key={value}
@@ -137,7 +153,7 @@ const Links = () => {
                     : "text-base-content/75",
                 )}
               >
-                {value}
+                {isRu ? labelRu : value}
               </button>
             ))}
           </div>
@@ -145,63 +161,73 @@ const Links = () => {
 
         {displayedResources.length > 0 ? (
           <div className="grid flex-4 grid-cols-1 gap-5 lg:grid-cols-3">
-            {displayedResources.map((resource, index) => (
-              <a
-                onClick={() => {
-                  const frequencies = JSON.parse(
-                    localStorage.getItem("userFrequencies") || "{}",
-                  );
-                  frequencies[resource.url] =
-                    (frequencies[resource.url] || 0) + 1;
-                  localStorage.setItem(
-                    "userFrequencies",
-                    JSON.stringify(frequencies),
-                  );
-                }}
-                href={resource.url}
-                target="_blank"
-                rel="nofollow noreferrer"
-                key={index}
-                className={cn(
-                  "resource-item bg-base-200 hover:bg-base-300 rounded-box flex min-h-[100px] flex-row gap-4 px-4 py-4 transition-all ease-in-out",
-                  visibleItems.includes(index) ? "visible" : "",
-                  activeIndex === index && searchQuery
-                    ? "ring-primary ring-3"
-                    : "",
-                )}
-              >
-                <span
+            {displayedResources.map((resource, index) => {
+              const resourceName = isRu
+                ? resource.resourceRu
+                : resource.resource;
+              const title = isRu ? resource.titleRu : resource.title;
+              const description = isRu
+                ? resource.descriptionRu
+                : resource.description;
+
+              return (
+                <a
+                  onClick={() => {
+                    const frequencies = JSON.parse(
+                      localStorage.getItem("userFrequencies") || "{}",
+                    );
+                    frequencies[resource.url] =
+                      (frequencies[resource.url] || 0) + 1;
+                    localStorage.setItem(
+                      "userFrequencies",
+                      JSON.stringify(frequencies),
+                    );
+                  }}
+                  href={resource.url}
+                  target="_blank"
+                  rel="nofollow noreferrer"
+                  key={index}
                   className={cn(
-                    resource.icon,
-                    "text-primary hidden w-8 shrink-0 text-3xl sm:block",
+                    "resource-item bg-base-200 hover:bg-base-300 rounded-box flex min-h-[100px] flex-row gap-4 px-4 py-4 transition-all ease-in-out",
+                    visibleItems.includes(index) ? "visible" : "",
+                    activeIndex === index && searchQuery
+                      ? "ring-primary ring-3"
+                      : "",
                   )}
-                />
-                <div>
-                  <p className="text-base-content flex text-lg font-semibold">
-                    <span
-                      className={cn(
-                        resource.icon,
-                        "text-primary mt-1 mr-2 shrink-0 text-xl sm:hidden",
-                      )}
-                    />
-                    <span>
-                      {resource.resource}
-                      {resource.title && `: ${resource.title}`}
-                    </span>
-                  </p>
-                  <p className="text-base-content/75 text-sm">
-                    {resource.description}
-                  </p>
-                </div>
-              </a>
-            ))}
+                >
+                  <span
+                    className={cn(
+                      resource.icon,
+                      "text-primary hidden w-8 shrink-0 text-3xl sm:block",
+                    )}
+                  />
+                  <div>
+                    <p className="text-base-content flex text-lg font-semibold">
+                      <span
+                        className={cn(
+                          resource.icon,
+                          "text-primary mt-1 mr-2 shrink-0 text-xl sm:hidden",
+                        )}
+                      />
+                      <span>
+                        {resourceName}
+                        {title && `: ${title}`}
+                      </span>
+                    </p>
+                    <p className="text-base-content/75 text-sm">
+                      {description}
+                    </p>
+                  </div>
+                </a>
+              );
+            })}
             {!searchQuery && filteredResources.length > 6 && !showAll && (
               <button
                 type="button"
                 onClick={() => setShowAll(true)}
                 className="btn btn-ghost min-h-[100px] lg:col-span-3"
               >
-                Show all ({filteredResources.length})
+                <Trans>Show all ({resourceCount})</Trans>
               </button>
             )}
             {!searchQuery && filteredResources.length > 6 && showAll && (
@@ -210,12 +236,14 @@ const Links = () => {
                 onClick={() => setShowAll(false)}
                 className="btn btn-ghost min-h-[100px] lg:col-span-3"
               >
-                Collapse
+                <Trans>Collapse</Trans>
               </button>
             )}
           </div>
         ) : (
-          <p className="text-base-content flex-4 text-lg">No results found.</p>
+          <p className="text-base-content flex-4 text-lg">
+            <Trans>No results found.</Trans>
+          </p>
         )}
       </div>
     </div>

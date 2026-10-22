@@ -1,4 +1,5 @@
 import { Modal } from "@/components/common/Modal.tsx";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { PdfDocumentPreview } from "@/components/web-print/PdfDocumentPreview.tsx";
 import { cn } from "@/lib/ui/cn";
 import {
@@ -42,9 +43,13 @@ async function validateFile(file: File): Promise<ReactNode | null> {
   if (file.size > 20 * 1024 * 1024) {
     return (
       <>
-        <p>File is too large!</p>
         <p>
-          Max file size is <span className="font-bold">20MB</span>
+          <Trans>File is too large!</Trans>
+        </p>
+        <p>
+          <Trans>
+            Max file size is <span className="font-bold">20MB</span>
+          </Trans>
         </p>
       </>
     );
@@ -53,7 +58,9 @@ async function validateFile(file: File): Promise<ReactNode | null> {
   if (!isAllowedExtension(file.name)) {
     return (
       <>
-        <p>Such file is not supported!</p>
+        <p>
+          <Trans>Such file is not supported!</Trans>
+        </p>
         <div className="mt-2 grid grid-cols-3 gap-1 text-sm">
           {ALLOWED_EXTENSIONS.map((ext) => (
             <span key={ext} className="badge badge-ghost badge-sm">
@@ -74,10 +81,10 @@ export function FileDropzone({
   blobPreviewURL,
   downloadFileName,
   isFunctional,
-  label = "Drag & drop a file here",
+  label,
   variant = "default",
   previewPages,
-  loadingLabel = "Processing…",
+  loadingLabel,
   loadingProgress,
   filePickerRef,
   previewToolbarHost,
@@ -95,6 +102,9 @@ export function FileDropzone({
   filePickerRef?: RefObject<HTMLInputElement | null>;
   previewToolbarHost?: HTMLElement | null;
 }) {
+  const { t } = useLingui();
+  const resolvedLabel = label ?? t`Drag & drop a file here`;
+  const resolvedLoadingLabel = loadingLabel ?? t`Processing…`;
   const [alert, setAlert] = useState<ReactNode>();
   const [isDragOver, setIsDragOver] = useState(false);
   const localInputRef = useRef<HTMLInputElement>(null);
@@ -158,7 +168,9 @@ export function FileDropzone({
       <div className="flex w-full max-w-xs flex-col items-center gap-3 px-4">
         <span className="loading loading-spinner loading-lg text-primary" />
         <p className="text-base-content/50 text-sm">
-          {showProgress ? `${loadingLabel} ${progressValue}%` : loadingLabel}
+          {showProgress
+            ? `${resolvedLoadingLabel} ${progressValue}%`
+            : resolvedLoadingLabel}
         </p>
         {showProgress && (
           <progress
@@ -212,10 +224,11 @@ export function FileDropzone({
                     <div className="flex flex-col items-center gap-3">
                       <span className="icon-[material-symbols--adf-scanner-rounded] text-base-content/20 text-6xl" />
                       <div>
-                        <p className="font-medium">No scan yet</p>
+                        <p className="font-medium">
+                          <Trans>No scan yet</Trans>
+                        </p>
                         <p className="text-base-content/50 mt-1 text-sm">
-                          Configure settings and start scanning — preview will
-                          appear here
+                          {t`Configure settings and start scanning — preview will appear here`}
                         </p>
                       </div>
                     </div>
@@ -235,25 +248,29 @@ export function FileDropzone({
                     <div className="flex flex-col items-center gap-3">
                       <span className="loading loading-spinner loading-lg text-primary" />
                       <p className="text-base-content/50 text-sm">
-                        {loadingLabel}
+                        {resolvedLoadingLabel}
                       </p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-3">
                       <span className="icon-[material-symbols--cloud-upload] text-base-content/25 text-6xl" />
                       <div>
-                        <p className="font-medium">Drop your file here</p>
+                        <p className="font-medium">
+                          <Trans>Drop your file here</Trans>
+                        </p>
                         <p className="text-base-content/50 mt-1 text-sm">
-                          or click to browse
+                          <Trans>or click to browse</Trans>
                         </p>
                       </div>
                       {isFunctional && (
                         <span className="btn btn-primary btn-wide mt-1">
-                          Choose file
+                          <Trans>Choose file</Trans>
                         </span>
                       )}
                       <p className="text-base-content/40 mt-2 max-w-xs text-xs">
-                        PDF, Word, Excel, images, and more · max 20 MB
+                        <Trans>
+                          PDF, Word, Excel, images, and more — max 20 MB
+                        </Trans>
                       </p>
                     </div>
                   )}
@@ -269,7 +286,7 @@ export function FileDropzone({
         <Modal
           open={!!alert}
           onOpenChange={() => setAlert(undefined)}
-          title="Warning"
+          title={t`Warning`}
         >
           {alert}
         </Modal>
@@ -297,7 +314,11 @@ export function FileDropzone({
           <>
             <span className="icon-[material-symbols--docs-rounded] text-base-content/30 mb-3 text-5xl" />
             <p className="text-base-content/50 text-center text-sm">
-              {isFunctional ? label : "Preview will appear here"}
+              {isFunctional ? (
+                resolvedLabel
+              ) : (
+                <Trans>Preview will appear here</Trans>
+              )}
             </p>
           </>
         )}
@@ -305,7 +326,7 @@ export function FileDropzone({
 
       {isFunctional && (
         <label className="btn btn-outline mt-4 w-full">
-          Attach file
+          <Trans>Attach file</Trans>
           {fileInput}
         </label>
       )}
@@ -317,14 +338,14 @@ export function FileDropzone({
           className="btn btn-outline mt-4 w-full"
         >
           <span className="icon-[material-symbols--download-rounded]" />
-          Download result
+          <Trans>Download result</Trans>
         </a>
       )}
 
       <Modal
         open={!!alert}
         onOpenChange={() => setAlert(undefined)}
-        title="Warning"
+        title={t`Warning`}
       >
         {alert}
       </Modal>

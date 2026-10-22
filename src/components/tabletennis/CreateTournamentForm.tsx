@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { $tabletennis } from "@/api/tabletennis";
 import {
-  formatApiErrorMessage,
+  formatApiErrorDescriptor,
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
@@ -28,6 +30,7 @@ export function CreateTournamentForm({
   onCreated: (tourId: string) => void;
   onCancel: () => void;
 }) {
+  const { t } = useLingui();
   const [name, setName] = useState("");
   const [tourDate, setTourDate] = useState("");
   const field = usePlayersField(options);
@@ -44,16 +47,16 @@ export function CreateTournamentForm({
         if (failed) {
           field.applyFailed(failed);
           showError(
-            "Tournament not created",
-            "Some players were not found, see the list below",
+            msg`Tournament not created`,
+            msg`Some players were not found, see the list below`,
           );
         } else if (isApiHttpError(error) && error.httpCode === 403) {
           showError(
-            "Access denied",
-            "Only administrators can create tournaments",
+            msg`Access denied`,
+            msg`Only administrators can create tournaments`,
           );
         } else {
-          showError("Error", formatApiErrorMessage(error));
+          showError(msg`Error`, formatApiErrorDescriptor(error));
         }
       },
     },
@@ -82,23 +85,27 @@ export function CreateTournamentForm({
         onSubmit={handleCreate}
         className="bg-base-200 w-full max-w-md rounded-lg p-5 md:p-8"
       >
-        <h2 className="mb-6 text-2xl font-light">Create tournament</h2>
+        <h2 className="mb-6 text-2xl font-light">
+          <Trans>Create tournament</Trans>
+        </h2>
         <div className="flex flex-col gap-4">
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Tournament name"
+            placeholder={t`Tournament name`}
             className="input input-bordered w-full"
             maxLength={100}
             required
           />
           <label className="flex flex-col gap-1">
             <span className="text-base-content/70 text-sm">
-              Date{" "}
-              <span className="text-base-content/40">
-                (optional, today if empty)
-              </span>
+              <Trans>
+                Date{" "}
+                <span className="text-base-content/40">
+                  (optional, today if empty)
+                </span>
+              </Trans>
             </span>
             <input
               type="date"
@@ -110,7 +117,7 @@ export function CreateTournamentForm({
           <PlayersField field={field} options={options} multiline />
           <div className="flex justify-end gap-2">
             <button type="button" className="btn btn-ghost" onClick={onCancel}>
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
             <button
               type="submit"
@@ -120,7 +127,7 @@ export function CreateTournamentForm({
               {creating ? (
                 <span className="loading loading-spinner loading-sm" />
               ) : (
-                "Create"
+                <Trans>Create</Trans>
               )}
             </button>
           </div>

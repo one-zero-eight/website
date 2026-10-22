@@ -1,62 +1,66 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 export function HowToCreateClubPage() {
+  const { t } = useLingui();
   return (
     <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-4 py-8 lg:px-8">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-base-content mb-4 text-3xl font-bold md:text-4xl">
-          Create Your Own Community
+          <Trans>Create Your Own Community</Trans>
         </h1>
         <p className="text-base-content/50 mx-auto max-w-2xl text-lg">
-          Have an idea for a club? Start your own community and make a
-          difference at Innopolis University!
+          <Trans>
+            Have an idea for a club? Start your own community and make a
+            difference at Innopolis University!
+          </Trans>
         </p>
       </div>
 
       {/* Benefits Section */}
       <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
-          Why Create a Club?
+          <Trans>Why Create a Club?</Trans>
         </h2>
         <div className="grid gap-6 md:grid-cols-2">
           <BenefitCard
             icon="icon-[material-symbols--self-improvement-rounded]"
-            title="Learn More About Yourself"
-            description="Joining a student organization contributes to your self-awareness and presents opportunities to learn more about yourself, your goals, and your strengths."
+            title={t`Learn More About Yourself`}
+            description={t`Joining a student organization contributes to your self-awareness and presents opportunities to learn more about yourself, your goals, and your strengths.`}
           />
           <BenefitCard
             icon="icon-[material-symbols--groups-rounded]"
-            title="Develop Soft Skills"
-            description="Learn and improve essential people skills like communication, teamwork, and work ethic through real-world experience."
+            title={t`Develop Soft Skills`}
+            description={t`Learn and improve essential people skills like communication, teamwork, and work ethic through real-world experience.`}
           />
           <BenefitCard
             icon="icon-[material-symbols--network-node]"
-            title="Networking Opportunities"
-            description="Meet new students, make connections, and build relationships that will help you down the line when looking for a job."
+            title={t`Networking Opportunities`}
+            description={t`Meet new students, make connections, and build relationships that will help you down the line when looking for a job.`}
           />
           <BenefitCard
             icon="icon-[material-symbols--lab-research-outline]"
-            title="Gain Practical Experience"
-            description="Get hands-on experience in your field of study in a safe environment where making mistakes is OK."
+            title={t`Gain Practical Experience`}
+            description={t`Get hands-on experience in your field of study in a safe environment where making mistakes is OK.`}
           />
           <BenefitCard
             icon="icon-[material-symbols--diversity-3-rounded]"
-            title="Engage with Diverse Groups"
-            description="Learn how different people respond to situations and develop your skills in presenting and implementing ideas."
+            title={t`Engage with Diverse Groups`}
+            description={t`Learn how different people respond to situations and develop your skills in presenting and implementing ideas.`}
           />
           <BenefitCard
             icon="icon-[material-symbols--work-outline]"
-            title="Expand Your CV"
-            description="Show employers that you're ambitious, broad-minded, and an active person who takes advantage of opportunities."
+            title={t`Expand Your CV`}
+            description={t`Show employers that you're ambitious, broad-minded, and an active person who takes advantage of opportunities.`}
           />
           <BenefitCard
             icon="icon-[material-symbols--school-outline]"
-            title="Give Back to the University"
-            description="Set standards and build future legacy by being an active member of the campus community."
+            title={t`Give Back to the University`}
+            description={t`Set standards and build future legacy by being an active member of the campus community.`}
           />
           <BenefitCard
             icon="icon-[material-symbols--celebration-outline]"
-            title="Have Fun!"
-            description="Meet new people, make friends, and participate in activities that make your university experience memorable."
+            title={t`Have Fun!`}
+            description={t`Meet new people, make friends, and participate in activities that make your university experience memorable.`}
           />
         </div>
       </div>
@@ -64,38 +68,38 @@ export function HowToCreateClubPage() {
       {/* Club Leader Benefits */}
       <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
-          Club Leader Benefits
+          <Trans>Club Leader Benefits</Trans>
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
           <LeaderBenefitItem
             icon="icon-[material-symbols--trophy-outline]"
-            title="Innopoints Rewards"
-            description="Apply for innopoints at the end of every semester via the Innopoints Website."
+            title={t`Innopoints Rewards`}
+            description={t`Apply for innopoints at the end of every semester via the Innopoints Website.`}
           />
           <LeaderBenefitItem
             icon="icon-[material-symbols--calendar-today-outline]"
-            title="Regular Schedule & Resources"
-            description="Request rooms, projectors, sports halls, and other resources for your club's meetings."
+            title={t`Regular Schedule & Resources`}
+            description={t`Request rooms, projectors, sports halls, and other resources for your club's meetings.`}
           />
           <LeaderBenefitItem
             icon="icon-[material-symbols--badge-outline]"
-            title="Guest Passes"
-            description="Get access passes for club members who need entry to IU main building."
+            title={t`Guest Passes`}
+            description={t`Get access passes for club members who need entry to IU main building.`}
           />
           <LeaderBenefitItem
             icon="icon-[material-symbols--leaderboard-outline]"
-            title="Club League"
-            description="Compete in the Club League to earn higher positions and more benefits."
+            title={t`Club League`}
+            description={t`Compete in the Club League to earn higher positions and more benefits.`}
           />
           <LeaderBenefitItem
             icon="icon-[material-symbols--payments-outline]"
-            title="Semestral Budget"
-            description="Get budget allocation based on your Club League position."
+            title={t`Semestral Budget`}
+            description={t`Get budget allocation based on your Club League position.`}
           />
           <LeaderBenefitItem
             icon="icon-[material-symbols--school]"
-            title="Higher Scholarship"
-            description="Top 20 clubs earn points for higher scholarship. Top 3 can nominate 3 active members."
+            title={t`Higher Scholarship`}
+            description={t`Top 20 clubs earn points for higher scholarship. Top 3 can nominate 3 active members.`}
           />
         </div>
       </div>
@@ -103,36 +107,39 @@ export function HowToCreateClubPage() {
       {/* Club Types */}
       <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
-          Club Types
+          <Trans>Club Types</Trans>
         </h2>
         <p className="text-base-content/50 mb-6">
-          When registering your club, you'll need to choose one of the following
-          categories. Each type has specific criteria in the Club League.
+          <Trans>
+            When registering your club, you'll need to choose one of the
+            following categories. Each type has specific criteria in the Club
+            League.
+          </Trans>
         </p>
         <div className="grid gap-4 md:grid-cols-2">
           <ClubTypeCard
             icon="icon-[material-symbols--code]"
-            title="Technical"
-            description="Clubs focused on technology, programming, engineering, robotics, and other technical disciplines."
-            examples="Programming Languages, Robotics, Web Development, AI/ML"
+            title={t`Technical`}
+            description={t`Clubs focused on technology, programming, engineering, robotics, and other technical disciplines.`}
+            examples={t`Programming Languages, Robotics, Web Development, AI/ML`}
           />
           <ClubTypeCard
             icon="icon-[material-symbols--sports-soccer]"
-            title="Sport"
-            description="Clubs centered around physical activities, sports, and fitness. Can give sport hours for trainings if accredited on InnoSport."
-            examples="Football, Basketball, Volleyball, Badminton, Yoga"
+            title={t({ message: "Sport", context: "club type" })}
+            description={t`Clubs centered around physical activities, sports, and fitness. Can give sport hours for trainings if accredited on InnoSport.`}
+            examples={t`Football, Basketball, Volleyball, Badminton, Yoga`}
           />
           <ClubTypeCard
             icon="icon-[material-symbols--palette-outline]"
-            title="Art & Culture"
-            description="Clubs dedicated to artistic expression, cultural activities, and creative pursuits."
-            examples="Music, Theater, Photography, Painting, Dance"
+            title={t`Art & Culture`}
+            description={t`Clubs dedicated to artistic expression, cultural activities, and creative pursuits.`}
+            examples={t`Music, Theater, Photography, Painting, Dance`}
           />
           <ClubTypeCard
             icon="icon-[material-symbols--interests-outline]"
-            title="Special Interest"
-            description="Clubs focused on hobbies, special interests, and community activities that don't fit other categories."
-            examples="Board Games, Languages, Debate, Movies"
+            title={t`Special Interest`}
+            description={t`Clubs focused on hobbies, special interests, and community activities that don't fit other categories.`}
+            examples={t`Board Games, Languages, Debate, Movies`}
           />
         </div>
       </div>
@@ -140,7 +147,7 @@ export function HowToCreateClubPage() {
       {/* Timeline Section */}
       <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-8 text-2xl font-semibold">
-          How to Register Your Club
+          <Trans>How to Register Your Club</Trans>
         </h2>
 
         <ul className="timeline timeline-vertical timeline-snap-icon timeline-compact">
@@ -150,11 +157,15 @@ export function HowToCreateClubPage() {
               <span className="icon-[material-symbols--group-add-outline] text-primary text-2xl" />
             </div>
             <div className="timeline-end mb-10 md:text-start">
-              <div className="text-lg font-black">Step 1: Find Your Team</div>
+              <div className="text-lg font-black">
+                <Trans>Step 1: Find Your Team</Trans>
+              </div>
               <div className="text-base-content/80 mt-2">
-                You need <strong>at least two responsible clubmates</strong> to
-                set up a club. Think about positions like communications
-                officer, marketing assistant, treasurer, etc.
+                <Trans>
+                  You need <strong>at least two responsible clubmates</strong>{" "}
+                  to set up a club. Think about positions like communications
+                  officer, marketing assistant, treasurer, etc.
+                </Trans>
               </div>
             </div>
             <hr className="bg-primary" />
@@ -168,11 +179,13 @@ export function HowToCreateClubPage() {
             </div>
             <div className="timeline-end mb-10 md:text-start">
               <div className="text-lg font-black">
-                Step 2: Create Telegram Group
+                <Trans>Step 2: Create Telegram Group</Trans>
               </div>
               <div className="text-base-content/80 mt-2">
-                Set up a <strong>Telegram group</strong> for your club and
-                invite all your friends who are interested in joining!
+                <Trans>
+                  Set up a <strong>Telegram group</strong> for your club and
+                  invite all your friends who are interested in joining!
+                </Trans>
               </div>
             </div>
             <hr className="bg-primary" />
@@ -186,12 +199,14 @@ export function HowToCreateClubPage() {
             </div>
             <div className="timeline-end mb-10 md:text-start">
               <div className="text-lg font-black">
-                Step 3: Define Goals & Mission
+                <Trans>Step 3: Define Goals & Mission</Trans>
               </div>
               <div className="text-base-content/80 mt-2">
-                Think about your <strong>aims and goals</strong> to keep your
-                club going purposefully. Consider writing mission and vision
-                statements to clarify your club's purpose.
+                <Trans>
+                  Think about your <strong>aims and goals</strong> to keep your
+                  club going purposefully. Consider writing mission and vision
+                  statements to clarify your club's purpose.
+                </Trans>
               </div>
             </div>
             <hr className="bg-primary" />
@@ -205,10 +220,12 @@ export function HowToCreateClubPage() {
             </div>
             <div className="timeline-end mb-10 md:text-start">
               <div className="text-lg font-black">
-                Step 4: Prepare Club Materials
+                <Trans>Step 4: Prepare Club Materials</Trans>
               </div>
               <div className="text-base-content/80 mt-2">
-                Create an <strong>avatar or logo</strong> for your club.
+                <Trans>
+                  Create an <strong>avatar or logo</strong> for your club.
+                </Trans>
               </div>
             </div>
             <hr className="bg-primary" />
@@ -222,18 +239,30 @@ export function HowToCreateClubPage() {
             </div>
             <div className="timeline-end mb-10 md:text-start">
               <div className="text-lg font-black">
-                Step 5: Fill Registration Form
+                <Trans>Step 5: Fill Registration Form</Trans>
               </div>
               <div className="text-base-content/80 mt-2 mb-4">
-                Complete the official registration form with all required
-                information about your club. You'll need to provide:
+                <Trans>
+                  Complete the official registration form with all required
+                  information about your club. You'll need to provide:
+                </Trans>
               </div>
               <ul className="text-base-content/80 ml-6 list-disc space-y-1">
-                <li>Full and short official names</li>
-                <li>Club description and goals</li>
-                <li>Logo/avatar file</li>
-                <li>Telegram group link</li>
-                <li>Leader's contact information</li>
+                <li>
+                  <Trans>Full and short official names</Trans>
+                </li>
+                <li>
+                  <Trans>Club description and goals</Trans>
+                </li>
+                <li>
+                  <Trans>Logo/avatar file</Trans>
+                </li>
+                <li>
+                  <Trans>Telegram group link</Trans>
+                </li>
+                <li>
+                  <Trans>Leader's contact information</Trans>
+                </li>
               </ul>
               <a
                 href="https://forms.yandex.ru/u/6a4b86f402848f003229d7d5"
@@ -242,7 +271,7 @@ export function HowToCreateClubPage() {
                 className="btn btn-primary mt-4"
               >
                 <span className="icon-[material-symbols--arrow-forward]" />
-                Go to Registration Form
+                <Trans>Go to Registration Form</Trans>
               </a>
             </div>
           </li>
@@ -252,11 +281,13 @@ export function HowToCreateClubPage() {
       {/* Contact Section */}
       <div className="bg-base-200 rounded-field p-6 text-center md:p-8">
         <h2 className="text-base-content mb-4 text-2xl font-semibold">
-          Need Help?
+          <Trans>Need Help?</Trans>
         </h2>
         <p className="text-base-content/50 mb-4">
-          If you need any assistance, advice, or resources to maintain and
-          develop your club, contact our Student Clubs Manager:
+          <Trans>
+            If you need any assistance, advice, or resources to maintain and
+            develop your club, contact our Student Clubs Manager:
+          </Trans>
         </p>
         <div className="text-base-content">
           <p className="text-lg font-semibold">Timofey Konovalov</p>
@@ -334,7 +365,9 @@ function ClubTypeCard({
       <p className="text-base-content/50 mb-3 text-sm">{description}</p>
       <div className="border-base-300 border-t pt-3">
         <p className="text-base-content/70 text-xs font-medium">
-          Examples: <span className="text-base-content/60">{examples}</span>
+          <Trans>
+            Examples: <span className="text-base-content/60">{examples}</span>
+          </Trans>
         </p>
       </div>
     </div>

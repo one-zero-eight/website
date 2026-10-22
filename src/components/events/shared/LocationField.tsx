@@ -1,5 +1,7 @@
 import { $maps } from "@/api/maps";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { SchemaArea } from "@/api/maps/types";
+import { getAreaTitle } from "@/components/maps/area-label.ts";
 import { cn } from "@/lib/ui/cn";
 import { useMemo, useState } from "react";
 import { eventFieldClass } from "./formStyles";
@@ -8,9 +10,10 @@ const MAX_SUGGESTIONS = 30;
 
 type LocationSuggestion = {
   key: string;
+  /** Canonical EN title stored in the form value */
   title: string;
+  displayTitle: string;
   sceneTitle: string;
-  ruTitle?: string | null;
 };
 
 function areaSearchText(area: SchemaArea) {
@@ -29,6 +32,7 @@ export function LocationField({
   onChange: (value: string) => void;
   disabled?: boolean;
 }) {
+  const { t, i18n } = useLingui();
   const [open, setOpen] = useState(false);
   const { data: scenes } = $maps.useQuery("get", "/scenes/");
 
@@ -41,7 +45,7 @@ export function LocationField({
     const matches: LocationSuggestion[] = [];
     for (const scene of scenes) {
       for (const [index, area] of (scene.areas ?? []).entries()) {
-        if (!area.title) {
+        if (!area.title && !area.ru_title) {
           continue;
         }
         if (!areaSearchText(area).includes(query)) {
@@ -49,9 +53,9 @@ export function LocationField({
         }
         matches.push({
           key: `${scene.scene_id}-${area.svg_polygon_id ?? index}`,
-          title: area.title,
+          title: area.title ?? area.ru_title ?? "",
+          displayTitle: getAreaTitle(area, i18n.locale),
           sceneTitle: scene.title,
-          ruTitle: area.ru_title,
         });
         if (matches.length >= MAX_SUGGESTIONS) {
           return matches;
@@ -59,18 +63,20 @@ export function LocationField({
       }
     }
     return matches;
-  }, [scenes, value]);
+  }, [scenes, value, i18n.locale]);
 
   const showSuggestions = open && !disabled && suggestions.length > 0;
 
   return (
     <label className="flex flex-col gap-1 text-sm">
-      <span>Location</span>
+      <span>
+        <Trans>Location</Trans>
+      </span>
       <div className="relative">
         <input
           type="text"
           className={eventFieldClass()}
-          placeholder="TBA"
+          placeholder={t`TBA`}
           value={value}
           disabled={disabled}
           autoComplete="off"
@@ -97,12 +103,9 @@ export function LocationField({
                     setOpen(false);
                   }}
                 >
-                  <span className="font-medium">{suggestion.title}</span>
+                  <span className="font-medium">{suggestion.displayTitle}</span>
                   <span className="text-base-content/70 text-xs">
-                    {suggestion.ruTitle &&
-                    suggestion.ruTitle !== suggestion.title
-                      ? `${suggestion.ruTitle} · ${suggestion.sceneTitle}`
-                      : suggestion.sceneTitle}
+                    {suggestion.sceneTitle}
                   </span>
                 </button>
               </li>

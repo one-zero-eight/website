@@ -1,6 +1,8 @@
+import type { MessageDescriptor } from "@lingui/core";
 import { $accounts } from "@/api/accounts";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useMe } from "@/api/accounts/user.ts";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { $schedule } from "@/api/schedule";
 import {
   getAllTagsByType,
@@ -21,6 +23,7 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
+  const { i18n, t } = useLingui();
   const { me } = useMe();
   const requiresTelegramReconnect =
     !!me?.telegram_update_data && !me.telegram_update_data.success;
@@ -36,9 +39,9 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
   const [building, setBuilding] = useState("");
   const [floor, setFloor] = useState("");
   const [isDormStepComplete, setIsDormStepComplete] = useState(false);
-  const [favoriteSaveError, setFavoriteSaveError] = useState<string | null>(
-    null,
-  );
+  const [favoriteSaveError, setFavoriteSaveError] = useState<
+    string | MessageDescriptor | null
+  >(null);
 
   const { mutate: connectTelegramCallback } = $accounts.useMutation(
     "post",
@@ -151,7 +154,7 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
       setIsDormStepComplete(true);
       navigate({ to: "/start", search: { step: 4 } });
     } catch (error) {
-      setFavoriteSaveError(formatApiErrorMessage(error));
+      setFavoriteSaveError(formatApiErrorDescriptor(error));
     }
   }
 
@@ -205,9 +208,13 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
   return (
     <main className="flex grow justify-center px-4 py-8">
       <div className="flex w-full max-w-2xl flex-col items-center">
-        <img src="/favicon.svg" alt="InNoHassle logo" className="h-20 w-20" />
+        <img
+          src="/favicon.svg"
+          alt={t`InNoHassle logo`}
+          className="h-20 w-20"
+        />
         <h1 className="mt-3 text-center text-3xl font-semibold">
-          Welcome to InNoHassle
+          <Trans>Welcome to InNoHassle</Trans>
         </h1>
         <div className="mt-6 w-full">
           <OnboardingProgress step={step} />
@@ -251,7 +258,12 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
                 isEventGroupsError={areEventGroupsError}
                 eventGroupsError={eventGroupsError}
                 isSaving={isFavoriteSavePending || isPreferencesSavePending}
-                saveError={favoriteSaveError}
+                saveError={
+                  typeof favoriteSaveError === "string" ||
+                  favoriteSaveError === null
+                    ? favoriteSaveError
+                    : i18n._(favoriteSaveError)
+                }
                 onContinue={handleSaveDormGroups}
                 onSkip={() => {
                   setIsDormStepComplete(true);
@@ -285,7 +297,7 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
               }
             >
               <span className="icon-[material-symbols--arrow-back]" />
-              Back
+              <Trans>Back</Trans>
             </button>
           )}
         </div>

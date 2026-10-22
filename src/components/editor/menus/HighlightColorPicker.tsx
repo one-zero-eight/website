@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import {
   HighlightColor,
   highlightColors,
@@ -22,6 +23,7 @@ import { useRef, useState } from "react";
 import { BubbleMenuButton } from "./BubbleMenuContent";
 
 export function HighlightColorPicker({ editor }: { editor: Editor }) {
+  const { t, i18n } = useLingui();
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -72,7 +74,7 @@ export function HighlightColorPicker({ editor }: { editor: Editor }) {
       <BubbleMenuButton
         isDisabled={!editorState.canHighlight}
         onClick={() => setIsOpen((prev) => !prev)}
-        title="Highlight"
+        title={t`Highlight`}
         iconClassName="icon-[material-symbols--format-ink-highlighter-outline]"
         className={cn(
           isOpen && "btn-active",
@@ -124,7 +126,7 @@ export function HighlightColorPicker({ editor }: { editor: Editor }) {
                       "--mark-color": colorOption.color,
                       "--mark-color-dark": colorOption.darkColor,
                     }}
-                    title={colorOption.label}
+                    title={i18n._(colorOption.label)}
                     {...getItemProps({
                       onClick: () => handleSelect(colorOption.id, index),
                       onKeyDown(event) {

@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import {
   calculateColorGPA,
   calculateGPA,
@@ -188,7 +189,7 @@ export default function ScholarshipCalculator() {
   return (
     <div className="flex flex-col gap-2">
       <div className="mb-4 text-center text-3xl font-medium">
-        Enter your grades or GPA
+        <Trans>Enter your grades or GPA</Trans>
       </div>
       <div className="relative">
         <textarea
@@ -223,7 +224,9 @@ export default function ScholarshipCalculator() {
         )}
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
-        <div className="text-xl font-medium">Course:</div>
+        <div className="text-xl font-medium">
+          <Trans>Course:</Trans>
+        </div>
         <div className="border-primary bg-base-100 rounded-box flex w-56 flex-row overflow-clip border-2">
           <button
             onClick={() => onMarksChange(marks.join(""), "B25")}
@@ -234,7 +237,7 @@ export default function ScholarshipCalculator() {
                 : "text-base-content/50 bg-transparent",
             )}
           >
-            B25
+            <Trans>B25</Trans>
           </button>
           <button
             onClick={() => onMarksChange(marks.join(""), "B24")}
@@ -245,7 +248,7 @@ export default function ScholarshipCalculator() {
                 : "text-base-content/50 bg-transparent",
             )}
           >
-            B24
+            <Trans>B24</Trans>
           </button>
           <button
             onClick={() => onMarksChange(marks.join(""), "B23")}
@@ -256,7 +259,7 @@ export default function ScholarshipCalculator() {
                 : "text-base-content/50 bg-transparent",
             )}
           >
-            B23
+            <Trans>B23</Trans>
           </button>
           <button
             onClick={() => onMarksChange(marks.join(""), "M25")}
@@ -267,12 +270,14 @@ export default function ScholarshipCalculator() {
                 : "text-base-content/50 bg-transparent",
             )}
           >
-            M25
+            <Trans>M25</Trans>
           </button>
         </div>
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
-        <div className="text-xl font-medium">Your GPA:</div>
+        <div className="text-xl font-medium">
+          <Trans>Your GPA:</Trans>
+        </div>
         <input
           value={displayGPA}
           onChange={(e) => onGPAChange(e.target.value, course)}
@@ -292,7 +297,9 @@ export default function ScholarshipCalculator() {
         />
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
-        <div className="text-xl font-medium">Scholarship:</div>
+        <div className="text-xl font-medium">
+          <Trans>Scholarship:</Trans>
+        </div>
         <input
           value={displayScholarship}
           onChange={(e) => onScholarshipChange(e.target.value, course)}

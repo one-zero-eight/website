@@ -193,6 +193,10 @@
     @apply ml-2 inline-flex h-7 w-fit items-center justify-center rounded-md bg-red-500 px-1 font-medium text-white;
   }
 
+  &:lang(ru) .fc-list-day.fc-day-today .fc-list-day-text::after {
+    content: "сегодня";
+  }
+
   .fc-daygrid-day-frame {
     @apply pt-1 pr-1.5 pl-0.5;
   }

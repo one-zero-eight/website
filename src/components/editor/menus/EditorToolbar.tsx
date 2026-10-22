@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { moveBlock } from "@/components/editor/utils/moveBlock";
 import { Editor } from "@tiptap/react";
 import { BubbleMenuButton } from "./BubbleMenuButton";
@@ -6,6 +7,7 @@ import { LinkDialog } from "./LinkButton";
 import { useEditorMenuState } from "./useEditorMenuState";
 
 export function EditorToolbar({ editor }: { editor: Editor }) {
+  const { t } = useLingui();
   const editorState = useEditorMenuState(editor);
 
   return (
@@ -19,14 +21,14 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
             isDisabled={!editorState.canMoveUp}
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => moveBlock(editor, "up")}
-            title="Move up"
+            title={t`Move up`}
             iconClassName="icon-[mdi--arrow-collapse-up]"
           />
           <BubbleMenuButton
             isDisabled={!editorState.canMoveDown}
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => moveBlock(editor, "down")}
-            title="Move down"
+            title={t`Move down`}
             iconClassName="icon-[mdi--arrow-collapse-up] rotate-180"
           />
 

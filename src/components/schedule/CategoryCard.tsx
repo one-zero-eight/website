@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Trans } from "@lingui/react/macro";
 
 export type CategoryCardProps = {
   icon: React.ReactNode;
@@ -28,7 +29,7 @@ export function CategoryCard({
           {title}
           {outdated && (
             <span className="blur-0 ml-2 w-fit rounded-xl border border-dashed border-red-500 px-2 py-1 text-sm text-red-500">
-              Outdated
+              <Trans>Outdated</Trans>
             </span>
           )}
         </p>

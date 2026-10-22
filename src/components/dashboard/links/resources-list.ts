@@ -1,12 +1,6 @@
-export type ResourceType = {
-  url: string;
-  resource: string;
-  title: string | null;
-  description: string;
-  icon: string;
-  category: string;
-  frequency: number;
-};
+import type { Resource } from "./types.ts";
+
+export type ResourceType = Resource;
 
 const INNOHASSLE_FREQUENCY = 10;
 
@@ -15,9 +9,13 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://sport.innopolis.university/profile/",
     resource: "Sport website",
+    resourceRu: "Сайт спорта",
     title: null,
+    titleRu: null,
     description:
       "Check in for classes at the sport complex and track the number of sport hours.",
+    descriptionRu:
+      "Отмечайтесь на занятиях в спорткомплексе и следите за спортивными часами.",
     icon: "icon-[material-symbols--sports-gymnastics]",
     category: "Extracurricular",
     frequency: 4163,
@@ -25,8 +23,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://moodle.innopolis.university/my/",
     resource: "Moodle",
+    resourceRu: "Moodle",
     title: null,
+    titleRu: null,
     description: "Access official course materials and tests.",
+    descriptionRu: "Официальные материалы курсов и тесты.",
     icon: "icon-[material-symbols--menu-book-outline]",
     category: "Academic",
     frequency: 3451,
@@ -34,8 +35,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://baam.tatar/s",
     resource: "Baam",
+    resourceRu: "Baam",
     title: "Scan attendance",
+    titleRu: "Отметить посещаемость",
     description: "Mark attendance by scanning QR code.",
+    descriptionRu: "Отметьте посещаемость, отсканировав QR-код.",
     icon: "icon-[material-symbols--qr-code-scanner]",
     category: "Academic",
     frequency: 1686 + 1131,
@@ -43,8 +47,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://mail.innopolis.ru",
     resource: "Outlook",
+    resourceRu: "Outlook",
     title: "Mail",
+    titleRu: "Почта",
     description: "Official corporate email service.",
+    descriptionRu: "Официальная корпоративная почта.",
     icon: "icon-[material-symbols--mail-outline]",
     category: "Technical",
     frequency: 61,
@@ -52,8 +59,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://baam.tatar/AttendanceCheck",
     resource: "Baam",
+    resourceRu: "Baam",
     title: "Collect attendance",
+    titleRu: "Собрать посещаемость",
     description: "Collect attendance for activity.",
+    descriptionRu: "Соберите посещаемость на мероприятии.",
     icon: "icon-[material-symbols--checklist]",
     category: "Academic",
     frequency: 18,
@@ -64,8 +74,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://my.innopolis.university/",
     resource: "My University",
+    resourceRu: "My University",
     title: null,
+    titleRu: null,
     description: "Official students portal.",
+    descriptionRu: "Официальный личный кабинет студента.",
     icon: "icon-[ic--baseline-school]",
     category: "Academic",
     frequency: 1521,
@@ -73,8 +86,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://my.innopolis.university/event",
     resource: "My University",
+    resourceRu: "My University",
     title: "Events for innopoints",
+    titleRu: "Мероприятия за иннопоинты",
     description: "Earn innopoints by participating in projects and activities.",
+    descriptionRu:
+      "Зарабатывайте иннопоинты, участвуя в проектах и активностях.",
     icon: "icon-[material-symbols--currency-ruble-rounded]",
     category: "Extracurricular",
     frequency: 858 / 2 + 295,
@@ -82,9 +99,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://my.innopolis.university/store",
     resource: "My University",
+    resourceRu: "My University",
     title: "InnoStore",
+    titleRu: "InnoStore",
     description:
       "Redeem your innopoints for cool merch and rewards at the InnoStore.",
+    descriptionRu: "Обменивайте иннопоинты на мерч и награды в InnoStore.",
     icon: "icon-[material-symbols--storefront-outline]",
     category: "Extracurricular",
     frequency: 858 / 2 + 20,
@@ -92,8 +112,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://my.innopolis.university/education",
     resource: "My University",
+    resourceRu: "My University",
     title: "Gradebook",
+    titleRu: "Зачётная книжка",
     description: "View your marks for all previous semesters.",
+    descriptionRu: "Оценки за все предыдущие семестры.",
     icon: "icon-[material-symbols--assignment-outline]",
     category: "Academic",
     frequency: 0,
@@ -101,8 +124,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://my.innopolis.university/papers",
     resource: "My University",
+    resourceRu: "My University",
     title: "Request references",
+    titleRu: "Заказать справки",
     description: "Request a reference about studying or other things.",
+    descriptionRu: "Закажите справку об обучении или другую.",
     icon: "icon-[material-symbols--description-outline]",
     category: "Academic",
     frequency: 0,
@@ -110,8 +136,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://my.innopolis.university/psychologist",
     resource: "My University",
+    resourceRu: "My University",
     title: "Psychologist",
+    titleRu: "Психолог",
     description: "Book an appointment with a psychologist.",
+    descriptionRu: "Запишитесь на приём к психологу.",
     icon: "icon-[material-symbols--psychology-outline]",
     category: "Support",
     frequency: 113,
@@ -119,9 +148,13 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://my.innopolis.university/education/scholarship",
     resource: "My University",
+    resourceRu: "My University",
     title: "Scholarship",
+    titleRu: "Стипендия",
     description:
       "See how the scholarship is calculated for your current semester in My University.",
+    descriptionRu:
+      "Посмотрите, как считается стипендия за текущий семестр в My University.",
     icon: "icon-[material-symbols--credit-card-outline]",
     category: "Financial",
     frequency: 0,
@@ -132,8 +165,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/IUSportBot",
     resource: "InNoHassle",
+    resourceRu: "InNoHassle",
     title: "Sport bot",
+    titleRu: "Спорт-бот",
     description: "Conveniently check in for sports in Telegram.",
+    descriptionRu: "Удобно записывайтесь на спорт в Telegram.",
     icon: "icon-[material-symbols--sports-soccer]",
     category: "Extracurricular",
     frequency: INNOHASSLE_FREQUENCY,
@@ -141,8 +177,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/InnoPrintBot",
     resource: "InNoHassle",
+    resourceRu: "InNoHassle",
     title: "Inno Print Bot",
+    titleRu: "Inno Print Bot",
     description: "Quickly print & scan on university printers.",
+    descriptionRu:
+      "Быстро печатайте и сканируйте на университетских принтерах.",
     icon: "icon-[material-symbols--print]",
     category: "Technical",
     frequency: INNOHASSLE_FREQUENCY,
@@ -150,8 +190,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/InnoMusicRoomBot",
     resource: "InNoHassle",
+    resourceRu: "InNoHassle",
     title: "Music room",
+    titleRu: "Музыкальная комната",
     description: "Access the music room with musical equipment.",
+    descriptionRu: "Доступ в музкомнату с музыкальным оборудованием.",
     icon: "icon-[material-symbols--music-note]",
     category: "Extracurricular",
     frequency: INNOHASSLE_FREQUENCY,
@@ -159,9 +202,13 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/IURoomsBot",
     resource: "InNoHassle",
+    resourceRu: "InNoHassle",
     title: "Dorms bot",
+    titleRu: "Бот общежития",
     description:
       "Manage your dormitory room and split duties with your roommates.",
+    descriptionRu:
+      "Управляйте комнатой в общежитии и делите обязанности с соседями.",
     icon: "icon-[material-symbols--home-work-outline]",
     category: "Housing",
     frequency: INNOHASSLE_FREQUENCY,
@@ -169,8 +216,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://innohassle.ru/maps",
     resource: "InNoHassle",
+    resourceRu: "InNoHassle",
     title: "Maps",
+    titleRu: "Карты",
     description: "Find any place in Innopolis.",
+    descriptionRu: "Найдите любое место в Иннополисе.",
     icon: "icon-[material-symbols--map-outline]",
     category: "Navigation",
     frequency: INNOHASSLE_FREQUENCY,
@@ -178,8 +228,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://innohassle.ru/room-booking",
     resource: "InNoHassle",
+    resourceRu: "InNoHassle",
     title: "Room booking",
+    titleRu: "Бронирование комнат",
     description: "Book the meeting rooms and auditoriums in the university.",
+    descriptionRu: "Бронируйте переговорки и аудитории в университете.",
     icon: "icon-[material-symbols--door-open-outline-rounded]",
     category: "Navigation",
     frequency: INNOHASSLE_FREQUENCY,
@@ -187,8 +240,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://innohassle.ru/calendar",
     resource: "InNoHassle",
+    resourceRu: "InNoHassle",
     title: "Calendar",
+    titleRu: "Календарь",
     description: "View your personal schedule with classes, sports, deadlines.",
+    descriptionRu: "Личное расписание с парами, спортом и дедлайнами.",
     icon: "icon-[material-symbols--calendar-month-outline-rounded]",
     category: "Academic",
     frequency: INNOHASSLE_FREQUENCY,
@@ -196,9 +252,13 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://innohassle.ru/scholarship",
     resource: "InNoHassle",
+    resourceRu: "InNoHassle",
     title: "Scholarship calculator",
+    titleRu: "Калькулятор стипендии",
     description:
       "Calculate your expected scholarship for the next semester in InNoHassle.",
+    descriptionRu:
+      "Посчитайте ожидаемую стипендию на следующий семестр в InNoHassle.",
     icon: "icon-[material-symbols--calculate-outline]",
     category: "Financial",
     frequency: INNOHASSLE_FREQUENCY,
@@ -206,8 +266,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://innohassle.ru/schedule",
     resource: "InNoHassle",
+    resourceRu: "InNoHassle",
     title: "Schedule",
+    titleRu: "Расписание",
     description: "Conveniently view your schedule in the calendar.",
+    descriptionRu: "Удобно смотрите расписание в календаре.",
     icon: "icon-[material-symbols--today-outline]",
     category: "Academic",
     frequency: INNOHASSLE_FREQUENCY,
@@ -215,9 +278,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://innohassle.ru/extension",
     resource: "InNoHassle",
+    resourceRu: "InNoHassle",
     title: "Browser extension",
+    titleRu: "Браузерное расширение",
     description:
       "Install browser extension for auto-login to Moodle and quick links.",
+    descriptionRu: "Расширение для автологина в Moodle и быстрых ссылок.",
     icon: "icon-[material-symbols--extension-outline]",
     category: "Technical",
     frequency: INNOHASSLE_FREQUENCY,
@@ -228,8 +294,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://eduwiki.innopolis.university/index.php/Main_Page",
     resource: "Eduwiki",
+    resourceRu: "Eduwiki",
     title: null,
+    titleRu: null,
     description: "View the official documents from DoE.",
+    descriptionRu: "Официальные документы от DoE.",
     icon: "icon-[material-symbols--library-books-outline]",
     category: "Academic",
     frequency: 305,
@@ -237,9 +306,13 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://eduwiki.innopolis.university/index.php/AcademicCalendar",
     resource: "Eduwiki",
+    resourceRu: "Eduwiki",
     title: "Academic calendar",
+    titleRu: "Учебный календарь",
     description:
       "View the official academic calendar with holidays and study days.",
+    descriptionRu:
+      "Официальный учебный календарь с каникулами и учебными днями.",
     icon: "icon-[material-symbols--calendar-month-outline]",
     category: "Academic",
     frequency: 2,
@@ -247,8 +320,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://eduwiki.innopolis.university/index.php/All:Schedule",
     resource: "Eduwiki",
+    resourceRu: "Eduwiki",
     title: "Schedule",
+    titleRu: "Расписание",
     description: "View the official schedule of classes.",
+    descriptionRu: "Официальное расписание занятий.",
     icon: "icon-[material-symbols--schedule-outline]",
     category: "Academic",
     frequency: 0,
@@ -256,9 +332,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://eduwiki.innopolis.university/index.php/ALL:StudyPlan",
     resource: "Eduwiki",
+    resourceRu: "Eduwiki",
     title: "Study plan",
+    titleRu: "Учебный план",
     description:
       "View the study plan with a documented amount of required studying hours.",
+    descriptionRu: "Учебный план с указанием количества учебных часов.",
     icon: "icon-[material-symbols--book-outline]",
     category: "Academic",
     frequency: 34,
@@ -269,9 +348,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://hotel.innopolis.university/studentaccommodation/",
     resource: "Dormitory",
+    resourceRu: "Общежитие",
     title: "Student accommodation",
+    titleRu: "Проживание студентов",
     description:
       "Fill the service requests, view the cleaning schedule, and read accommodation rules.",
+    descriptionRu: "Заявки на услуги, график уборки и правила проживания.",
     icon: "icon-[material-symbols--home-outline]",
     category: "Housing",
     frequency: 54,
@@ -279,9 +361,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://hotel.innopolis.university/studentaccommodation/#block2944",
     resource: "Dormitory",
+    resourceRu: "Общежитие",
     title: "Service request",
+    titleRu: "Заявка на услугу",
     description:
       "Submit requests for maintenance or services in your dormitory.",
+    descriptionRu: "Оставляйте заявки на обслуживание в общежитии.",
     icon: "icon-[material-symbols--construction]",
     category: "Housing",
     frequency: 18,
@@ -289,9 +374,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/campus_info",
     resource: "Dormitory",
+    resourceRu: "Общежитие",
     title: "Information channel",
+    titleRu: "Информационный канал",
     description:
       "Get the latest updates and information about dormitory life and rules in Telegram.",
+    descriptionRu: "Новости и правила жизни в общежитии в Telegram.",
     icon: "icon-[material-symbols--info-outline]",
     category: "Housing",
     frequency: 15,
@@ -299,9 +387,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/hoteluni",
     resource: "Dormitory",
+    resourceRu: "Общежитие",
     title: "Administration",
+    titleRu: "Администрация",
     description:
       "Contact the hotel administration for official inquiries and concerns.",
+    descriptionRu: "Связь с администрацией общежития по официальным вопросам.",
     icon: "icon-[material-symbols--admin-panel-settings-outline]",
     category: "Housing",
     frequency: 9,
@@ -309,8 +400,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/Inno_dorm",
     resource: "Dormitory",
+    resourceRu: "Общежитие",
     title: "Student support",
+    titleRu: "Студенческая поддержка",
     description: "Get assistance and support for dormitory-related issues.",
+    descriptionRu: "Помощь по вопросам общежития.",
     icon: "icon-[material-symbols--support-agent]",
     category: "Housing",
     frequency: 8,
@@ -321,9 +415,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://campuslife.innopolis.ru/",
     resource: "Campus life",
+    resourceRu: "Campus Life",
     title: null,
+    titleRu: null,
     description:
       "Read the student handbook, learn about opportunities and events.",
+    descriptionRu: "Студенческий handbook, возможности и мероприятия.",
     icon: "icon-[material-symbols--groups-outline]",
     category: "Extracurricular",
     frequency: 17,
@@ -331,8 +428,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://campuslife.innopolis.ru/handbook2023#scholarship",
     resource: "Campus life",
+    resourceRu: "Campus Life",
     title: "Scholarship",
+    titleRu: "Стипендия",
     description: "Read the official scholarship rules and regulations.",
+    descriptionRu: "Официальные правила начисления стипендии.",
     icon: "icon-[material-symbols--menu-book-outline]",
     category: "Financial",
     frequency: 43,
@@ -340,9 +440,13 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://campuslife.innopolis.ru/handbook2023",
     resource: "Campus life",
+    resourceRu: "Campus Life",
     title: "Handbook",
+    titleRu: "Handbook",
     description:
       "Access the official student handbook for campus rules, policies, and guidelines.",
+    descriptionRu:
+      "Официальный студенческий handbook: правила и политики кампуса.",
     icon: "icon-[material-symbols--menu-book-outline]",
     category: "Extracurricular",
     frequency: 0,
@@ -353,8 +457,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://vm.innopolis.university/",
     resource: "IT help",
+    resourceRu: "IT-поддержка",
     title: "Virtual machines",
+    titleRu: "Виртуальные машины",
     description: "Access free virtual machines.",
+    descriptionRu: "Бесплатные виртуальные машины.",
     icon: "icon-[material-symbols--computer-outline]",
     category: "Technical",
     frequency: 37,
@@ -362,8 +469,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://it.innopolis.university",
     resource: "IT help",
+    resourceRu: "IT-поддержка",
     title: "Ticketing system",
+    titleRu: "Система заявок",
     description: "Fill the tickets for the IT department.",
+    descriptionRu: "Заявки в IT-отдел.",
     icon: "icon-[material-symbols--computer-outline]",
     category: "Technical",
     frequency: 8,
@@ -371,9 +481,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/iuithelp",
     resource: "IT help",
+    resourceRu: "IT-поддержка",
     title: "Contact for urgent messages",
+    titleRu: "Срочная связь",
     description:
       "Reach out IT department for urgent assistance or inquiries via Telegram.",
+    descriptionRu: "Срочная помощь IT-отдела через Telegram.",
     icon: "icon-[material-symbols--contact-support-outline]",
     category: "Technical",
     frequency: 3,
@@ -381,8 +494,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://help.university.innopolis.ru",
     resource: "IT help",
+    resourceRu: "IT-поддержка",
     title: "Wiki",
+    titleRu: "Wiki",
     description: "Access the IT department's instructions.",
+    descriptionRu: "Инструкции IT-отдела.",
     icon: "icon-[material-symbols--contact-support-outline]",
     category: "Technical",
     frequency: 0,
@@ -390,8 +506,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://booking-innodatahub.innopolis.university/",
     resource: "InnoDataHub",
+    resourceRu: "InnoDataHub",
     title: null,
+    titleRu: null,
     description: "Book powerful computing resources.",
+    descriptionRu: "Бронирование мощных вычислительных ресурсов.",
     icon: "icon-[material-symbols--storage]",
     category: "Technical",
     frequency: 37,
@@ -402,9 +521,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://portal.university.innopolis.ru/reading_hall/",
     resource: "Bitrix",
+    resourceRu: "Bitrix",
     title: "Library",
+    titleRu: "Библиотека",
     description:
       "Explore books available in the university library and reserve some of them.",
+    descriptionRu: "Каталог книг университетской библиотеки и бронирование.",
     icon: "icon-[material-symbols--local-library-outline]",
     category: "Academic",
     frequency: 21,
@@ -412,9 +534,13 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/InnaHelpBot",
     resource: "Inna",
+    resourceRu: "Инна",
     title: "Bus schedule",
+    titleRu: "Расписание автобусов",
     description:
       "Quickly find any city organization and view the bus schedule in Telegram.",
+    descriptionRu:
+      "Находите организации города и смотрите расписание автобусов в Telegram.",
     icon: "icon-[material-symbols--directions-bus-outline]",
     category: "Navigation",
     frequency: 10,
@@ -422,9 +548,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/+H0MsiY00PoI4Yzcy",
     resource: "Library",
+    resourceRu: "Библиотека",
     title: "Information channel",
+    titleRu: "Информационный канал",
     description:
       "Get the latest updates and information about the library in Telegram.",
+    descriptionRu: "Новости библиотеки в Telegram.",
     icon: "icon-[material-symbols--local-library-outline]",
     category: "Academic",
     frequency: 0,
@@ -432,8 +561,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://portal.university.innopolis.ru/booking/index.php",
     resource: "Bitrix",
+    resourceRu: "Bitrix",
     title: "Ski equipment",
+    titleRu: "Лыжный инвентарь",
     description: "Book ski equipment for free.",
+    descriptionRu: "Бесплатное бронирование лыжного инвентаря.",
     icon: "icon-[material-symbols--downhill-skiing]",
     category: "Extracurricular",
     frequency: 22,
@@ -441,8 +573,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/innobus",
     resource: "Bus",
+    resourceRu: "Автобус",
     title: "Information channel",
+    titleRu: "Информационный канал",
     description: "View news about the current bus location in Telegram.",
+    descriptionRu: "Новости о местоположении автобуса в Telegram.",
     icon: "icon-[material-symbols--map-outline]",
     category: "Navigation",
     frequency: 5,
@@ -450,8 +585,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/innolinks",
     resource: "Chat with chats",
+    resourceRu: "Чаты и каналы",
     title: null,
+    titleRu: null,
     description: "Explore links to many Telegram channels and chats.",
+    descriptionRu: "Ссылки на Telegram-каналы и чаты.",
     icon: "icon-[material-symbols--chat-outline]",
     category: "Extracurricular",
     frequency: 30,
@@ -459,8 +597,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://mail.innopolis.ru/owa/#path=/calendar",
     resource: "Outlook",
+    resourceRu: "Outlook",
     title: "Calendar",
+    titleRu: "Календарь",
     description: "Access the calendar and arrange meetings with IU employees.",
+    descriptionRu: "Календарь и встречи с сотрудниками университета.",
     icon: "icon-[material-symbols--calendar-month-outline]",
     category: "Technical",
     frequency: 11,
@@ -468,9 +609,13 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/InnoChatCleanerBot",
     resource: "Chat cleaner",
+    resourceRu: "Chat cleaner",
     title: null,
+    titleRu: null,
     description:
       "Remove 'joined the group' messages and quickly generate an avatar for your course chats and channels.",
+    descriptionRu:
+      "Удаляет сообщения «joined the group» и генерирует аватар для чатов курса.",
     icon: "icon-[material-symbols--image-outline]",
     category: "Technical",
     frequency: 36,
@@ -478,8 +623,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://gitlab.pg.innopolis.university",
     resource: "GitLab",
+    resourceRu: "GitLab",
     title: null,
+    titleRu: null,
     description: "Access the university GitLab for projects and assignments.",
+    descriptionRu: "Университетский GitLab для проектов и заданий.",
     icon: "icon-[material-symbols--data-object]",
     category: "Technical",
     frequency: 13,
@@ -487,9 +635,12 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/opportunitiesforyou",
     resource: "Opportunities For You",
+    resourceRu: "Opportunities For You",
     title: null,
+    titleRu: null,
     description:
       "Telegram channel with announcements about interesting activities and events.",
+    descriptionRu: "Telegram-канал с анонсами активностей и мероприятий.",
     icon: "icon-[material-symbols--info-outline]",
     category: "Extracurricular",
     frequency: 0,
@@ -497,8 +648,11 @@ export const resourcesList: ResourceType[] = [
   {
     url: "https://telegram.me/StudentAffairs_bot",
     resource: "Student Affairs bot",
+    resourceRu: "Бот Student Affairs",
     title: null,
+    titleRu: null,
     description: "Bot for communication with 319 and DoE.",
+    descriptionRu: "Бот для связи с 319 и DoE.",
     icon: "icon-[material-symbols--chat-outline]",
     category: "Support",
     frequency: 8,

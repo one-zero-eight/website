@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   autoUpdate,
   flip,
@@ -70,6 +71,7 @@ export function CompactColorPicker({
   className?: string;
   triggerClassName?: string;
 }) {
+  const { t } = useLingui();
   const canonicalValue = value ? normalizeHexColor(value) : null;
   const displayColor = canonicalValue ?? automaticColor;
   const [open, setOpen] = useState(false);
@@ -139,7 +141,7 @@ export function CompactColorPicker({
           className="border-base-300 h-4 w-4 shrink-0 rounded border"
           style={displayColor ? colorSwatchStyle(displayColor) : undefined}
         />
-        <span>{canonicalValue ?? "Автоматически"}</span>
+        <span>{canonicalValue ?? t`Automatic`}</span>
         <span className="icon-[mdi--chevron-down] text-base-content/60" />
       </button>
 
@@ -174,7 +176,7 @@ export function CompactColorPicker({
               <div className="flex items-center gap-2">
                 <label className="flex shrink-0 flex-col gap-1">
                   <span className="text-base-content/60 text-[0.625rem]">
-                    Другой
+                    <Trans>Other</Trans>
                   </span>
                   <span className="relative block h-8 w-10">
                     <span
@@ -192,7 +194,7 @@ export function CompactColorPicker({
                 </label>
                 <label className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="text-base-content/60 text-[0.625rem]">
-                    HEX
+                    <Trans>HEX</Trans>
                   </span>
                   <input
                     className={cn(
@@ -241,7 +243,7 @@ export function CompactColorPicker({
                     style={colorSwatchStyle(automaticColor)}
                   />
                 ) : null}
-                Автоматически
+                <Trans>Automatic</Trans>
               </button>
             </div>
           </FloatingFocusManager>

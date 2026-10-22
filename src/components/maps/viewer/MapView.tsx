@@ -1,4 +1,6 @@
 import { customFetch } from "@/api/helpers/custom-fetch.ts";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { mapsTypes } from "@/api/maps";
 import {
   getSceneGeoReference,
@@ -28,6 +30,7 @@ export function MapView({
   highlightAreas: mapsTypes.SchemaArea[];
   disablePopup?: boolean;
 }) {
+  const { t } = useLingui();
   const { showError } = useToast();
   const [fullscreen, setFullscreen] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -97,24 +100,34 @@ export function MapView({
    */
   const locationIssue = useMemo(() => {
     if (locationStatus === "denied") {
-      return { kind: "denied", message: "Location access denied" };
+      return {
+        kind: "denied",
+        message: t`Location access denied`,
+      };
     }
     if (locationStatus === "unavailable") {
-      return { kind: "unavailable", message: "Location unavailable" };
+      return {
+        kind: "unavailable",
+        message: t`Location unavailable`,
+      };
     }
     if (locationStatus === "error") {
-      return { kind: "error", message: "No GPS signal" };
+      return { kind: "error", message: t`No GPS signal` };
     }
     if (userLocation && !userLocation.visible) {
+      const accuracyM = Math.round(userLocation.accuracyM);
       return userLocation.withinBounds
         ? {
             kind: "weak-signal",
-            message: `Weak GPS signal (±${Math.round(userLocation.accuracyM)}m)`,
+            message: t`Weak GPS signal (±${accuracyM}m)`,
           }
-        : { kind: "outside-map", message: "You are outside this map" };
+        : {
+            kind: "outside-map",
+            message: t`You are outside this map`,
+          };
     }
     return null;
-  }, [locationStatus, userLocation]);
+  }, [locationStatus, userLocation, t]);
 
   // The message is only a brief hint; the button keeps the error icon afterwards.
   // Keyed by kind, so live updates of the same issue (e.g. accuracy) don't re-show it.
@@ -142,7 +155,7 @@ export function MapView({
       );
 
       if (error || !data) {
-        showError("Export failed", "Could not download maps PDF.");
+        showError(msg`Export failed`, msg`Could not download maps PDF.`);
         return;
       }
 
@@ -153,7 +166,7 @@ export function MapView({
       link.click();
       URL.revokeObjectURL(url);
     } catch {
-      showError("Export failed", "Could not download maps PDF.");
+      showError(msg`Export failed`, msg`Could not download maps PDF.`);
     } finally {
       setIsExportingPdf(false);
     }
@@ -222,14 +235,16 @@ export function MapView({
               ) : (
                 <span className="icon-[material-symbols--description-outline] text-2xl" />
               )}
-              <span className="text-base font-thin">Export PDF</span>
+              <span className="text-base font-thin">
+                <Trans>Export PDF</Trans>
+              </span>
             </button>
             <div className="absolute right-2 bottom-2 flex flex-col gap-2">
               {Math.abs(bearing) > 0.2 && (
                 <button
                   type="button"
                   className="bg-base-300/50 hover:bg-base-300/75 flex h-fit justify-center rounded-xl px-2 py-2"
-                  aria-label="Reset north"
+                  aria-label={t`Reset north`}
                   onClick={() => mapViewerRef.current?.resetBearing()}
                 >
                   {/* Counter-rotated by the bearing so the white end of the
@@ -264,7 +279,7 @@ export function MapView({
                         "text-primary",
                       locationIssue && "text-error",
                     )}
-                    aria-label="Show my location"
+                    aria-label={t`Show my location`}
                     onClick={() => {
                       if (
                         locationStatus === "active" ||

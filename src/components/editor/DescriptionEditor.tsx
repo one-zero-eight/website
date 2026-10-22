@@ -1,4 +1,5 @@
 import { ComponentProps, lazy, Suspense, forwardRef } from "react";
+import { Trans } from "@lingui/react/macro";
 import { ErrorBoundary } from "react-error-boundary";
 import type { TiptapEditorRef } from "./_TiptapDescriptionEditor";
 
@@ -14,7 +15,9 @@ export const DescriptionEditor = forwardRef(function DescriptionEditor(
     <ErrorBoundary
       fallback={
         <div className={props.className}>
-          <i>Some error occurred</i>
+          <i>
+            <Trans>Some error occurred</Trans>
+          </i>
         </div>
       }
     >

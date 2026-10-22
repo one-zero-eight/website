@@ -1,4 +1,7 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
+import type { MessageDescriptor } from "@lingui/core";
 import {
   FormEvent,
   useCallback,
@@ -7,7 +10,10 @@ import {
   type ReactNode,
 } from "react";
 import { $when2meet } from "@/api/when2meet";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  formatApiErrorDescriptor,
+  formatApiErrorMessage,
+} from "@/api/helpers/create-query-client";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
@@ -68,6 +74,7 @@ function TimeSetupOption({
 }
 
 export function CreationPage({ meetingId }: { meetingId?: string }) {
+  const { t, i18n } = useLingui();
   const isEditMode = !!meetingId;
   const { me } = useMe();
   const queryClient = useQueryClient();
@@ -82,9 +89,9 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
   });
   const [timeSetupMode, setTimeSetupMode] =
     useState<TimeSetupMode>("daily_range");
-  const [nameError, setNameError] = useState<string>();
-  const [datesError, setDatesError] = useState<string>();
-  const [timeError, setTimeError] = useState<string>();
+  const [nameError, setNameError] = useState<MessageDescriptor>();
+  const [datesError, setDatesError] = useState<MessageDescriptor>();
+  const [timeError, setTimeError] = useState<MessageDescriptor>();
   const [isFormInitialized, setIsFormInitialized] = useState(!isEditMode);
 
   const eventQueryKey = meetingId
@@ -130,7 +137,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
       return;
     }
 
-    showError("Error", "Only the meeting owner can edit this event.");
+    showError(msg`Error`, msg`Only the meeting owner can edit this event.`);
     navigate({
       to: "/when2meet/$meetingId",
       params: { meetingId: event.slug },
@@ -142,7 +149,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
     "/meetings/",
     {
       onError: (error) => {
-        showError("Error", formatApiErrorMessage(error));
+        showError(msg`Error`, formatApiErrorDescriptor(error));
       },
     },
   );
@@ -152,7 +159,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
     "/meetings/{meeting_ref}",
     {
       onError: (error) => {
-        showError("Error", formatApiErrorMessage(error));
+        showError(msg`Error`, formatApiErrorDescriptor(error));
       },
     },
   );
@@ -173,14 +180,14 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
     const trimmedName = meetingName.trim();
     const nextNameError =
       trimmedName.length < 3
-        ? "Meeting name should contain at least 3 symbols."
+        ? msg`Meeting name should contain at least 3 symbols.`
         : undefined;
 
     const nextDatesError =
-      selectedDates.size === 0 ? "Choose at least one date." : undefined;
+      selectedDates.size === 0 ? msg`Choose at least one date.` : undefined;
     const nextTimeError =
       timeSetupMode === "daily_range" && !isTimeRangeValid(timeRange)
-        ? "End time must be later than start time."
+        ? msg`End time must be later than start time.`
         : undefined;
 
     setNameError(nextNameError);
@@ -238,8 +245,8 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
               markPendingSetup(updatedEvent.slug);
               saveSetupSlotPrefill(updatedEvent.slug, setupSlotPrefill);
               showSuccess(
-                "Meeting updated",
-                "Choose allowed timeslots on the meeting page.",
+                msg`Meeting updated`,
+                msg`Choose allowed timeslots on the meeting page.`,
               );
               navigate({
                 to: "/when2meet/$meetingId",
@@ -251,7 +258,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
               return;
             }
 
-            showSuccess("Meeting updated", `"${trimmedName}" was saved.`);
+            showSuccess(msg`Meeting updated`, msg`"${trimmedName}" was saved.`);
             navigate({
               to: "/when2meet/$meetingId",
               params: { meetingId: updatedEvent.slug },
@@ -279,7 +286,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
       {
         onSuccess: (createdEvent) => {
           if (!createdEvent.id) {
-            showError("Error", "Meeting was created without an id.");
+            showError(msg`Error`, msg`Meeting was created without an id.`);
             return;
           }
 
@@ -288,10 +295,10 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
           }
 
           showSuccess(
-            "Meeting created",
+            msg`Meeting created`,
             isManualSlots
-              ? "Choose allowed timeslots on the meeting page."
-              : `"${trimmedName}" is ready for participants.`,
+              ? msg`Choose allowed timeslots on the meeting page.`
+              : msg`"${trimmedName}" is ready for participants.`,
           );
           navigate({
             to: "/when2meet/$meetingId",
@@ -339,11 +346,11 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
       params={{ meetingId: meetingSlug }}
       className="btn btn-ghost"
     >
-      Cancel
+      <Trans>Cancel</Trans>
     </Link>
   ) : (
     <Link to="/when2meet" className="btn btn-ghost">
-      Cancel
+      <Trans>Cancel</Trans>
     </Link>
   );
 
@@ -351,7 +358,8 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
     <>
       <label className="block min-w-0">
         <span className="text-sm">
-          Meeting name<span className="text-error ml-1">*</span>
+          <Trans>Meeting name</Trans>
+          <span className="text-error ml-1">*</span>
         </span>
         <input
           type="text"
@@ -359,7 +367,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
             "input input-bordered mt-1 w-full focus:outline-none",
             nameError && "input-error border-error",
           )}
-          placeholder="Name your meeting"
+          placeholder={t`Name your meeting`}
           value={meetingName}
           onChange={(inputEvent) => {
             setMeetingName(inputEvent.target.value);
@@ -367,14 +375,18 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
           }}
         />
         {nameError && (
-          <p className="text-error mt-1 text-sm font-medium">{nameError}</p>
+          <p className="text-error mt-1 text-sm font-medium">
+            {i18n._(nameError)}
+          </p>
         )}
       </label>
       <label className="mt-3 block min-w-0">
-        <span className="text-sm">Description</span>
+        <span className="text-sm">
+          <Trans>Description</Trans>
+        </span>
         <textarea
           className="textarea textarea-bordered mt-1 w-full resize-none focus:outline-none"
-          placeholder="Optional meeting details"
+          placeholder={t`Optional meeting details`}
           rows={4}
           value={description}
           onChange={(inputEvent) => setDescription(inputEvent.target.value)}
@@ -385,12 +397,14 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
 
   const timeSetupFields = (
     <label className="fieldset mt-3">
-      <span className="text-sm">When can people meet?</span>
+      <span className="text-sm">
+        <Trans>When can people meet?</Trans>
+      </span>
       <div className="grid gap-2">
         <TimeSetupOption
           name="time-setup-mode"
           selected={timeSetupMode === "daily_range"}
-          title="Same hours every day"
+          title={t`Same hours every day`}
           onSelect={() => {
             setTimeSetupMode("daily_range");
             setTimeError(undefined);
@@ -404,14 +418,16 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
             }}
           />
           {timeError && (
-            <p className="text-error mt-2 text-sm font-medium">{timeError}</p>
+            <p className="text-error mt-2 text-sm font-medium">
+              {i18n._(timeError)}
+            </p>
           )}
         </TimeSetupOption>
 
         <TimeSetupOption
           name="time-setup-mode"
           selected={timeSetupMode === "manual_slots"}
-          title="Pick timeslots on the next step"
+          title={t`Pick timeslots on the next step`}
           onSelect={() => {
             setTimeSetupMode("manual_slots");
             setTimeError(undefined);
@@ -430,9 +446,9 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
       {isSubmitting ? (
         <span className="loading loading-spinner loading-sm" />
       ) : timeSetupMode === "manual_slots" ? (
-        "Next"
+        t`Next`
       ) : (
-        "Create"
+        t`Create`
       )}
     </button>
   );
@@ -446,7 +462,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
       {isSubmitting ? (
         <span className="loading loading-spinner loading-sm" />
       ) : (
-        "Save"
+        t`Save`
       )}
     </button>
   );
@@ -459,7 +475,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
           {timeSetupFields}
           {datesError && (
             <p className="text-error mt-1 hidden text-sm font-medium lg:block">
-              {datesError}
+              {i18n._(datesError)}
             </p>
           )}
         </div>
@@ -470,6 +486,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
               key={isEditMode ? `${meetingId}-initialized` : "create"}
               defaultSelectedDates={selectedDates}
               onDatesChange={handleDatesChange}
+              locale={i18n.locale}
               className="w-full"
             />
           )}
@@ -478,7 +495,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
           )}
           {datesError && (
             <p className="text-error mt-2 text-sm font-medium lg:hidden">
-              {datesError}
+              {i18n._(datesError)}
             </p>
           )}
         </div>
@@ -501,7 +518,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
             className="text-base-content/70 hover:text-base-content mb-4 inline-flex w-fit items-center gap-1 text-sm font-medium"
           >
             <span className="icon-[material-symbols--arrow-back] text-lg" />
-            Back to meeting
+            <Trans>Back to meeting</Trans>
           </Link>
         ) : (
           <Link
@@ -509,12 +526,16 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
             className="text-base-content/70 hover:text-base-content mb-4 inline-flex w-fit items-center gap-1 text-sm font-medium"
           >
             <span className="icon-[material-symbols--arrow-back] text-lg" />
-            All meetings
+            <Trans>All meetings</Trans>
           </Link>
         )}
 
         <h1 className="mb-6 px-2 text-2xl font-semibold md:p-0">
-          {isEditMode ? "Edit meeting" : "New meeting"}
+          {isEditMode ? (
+            <Trans>Edit meeting</Trans>
+          ) : (
+            <Trans>New meeting</Trans>
+          )}
         </h1>
 
         <form onSubmit={handleSubmit} className="bg-base-100 p-2 md:p-0">

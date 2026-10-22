@@ -1,4 +1,6 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { $sport } from "@/api/sport";
 import type {
   SchemaAttendanceStudentGradeSchema,
@@ -31,6 +33,7 @@ export function SportTrainerTrainingModal({
   onOpenChange: (open: boolean) => void;
   row: SchemaTrainingInfoPersonalSchema;
 }) {
+  const { t } = useLingui();
   const [view, setView] = useState<TrainerModalView>("main");
 
   useEffect(() => {
@@ -39,7 +42,8 @@ export function SportTrainerTrainingModal({
     }
   }, [open]);
 
-  const title = sportTrainingTitle(row) + " (Trainer)";
+  const trainingTitle = sportTrainingTitle(row);
+  const title = t`${trainingTitle} (Trainer)`;
   const [importing, setImporting] = useState(false);
   const { data: attendance } = $sport.useQuery(
     "get",
@@ -84,7 +88,7 @@ export function SportTrainerTrainingModal({
           disabled={importing}
           onClick={() => onOpenChange(false)}
         >
-          Close
+          <Trans>Close</Trans>
         </button>
         {view === "attendees" && row.can_edit ? (
           <SportTrainerBaamImportButton
@@ -135,7 +139,7 @@ function SportTrainerTrainingModalMain({
         className={cn(sportTrainerMenuBtn, "w-full")}
         onClick={onViewAttendees}
       >
-        View attendee
+        <Trans>View attendee</Trans>
       </button>
     </div>
   );
@@ -196,7 +200,10 @@ function SportTrainerTrainingModalAttendees({
         invalidateAttendance(trainingId);
       },
       onError: (error) => {
-        showError("Could not update attendance", formatApiErrorMessage(error));
+        showError(
+          msg`Could not update attendance`,
+          formatApiErrorDescriptor(error),
+        );
       },
     },
   );
@@ -317,7 +324,7 @@ function SportTrainerTrainingModalAttendees({
     <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-4">
       {holdHintVisible ? (
         <div className="text-warning text-center text-sm font-medium">
-          hold to set all 0h
+          <Trans>Hold to set all hours to 0</Trans>
         </div>
       ) : null}
 
@@ -330,7 +337,7 @@ function SportTrainerTrainingModalAttendees({
         />
       ) : (
         <div className="text-warning text-sm">
-          You can't change this training.
+          <Trans>You can't change this training.</Trans>
         </div>
       )}
 
@@ -342,7 +349,7 @@ function SportTrainerTrainingModalAttendees({
         </div>
       ) : isError ? (
         <div className="alert alert-error">
-          Attendance list could not be loaded.
+          <Trans>Attendance list could not be loaded.</Trans>
         </div>
       ) : (
         <>
@@ -359,7 +366,7 @@ function SportTrainerTrainingModalAttendees({
               }
               onClick={() => handleAllHours(attendance?.academic_duration ?? 0)}
             >
-              All {attendance?.academic_duration ?? 0}h
+              <Trans>All {attendance?.academic_duration ?? 0}h</Trans>
             </button>
             <button
               type="button"
@@ -375,7 +382,7 @@ function SportTrainerTrainingModalAttendees({
               onPointerLeave={handleAllZeroHoldEnd}
               onPointerCancel={handleAllZeroHoldEnd}
             >
-              All 0h
+              <Trans>All 0h</Trans>
             </button>
           </div>
 
@@ -392,7 +399,7 @@ function SportTrainerTrainingModalAttendees({
                 )}
                 onClick={() => toggleHoursFilter(hours)}
               >
-                {hours}h
+                <Trans>{hours}h</Trans>
               </button>
             ))}
           </div>
@@ -411,11 +418,11 @@ function SportTrainerTrainingModalAttendees({
             </ul>
           ) : sortedGrades.length ? (
             <div className="text-base-content/60 text-sm">
-              No attendees match the selected hour filters.
+              <Trans>No attendees match the selected hour filters.</Trans>
             </div>
           ) : (
             <div className="text-base-content/60 text-sm">
-              No attendees yet.
+              <Trans>No attendees yet.</Trans>
             </div>
           )}
         </>
@@ -435,6 +442,7 @@ export function SportTrainerStudentAddField({
   groupId: number;
   maxHours?: number;
 }) {
+  const { t } = useLingui();
   const { showError, showSuccess, showWarning } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -485,7 +493,10 @@ export function SportTrainerStudentAddField({
         setSuggestionsOpen(false);
       },
       onError: (error) => {
-        showError("Could not update attendance", formatApiErrorMessage(error));
+        showError(
+          msg`Could not update attendance`,
+          formatApiErrorDescriptor(error),
+        );
       },
     },
   );
@@ -528,7 +539,7 @@ export function SportTrainerStudentAddField({
         <input
           type="text"
           className="input input-bordered w-full"
-          placeholder="Student name"
+          placeholder={t`Student name`}
           value={searchTerm}
           onChange={(e) => handleSearchChange(e.target.value)}
           onFocus={() => {
@@ -548,7 +559,7 @@ export function SportTrainerStudentAddField({
               </li>
             ) : suggestionsError ? (
               <li className="text-error px-3 py-2 text-sm">
-                Suggestions could not be loaded.
+                <Trans>Suggestions could not be loaded.</Trans>
               </li>
             ) : suggestions.length ? (
               suggestions.map((student) => (
@@ -570,7 +581,7 @@ export function SportTrainerStudentAddField({
               ))
             ) : (
               <li className="text-base-content/60 px-3 py-2 text-sm">
-                No students found.
+                <Trans>No students found.</Trans>
               </li>
             )}
           </ul>
@@ -587,9 +598,9 @@ export function SportTrainerStudentAddField({
         {markPending ? (
           <span className="loading loading-spinner loading-sm" />
         ) : maxHours == null ? (
-          "Add"
+          <Trans>Add</Trans>
         ) : (
-          `Add ${maxHours}`
+          <Trans>Add {maxHours}</Trans>
         )}
       </button>
     </div>
@@ -635,7 +646,7 @@ export function SportTrainerAttendanceRow({
             disabled={disabled}
             onClick={() => onHoursChange(grade.id, hours)}
           >
-            {hours}h
+            <Trans>{hours}h</Trans>
           </button>
         ))}
       </div>

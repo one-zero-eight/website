@@ -4,20 +4,21 @@ import { ScanPage } from "@/components/web-print/ScanPage.tsx";
 import { WebPrintTabs } from "@/components/web-print/WebPrintTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/printers/scan")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   return (
     <>
       <Helmet>
-        <title>Scan — Printers</title>
+        <title>{t`Scan — Printers`}</title>
         <meta
           name="description"
-          content="Scan documents on Innopolis University scanners from your browser."
+          content={t`Scan documents on Innopolis University scanners from your browser.`}
         />
       </Helmet>
 

@@ -1,4 +1,6 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
 import { SportTrainerBaamImportButton } from "@/components/sport/SportTrainerBaamImportButton.tsx";
@@ -24,6 +26,8 @@ export function SportTrainerAttendanceModal({
   onOpenChange: (open: boolean) => void;
   row: SchemaTrainingInfoPersonalSchema;
 }) {
+  const { t } = useLingui();
+  const trainingTitle = sportTrainingTitle(row);
   const trainingId = row.training.id;
   const groupId = row.training.group_id;
   const canEdit = row.can_edit;
@@ -61,7 +65,10 @@ export function SportTrainerAttendanceModal({
         invalidateAttendance(trainingId);
       },
       onError: (error) => {
-        showError("Could not update attendance", formatApiErrorMessage(error));
+        showError(
+          msg`Could not update attendance`,
+          formatApiErrorDescriptor(error),
+        );
       },
     },
   );
@@ -85,7 +92,7 @@ export function SportTrainerAttendanceModal({
     <SportTrainingModalShell
       open={open}
       onOpenChange={onOpenChange}
-      title={sportTrainingTitle(row) + " (Trainer)"}
+      title={t`${trainingTitle} (Trainer)`}
       closeDisabled={importing}
     >
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-4">
@@ -98,7 +105,7 @@ export function SportTrainerAttendanceModal({
           />
         ) : (
           <div className="text-warning text-sm">
-            You can't change this training.
+            <Trans>You can't change this training.</Trans>
           </div>
         )}
 
@@ -110,7 +117,7 @@ export function SportTrainerAttendanceModal({
           </div>
         ) : attendanceError ? (
           <div className="alert alert-error">
-            Attendance list could not be loaded.
+            <Trans>Attendance list could not be loaded.</Trans>
           </div>
         ) : sortedGrades.length ? (
           <ul className="divide-base-300 divide-y">
@@ -125,7 +132,9 @@ export function SportTrainerAttendanceModal({
             ))}
           </ul>
         ) : (
-          <div className="text-base-content/60 text-sm">No attendees yet.</div>
+          <div className="text-base-content/60 text-sm">
+            <Trans>No attendees yet.</Trans>
+          </div>
         )}
       </div>
 
@@ -136,7 +145,7 @@ export function SportTrainerAttendanceModal({
           disabled={importing}
           onClick={() => onOpenChange(false)}
         >
-          Close
+          <Trans>Close</Trans>
         </button>
         {canEdit ? (
           <SportTrainerBaamImportButton

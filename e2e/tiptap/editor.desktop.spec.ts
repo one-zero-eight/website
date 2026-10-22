@@ -22,6 +22,50 @@ test.describe("Tiptap editor desktop", () => {
     await expect(editor.getByText("Callout text")).toBeVisible();
   });
 
+  test("switches editor labels and an open link dialog without losing edits", async ({
+    page,
+  }) => {
+    await clickBlockWithText(page, "Second paragraph");
+    await page.keyboard.press("End");
+    await page.keyboard.type(" localized");
+    const editor = proseMirror(page);
+    const editorHandle = await editor.elementHandle();
+    const contentBeforeSwitch = await page.evaluate(() =>
+      window.__tiptapPlayground!.getContent(),
+    );
+
+    await page.evaluate(() => window.__tiptapPlayground!.setLocale("ru"));
+    await expect(
+      page.getByTestId("editor-toolbar").getByTitle("Жирный"),
+    ).toBeVisible();
+    expect(
+      await page.evaluate(() => window.__tiptapPlayground!.getContent()),
+    ).toEqual(contentBeforeSwitch);
+    expect(
+      await editor.evaluate(
+        (element, previous) => element === previous,
+        editorHandle,
+      ),
+    ).toBe(true);
+
+    await page.keyboard.press("Control+k");
+    const urlInput = page.getByPlaceholder("https://example.com");
+    await urlInput.fill("https://example.com/draft");
+    await expect(
+      page.getByRole("button", { name: "Добавить ссылку", exact: true }),
+    ).toBeVisible();
+
+    await page.evaluate(() => window.__tiptapPlayground!.setLocale("en"));
+    await expect(
+      page.getByRole("button", { name: "Add Link", exact: true }),
+    ).toBeVisible();
+    await expect(urlInput).toHaveValue("https://example.com/draft");
+    expect(
+      await page.evaluate(() => window.__tiptapPlayground!.getContent()),
+    ).toEqual(contentBeforeSwitch);
+    await page.keyboard.press("Escape");
+  });
+
   test("typing appends text to the current block", async ({ page }) => {
     await clickBlockWithText(page, "Second paragraph");
     await page.keyboard.type(" added");

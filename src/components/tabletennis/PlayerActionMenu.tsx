@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import {
   autoUpdate,
   flip,
@@ -13,11 +15,11 @@ import {
 } from "@floating-ui/react";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
 import {
-  formatApiErrorMessage,
+  formatApiErrorDescriptor,
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
 import { Modal } from "@/components/common/Modal.tsx";
-import { useToast } from "@/components/toast";
+import { useToast, type ToastText } from "@/components/toast";
 import { MergeGuestModal } from "./MergeGuestModal";
 import { useTabletennisRefresh } from "./useTabletennisRefresh";
 
@@ -39,6 +41,7 @@ export function PlayerActionMenu({
 }: {
   player: SchemaPlayer & { is_active: boolean };
 }) {
+  const { t } = useLingui();
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [ratingOpen, setRatingOpen] = useState(false);
@@ -66,11 +69,11 @@ export function PlayerActionMenu({
   const { mutate: setRatingMutate, isPending: settingRating } =
     $tabletennis.useMutation("post", "/set-rating");
 
-  function handleError(error: unknown, action: string) {
+  function handleError(error: unknown, action: ToastText) {
     if (isApiHttpError(error) && error.httpCode === 403) {
-      showError("Access denied", `Only administrators can ${action}`);
+      showError(msg`Access denied`, action);
     } else {
-      showError("Error", formatApiErrorMessage(error as never));
+      showError(msg`Error`, formatApiErrorDescriptor(error as never));
     }
   }
 
@@ -99,13 +102,16 @@ export function PlayerActionMenu({
       {
         onSuccess: () => {
           showSuccess(
-            "Status updated",
-            `${player.nickname} is now ${targetStatus}`,
+            msg`Status updated`,
+            targetStatus === "advanced"
+              ? msg`${player.nickname} is now Advanced`
+              : msg`${player.nickname} is now Beginner`,
           );
           refresh();
           setConfirmOpen(false);
         },
-        onError: (error) => handleError(error, "change player status"),
+        onError: (error) =>
+          handleError(error, msg`Only administrators can change player status`),
       },
     );
   }
@@ -124,11 +130,12 @@ export function PlayerActionMenu({
       },
       {
         onSuccess: () => {
-          showSuccess("Rating updated", `${player.nickname}: ${rating}`);
+          showSuccess(msg`Rating updated`, `${player.nickname}: ${rating}`);
           refresh();
           setRatingOpen(false);
         },
-        onError: (error) => handleError(error, "change player rating"),
+        onError: (error) =>
+          handleError(error, msg`Only administrators can change player rating`),
       },
     );
   }
@@ -138,7 +145,7 @@ export function PlayerActionMenu({
       <button
         ref={refs.setReference}
         type="button"
-        aria-label={`Actions for ${player.nickname}`}
+        aria-label={t`Actions for ${player.nickname}`}
         className="btn btn-ghost btn-sm btn-square"
         {...getReferenceProps()}
       >
@@ -166,15 +173,17 @@ export function PlayerActionMenu({
                       : "icon-[material-symbols--upgrade] text-primary rotate-180"
                   }
                 />
-                {targetStatus === "advanced"
-                  ? "Upgrade to Advanced"
-                  : "Downgrade to Beginner"}
+                {targetStatus === "advanced" ? (
+                  <Trans>Upgrade to Advanced</Trans>
+                ) : (
+                  <Trans>Downgrade to Beginner</Trans>
+                )}
               </button>
             </li>
             <li>
               <button type="button" className="min-h-11" onClick={openRating}>
                 <span className="icon-[mdi--star-cog-outline] text-primary" />
-                Set rating
+                <Trans>Set rating</Trans>
               </button>
             </li>
             {player.placeholder && (
@@ -185,7 +194,7 @@ export function PlayerActionMenu({
                   onClick={() => openFromMenu(setMergeOpen)}
                 >
                   <span className="icon-[mdi--account-arrow-right-outline] text-primary" />
-                  Link to account
+                  <Trans>Link to account</Trans>
                 </button>
               </li>
             )}
@@ -196,12 +205,20 @@ export function PlayerActionMenu({
       <Modal
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="Confirm status change"
+        title={t`Confirm status change`}
       >
         <p className="text-base-content/80">
-          Are you sure you want to{" "}
-          {targetStatus === "beginner" ? "downgrade" : "upgrade"}{" "}
-          <strong>{player.nickname}</strong> to <strong>{targetStatus}</strong>?
+          {targetStatus === "beginner" ? (
+            <Trans>
+              Are you sure you want to downgrade{" "}
+              <strong>{player.nickname}</strong> to Beginner?
+            </Trans>
+          ) : (
+            <Trans>
+              Are you sure you want to upgrade{" "}
+              <strong>{player.nickname}</strong> to Advanced?
+            </Trans>
+          )}
         </p>
         <div className="mt-4 flex justify-end gap-2">
           <button
@@ -209,7 +226,7 @@ export function PlayerActionMenu({
             className="btn btn-ghost"
             onClick={() => setConfirmOpen(false)}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="button"
@@ -220,7 +237,7 @@ export function PlayerActionMenu({
             {isPending ? (
               <span className="loading loading-spinner loading-sm" />
             ) : (
-              "Confirm"
+              <Trans>Confirm</Trans>
             )}
           </button>
         </div>
@@ -234,11 +251,17 @@ export function PlayerActionMenu({
         />
       )}
 
-      <Modal open={ratingOpen} onOpenChange={setRatingOpen} title="Set rating">
+      <Modal
+        open={ratingOpen}
+        onOpenChange={setRatingOpen}
+        title={t`Set rating`}
+      >
         <form onSubmit={handleSetRating}>
           <p className="text-base-content/70 text-sm">
-            Current rating of <strong>{player.nickname}</strong>:{" "}
-            {player.rating}. Enter any whole number from 0.
+            <Trans>
+              Current rating of <strong>{player.nickname}</strong>:{" "}
+              {player.rating}. Enter any whole number from 0.
+            </Trans>
           </p>
           <input
             type="number"
@@ -248,12 +271,12 @@ export function PlayerActionMenu({
             autoFocus
             value={ratingInput}
             onChange={(e) => setRatingInput(e.target.value)}
-            aria-label="New rating"
+            aria-label={t`New rating`}
             className="input input-bordered mt-3 h-14 w-full text-center text-3xl font-semibold tabular-nums"
           />
           {ratingInput.trim() !== "" && rating === null && (
             <p className="text-error mt-1 text-xs">
-              The rating must be a whole number from 0.
+              <Trans>The rating must be a whole number from 0.</Trans>
             </p>
           )}
           {targetStatus === "advanced" &&
@@ -261,7 +284,9 @@ export function PlayerActionMenu({
             player.rating < ADVANCED_RATING &&
             rating >= ADVANCED_RATING && (
               <p className="text-base-content/60 mt-1 text-xs">
-                {player.nickname} will become Advanced ({ADVANCED_RATING}+).
+                <Trans>
+                  {player.nickname} will become Advanced ({ADVANCED_RATING}+).
+                </Trans>
               </p>
             )}
           <div className="mt-4 flex justify-end gap-2">
@@ -270,7 +295,7 @@ export function PlayerActionMenu({
               className="btn btn-ghost"
               onClick={() => setRatingOpen(false)}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
             <button
               type="submit"
@@ -282,7 +307,7 @@ export function PlayerActionMenu({
               {settingRating ? (
                 <span className="loading loading-spinner loading-sm" />
               ) : (
-                "Save"
+                <Trans>Save</Trans>
               )}
             </button>
           </div>

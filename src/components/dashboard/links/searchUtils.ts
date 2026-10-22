@@ -11,8 +11,11 @@ export const createFuseInstance = (resourcesList: Resource[]) => {
   return new Fuse(resourcesList, {
     keys: [
       { name: "resource", weight: 5 },
+      { name: "resourceRu", weight: 5 },
       { name: "title", weight: 3 },
+      { name: "titleRu", weight: 3 },
       { name: "description", weight: 1 },
+      { name: "descriptionRu", weight: 1 },
     ],
     threshold: 0.3,
   });

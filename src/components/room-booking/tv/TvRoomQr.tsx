@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "react";
 
 export function TvRoomQr({ id }: { id: string }) {
@@ -19,7 +20,9 @@ export function TvRoomQr({ id }: { id: string }) {
 
   return (
     <div className="mt-auto flex flex-col items-center text-center">
-      <p>Book this room</p>
+      <p>
+        <Trans>Book this room</Trans>
+      </p>
       <div className="mt-3 flex justify-center">
         <div className="bg-base-100 inline-flex rounded-md p-2">
           <div

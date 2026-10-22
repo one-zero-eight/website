@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+
 export function sportTrainingTitle(row: {
   training: {
     sport_name?: string | null;
@@ -20,6 +22,6 @@ export function sportTrainingTitle(row: {
       .filter(Boolean)
       .join(" — ") ||
     training.training_class ||
-    "Training"
+    t`Training`
   );
 }

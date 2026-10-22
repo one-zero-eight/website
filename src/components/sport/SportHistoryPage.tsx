@@ -1,4 +1,6 @@
 import { $clubs } from "@/api/clubs";
+import { Trans, Plural, useLingui } from "@lingui/react/macro";
+import { useLingui as useLinguiRuntime } from "@lingui/react";
 import type { SchemaClub } from "@/api/clubs/types.ts";
 import { $sport } from "@/api/sport";
 import type {
@@ -24,6 +26,7 @@ export function SportHistoryPage() {
 }
 
 function SportHistoryContent({ studentId }: { studentId: number }) {
+  const { t } = useLingui();
   const [selectedTrainingId, setSelectedTrainingId] = useState<number | null>(
     null,
   );
@@ -58,7 +61,7 @@ function SportHistoryContent({ studentId }: { studentId: number }) {
   if (isError) {
     return (
       <div className="alert alert-error">
-        Sport hours history could not be loaded.
+        <Trans>Sport hours history could not be loaded.</Trans>
       </div>
     );
   }
@@ -93,17 +96,17 @@ function SportHistoryContent({ studentId }: { studentId: number }) {
     <div>
       {currentSemesterError ? (
         <p className="text-error mb-4 text-sm">
-          Current semester could not be loaded.
+          <Trans>Current semester could not be loaded.</Trans>
         </p>
       ) : null}
       {clubsError || sportsError ? (
         <p className="text-error mb-4 text-sm">
-          Club logos could not be loaded.
+          <Trans>Club logos could not be loaded.</Trans>
         </p>
       ) : null}
       {sortedSemesters.length === 0 ? (
         <p className="text-base-content/70 py-6 text-center text-sm">
-          No sport hours history yet.
+          <Trans>No sport hours history yet.</Trans>
         </p>
       ) : (
         <div className="divide-base-300 divide-y">
@@ -125,13 +128,13 @@ function SportHistoryContent({ studentId }: { studentId: number }) {
           onOpenChange={(open) => {
             if (!open) setSelectedTrainingId(null);
           }}
-          title="Training"
+          title={t`Training`}
         >
           {trainingPending ? (
             <div className="skeleton m-4 h-32" />
           ) : (
             <p className="text-error p-4">
-              Training details could not be loaded.
+              <Trans>Training details could not be loaded.</Trans>
             </p>
           )}
         </SportTrainingModalShell>
@@ -174,10 +177,12 @@ function SportHistorySemester({
   sportIdsByName: ReadonlyMap<string, number>;
   onSelectTraining: (trainingId: number) => void;
 }) {
+  const { i18n } = useLingui();
   const { required_hours: required, total_hours: earned } = semester;
   const dateRange = formatSemesterDateRange(
     semester.semester_start,
     semester.semester_end,
+    i18n.locale,
   );
   const trainings = semester.trainings;
   // The API lists every fitness test session held that semester, not just
@@ -194,7 +199,7 @@ function SportHistorySemester({
           <h3 className="text-lg font-semibold">{semester.semester_name}</h3>
           {isCurrent ? (
             <span className="text-base-content/60 text-sm">
-              (current semester)
+              <Trans>(current semester)</Trans>
             </span>
           ) : null}
         </div>
@@ -204,20 +209,27 @@ function SportHistorySemester({
       </div>
 
       <p className="text-base-content/80 text-sm">
-        Sport hours:{" "}
-        <span className="text-base-content font-semibold">
-          {earned} out of {required} hours
-        </span>
+        <Trans>
+          Sport hours:{" "}
+          <span className="text-base-content font-semibold">
+            {earned} out of{" "}
+            <Plural value={required} one="# hour" other="# hours" />
+          </span>
+        </Trans>
       </p>
 
       {trainings.length === 0 ? (
         <p className="text-base-content/70 mt-1 text-sm font-medium">
-          0 trainings
+          <Plural value={0} one="# training" other="# trainings" />
         </p>
       ) : (
         <details className="mt-1" open={isCurrent}>
           <summary className="text-base-content/70 cursor-pointer text-sm font-medium">
-            {trainings.length} training{trainings.length === 1 ? "" : "s"}
+            <Plural
+              value={trainings.length}
+              one="# training"
+              other="# trainings"
+            />
           </summary>
           <ul className="bg-base-200/50 rounded-box mt-2 px-3">
             {trainings.map((training) => (
@@ -241,7 +253,11 @@ function SportHistorySemester({
       {fitnessTests.length > 0 ? (
         <details className="mt-1" open={isCurrent}>
           <summary className="text-base-content/70 cursor-pointer text-sm font-medium">
-            Fitness test{fitnessTests.length === 1 ? "" : "s"}
+            <Plural
+              value={fitnessTests.length}
+              one="Fitness test"
+              other="Fitness tests"
+            />
           </summary>
           <ul className="bg-base-200/50 rounded-box mt-2 px-3">
             {fitnessTests.map((fitnessTest) => (
@@ -266,6 +282,7 @@ function SportHistoryTrainingRow({
   club?: SchemaClub;
   onSelectTraining: (trainingId: number) => void;
 }) {
+  useLinguiRuntime();
   const content = (
     <>
       <span className="text-base-content/60 shrink-0 text-xs tabular-nums">
@@ -284,7 +301,7 @@ function SportHistoryTrainingRow({
         <span>{sportTrainingTitle({ training })}</span>
         {training.hours > 0 ? (
           <span className="badge badge-success badge-sm">
-            {training.hours}h
+            <Trans>{training.hours}h</Trans>
           </span>
         ) : null}
       </span>
@@ -313,6 +330,7 @@ function FitnessTestResultRow({
 }: {
   fitnessTest: SchemaFitnessTestStudentSessionResultSchema;
 }) {
+  const { i18n } = useLingui();
   const {
     session,
     exercise_results: exerciseResults,
@@ -328,7 +346,7 @@ function FitnessTestResultRow({
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-medium">
             {date
-              ? date.toLocaleDateString("en-US", {
+              ? date.toLocaleDateString(i18n.locale, {
                   month: "short",
                   day: "numeric",
                   year: "numeric",
@@ -336,12 +354,17 @@ function FitnessTestResultRow({
               : session.date}
           </span>
           {session.retake ? (
-            <span className="badge badge-warning badge-sm">Retake</span>
+            <span className="badge badge-warning badge-sm">
+              <Trans>Retake</Trans>
+            </span>
           ) : null}
         </div>
         <div className="flex items-center gap-2">
           <span className="font-semibold tabular-nums">
-            {totalScore}/{maxScore} points
+            <Trans>
+              {totalScore}/{maxScore}{" "}
+              <Plural value={totalScore} one="point" other="points" />
+            </Trans>
           </span>
           <span
             className={cn(
@@ -349,18 +372,20 @@ function FitnessTestResultRow({
               passed ? "badge-success" : "badge-error",
             )}
           >
-            {passed ? "Pass" : "Fail"}
+            {passed ? <Trans>Pass</Trans> : <Trans>Fail</Trans>}
           </span>
         </div>
       </div>
       {exerciseResults.length > 0 ? (
         <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(4rem,auto)_minmax(4rem,auto)] items-center gap-x-3 gap-y-1.5 text-xs @md/content:gap-x-6">
-          <span className="text-base-content/50 font-medium">Exercise</span>
-          <span className="text-base-content/50 text-right font-medium">
-            Result
+          <span className="text-base-content/50 font-medium">
+            <Trans>Exercise</Trans>
           </span>
           <span className="text-base-content/50 text-right font-medium">
-            Points
+            <Trans>Result</Trans>
+          </span>
+          <span className="text-base-content/50 text-right font-medium">
+            <Trans>Points</Trans>
           </span>
           {exerciseResults.map((result) => (
             <div key={result.exercise_id} className="contents">
@@ -379,7 +404,11 @@ function FitnessTestResultRow({
   );
 }
 
-function formatSemesterDateRange(start: unknown, end: unknown): string | null {
+function formatSemesterDateRange(
+  start: unknown,
+  end: unknown,
+  locale: string,
+): string | null {
   const startDate = toDateSafe(start);
   const endDate = toDateSafe(end);
   if (!startDate || !endDate) {
@@ -387,7 +416,7 @@ function formatSemesterDateRange(start: unknown, end: unknown): string | null {
   }
 
   const format = (date: Date) =>
-    date.toLocaleDateString("en-US", {
+    date.toLocaleDateString(locale, {
       month: "short",
       day: "numeric",
       year: "numeric",

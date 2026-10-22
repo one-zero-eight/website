@@ -1,16 +1,20 @@
 import { $maps } from "@/api/maps";
 import { $roomBooking } from "@/api/room-booking";
-import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types";
-import { Topbar } from "@/components/layout/Topbar.tsx";
+import {
+  accessLevelLabel,
+  capacityPeopleLabel,
+} from "@/components/room-booking/access-level-label.ts";
 import { AccessLevelIcon } from "@/components/room-booking/AccessLevelIcon.tsx";
 import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
 import { RoomCalendar } from "@/components/room-booking/room-page/RoomCalendar.tsx";
 import { RoomMapPreview } from "@/components/room-booking/room-page/RoomMapPreview.tsx";
+import { Topbar } from "@/components/layout/Topbar.tsx";
 import { Link } from "@tanstack/react-router";
-import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { useLingui as useLinguiRuntime } from "@lingui/react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
-import { Trans } from "@lingui/react/macro";
 
 const ViewOnMapButton = memo(function ViewOnMapButton({
   sceneId,
@@ -35,7 +39,7 @@ const ViewOnMapButton = memo(function ViewOnMapButton({
           className="border-border bg-background hover:bg-muted text-foreground inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors"
         >
           <span className="icon-[material-symbols--map-outline] text-base" />
-          View on Map
+          <Trans>View on Map</Trans>
         </Link>
       </div>
     </div>
@@ -55,6 +59,8 @@ const RoomDetails = memo(function RoomDetails({
   handleShare: () => void;
   copied: boolean;
 }) {
+  useLinguiRuntime();
+
   return (
     <div className="p-4">
       {/* Two-column layout on large screens */}
@@ -71,14 +77,10 @@ const RoomDetails = memo(function RoomDetails({
               />
               <div className="flex-1">
                 <p className="text-foreground text-sm font-medium">
-                  Access Level
+                  <Trans>Access Level</Trans>
                 </p>
                 <p className="text-muted-foreground text-sm">
-                  {room.access_level === RoomAccess_levelAnyOf0.yellow
-                    ? "Yellow (for students)"
-                    : room.access_level === RoomAccess_levelAnyOf0.red
-                      ? "Red (for employees)"
-                      : "Special rules apply"}
+                  {accessLevelLabel(room.access_level)}
                 </p>
               </div>
             </div>
@@ -88,9 +90,11 @@ const RoomDetails = memo(function RoomDetails({
             <div className="flex flex-row items-center gap-3">
               <span className="text-foreground icon-[material-symbols--event-seat-outline-rounded] text-3xl" />
               <div className="flex-1">
-                <p className="text-foreground text-sm font-medium">Capacity</p>
+                <p className="text-foreground text-sm font-medium">
+                  <Trans>Capacity</Trans>
+                </p>
                 <p className="text-muted-foreground text-sm">
-                  {room.capacity} people
+                  {capacityPeopleLabel(room.capacity)}
                 </p>
               </div>
             </div>
@@ -101,10 +105,12 @@ const RoomDetails = memo(function RoomDetails({
               <span className="text-foreground icon-[material-symbols--schedule-outline] text-3xl" />
               <div className="flex-1">
                 <p className="text-foreground text-sm font-medium">
-                  Time Restrictions
+                  <Trans>Time Restrictions</Trans>
                 </p>
                 <p className="text-muted-foreground text-sm">
-                  Students can book only at night (19:00-8:00) and weekends
+                  <Trans>
+                    Students can book only at night (19:00-8:00) and weekends
+                  </Trans>
                 </p>
               </div>
             </div>
@@ -123,7 +129,11 @@ const RoomDetails = memo(function RoomDetails({
                 }`}
               >
                 <span className="icon-[material-symbols--share-outline] text-base" />
-                {copied ? "Link copied!" : "Share this room"}
+                {copied ? (
+                  <Trans>Link copied!</Trans>
+                ) : (
+                  <Trans>Share this room</Trans>
+                )}
               </button>
             </div>
           </div>
@@ -145,6 +155,7 @@ const RoomDetails = memo(function RoomDetails({
 });
 
 export function RoomPage({ id }: { id: string }) {
+  const { t } = useLingui();
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
     params: { query: { include_red: true } },
   });
@@ -211,10 +222,11 @@ export function RoomPage({ id }: { id: string }) {
     const url = window.location.href;
 
     if (navigator.share) {
+      const roomTitle = room?.title ?? "";
       try {
         await navigator.share({
-          title: room?.title || "Room Details",
-          text: `Check out this room: ${room?.title}`,
+          title: room?.title || t`Room details`,
+          text: t`Check out this room: ${roomTitle}`,
           url: url,
         });
       } catch {
@@ -224,7 +236,7 @@ export function RoomPage({ id }: { id: string }) {
     } else {
       copyToClipboard(url);
     }
-  }, [room, copyToClipboard]);
+  }, [room, copyToClipboard, t]);
 
   if (!room) {
     return <Topbar title={<Trans>Room</Trans>} />;

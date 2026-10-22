@@ -1,4 +1,6 @@
 import { $accounts } from "@/api/accounts";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
 import { $schedule } from "@/api/schedule";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { AdminUserDetails } from "@/components/admin/AdminUserDetails.tsx";
@@ -11,6 +13,7 @@ import {
 import { useMemo } from "react";
 
 export function AdminUserPage({ id }: { id: string }) {
+  useLingui();
   const {
     data: user,
     isPending,
@@ -64,7 +67,7 @@ export function AdminUserPage({ id }: { id: string }) {
           className="btn btn-outline"
           onClick={() => refetch()}
         >
-          Retry
+          <Trans>Retry</Trans>
         </button>
       </div>
     );
@@ -90,7 +93,7 @@ export function AdminUserPage({ id }: { id: string }) {
           {isImpersonating ? (
             <span className="loading loading-spinner loading-sm" />
           ) : (
-            "Impersonate"
+            <Trans>Impersonate</Trans>
           )}
         </button>
       </div>

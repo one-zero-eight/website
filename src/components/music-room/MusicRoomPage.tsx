@@ -1,4 +1,5 @@
 import { Calendar } from "@/components/calendar/Calendar.tsx";
+import { Trans, useLingui } from "@lingui/react/macro";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
 import { getMusicRoomLink, getMyMusicRoomLink } from "@/api/schedule/links.ts";
 import { Link } from "@tanstack/react-router";
@@ -7,6 +8,7 @@ import { ExportModal } from "@/components/calendar/ExportModal.tsx";
 import { TargetForExport } from "@/api/schedule/types.ts";
 
 export function MusicRoomPage() {
+  const { t } = useLingui();
   const [exportModalOpen, setExportModalOpen] = useState(false);
   return (
     <>
@@ -22,10 +24,10 @@ export function MusicRoomPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <p className="text-base-content text-2xl font-semibold">
-                  Telegram bot
+                  <Trans>Telegram bot</Trans>
                 </p>
                 <p className="text-base-content/75 text-lg">
-                  Register in Telegram bot to book timeslots.
+                  <Trans>Register in Telegram bot to book timeslots.</Trans>
                 </p>
               </div>
             </a>
@@ -38,11 +40,13 @@ export function MusicRoomPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <p className="text-base-content text-2xl font-semibold">
-                  Instructions
+                  <Trans>Instructions</Trans>
                 </p>
                 <p className="text-base-content/75 text-lg">
-                  Read rules and guides on how to access the Music room. Every
-                  visitor should accept these conditions.
+                  <Trans>
+                    Read rules and guides on how to access the Music room. Every
+                    visitor should accept these conditions.
+                  </Trans>
                 </p>
               </div>
             </Link>
@@ -61,11 +65,13 @@ export function MusicRoomPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <p className="text-base-content text-2xl font-semibold">
-                  Telegram chat
+                  <Trans>Telegram chat</Trans>
                 </p>
                 <p className="text-base-content/75 text-lg">
-                  Join telegram chat to receive latest news about Music room and
-                  ask questions.
+                  <Trans>
+                    Join telegram chat to receive latest news about Music room
+                    and ask questions.
+                  </Trans>
                 </p>
               </div>
             </button>
@@ -75,7 +81,7 @@ export function MusicRoomPage() {
               width="704"
               height="396"
               src="https://www.youtube-nocookie.com/embed/mGfdun8ah3g"
-              title="How to get to the Innopolis Music room?"
+              title={t`How to get to the Innopolis Music room?`}
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
@@ -91,9 +97,11 @@ export function MusicRoomPage() {
           </div>
         </div>
         <div className="my-4 flex flex-row flex-wrap items-center">
-          <h2 className="flex grow text-3xl font-medium">Booking calendar</h2>
+          <h2 className="flex grow text-3xl font-medium">
+            <Trans>Booking calendar</Trans>
+          </h2>
           <ExportButton
-            tooltip="Export your personal calendar"
+            tooltip={t`Export your personal calendar`}
             onClick={() => setExportModalOpen(true)}
           />
         </div>

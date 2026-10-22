@@ -2,20 +2,21 @@ import { MyTokenPage } from "@/components/account/MyTokenPage.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/account/token")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   return (
     <>
       <Helmet>
-        <title>Generate access token</title>
+        <title>{t`Generate access token`}</title>
         <meta
           name="description"
-          content="Generate access token for InNoHassle Account."
+          content={t`Generate access token for InNoHassle Account.`}
         />
 
         {/* Do not scan this page */}

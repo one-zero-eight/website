@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { cn } from "@/lib/ui/cn";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { ScoreSheet } from "./ScoreSheet";
 import {
@@ -111,6 +113,7 @@ function GroupSetup({
   getName: (id: string) => string;
   onChanged: () => Promise<void>;
 }) {
+  const { t } = useLingui();
   const { showError, showConfirm } = useToast();
   const hasServerGroups = Object.keys(serverGroups).length > 0;
   const defaultCount = Math.max(1, Math.round(players.length / 4));
@@ -165,17 +168,17 @@ function GroupSetup({
   const { mutateAsync: setGroups } = $tabletennis.useMutation(
     "post",
     "/reg-tour/set-groups",
-    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+    { onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)) },
   );
   const { mutateAsync: lockGroups } = $tabletennis.useMutation(
     "post",
     "/reg-tour/lock-groups",
-    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+    { onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)) },
   );
   const { mutateAsync: removePlayers } = $tabletennis.useMutation(
     "post",
     "/reg-tour/remove-players",
-    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+    { onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)) },
   );
 
   function edit(next: Groups) {
@@ -224,11 +227,10 @@ function GroupSetup({
     );
     if (!sameGroups(draft, snakeGroups(players, groupCount))) {
       const ok = await showConfirm({
-        title: "Redistribute players",
-        message:
-          "Players are split by rating again, your manual moves are lost.",
-        confirmText: "Redistribute",
-        cancelText: "Keep",
+        title: msg`Redistribute players`,
+        message: msg`Players are split by rating again, your manual moves are lost.`,
+        confirmText: msg`Redistribute`,
+        cancelText: msg`Keep`,
         type: "warning",
       });
       if (!ok) return;
@@ -240,10 +242,10 @@ function GroupSetup({
 
   async function removeFromTournament(id: string) {
     const ok = await showConfirm({
-      title: "Remove player",
-      message: `Remove ${getName(id)} from the tournament?`,
-      confirmText: "Remove",
-      cancelText: "Keep",
+      title: msg`Remove player`,
+      message: msg`Remove ${getName(id)} from the tournament?`,
+      confirmText: msg`Remove`,
+      cancelText: msg`Keep`,
       type: "warning",
     });
     if (!ok) return;
@@ -254,7 +256,7 @@ function GroupSetup({
         body: { player_ids: [id] },
       })) as { removed?: string[]; failed?: { reason: string }[] };
       if (!res.removed?.includes(id)) {
-        showError("Not removed", res.failed?.[0]?.reason ?? getName(id));
+        showError(msg`Not removed`, res.failed?.[0]?.reason ?? getName(id));
         return;
       }
       setSelected(null);
@@ -323,14 +325,16 @@ function GroupSetup({
   if (!isAdmin) {
     return (
       <div className="flex flex-col gap-3 px-4 py-5 md:px-7">
-        <h2 className="text-xl font-light">Groups</h2>
+        <h2 className="text-xl font-light">
+          <Trans>Groups</Trans>
+        </h2>
         {hasServerGroups ? (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {Object.entries(serverGroups).map(([name, members]) => (
               <GroupShell
                 key={name}
                 name={name}
-                subtitle={`${members.length} players`}
+                subtitle={t`${members.length} players`}
               >
                 <div className="flex flex-wrap gap-2">
                   {members.map((id) => (
@@ -350,7 +354,7 @@ function GroupSetup({
           </div>
         ) : (
           <p className="text-base-content/50 text-sm">
-            The organiser is forming the groups.
+            <Trans>The organiser is forming the groups.</Trans>
           </p>
         )}
       </div>
@@ -361,18 +365,24 @@ function GroupSetup({
     <div className="flex flex-col gap-4 px-4 py-5 md:px-7">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-light">Split players into groups</h2>
+          <h2 className="text-xl font-light">
+            <Trans>Split players into groups</Trans>
+          </h2>
           <p className="text-base-content/50 mt-0.5 text-xs">
-            Hold a player and drag them to another group, or tap a player and
-            then a group. Groups can be of any size.
+            <Trans>
+              Hold a player and drag them to another group, or tap a player and
+              then a group. Groups can be of any size.
+            </Trans>
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-base-content/60 text-xs">Groups</span>
+          <span className="text-base-content/60 text-xs">
+            <Trans>Groups</Trans>
+          </span>
           <div className="border-base-300 flex items-center rounded-xl border">
             <button
               type="button"
-              aria-label="Fewer groups"
+              aria-label={t`Fewer groups`}
               onClick={() => changeCount(-1)}
               disabled={groupCount <= 1}
               className="flex h-10 w-10 items-center justify-center disabled:opacity-30"
@@ -384,7 +394,7 @@ function GroupSetup({
             </span>
             <button
               type="button"
-              aria-label="More groups"
+              aria-label={t`More groups`}
               onClick={() => changeCount(1)}
               disabled={groupCount >= Math.floor(players.length / 2)}
               className="flex h-10 w-10 items-center justify-center disabled:opacity-30"
@@ -398,7 +408,7 @@ function GroupSetup({
             className="flex h-10 items-center gap-1 rounded-xl border border-[#712BB2] px-3 text-xs font-medium text-[#712BB2]"
           >
             <span className="icon-[mdi--shuffle-variant] text-base" />
-            By rating
+            <Trans>By rating</Trans>
           </button>
         </div>
       </div>
@@ -408,7 +418,7 @@ function GroupSetup({
           <GroupShell
             key={name}
             name={name}
-            subtitle={`${members.length} player${members.length === 1 ? "" : "s"}`}
+            subtitle={t`${members.length} players`}
             highlight={!drag && !!selected && !members.includes(selected)}
             warn={members.length < 2}
             onHeaderClick={selected ? () => moveSelected(name) : undefined}
@@ -430,7 +440,7 @@ function GroupSetup({
               ))}
               {members.length === 0 && (
                 <span className="text-base-content/40 text-xs">
-                  Empty group
+                  <Trans>Empty group</Trans>
                 </span>
               )}
             </div>
@@ -439,7 +449,7 @@ function GroupSetup({
         {(unassigned.length > 0 || drag) && (
           <GroupShell
             name={UNASSIGNED}
-            subtitle="Not in a group"
+            subtitle={t`Not in a group`}
             warn
             dropId={UNASSIGNED}
             dropState={dropState(UNASSIGNED)}
@@ -459,7 +469,7 @@ function GroupSetup({
               ))}
               {unassigned.length === 0 && (
                 <span className="text-base-content/40 text-xs">
-                  Drop here to remove from groups
+                  <Trans>Drop here to remove from groups</Trans>
                 </span>
               )}
             </div>
@@ -481,7 +491,9 @@ function GroupSetup({
       {selected && (
         <div className="bg-base-100/95 border-base-300 sticky bottom-0 z-[1] -mx-4 flex flex-wrap items-center gap-2 border-t px-4 py-3 backdrop-blur md:mx-0 md:rounded-xl md:border">
           <span className="text-sm">
-            Move <b>{getName(selected)}</b> to
+            <Trans>
+              Move <b>{getName(selected)}</b> to
+            </Trans>
           </span>
           {Object.keys(draft).map((name) => (
             <button
@@ -499,7 +511,7 @@ function GroupSetup({
             onClick={() => edit({ ...draft, [groupName(groupCount)]: [] })}
             className="h-10 rounded-xl border border-[#712BB2] px-3 text-sm text-[#712BB2]"
           >
-            + New group
+            <Trans>+ New group</Trans>
           </button>
           <button
             type="button"
@@ -512,7 +524,7 @@ function GroupSetup({
             ) : (
               <>
                 <span className="icon-[mdi--account-remove-outline] text-base" />
-                Remove from tournament
+                <Trans>Remove from tournament</Trans>
               </>
             )}
           </button>
@@ -521,7 +533,7 @@ function GroupSetup({
 
       {tooSmall && (
         <p className="text-warning text-xs">
-          Every group needs at least 2 players.
+          <Trans>Every group needs at least 2 players.</Trans>
         </p>
       )}
 
@@ -530,25 +542,25 @@ function GroupSetup({
           {saving ? (
             <>
               <span className="loading loading-spinner loading-xs" />
-              Saving…
+              <Trans>Saving…</Trans>
             </>
           ) : saveFailed ? (
             <span className="text-error flex items-center gap-1">
-              Not saved
+              <Trans>Not saved</Trans>
               <button
                 type="button"
                 onClick={save}
                 className="h-8 px-1 font-medium underline"
               >
-                Retry
+                <Trans>Retry</Trans>
               </button>
             </span>
           ) : dirty ? (
-            "Unsaved changes"
+            <Trans>Unsaved changes</Trans>
           ) : (
             <>
               <span className="icon-[mdi--check] text-[#712BB2]" />
-              Saved, other admins see these groups
+              <Trans>Saved, other admins see these groups</Trans>
             </>
           )}
         </p>
@@ -563,7 +575,7 @@ function GroupSetup({
           ) : (
             <>
               <span className="icon-[mdi--lock]" />
-              Lock groups & start
+              <Trans>Lock groups &amp; start</Trans>
             </>
           )}
         </button>
@@ -595,6 +607,7 @@ function GroupStage({
   onChanged: () => Promise<void>;
   onGoToQualification?: () => void;
 }) {
+  const { t } = useLingui();
   const { showError, showConfirm } = useToast();
   const [scoring, setScoring] = useState<Scoring | null>(null);
   const [busy, setBusy] = useState(false);
@@ -602,32 +615,32 @@ function GroupStage({
   const { mutateAsync: fixGame } = $tabletennis.useMutation(
     "post",
     "/fix-game",
-    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+    { onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)) },
   );
   const { mutateAsync: cancelGame } = $tabletennis.useMutation(
     "post",
     "/cancel-game",
-    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+    { onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)) },
   );
 
   const { mutateAsync: createGame } = $tabletennis.useMutation(
     "post",
     "/reg-game",
     {
-      onError: (e) => showError("Error", formatApiErrorMessage(e)),
+      onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)),
     },
   );
   const { mutateAsync: finishGame } = $tabletennis.useMutation(
     "post",
     "/finish-game",
     {
-      onError: (e) => showError("Error", formatApiErrorMessage(e)),
+      onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)),
     },
   );
   const { mutateAsync: unlockGroups } = $tabletennis.useMutation(
     "post",
     "/reg-tour/unlock-groups",
-    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+    { onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)) },
   );
 
   const totalGames = Object.values(groups).reduce(
@@ -691,10 +704,10 @@ function GroupStage({
   async function cancelScoring() {
     if (!scoring) return;
     const ok = await showConfirm({
-      title: "Cancel match",
-      message: `Delete the match ${getName(scoring.p1)} vs ${getName(scoring.p2)}? No rating changes.`,
-      confirmText: "Delete",
-      cancelText: "Keep",
+      title: msg`Cancel match`,
+      message: msg`Delete the match ${getName(scoring.p1)} vs ${getName(scoring.p2)}? No rating changes.`,
+      confirmText: msg`Delete`,
+      cancelText: msg`Keep`,
       type: "warning",
     });
     if (!ok) throw new Error("kept");
@@ -728,10 +741,14 @@ function GroupStage({
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-xl font-light">Group stage</h2>
+          <h2 className="text-xl font-light">
+            <Trans>Group stage</Trans>
+          </h2>
           <p className="text-base-content/50 text-xs">
-            {finishedCount} of {totalGames} games played · {leftCount} left ·{" "}
-            {players.length} players
+            <Trans>
+              {finishedCount} of {totalGames} games played · {leftCount} left ·{" "}
+              {players.length} players
+            </Trans>
           </p>
         </div>
         {isAdmin && validationGames.length === 0 && (
@@ -742,7 +759,7 @@ function GroupStage({
             className="border-base-content/20 text-base-content/70 flex h-10 items-center gap-1 rounded-xl border px-3 text-xs"
           >
             <span className="icon-[mdi--lock-open-variant-outline]" />
-            Edit groups
+            <Trans>Edit groups</Trans>
           </button>
         )}
       </div>
@@ -757,7 +774,7 @@ function GroupStage({
 
       {qualStarted && (
         <p className="bg-base-200 rounded-xl px-4 py-3 text-xs">
-          Qualification has started, the group stage is closed.
+          <Trans>Qualification has started, the group stage is closed.</Trans>
         </p>
       )}
 
@@ -765,7 +782,7 @@ function GroupStage({
         <div className="flex flex-col gap-2">
           <h3 className="flex items-center gap-2 text-sm font-semibold">
             <span className="icon-[mdi--lightbulb-on-outline] text-lg text-[#712BB2]" />
-            Suggested next
+            <Trans>Suggested next</Trans>
           </h3>
           <div className="-mx-4 flex snap-x scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:px-0">
             {suggestions.map((s) => (
@@ -778,12 +795,14 @@ function GroupStage({
                     {s.group}
                   </span>
                   <span className="text-base-content/60">
-                    {s.remaining} game{s.remaining === 1 ? "" : "s"} not started
+                    <Trans>Games not started: {s.remaining}</Trans>
                   </span>
                 </div>
                 <p className="truncate text-sm font-medium">
                   {getName(s.p1)}{" "}
-                  <span className="text-base-content/40">vs</span>{" "}
+                  <span className="text-base-content/40">
+                    <Trans>vs</Trans>
+                  </span>{" "}
                   {getName(s.p2)}
                 </p>
                 <button
@@ -793,7 +812,7 @@ function GroupStage({
                   className="flex h-10 items-center justify-center gap-1 rounded-xl bg-[#712BB2] text-sm font-medium text-white disabled:opacity-40"
                 >
                   <span className="icon-[mdi--play]" />
-                  Start
+                  <Trans>Start</Trans>
                 </button>
               </div>
             ))}
@@ -821,22 +840,22 @@ function GroupStage({
       <ScoreSheet
         open={!!scoring}
         onOpenChange={(v) => !v && setScoring(null)}
-        title={scoring?.mode === "fix" ? "Correct score" : "Group match"}
+        title={scoring?.mode === "fix" ? t`Correct score` : t`Group match`}
         player1={scoring ? getName(scoring.p1) : ""}
         player2={scoring ? getName(scoring.p2) : ""}
         onSubmit={submitScore}
         initial={scoring?.initial}
         submitLabel={
-          scoring?.mode === "fix" ? "Save correction" : "Finish match"
+          scoring?.mode === "fix" ? t`Save correction` : t`Finish match`
         }
         note={
           scoring?.mode === "fix"
-            ? "The old result's rating change is rolled back and recalculated."
+            ? t`The old result's rating change is rolled back and recalculated.`
             : undefined
         }
         secondaryAction={
           scoring?.mode === "finish"
-            ? { label: "Cancel this match", onClick: cancelScoring }
+            ? { label: t`Cancel this match`, onClick: cancelScoring }
             : undefined
         }
       />
@@ -850,7 +869,11 @@ function GroupStage({
           }}
           className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-10 flex h-14 items-center gap-2 rounded-2xl bg-[#712BB2] px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(113,43,178,0.45)]"
         >
-          {qualStarted ? "Open bracket" : "Qualification"}
+          {qualStarted ? (
+            <Trans>Open bracket</Trans>
+          ) : (
+            <Trans>Qualification</Trans>
+          )}
           <span className="icon-[mdi--arrow-right] text-xl" />
         </button>
       )}
@@ -879,6 +902,7 @@ function GroupCard({
   onStart: (p1: string, p2: string) => void;
   onOpenGame: (g: Scoring) => void;
 }) {
+  const { t } = useLingui();
   const [open, setOpen] = useState(true);
   const [picked, setPicked] = useState<string[]>([]);
 
@@ -948,9 +972,7 @@ function GroupCard({
   return (
     <GroupShell
       name={name}
-      subtitle={`${members.length} players · ${played}/${total} played · ${
-        total - played === 0 ? "all done" : `${total - played} left`
-      }`}
+      subtitle={t`${members.length} players · ${played}/${total} played · ${total - played} left`}
       done={played === total}
       collapsible
       open={open}
@@ -966,16 +988,16 @@ function GroupCard({
                     №
                   </th>
                   <th className="bg-base-100 sticky left-6 z-[1] py-1.5 pr-3 text-left font-medium">
-                    Player
+                    <Trans>Player</Trans>
                   </th>
                   <th className="w-9 py-1.5 text-center font-semibold text-[#712BB2]">
-                    Pts
+                    <Trans>Pts</Trans>
                   </th>
                   <th className="w-11 py-1.5 pr-1 text-center font-medium">
-                    Sets
+                    <Trans>Sets</Trans>
                   </th>
                   <th className="w-9 py-1.5 pr-1 text-center font-medium">
-                    Pl
+                    <Trans>Pl</Trans>
                   </th>
                   {standings.map((s, i) => (
                     <th
@@ -1026,7 +1048,7 @@ function GroupCard({
                           <button
                             type="button"
                             disabled={!sc || !canPlay}
-                            aria-label={sc ? "Correct this score" : undefined}
+                            aria-label={sc ? t`Correct this score` : undefined}
                             onClick={() =>
                               sc &&
                               onOpenGame({
@@ -1052,11 +1074,13 @@ function GroupCard({
                                 "border border-dashed border-[#712BB2] text-[#712BB2]",
                             )}
                           >
-                            {sc
-                              ? `${sc.mine}:${sc.theirs}`
-                              : live
-                                ? "live"
-                                : ""}
+                            {sc ? (
+                              `${sc.mine}:${sc.theirs}`
+                            ) : live ? (
+                              <Trans>live</Trans>
+                            ) : (
+                              ""
+                            )}
                           </button>
                         </td>
                       );
@@ -1083,12 +1107,14 @@ function GroupCard({
                   </span>
                   <span className="min-w-0 flex-1 truncate">
                     {getName(g.p1)}{" "}
-                    <span className="text-base-content/40">vs</span>{" "}
+                    <span className="text-base-content/40">
+                      <Trans>vs</Trans>
+                    </span>{" "}
                     {getName(g.p2)}
                   </span>
                   {canPlay && (
                     <span className="shrink-0 text-xs font-medium text-[#712BB2]">
-                      Enter score
+                      <Trans>Enter score</Trans>
                     </span>
                   )}
                 </button>
@@ -1099,7 +1125,7 @@ function GroupCard({
           {canPlay && played + openGames.length < total && (
             <div className="flex flex-col gap-2">
               <p className="text-base-content/50 text-xs">
-                Pick two players for the next match
+                <Trans>Pick two players for the next match</Trans>
               </p>
               {suggestion && (
                 <button
@@ -1109,8 +1135,10 @@ function GroupCard({
                 >
                   <span className="icon-[mdi--lightbulb-on-outline] shrink-0 text-base" />
                   <span className="min-w-0 flex-1 truncate">
-                    Suggested: {getName(suggestion.p1)} vs{" "}
-                    {getName(suggestion.p2)}
+                    <Trans>
+                      Suggested: {getName(suggestion.p1)} vs{" "}
+                      {getName(suggestion.p2)}
+                    </Trans>
                   </span>
                 </button>
               )}
@@ -1134,7 +1162,7 @@ function GroupCard({
                       label={getName(id)}
                       active={picked.includes(id)}
                       disabled={inGame || blocked || everyoneDone}
-                      hint={inGame ? "playing" : undefined}
+                      hint={inGame ? t`playing` : undefined}
                       onClick={() => toggle(id)}
                     />
                   );
@@ -1152,9 +1180,9 @@ function GroupCard({
                 {busy ? (
                   <span className="loading loading-spinner loading-sm" />
                 ) : picked.length === 2 ? (
-                  `Start ${getName(picked[0]!)} vs ${getName(picked[1]!)}`
+                  t`Start ${getName(picked[0]!)} vs ${getName(picked[1]!)}`
                 ) : (
-                  "Start match"
+                  <Trans>Start match</Trans>
                 )}
               </button>
             </div>
@@ -1221,7 +1249,11 @@ function GroupShell({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold">
-            {name === "?" ? "Unassigned" : `Group ${name}`}
+            {name === "?" ? (
+              <Trans>Unassigned</Trans>
+            ) : (
+              <Trans>Group {name}</Trans>
+            )}
           </span>
           <span className="text-base-content/50 block text-xs">{subtitle}</span>
         </span>
@@ -1229,10 +1261,14 @@ function GroupShell({
           <span className="icon-[mdi--check-circle] text-xl text-[#712BB2]" />
         )}
         {highlight && (
-          <span className="text-xs font-medium text-[#712BB2]">Move here</span>
+          <span className="text-xs font-medium text-[#712BB2]">
+            <Trans>Move here</Trans>
+          </span>
         )}
         {dropState === "over" && (
-          <span className="text-xs font-medium text-[#712BB2]">Drop here</span>
+          <span className="text-xs font-medium text-[#712BB2]">
+            <Trans>Drop here</Trans>
+          </span>
         )}
         {collapsible && (
           <span
@@ -1302,7 +1338,11 @@ function PlayerChip({
           {rating}
         </span>
       )}
-      {guest && <span className="text-[10px] font-normal">· guest</span>}
+      {guest && (
+        <span className="text-[10px] font-normal">
+          · <Trans>guest</Trans>
+        </span>
+      )}
       {hint && <span className="text-[10px] font-normal">· {hint}</span>}
     </button>
   );

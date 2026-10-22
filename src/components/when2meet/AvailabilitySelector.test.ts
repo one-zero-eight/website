@@ -1,10 +1,22 @@
-import { act, createElement } from "react";
+import { messages as enMessages } from "@/locales/en.po";
+import { messages as ruMessages } from "@/locales/ru.po";
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
+import { act, createElement, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
 
 const now = Date.parse("2027-06-15T09:00:00Z");
 const slot = (time: string) => `2027-06-15_${time}`;
+
+function renderWithI18n(root: Root, children: ReactNode) {
+  const i18n = setupI18n({
+    locale: "en",
+    messages: { en: enMessages, ru: ruMessages },
+  });
+  root.render(createElement(I18nProvider, { i18n }, children));
+}
 
 describe("final meeting selection on the grid", () => {
   let container: HTMLDivElement;
@@ -36,7 +48,8 @@ describe("final meeting selection on the grid", () => {
 
   function renderGrid(isPhone = false, intervalSelectionMode = true) {
     act(() => {
-      root.render(
+      renderWithI18n(
+        root,
         createElement(AvailabilitySelector, {
           dates: [{ id: "2027-06-15", monthDay: "Jun 15", weekDay: "Tue" }],
           timeSlots: ["11:30", "12:00", "12:30", "13:00"],
@@ -257,7 +270,8 @@ describe("final meeting selection on the grid", () => {
     const adjacentSlot = "2027-06-16_12:30";
 
     act(() => {
-      root.render(
+      renderWithI18n(
+        root,
         createElement(AvailabilitySelector, {
           dates: [
             { id: "2027-06-15", monthDay: "Jun 15", weekDay: "Tue" },
@@ -298,7 +312,8 @@ describe("final meeting selection on the grid", () => {
     const futureSlot = slot("12:30");
 
     act(() => {
-      root.render(
+      renderWithI18n(
+        root,
         createElement(AvailabilitySelector, {
           dates: [{ id: "2027-06-15", monthDay: "Jun 15", weekDay: "Tue" }],
           timeSlots: ["11:30", "12:30"],
@@ -375,7 +390,8 @@ describe("all-day personal calendar events", () => {
       }));
 
       act(() => {
-        root.render(
+        renderWithI18n(
+          root,
           createElement(AvailabilitySelector, {
             dates,
             timeSlots: ["12:00"],
@@ -433,7 +449,8 @@ describe("time grid double click", () => {
       const handleTimeGridDoubleClick = vi.fn();
 
       act(() => {
-        root.render(
+        renderWithI18n(
+          root,
           createElement(AvailabilitySelector, {
             dates: [{ id: "2027-06-15", monthDay: "Jun 15", weekDay: "Tue" }],
             timeSlots: ["12:00"],
@@ -488,7 +505,8 @@ describe("time grid mouse leave", () => {
       const handleHoveredSlotKeyChange = vi.fn();
 
       act(() => {
-        root.render(
+        renderWithI18n(
+          root,
           createElement(AvailabilitySelector, {
             dates: [{ id: "2027-06-15", monthDay: "Jun 15", weekDay: "Tue" }],
             timeSlots: ["12:00"],

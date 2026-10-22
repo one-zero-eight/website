@@ -1,4 +1,5 @@
 import { scheduleTypes } from "@/api/schedule";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 import { Link } from "@tanstack/react-router";
 
@@ -50,6 +51,7 @@ export function PredefinedGroupBadge({
   eventGroupsByAlias: Map<string, scheduleTypes.SchemaViewEventGroup>;
   className?: string;
 }) {
+  const { t } = useLingui();
   const eventGroup = getEventGroupByAlias(eventGroupsByAlias, alias);
   const name = eventGroup?.name;
 
@@ -60,10 +62,12 @@ export function PredefinedGroupBadge({
           "bg-base-100 text-error inline-flex max-w-full min-w-0 items-center gap-2 overflow-hidden rounded-full px-3 py-1 text-sm",
           className,
         )}
-        title={`${alias} — Not in schedule`}
+        title={t`${alias} — Not in schedule`}
       >
         <span className="min-w-0 truncate">{alias}</span>
-        <span className="shrink-0">— Not in schedule</span>
+        <span className="shrink-0">
+          — <Trans>Not in schedule</Trans>
+        </span>
       </span>
     );
   }
@@ -116,7 +120,7 @@ export function PredefinedGroupTitle({
           {fallbackName}
         </span>
         <span className="text-error shrink-0 text-sm">
-          {alias} — Not in schedule
+          <Trans>{alias} — Not in schedule</Trans>
         </span>
       </span>
     );

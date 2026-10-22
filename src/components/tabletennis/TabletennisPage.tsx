@@ -1,4 +1,6 @@
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { useLingui as useLinguiRuntime } from "@lingui/react";
 import {
   formatApiErrorMessage,
   isApiHttpError,
@@ -12,6 +14,7 @@ import { BACKGROUND_REFETCH_MS } from "./useTabletennisRefresh";
 type SchemaPlayer = tabletennisTypes.SchemaPlayer;
 
 export function TabletennisPage() {
+  useLinguiRuntime();
   const { data, isPending, isError, error, refetch } = $tabletennis.useQuery(
     "get",
     "/get-player",
@@ -24,9 +27,13 @@ export function TabletennisPage() {
   if (isError && isApiHttpError(error) && error.httpCode === 401) {
     return (
       <div className="px-4 py-12">
-        <h2 className="mb-4 text-3xl font-medium">Sign in to get access</h2>
+        <h2 className="mb-4 text-3xl font-medium">
+          <Trans>Sign in to get access</Trans>
+        </h2>
         <p className="text-base-content/75 mb-4 text-lg">
-          Use your Innopolis account to access table tennis features.
+          <Trans>
+            Use your Innopolis account to access InNoHassle services.
+          </Trans>
         </p>
         <SignInButton />
       </div>
@@ -107,19 +114,32 @@ function ProfileInfo({
   winGames: number;
   place: number | null;
 }) {
+  const { t } = useLingui();
   return (
     <PlateTemplate>
       <div>
-        <InfoPlate discription="Status" info={status} />
+        <InfoPlate
+          discription={t`Status`}
+          info={
+            status.toLowerCase() === "beginner"
+              ? t`Beginner`
+              : status.toLowerCase() === "advanced"
+                ? t`Advanced`
+                : status
+          }
+        />
         <Line />
-        <InfoPlate discription="Current score" info={String(score)} />
+        <InfoPlate discription={t`Current score`} info={String(score)} />
         <Line />
-        <InfoPlate discription="Wins" info={String(winGames)} />
-        <Line />
-        <InfoPlate discription="Loses" info={String(totalGames - winGames)} />
+        <InfoPlate discription={t`Wins`} info={String(winGames)} />
         <Line />
         <InfoPlate
-          discription="Win rate"
+          discription={t`Losses`}
+          info={String(totalGames - winGames)}
+        />
+        <Line />
+        <InfoPlate
+          discription={t`Win rate`}
           info={
             totalGames > 0
               ? `${((winGames / totalGames) * 100).toFixed(1)}%`
@@ -128,7 +148,7 @@ function ProfileInfo({
         />
         <Line />
         <InfoPlate
-          discription="Place"
+          discription={t`Place`}
           info={place === null ? "—" : String(place)}
         />
       </div>

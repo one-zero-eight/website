@@ -1,9 +1,10 @@
 import { SchemaResolvedLocation } from "@/api/events/types";
+import { t } from "@lingui/core/macro";
 
 export function locationDisplayName(
   location: SchemaResolvedLocation | null | undefined,
 ): string {
-  return location?.display_name?.trim() || "TBA";
+  return location?.display_name?.trim() || t`TBA`;
 }
 
 export function locationMapsSearch(

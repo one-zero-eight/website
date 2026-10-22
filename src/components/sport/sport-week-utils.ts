@@ -1,3 +1,5 @@
+import { i18n } from "@lingui/core";
+
 /** Sport office schedules follow Europe/Moscow (MSK, fixed UTC+3). */
 const MSK_TZ = "Europe/Moscow";
 const MSK_OFFSET = "+03:00";
@@ -117,8 +119,8 @@ export function formatSportWeekRangeLabel(
     day: "numeric",
     timeZone: MSK_TZ,
   };
-  const fmtShort = new Intl.DateTimeFormat("en-US", optsShort);
-  const fmtLong = new Intl.DateTimeFormat("en-US", {
+  const fmtShort = new Intl.DateTimeFormat(i18n.locale, optsShort);
+  const fmtLong = new Intl.DateTimeFormat(i18n.locale, {
     ...optsShort,
     year: "numeric",
   });
@@ -148,11 +150,11 @@ export function formatDayHeaderMoscow(iso: string): {
 } {
   const d = new Date(iso);
   return {
-    weekday: d.toLocaleDateString("en-US", {
+    weekday: d.toLocaleDateString(i18n.locale, {
       weekday: "long",
       timeZone: MSK_TZ,
     }),
-    long: d.toLocaleDateString("en-US", {
+    long: d.toLocaleDateString(i18n.locale, {
       month: "long",
       day: "numeric",
       year: "numeric",
@@ -168,7 +170,7 @@ export function formatTimeRangeMoscow(
   const s = new Date(startIso);
   const e = new Date(endIso);
   const t = (x: Date) =>
-    x.toLocaleTimeString("en-US", {
+    x.toLocaleTimeString(i18n.locale, {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,

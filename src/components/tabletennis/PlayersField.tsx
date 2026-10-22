@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { cn } from "@/lib/ui/cn";
 import { $tabletennis } from "@/api/tabletennis";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { useTabletennisRefresh } from "./useTabletennisRefresh";
 
@@ -213,6 +215,7 @@ export function PlayersField({
   options: PlayerOption[];
   multiline?: boolean;
 }) {
+  const { t } = useLingui();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [guestBusy, setGuestBusy] = useState<number | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -223,7 +226,7 @@ export function PlayersField({
   const { mutateAsync: createGuest } = $tabletennis.useMutation(
     "post",
     "/guests",
-    { onError: (e) => showError("Error", formatApiErrorMessage(e)) },
+    { onError: (e) => showError(msg`Error`, formatApiErrorDescriptor(e)) },
   );
 
   useEffect(() => {
@@ -284,7 +287,7 @@ export function PlayersField({
     onChange: (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) =>
       field.setRaw(e.target.value),
     onFocus: () => setShowSuggestions(true),
-    placeholder: "Player emails or nicknames (comma or newline separated)",
+    placeholder: t`Player emails or nicknames (comma or newline separated)`,
   };
 
   return (
@@ -342,7 +345,7 @@ export function PlayersField({
               {p.guest && <GuestBadge />}
               <button
                 type="button"
-                aria-label={`Remove ${p.name}`}
+                aria-label={t`Remove ${p.name}`}
                 onClick={() =>
                   field.setPicked((prev) => prev.filter((x) => x.id !== p.id))
                 }
@@ -358,9 +361,10 @@ export function PlayersField({
       {field.unresolved.length > 0 && (
         <div className="border-warning/60 bg-warning/10 flex flex-col gap-3 rounded-xl border p-3">
           <p className="text-sm font-medium">
-            Check {field.unresolved.length} player
-            {field.unresolved.length === 1 ? "" : "s"}: pick the right one, fix
-            the email, add as a guest, or remove.
+            <Trans>
+              Check the players ({field.unresolved.length}): pick the right one,
+              fix the email, add as a guest, or remove.
+            </Trans>
           </p>
           {field.unresolved.map((row) => {
             const nickname = guestNickname(row.text);
@@ -400,14 +404,14 @@ export function PlayersField({
                       ) : (
                         <>
                           <span className="icon-[mdi--account-question-outline] text-base" />
-                          Guest
+                          <Trans>Guest</Trans>
                         </>
                       )}
                     </button>
                   )}
                   <button
                     type="button"
-                    aria-label="Remove"
+                    aria-label={t`Remove`}
                     onClick={() =>
                       field.setUnresolved((prev) =>
                         prev.filter((u) => u.key !== row.key),
@@ -421,7 +425,11 @@ export function PlayersField({
                 {candidates.length > 0 && (
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-base-content/60 text-xs">
-                      {row.code === "ambiguous" ? "Who is it?" : "Did you mean"}
+                      {row.code === "ambiguous" ? (
+                        <Trans>Who is it?</Trans>
+                      ) : (
+                        <Trans>Did you mean</Trans>
+                      )}
                     </span>
                     {candidates.map((c) => (
                       <button
@@ -441,7 +449,7 @@ export function PlayersField({
                         </span>
                         {c.guest && (
                           <span className="text-[10px] font-normal">
-                            · guest
+                            · <Trans>guest</Trans>
                           </span>
                         )}
                       </button>
@@ -449,11 +457,15 @@ export function PlayersField({
                   </div>
                 )}
                 <p className="text-base-content/60 text-[11px]">
-                  {row.reason}
+                  {row.code === "ambiguous" ? (
+                    <Trans>Several players have this nickname, pick one</Trans>
+                  ) : (
+                    row.reason
+                  )}
                   {row.code === "not_found" &&
                     candidates.length === 0 &&
                     nickname.length >= 2 &&
-                    ` · guest name: ${nickname}`}
+                    t` · guest name: ${nickname}`}
                 </p>
               </div>
             );
@@ -472,7 +484,7 @@ export function GuestBadge({ className }: { className?: string }) {
         className,
       )}
     >
-      guest
+      <Trans>guest</Trans>
     </span>
   );
 }

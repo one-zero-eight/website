@@ -1,5 +1,7 @@
+import type { MessageDescriptor } from "@lingui/core";
 import { $clubs, clubsTypes } from "@/api/clubs";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -13,12 +15,15 @@ export function AddClubDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t, i18n } = useLingui();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<
+    "required" | { apiMessage: string | MessageDescriptor } | null
+  >(null);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -43,7 +48,7 @@ export function AddClubDialog({
       }
     },
     onError: (error) => {
-      setError(formatApiErrorMessage(error));
+      setError({ apiMessage: formatApiErrorDescriptor(error) });
     },
   });
 
@@ -52,7 +57,7 @@ export function AddClubDialog({
     setError(null);
 
     if (!title.trim() || !slug.trim()) {
-      setError("Title and Slug are required");
+      setError("required");
       return;
     }
 
@@ -72,7 +77,7 @@ export function AddClubDialog({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Add New Club"
+      title={t`Add New Club`}
       closeOnOutsidePress={!isPending}
     >
       <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-4">
@@ -81,13 +86,15 @@ export function AddClubDialog({
             htmlFor="club-title"
             className="text-base-content text-sm font-semibold"
           >
-            Title <span className="text-error">*</span>
+            <Trans>
+              Title <span className="text-error">*</span>
+            </Trans>
           </label>
           <input
             ref={titleInputRef}
             id="club-title"
             type="text"
-            placeholder="Enter club title"
+            placeholder={t`Enter club title`}
             value={title}
             onChange={(e) => {
               setTitle(e.target.value);
@@ -111,12 +118,14 @@ export function AddClubDialog({
             htmlFor="club-slug"
             className="text-base-content text-sm font-semibold"
           >
-            Slug <span className="text-error">*</span>
+            <Trans>
+              Slug <span className="text-error">*</span>
+            </Trans>
           </label>
           <input
             id="club-slug"
             type="text"
-            placeholder="club-url-slug"
+            placeholder={t`club-url-slug`}
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
             className="input input-bordered w-full"
@@ -124,14 +133,20 @@ export function AddClubDialog({
             required
           />
           <p className="text-base-content/50 text-xs">
-            URL-friendly identifier (e.g., "robotics-club")
+            <Trans>URL-friendly identifier (e.g., "robotics-club")</Trans>
           </p>
         </div>
 
         {error && (
           <div className="alert alert-error">
             <span className="icon-[mdi--alert-circle] size-5" />
-            <span>{error}</span>
+            <span>
+              {error === "required"
+                ? t`Title and Slug are required`
+                : typeof error.apiMessage === "string"
+                  ? error.apiMessage
+                  : i18n._(error.apiMessage)}
+            </span>
           </div>
         )}
 
@@ -142,7 +157,7 @@ export function AddClubDialog({
             onClick={handleClose}
             disabled={isPending}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="submit"
@@ -152,12 +167,16 @@ export function AddClubDialog({
             {isPending ? (
               <>
                 <span className="loading loading-spinner loading-sm" />
-                <span>Creating...</span>
+                <span>
+                  <Trans>Creating...</Trans>
+                </span>
               </>
             ) : (
               <>
                 <span className="icon-[mdi--plus] size-5" />
-                <span>Create</span>
+                <span>
+                  <Trans>Create</Trans>
+                </span>
               </>
             )}
           </button>

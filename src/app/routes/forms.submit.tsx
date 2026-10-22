@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import { $forms } from "@/api/forms";
 import { useMe } from "@/api/accounts/user.ts";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/forms/submit")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { slug, form } = Route.useSearch();
   const { me } = useMe();
 
@@ -81,7 +83,7 @@ function RouteComponent() {
       return (
         <div className="flex h-full items-center justify-center">
           <Helmet>
-            <title>Redirecting to the form</title>
+            <title>{t`Redirecting to the form`}</title>
             {/* Do not scan this page */}
             <meta name="robots" content="noindex, follow" />
           </Helmet>
@@ -94,7 +96,7 @@ function RouteComponent() {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
         <Helmet>
-          <title>Redirecting to the form</title>
+          <title>{t`Redirecting to the form`}</title>
           {/* Do not scan this page */}
           <meta name="robots" content="noindex, follow" />
         </Helmet>
@@ -103,9 +105,11 @@ function RouteComponent() {
         <div className="mb-6">
           <span className="text-primary loading loading-spinner loading-6xl" />
         </div>
-        <h2 className="mb-2 text-2xl font-bold">Redirecting...</h2>
+        <h2 className="mb-2 text-2xl font-bold">
+          <Trans>Redirecting...</Trans>
+        </h2>
         <p className="text-base-content/70 mb-4 text-lg">
-          Just a moment, we're redirecting you to the form...
+          <Trans>Just a moment, we're redirecting you to the form...</Trans>
         </p>
       </div>
     );
@@ -115,14 +119,16 @@ function RouteComponent() {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
         <Helmet>
-          <title>Form</title>
+          <title>{t`Form`}</title>
           {/* Do not scan this page */}
           <meta name="robots" content="noindex, follow" />
         </Helmet>
 
-        <h2 className="mb-2 text-2xl font-bold">Invalid Link</h2>
+        <h2 className="mb-2 text-2xl font-bold">
+          <Trans>Invalid link</Trans>
+        </h2>
         <p className="text-base-content/70 text-lg">
-          The slug parameter is missing or invalid.
+          <Trans>The slug parameter is missing or invalid.</Trans>
         </p>
       </div>
     );
@@ -132,7 +138,7 @@ function RouteComponent() {
     return (
       <div className="flex h-full items-center justify-center">
         <Helmet>
-          <title>Form</title>
+          <title>{t`Form`}</title>
           {/* Do not scan this page */}
           <meta name="robots" content="noindex, follow" />
         </Helmet>
@@ -146,7 +152,7 @@ function RouteComponent() {
     return (
       <div className="flex min-h-[60vh] flex-col gap-4 p-4">
         <Helmet>
-          <title>Form</title>
+          <title>{t`Form`}</title>
           {/* Do not scan this page */}
           <meta name="robots" content="noindex, follow" />
         </Helmet>
@@ -159,14 +165,18 @@ function RouteComponent() {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-8 text-center">
         <Helmet>
-          <title>Form</title>
+          <title>{t`Form`}</title>
           {/* Do not scan this page */}
           <meta name="robots" content="noindex, follow" />
         </Helmet>
 
-        <h2 className="mb-2 text-2xl font-bold">Could not load form</h2>
+        <h2 className="mb-2 text-2xl font-bold">
+          <Trans>Could not load form</Trans>
+        </h2>
         <p className="text-base-content/70 mb-4 max-w-md text-lg">
-          This link may be invalid, expired, or you may not have access.
+          <Trans>
+            This link may be invalid, expired, or you may not have access.
+          </Trans>
         </p>
         <button
           type="button"
@@ -175,7 +185,7 @@ function RouteComponent() {
             void refetch();
           }}
         >
-          Try again
+          <Trans>Try again</Trans>
         </button>
       </div>
     );
@@ -184,7 +194,7 @@ function RouteComponent() {
   return (
     <div className="px-4">
       <Helmet>
-        <title>Form</title>
+        <title>{t`Form`}</title>
         {/* Do not scan this page */}
         <meta name="robots" content="noindex, follow" />
         <script src="https://forms.yandex.ru/_static/embed.js" defer></script>
@@ -195,7 +205,7 @@ function RouteComponent() {
         </style>
       </Helmet>
       <iframe
-        title="Yandex Form"
+        title={t`Yandex Form`}
         src={iframeSrc}
         className="mx-auto my-4 w-full max-w-[650px] focus-visible:outline-none md:my-12 xl:my-24"
       ></iframe>

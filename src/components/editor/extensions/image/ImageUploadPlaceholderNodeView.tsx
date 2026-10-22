@@ -1,13 +1,14 @@
 import { NodeViewWrapper, ReactNodeViewProps } from "@tiptap/react";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useState } from "react";
 import { uploadEditorImage } from "@/components/editor/utils/uploadEditorImage";
 import { cn } from "@/lib/ui/cn";
-
 export function ImageUploadPlaceholderNodeView({
   node,
   editor,
   getPos,
 }: ReactNodeViewProps) {
+  const { t } = useLingui();
   const [isFileUploading, setIsFileUploading] = useState(false);
   const isUploading = isFileUploading || Boolean(node.attrs.uploadId);
 
@@ -21,7 +22,7 @@ export function ImageUploadPlaceholderNodeView({
       await uploadEditorImage(editor, file, getPos);
     } catch (error) {
       console.error("Failed to upload image:", error);
-      alert("Failed to upload image");
+      alert(t`Failed to upload image`);
     } finally {
       setIsFileUploading(false);
     }
@@ -78,16 +79,18 @@ export function ImageUploadPlaceholderNodeView({
         {isUploading ? (
           <div className="flex flex-col items-center gap-2">
             <span className="icon-[mdi--loading] text-primary h-8 w-8 animate-spin" />
-            <p className="text-base-content/70 text-sm">Uploading image...</p>
+            <p className="text-base-content/70 text-sm">
+              <Trans>Uploading image...</Trans>
+            </p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 text-center">
             <span className="icon-[material-symbols--image] text-base-content/50 h-12 w-12" />
             <p className="text-base-content text-sm font-medium">
-              Click to upload or paste an image
+              <Trans>Click to upload or paste an image</Trans>
             </p>
             <p className="text-base-content/50 text-xs">
-              Drag and drop an image here
+              <Trans>Drag and drop an image here</Trans>
             </p>
           </div>
         )}

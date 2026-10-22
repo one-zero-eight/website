@@ -2,20 +2,21 @@ import { Topbar } from "@/components/layout/Topbar.tsx";
 import TimerPage from "@/components/timer/TimerPage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/timer")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   return (
     <>
       <Helmet>
-        <title>Timer</title>
+        <title>{t`Timer`}</title>
         <meta
           name="description"
-          content="Make a time deadline for any task with this timer."
+          content={t`Make a time deadline for any task with this timer.`}
         />
       </Helmet>
 

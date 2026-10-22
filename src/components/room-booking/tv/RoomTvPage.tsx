@@ -1,4 +1,5 @@
 import { $roomBooking } from "@/api/room-booking";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { type roomBookingTypes } from "@/api/room-booking";
 import { T } from "@/lib/utils/dates";
 import { Helmet } from "@dr.pogodin/react-helmet";
@@ -43,6 +44,7 @@ function findCurrentBooking(
 }
 
 export function RoomTvPage({ id }: { id: string }) {
+  const { i18n, t } = useLingui();
   const calendarRef = useRef<FullCalendar>(null);
   const [now, setNow] = useState(() => new Date());
   const { start, end } = useMemo(() => getTodayRange(), [now]);
@@ -144,7 +146,7 @@ export function RoomTvPage({ id }: { id: string }) {
   return (
     <>
       <Helmet>
-        <title>Room TV</title>
+        <title>{t`Room TV`}</title>
         <meta name="robots" content="noindex" />
       </Helmet>
       <div
@@ -182,17 +184,21 @@ export function RoomTvPage({ id }: { id: string }) {
             <>
               <h1>{id}</h1>
               <p className="mt-2 text-red-500">
-                {moment(now).format("dddd, D MMMM HH:mm")}
+                {moment(now).locale(i18n.locale).format("dddd, D MMMM HH:mm")}
               </p>
               <div className="divider my-6" />
               <div>
                 {currentBooking ? (
                   <div className="mt-2">
-                    <p className="text-sm uppercase">Title</p>
+                    <p className="text-sm uppercase">
+                      <Trans>Title</Trans>
+                    </p>
                     <p className="mt-1 line-clamp-3 break-all">
                       {sanitizeBookingTitle(currentBooking.title)}
                     </p>
-                    <p className="mt-3 text-sm uppercase">Time</p>
+                    <p className="mt-3 text-sm uppercase">
+                      <Trans>Time</Trans>
+                    </p>
                     <p className="text-primary mt-1">
                       {moment(currentBooking.start).format("HH:mm")} -{" "}
                       {moment(currentBooking.end).format("HH:mm")}
@@ -201,7 +207,9 @@ export function RoomTvPage({ id }: { id: string }) {
                     {(organizerDetails || organizerEmail) && (
                       <div className="mt-5 space-y-3">
                         <div>
-                          <p className="text-sm uppercase">Organizer</p>
+                          <p className="text-sm uppercase">
+                            <Trans>Organizer</Trans>
+                          </p>
                           <p>{organizerDetails?.name ?? null}</p>
                           <p className="text-base break-all">
                             {organizerDetails?.email ?? organizerEmail ?? null}
@@ -213,7 +221,7 @@ export function RoomTvPage({ id }: { id: string }) {
                       <div className="mt-5">
                         <div className="divider my-2" />
                         <p className="text-base">
-                          Next meeting at{" "}
+                          <Trans>Next meeting at</Trans>{" "}
                           <span className="text-primary">
                             {moment(nextBooking.start).format("HH:mm")} -{" "}
                             {moment(nextBooking.end).format("HH:mm")}
@@ -224,12 +232,14 @@ export function RoomTvPage({ id }: { id: string }) {
                   </div>
                 ) : (
                   <div className="mt-5 space-y-2">
-                    <p>No active booking now.</p>
+                    <p>
+                      <Trans>No active booking now.</Trans>
+                    </p>
                     {nextBooking && (
                       <div>
                         <div className="divider my-2" />
                         <p className="text-base">
-                          Next meeting at{" "}
+                          <Trans>Next meeting at</Trans>{" "}
                           <span className="text-primary">
                             {moment(nextBooking.start).format("HH:mm")} -{" "}
                             {moment(nextBooking.end).format("HH:mm")}

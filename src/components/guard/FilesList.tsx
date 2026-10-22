@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { buildJoinLink, formatDate, parseSlugFromJoinLink } from "./utils";
 import { CopyLinkButton } from "./CopyLinkButton";
 
@@ -37,11 +38,19 @@ export function FilesList({
   }, [files, normalizedSearch, searchSlug]);
 
   if (files.length === 0) {
-    return <p className="text-base-content/60">No files found.</p>;
+    return (
+      <p className="text-base-content/60">
+        <Trans>No files found.</Trans>
+      </p>
+    );
   }
 
   if (filtered.length === 0) {
-    return <p className="text-base-content/60">No files match your search.</p>;
+    return (
+      <p className="text-base-content/60">
+        <Trans>No files match your search.</Trans>
+      </p>
+    );
   }
 
   return (
@@ -64,13 +73,15 @@ function FileItemCard({
   file: FileItem;
   onShowDetails: (slug: string) => void;
 }) {
+  const { i18n, t } = useLingui();
+
   return (
     <div
       onClick={() => onShowDetails(file.slug)}
       className="bg-base-200 hover:bg-base-300 rounded-box flex cursor-pointer flex-col gap-3 px-4 py-3 transition-colors sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="min-w-0">
-        <div className="truncate font-medium">{file.title || "Untitled"}</div>
+        <div className="truncate font-medium">{file.title || t`Untitled`}</div>
         <div className="text-base-content/60 flex items-center gap-3 text-sm">
           <span className="flex items-center gap-1">
             <span className="icon-[material-symbols--group-outline-rounded] text-base" />
@@ -78,7 +89,7 @@ function FileItemCard({
           </span>
           <span className="flex items-center gap-1">
             <span className="icon-[material-symbols--schedule-outline-rounded] text-base" />
-            {formatDate(file.created_at)}
+            {formatDate(file.created_at, i18n.locale)}
           </span>
         </div>
       </div>
