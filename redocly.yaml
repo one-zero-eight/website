@@ -1,86 +1,86 @@
 apis:
-#  accounts:
-#    root: https://api.innohassle.ru/accounts/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/accounts/types.ts
-#      #  --root-types --enum
-#  schedule:
-#    root: https://api.innohassle.ru/schedule/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/schedule/types.ts
-#      #  --root-types --enum
-#  maps:
-#    root: http://api.innohassle.ru/maps/v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/maps/types.ts
-#      #  --root-types --enum
-#  music:
-#    root: https://api.innohassle.ru/music-room/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/music-room/types.ts
-#      #  --root-types --enum
-  room:
-    root: https://api.innohassle.ru/room-booking/v0/openapi.json
+  accounts:
+    root: https://api.innohassle.ru/accounts/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/accounts/types.ts
+      #  --root-types --enum
+  schedule:
+    root: https://api.innohassle.ru/schedule/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/schedule/types.ts
+      #  --root-types --enum
+  maps:
+    root: https://api.innohassle.ru/maps/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/maps/types.ts
+      #  --root-types --enum
+  music-room:
+    root: https://api.innohassle.ru/music-room/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/music-room/types.ts
+      #  --root-types --enum
+  room-booking:
+    root: https://api.innohassle.ru/room-booking/staging-v0/openapi.json
     x-openapi-ts:
       output: ./src/api/room-booking/types.ts
       #  --root-types --enum
-#  search:
-#    root: https://api.innohassle.ru/search/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/search/types.ts
-#      #  --root-types --enum
-#  events:
-#    root: https://api.innohassle.ru/events/staging-v1/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/events/types.ts
-#      #  --root-types --enum
-#  when2meet:
-#    root: https://api.innohassle.ru/when2meet/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/when2meet/types.ts
-#      #  --root-types --enum
-#  guard:
-#    root: https://api.innohassle.ru/guard/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/guard/types.ts
-#      #  --root-types --enum
-#  clubs:
-#    root: https://api.innohassle.ru/clubs/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/clubs/types.ts
-#      #  --root-types --enum
-#  student-affairs:
-#    root: https://api.innohassle.ru/student-affairs/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/student-affairs/types.ts
-#      #  --root-types --enum
-#  forms:
-#    root: https://api.innohassle.ru/forms/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/forms/types.ts
-#      #  --root-types --enum
-#  printers:
-#    root: https://api.innohassle.ru/printers/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/printers/types.ts
-#      #  --root-types --enum
-#  tabletennis:
-#    root: https://api.innohassle.ru/tabletennis/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/tabletennis/types.ts
-#      #  --root-types --enum
-#  board-games:
-#    root: https://api.innohassle.ru/board-games/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/board-games/types.ts
-#      #  --root-types --enum
-#  sport:
-#    root: https://sport.innopolis.university/api/v3/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/sport/types.ts
-#      #  --root-types --enum
-#  schedule-assistant:
-#    root: https://api.innohassle.ru/schedule-assistant/staging-v0/openapi.json
-#    x-openapi-ts:
-#      output: ./src/api/schedule-assistant/types.ts
-#      #  --root-types --enum
+  search:
+    root: https://api.innohassle.ru/search/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/search/types.ts
+      #  --root-types --enum
+  events:
+    root: https://api.innohassle.ru/events/staging-v1/openapi.json
+    x-openapi-ts:
+      output: ./src/api/events/types.ts
+      #  --root-types --enum
+  when2meet:
+    root: https://api.innohassle.ru/when2meet/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/when2meet/types.ts
+      #  --root-types --enum
+  guard:
+    root: https://api.innohassle.ru/guard/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/guard/types.ts
+      #  --root-types --enum
+  clubs:
+    root: https://api.innohassle.ru/clubs/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/clubs/types.ts
+      #  --root-types --enum
+  student-affairs:
+    root: https://api.innohassle.ru/student-affairs/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/student-affairs/types.ts
+      #  --root-types --enum
+  forms:
+    root: https://api.innohassle.ru/forms/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/forms/types.ts
+      #  --root-types --enum
+  printers:
+    root: https://api.innohassle.ru/printers/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/printers/types.ts
+      #  --root-types --enum
+  tabletennis:
+    root: https://api.innohassle.ru/tabletennis/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/tabletennis/types.ts
+      #  --root-types --enum
+  board-games:
+    root: https://api.innohassle.ru/board-games/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/board-games/types.ts
+      #  --root-types --enum
+  sport:
+    root: https://sport.innopolis.university/api/v3/openapi.json
+    x-openapi-ts:
+      output: ./src/api/sport/types.ts
+      #  --root-types --enum
+  schedule-assistant:
+    root: https://api.innohassle.ru/schedule-assistant/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/schedule-assistant/types.ts
+      #  --root-types --enum
