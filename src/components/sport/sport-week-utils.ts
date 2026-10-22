@@ -163,6 +163,21 @@ export function formatDayHeaderMoscow(iso: string): {
   };
 }
 
+export function formatTrainingHistoryDateTimeMoscow(
+  date: string,
+  time: string,
+  locale: string,
+): string {
+  const iso = `${date}T${time}Z`;
+  const moscowTime = new Date(iso).toLocaleTimeString(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: MSK_TZ,
+  });
+  return `${moscowDateKey(iso)} ${moscowTime}`;
+}
+
 export function formatTimeRangeMoscow(
   startIso: string,
   endIso: string,

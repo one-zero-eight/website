@@ -12,6 +12,7 @@ import type {
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { useSportProfile } from "@/components/sport/sport-profile.ts";
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
+import { formatTrainingHistoryDateTimeMoscow } from "@/components/sport/sport-week-utils.ts";
 import { SportStudentTrainingModal } from "@/components/sport/SportStudentTrainingModal.tsx";
 import { SportTrainingModalShell } from "@/components/sport/SportTrainingModalShell.tsx";
 import { cn } from "@/lib/ui/cn";
@@ -282,11 +283,15 @@ function SportHistoryTrainingRow({
   club?: SchemaClub;
   onSelectTraining: (trainingId: number) => void;
 }) {
-  useLinguiRuntime();
+  const { i18n } = useLinguiRuntime();
   const content = (
     <>
       <span className="text-base-content/60 shrink-0 text-xs tabular-nums">
-        {training.date} {training.time}
+        {formatTrainingHistoryDateTimeMoscow(
+          training.date,
+          training.time,
+          i18n.locale,
+        )}
       </span>
       <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
         {club?.id ? (

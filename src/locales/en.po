@@ -71,7 +71,7 @@ msgstr "\"{trimmedName}\" was saved."
 msgid "({daysLeft, plural, one {# day left} other {# days left}})"
 msgstr "({daysLeft, plural, one {# day left} other {# days left}})"
 
-#: src/components/sport/SportHistoryPage.tsx:202
+#: src/components/sport/SportHistoryPage.tsx:203
 msgid "(current semester)"
 msgstr "(current semester)"
 
@@ -108,8 +108,8 @@ msgstr "{0, plural, one {# player} other {# players}}"
 
 #. placeholder {0}: 0
 #. placeholder {0}: trainings.length
-#: src/components/sport/SportHistoryPage.tsx:223
-#: src/components/sport/SportHistoryPage.tsx:228
+#: src/components/sport/SportHistoryPage.tsx:224
+#: src/components/sport/SportHistoryPage.tsx:229
 msgid "{0, plural, one {# training} other {# trainings}}"
 msgstr "{0, plural, one {# training} other {# trainings}}"
 
@@ -120,7 +120,7 @@ msgid "{0, plural, one {Added # minute to timer} other {Added # minutes to timer
 msgstr "{0, plural, one {Added # minute to timer} other {Added # minutes to timer}}"
 
 #. placeholder {0}: fitnessTests.length
-#: src/components/sport/SportHistoryPage.tsx:256
+#: src/components/sport/SportHistoryPage.tsx:257
 msgid "{0, plural, one {Fitness test} other {Fitness tests}}"
 msgstr "{0, plural, one {Fitness test} other {Fitness tests}}"
 
@@ -191,7 +191,7 @@ msgid "{0} will become Advanced ({ADVANCED_RATING}+)."
 msgstr "{0} will become Advanced ({ADVANCED_RATING}+)."
 
 #. placeholder {0}: training.hours
-#: src/components/sport/SportHistoryPage.tsx:304
+#: src/components/sport/SportHistoryPage.tsx:309
 msgid "{0}h"
 msgstr "{0}h"
 
@@ -353,7 +353,7 @@ msgstr "{size} KB"
 msgid "{size} MB"
 msgstr "{size} MB"
 
-#: src/components/sport/SportHistoryPage.tsx:364
+#: src/components/sport/SportHistoryPage.tsx:369
 msgid "{totalScore}/{maxScore} {totalScore, plural, one {point} other {points}}"
 msgstr "{totalScore}/{maxScore} {totalScore, plural, one {point} other {points}}"
 
@@ -1624,7 +1624,7 @@ msgstr "Club logo"
 msgid "Club Logo"
 msgstr "Club Logo"
 
-#: src/components/sport/SportHistoryPage.tsx:104
+#: src/components/sport/SportHistoryPage.tsx:105
 #: src/components/sport/SportSchedulePage.tsx:323
 msgid "Club logos could not be loaded."
 msgstr "Club logos could not be loaded."
@@ -2124,7 +2124,7 @@ msgstr "Current reservations"
 msgid "Current score"
 msgstr "Current score"
 
-#: src/components/sport/SportHistoryPage.tsx:99
+#: src/components/sport/SportHistoryPage.tsx:100
 msgid "Current semester could not be loaded."
 msgstr "Current semester could not be loaded."
 
@@ -2882,7 +2882,7 @@ msgstr "Example: <0>{example}</0>"
 msgid "Examples: <0>{examples}</0>"
 msgstr "Examples: <0>{examples}</0>"
 
-#: src/components/sport/SportHistoryPage.tsx:382
+#: src/components/sport/SportHistoryPage.tsx:387
 msgid "Exercise"
 msgstr "Exercise"
 
@@ -2966,7 +2966,7 @@ msgstr "External host name is required."
 msgid "External URL"
 msgstr "External URL"
 
-#: src/components/sport/SportHistoryPage.tsx:375
+#: src/components/sport/SportHistoryPage.tsx:380
 msgid "Fail"
 msgstr "Fail"
 
@@ -4788,7 +4788,7 @@ msgstr "No scan yet"
 msgid "No slot selected"
 msgstr "No slot selected"
 
-#: src/components/sport/SportHistoryPage.tsx:109
+#: src/components/sport/SportHistoryPage.tsx:110
 msgid "No sport hours history yet."
 msgstr "No sport hours history yet."
 
@@ -5131,7 +5131,7 @@ msgstr "Participants can now add their availability."
 msgid "Participating in"
 msgstr "Participating in"
 
-#: src/components/sport/SportHistoryPage.tsx:375
+#: src/components/sport/SportHistoryPage.tsx:380
 msgid "Pass"
 msgstr "Pass"
 
@@ -5289,7 +5289,7 @@ msgstr "Please submit an image of the reference document (e.g. a medical certifi
 msgid "Please, reload the page."
 msgstr "Please, reload the page."
 
-#: src/components/sport/SportHistoryPage.tsx:388
+#: src/components/sport/SportHistoryPage.tsx:393
 msgid "Points"
 msgstr "Points"
 
@@ -5845,7 +5845,7 @@ msgstr "Restore"
 msgid "Restore draft"
 msgstr "Restore draft"
 
-#: src/components/sport/SportHistoryPage.tsx:385
+#: src/components/sport/SportHistoryPage.tsx:390
 msgid "Result"
 msgstr "Result"
 
@@ -5857,7 +5857,7 @@ msgstr "Results for: {searchedFor}"
 msgid "Resume"
 msgstr "Resume"
 
-#: src/components/sport/SportHistoryPage.tsx:358
+#: src/components/sport/SportHistoryPage.tsx:363
 msgid "Retake"
 msgstr "Retake"
 
@@ -6669,11 +6669,11 @@ msgstr "Sport history"
 msgid "Sport hours earned"
 msgstr "Sport hours earned"
 
-#: src/components/sport/SportHistoryPage.tsx:64
+#: src/components/sport/SportHistoryPage.tsx:65
 msgid "Sport hours history could not be loaded."
 msgstr "Sport hours history could not be loaded."
 
-#: src/components/sport/SportHistoryPage.tsx:212
+#: src/components/sport/SportHistoryPage.tsx:213
 msgid "Sport hours: <0>{earned} out of {required, plural, one {# hour} other {# hours}}</0>"
 msgstr "Sport hours: <0>{earned} out of {required, plural, one {# hour} other {# hours}}</0>"
 
@@ -7561,11 +7561,11 @@ msgid "Trainer tools for sport groups at Innopolis University."
 msgstr "Trainer tools for sport groups at Innopolis University."
 
 #: src/components/sport/sport-training-label.ts:25
-#: src/components/sport/SportHistoryPage.tsx:131
+#: src/components/sport/SportHistoryPage.tsx:132
 msgid "Training"
 msgstr "Training"
 
-#: src/components/sport/SportHistoryPage.tsx:137
+#: src/components/sport/SportHistoryPage.tsx:138
 msgid "Training details could not be loaded."
 msgstr "Training details could not be loaded."
 

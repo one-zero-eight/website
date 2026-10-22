@@ -71,7 +71,7 @@ msgstr "Встреча «{trimmedName}» сохранена."
 msgid "({daysLeft, plural, one {# day left} other {# days left}})"
 msgstr "({daysLeft, plural, one {остался # день} few {осталось # дня} many {осталось # дней} other {осталось # дней}})"
 
-#: src/components/sport/SportHistoryPage.tsx:202
+#: src/components/sport/SportHistoryPage.tsx:203
 msgid "(current semester)"
 msgstr "(текущий семестр)"
 
@@ -108,8 +108,8 @@ msgstr "{0, plural, one {# игрок} few {# игрока} many {# игроко
 
 #. placeholder {0}: 0
 #. placeholder {0}: trainings.length
-#: src/components/sport/SportHistoryPage.tsx:223
-#: src/components/sport/SportHistoryPage.tsx:228
+#: src/components/sport/SportHistoryPage.tsx:224
+#: src/components/sport/SportHistoryPage.tsx:229
 msgid "{0, plural, one {# training} other {# trainings}}"
 msgstr "{0, plural, one {# тренировка} few {# тренировки} many {# тренировок} other {# тренировки}}"
 
@@ -120,7 +120,7 @@ msgid "{0, plural, one {Added # minute to timer} other {Added # minutes to timer
 msgstr "{0, plural, one {К таймеру добавлена # минута} few {К таймеру добавлено # минуты} many {К таймеру добавлено # минут} other {К таймеру добавлено # минут}}"
 
 #. placeholder {0}: fitnessTests.length
-#: src/components/sport/SportHistoryPage.tsx:256
+#: src/components/sport/SportHistoryPage.tsx:257
 msgid "{0, plural, one {Fitness test} other {Fitness tests}}"
 msgstr "{0, plural, one {Тест физподготовки} few {Тесты физподготовки} many {Тесты физподготовки} other {Тесты физподготовки}}"
 
@@ -191,7 +191,7 @@ msgid "{0} will become Advanced ({ADVANCED_RATING}+)."
 msgstr "Игрок {0} перейдёт в категорию «Продвинутые» ({ADVANCED_RATING}+)."
 
 #. placeholder {0}: training.hours
-#: src/components/sport/SportHistoryPage.tsx:304
+#: src/components/sport/SportHistoryPage.tsx:309
 msgid "{0}h"
 msgstr "{0} ч"
 
@@ -353,7 +353,7 @@ msgstr "{size} КБ"
 msgid "{size} MB"
 msgstr "{size} МБ"
 
-#: src/components/sport/SportHistoryPage.tsx:364
+#: src/components/sport/SportHistoryPage.tsx:369
 msgid "{totalScore}/{maxScore} {totalScore, plural, one {point} other {points}}"
 msgstr "{totalScore}/{maxScore} {totalScore, plural, one {балл} few {балла} many {баллов} other {балла}}"
 
@@ -1624,7 +1624,7 @@ msgstr "Логотип клуба"
 msgid "Club Logo"
 msgstr "Логотип клуба"
 
-#: src/components/sport/SportHistoryPage.tsx:104
+#: src/components/sport/SportHistoryPage.tsx:105
 #: src/components/sport/SportSchedulePage.tsx:323
 msgid "Club logos could not be loaded."
 msgstr "Не удалось загрузить логотипы клубов."
@@ -2124,7 +2124,7 @@ msgstr "Текущие бронирования"
 msgid "Current score"
 msgstr "Текущий счёт"
 
-#: src/components/sport/SportHistoryPage.tsx:99
+#: src/components/sport/SportHistoryPage.tsx:100
 msgid "Current semester could not be loaded."
 msgstr "Не удалось загрузить текущий семестр."
 
@@ -2882,7 +2882,7 @@ msgstr "Пример: <0>{example}</0>"
 msgid "Examples: <0>{examples}</0>"
 msgstr "Примеры: <0>{examples}</0>"
 
-#: src/components/sport/SportHistoryPage.tsx:382
+#: src/components/sport/SportHistoryPage.tsx:387
 msgid "Exercise"
 msgstr "Упражнение"
 
@@ -2966,7 +2966,7 @@ msgstr "Укажите название внешнего организатор�
 msgid "External URL"
 msgstr "Внешний URL"
 
-#: src/components/sport/SportHistoryPage.tsx:375
+#: src/components/sport/SportHistoryPage.tsx:380
 msgid "Fail"
 msgstr "Не сдал"
 
@@ -4788,7 +4788,7 @@ msgstr "Сканирования ещё не было"
 msgid "No slot selected"
 msgstr "Слот не выбран"
 
-#: src/components/sport/SportHistoryPage.tsx:109
+#: src/components/sport/SportHistoryPage.tsx:110
 msgid "No sport hours history yet."
 msgstr "Истории спортивных часов пока нет."
 
@@ -5131,7 +5131,7 @@ msgstr "Теперь участники могут указать удобное
 msgid "Participating in"
 msgstr "Участник в"
 
-#: src/components/sport/SportHistoryPage.tsx:375
+#: src/components/sport/SportHistoryPage.tsx:380
 msgid "Pass"
 msgstr "Сдал"
 
@@ -5289,7 +5289,7 @@ msgstr "Пожалуйста, загрузите изображение подт
 msgid "Please, reload the page."
 msgstr "Пожалуйста, перезагрузите страницу."
 
-#: src/components/sport/SportHistoryPage.tsx:388
+#: src/components/sport/SportHistoryPage.tsx:393
 msgid "Points"
 msgstr "Очки"
 
@@ -5845,7 +5845,7 @@ msgstr "Восстановить"
 msgid "Restore draft"
 msgstr "Восстановить черновик"
 
-#: src/components/sport/SportHistoryPage.tsx:385
+#: src/components/sport/SportHistoryPage.tsx:390
 msgid "Result"
 msgstr "Результат"
 
@@ -5857,7 +5857,7 @@ msgstr "Результаты по запросу: {searchedFor}"
 msgid "Resume"
 msgstr "Продолжить"
 
-#: src/components/sport/SportHistoryPage.tsx:358
+#: src/components/sport/SportHistoryPage.tsx:363
 msgid "Retake"
 msgstr "Пересдача"
 
@@ -6669,11 +6669,11 @@ msgstr "История спорта"
 msgid "Sport hours earned"
 msgstr "Заработанные спортивные часы"
 
-#: src/components/sport/SportHistoryPage.tsx:64
+#: src/components/sport/SportHistoryPage.tsx:65
 msgid "Sport hours history could not be loaded."
 msgstr "Не удалось загрузить историю спортивных часов."
 
-#: src/components/sport/SportHistoryPage.tsx:212
+#: src/components/sport/SportHistoryPage.tsx:213
 msgid "Sport hours: <0>{earned} out of {required, plural, one {# hour} other {# hours}}</0>"
 msgstr "Спортивные часы: <0>{earned} из {required, plural, one {# часа} few {# часов} many {# часов} other {# часа}}</0>"
 
@@ -7561,11 +7561,11 @@ msgid "Trainer tools for sport groups at Innopolis University."
 msgstr "Инструменты тренера для спортивных групп Университета Иннополис."
 
 #: src/components/sport/sport-training-label.ts:25
-#: src/components/sport/SportHistoryPage.tsx:131
+#: src/components/sport/SportHistoryPage.tsx:132
 msgid "Training"
 msgstr "Тренировка"
 
-#: src/components/sport/SportHistoryPage.tsx:137
+#: src/components/sport/SportHistoryPage.tsx:138
 msgid "Training details could not be loaded."
 msgstr "Не удалось загрузить детали тренировки."
 
