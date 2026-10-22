@@ -5,7 +5,7 @@ export default defineConfig({
   locales: ["en", "ru", "pseudo-LOCALE"],
   pseudoLocale: { locale: "pseudo-LOCALE" },
   fallbackLocales: {
-    "pseudo-LOCALE": "ru",
+    "pseudo-LOCALE": "en",
   },
   catalogs: [
     {

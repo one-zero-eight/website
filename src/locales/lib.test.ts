@@ -7,7 +7,13 @@ import moment from "moment";
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { activateLocale, LOCALE_STORAGE_KEY, useAppLocale } from "./lib";
+import {
+  activateLocale,
+  getInitialLocale,
+  initializeI18n,
+  LOCALE_STORAGE_KEY,
+  useAppLocale,
+} from "./lib";
 
 function LocaleControls() {
   const [locale, setLocale] = useAppLocale();
@@ -47,7 +53,63 @@ describe("application locale switching", () => {
     container.remove();
     localStorage.removeItem(LOCALE_STORAGE_KEY);
     activateLocale("en");
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
+  });
+
+  it.each([
+    ["ru", "ru"],
+    ["ru-RU", "ru"],
+    ["ru-KZ", "ru"],
+    ["en-US", "en"],
+    ["de-DE", "en"],
+  ])(
+    "defaults to %s browser language as %s when no locale is stored",
+    (language, expectedLocale) => {
+      localStorage.removeItem(LOCALE_STORAGE_KEY);
+      vi.spyOn(navigator, "language", "get").mockReturnValue(language);
+
+      expect(getInitialLocale()).toBe(expectedLocale);
+      expect(initializeI18n()).toBe(expectedLocale);
+      expect(i18n.locale).toBe(expectedLocale);
+      expect(document.documentElement.lang).toBe(expectedLocale);
+    },
+  );
+
+  it.each(["en", "ru", "pseudo-LOCALE"])(
+    "preserves the stored %s locale instead of the browser language",
+    (locale) => {
+      localStorage.setItem(LOCALE_STORAGE_KEY, JSON.stringify(locale));
+      vi.spyOn(navigator, "language", "get").mockReturnValue("ru-RU");
+
+      expect(getInitialLocale()).toBe(locale);
+    },
+  );
+
+  it("keeps the browser locale when locale controls mount and persists an explicit change", () => {
+    localStorage.removeItem(LOCALE_STORAGE_KEY);
+    vi.spyOn(navigator, "language", "get").mockReturnValue("ru-RU");
+    initializeI18n();
+
+    act(() => {
+      root.render(
+        createElement(I18nProvider, { i18n }, createElement(LocaleControls)),
+      );
+    });
+
+    const button = container.querySelector("button")!;
+    expect(button.title).toBe("Сменить язык");
+    expect(button.textContent).toBe("октябрь");
+    expect(i18n.locale).toBe("ru");
+    expect(document.documentElement.lang).toBe("ru");
+    expect(localStorage.getItem(LOCALE_STORAGE_KEY)).toBeNull();
+
+    act(() => button.click());
+
+    expect(i18n.locale).toBe("en");
+    expect(button.title).toBe("Switch language");
+    expect(localStorage.getItem(LOCALE_STORAGE_KEY)).toBe(JSON.stringify("en"));
+    expect(getInitialLocale()).toBe("en");
   });
 
   it("uses the provider's locale independently of the global i18n instance", () => {

@@ -9,7 +9,7 @@ import { messages as ruMessages } from "./ru.po";
 
 export const LOCALE_STORAGE_KEY = "locale";
 export const DEFAULT_LOCALE = "en";
-export const SUPPORTED_LOCALES = ["en", "ru"] as const;
+export const SUPPORTED_LOCALES = ["en", "ru", "pseudo-LOCALE"] as const;
 
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 
@@ -20,6 +20,7 @@ export const isLocale = (value: string | null): value is Locale => {
 export const LOCALE_LABELS: Record<Locale, string> = {
   en: "EN",
   ru: "RU",
+  "pseudo-LOCALE": "Pseudo-LOCALE",
 };
 
 export const getLocaleLabel = (locale: string): string => {
@@ -38,19 +39,24 @@ const catalogs: Record<string, Messages> = {
   "pseudo-LOCALE": pseudoLocaleMessages,
 };
 
+const getBrowserLocale = (): Locale => {
+  const language = navigator.language.toLowerCase().split("-")[0];
+  return isLocale(language) ? language : DEFAULT_LOCALE;
+};
+
 export const getInitialLocale = (): Locale => {
   try {
     const storedLocale = JSON.parse(
       window.localStorage.getItem(LOCALE_STORAGE_KEY) || "null",
     );
     if (!isLocale(storedLocale)) {
-      return DEFAULT_LOCALE;
+      return getBrowserLocale();
     }
 
     return storedLocale;
   } catch (error) {
     console.error("Error getting initial locale from localStorage", error);
-    return DEFAULT_LOCALE;
+    return getBrowserLocale();
   }
 };
 
@@ -67,7 +73,7 @@ const loadCatalogs = () => {
 export const useAppLocale = () => {
   const [locale, setLocaleState] = useLocalStorage<Locale>(
     LOCALE_STORAGE_KEY,
-    DEFAULT_LOCALE,
+    getInitialLocale,
   );
 
   const setLocale = (next: Locale) => {
