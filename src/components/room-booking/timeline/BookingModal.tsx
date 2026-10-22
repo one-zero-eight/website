@@ -7,6 +7,7 @@ import { Modal } from "@/components/common/Modal.tsx";
 import { capacityOptionSuffix } from "@/components/room-booking/access-level-label.ts";
 import {
   formatBookingDuration,
+  getRoomTitle,
   sanitizeBookingTitle,
 } from "@/components/room-booking/utils.ts";
 import { clockTime, msBetween, T } from "@/lib/utils/dates.ts";
@@ -443,6 +444,10 @@ export function BookingModal({
   ]);
 
   const room = activeNewBookingRoom ?? getRoomById(detailsBooking?.room_id);
+  const roomDetails = getRoomById(room?.id);
+  const roomTitle = roomDetails
+    ? getRoomTitle(roomDetails, i18n.locale)
+    : room?.title;
 
   const { data: canBookData, isPending: canBookPending } =
     $roomBooking.useQuery(
@@ -494,7 +499,7 @@ export function BookingModal({
             params={{ room: room.room?.id ?? "" }}
             className="flex items-center py-1 wrap-anywhere whitespace-pre-wrap hover:underline"
           >
-            {room.room?.title}
+            {room.room && getRoomTitle(room.room, i18n.locale)}
           </Link>
           {outlookBookingId && (
             <StatusBadge
@@ -516,7 +521,7 @@ export function BookingModal({
       >
         {roomOptions.map((option) => (
           <option key={option.id} value={option.id}>
-            {option.title}
+            {getRoomTitle(option, i18n.locale)}
             {option.capacity ? capacityOptionSuffix(option.capacity) : ""}
           </option>
         ))}
@@ -532,7 +537,7 @@ export function BookingModal({
         params={{ room: room?.id }}
         className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap hover:underline"
       >
-        {room?.title}
+        {roomTitle}
       </Link>
     </div>
   ) : undefined;

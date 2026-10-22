@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 export function MapsPageTabs() {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const navigate = useNavigate();
   const { data: scenes } = $maps.useQuery("get", "/scenes/");
   const { scene: sceneId, q } = useLocation({ select: ({ search }) => search });
@@ -60,7 +60,7 @@ export function MapsPageTabs() {
                 : "border-base-300 border-b",
             )}
           >
-            {scene.title}
+            {i18n.locale === "ru" ? scene.ru_title : scene.title}
           </Link>
         ))}
         <div className="border-base-300 min-w-2 grow border-b" />

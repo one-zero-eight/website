@@ -1,4 +1,7 @@
-import { formatBookingDuration } from "@/components/room-booking/utils.ts";
+import {
+  formatBookingDuration,
+  getRoomTitle,
+} from "@/components/room-booking/utils.ts";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
 import { Trans, useLingui } from "@lingui/react/macro";
 import Tooltip from "@/components/common/Tooltip.tsx";
@@ -90,7 +93,9 @@ export function BookingCard({
       <div className="group bg-base-200 rounded-field flex flex-row px-4 py-2">
         <div className="flex grow flex-col">
           <h2 className="text-base-content font-medium">{booking.title}</h2>
-          <p className="text-base-content/70">{room?.title}</p>
+          <p className="text-base-content/70">
+            {room && getRoomTitle(room, i18n.locale)}
+          </p>
           <p className="text-base-content/70">
             <span>
               {start.toLocaleString(i18n.locale, {

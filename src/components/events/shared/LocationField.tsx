@@ -55,7 +55,7 @@ export function LocationField({
           key: `${scene.scene_id}-${area.svg_polygon_id ?? index}`,
           title: area.title ?? area.ru_title ?? "",
           displayTitle: getAreaTitle(area, i18n.locale),
-          sceneTitle: scene.title,
+          sceneTitle: i18n.locale === "ru" ? scene.ru_title : scene.title,
         });
         if (matches.length >= MAX_SUGGESTIONS) {
           return matches;

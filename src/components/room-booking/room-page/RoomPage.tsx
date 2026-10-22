@@ -1,5 +1,6 @@
 import { $maps } from "@/api/maps";
 import { $roomBooking } from "@/api/room-booking";
+import { getRoomTitle } from "@/components/room-booking/utils.ts";
 import {
   accessLevelLabel,
   capacityPeopleLabel,
@@ -59,7 +60,7 @@ const RoomDetails = memo(function RoomDetails({
   handleShare: () => void;
   copied: boolean;
 }) {
-  useLinguiRuntime();
+  const { i18n } = useLinguiRuntime();
 
   return (
     <div className="p-4">
@@ -67,7 +68,9 @@ const RoomDetails = memo(function RoomDetails({
       <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
         {/* Room details column */}
         <div className="flex min-h-full grow flex-col gap-3 lg:flex-1">
-          <h1 className="text-3xl font-semibold">{room.title}</h1>
+          <h1 className="text-3xl font-semibold">
+            {getRoomTitle(room, i18n.locale)}
+          </h1>
 
           {room.access_level && (
             <div className="flex flex-row items-center gap-3">
@@ -155,11 +158,12 @@ const RoomDetails = memo(function RoomDetails({
 });
 
 export function RoomPage({ id }: { id: string }) {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
     params: { query: { include_red: true } },
   });
   const room = rooms?.find((r) => r.id === id);
+  const roomTitle = room ? getRoomTitle(room, i18n.locale) : "";
   const [_, _copy] = useCopyToClipboard();
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<any>(null);
@@ -222,10 +226,9 @@ export function RoomPage({ id }: { id: string }) {
     const url = window.location.href;
 
     if (navigator.share) {
-      const roomTitle = room?.title ?? "";
       try {
         await navigator.share({
-          title: room?.title || t`Room details`,
+          title: roomTitle || t`Room details`,
           text: t`Check out this room: ${roomTitle}`,
           url: url,
         });
@@ -236,7 +239,7 @@ export function RoomPage({ id }: { id: string }) {
     } else {
       copyToClipboard(url);
     }
-  }, [room, copyToClipboard, t]);
+  }, [roomTitle, copyToClipboard, t]);
 
   if (!room) {
     return <Topbar title={<Trans>Room</Trans>} />;
@@ -245,8 +248,8 @@ export function RoomPage({ id }: { id: string }) {
   return (
     <>
       <Helmet>
-        <title>{room.title}</title>
-        <meta name="description" content={room.title ?? undefined} />
+        <title>{roomTitle}</title>
+        <meta name="description" content={roomTitle} />
       </Helmet>
 
       <Topbar title={<Trans>Room details</Trans>} />

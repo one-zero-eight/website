@@ -1,4 +1,5 @@
 import { $roomBooking } from "@/api/room-booking";
+import { getRoomTitle } from "@/components/room-booking/utils.ts";
 import {
   accessLevelLabel,
   capacityPeopleLabel,
@@ -9,7 +10,7 @@ import { useLingui } from "@lingui/react";
 import { Link } from "@tanstack/react-router";
 
 export function RoomsList() {
-  useLingui();
+  const { i18n } = useLingui();
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
     params: {
       query: {
@@ -38,7 +39,9 @@ export function RoomsList() {
           key={room.id}
         >
           <div className="flex grow flex-col">
-            <h2 className="text-base-content mb-3 font-medium">{room.title}</h2>
+            <h2 className="text-base-content mb-3 font-medium">
+              {getRoomTitle(room, i18n.locale)}
+            </h2>
 
             <div className="space-y-3">
               {room.access_level && (

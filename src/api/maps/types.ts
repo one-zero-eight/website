@@ -177,6 +177,11 @@ export interface components {
        */
       title: string;
       /**
+       * Ru Title
+       * @description Title of the scene in Russian
+       */
+      ru_title: string;
+      /**
        * Svg File
        * @description Path to the SVG file in /static
        */

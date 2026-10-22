@@ -1,5 +1,13 @@
+import type { SchemaRoom } from "@/api/room-booking/types";
 import { T } from "@/lib/utils/dates";
 import { t } from "@lingui/core/macro";
+
+export function getRoomTitle(
+  room: Pick<SchemaRoom, "title" | "ru_title">,
+  locale: string,
+): string {
+  return locale === "ru" ? room.ru_title : room.title;
+}
 
 export function formatBookingDuration(durationMs: number): string {
   const hours = Math.floor(durationMs / T.Hour);

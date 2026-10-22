@@ -2,6 +2,7 @@ import { $accounts } from "@/api/accounts";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { msg } from "@lingui/core/macro";
 import { $roomBooking } from "@/api/room-booking";
+import { getRoomTitle } from "@/components/room-booking/utils.ts";
 import {
   formatApiErrorDescriptor,
   formatApiErrorMessage,
@@ -45,6 +46,7 @@ export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
       (room) =>
         room.id.toLowerCase().includes(query) ||
         room.title.toLowerCase().includes(query) ||
+        room.ru_title.toLowerCase().includes(query) ||
         room.short_name.toLowerCase().includes(query),
     );
   }, [rooms, roomSearch]);
@@ -188,8 +190,10 @@ export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
                   )}
                   onClick={() => setSelectedRoomId(room.id)}
                 >
-                  <span className="font-medium">{room.title}</span>
-                  {room.short_name !== room.title && (
+                  <span className="font-medium">
+                    {getRoomTitle(room, i18n.locale)}
+                  </span>
+                  {room.short_name !== getRoomTitle(room, i18n.locale) && (
                     <span className="text-base-content/75 text-sm">
                       {room.short_name}
                     </span>
@@ -203,7 +207,8 @@ export function AdminRoomsPage({ initialCode }: { initialCode?: string }) {
         {selectedRoom && (
           <p className="text-base-content/75 text-sm">
             <Trans>
-              Selected: {selectedRoom.title} ({selectedRoom.id})
+              Selected: {getRoomTitle(selectedRoom, i18n.locale)} (
+              {selectedRoom.id})
             </Trans>
           </p>
         )}

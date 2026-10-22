@@ -2,7 +2,10 @@ import type { roomBookingTypes } from "@/api/room-booking";
 import { Trans } from "@lingui/react/macro";
 import { useLingui } from "@lingui/react";
 import { accessLevelColors } from "@/components/room-booking/AccessLevelIcon.tsx";
-import { sanitizeBookingTitle } from "@/components/room-booking/utils.ts";
+import {
+  getRoomTitle,
+  sanitizeBookingTitle,
+} from "@/components/room-booking/utils.ts";
 import { cn } from "@/lib/ui/cn";
 import {
   clockTime,
@@ -710,7 +713,9 @@ export const BookingTimeline = forwardRef<
                       to="/room-booking/rooms/$room"
                       params={{ room: room.id }}
                     >
-                      {compactModeEnabled ? room.short_name : room.title}
+                      {compactModeEnabled
+                        ? room.short_name
+                        : getRoomTitle(room, i18n.locale)}
                     </Link>
                   )}
                 </div>

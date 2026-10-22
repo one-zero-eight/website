@@ -2,6 +2,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { msg, plural } from "@lingui/core/macro";
 import { $roomBooking } from "@/api/room-booking";
+import { getRoomTitle } from "@/components/room-booking/utils.ts";
 import { $when2meet, type when2meetTypes } from "@/api/when2meet";
 import {
   formatApiErrorDescriptor,
@@ -387,8 +388,9 @@ export function MeetingPage({
     },
   );
 
-  const bookedRoomTitle =
-    bookedRoomDetails?.title ?? event?.booked_room?.room_id ?? null;
+  const bookedRoomTitle = bookedRoomDetails
+    ? getRoomTitle(bookedRoomDetails, i18n.locale)
+    : (event?.booked_room?.room_id ?? null);
 
   const outlookBookingId = event?.booked_room?.outlook_booking_id;
   const outlookEntryId = event?.booked_room?.outlook_entry_id;
