@@ -360,10 +360,11 @@ export function SportTrainingsCalendarList({
               }
             },
             listDaySideFormat: (arg) => {
-              const week = calculateAcademicWeek(
+              const weekNumber = calculateAcademicWeek(
                 academicCalendar,
                 moment(arg.date).toDate(),
               );
+              const week = weekNumber === Infinity ? "∞" : weekNumber;
               return t`Week ${week}`;
             },
           },

@@ -1753,8 +1753,8 @@ msgstr "Заполните официальную форму регистрац�
 msgid "Completed tournaments"
 msgstr "Завершённые турниры"
 
-#: src/components/calendar/CalendarViewer.tsx:719
-#: src/components/calendar/CalendarViewer.tsx:862
+#: src/components/calendar/CalendarViewer.tsx:723
+#: src/components/calendar/CalendarViewer.tsx:866
 #: src/components/calendar/ConfigCalendarDialog.tsx:43
 #: src/components/layout/UserMenu.tsx:138
 msgid "Config & Export"
@@ -3331,7 +3331,7 @@ msgstr "Перейти на сайт →"
 msgid "Go to your dashboard"
 msgstr "Перейти в личный кабинет"
 
-#: src/components/calendar/CalendarViewer.tsx:828
+#: src/components/calendar/CalendarViewer.tsx:832
 msgid "Go today"
 msgstr "Сегодня"
 
@@ -4578,7 +4578,7 @@ msgstr "Документ не указан"
 msgid "No drafts yet."
 msgstr "Пока нет черновиков."
 
-#: src/components/calendar/CalendarViewer.tsx:526
+#: src/components/calendar/CalendarViewer.tsx:522
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:1031
 msgid "No events this month"
 msgstr "В этом месяце нет событий"
@@ -7503,7 +7503,7 @@ msgstr "К источнику"
 msgid "To teach student club leaders to run reports"
 msgstr "Учить лидеров студенческих клубов вести отчётность"
 
-#: src/components/calendar/CalendarViewer.tsx:693
+#: src/components/calendar/CalendarViewer.tsx:697
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:297
 #: src/components/sport/SportSchedulePage.tsx:237
 msgid "Today"
@@ -8079,9 +8079,9 @@ msgstr "Вебвизор (sport.innopolis.university)"
 msgid "Week"
 msgstr "Неделя"
 
-#: src/components/calendar/CalendarViewer.tsx:447
-#: src/components/calendar/CalendarViewer.tsx:504
-#: src/components/sport/SportTrainingsCalendarList.tsx:367
+#: src/components/calendar/CalendarViewer.tsx:445
+#: src/components/calendar/CalendarViewer.tsx:500
+#: src/components/sport/SportTrainingsCalendarList.tsx:368
 msgid "Week {week}"
 msgstr "Неделя {week}"
 

@@ -1753,8 +1753,8 @@ msgstr ""
 msgid "Completed tournaments"
 msgstr ""
 
-#: src/components/calendar/CalendarViewer.tsx:719
-#: src/components/calendar/CalendarViewer.tsx:862
+#: src/components/calendar/CalendarViewer.tsx:723
+#: src/components/calendar/CalendarViewer.tsx:866
 #: src/components/calendar/ConfigCalendarDialog.tsx:43
 #: src/components/layout/UserMenu.tsx:138
 msgid "Config & Export"
@@ -3331,7 +3331,7 @@ msgstr ""
 msgid "Go to your dashboard"
 msgstr ""
 
-#: src/components/calendar/CalendarViewer.tsx:828
+#: src/components/calendar/CalendarViewer.tsx:832
 msgid "Go today"
 msgstr ""
 
@@ -4578,7 +4578,7 @@ msgstr ""
 msgid "No drafts yet."
 msgstr ""
 
-#: src/components/calendar/CalendarViewer.tsx:526
+#: src/components/calendar/CalendarViewer.tsx:522
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:1031
 msgid "No events this month"
 msgstr ""
@@ -7503,7 +7503,7 @@ msgstr ""
 msgid "To teach student club leaders to run reports"
 msgstr ""
 
-#: src/components/calendar/CalendarViewer.tsx:693
+#: src/components/calendar/CalendarViewer.tsx:697
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:297
 #: src/components/sport/SportSchedulePage.tsx:237
 msgid "Today"
@@ -8079,9 +8079,9 @@ msgstr ""
 msgid "Week"
 msgstr ""
 
-#: src/components/calendar/CalendarViewer.tsx:447
-#: src/components/calendar/CalendarViewer.tsx:504
-#: src/components/sport/SportTrainingsCalendarList.tsx:367
+#: src/components/calendar/CalendarViewer.tsx:445
+#: src/components/calendar/CalendarViewer.tsx:500
+#: src/components/sport/SportTrainingsCalendarList.tsx:368
 msgid "Week {week}"
 msgstr ""
 

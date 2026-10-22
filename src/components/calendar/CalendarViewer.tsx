@@ -139,10 +139,10 @@ export function CalendarViewer({
     }
     return view.displayName;
   }
-  const academicCalendarRef = useRef(academicCalendar);
-  useEffect(() => {
-    academicCalendarRef.current = academicCalendar;
-  }, [academicCalendar]);
+  const calculateWeek = useCallback(
+    (date: Date) => calculateAcademicWeek(academicCalendar, date),
+    [academicCalendar],
+  );
 
   const availableViews = useMemo(() => {
     const builtInViews = new Map(
@@ -440,10 +440,8 @@ export function CalendarViewer({
               }
             },
             listDaySideFormat: (arg) => {
-              const week = calculateAcademicWeek(
-                academicCalendarRef.current,
-                moment(arg.date).toDate(),
-              );
+              const weekNumber = calculateWeek(moment(arg.date).toDate());
+              const week = weekNumber === Infinity ? "∞" : weekNumber;
               return t`Week ${week}`;
             },
           },
@@ -494,11 +492,9 @@ export function CalendarViewer({
         weekNumbers={!isMobile} // Display numbers of weeks
         weekNumberFormat={{ week: "long" }} // Show "Week 1", not "W1"
         weekNumberClassNames="text-sm week-cell" // Small text size
-        weekNumberCalculation={(d) =>
-          calculateAcademicWeek(academicCalendarRef.current, d)
-        } // Display academic week numbers
+        weekNumberCalculation={calculateWeek} // Display academic week numbers
         weekNumberContent={(arg) => {
-          const week = arg.num;
+          const week = arg.num === Infinity ? "∞" : arg.num;
           return (
             <span className="whitespace-pre-wrap sm:whitespace-normal">
               {t`Week ${week}`.replace(" ", "\n")}
@@ -529,7 +525,15 @@ export function CalendarViewer({
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isFullPage, handleDatesSet, isMobile, i18n.locale, calendarView, t],
+    [
+      isFullPage,
+      handleDatesSet,
+      isMobile,
+      i18n.locale,
+      calendarView,
+      t,
+      calculateWeek,
+    ],
   );
 
   useEffect(() => {
