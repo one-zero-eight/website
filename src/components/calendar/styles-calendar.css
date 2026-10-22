@@ -150,7 +150,7 @@
   }
 
   .fc-col-header-cell-cushion {
-    @apply text-base-content/50 text-lg;
+    @apply text-base-content/50 text-lg capitalize;
   }
 
   .fc-day-today {
