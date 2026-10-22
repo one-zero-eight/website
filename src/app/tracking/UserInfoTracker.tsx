@@ -2,6 +2,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { ymUserParams, ymVisitParams } from "@/app/tracking/YandexMetrika.tsx";
 import { useEffect, useState } from "react";
 import { useTheme } from "@/lib/ui/use-theme.ts";
+import { useLingui } from "@lingui/react";
 
 type PWADisplayMode =
   | "twa"
@@ -37,6 +38,8 @@ function getPWADisplayMode(): PWADisplayMode {
 
 export function UserInfoTracker() {
   const { me } = useMe();
+  const { i18n } = useLingui();
+  const locale = i18n.locale;
 
   const { isDarkMode } = useTheme();
 
@@ -85,8 +88,10 @@ export function UserInfoTracker() {
       theme: isDarkMode ? "dark" : "light",
       pwa: pwaDisplayMode !== "browser" && pwaDisplayMode !== "unknown",
       display_mode: pwaDisplayMode,
+      locale,
+      browserLocale: navigator.language,
     });
-  }, [isDarkMode, pwaDisplayMode]);
+  }, [isDarkMode, pwaDisplayMode, locale]);
 
   return null;
 }
