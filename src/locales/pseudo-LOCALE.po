@@ -1275,8 +1275,8 @@ msgstr ""
 #: src/components/toast/ConfirmDialog.tsx:23
 #: src/components/toast/ToastProvider.test.ts:130
 #: src/components/web-print/PrintPage.tsx:505
-#: src/components/web-print/ScanPage.tsx:688
-#: src/components/web-print/ScanPage.tsx:752
+#: src/components/web-print/ScanPage.tsx:694
+#: src/components/web-print/ScanPage.tsx:758
 #: src/components/when2meet/ArchiveMeetingButton.test.ts:44
 #: src/components/when2meet/ArchiveMeetingButton.tsx:40
 #: src/components/when2meet/CreationPage.tsx:349
@@ -5663,7 +5663,7 @@ msgstr ""
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:97
 #: src/components/tabletennis/PlayersField.tsx:414
 #: src/components/tabletennis/ValidationMatches.tsx:247
-#: src/components/web-print/ScanPage.tsx:767
+#: src/components/web-print/ScanPage.tsx:773
 #: src/components/when2meet/MeetingPage.tsx:960
 msgid "Remove"
 msgstr ""
@@ -5706,7 +5706,7 @@ msgstr ""
 msgid "Remove last page"
 msgstr ""
 
-#: src/components/web-print/ScanPage.tsx:736
+#: src/components/web-print/ScanPage.tsx:742
 msgid "Remove last page?"
 msgstr ""
 
@@ -6091,7 +6091,7 @@ msgstr ""
 msgid "Saving…"
 msgstr ""
 
-#: src/components/web-print/ScanPage.tsx:705
+#: src/components/web-print/ScanPage.tsx:711
 #: src/components/web-print/WebPrintLandingPage.tsx:52
 #: src/components/web-print/WebPrintTabs.tsx:14
 msgid "Scan"
@@ -6114,7 +6114,7 @@ msgid "Scan from both sides"
 msgstr ""
 
 #: src/components/web-print/ScanPage.tsx:488
-#: src/components/web-print/ScanPage.tsx:703
+#: src/components/web-print/ScanPage.tsx:709
 msgid "Scan next page"
 msgstr ""
 
@@ -6561,6 +6561,7 @@ msgid "Slug <0>*</0>"
 msgstr ""
 
 #: src/components/web-print/ScanPage.tsx:652
+#: src/components/web-print/ScanPage.tsx:658
 msgid "Smart crop"
 msgstr ""
 
@@ -7385,7 +7386,7 @@ msgstr ""
 msgid "This will create a link that automatically fills in the respondent's email address when they open the form."
 msgstr ""
 
-#: src/components/web-print/ScanPage.tsx:741
+#: src/components/web-print/ScanPage.tsx:747
 msgid "This will permanently remove the last scanned page from the document. Are you sure?"
 msgstr ""
 
@@ -7992,7 +7993,7 @@ msgstr ""
 #: src/components/web-print/FileDropzone.tsx:348
 #: src/components/web-print/PrintPage.tsx:677
 #: src/components/web-print/PrintPage.tsx:685
-#: src/components/web-print/ScanPage.tsx:725
+#: src/components/web-print/ScanPage.tsx:731
 msgid "Warning"
 msgstr ""
 

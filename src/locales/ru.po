@@ -420,7 +420,7 @@ msgstr "<0>Выберите группы в расписании</0>."
 
 #: src/components/dashboard/SportsWidget.tsx:82
 msgid "<0>Deadline:</0> {deadlineDate} ({daysLeft, plural, one {# day left} other {# days left}})"
-msgstr "<0>Крайний срок:</0> {deadlineDate} ({daysLeft, plural, one {остался # день} few {осталось # дня} many {осталось # дней} other {осталось # дня}})"
+msgstr "<0>Дедлайн:</0> {deadlineDate} ({daysLeft, plural, one {остался # день} few {осталось # дня} many {осталось # дней} other {осталось # дня}})"
 
 #: src/components/clubs/ClubLeaguePage.tsx:199
 msgid "<0>Example:</0> Badminton club can buy shuttlecocks, but cannot buy a flower pot."
@@ -1214,7 +1214,7 @@ msgstr "Не удалось обновить календарь"
 #. placeholder {0}: moment(event.extendedProps.updatedAt).format( "DD.MM HH:mm", )
 #: src/components/calendar/CalendarEventPopover.tsx:262
 msgid "Calendar updated at: {0}"
-msgstr "Календарь обновлён: {0}"
+msgstr "Обновлено: {0}"
 
 #: src/components/calendar/import/ImportModal.tsx:174
 msgid "Calendar URL"
@@ -1275,8 +1275,8 @@ msgstr "Можно играть сейчас"
 #: src/components/toast/ConfirmDialog.tsx:23
 #: src/components/toast/ToastProvider.test.ts:130
 #: src/components/web-print/PrintPage.tsx:505
-#: src/components/web-print/ScanPage.tsx:688
-#: src/components/web-print/ScanPage.tsx:752
+#: src/components/web-print/ScanPage.tsx:694
+#: src/components/web-print/ScanPage.tsx:758
 #: src/components/when2meet/ArchiveMeetingButton.test.ts:44
 #: src/components/when2meet/ArchiveMeetingButton.tsx:40
 #: src/components/when2meet/CreationPage.tsx:349
@@ -1428,7 +1428,7 @@ msgstr "Отменить запись"
 
 #: src/components/extension/ExtensionPage.tsx:106
 msgid "Check out the source code, report issues and contribute to the project on GitHub."
-msgstr "Исходный код, баги и вклад в проект — на GitHub."
+msgstr "Исходный код, сообщения о багах и вклад в проект — на GitHub."
 
 #: src/components/room-booking/room-page/RoomPage.tsx:232
 msgid "Check out this room: {roomTitle}"
@@ -3254,7 +3254,7 @@ msgstr "Генерация..."
 
 #: src/components/clubs/HowToCreateClubPage.tsx:87
 msgid "Get access passes for club members who need entry to IU main building."
-msgstr "Получайте пропуска для участников клуба, которым нужен вход в главный корпус ИУ."
+msgstr "Получайте пропуска для участников клуба, которым нужен вход в главный корпус УИ."
 
 #: src/components/clubs/HowToCreateClubPage.tsx:97
 msgid "Get budget allocation based on your Club League position."
@@ -5514,7 +5514,7 @@ msgstr "Качество · {quality} dpi"
 
 #: src/components/extension/ExtensionPage.tsx:37
 msgid "Quick links to your courses and IU resources"
-msgstr "Быстрые ссылки на ваши курсы и ресурсы ИУ"
+msgstr "Быстрые ссылки на ваши курсы и ресурсы УИ"
 
 #: src/components/timer/components/PresetButtons.tsx:20
 msgid "Quick Presets:"
@@ -5663,7 +5663,7 @@ msgstr "Обновите страницу после восстановлени�
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:97
 #: src/components/tabletennis/PlayersField.tsx:414
 #: src/components/tabletennis/ValidationMatches.tsx:247
-#: src/components/web-print/ScanPage.tsx:767
+#: src/components/web-print/ScanPage.tsx:773
 #: src/components/when2meet/MeetingPage.tsx:960
 msgid "Remove"
 msgstr "Удалить"
@@ -5706,7 +5706,7 @@ msgstr "Убрать выделение"
 msgid "Remove last page"
 msgstr "Удалить последнюю страницу"
 
-#: src/components/web-print/ScanPage.tsx:736
+#: src/components/web-print/ScanPage.tsx:742
 msgid "Remove last page?"
 msgstr "Удалить последнюю страницу?"
 
@@ -6091,7 +6091,7 @@ msgstr "Сохранение..."
 msgid "Saving…"
 msgstr "Сохранение…"
 
-#: src/components/web-print/ScanPage.tsx:705
+#: src/components/web-print/ScanPage.tsx:711
 #: src/components/web-print/WebPrintLandingPage.tsx:52
 #: src/components/web-print/WebPrintTabs.tsx:14
 msgid "Scan"
@@ -6114,7 +6114,7 @@ msgid "Scan from both sides"
 msgstr "Сканировать с обеих сторон"
 
 #: src/components/web-print/ScanPage.tsx:488
-#: src/components/web-print/ScanPage.tsx:703
+#: src/components/web-print/ScanPage.tsx:709
 msgid "Scan next page"
 msgstr "Сканировать следующую страницу"
 
@@ -6561,6 +6561,7 @@ msgid "Slug <0>*</0>"
 msgstr "Slug <0>*</0>"
 
 #: src/components/web-print/ScanPage.tsx:652
+#: src/components/web-print/ScanPage.tsx:658
 msgid "Smart crop"
 msgstr "Умная обрезка"
 
@@ -6887,7 +6888,7 @@ msgstr "Статус студента: <0>{enrollmentStatus}</0>"
 #: src/components/room-booking/room-page/RoomPage.tsx:114
 #: src/components/room-booking/rooms-list/RoomsList.tsx:86
 msgid "Students can book only at night (19:00-8:00) and weekends"
-msgstr "Студенты могут бронировать только ночью (19:00–8:00) и в выходные"
+msgstr "Студенты могут бронировать только не в рабочее время (19:00–8:00) и в выходные"
 
 #: src/components/sport/SportTrainerBaamImportButton.tsx:120
 msgid "Students not found"
@@ -7385,7 +7386,7 @@ msgstr "Это будет загружено при сохранении изм�
 msgid "This will create a link that automatically fills in the respondent's email address when they open the form."
 msgstr "Будет создана ссылка, которая автоматически подставит email респондента при открытии формы."
 
-#: src/components/web-print/ScanPage.tsx:741
+#: src/components/web-print/ScanPage.tsx:747
 msgid "This will permanently remove the last scanned page from the document. Are you sure?"
 msgstr "Последняя отсканированная страница будет безвозвратно удалена из документа. Продолжить?"
 
@@ -7919,7 +7920,7 @@ msgstr "Смотрите ответы на встречу и выбирайте 
 
 #: src/components/room-booking/room-page/RoomPage.tsx:43
 msgid "View on Map"
-msgstr "Смотреть на карте"
+msgstr "Показать на карте"
 
 #: src/app/routes/_with_menu/maps.tsx:35
 msgid "View plans of Innopolis University."
@@ -7992,7 +7993,7 @@ msgstr "Ожидание ссылки на активность"
 #: src/components/web-print/FileDropzone.tsx:348
 #: src/components/web-print/PrintPage.tsx:677
 #: src/components/web-print/PrintPage.tsx:685
-#: src/components/web-print/ScanPage.tsx:725
+#: src/components/web-print/ScanPage.tsx:731
 msgid "Warning"
 msgstr "Предупреждение"
 
@@ -8269,7 +8270,7 @@ msgstr "У вас нет доступа к админке настольных �
 
 #: src/components/dashboard/MusicRoomWidget.tsx:61
 msgid "You don't have any bookings now."
-msgstr "У вас сейчас нет бронирований."
+msgstr "У вас нет бронирований."
 
 #: src/app/routes/__root.tsx:65
 msgid "You don't have permission to access this page."
