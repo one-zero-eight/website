@@ -282,6 +282,12 @@ export const items: ItemType[] = [
   },
   {
     type: "external",
+    title: "Innopa",
+    href: "https://innopa.ru/about",
+    icon: <span className="icon-[bxl--linkedin]" />,
+  },
+  {
+    type: "external",
     title: "My University",
     href: "https://my.innopolis.university",
     icon: <span className="icon-[material-symbols--account-circle-outline]" />,

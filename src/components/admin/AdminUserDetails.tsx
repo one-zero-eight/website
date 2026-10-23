@@ -2,6 +2,7 @@ import { accountsTypes } from "@/api/accounts";
 import { Trans, useLingui } from "@lingui/react/macro";
 import {
   getInnohassleWebvisorUrl,
+  getInnopaSearchUrl,
   getSportAdminStudentUrl,
   getSportWebvisorUrl,
   getTelegramProfileUrl,
@@ -245,6 +246,16 @@ export function AdminUserDetails({
                 className="link text-primary block truncate"
               >
                 <Trans>Sport admin</Trans>
+              </a>
+            </li>
+            <li className="min-w-0">
+              <a
+                href={getInnopaSearchUrl(email)}
+                target="_blank"
+                rel="noreferrer"
+                className="link text-primary block truncate"
+              >
+                Innopa
               </a>
             </li>
           </ul>

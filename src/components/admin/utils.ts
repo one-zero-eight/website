@@ -148,6 +148,12 @@ export function getSportAdminStudentUrl(email: string) {
   return `https://sport.innopolis.university/admin/sport/student/?${params.toString()}`;
 }
 
+export function getInnopaSearchUrl(email: string) {
+  const surname = email.split("@", 1)[0].split(".", 2)[1];
+  const params = new URLSearchParams({ q: surname, tab: "people" });
+  return `https://innopa.ru/search?${params.toString()}`;
+}
+
 export function getTelegramProfileUrl({
   username,
   id,

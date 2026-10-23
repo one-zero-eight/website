@@ -652,6 +652,20 @@ export const resourcesList: ResourceType[] = [
     category: "Support",
     frequency: 8,
   },
+  {
+    url: "https://innopa.ru/about",
+    resource: "Innopa",
+    resourceRu: "Innopa",
+    title: "Social network",
+    titleRu: "Социальная сеть",
+    description:
+      "Independent social network for Innopolis students. Posts, stories, feed, notes, clans.",
+    descriptionRu:
+      "Соцсеть для студентов Иннополиса - посты, истории, лента, конспекты, кланы.",
+    icon: "icon-[bxl--linkedin]",
+    category: "Extracurricular",
+    frequency: 8,
+  },
 ];
 
 export const globalFrequencies = resourcesList.reduce(
