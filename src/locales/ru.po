@@ -3317,7 +3317,7 @@ msgstr "Перейти в профиль"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:274
 msgid "Go to Registration Form"
-msgstr "Перейти к регистрационной форме"
+msgstr "Перейти к форме регистрации"
 
 #: src/components/calendar/CalendarEventPopover.tsx:281
 msgid "Go to source"
@@ -6356,7 +6356,7 @@ msgstr "Селф-спорт: {0}ч"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:96
 msgid "Semestral Budget"
-msgstr "Семестровый бюджет"
+msgstr "Бюджет на семестр"
 
 #: src/app/routes/_with_menu/board-games/index.tsx:21
 msgid "Service for board games reservation."
@@ -7595,7 +7595,7 @@ msgstr "Попробовать снова"
 
 #: src/components/layout/Offline.tsx:61
 msgid "Try to disable VPN and connect to University WiFi, then reload the page."
-msgstr "Отключите VPN и подключитесь к университетскому Wi‑Fi, затем обновите страницу."
+msgstr "Отключите VPN и подключитесь к Wi‑Fi университета, затем обновите страницу."
 
 #. placeholder {0}: lastApproval.roomId
 #. placeholder {1}: new Date(lastApproval.at).toLocaleString(i18n.locale, { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", })
@@ -7778,7 +7778,7 @@ msgstr "Перевести в продвинутые"
 
 #: src/components/web-print/WebPrintLandingPage.tsx:40
 msgid "Upload a file, pick a printer, send the job"
-msgstr "Загрузите файл, выберите принтер, отправьте задание"
+msgstr "Загрузите файл, выберите принтер, отправьте на печать"
 
 #: src/components/clubs/EditClubPage.tsx:652
 msgid "Upload new logo"
