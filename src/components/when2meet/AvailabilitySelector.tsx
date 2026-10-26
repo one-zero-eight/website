@@ -975,50 +975,47 @@ export function AvailabilitySelector({
         );
       })}
 
-      {hasVisibleAllDayEvents && (
-        <>
-          <div />
-          {visibleDates.map((date, visibleIndex) => {
-            const dateIndex = dateOffset + visibleIndex;
-            const dateColumnGapClassName = getDateColumnGapClassName(dateIndex);
-            const dateColumnGapBorderClassName =
-              getDateColumnGapBorderClassName(dateIndex);
-            const eventTitles = calendarAllDayEvents?.get(date.id) ?? [];
-            const firstEventTitle = eventTitles[0];
-            const allDayEventLabel =
-              eventTitles.length > 1
-                ? `${firstEventTitle} +${eventTitles.length - 1}`
-                : firstEventTitle;
-            return (
-              <div
-                key={`all-day-${date.id}`}
-                data-all-day-date={date.id}
-                className={cn(
-                  "border-base-300 mb-2 grid min-w-0 gap-1 border-r px-0.5",
-                  visibleIndex === 0 && "border-l",
-                  dateColumnGapClassName,
-                  dateColumnGapBorderClassName,
-                )}
-              >
-                {firstEventTitle && (
-                  <div
-                    title={eventTitles.join(", ")}
-                    className={cn(
-                      "bg-base-200 text-base-content/80 relative flex min-h-5 min-w-0 items-center justify-center truncate px-0.5 text-center dark:text-[#f5f0d8]",
-                      CALENDAR_EVENT_TEXT_CLASS_NAME,
-                      CALENDAR_EVENT_PATTERN_CLASS_NAME,
-                    )}
-                  >
-                    <span className="relative truncate">
-                      {allDayEventLabel}
-                    </span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </>
-      )}
+      <>
+        <div />
+        {visibleDates.map((date, visibleIndex) => {
+          const dateIndex = dateOffset + visibleIndex;
+          const dateColumnGapClassName = getDateColumnGapClassName(dateIndex);
+          const dateColumnGapBorderClassName =
+            getDateColumnGapBorderClassName(dateIndex);
+          const eventTitles = calendarAllDayEvents?.get(date.id) ?? [];
+          const firstEventTitle = eventTitles[0];
+          const allDayEventLabel =
+            eventTitles.length > 1
+              ? `${firstEventTitle} +${eventTitles.length - 1}`
+              : firstEventTitle;
+          return (
+            <div
+              key={`all-day-${date.id}`}
+              data-all-day-date={date.id}
+              className={cn(
+                "border-base-300 mb-2 grid min-h-5 min-w-0 gap-1 border-r px-0.5",
+                !hasVisibleAllDayEvents && "invisible",
+                visibleIndex === 0 && "border-l",
+                dateColumnGapClassName,
+                dateColumnGapBorderClassName,
+              )}
+            >
+              {firstEventTitle && (
+                <div
+                  title={eventTitles.join(", ")}
+                  className={cn(
+                    "bg-base-200 text-base-content/80 relative flex min-h-5 min-w-0 items-center justify-center truncate px-0.5 text-center dark:text-[#f5f0d8]",
+                    CALENDAR_EVENT_TEXT_CLASS_NAME,
+                    CALENDAR_EVENT_PATTERN_CLASS_NAME,
+                  )}
+                >
+                  <span className="relative truncate">{allDayEventLabel}</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </>
 
       {timeSlots.map((time, timeIndex) => (
         <div key={time} className="contents">
