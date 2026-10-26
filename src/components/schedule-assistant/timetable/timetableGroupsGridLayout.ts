@@ -82,7 +82,7 @@ export const GROUPS_SLOT_ROW_CLASS =
   "slot-row [&_.empty]:h-full [&_.empty]:min-h-[64px] [&_.meeting]:min-h-0 [&_td]:h-[100px]";
 
 export const COMPACT_GROUPS_SLOT_ROW_CLASS =
-  "[contain-intrinsic-size:auto_52px] [&_.empty]:min-h-7! [&_.meeting]:min-h-0! [&_.meeting]:p-1 [&_.meeting-body]:grid-rows-[auto_auto] [&_.meeting-body]:gap-0 [&_.meeting-footer]:gap-0 [&_.meeting-title]:line-clamp-1 [&_.meeting-title]:max-h-[1.25em] [&_td]:h-13!";
+  "[contain-intrinsic-size:auto_64px] [&_.empty]:min-h-7! [&_.meeting]:min-h-0! [&_.meeting]:p-1 [&_.meeting-body]:gap-0 [&_.meeting-footer]:gap-0 [&_.meeting-title]:line-clamp-1 [&_.meeting-title]:max-h-[1.25em] [&_td]:h-16!";
 
 export const GROUPS_HEAD_PAD = "px-2 py-1.5 text-[0.6875rem] leading-tight";
 
@@ -105,13 +105,14 @@ export const GROUPS_TABLE_HEAD_CLASS =
 export const GROUPS_GRID_HEADER_HEIGHT_DEFAULT = "57px";
 
 export const GROUPS_MEETING_CLASS =
-  "mb-0 flex h-full min-h-0 w-full cursor-pointer flex-col gap-0.5 rounded border p-[7px] pb-1.5 last:mb-0";
+  "mb-0 flex h-full min-h-0 w-full min-w-0 cursor-pointer flex-col gap-0.5 rounded border p-[7px] pb-1.5 last:mb-0";
 
+/** Constrain sticky, intrinsic-width titles without sacrificing footer space. */
 export const GROUPS_MEETING_BODY_CLASS =
-  "meeting-body grid h-full min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-0.5 overflow-hidden";
+  "meeting-body grid h-full min-h-0 min-w-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)_auto] gap-0.5 overflow-hidden";
 
 export const GROUPS_MEETING_TITLE_CLASS =
-  "meeting-title line-clamp-3 max-h-[calc(1.25em*3)] min-h-0 min-w-0 overflow-hidden text-[0.6875rem] leading-tight font-bold break-words text-[#1a2332]";
+  "meeting-title line-clamp-3 max-h-[calc(1.25em*3)] min-h-0 max-w-full min-w-0 overflow-hidden text-[0.6875rem] leading-tight font-bold wrap-anywhere whitespace-normal text-[#1a2332]";
 
 export const GROUPS_MEETING_FOOTER_CLASS =
   "meeting-footer flex min-w-0 shrink-0 flex-col gap-0.5";

@@ -1,9 +1,7 @@
-import { act, createElement } from "react";
-import { createRoot } from "react-dom/client";
-import { describe, expect, it, vi } from "vitest";
-import { TimetableBlockNavigation } from "./TimetableBlockNavigation.tsx";
-
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+import { createElement } from "react";
+import { describe, expect, it } from "vitest";
+import { TimetableWeekBlockLabel } from "./TimetableBlockNavigation.tsx";
+import { renderToStaticMarkup } from "react-dom/server";
 
 const blocks = [
   {
@@ -25,50 +23,38 @@ const weeks = [
   { key: "2026-09-14", start: "2026-09-14", end: "2026-09-20" },
 ];
 
-describe("TimetableBlockNavigation", () => {
-  it("switches presets and weeks independently and marks block boundaries", async () => {
-    const container = document.createElement("div");
-    document.body.append(container);
-    const root = createRoot(container);
-    const onBlockChange = vi.fn();
-    const onWeekChange = vi.fn();
-    try {
-      await act(async () =>
-        root.render(
-          createElement(TimetableBlockNavigation, {
-            blocks,
-            selectedBlockId: "second",
-            onBlockChange,
-            weeks,
-            weekIndex: 2,
-            onWeekChange,
-          }),
-        ),
+describe("TimetableWeekBlockLabel", () => {
+  it.each([
+    [weeks[0], "Первый блок"],
+    [weeks[1], "Первый блок"],
+    [weeks[2], "Первый блок / Второй блок"],
+    [
+      { key: "2026-09-21", start: "2026-09-21", end: "2026-09-27" },
+      "Второй блок",
+    ],
+  ])(
+    "labels the selected week instead of individual events (%j)",
+    (week, label) => {
+      const html = renderToStaticMarkup(
+        createElement(TimetableWeekBlockLabel, { blocks, week }),
       );
-      const buttons = [...container.querySelectorAll("button")];
-      const selectedBlock = buttons.find(
-        (button) => button.textContent === "Второй блок",
-      )!;
-      expect(selectedBlock.className).toContain("btn-primary");
-      expect(selectedBlock.title).toContain("2026");
-      await act(async () => selectedBlock.click());
-      expect(onBlockChange).toHaveBeenLastCalledWith("second");
-      expect(onWeekChange).not.toHaveBeenCalled();
-      await act(async () => buttons[0].click());
-      expect(onBlockChange).toHaveBeenLastCalledWith("all");
+      expect(html).toContain(label);
+      expect(html).not.toContain("button");
+    },
+  );
 
-      const weekButtons = buttons.slice(3);
-      expect(weekButtons[0].title).toContain("Первый блок");
-      expect(weekButtons[1].title).not.toContain("Начало");
-      expect(weekButtons[2].title).toContain("Второй блок");
-      expect(weekButtons[2].className).toContain("bg-primary");
-      await act(async () => weekButtons[1].click());
-      expect(onWeekChange).toHaveBeenCalledWith(1);
-      expect(onBlockChange).toHaveBeenCalledTimes(2);
-      expect(buttons.every((button) => button.type === "button")).toBe(true);
-    } finally {
-      await act(async () => root.unmount());
-      container.remove();
+  it("does not show a label outside blocks, without weeks, or without blocks", () => {
+    for (const props of [
+      { blocks, week: undefined },
+      { blocks: [], week: weeks[0] },
+      {
+        blocks,
+        week: { key: "2026-10-05", start: "2026-10-05", end: "2026-10-11" },
+      },
+    ]) {
+      expect(
+        renderToStaticMarkup(createElement(TimetableWeekBlockLabel, props)),
+      ).toBe("");
     }
   });
 });

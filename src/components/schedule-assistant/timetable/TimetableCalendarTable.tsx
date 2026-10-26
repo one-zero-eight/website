@@ -1,5 +1,4 @@
 import { cn } from "@/lib/ui/cn";
-import { MeetingBlockBadge } from "./MeetingBlockBadge.tsx";
 import { meetingColorStyle } from "./timetableGroupsGridLayout.ts";
 import { Fragment, memo } from "react";
 
@@ -98,7 +97,6 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
         </span>
       ) : null}
       <span className="font-semibold">{mainLabel}</span>
-      <MeetingBlockBadge instanceId={meeting.instance_id} />
       {groupsLabel ? (
         <span className="font-normal text-[#4f5c6d]"> ({groupsLabel})</span>
       ) : null}
