@@ -1,5 +1,6 @@
 import type {
   SchemaCourseConfig,
+  SchemaDateRange,
   SchemaScheduleConfig,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
@@ -33,6 +34,7 @@ export function InstructorPicker({
   weekday,
   date,
   weeklySlot,
+  active,
   audienceTokens,
   start,
   end,
@@ -58,6 +60,7 @@ export function InstructorPicker({
   weekday: TermWeekdayKey;
   date?: string;
   weeklySlot?: SchemaWeeklyPatternSlot;
+  active?: SchemaDateRange | null;
   audienceTokens?: string[];
   start: string;
   end: string;
@@ -120,6 +123,7 @@ export function InstructorPicker({
               weeklySlot,
               audienceTokens ?? [],
               "instructor",
+              active,
             )
           : [];
       const dates = slots.map((slot) => slot.date);
@@ -154,6 +158,7 @@ export function InstructorPicker({
       ];
     },
     [
+      active,
       allowEmpty,
       config,
       courseInstructors,

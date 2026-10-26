@@ -1,4 +1,5 @@
 import type {
+  SchemaDateRange,
   SchemaScheduleConfig,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
@@ -22,7 +23,7 @@ import {
   minimizeAudienceTokens,
 } from "./audienceSelectorTree.ts";
 import {
-  applyEditableEventsToCourse,
+  serializeOccurrenceEvents,
   createOccurrenceEvent,
   editableEventsToDraftMeetings,
   eventsEqual,
@@ -37,6 +38,8 @@ import {
   validateEditableEvents,
   type EditableSessionEvent,
 } from "./editableSessionEvents.ts";
+import { SessionWindowFields } from "./SessionWindowFields.tsx";
+import { resolveSessionWindow } from "./sessionWindows.ts";
 import { EditableSessionEventsEditor } from "./EditableSessionEventsEditor.tsx";
 import {
   formatAudienceTokensLabel,
@@ -47,6 +50,8 @@ import {
   parseMeetingInstanceId,
   perGroupAudienceOptions,
   resolveEndTimeForStart,
+  sessionActiveEqual,
+  applySeriesScheduleToCourse,
 } from "./meetingEditUtils.ts";
 import {
   buildMeetingPickerIndex,
@@ -92,6 +97,8 @@ export function EditClassModal({
   const [dismissed, setDismissed] = useState(false);
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
+  const [active, setActive] = useState<SchemaDateRange | null>(null);
+  const [windowValid, setWindowValid] = useState(true);
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
   const [events, setEvents] = useState<EditableSessionEvent[]>([]);
   const [originalEvents, setOriginalEvents] = useState<EditableSessionEvent[]>(
@@ -183,6 +190,8 @@ export function EditClassModal({
     );
     setAudienceValue(audience);
     setNotes(meetingSeries?.notes ?? "");
+    setActive(meetingSeries?.active ?? null);
+    setWindowValid(true);
 
     const initialPlacement: SessionPlacement =
       meetingRef.kind === "occ" ? "dates_pattern" : "weekly";
@@ -242,6 +251,7 @@ export function EditClassModal({
       config,
       weeklySlots: slots,
       audienceTokens: audience,
+      active: meetingSeries?.active,
     });
     setWeeklySlots(slots);
     setOriginalWeeklySlots(structuredClone(slots));
@@ -272,6 +282,7 @@ export function EditClassModal({
       config,
       weeklySlots,
       audienceTokens: audienceValue,
+      active,
     }).map((event) => {
       const matching = events.find((candidate) =>
         eventSchedulesEqual(
@@ -293,6 +304,7 @@ export function EditClassModal({
       config,
       weeklySlots: nextSlots,
       audienceTokens: audienceValue,
+      active,
     });
     if (
       !eventSchedulesEqual(events, nextEvents) &&
@@ -327,6 +339,7 @@ export function EditClassModal({
         config,
         weeklySlots: slots,
         audienceTokens: audienceValue,
+        active,
       }),
     );
   }
@@ -340,6 +353,32 @@ export function EditClassModal({
         config,
         weeklySlots: editableWeeklySlots,
         audienceTokens: audience,
+        active,
+      }),
+    );
+  }
+
+  function handleActiveChange(nextActive: SchemaDateRange | null) {
+    if (sessionActiveEqual(active, nextActive)) return;
+    setActive(nextActive);
+    if (placement !== "weekly") return;
+    // Avoid rewriting an untouched template during a range-only edit.
+    const previousEvents = expandWeeklySlotsToEvents({
+      config,
+      weeklySlots,
+      audienceTokens: audienceValue,
+      active,
+    });
+    const nextSlots = eventsEqual(events, previousEvents)
+      ? weeklySlots
+      : editableWeeklySlots;
+    setWeeklySlots(nextSlots);
+    setEvents(
+      expandWeeklySlotsToEvents({
+        config,
+        weeklySlots: nextSlots,
+        audienceTokens: audienceValue,
+        active: nextActive,
       }),
     );
   }
@@ -358,7 +397,7 @@ export function EditClassModal({
   }
 
   function handleSubmit() {
-    if (isPending) return;
+    if (isPending || !windowValid) return;
     if (!meeting || !meetingRef || !courses || !originals) return;
     const course = courses.find((item) => item.name === meeting.course);
     if (!course) {
@@ -374,7 +413,14 @@ export function EditClassModal({
       return;
     }
 
-    const seriesError = validateEditableEvents(events);
+    const sessionWindow = resolveSessionWindow(config, audienceValue, active);
+    const seriesError =
+      sessionWindow &&
+      placement === "weekly" &&
+      weeklySlots.length > 0 &&
+      events.length === 0
+        ? null
+        : validateEditableEvents(events, sessionWindow);
     if (seriesError) {
       showError("Ошибка", seriesError);
       return;
@@ -388,21 +434,55 @@ export function EditClassModal({
       templateChanged || !eventsEqual(events, originalEvents);
 
     const notesChanged = notes !== (meetingSeries?.notes ?? "");
-    if (!audienceChanged && !scheduleDirty && !notesChanged) {
+    if (
+      !audienceChanged &&
+      !scheduleDirty &&
+      !notesChanged &&
+      sessionActiveEqual(active, meetingSeries?.active)
+    ) {
       showError("Ошибка", "Нет изменений для сохранения.");
       return;
     }
 
-    const updatedCourse = applyEditableEventsToCourse({
+    const placementChanged =
+      placement !== (meetingRef.kind === "occ" ? "dates_pattern" : "weekly");
+    const expectedEvents =
+      placement === "weekly"
+        ? expandWeeklySlotsToEvents({
+            config,
+            weeklySlots,
+            audienceTokens: audienceValue,
+            active,
+          })
+        : originalEvents;
+    const schedulePayloadChanged =
+      templateChanged || !eventsEqual(events, expectedEvents);
+    const updatedCourse = applySeriesScheduleToCourse(
       course,
       meetingRef,
       config,
-      audience: audienceChanged ? audienceValue : undefined,
-      notes,
-      placement,
-      weeklySlots,
-      events,
-    });
+      {
+        audience: audienceChanged ? audienceValue : undefined,
+        notes,
+        active,
+        weeklyPattern:
+          placement === "weekly" && schedulePayloadChanged
+            ? serializeWeeklyEventsToSlots({
+                originalSlots: weeklySlots,
+                events,
+                config,
+              })
+            : placementChanged
+              ? null
+              : undefined,
+        dates_pattern:
+          placement === "dates_pattern" && schedulePayloadChanged
+            ? serializeOccurrenceEvents(events)
+            : placementChanged
+              ? null
+              : undefined,
+      },
+    );
 
     if (!updatedCourse) {
       showError("Ошибка", "Не удалось применить изменение к занятию.");
@@ -434,7 +514,10 @@ export function EditClassModal({
   const scheduleChanged =
     templateChanged || !eventsEqual(events, originalEvents);
   const notesChanged = notes !== (meetingSeries?.notes ?? "");
-  const canSave = audienceChanged || scheduleChanged || notesChanged;
+  const activeChanged = !sessionActiveEqual(active, meetingSeries?.active);
+  const canSave =
+    windowValid &&
+    (audienceChanged || scheduleChanged || notesChanged || activeChanged);
   const groupsOverridden = isMeetingAudienceOverridden(
     config,
     meetingComponent,
@@ -445,6 +528,7 @@ export function EditClassModal({
     : "";
 
   function restoreScheduleOriginals() {
+    setActive(meetingSeries?.active ?? null);
     setNotes(meetingSeries?.notes ?? "");
     setPlacement(meetingRef?.kind === "occ" ? "dates_pattern" : "weekly");
     setWeeklySlots(structuredClone(originalWeeklySlots));
@@ -454,6 +538,7 @@ export function EditClassModal({
             config,
             weeklySlots: originalWeeklySlots,
             audienceTokens: audienceValue,
+            active: meetingSeries?.active,
           })
         : structuredClone(originalEvents),
     );
@@ -483,6 +568,15 @@ export function EditClassModal({
           </div>
         </div>
 
+        <SessionWindowFields
+          config={config}
+          audience={audienceValue}
+          active={active}
+          onChange={handleActiveChange}
+          disabled={isPending}
+          onValidityChange={setWindowValid}
+        />
+
         <SeriesNotesField
           notes={notes}
           onChange={setNotes}
@@ -492,11 +586,12 @@ export function EditClassModal({
         {placement === "weekly" ? (
           <details className="rounded-box border-base-300 border p-3">
             <summary className="cursor-pointer text-sm font-medium">
-              Шаблон на весь учебный период
+              Шаблон на период серии
             </summary>
             <div className="mt-3">
               <SessionSeriesEditor
                 config={config}
+                active={active}
                 meetings={meetings}
                 meetingIndex={_meetingPickerIndex}
                 placement={placement}
@@ -521,6 +616,7 @@ export function EditClassModal({
 
         <EditableSessionEventsEditor
           config={config}
+          active={active}
           meetings={conflictMeetings}
           meetingIndex={conflictMeetingIndex}
           events={events}
@@ -593,7 +689,7 @@ export function EditClassModal({
         )}
 
         <div className="mt-1 flex items-center justify-end gap-3">
-          {scheduleChanged || notesChanged ? (
+          {scheduleChanged || notesChanged || activeChanged ? (
             <button
               type="button"
               className="text-base-content/50 hover:text-base-content/80 text-sm"

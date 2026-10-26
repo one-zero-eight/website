@@ -1,5 +1,6 @@
 import type {
   SchemaCourseConfig,
+  SchemaDateRange,
   SchemaScheduleConfig,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
@@ -118,16 +119,18 @@ export function expandWeeklySlotsToEvents({
   config,
   weeklySlots,
   audienceTokens,
+  active,
 }: {
   config: SchemaScheduleConfig;
   weeklySlots: SchemaWeeklyPatternSlot[];
   audienceTokens: string[];
+  active?: SchemaDateRange | null;
 }): EditableSessionEvent[] {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
   const events: EditableSessionEvent[] = [];
 
   for (const [slotIdx, slot] of weeklySlots.entries()) {
-    const dates = activeWeeklySlotDates(config, slot, audienceTokens);
+    const dates = activeWeeklySlotDates(config, slot, audienceTokens, active);
     for (const patternDate of dates) {
       const resolved = resolveWeeklyMeetingFields(slot, patternDate, config);
       const base = resolveWeeklyMeetingFields(
@@ -447,7 +450,11 @@ export function serializeOccurrenceEvents(
 
 export function validateEditableEvents(
   events: EditableSessionEvent[],
+  sessionWindow?: SchemaDateRange | null,
 ): string | null {
+  if (sessionWindow === null) {
+    return "Период серии не пересекается с учебным периодом выбранных групп.";
+  }
   const active = events.filter((event) => !event.cancelled);
   if (!active.length) return "Добавьте хотя бы одно занятие.";
   for (const [index, event] of active.entries()) {
@@ -456,6 +463,13 @@ export function validateEditableEvents(
     }
     if (!normalizeTypedHhmm(event.start_time).slice(0, 5)) {
       return `Укажите время для строки ${index + 1}.`;
+    }
+    if (
+      sessionWindow &&
+      (event.date < sessionWindow.start_date ||
+        event.date > sessionWindow.end_date)
+    ) {
+      return `Дата ${event.date} в строке ${index + 1} вне периода серии.`;
     }
   }
   return null;
@@ -539,6 +553,7 @@ export function applyEditableEventsToCourse({
   config,
   audience,
   notes,
+  active,
   placement,
   weeklySlots,
   events,
@@ -548,6 +563,7 @@ export function applyEditableEventsToCourse({
   config: SchemaScheduleConfig;
   audience?: string[];
   notes?: string;
+  active?: SchemaDateRange | null;
   placement: "weekly" | "dates_pattern";
   weeklySlots: SchemaWeeklyPatternSlot[];
   events: EditableSessionEvent[];
@@ -556,6 +572,7 @@ export function applyEditableEventsToCourse({
     return applySeriesScheduleToCourse(course, meetingRef, config, {
       audience,
       notes,
+      active,
       weeklyPattern: serializeWeeklyEventsToSlots({
         originalSlots: weeklySlots,
         events,
@@ -568,6 +585,7 @@ export function applyEditableEventsToCourse({
   return applySeriesScheduleToCourse(course, meetingRef, config, {
     audience,
     notes,
+    active,
     dates_pattern: serializeOccurrenceEvents(events),
     weeklyPattern: null,
   });

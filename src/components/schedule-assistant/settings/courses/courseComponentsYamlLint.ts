@@ -9,6 +9,7 @@ import type { EditorView } from "@codemirror/view";
 import Ajv, { type ErrorObject } from "ajv";
 import { parseDocument } from "yaml";
 import type { Node } from "yaml";
+import { dateToDay } from "@/components/schedule-assistant/settings/semester/semesterBlocks.ts";
 
 /**
  * JSON Schema for `courses[].components[]` (schedule-assistant CourseConfig.Component).
@@ -90,10 +91,22 @@ const courseComponentsRootSchema = {
         instructor: { $ref: "#/$defs/instructorValue" },
       },
     },
+    dateRange: {
+      type: "object",
+      validDateRange: true,
+      additionalProperties: false,
+      required: ["start_date", "end_date"],
+      properties: {
+        start_date: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$" },
+        end_date: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$" },
+      },
+    },
     componentSessionSeries: {
       type: "object",
       additionalProperties: false,
       properties: {
+        notes: { type: "string", default: "" },
+        active: { anyOf: [{ type: "null" }, { $ref: "#/$defs/dateRange" }] },
         audience: {
           type: "array",
           items: { type: "string" },
@@ -183,6 +196,19 @@ const courseComponentsRootSchema = {
 } as const;
 
 const ajv = new Ajv({ allErrors: true, strict: false });
+ajv.addKeyword({
+  keyword: "validDateRange",
+  type: "object",
+  validate: (
+    _schema: boolean,
+    value: { start_date?: string; end_date?: string },
+  ) =>
+    typeof value.start_date === "string" &&
+    typeof value.end_date === "string" &&
+    Number.isFinite(dateToDay(value.start_date)) &&
+    Number.isFinite(dateToDay(value.end_date)) &&
+    value.start_date <= value.end_date,
+});
 const validateComponents = ajv.compile(courseComponentsRootSchema);
 
 /** Все коды групп из `students_groups`, как в настройках. */
@@ -344,6 +370,8 @@ function rangeForYamlError(
 }
 
 function formatAjvMessage(err: ErrorObject): string {
+  if (err.keyword === "validDateRange")
+    return "Период серии: укажите корректные календарные даты, начало не позже окончания.";
   if (
     err.keyword === "additionalProperties" &&
     err.params &&

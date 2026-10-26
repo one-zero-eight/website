@@ -1,4 +1,5 @@
 import type {
+  SchemaDateRange,
   SchemaScheduleConfig,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
@@ -121,17 +122,22 @@ export function weeklyPickerSlots(
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[],
   resource: "room" | "instructor",
+  active?: SchemaDateRange | null,
 ): MeetingPickerSlot[] {
-  return activeWeeklySlotDates(config, slot, audienceTokens).flatMap((date) => {
-    const edit = findEditForMeetingDate(
-      date,
-      slot.edits,
-      config.term.starting_day ?? Weekday.MONDAY,
-    );
-    // An explicit resource override survives changes to the base slot.
-    if (edit?.[resource] != null) return [];
-    const resolved = resolveWeeklyMeetingFields(slot, date, config);
-    if (resolved.cancelled) return [];
-    return [{ date: resolved.date, start: resolved.start, end: resolved.end }];
-  });
+  return activeWeeklySlotDates(config, slot, audienceTokens, active).flatMap(
+    (date) => {
+      const edit = findEditForMeetingDate(
+        date,
+        slot.edits,
+        config.term.starting_day ?? Weekday.MONDAY,
+      );
+      // An explicit resource override survives changes to the base slot.
+      if (edit?.[resource] != null) return [];
+      const resolved = resolveWeeklyMeetingFields(slot, date, config);
+      if (resolved.cancelled) return [];
+      return [
+        { date: resolved.date, start: resolved.start, end: resolved.end },
+      ];
+    },
+  );
 }

@@ -92,6 +92,50 @@ describe("notes controls", () => {
   });
 });
 
+describe("window-aware new occurrences", () => {
+  it("seeds the first explicit date from the effective selected window", async () => {
+    const active = { start_date: "2026-09-16", end_date: "2026-09-30" };
+    const onEventsChange = vi.fn();
+    const container = document.createElement("div");
+    const root = createRoot(container);
+    Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+    try {
+      await act(async () =>
+        root.render(
+          createElement(EditableSessionEventsEditor, {
+            config: {
+              term: {
+                semester: { start_date: "2026-09-01", end_date: "2026-09-30" },
+                sections: [],
+              },
+              students_groups: [],
+            } as unknown as SchemaScheduleConfig,
+            meetings: [],
+            meetingIndex: null,
+            events: [],
+            originalEvents: [],
+            audienceTokens: [],
+            onEventsChange,
+            meetingRef: null,
+            focusKey: null,
+            allowAddOccurrence: true,
+            active,
+          }),
+        ),
+      );
+      await act(async () =>
+        [...container.querySelectorAll("button")]
+          .find((button) => button.textContent?.includes("Добавить дату"))!
+          .click(),
+      );
+      expect(onEventsChange.mock.lastCall![0][0].date).toBe(active.start_date);
+    } finally {
+      await act(async () => root.unmount());
+      Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: false });
+    }
+  });
+});
+
 describe("bulk resource picker selection", () => {
   it("updates both selected row pickers and leaves unselected rows independent", async () => {
     const events: EditableSessionEvent[] = [

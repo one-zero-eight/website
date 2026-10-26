@@ -6,6 +6,7 @@ import {
 } from "@/api/schedule-assistant/types.ts";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import Tooltip from "@/components/common/Tooltip.tsx";
+import innohassleLogo from "@/components/icons/logo-invert.svg";
 import { DetailFullscreenModal } from "@/components/schedule-assistant/DetailFullscreenModal.tsx";
 import { ReturnToChecksLink } from "@/components/schedule-assistant/checks/ReturnToChecksLink.tsx";
 import {
@@ -35,6 +36,12 @@ import { useMediaQuery } from "usehooks-ts";
 import { CalendarCourseLegendPanel } from "./CalendarCourseLegendPanel.tsx";
 import { buildCalendarCourseLegend } from "./calendarCourseLegend.ts";
 import { CreateClassModal } from "./CreateClassModal.tsx";
+import { TimetableBlockNavigation } from "./TimetableBlockNavigation.tsx";
+import {
+  MeetingBlockBadge,
+  TeachingBlocksContext,
+} from "./MeetingBlockBadge.tsx";
+import { buildTeachingWeeks, courseMatchesBlock } from "./timetableBlocks.ts";
 import {
   createSelectionStore,
   SelectionStoreContext,
@@ -144,7 +151,6 @@ import {
   buildInstructorLabelById,
   buildMeetings,
   buildRoomCapacityMap,
-  buildWeeks,
   cellSignature,
   colorBySubject,
   columnsForTab,
@@ -353,6 +359,24 @@ export function TimetableViewer(props: TimetableViewerProps) {
   const [msg, setMsg] = useState("");
   const [weeks, setWeeks] = useState<WeekRange[]>([]);
   const [weekIndex, setWeekIndex] = useState(0);
+  const [selectedBlockId, setSelectedBlockId] = useState("all");
+  const teachingBlocks = config?.term.blocks ?? [];
+  const selectedBlock =
+    teachingBlocks.find((block) => block.id === selectedBlockId) ?? null;
+  const defaultActive = useMemo(
+    () =>
+      selectedBlock
+        ? {
+            start_date: selectedBlock.start_date,
+            end_date: selectedBlock.end_date,
+          }
+        : null,
+    [selectedBlock],
+  );
+
+  useEffect(() => {
+    if (selectedBlockId !== "all" && !selectedBlock) setSelectedBlockId("all");
+  }, [selectedBlock, selectedBlockId]);
   const [columns, setColumns] = useState<Column[]>([]);
   const [allMeetings, setAllMeetings] = useState<Meeting[]>([]);
   const deferredMeetings = useDeferredValue(allMeetings);
@@ -363,6 +387,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
   const coursesSnapshotRef = useRef<SchemaScheduleConfig["courses"] | null>(
     null,
   );
+  const termSnapshotRef = useRef<SchemaScheduleConfig["term"] | null>(null);
   const meetingsSnapshotRef = useRef<Meeting[]>([]);
   meetingsSnapshotRef.current = allMeetings;
   const meetingsRebuildIdRef = useRef(0);
@@ -547,6 +572,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
       try {
         const nextCourses = config.courses ?? [];
         const prevCourses = coursesSnapshotRef.current;
+        const termUnchanged = termSnapshotRef.current === config.term;
         const previousMeetings = meetingsSnapshotRef.current;
 
         const changedIndexes: number[] = [];
@@ -561,12 +587,14 @@ export function TimetableViewer(props: TimetableViewerProps) {
         }
 
         const coursesUnchanged =
+          termUnchanged &&
           !!prevCourses &&
           previousMeetings.length > 0 &&
           prevCourses.length === nextCourses.length &&
           changedIndexes.length === 0;
 
         const useIncremental =
+          termUnchanged &&
           changedIndexes.length > 0 &&
           changedIndexes.length <= 3 &&
           changedIndexes.length < nextCourses.length;
@@ -582,7 +610,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
             : buildMeetings(config);
         }
 
-        if (!meetings.length) {
+        if (!meetings.length && !config.term.blocks?.length) {
           setAllMeetings([]);
           setWeeks([]);
           setColumns([]);
@@ -602,7 +630,9 @@ export function TimetableViewer(props: TimetableViewerProps) {
         if (!cols.length)
           throw new Error("Не удалось построить колонки групп из config.");
 
-        const nextWeeks = coursesUnchanged ? null : buildWeeks(meetings);
+        const nextWeeks = coursesUnchanged
+          ? null
+          : buildTeachingWeeks(config, meetings);
         const nextColors = coursesUnchanged
           ? null
           : buildCourseColors(meetings, nextCourses);
@@ -617,6 +647,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
         // config change the table stayed stale until reload.
         if (!coursesUnchanged) {
           coursesSnapshotRef.current = nextCourses;
+          termSnapshotRef.current = config.term;
           setAllMeetings(meetings);
           if (nextColors) {
             setCourseColors((prev) =>
@@ -810,7 +841,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
 
   const calendarGrid = useMemo(() => {
     if (layoutMode !== "calendar" || isUtilizationTab) return null;
-    if (!config || !deferredMeetings.length || !weeks.length) return null;
+    if (!config || !weeks.length) return null;
     return buildCalendarGrid(
       config,
       deferredMeetings,
@@ -911,6 +942,26 @@ export function TimetableViewer(props: TimetableViewerProps) {
     weekIndex,
     isUtilizationTab,
   ]);
+
+  const handleTeachingWeekChange = useCallback(
+    (index: number) => {
+      setWeekIndex(index);
+      if (layoutMode !== "calendar") return;
+      gridWrapRef.current
+        ?.querySelector(`[data-calendar-week-index="${index}"]`)
+        ?.scrollIntoView({ block: "start" });
+    },
+    [layoutMode],
+  );
+
+  function handleBlockChange(blockId: string) {
+    setSelectedBlockId(blockId);
+    setPlaceTargetKey(null);
+    setHoverPlaceCell(null);
+    const block = teachingBlocks.find((item) => item.id === blockId);
+    if (block)
+      handleTeachingWeekChange(weekIndexForDate(weeks, block.start_date));
+  }
 
   const prevLayoutModeRef = useRef(layoutMode);
   useEffect(() => {
@@ -1243,11 +1294,15 @@ export function TimetableViewer(props: TimetableViewerProps) {
   const deferredCourses = useDeferredValue(config?.courses);
   const unarrangedGroups = useMemo(() => {
     if (!editConfig || isUtilizationTab || !deferredCourses) return [];
+    const courses = editConfig.courses ?? [];
     return buildUnarrangedComponentGroups(
-      editConfig.courses ?? [],
+      courses,
       editConfig,
       unarrangedViewContext,
       instructorLabelById,
+      defaultActive,
+    ).filter((group) =>
+      courseMatchesBlock(courses[group.courseIdx]!, selectedBlockId),
     );
   }, [
     editConfig,
@@ -1255,6 +1310,8 @@ export function TimetableViewer(props: TimetableViewerProps) {
     instructorLabelById,
     isUtilizationTab,
     unarrangedViewContext,
+    selectedBlockId,
+    defaultActive,
   ]);
 
   const placePending = createModalOpen && Boolean(createPresetSnapshot);
@@ -1524,354 +1581,341 @@ export function TimetableViewer(props: TimetableViewerProps) {
     : null;
   return (
     <TimetableEditConfigContext.Provider value={editConfig}>
-      <SelectionStoreContext.Provider value={selectionStore}>
-        <div
-          className="font-rubik text-base-content flex min-h-0 flex-1 flex-col leading-[1.45] antialiased"
-          onPointerDownCapture={handleUserNavigation}
-          onKeyDownCapture={handleUserNavigation}
-          onWheelCapture={handleUserNavigation}
-          onTouchMoveCapture={handleUserNavigation}
-        >
-          <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-3 px-4 pt-4 pb-0">
-            <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[minmax(0,1fr)]">
-              <div className="-ml-4 flex min-h-0 min-w-0 flex-col overflow-hidden">
-                {msg ? (
-                  <div
-                    className={cn(
-                      "alert alert-soft mx-2 mt-2 shrink-0 py-2 text-sm",
-                      msg === "В расписании пока нет занятий."
-                        ? "alert-info"
-                        : "alert-error",
-                    )}
-                  >
-                    {msg}
-                  </div>
-                ) : null}
-
-                <div
-                  id="tableStage"
-                  data-theme="light"
-                  className="rounded-tr-box relative flex min-h-0 flex-1 flex-col overflow-hidden border border-[#d8dfeb] bg-white"
-                >
-                  {!personalLessons && ownGroups.length ? (
-                    <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[#d8dfeb] px-2 py-1 text-xs">
-                      <span className="font-semibold text-emerald-700">
-                        Мои группы
-                      </span>
-                      {ownGroups.map((group) => (
-                        <button
-                          type="button"
-                          key={group.groupId}
-                          className="btn btn-xs btn-ghost text-emerald-700"
-                          onClick={() => navigateToPersonalGroup(group)}
-                        >
-                          {group.label}
-                        </button>
-                      ))}
+      <TeachingBlocksContext.Provider value={config}>
+        <SelectionStoreContext.Provider value={selectionStore}>
+          <div
+            className="font-rubik text-base-content flex min-h-0 flex-1 flex-col leading-[1.45] antialiased"
+            onPointerDownCapture={handleUserNavigation}
+            onKeyDownCapture={handleUserNavigation}
+            onWheelCapture={handleUserNavigation}
+            onTouchMoveCapture={handleUserNavigation}
+          >
+            <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-3 px-4 pt-4 pb-0">
+              <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[minmax(0,1fr)]">
+                <div className="-ml-4 flex min-h-0 min-w-0 flex-col overflow-hidden">
+                  {msg ? (
+                    <div
+                      className={cn(
+                        "alert alert-soft mx-2 mt-2 shrink-0 py-2 text-sm",
+                        msg === "В расписании пока нет занятий."
+                          ? "alert-info"
+                          : "alert-error",
+                      )}
+                    >
+                      {msg}
                     </div>
                   ) : null}
-                  <div className="schedule-assistant-toolbar flex shrink-0 flex-wrap items-center gap-2 border-b border-[#d8dfeb] px-2 py-1 text-sm">
-                    {showDashboardBack ? (
-                      <Link
-                        to="/dashboard"
-                        className="btn btn-xs btn-ghost btn-circle"
-                        title="InNoHassle"
-                      >
-                        <span className="icon-[material-symbols--arrow-back-rounded] text-lg" />
-                      </Link>
-                    ) : null}
-                    {returnFromChecks ? <ReturnToChecksLink /> : null}
-                    {layoutMode === "calendar" &&
-                    activeSectionPrograms.length > 1 ? (
-                      <TimetableProgramTabs
-                        programs={activeSectionPrograms}
-                        activeProgramCode={activeProgramCode}
-                        onProgramChange={(programCode) => {
-                          setActiveProgramCode(programCode);
-                          selectionStore.setSelection(null);
-                          setPlaceTargetKey(null);
-                          setHoverPlaceCell(null);
-                        }}
-                      />
-                    ) : null}
-                    {layoutMode !== "calendar" ? (
-                      <div className="flex shrink-0 items-center gap-1.5">
-                        <div className="join">
-                          <button
-                            type="button"
-                            className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                            title="Предыдущая неделя"
-                            disabled={weekIndex <= 0 || !weeks.length}
-                            onClick={() => {
-                              if (weekIndex > 0) setWeekIndex((i) => i - 1);
-                            }}
-                          >
-                            ‹
-                          </button>
-                          <span
-                            className="join-item btn btn-xs btn-ghost no-animation text-base-content inline-flex h-auto min-h-8 max-w-[min(100vw-8rem,28rem)] min-w-[10.5rem] cursor-default items-center justify-center px-2 py-1 text-center text-sm leading-tight font-normal whitespace-nowrap normal-case"
-                            role="status"
-                          >
-                            {weekLabel}
-                          </span>
-                          <button
-                            type="button"
-                            className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                            title="Следующая неделя"
-                            disabled={
-                              weekIndex >= weeks.length - 1 || !weeks.length
-                            }
-                            onClick={() => {
-                              if (weekIndex < weeks.length - 1)
-                                setWeekIndex((i) => i + 1);
-                            }}
-                          >
-                            ›
-                          </button>
-                        </div>
-                        {weekRelative ? (
-                          <Tooltip
-                            content={`${WEEK_RELATIVE_LABELS[weekRelative]} неделя`}
-                          >
-                            <span className="inline-flex size-5 shrink-0 items-center justify-center">
-                              <span
-                                className={clsx(
-                                  "inline-block size-2.5 rounded-full",
-                                  WEEK_RELATIVE_DOT_CLASS[weekRelative],
-                                )}
-                              />
-                            </span>
-                          </Tooltip>
-                        ) : null}
-                      </div>
-                    ) : null}
-                    <div className="ml-auto flex shrink-0 items-center gap-2">
-                      {editConfig && !isUtilizationTab ? (
-                        <button
-                          type="button"
-                          className="btn btn-primary btn-xs gap-1"
-                          onClick={handleToolbarCreateClick}
-                        >
-                          <span className="icon-[material-symbols--add-rounded] text-base" />
-                          Добавить занятие
-                        </button>
-                      ) : null}
-                      {!isLgUp ? (
-                        <button
-                          type="button"
-                          className="btn btn-xs btn-ghost gap-1"
-                          onClick={() => setMobileMenuOpen(true)}
-                        >
-                          <span className="icon-[material-symbols--playlist-add-check-rounded] text-base" />
-                          Меню
-                        </button>
-                      ) : null}
-                      {editConfig ? (
-                        <button
-                          type="button"
-                          className="btn btn-xs btn-ghost gap-1"
-                          title={
-                            isUtilizationTab
-                              ? "Экспорт недоступен на вкладках преподавателей и локаций"
-                              : "Экспорт всех разделов в XLSX"
-                          }
-                          disabled={
-                            isUtilizationTab || exportPending || !config
-                          }
-                          onClick={() => {
-                            void handleExportXlsx();
-                          }}
-                        >
-                          {exportPending ? (
-                            <span className="loading loading-spinner loading-xs" />
-                          ) : (
-                            <span className="icon-[material-symbols--download-rounded] text-base" />
-                          )}
-                          Экспорт XLSX
-                        </button>
-                      ) : null}
-                      <TimetableLayoutSelector
-                        layoutMode={layoutMode}
-                        onLayoutModeChange={setLayoutMode}
-                        calendarDisabled={isUtilizationTab}
-                      />
-                      <TimetableTabSelector
-                        config={config}
-                        activeTab={activeTab}
-                        onTabChange={applyTabChange}
-                      />
-                    </div>
-                  </div>
 
                   <div
-                    id="gridWrap"
-                    ref={gridWrapRef}
-                    className={clsx(
-                      "min-h-0 flex-1 [scrollbar-width:thin] overflow-auto overscroll-x-contain bg-white pb-4 [overflow-anchor:none]",
-                      isMiddleDragScrolling ? "cursor-grabbing" : "cursor-auto",
-                    )}
-                    style={
-                      {
-                        "--sa-time-col-width": `${GROUPS_TIME_COL_PX}px`,
-                        "--sa-grid-header-height":
-                          GROUPS_GRID_HEADER_HEIGHT_DEFAULT,
-                      } as React.CSSProperties
-                    }
+                    id="tableStage"
+                    data-theme="light"
+                    className="rounded-tr-box relative flex min-h-0 flex-1 flex-col overflow-hidden border border-[#d8dfeb] bg-white"
                   >
-                    {!grid && !msg ? (
-                      <div className="text-base-content/60 flex h-full min-h-48 items-center justify-center gap-2 text-sm">
-                        <span className="skeleton h-24 w-3/4" />
+                    {!personalLessons && ownGroups.length ? (
+                      <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[#d8dfeb] px-2 py-1 text-xs">
+                        <span className="font-semibold text-emerald-700">
+                          Мои группы
+                        </span>
+                        {ownGroups.map((group) => (
+                          <button
+                            type="button"
+                            key={group.groupId}
+                            className="btn btn-xs btn-ghost text-emerald-700"
+                            onClick={() => navigateToPersonalGroup(group)}
+                          >
+                            {group.label}
+                          </button>
+                        ))}
                       </div>
-                    ) : (
-                      <div
-                        className={cn(
-                          showCalendarCourseLegend &&
-                            "flex min-h-full min-w-max items-start",
-                        )}
-                      >
+                    ) : null}
+                    <div className="schedule-assistant-toolbar flex shrink-0 flex-wrap items-center gap-2 border-b border-[#d8dfeb] px-2 py-1 text-sm">
+                      {showDashboardBack ? (
+                        <Link
+                          to="/"
+                          className="btn btn-sm btn-ghost btn-circle p-0"
+                          title="InNoHassle"
+                        >
+                          <img
+                            src={innohassleLogo}
+                            alt="InNoHassle"
+                            className="size-8"
+                          />
+                        </Link>
+                      ) : null}
+                      {returnFromChecks ? <ReturnToChecksLink /> : null}
+                      {layoutMode === "calendar" &&
+                      activeSectionPrograms.length > 1 ? (
+                        <TimetableProgramTabs
+                          programs={activeSectionPrograms}
+                          activeProgramCode={activeProgramCode}
+                          onProgramChange={(programCode) => {
+                            setActiveProgramCode(programCode);
+                            selectionStore.setSelection(null);
+                            setPlaceTargetKey(null);
+                            setHoverPlaceCell(null);
+                          }}
+                        />
+                      ) : null}
+                      {layoutMode !== "calendar" ? (
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          <div className="join">
+                            <button
+                              type="button"
+                              className="btn btn-xs join-item min-h-8 min-w-8 px-0"
+                              title="Предыдущая неделя"
+                              disabled={weekIndex <= 0 || !weeks.length}
+                              onClick={() => {
+                                if (weekIndex > 0) setWeekIndex((i) => i - 1);
+                              }}
+                            >
+                              ‹
+                            </button>
+                            <span
+                              className="join-item btn btn-xs btn-ghost no-animation text-base-content inline-flex h-auto min-h-8 max-w-[min(100vw-8rem,28rem)] min-w-[10.5rem] cursor-default items-center justify-center px-2 py-1 text-center text-sm leading-tight font-normal whitespace-nowrap normal-case"
+                              role="status"
+                            >
+                              {weekLabel}
+                            </span>
+                            <button
+                              type="button"
+                              className="btn btn-xs join-item min-h-8 min-w-8 px-0"
+                              title="Следующая неделя"
+                              disabled={
+                                weekIndex >= weeks.length - 1 || !weeks.length
+                              }
+                              onClick={() => {
+                                if (weekIndex < weeks.length - 1)
+                                  setWeekIndex((i) => i + 1);
+                              }}
+                            >
+                              ›
+                            </button>
+                          </div>
+                          {weekRelative ? (
+                            <Tooltip
+                              content={`${WEEK_RELATIVE_LABELS[weekRelative]} неделя`}
+                            >
+                              <span className="inline-flex size-5 shrink-0 items-center justify-center">
+                                <span
+                                  className={clsx(
+                                    "inline-block size-2.5 rounded-full",
+                                    WEEK_RELATIVE_DOT_CLASS[weekRelative],
+                                  )}
+                                />
+                              </span>
+                            </Tooltip>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      {editConfig && teachingBlocks.length > 0 ? (
+                        <TimetableBlockNavigation
+                          blocks={teachingBlocks}
+                          selectedBlockId={selectedBlockId}
+                          onBlockChange={handleBlockChange}
+                          weeks={weeks}
+                          weekIndex={weekIndex}
+                          onWeekChange={handleTeachingWeekChange}
+                        />
+                      ) : null}
+                      <div className="ml-auto flex shrink-0 items-center gap-2">
+                        {editConfig && !isUtilizationTab ? (
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-xs gap-1"
+                            onClick={handleToolbarCreateClick}
+                          >
+                            <span className="icon-[material-symbols--add-rounded] text-base" />
+                            Добавить занятие
+                          </button>
+                        ) : null}
+                        {!isLgUp ? (
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-ghost gap-1"
+                            onClick={() => setMobileMenuOpen(true)}
+                          >
+                            <span className="icon-[material-symbols--playlist-add-check-rounded] text-base" />
+                            Меню
+                          </button>
+                        ) : null}
+                        {editConfig ? (
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-ghost gap-1"
+                            title={
+                              isUtilizationTab
+                                ? "Экспорт недоступен на вкладках преподавателей и локаций"
+                                : "Экспорт всех разделов в XLSX"
+                            }
+                            disabled={
+                              isUtilizationTab || exportPending || !config
+                            }
+                            onClick={() => {
+                              void handleExportXlsx();
+                            }}
+                          >
+                            {exportPending ? (
+                              <span className="loading loading-spinner loading-xs" />
+                            ) : (
+                              <span className="icon-[material-symbols--download-rounded] text-base" />
+                            )}
+                            Экспорт XLSX
+                          </button>
+                        ) : null}
+                        <TimetableLayoutSelector
+                          layoutMode={layoutMode}
+                          onLayoutModeChange={setLayoutMode}
+                          calendarDisabled={isUtilizationTab}
+                        />
+                        <TimetableTabSelector
+                          config={config}
+                          activeTab={activeTab}
+                          onTabChange={applyTabChange}
+                        />
+                      </div>
+                    </div>
+
+                    <div
+                      id="gridWrap"
+                      ref={gridWrapRef}
+                      className={clsx(
+                        "min-h-0 flex-1 [scrollbar-width:thin] overflow-auto overscroll-x-contain bg-white pb-4 [overflow-anchor:none]",
+                        isMiddleDragScrolling
+                          ? "cursor-grabbing"
+                          : "cursor-auto",
+                      )}
+                      style={
+                        {
+                          "--sa-time-col-width": `${GROUPS_TIME_COL_PX}px`,
+                          "--sa-grid-header-height":
+                            GROUPS_GRID_HEADER_HEIGHT_DEFAULT,
+                        } as React.CSSProperties
+                      }
+                    >
+                      {!grid && !msg ? (
+                        <div className="text-base-content/60 flex h-full min-h-48 items-center justify-center gap-2 text-sm">
+                          <span className="skeleton h-24 w-3/4" />
+                        </div>
+                      ) : (
                         <div
                           className={cn(
                             showCalendarCourseLegend &&
-                              "min-w-[min(72rem,calc(100vw-2rem))] shrink-0",
+                              "flex min-h-full min-w-max items-start",
                           )}
                         >
-                          <TimetableMainGrid
-                            layoutMode={layoutMode}
-                            isUtilizationTab={isUtilizationTab}
-                            calendarGrid={calendarGrid}
-                            grid={grid}
-                            compactRows={compactRows}
-                            activeWeek={weeks[weekIndex] ?? null}
-                            columns={columns}
-                            activeTab={activeTab}
-                            allMeetings={allMeetings}
-                            config={config}
-                            courseColors={courseColors}
-                            roomCapacityById={roomCapacityById}
-                            groupSizeById={groupSizeById}
-                            instructorLabelById={instructorLabelById}
-                            selectMeeting={selectMeeting}
-                            openMeetingEdit={
-                              editConfig ? openMeetingEdit : undefined
-                            }
-                            selectInstructorCell={selectInstructorCell}
-                            selectRoomCell={selectRoomCell}
-                            selectInstructorHeader={selectInstructorHeader}
-                            selectRoomHeader={selectRoomHeader}
-                            selectProgram={selectProgram}
-                            selectGroup={selectGroup}
-                            clearSelection={clearSelection}
-                            onEmptyCellClick={
-                              !editConfig || isUtilizationTab
-                                ? undefined
-                                : handleEmptyCellClick
-                            }
-                            placeTarget={
-                              layoutMode === "compact_groups"
-                                ? null
-                                : placeTarget
-                            }
-                            placeGhostRoom={placeGhostRoom}
-                            placeGhostInstructor={placeGhostInstructor}
-                            hoverPlaceCell={hoverPlaceCell}
-                            onHoverPlaceCell={
-                              placeTarget ? setHoverPlaceCell : undefined
-                            }
-                          />
+                          <div
+                            className={cn(
+                              showCalendarCourseLegend &&
+                                "min-w-[min(72rem,calc(100vw-2rem))] shrink-0",
+                            )}
+                          >
+                            <TimetableMainGrid
+                              layoutMode={layoutMode}
+                              isUtilizationTab={isUtilizationTab}
+                              calendarGrid={calendarGrid}
+                              grid={grid}
+                              compactRows={compactRows}
+                              activeWeek={weeks[weekIndex] ?? null}
+                              columns={columns}
+                              activeTab={activeTab}
+                              allMeetings={allMeetings}
+                              config={config}
+                              courseColors={courseColors}
+                              roomCapacityById={roomCapacityById}
+                              groupSizeById={groupSizeById}
+                              instructorLabelById={instructorLabelById}
+                              selectMeeting={selectMeeting}
+                              openMeetingEdit={
+                                editConfig ? openMeetingEdit : undefined
+                              }
+                              selectInstructorCell={selectInstructorCell}
+                              selectRoomCell={selectRoomCell}
+                              selectInstructorHeader={selectInstructorHeader}
+                              selectRoomHeader={selectRoomHeader}
+                              selectProgram={selectProgram}
+                              selectGroup={selectGroup}
+                              clearSelection={clearSelection}
+                              onEmptyCellClick={
+                                !editConfig || isUtilizationTab
+                                  ? undefined
+                                  : handleEmptyCellClick
+                              }
+                              placeTarget={
+                                layoutMode === "compact_groups"
+                                  ? null
+                                  : placeTarget
+                              }
+                              placeGhostRoom={placeGhostRoom}
+                              placeGhostInstructor={placeGhostInstructor}
+                              hoverPlaceCell={hoverPlaceCell}
+                              onHoverPlaceCell={
+                                placeTarget ? setHoverPlaceCell : undefined
+                              }
+                            />
+                          </div>
+                          {showCalendarCourseLegend ? (
+                            <CalendarCourseLegendPanel
+                              rows={calendarCourseLegend}
+                              className="sticky top-0 w-lg shrink-0 self-start border-l border-[#d8dfeb] p-3"
+                            />
+                          ) : null}
                         </div>
-                        {showCalendarCourseLegend ? (
-                          <CalendarCourseLegendPanel
-                            rows={calendarCourseLegend}
-                            className="sticky top-0 w-lg shrink-0 self-start border-l border-[#d8dfeb] p-3"
-                          />
-                        ) : null}
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <aside
-                className="detail border-base-300 bg-base-100 rounded-box hidden min-h-0 w-full flex-col overflow-hidden border lg:col-start-2 lg:mb-4 lg:flex lg:h-[calc(100%-1rem)]"
-                id="detail"
-              >
-                {isLgUp ? (
-                  <div className="flex min-h-0 min-w-0 flex-1 [scrollbar-width:thin] flex-col gap-3 overflow-y-auto p-3">
-                    <TimetableDetailPanel
-                      allMeetings={allMeetings}
-                      meetingPickerIndex={meetingPickerIndex}
-                      config={config}
-                      clearSelection={clearSelection}
-                      onNavigateToMeeting={navigateToMeeting}
-                      chrome="aside"
-                      activeDate={weeks[weekIndex]?.start ?? todayIsoDate()}
-                      editModalOpen={editModalOpen}
-                      onEditModalOpenChange={setEditModalOpen}
-                      unarrangedGroups={panelUnarrangedGroups}
-                      placeTargetKey={placeTargetKey}
-                      onSelectUnarranged={handleSelectUnarranged}
-                      onCancelPlace={clearPlaceMode}
-                      placePending={placePending}
-                      showUnarranged={
-                        !!editConfig &&
-                        !isUtilizationTab &&
-                        layoutMode !== "compact_groups"
-                      }
-                      personalLessons={personalLessons}
-                      ownGroups={ownGroups}
-                      courseColors={courseColors}
-                      sidebarAction={sidebarAction}
-                    />
-                  </div>
-                ) : null}
-              </aside>
+                <aside
+                  className="detail border-base-300 bg-base-100 rounded-box hidden min-h-0 w-full flex-col overflow-hidden border lg:col-start-2 lg:mb-4 lg:flex lg:h-[calc(100%-1rem)]"
+                  id="detail"
+                >
+                  {isLgUp ? (
+                    <div className="flex min-h-0 min-w-0 flex-1 [scrollbar-width:thin] flex-col gap-3 overflow-y-auto p-3">
+                      <TimetableDetailPanel
+                        allMeetings={allMeetings}
+                        meetingPickerIndex={meetingPickerIndex}
+                        config={config}
+                        clearSelection={clearSelection}
+                        onNavigateToMeeting={navigateToMeeting}
+                        chrome="aside"
+                        activeDate={weeks[weekIndex]?.start ?? todayIsoDate()}
+                        editModalOpen={editModalOpen}
+                        onEditModalOpenChange={setEditModalOpen}
+                        unarrangedGroups={panelUnarrangedGroups}
+                        placeTargetKey={placeTargetKey}
+                        onSelectUnarranged={handleSelectUnarranged}
+                        onCancelPlace={clearPlaceMode}
+                        placePending={placePending}
+                        showUnarranged={
+                          !!editConfig &&
+                          !isUtilizationTab &&
+                          layoutMode !== "compact_groups"
+                        }
+                        personalLessons={personalLessons}
+                        ownGroups={ownGroups}
+                        courseColors={courseColors}
+                        sidebarAction={sidebarAction}
+                      />
+                    </div>
+                  ) : null}
+                </aside>
+              </div>
             </div>
           </div>
-        </div>
-        {!isLgUp ? (
-          <TimetableMobileDetailModal
-            allMeetings={allMeetings}
-            meetingPickerIndex={meetingPickerIndex}
-            config={config}
-            clearSelection={clearSelection}
-            onNavigateToMeeting={navigateToMeeting}
-            editModalOpen={editModalOpen}
-            onEditModalOpenChange={setEditModalOpen}
-            unarrangedGroups={panelUnarrangedGroups}
-            placeTargetKey={placeTargetKey}
-            onSelectUnarranged={handleSelectUnarranged}
-            onCancelPlace={clearPlaceMode}
-            placePending={placePending}
-            showUnarranged={
-              !!editConfig &&
-              !isUtilizationTab &&
-              layoutMode !== "compact_groups"
-            }
-            personalLessons={personalLessons}
-            ownGroups={ownGroups}
-            courseColors={courseColors}
-            sidebarAction={sidebarAction}
-          />
-        ) : null}
-        {!isLgUp ? (
-          <DetailFullscreenModal
-            open={mobileMenuOpen}
-            onOpenChange={setMobileMenuOpen}
-            title="Меню"
-          >
-            <TimetableSidebarMenu
-              activeDate={weeks[weekIndex]?.start ?? todayIsoDate()}
-              meetings={allMeetings}
+          {!isLgUp ? (
+            <TimetableMobileDetailModal
+              allMeetings={allMeetings}
+              meetingPickerIndex={meetingPickerIndex}
               config={config}
-              onNavigateToMeeting={(meeting) => {
-                setMobileMenuOpen(false);
-                navigateToMeeting(meeting);
-              }}
-              groups={panelUnarrangedGroups}
-              selectedKey={placeTargetKey}
+              clearSelection={clearSelection}
+              onNavigateToMeeting={navigateToMeeting}
+              editModalOpen={editModalOpen}
+              onEditModalOpenChange={setEditModalOpen}
+              unarrangedGroups={panelUnarrangedGroups}
+              placeTargetKey={placeTargetKey}
               onSelectUnarranged={handleSelectUnarranged}
               onCancelPlace={clearPlaceMode}
-              placing={placePending}
+              placePending={placePending}
               showUnarranged={
                 !!editConfig &&
                 !isUtilizationTab &&
@@ -1882,35 +1926,67 @@ export function TimetableViewer(props: TimetableViewerProps) {
               courseColors={courseColors}
               sidebarAction={sidebarAction}
             />
-          </DetailFullscreenModal>
-        ) : null}
-        {editConfig ? (
-          <CreateClassModal
-            key={
-              createModalOpen
-                ? [
-                    createPresetSnapshot
-                      ? `${createPresetSnapshot.courseIdx}:${createPresetSnapshot.componentIdx}:${createPresetSnapshot.audience.join("|")}`
-                      : "free",
-                    createCellContext?.date ?? "",
-                    createCellContext?.time ?? "",
-                    createCellContext?.groupId ?? "",
-                  ].join("::")
-                : "closed"
-            }
-            open={createModalOpen}
-            onOpenChange={handleCreateModalOpenChange}
-            cellContext={createCellContext}
-            config={editConfig}
-            meetings={allMeetings}
-            meetingPickerIndex={meetingPickerIndex}
-            layoutMode={layoutMode}
-            viewContext={createViewContext}
-            preset={createPresetSnapshot}
-            onCreated={clearPlaceMode}
-          />
-        ) : null}
-      </SelectionStoreContext.Provider>
+          ) : null}
+          {!isLgUp ? (
+            <DetailFullscreenModal
+              open={mobileMenuOpen}
+              onOpenChange={setMobileMenuOpen}
+              title="Меню"
+            >
+              <TimetableSidebarMenu
+                activeDate={weeks[weekIndex]?.start ?? todayIsoDate()}
+                meetings={allMeetings}
+                config={config}
+                onNavigateToMeeting={(meeting) => {
+                  setMobileMenuOpen(false);
+                  navigateToMeeting(meeting);
+                }}
+                groups={panelUnarrangedGroups}
+                selectedKey={placeTargetKey}
+                onSelectUnarranged={handleSelectUnarranged}
+                onCancelPlace={clearPlaceMode}
+                placing={placePending}
+                showUnarranged={
+                  !!editConfig &&
+                  !isUtilizationTab &&
+                  layoutMode !== "compact_groups"
+                }
+                personalLessons={personalLessons}
+                ownGroups={ownGroups}
+                courseColors={courseColors}
+                sidebarAction={sidebarAction}
+              />
+            </DetailFullscreenModal>
+          ) : null}
+          {editConfig ? (
+            <CreateClassModal
+              key={
+                createModalOpen
+                  ? [
+                      createPresetSnapshot
+                        ? `${createPresetSnapshot.courseIdx}:${createPresetSnapshot.componentIdx}:${createPresetSnapshot.audience.join("|")}`
+                        : "free",
+                      createCellContext?.date ?? "",
+                      createCellContext?.time ?? "",
+                      createCellContext?.groupId ?? "",
+                    ].join("::")
+                  : "closed"
+              }
+              open={createModalOpen}
+              onOpenChange={handleCreateModalOpenChange}
+              cellContext={createCellContext}
+              config={editConfig}
+              meetings={allMeetings}
+              meetingPickerIndex={meetingPickerIndex}
+              layoutMode={layoutMode}
+              viewContext={createViewContext}
+              defaultActive={defaultActive}
+              preset={createPresetSnapshot}
+              onCreated={clearPlaceMode}
+            />
+          ) : null}
+        </SelectionStoreContext.Provider>
+      </TeachingBlocksContext.Provider>
     </TimetableEditConfigContext.Provider>
   );
 }
@@ -3715,6 +3791,7 @@ const MeetingCard = memo(function MeetingCard({
             {courseTitle}
             {!hideClassTag || m.tag !== "class" ? ` (${m.tag})` : ""}
             {count > 1 ? ` x${count}` : ""}
+            <MeetingBlockBadge instanceId={m.instance_id} />
             {m.notes ? (
               <span className="ml-1 text-[9px] font-normal text-[#4f5c6d]">
                 · Заметка
@@ -4195,6 +4272,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
               title={`${courseTitle} (${m.tag})${row.count > 1 ? ` x${row.count}` : ""}`}
             >
               {courseTitle} ({m.tag}){row.count > 1 ? ` x${row.count}` : ""}
+              <MeetingBlockBadge instanceId={m.instance_id} />
               {m.notes ? (
                 <span className="ml-1 text-[9px] font-normal text-[#4f5c6d]">
                   · Заметка

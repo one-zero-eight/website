@@ -1,5 +1,6 @@
 import type {
   SchemaCourseConfig,
+  SchemaDateRange,
   SchemaScheduleConfig,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
@@ -156,6 +157,8 @@ export function SessionSeriesEditor({
   notes = "",
   onNotesChange,
   audienceTokens,
+  active,
+  weeklyContextForIndex,
   courseInstructors,
   instructorPool,
   originalWeeklySlots,
@@ -196,6 +199,11 @@ export function SessionSeriesEditor({
   notes?: string;
   onNotesChange?: (notes: string) => void;
   audienceTokens: string[];
+  active?: SchemaDateRange | null;
+  weeklyContextForIndex?: (index: number) => {
+    active?: SchemaDateRange | null;
+    audienceTokens: string[];
+  };
   courseInstructors?: SchemaCourseConfig["instructors"];
   instructorPool?: unknown[] | null;
   originalWeeklySlots?: SchemaWeeklyPatternSlot[];
@@ -390,6 +398,10 @@ export function SessionSeriesEditor({
             highlightFromIndex != null &&
             index >= highlightFromIndex &&
             !deleted;
+          const context = weeklyContextForIndex?.(index) ?? {
+            active,
+            audienceTokens,
+          };
           const original = originalWeeklySlots?.[index];
           const originalWeekdayLabel = original
             ? TERM_WEEKDAY_LABEL_RU[weekdayToKey(String(original.weekday))]
@@ -408,9 +420,11 @@ export function SessionSeriesEditor({
                     index,
                     deletedWeekly,
                     lockedRowCount,
+                    active,
                   )}
                   slot={slot}
-                  audienceTokens={audienceTokens}
+                  active={context.active}
+                  audienceTokens={context.audienceTokens}
                   courseInstructors={courseInstructors}
                   instructorPool={instructorPool}
                   excludeRef={excludeRefForWeekly?.(index) ?? null}

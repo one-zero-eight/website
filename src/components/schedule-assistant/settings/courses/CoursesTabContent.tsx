@@ -1,4 +1,8 @@
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
+import {
+  BlockFilter,
+  type BlockFilterValue,
+} from "@/components/schedule-assistant/BlockFilter.tsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AudienceTreeInfoIcon } from "./audienceTreeTooltip.tsx";
@@ -50,7 +54,7 @@ function CourseRowButton({
   return (
     <button
       type="button"
-      className={clsx(
+      className={cn(
         "border-base-300 flex w-full items-center justify-between gap-3 border-t py-1 text-left",
         indentClass,
         isLast ? "rounded-b-box" : "",
@@ -74,6 +78,16 @@ function CourseRowButton({
         <div className="text-base-content/60 truncate text-xs leading-tight">
           Компоненты: {course.subtitle ?? "—"}
         </div>
+        <div className="mt-1 flex flex-wrap gap-1">
+          {course.blockLabels.map((label) => (
+            <span
+              key={label}
+              className="badge badge-ghost badge-xs h-auto max-w-full whitespace-normal"
+            >
+              {label}
+            </span>
+          ))}
+        </div>
       </div>
     </button>
   );
@@ -84,7 +98,17 @@ export function CoursesTabContent() {
   const { mutate: createCourse, isPending: isCreating } =
     useCreateCourseMutation();
   const { selectedSelectionId, selectItem } = useSelection();
-  const { sections } = useMemo(() => buildCoursesTabSections(config), [config]);
+  const [blockFilter, setBlockFilter] = useState<BlockFilterValue>("all");
+  const effectiveBlockFilter =
+    blockFilter === "all" ||
+    blockFilter === "semester" ||
+    config?.term.blocks?.some((block) => block.id === blockFilter)
+      ? blockFilter
+      : "all";
+  const { sections } = useMemo(
+    () => buildCoursesTabSections(config, effectiveBlockFilter),
+    [config, effectiveBlockFilter],
+  );
   const [activeSectionKey, setActiveSectionKey] = useState(() => {
     if (typeof window === "undefined") return "";
     return window.localStorage.getItem(COURSES_SUBTAB_STORAGE_KEY) || "";
@@ -149,6 +173,7 @@ export function CoursesTabContent() {
           name_ru: newNameRu.trim() || null,
           short_name_ru: newShortNameRu.trim() || null,
           color: newColor,
+          blocks: null,
           components: [],
         },
       },
@@ -287,7 +312,14 @@ export function CoursesTabContent() {
           В конфигурации отсутствуют sections для табов курсов.
         </div>
       )}
-      {createButton}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {createButton}
+        <BlockFilter
+          blocks={config.term.blocks ?? []}
+          value={effectiveBlockFilter}
+          onChange={setBlockFilter}
+        />
+      </div>
       <div className="flex flex-col gap-6">
         {sections.length && !programs.length && !looseCourses.length ? (
           <div className="text-base-content/70 text-sm">
@@ -327,7 +359,7 @@ export function CoursesTabContent() {
               className="border-base-300 rounded-box overflow-hidden border"
             >
               <div
-                className={clsx(
+                className={cn(
                   "border-base-300 bg-base-200/70 flex items-center gap-1 px-3 py-2 text-sm font-semibold",
                   hasBody ? "border-b" : "",
                   hasBody ? "rounded-t-box" : "rounded-box",
@@ -392,7 +424,7 @@ export function CoursesTabContent() {
                     return (
                       <div key={track.key}>
                         <div
-                          className={clsx(
+                          className={cn(
                             "bg-base-200/30 flex items-center gap-1 px-3 py-1.5 text-sm font-medium",
                             isLastTrack && !trackHasContent
                               ? "rounded-b-box"
@@ -436,7 +468,7 @@ export function CoursesTabContent() {
                           return (
                             <div key={groupBucket.key}>
                               <div
-                                className={clsx(
+                                className={cn(
                                   "border-base-300 text-base-content/80 border-t px-3 py-1 pl-6 text-sm font-medium",
                                   isLastGroup &&
                                     groupBucket.courses.length === 0

@@ -1,5 +1,6 @@
 import type {
   SchemaCourseConfig,
+  SchemaDateRange,
   SchemaScheduleConfig,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
@@ -127,6 +128,16 @@ export type MeetingOriginalValues = {
   instructor: string;
   audience: string[];
 };
+
+export function sessionActiveEqual(
+  left: SchemaDateRange | null | undefined,
+  right: SchemaDateRange | null | undefined,
+) {
+  return (
+    (left?.start_date ?? null) === (right?.start_date ?? null) &&
+    (left?.end_date ?? null) === (right?.end_date ?? null)
+  );
+}
 
 export function meetingAudienceEqual(a: string[], b: string[]) {
   const normalize = (items: string[]) =>
@@ -487,8 +498,9 @@ function weeklyMeetingDatesForSlot(
   config: SchemaScheduleConfig,
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[] = [],
+  active?: SchemaDateRange | null,
 ): string[] {
-  return activeWeeklySlotDates(config, slot, audienceTokens);
+  return activeWeeklySlotDates(config, slot, audienceTokens, active);
 }
 
 function getWeeklySlotContext(
@@ -535,9 +547,15 @@ function preservePastWeeksBeforeDate(
     room: string | null;
     instructor: string | string[] | null;
   },
+  active?: SchemaDateRange | null,
 ) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
-  for (const date of activeWeeklySlotDates(config, slot, audienceTokens)) {
+  for (const date of activeWeeklySlotDates(
+    config,
+    slot,
+    audienceTokens,
+    active,
+  )) {
     if (date >= fromDate) continue;
     applyWeeklySingleEdit(slot, date, startingDay, {
       date,
@@ -556,6 +574,7 @@ function applyWeeklyFutureScope(
   meetingDate: string,
   mutator: (slot: SchemaWeeklyPatternSlot) => void,
   audienceTokens: string[],
+  active?: SchemaDateRange | null,
 ) {
   const snapshot = {
     weekday: weeklyPatternDayKey(String(slot.weekday)) || dayKey(meetingDate),
@@ -570,6 +589,7 @@ function applyWeeklyFutureScope(
     meetingDate,
     audienceTokens,
     snapshot,
+    active,
   );
   mutator(slot);
 }
@@ -674,6 +694,7 @@ export function applySeriesScheduleToCourse(
   update: {
     audience?: string[];
     notes?: string;
+    active?: SchemaDateRange | null;
     dates_pattern?: SchemaSessionOccurrence[] | null;
     weeklyPattern?: SchemaWeeklyPatternSlot[] | null;
   },
@@ -695,6 +716,8 @@ export function applySeriesScheduleToCourse(
   }
 
   if (update.notes !== undefined) series.notes = update.notes;
+  if (update.active !== undefined)
+    series.active = structuredClone(update.active);
 
   if (update.dates_pattern !== undefined) {
     series.dates_pattern = (update.dates_pattern ?? []).map((occurrence) => ({
@@ -815,6 +838,7 @@ export function applyMeetingEditsToCourse(
         config,
         slot,
         audienceTokens,
+        ctx.series.active,
       )) {
         if (date < meetingDate) continue;
         applyWeeklySingleEdit(slot, date, startingDay, { cancel: true });
@@ -853,6 +877,7 @@ export function applyMeetingEditsToCourse(
     (ctx.series.audience?.length
       ? ctx.series.audience
       : ctx.component.audience) || [],
+    ctx.series.active,
   );
   return nextCourse;
 }

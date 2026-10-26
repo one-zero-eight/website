@@ -1,6 +1,7 @@
 import type {
   SchemaComponent,
   SchemaCourseConfig,
+  SchemaDateRange,
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import {
@@ -85,6 +86,7 @@ function buildSessionItem(params: {
   groupIds: string[];
   status: ComponentScheduleStatus;
   config: SchemaScheduleConfig;
+  active?: SchemaDateRange | null;
 }): UnarrangedLessonItem | null {
   if (params.status === "covered") return null;
   if (!params.audience.length) return null;
@@ -105,6 +107,7 @@ function buildSessionItem(params: {
     params.config,
     params.course.section_code,
     focusGroupId,
+    params.active,
   );
   const key = `${params.courseIdx}:${params.componentIdx}:${params.audience.join("|")}`;
   const sessionLabel = audienceLabel ? `${label} · ${audienceLabel}` : label;
@@ -144,6 +147,7 @@ function sessionBucketsForComponent(
   componentIdx: number,
   config: SchemaScheduleConfig,
   focusGroupId?: string,
+  active?: SchemaDateRange | null,
 ): UnarrangedLessonItem[] {
   const sectionCode = course.section_code;
   const tree = buildAudienceSelectorTree(config, { sectionCode });
@@ -157,6 +161,7 @@ function sessionBucketsForComponent(
         config,
         sectionCode,
         groupId,
+        active,
       );
       const item = buildSessionItem({
         course,
@@ -167,6 +172,7 @@ function sessionBucketsForComponent(
         groupIds: [groupId],
         status,
         config,
+        active,
       });
       if (item) sessions.push(item);
     }
@@ -178,6 +184,7 @@ function sessionBucketsForComponent(
     config,
     sectionCode,
     focusGroupId,
+    active,
   );
   const item = buildSessionItem({
     course,
@@ -188,6 +195,7 @@ function sessionBucketsForComponent(
     groupIds: pool,
     status,
     config,
+    active,
   });
   if (item) sessions.push(item);
   return sessions;
@@ -198,6 +206,7 @@ export function buildUnarrangedComponentGroups(
   config: SchemaScheduleConfig,
   view?: CreateMeetingViewContext,
   instructorLabelById: Record<string, string> = {},
+  active?: SchemaDateRange | null,
 ): UnarrangedComponentGroup[] {
   const groups: UnarrangedComponentGroup[] = [];
   const focusGroupId = view?.groupId;
@@ -217,6 +226,7 @@ export function buildUnarrangedComponentGroups(
         componentIdx,
         config,
         focusGroupId,
+        active,
       ).sort((a, b) => {
         if (a.status !== b.status) {
           return STATUS_RANK[a.status] - STATUS_RANK[b.status];
@@ -228,6 +238,7 @@ export function buildUnarrangedComponentGroups(
         config,
         course.section_code,
         focusGroupId,
+        active,
       );
       if (componentStatus === "covered" && !sessions.length) continue;
 
@@ -287,9 +298,10 @@ export function buildUnarrangedLessons(
   courses: SchemaCourseConfig[],
   config: SchemaScheduleConfig,
   view?: CreateMeetingViewContext,
+  active?: SchemaDateRange | null,
 ): UnarrangedLessonItem[] {
   return flattenUnarrangedGroups(
-    buildUnarrangedComponentGroups(courses, config, view),
+    buildUnarrangedComponentGroups(courses, config, view, undefined, active),
   );
 }
 

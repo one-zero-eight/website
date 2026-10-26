@@ -1,5 +1,6 @@
 import type {
   SchemaCourseConfig,
+  SchemaDateRange,
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { InstructorPicker } from "@/components/schedule-assistant/timetable/InstructorPicker.tsx";
@@ -32,6 +33,7 @@ import {
 import { SessionEventCard } from "@/components/schedule-assistant/timetable/SessionEventCard.tsx";
 import { cn } from "@/lib/ui/cn";
 import { SessionNotesOverrideField } from "./SessionSeriesEditor.tsx";
+import { resolveSessionWindow } from "./sessionWindows.ts";
 import {
   memo,
   startTransition,
@@ -456,6 +458,7 @@ export function EditableSessionEventsEditor({
   meetingRef,
   focusKey,
   afterHeader,
+  active,
   allowAddOccurrence = false,
 }: {
   config: SchemaScheduleConfig;
@@ -471,6 +474,7 @@ export function EditableSessionEventsEditor({
   meetingRef: MeetingRef | null;
   focusKey: string | null;
   afterHeader?: ReactNode;
+  active?: SchemaDateRange | null;
   allowAddOccurrence?: boolean;
 }) {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(
@@ -674,10 +678,15 @@ export function EditableSessionEventsEditor({
           onClick={() => {
             const template =
               events.find((item) => !item.cancelled) ?? events[0];
+            const sessionWindow = resolveSessionWindow(
+              config,
+              audienceTokens,
+              active,
+            );
             onEventsChange([
               ...events,
               createOccurrenceEvent({
-                date: template?.date,
+                date: template?.date ?? sessionWindow?.start_date,
                 start_time: template?.start_time,
                 end_time: template?.end_time,
                 room: template?.room ?? null,

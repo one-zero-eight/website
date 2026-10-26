@@ -1,5 +1,6 @@
 import type {
   SchemaCourseConfig,
+  SchemaDateRange,
   SchemaScheduleConfig,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
@@ -39,7 +40,7 @@ import { instructorValue } from "@/components/schedule-assistant/timetable/sessi
 import { SessionEventCard } from "@/components/schedule-assistant/timetable/SessionEventCard.tsx";
 import { cn } from "@/lib/ui/cn";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
-import { resolveAudienceSemester } from "./programTimeSlots.ts";
+import { resolveSessionWindow } from "./sessionWindows.ts";
 import {
   formatDisplayDate,
   inactiveWeeklySlotEdits,
@@ -390,20 +391,23 @@ export function WeeklyAlternationFields({
   config,
   slot,
   audienceTokens,
+  active,
   onChange,
 }: {
   config: SchemaScheduleConfig;
   slot: SchemaWeeklyPatternSlot;
   audienceTokens: string[];
+  active?: SchemaDateRange | null;
   onChange: (slot: SchemaWeeklyPatternSlot) => void;
 }) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
-  const window = resolveAudienceSemester(config, audienceTokens);
+  const window = resolveSessionWindow(config, audienceTokens, active);
   const ignoredEdits = inactiveWeeklySlotEdits(config, slot);
   const preview = expandWeeklySlotsToEvents({
     config,
     weeklySlots: [slot],
     audienceTokens,
+    active,
   })
     .filter((event) => !event.cancelled)
     .slice(0, 6);
@@ -550,11 +554,13 @@ export function draftMeetingsFromWeeklySlots(
   skipIndex: number,
   deleted: Set<number>,
   lockedRowCount = 0,
+  active?: SchemaDateRange | null,
 ): Meeting[] {
   return expandWeeklySlotsToEvents({
     config,
     weeklySlots: slots,
     audienceTokens,
+    active,
   })
     .filter(
       (event) =>
@@ -602,6 +608,7 @@ export function RoomSelect({
   value,
   weekday,
   weeklySlot,
+  active,
   date,
   start,
   end,
@@ -618,6 +625,7 @@ export function RoomSelect({
   value: string;
   weekday: TermWeekdayKey;
   weeklySlot?: SchemaWeeklyPatternSlot;
+  active?: SchemaDateRange | null;
   date?: string;
   start: string;
   end: string;
@@ -664,7 +672,13 @@ export function RoomSelect({
       const slots = date?.trim()
         ? [{ date: date.trim(), start, end }]
         : weeklySlot
-          ? weeklyPickerSlots(config, weeklySlot, audienceTokens, "room")
+          ? weeklyPickerSlots(
+              config,
+              weeklySlot,
+              audienceTokens,
+              "room",
+              active,
+            )
           : [];
       const dates = slots.map((slot) => slot.date);
       if (!start.trim() || !meetingIndex) {
@@ -705,6 +719,7 @@ export function RoomSelect({
       ];
     },
     [
+      active,
       audienceTokens,
       config,
       date,
@@ -752,6 +767,7 @@ export function WeeklySlotRow({
   extraMeetings,
   slot,
   audienceTokens,
+  active,
   courseInstructors,
   instructorPool,
   excludeRef,
@@ -768,6 +784,7 @@ export function WeeklySlotRow({
   extraMeetings?: Meeting[];
   slot: SchemaWeeklyPatternSlot;
   audienceTokens: string[];
+  active?: SchemaDateRange | null;
   courseInstructors?: SchemaCourseConfig["instructors"];
   instructorPool?: unknown[] | null;
   excludeRef?: MeetingRef | null;
@@ -855,6 +872,7 @@ export function WeeklySlotRow({
             <WeeklyAlternationFields
               config={config}
               slot={slot}
+              active={active}
               audienceTokens={audienceTokens}
               onChange={onChange}
             />
@@ -868,6 +886,7 @@ export function WeeklySlotRow({
               value={String(slot.room || "")}
               weekday={weekdayKey}
               weeklySlot={slot}
+              active={active}
               start={start}
               end={end}
               audienceTokens={audienceTokens}
@@ -891,6 +910,7 @@ export function WeeklySlotRow({
               value={instructorValue(slot.instructor)}
               weekday={weekdayKey}
               weeklySlot={slot}
+              active={active}
               start={start}
               end={end}
               audienceTokens={audienceTokens}

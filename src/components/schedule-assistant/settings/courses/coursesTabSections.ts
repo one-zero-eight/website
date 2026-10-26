@@ -9,6 +9,9 @@ import type {
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
+import { matchesCourseBlockFilter } from "./courseBlockFilter.ts";
+import { sortSemesterBlocks } from "@/components/schedule-assistant/settings/semester/semesterBlocks.ts";
+import type { BlockFilterValue } from "@/components/schedule-assistant/BlockFilter.tsx";
 import type { SettingsListRow } from "@/components/schedule-assistant/settings/useSelection.tsx";
 
 /** Курс в сводке по секциям на вкладке «Курсы» (id = `course-${courseIndex}`). */
@@ -16,6 +19,7 @@ export type CourseUsageRow = SettingsListRow & {
   courseIndex: number;
   colorKey: string;
   color: string | null;
+  blockLabels: string[];
 };
 
 /** Курсы, привязанные к конкретной студенческой группе. */
@@ -67,6 +71,7 @@ function dedupeCourses(courses: CourseUsageRow[]): CourseUsageRow[] {
 function buildCourseUsageRows(
   config: SchemaScheduleConfig | null,
 ): CourseUsageRow[] {
+  const sortedBlocks = sortSemesterBlocks(config?.term.blocks ?? []);
   return (config?.courses || []).map(
     (course: SchemaCourseConfig, index: number) => {
       const components = (course?.components || [])
@@ -86,6 +91,17 @@ function buildCourseUsageRows(
         courseIndex: index,
         colorKey: course.name,
         color: course.color ?? null,
+        blockLabels:
+          course.blocks == null
+            ? ["Весь семестр"]
+            : (course.blocks ?? []).map((id) => {
+                const index = sortedBlocks.findIndex(
+                  (block) => block.id === id,
+                );
+                return index >= 0
+                  ? `Блок ${index + 1}: ${sortedBlocks[index].name}`
+                  : `Неизвестный блок: ${id}`;
+              }),
       };
     },
   );
@@ -98,9 +114,14 @@ export type CoursesTabSectionsResult = {
 
 export function buildCoursesTabSections(
   config: SchemaScheduleConfig | null,
+  blockFilter: BlockFilterValue = "all",
 ): CoursesTabSectionsResult {
-  const courseItems = buildCourseUsageRows(config);
-  if (!courseItems.length) return { sections: [] };
+  const courseItems = buildCourseUsageRows(config).filter((row) =>
+    matchesCourseBlockFilter(
+      config?.courses?.[row.courseIndex]?.blocks ?? null,
+      blockFilter,
+    ),
+  );
 
   const courseByIndex = new Map<number, CourseUsageRow>();
   for (const item of courseItems) {

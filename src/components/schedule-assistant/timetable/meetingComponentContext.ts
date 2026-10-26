@@ -102,7 +102,13 @@ export function countComponentPlacement(
       : (component?.audience ?? []);
     weeklyOccurrences += (series.weekly_pattern ?? []).reduce(
       (sum, slot) =>
-        sum + countWeeklyPatternSlotOccurrences(config, slot, audienceTokens),
+        sum +
+        countWeeklyPatternSlotOccurrences(
+          config,
+          slot,
+          audienceTokens,
+          series.active,
+        ),
       0,
     );
     occurrences += series.dates_pattern?.length ?? 0;

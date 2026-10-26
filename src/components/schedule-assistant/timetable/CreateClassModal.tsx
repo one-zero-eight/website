@@ -1,4 +1,5 @@
 import type {
+  SchemaDateRange,
   SchemaScheduleConfig,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
@@ -47,6 +48,8 @@ import {
   formatAudienceTokensLabel,
   occurrenceExcludeRef,
   perGroupAudienceOptions,
+  sessionActiveEqual,
+  applySeriesScheduleToCourse,
   timeOptionsForConfig,
   weeklySlotExcludeRef,
 } from "./meetingEditUtils.ts";
@@ -56,6 +59,13 @@ import { audienceSummaryHintProps } from "./audienceSummaryHints.ts";
 import { suggestBestRoomId } from "./roomPickerOptions.ts";
 import { weeklyPickerSlots } from "./meetingPickerSchedule.ts";
 import { validateSessionSeriesDraft } from "./sessionSeriesValidation.ts";
+import { SessionWindowFields } from "./SessionWindowFields.tsx";
+import { resolveSessionWindow } from "./sessionWindows.ts";
+import {
+  expandOccurrencesToEvents,
+  expandWeeklySlotsToEvents,
+  validateEditableEvents,
+} from "./editableSessionEvents.ts";
 import { SessionSeriesEditor } from "./SessionSeriesEditor.tsx";
 import { normalizeOccurrence, normalizeWeeklySlot } from "./sessionRowMarks.ts";
 import { toUiTime, weekdayToKey } from "./sessionSeriesRows.tsx";
@@ -185,6 +195,7 @@ export function CreateClassModal({
   layoutMode,
   viewContext,
   preset,
+  defaultActive = null,
   onCreated,
 }: {
   open: boolean;
@@ -196,6 +207,7 @@ export function CreateClassModal({
   layoutMode: TimetableLayoutMode;
   viewContext?: CreateMeetingViewContext;
   preset?: CreateMeetingPreset | null;
+  defaultActive?: SchemaDateRange | null;
   onCreated?: () => void;
 }) {
   const { data: courses } = useCoursesQuery();
@@ -206,6 +218,8 @@ export function CreateClassModal({
   const [courseComponentKey, setCourseComponentKey] = useState("");
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
+  const [active, setActive] = useState<SchemaDateRange | null>(defaultActive);
+  const [windowValid, setWindowValid] = useState(true);
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
   const [placement, setPlacement] = useState<CreatePlacement>(() =>
     layoutMode === "calendar" ? "dates_pattern" : "weekly",
@@ -256,11 +270,16 @@ export function CreateClassModal({
 
   const createOptions = useMemo(() => {
     if (!courses) return [];
-    return courseComponentOptions(courses, config, {
-      ...viewContext,
-      groupId: cellContext?.groupId ?? viewContext?.groupId,
-    });
-  }, [cellContext?.groupId, config, courses, viewContext]);
+    return courseComponentOptions(
+      courses,
+      config,
+      {
+        ...viewContext,
+        groupId: cellContext?.groupId ?? viewContext?.groupId,
+      },
+      active,
+    );
+  }, [active, cellContext?.groupId, config, courses, viewContext]);
 
   const courseComponentDropdownOptions = useMemo(
     () => toSelectOptions(createOptions),
@@ -293,8 +312,10 @@ export function CreateClassModal({
       audienceValue,
       config,
       selectedCourse.section_code,
+      active,
     );
   }, [
+    active,
     audienceValue,
     config,
     selectedComponent,
@@ -312,6 +333,7 @@ export function CreateClassModal({
     audience: string[],
     sectionCode: string,
     preserveNotes = false,
+    nextActive = active,
   ) {
     if (!cellContext) return;
     const seededWeekly = seedWeeklyFromCell(config, cellContext, audience);
@@ -322,7 +344,13 @@ export function CreateClassModal({
     );
     const matched =
       audience.length > 0
-        ? findMatchingSessionSeries(component, audience, config, sectionCode)
+        ? findMatchingSessionSeries(
+            component,
+            audience,
+            config,
+            sectionCode,
+            nextActive,
+          )
         : null;
     const covering =
       audience.length > 0
@@ -344,7 +372,14 @@ export function CreateClassModal({
     const addedOccurrences = preserveNotes
       ? occurrences.slice(seriesBaselineOccurrences)
       : [];
-    setWeeklySlots([...foreignWeekly, ...dedicatedWeekly, seededWeekly]);
+    const addedWeekly = preserveNotes
+      ? weeklySlots.slice(seriesBaselineWeekly)
+      : [];
+    setWeeklySlots([
+      ...foreignWeekly,
+      ...dedicatedWeekly,
+      ...(addedWeekly.length ? addedWeekly : [seededWeekly]),
+    ]);
     setOccurrences([
       ...foreignOccurrences,
       ...dedicatedOccurrences,
@@ -382,11 +417,15 @@ export function CreateClassModal({
       cellContext.time,
       cellContext.groupId ?? "",
       (preset?.audience ?? []).join("|"),
+      defaultActive?.start_date ?? "",
+      defaultActive?.end_date ?? "",
     ].join("::");
     if (seededOpenKeyRef.current === seedKey) return;
     seededOpenKeyRef.current = seedKey;
 
     setCourseComponentKey(presetKey);
+    setActive(defaultActive);
+    setWindowValid(true);
 
     // Seed the final audience immediately (preset or component default) so
     // room/instructor autofill never runs against the cell's single group.
@@ -425,6 +464,8 @@ export function CreateClassModal({
         component,
         audience,
         courses[parsed.courseIdx].section_code,
+        false,
+        defaultActive,
       );
     } else {
       setWeeklySlots([seedWeeklyFromCell(config, cellContext, audience)]);
@@ -444,7 +485,16 @@ export function CreateClassModal({
     }
     // seedSeriesDraft closes over cellContext/config; intentionally tied to open seed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cellContext, config, courses, open, preset, presetKey]);
+  }, [
+    cellContext,
+    config,
+    courses,
+    open,
+    preset,
+    presetKey,
+    defaultActive?.start_date,
+    defaultActive?.end_date,
+  ]);
 
   function handleCourseComponentChange(nextKey: string) {
     setCourseComponentKey(nextKey);
@@ -519,12 +569,14 @@ export function CreateClassModal({
         audienceValue,
         config,
         layoutMode,
+        active,
       ),
     );
     // Do not depend on config/selectedCourse identity: optimistic cache
     // updates would reset the draft while the modal is still open.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    active,
     audienceValue,
     layoutMode,
     open,
@@ -532,6 +584,12 @@ export function CreateClassModal({
     selectedCourse?.name,
     selectedCourse?.section_code,
   ]);
+
+  const seedWeeklyStartTime = weeklySlots[seriesBaselineWeekly]?.start_time;
+  const seedWeeklyWeekday = weeklySlots[seriesBaselineWeekly]?.weekday;
+  const seedOccurrenceDate = occurrences[seriesBaselineOccurrences]?.date;
+  const seedOccurrenceStartTime =
+    occurrences[seriesBaselineOccurrences]?.start_time;
 
   useEffect(() => {
     if (!open || !audienceValue.length) return;
@@ -560,12 +618,14 @@ export function CreateClassModal({
           slot,
           audienceValue,
           "room",
+          active,
         );
         const instructorSlots = weeklyPickerSlots(
           config,
           slot,
           audienceValue,
           "instructor",
+          active,
         );
         if (!start) return slots;
 
@@ -672,6 +732,7 @@ export function CreateClassModal({
       return list;
     });
   }, [
+    active,
     audienceValue,
     cellContext?.date,
     config,
@@ -683,10 +744,10 @@ export function CreateClassModal({
     selectedCourse?.instructors,
     seriesBaselineOccurrences,
     seriesBaselineWeekly,
-    weeklySlots[seriesBaselineWeekly]?.start_time,
-    weeklySlots[seriesBaselineWeekly]?.weekday,
-    occurrences[seriesBaselineOccurrences]?.date,
-    occurrences[seriesBaselineOccurrences]?.start_time,
+    seedWeeklyStartTime,
+    seedWeeklyWeekday,
+    seedOccurrenceDate,
+    seedOccurrenceStartTime,
   ]);
 
   function handleClose() {
@@ -770,8 +831,29 @@ export function CreateClassModal({
             originalOccurrences,
           )));
 
+  function handleActiveChange(nextActive: SchemaDateRange | null) {
+    if (sessionActiveEqual(active, nextActive)) return;
+    if (
+      existingScheduleChanged &&
+      !window.confirm(
+        "Изменения существующей серии будут сброшены. Новые строки и заметки сохранятся. Изменить период?",
+      )
+    )
+      return;
+    setActive(nextActive);
+    if (selectedComponent && selectedCourse) {
+      seedSeriesDraft(
+        selectedComponent,
+        audienceValue,
+        selectedCourse.section_code,
+        true,
+        nextActive,
+      );
+    }
+  }
+
   function handleSubmit() {
-    if (isPending) return;
+    if (isPending || !windowValid) return;
     if (!cellContext || !courses || !parsedComponent || !selectedCourse) {
       showError("Ошибка", "Выберите предмет и компонент.");
       return;
@@ -810,16 +892,60 @@ export function CreateClassModal({
         !deletedOccurrenceIndexes.has(index),
     );
 
-    const updatedCourse = applyCreateMeetingToCourse(selectedCourse, config, {
-      courseIdx: parsedComponent.courseIdx,
-      componentIdx: parsedComponent.componentIdx,
-      audience: audienceValue,
-      notes,
-      placement,
-      weeklySlots: placement === "weekly" ? activeWeeklySlots : undefined,
-      occurrences:
-        placement === "dates_pattern" ? activeOccurrences : undefined,
-    });
+    const sessionWindow = resolveSessionWindow(config, audienceValue, active);
+    const draftEvents =
+      placement === "weekly"
+        ? expandWeeklySlotsToEvents({
+            config,
+            weeklySlots: activeWeeklySlots,
+            audienceTokens: audienceValue,
+            active,
+          })
+        : expandOccurrencesToEvents(activeOccurrences);
+    const windowError =
+      sessionWindow &&
+      placement === "weekly" &&
+      activeWeeklySlots.length &&
+      !draftEvents.length
+        ? null
+        : validateEditableEvents(draftEvents, sessionWindow);
+    if (windowError) {
+      showError("Ошибка", windowError);
+      return;
+    }
+
+    const updatedCourse =
+      matchedSeriesIdx != null
+        ? applySeriesScheduleToCourse(
+            selectedCourse,
+            {
+              kind: "occ",
+              courseIdx: parsedComponent.courseIdx,
+              componentIdx: parsedComponent.componentIdx,
+              seriesIdx: matchedSeriesIdx,
+              occIdx: 0,
+            },
+            config,
+            {
+              notes,
+              active,
+              weeklyPattern:
+                placement === "weekly" ? activeWeeklySlots : undefined,
+              dates_pattern:
+                placement === "dates_pattern" ? activeOccurrences : undefined,
+            },
+          )
+        : applyCreateMeetingToCourse(selectedCourse, config, {
+            courseIdx: parsedComponent.courseIdx,
+            componentIdx: parsedComponent.componentIdx,
+            audience: audienceValue,
+            active,
+            notes,
+            placement,
+            weeklySlots: placement === "weekly" ? activeWeeklySlots : undefined,
+            occurrences:
+              placement === "dates_pattern" ? activeOccurrences : undefined,
+          });
 
     if (!updatedCourse) {
       showError("Ошибка", "Не удалось создать занятие.");
@@ -925,8 +1051,37 @@ export function CreateClassModal({
           />
         ) : null}
 
+        <SessionWindowFields
+          config={config}
+          audience={audienceValue}
+          active={active}
+          onChange={handleActiveChange}
+          disabled={isPending}
+          onValidityChange={setWindowValid}
+        />
+
         <SessionSeriesEditor
           config={config}
+          active={active}
+          lockedRowCount={
+            placement === "weekly"
+              ? lockedExistingWeekly
+              : lockedExistingOccurrences
+          }
+          weeklyContextForIndex={(index) => {
+            const ref = coveringWeeklyRefs[index];
+            const series = ref
+              ? selectedComponent?.sessions?.[ref.seriesIdx]
+              : null;
+            return series
+              ? {
+                  active: series.active,
+                  audienceTokens: series.audience?.length
+                    ? series.audience
+                    : (selectedComponent?.audience ?? []),
+                }
+              : { active, audienceTokens: audienceValue };
+          }}
           meetings={meetings}
           meetingIndex={meetingPickerIndex}
           placement={placement}
@@ -1093,7 +1248,7 @@ export function CreateClassModal({
           <button
             type="button"
             className="btn btn-primary relative"
-            disabled={isPending}
+            disabled={isPending || !windowValid}
             onClick={handleSubmit}
           >
             <span className={cn(isPending && "invisible")}>

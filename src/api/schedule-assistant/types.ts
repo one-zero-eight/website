@@ -939,11 +939,8 @@ export interface components {
       uid: string | null;
       /** Organizer Mailbox */
       organizer_mailbox: string | null;
-      /**
-       * Room Id
-       * @description ID of the room
-       */
-      room_id: string;
+      /** Room Id */
+      room_id: string | null;
       /**
        * Room Response
        * @default Unknown
@@ -1371,7 +1368,7 @@ export interface components {
       tag: components["schemas"]["CommonCourseClassTags"] | string;
       /**
        * Per Week
-       * @description Number of weekly meetings
+       * @description Expected configured weekly slots in concurrent teaching weeks; alternation and one-off cancellations do not change this target
        */
       per_week?: number | null;
       /**
@@ -1435,6 +1432,8 @@ export interface components {
        * @default []
        */
       audience: string[];
+      /** @description Explicit inclusive teaching window intersected with audience dates; null preserves audience semester behavior */
+      active?: components["schemas"]["DateRange"] | null;
       /**
        * Weekly Pattern
        * @description Fixed weekly slots for core courses
@@ -1489,6 +1488,11 @@ export interface components {
        * @description Course name
        */
       name: string;
+      /**
+       * Blocks
+       * @description Course pool/filter metadata only; null means whole semester, non-null must be nonempty unique known block ids
+       */
+      blocks?: string[] | null;
       /**
        * Color
        * @description Optional display color in #RRGGBB format
@@ -1783,11 +1787,8 @@ export interface components {
       uid: string | null;
       /** Organizer Mailbox */
       organizer_mailbox: string | null;
-      /**
-       * Room Id
-       * @description Booked room
-       */
-      room_id: string;
+      /** Room Id */
+      room_id: string | null;
       /**
        * Room Response
        * @default Unknown
@@ -2367,6 +2368,7 @@ export interface components {
     PublicComponentSessionSeries: {
       /** Audience */
       audience?: string[];
+      active?: components["schemas"]["PublicDateRange"] | null;
       /** Weekly Pattern */
       weekly_pattern?:
         | components["schemas"]["PublicWeeklyPatternSlot"][]
@@ -2388,6 +2390,8 @@ export interface components {
       color?: string | null;
       /** Section Code */
       section_code: string;
+      /** Blocks */
+      blocks?: string[] | null;
       /** Short Name */
       short_name?: string | null;
       /** Name Ru */
@@ -2507,6 +2511,8 @@ export interface components {
       /** Name */
       name: string;
       semester: components["schemas"]["PublicDateRange"];
+      /** Blocks */
+      blocks?: components["schemas"]["PublicTermBlock"][];
       /** Days */
       days: components["schemas"]["Weekday"][];
       starting_day: components["schemas"]["Weekday"];
@@ -2514,6 +2520,23 @@ export interface components {
       time_slots: components["schemas"]["PublicTimeSlot"][];
       /** Sections */
       sections?: components["schemas"]["PublicSection"][];
+    };
+    /** PublicTermBlock */
+    PublicTermBlock: {
+      /**
+       * Start Date
+       * Format: date
+       */
+      start_date: string;
+      /**
+       * End Date
+       * Format: date
+       */
+      end_date: string;
+      /** Id */
+      id: string;
+      /** Name */
+      name: string;
     };
     /** PublicTimeSlot */
     PublicTimeSlot: {
@@ -3097,6 +3120,31 @@ export interface components {
       /** Studying Meetings */
       studying_meetings: components["schemas"]["ScheduledMeeting"][];
     };
+    /** TermBlock */
+    TermBlock: {
+      /**
+       * Id
+       * @description Stable block identifier used only by course pool metadata
+       */
+      id: string;
+      /**
+       * Name
+       * @description Human-readable teaching block name
+       */
+      name: string;
+      /**
+       * Start Date
+       * Format: date
+       * @description Inclusive block start date
+       */
+      start_date: string;
+      /**
+       * End Date
+       * Format: date
+       * @description Inclusive block end date
+       */
+      end_date: string;
+    };
     /** TermConfig */
     TermConfig: {
       /**
@@ -3106,6 +3154,11 @@ export interface components {
       name: string;
       /** @description Single teaching period (start and end dates inclusive) */
       semester: components["schemas"]["DateRange"];
+      /**
+       * Blocks
+       * @description Named teaching presets; changing these does not rewrite session active dates
+       */
+      blocks?: components["schemas"]["TermBlock"][];
       /**
        * Days
        * @description Working days used by the scheduler (for example, MONDAY..SATURDAY)
@@ -3190,6 +3243,8 @@ export interface components {
       /** Name */
       name?: string | null;
       semester?: components["schemas"]["DateRange"] | null;
+      /** Blocks */
+      blocks?: components["schemas"]["TermBlock"][] | null;
       /** Days */
       days?: components["schemas"]["Weekday"][] | null;
       starting_day?: components["schemas"]["Weekday"] | null;
@@ -3524,6 +3579,7 @@ export type SchemaPublicSessionOccurrence =
 export type SchemaPublicStudentGroup =
   components["schemas"]["PublicStudentGroup"];
 export type SchemaPublicTerm = components["schemas"]["PublicTerm"];
+export type SchemaPublicTermBlock = components["schemas"]["PublicTermBlock"];
 export type SchemaPublicTimeSlot = components["schemas"]["PublicTimeSlot"];
 export type SchemaPublicTimetable = components["schemas"]["PublicTimetable"];
 export type SchemaPublicTrack = components["schemas"]["PublicTrack"];
@@ -3553,6 +3609,7 @@ export type SchemaStudentEmailIssue =
 export type SchemaStudentIssue = components["schemas"]["StudentIssue"];
 export type SchemaStudentsGroups = components["schemas"]["StudentsGroups"];
 export type SchemaTeacherIssue = components["schemas"]["TeacherIssue"];
+export type SchemaTermBlock = components["schemas"]["TermBlock"];
 export type SchemaTermConfig = components["schemas"]["TermConfig"];
 export type SchemaTermPartialUpdate =
   components["schemas"]["TermPartialUpdate"];
@@ -4424,7 +4481,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "text/calendar": string;
         };
       };
       /** @description Validation Error */
@@ -4455,7 +4512,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "text/calendar": string;
         };
       };
       /** @description Validation Error */

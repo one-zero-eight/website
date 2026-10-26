@@ -1,9 +1,11 @@
 /** Port of schedule-assistant-viewer.html script (same behavior). */
+import { resolveSessionWindow } from "./sessionWindows.ts";
 import type {
   TimetableViewConfig as SchemaScheduleConfig,
   TimetableViewCourse as SchemaCourseConfig,
 } from "./timetableViewTypes.ts";
 import type {
+  SchemaDateRange,
   SchemaWeeklyPatternSlot,
   SchemaWeeklyPatternSlotEdit,
 } from "@/api/schedule-assistant/types.ts";
@@ -18,7 +20,6 @@ import {
   nearestSlotStart,
   normalizeHhmm,
   programResolvedTimeSlots,
-  resolveAudienceSemester,
   resolveProgramTimeColumns,
   termResolvedTimeSlots,
   toMinutes as slotToMinutes,
@@ -466,9 +467,10 @@ export function activeWeeklySlotDates(
   config: SchemaScheduleConfig,
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[],
+  active?: SchemaDateRange | null,
 ): string[] {
   const weekday = weeklyPatternDayKey(String(slot.weekday));
-  const range = resolveAudienceSemester(config, audienceTokens);
+  const range = resolveSessionWindow(config, audienceTokens, active);
   if (!weekday || !range) return [];
   return semesterDatesForWeekday(config, weekday, range).filter((date) =>
     isWeeklySlotActiveOnDate(
@@ -497,8 +499,9 @@ export function countWeeklyPatternSlotOccurrences(
   config: SchemaScheduleConfig,
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[],
+  active?: SchemaDateRange | null,
 ): number {
-  return activeWeeklySlotDates(config, slot, audienceTokens).filter(
+  return activeWeeklySlotDates(config, slot, audienceTokens, active).filter(
     (date) => !resolveWeeklyMeetingFields(slot, date, config).cancelled,
   ).length;
 }
@@ -836,7 +839,6 @@ export function buildMeetingsForCourse(
   const course = config.courses?.[courseIdx];
   if (!course) return [] as Meeting[];
   const section = course.section_code;
-  const groupToProgram = buildGroupToProgramMap(config);
 
   const flat: Meeting[] = [];
   for (const [componentIdx, component] of (course.components || []).entries()) {
@@ -846,12 +848,6 @@ export function buildMeetingsForCourse(
         config,
         audienceTokens,
       );
-      const audienceWindow = resolveAudienceSemester(
-        config,
-        audienceTokens,
-        groupToProgram,
-      );
-
       for (const [occIdx, occurrence] of (
         series.dates_pattern || []
       ).entries()) {
@@ -878,9 +874,13 @@ export function buildMeetingsForCourse(
 
       const pattern = series.weekly_pattern || [];
       if (pattern.length === 0) continue;
-      if (audienceWindow == null) continue;
       for (const [slotIdx, slot] of pattern.entries()) {
-        const dates = activeWeeklySlotDates(config, slot, audienceTokens);
+        const dates = activeWeeklySlotDates(
+          config,
+          slot,
+          audienceTokens,
+          series.active,
+        );
         for (const date of dates) {
           const resolved = resolveWeeklyMeetingFields(
             slot,

@@ -208,6 +208,8 @@ export function instructorAvailabilityForSlot({
   index?: MeetingPickerIndex | null;
 }): InstructorAvailabilityInfo {
   const id = instructorId.trim();
+  // Callers expand weekly series with their active range; concrete/moved dates
+  // must remain visible to conflict checks even when outside that range.
   const actualSlots = (slots ?? dates.map((date) => ({ date, start, end })))
     .map((slot) => {
       const proposedStart = normalizeHhmm(slot.start);
