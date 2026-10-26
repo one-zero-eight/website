@@ -1286,6 +1286,7 @@ msgstr "Can be played now"
 #: src/components/when2meet/MeetingPage.tsx:1159
 #: src/components/when2meet/MeetingPage.tsx:1411
 #: src/components/when2meet/MeetingPage.tsx:1639
+#: src/components/when2meet/MeetingName.tsx:126
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -2592,6 +2593,11 @@ msgstr "Edit meeting"
 msgid "Edit meeting | When2Meet"
 msgstr "Edit meeting | When2Meet"
 
+#: src/components/when2meet/MeetingName.tsx:62
+#: src/components/when2meet/MeetingName.tsx:65
+msgid "Edit meeting name"
+msgstr "Edit meeting name"
+
 #: src/app/routes/_with_menu/when2meet/$meetingId.edit.tsx:21
 msgid "Edit meeting name, dates, times, and availability setup."
 msgstr "Edit meeting name, dates, times, and availability setup."
@@ -2798,6 +2804,7 @@ msgstr "Equipment"
 #: src/components/when2meet/MeetingPage.tsx:1085
 #: src/components/when2meet/MeetingPage.tsx:1142
 #: src/components/when2meet/MeetingRoomModal.tsx:189
+#: src/components/when2meet/MeetingName.tsx:35
 msgid "Error"
 msgstr "Error"
 
@@ -4194,10 +4201,12 @@ msgid "Meeting deleted"
 msgstr "Meeting deleted"
 
 #: src/components/when2meet/CreationPage.tsx:361
+#: src/components/when2meet/MeetingName.tsx:85
 msgid "Meeting name"
 msgstr "Meeting name"
 
 #: src/components/when2meet/CreationPage.tsx:183
+#: src/components/when2meet/MeetingName.tsx:106
 msgid "Meeting name should contain at least 3 symbols."
 msgstr "Meeting name should contain at least 3 symbols."
 
@@ -6051,6 +6060,7 @@ msgstr "Same hours every day"
 #: src/components/events/drafts/EditDraftInfoModal.tsx:179
 #: src/components/tabletennis/PlayerActionMenu.tsx:310
 #: src/components/when2meet/CreationPage.tsx:465
+#: src/components/when2meet/MeetingName.tsx:117
 msgid "Save"
 msgstr "Save"
 

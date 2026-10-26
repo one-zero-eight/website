@@ -881,7 +881,7 @@ msgstr "Перенести встречу «{meetingName}» в архив? Уч�
 
 #: src/components/when2meet/ArchiveMeetingButton.tsx:61
 msgid "Archive event"
-msgstr "Перенести событие в архив"
+msgstr "Архивировать"
 
 #: src/components/when2meet/ArchiveMeetingButton.test.ts:41
 #: src/components/when2meet/ArchiveMeetingButton.tsx:37
@@ -1286,6 +1286,7 @@ msgstr "Можно играть сейчас"
 #: src/components/when2meet/MeetingPage.tsx:1159
 #: src/components/when2meet/MeetingPage.tsx:1411
 #: src/components/when2meet/MeetingPage.tsx:1639
+#: src/components/when2meet/MeetingName.tsx:126
 msgid "Cancel"
 msgstr "Отмена"
 
@@ -1521,7 +1522,7 @@ msgstr "Выберите файл"
 
 #: src/components/when2meet/MeetingPage.tsx:1651
 msgid "Choose meeting time"
-msgstr "Выберите время встречи"
+msgstr "Выбрать лучшее время"
 
 #: src/components/extension/ExtensionPage.tsx:60
 msgid "Chrome extension"
@@ -2565,7 +2566,7 @@ msgstr "Редактировать черновик"
 
 #: src/components/when2meet/MeetingPage.tsx:1691
 msgid "Edit event"
-msgstr "Редактировать событие"
+msgstr "Редактировать"
 
 #: src/components/events/drafts/DraftHostsSection.tsx:555
 msgid "Edit external host"
@@ -2591,6 +2592,11 @@ msgstr "Редактировать встречу"
 #: src/app/routes/_with_menu/when2meet/$meetingId.edit.tsx:18
 msgid "Edit meeting | When2Meet"
 msgstr "Редактировать встречу | When2Meet"
+
+#: src/components/when2meet/MeetingName.tsx:62
+#: src/components/when2meet/MeetingName.tsx:65
+msgid "Edit meeting name"
+msgstr "Изменить название встречи"
 
 #: src/app/routes/_with_menu/when2meet/$meetingId.edit.tsx:21
 msgid "Edit meeting name, dates, times, and availability setup."
@@ -2798,6 +2804,7 @@ msgstr "Оборудование"
 #: src/components/when2meet/MeetingPage.tsx:1085
 #: src/components/when2meet/MeetingPage.tsx:1142
 #: src/components/when2meet/MeetingRoomModal.tsx:189
+#: src/components/when2meet/MeetingName.tsx:35
 msgid "Error"
 msgstr "Ошибка"
 
@@ -4194,10 +4201,12 @@ msgid "Meeting deleted"
 msgstr "Встреча удалена"
 
 #: src/components/when2meet/CreationPage.tsx:361
+#: src/components/when2meet/MeetingName.tsx:85
 msgid "Meeting name"
 msgstr "Название встречи"
 
 #: src/components/when2meet/CreationPage.tsx:183
+#: src/components/when2meet/MeetingName.tsx:106
 msgid "Meeting name should contain at least 3 symbols."
 msgstr "Название встречи должно содержать не менее 3 символов."
 
@@ -6051,6 +6060,7 @@ msgstr "Одинаковые часы каждый день"
 #: src/components/events/drafts/EditDraftInfoModal.tsx:179
 #: src/components/tabletennis/PlayerActionMenu.tsx:310
 #: src/components/when2meet/CreationPage.tsx:465
+#: src/components/when2meet/MeetingName.tsx:117
 msgid "Save"
 msgstr "Сохранить"
 
@@ -6417,7 +6427,7 @@ msgstr "Поделитесь ссылкой: пользователи войду
 
 #: src/components/when2meet/MeetingPage.tsx:1385
 msgid "Share link"
-msgstr "Поделиться ссылкой"
+msgstr "Поделиться"
 
 #: src/components/maps/viewer/DetailsPopup.tsx:228
 msgid "Share link to this room"
@@ -8318,7 +8328,7 @@ msgstr "Расписание уборки и смены белья появит�
 
 #: src/components/when2meet/AvailabilitySelector.tsx:1440
 msgid "Your"
-msgstr "Ваш"
+msgstr "Ваши таймслоты"
 
 #: src/components/dashboard/AccountWidget.tsx:25
 #: src/components/layout/UserMenu.tsx:100

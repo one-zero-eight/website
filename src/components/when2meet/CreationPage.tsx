@@ -177,14 +177,26 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
   function handleSubmit(formEvent: FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
 
-    const trimmedName = meetingName.trim();
+    const trimmedName = meetingName.trim() || (isEditMode ? "" : "New Meeting");
+    const meetingDates = new Set(selectedDates);
+
+    if (!isEditMode && meetingDates.size === 0) {
+      const today = new Date();
+
+      for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + dayOffset);
+        meetingDates.add(date.toLocaleDateString("en-CA"));
+      }
+    }
+
     const nextNameError =
       trimmedName.length < 3
         ? msg`Meeting name should contain at least 3 symbols.`
         : undefined;
 
     const nextDatesError =
-      selectedDates.size === 0 ? msg`Choose at least one date.` : undefined;
+      meetingDates.size === 0 ? msg`Choose at least one date.` : undefined;
     const nextTimeError =
       timeSetupMode === "daily_range" && !isTimeRangeValid(timeRange)
         ? msg`End time must be later than start time.`
@@ -201,9 +213,9 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
     const isManualSlots = timeSetupMode === "manual_slots";
 
     const slots = isManualSlots
-      ? buildFullDaySlotsFromDates(selectedDates)
+      ? buildFullDaySlotsFromDates(meetingDates)
       : buildSlotsFromDatesAndRange(
-          selectedDates,
+          meetingDates,
           timeRange.start,
           timeRange.end,
         );
@@ -359,7 +371,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
       <label className="block min-w-0">
         <span className="text-sm">
           <Trans>Meeting name</Trans>
-          <span className="text-error ml-1">*</span>
+          {isEditMode && <span className="text-error ml-1">*</span>}
         </span>
         <input
           type="text"

@@ -21,6 +21,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
 import { ArchiveMeetingButton } from "./ArchiveMeetingButton.tsx";
 import { MeetingMobileBar } from "./MeetingMobileBar.tsx";
+import { MeetingName } from "./MeetingName.tsx";
 import { MeetingRoomModal } from "./MeetingRoomModal.tsx";
 import { useWhen2MeetPersonalCalendarOverlay } from "./useWhen2MeetPersonalCalendarOverlay.ts";
 import {
@@ -1279,9 +1280,13 @@ export function MeetingPage({
           <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="flex min-w-0 items-start justify-between gap-3 md:block">
               <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <h1 className="text-2xl font-semibold">{meetingName}</h1>
-                </div>
+                <MeetingName
+                  key={meetingId}
+                  meetingRef={meetingId}
+                  name={meetingName}
+                  canEdit={isOwner && !isArchived}
+                  onMeetingUpdated={handleMeetingUpdated}
+                />
                 {meetingDescription && (
                   <p className="text-base-content/70 mt-2 max-w-3xl text-sm">
                     {meetingDescription}
