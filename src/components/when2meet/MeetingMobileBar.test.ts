@@ -216,7 +216,7 @@ describe("MeetingMobileBar", () => {
     expect(document.body.textContent).toContain(
       "2 доступны: T. Khasanov, A. Belyakova",
     );
-    expect(document.body.textContent).toContain("Изменить мою доступность");
+    expect(document.body.textContent).toContain("Изменить мои таймслоты");
     expect(document.body.textContent).not.toContain("Change my availability");
 
     const showAllButton = Array.from(
@@ -237,7 +237,7 @@ describe("MeetingMobileBar", () => {
       "2 available: T. Khasanov, A. Belyakova",
     );
     expect(document.body.textContent).toContain("Change my availability");
-    expect(document.body.textContent).not.toContain("Изменить мою доступность");
+    expect(document.body.textContent).not.toContain("Изменить мои таймслоты");
     expect(showAllButton?.textContent).toBe("Hide all");
 
     act(() => showAllButton!.click());

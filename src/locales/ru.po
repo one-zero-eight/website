@@ -980,7 +980,7 @@ msgstr "Автоматически определяет края докумен�
 
 #: src/components/when2meet/AvailabilitySelector.tsx:1469
 msgid "Availability"
-msgstr "Доступность"
+msgstr "Общие таймслоты"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:597
 #: src/components/board-games/BoardGamesPage.tsx:412
@@ -1395,7 +1395,7 @@ msgstr "Изменить медицинскую группу"
 #: src/components/when2meet/MeetingMobileBar.tsx:209
 #: src/components/when2meet/MeetingPage.tsx:1433
 msgid "Change my availability"
-msgstr "Изменить мою доступность"
+msgstr "Изменить мои таймслоты"
 
 #: src/components/when2meet/MeetingPage.tsx:1670
 #: src/components/when2meet/MeetingRoomModal.tsx:266
@@ -5842,7 +5842,7 @@ msgstr "Ресурсы и ссылки"
 
 #: src/components/when2meet/MeetingPage.tsx:1733
 msgid "Responses"
-msgstr "Ответы"
+msgstr "Участники"
 
 #: src/components/events/drafts/DraftPage.tsx:332
 #: src/components/events/drafts/DraftPage.tsx:671
