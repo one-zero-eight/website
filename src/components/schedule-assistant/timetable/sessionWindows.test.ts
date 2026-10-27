@@ -89,7 +89,6 @@ function configFor(): SchemaScheduleConfig {
       {
         name: "Math",
         section_code: "core",
-        blocks: ["first"],
         components: [
           {
             tag: "lec",
@@ -99,13 +98,11 @@ function configFor(): SchemaScheduleConfig {
             sessions: [
               {
                 audience: ["G1"],
-                notes: "",
                 active: first,
                 weekly_pattern: [slot],
               },
               {
                 audience: ["G1"],
-                notes: "",
                 active: second,
                 weekly_pattern: [slot],
               },
@@ -208,22 +205,40 @@ describe("session windows", () => {
     expect(resolveSessionWindow(config, ["G1", "G2"], null)).toBeNull();
   });
 
-  it("matches only exact explicit block ranges without applying course metadata", () => {
+  it("resolves block references live without rewriting series or inferring a block from custom dates", () => {
     const config = configFor();
-    expect(matchSessionBlock(config, first)?.id).toBe("first");
-    expect(matchSessionBlock(config, second)?.id).toBe("second");
+    const series = {
+      audience: ["G1"],
+      active: null,
+      block_id: "first",
+      weekly_pattern: [slot],
+    };
+    config.courses![0].components[0].sessions = [series];
+    expect(matchSessionBlock(config, "first")?.id).toBe("first");
+    expect(matchSessionBlock(config, "second")?.id).toBe("second");
     expect(matchSessionBlock(config, null)).toBeNull();
-    expect(
-      matchSessionBlock(config, { ...first, start_date: "2026-09-02" }),
-    ).toBeNull();
-    expect(
-      matchSessionBlock(config, resolveSessionWindow(config, ["G2"], first)),
-    ).toBeNull();
-    expect(resolveSessionWindow(config, ["G1"], second)).toEqual(second);
-    const input = structuredClone(config);
-    resolveSessionWindow(config, ["G1", "G2"], first);
-    matchSessionBlock(config, first);
-    expect(config).toEqual(input);
+    expect(resolveSessionWindow(config, ["G1"], null, "missing")).toBeNull();
+    expect(resolveSessionWindow(config, ["G1"], null, "first")).toEqual(first);
+    expect(buildMeetings(config).map((meeting) => meeting.date)).toEqual([
+      "2026-09-01",
+      "2026-09-08",
+      "2026-09-15",
+    ]);
+    config.term.blocks![0].end_date = "2026-09-08";
+    expect(resolveSessionWindow(config, ["G1"], null, "first")?.end_date).toBe(
+      "2026-09-08",
+    );
+    expect(buildMeetings(config).map((meeting) => meeting.date)).toEqual([
+      "2026-09-01",
+      "2026-09-08",
+    ]);
+    expect(series).toEqual({
+      audience: ["G1"],
+      active: null,
+      block_id: "first",
+      weekly_pattern: [slot],
+    });
+    expect(resolveSessionWindow(config, ["G1"], first)).toEqual(first);
   });
 
   it("does not reset alternation at a block boundary", () => {
@@ -499,13 +514,21 @@ describe("session window consumers", () => {
         {
           name: "Math",
           section_code: "core",
-          blocks: ["first"],
+          notes: "Course notes",
           components: [
             {
               tag: "lec",
               sessions: [
-                { notes: "First", active: first, weekly_pattern: [slot] },
-                { notes: "Second", active: second, weekly_pattern: [slot] },
+                {
+                  active: null,
+                  block_id: "first",
+                  weekly_pattern: [slot],
+                },
+                {
+                  active: null,
+                  block_id: "second",
+                  weekly_pattern: [slot],
+                },
               ],
             },
           ],
@@ -514,26 +537,27 @@ describe("session window consumers", () => {
     };
     const view = publicTimetableConfig(data);
     expect(view.term.blocks).toEqual(config.term.blocks);
-    expect(view.courses![0].blocks).toEqual(["first"]);
-    expect(view.courses![0].components[0].sessions![1].active).toEqual(second);
+    expect(view.courses![0].components[0].sessions![1].block_id).toEqual(
+      "second",
+    );
     expect(
       buildMeetings(view).map((meeting) => [meeting.date, meeting.notes]),
     ).toEqual([
-      ["2026-09-01", "First"],
-      ["2026-09-08", "First"],
-      ["2026-09-15", "First"],
-      ["2026-09-22", "Second"],
-      ["2026-09-29", "Second"],
+      ["2026-09-01", "Course notes"],
+      ["2026-09-08", "Course notes"],
+      ["2026-09-15", "Course notes"],
+      ["2026-09-22", "Course notes"],
+      ["2026-09-29", "Course notes"],
     ]);
     data.term.blocks = [];
-    expect(matchSessionBlock(publicTimetableConfig(data), first)).toBeNull();
+    expect(matchSessionBlock(publicTimetableConfig(data), "first")).toBeNull();
     delete data.term.blocks;
-    data.courses![0].components[0].sessions![0].active = null;
+    data.courses![0].components[0].sessions![0].block_id = null;
     const fullTermView = publicTimetableConfig(data);
     expect(fullTermView.term.blocks).toEqual([]);
     expect(
       buildMeetings(fullTermView)
-        .filter((meeting) => meeting.notes === "First")
+        .filter((meeting) => meeting.notes === "Course notes")
         .map((meeting) => meeting.date),
     ).toEqual([
       "2026-09-01",

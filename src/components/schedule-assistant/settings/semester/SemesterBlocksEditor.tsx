@@ -1,21 +1,34 @@
 import { useEffect, useId, useState } from "react";
+import { useLingui } from "@lingui/react/macro";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { DateInput } from "@/components/schedule-assistant/DateInput.tsx";
 import {
   useConfig,
   useUpdateTermMutation,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { useSettingsSaveStatusContext } from "@/components/schedule-assistant/settings/settingsSaveStatus.tsx";
-import { cn } from "@/lib/ui/cn";
 import {
-  dateToDay,
   firstAvailableBlockPeriod,
   sortSemesterBlocks,
-  splitSemesterInTwo,
   validateSemesterBlocks,
   type SemesterBlock,
+  type SemesterPeriod,
 } from "./semesterBlocks.ts";
 
+function defaultNewBlockPeriod(
+  semester: SemesterPeriod,
+  blocks: readonly SemesterBlock[],
+): SemesterPeriod {
+  return (
+    firstAvailableBlockPeriod(semester, blocks) ?? {
+      start_date: semester.start_date,
+      end_date: semester.start_date,
+    }
+  );
+}
+
 export function SemesterBlocksEditor() {
+  const { t } = useLingui();
   const {
     config,
     isPending: isLoading,
@@ -59,8 +72,6 @@ export function SemesterBlocksEditor() {
   if (!term || !semester || !config) return null;
 
   const sortedBlocks = sortSemesterBlocks(blocks);
-  const availablePeriod = firstAvailableBlockPeriod(semester, blocks);
-  const splitBlocks = splitSemesterInTwo(semester);
 
   function handleChange(blockId: string, patch: Partial<SemesterBlock>) {
     setActionError(null);
@@ -71,13 +82,27 @@ export function SemesterBlocksEditor() {
     );
   }
 
+  function referencedSeries(blockIds: string[]) {
+    return (config?.courses ?? [])
+      .flatMap((course) =>
+        course.components.flatMap((component) =>
+          (component.sessions ?? []).flatMap((series, index) =>
+            series.block_id != null && blockIds.includes(series.block_id)
+              ? [
+                  `${course.name_ru || course.name} · ${component.tag} · ${index + 1}`,
+                ]
+              : [],
+          ),
+        ),
+      )
+      .join(", ");
+  }
+
   function handleDelete(blockId: string) {
-    const referencingCourses = (config?.courses ?? []).filter((course) =>
-      course.blocks?.includes(blockId),
-    );
-    if (referencingCourses.length > 0) {
+    const references = referencedSeries([blockId]);
+    if (references) {
       setActionError(
-        `Нельзя удалить блок: на него ссылаются курсы ${referencingCourses.map((course) => `«${course.name_ru || course.name}»`).join(", ")}. Сначала измените блоки этих курсов.`,
+        t`Cannot delete a block referenced by series: ${references}. Change their windows first.`,
       );
       return;
     }
@@ -85,17 +110,28 @@ export function SemesterBlocksEditor() {
     setDraft(blocks.filter((block) => block.id !== blockId));
   }
 
+  function handleAddBlock() {
+    if (!semester) return;
+    setActionError(null);
+    setDraft([
+      ...blocks,
+      {
+        id: crypto.randomUUID(),
+        name: `Блок ${blocks.length + 1}`,
+        ...defaultNewBlockPeriod(semester, blocks),
+      },
+    ]);
+  }
+
   function handleSave() {
     if (!term || !semester || validationError || !draft || !isDirty) return;
     const removedIds = (term.blocks ?? [])
       .filter((block) => !draft.some((candidate) => candidate.id === block.id))
       .map((block) => block.id);
-    const referencingCourses = (config?.courses ?? []).filter((course) =>
-      course.blocks?.some((id) => removedIds.includes(id)),
-    );
-    if (referencingCourses.length) {
+    const references = referencedSeries(removedIds);
+    if (references) {
       setActionError(
-        `Удалённые блоки используются курсами: ${referencingCourses.map((course) => course.name_ru || course.name).join(", ")}. Восстановите блоки или измените привязки курсов.`,
+        t`Cannot delete a block referenced by series: ${references}. Change their windows first.`,
       );
       return;
     }
@@ -118,141 +154,68 @@ export function SemesterBlocksEditor() {
 
   return (
     <section className="border-base-300 rounded-box flex shrink-0 flex-col gap-3 border p-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold">Блоки семестра</h3>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            className="btn btn-outline btn-xs"
-            disabled={isPending || !availablePeriod}
-            onClick={() => {
-              if (!availablePeriod) return;
-              setActionError(null);
-              setDraft([
-                ...blocks,
-                {
-                  id: crypto.randomUUID(),
-                  name: `Блок ${blocks.length + 1}`,
-                  ...availablePeriod,
-                },
-              ]);
-            }}
-          >
-            Добавить блок
-          </button>
-          <button
-            type="button"
-            className="btn btn-outline btn-xs"
-            disabled={
-              isPending || blocks.length > 0 || splitBlocks.length !== 2
-            }
-            onClick={() => {
-              setActionError(null);
-              setDraft(splitBlocks);
-            }}
-          >
-            Разделить семестр пополам
-          </button>
-        </div>
-      </div>
-      <p className="text-base-content/60 text-xs">
-        Порядок определяется датами. Границы включены, блоки не пересекаются.
-        Деление пополам доступно для пустого списка; лишний день остаётся в
-        первом блоке.
-      </p>
-      <p className="text-warning text-xs">
-        Изменение дат блоков не изменяет периоды серий существующих занятий и их
-        фактические даты. Проверьте диапазоны занятий отдельно после сохранения.
-      </p>
-      {!validationError && sortedBlocks.length > 0 ? (
-        <div className="flex flex-col gap-1">
-          <div className="bg-base-200 relative h-8 overflow-hidden rounded">
-            {sortedBlocks.map((block, index) => {
-              const totalDays =
-                dateToDay(semester.end_date) -
-                dateToDay(semester.start_date) +
-                1;
-              return (
-                <div
-                  key={block.id}
-                  title={`${block.name}: ${block.start_date} — ${block.end_date}`}
-                  className={cn(
-                    "border-base-100 absolute inset-y-0 flex items-center justify-center overflow-hidden border-r px-1 text-xs",
-                    index % 2 === 0 ? "bg-primary/25" : "bg-secondary/25",
-                  )}
-                  style={{
-                    left: `${((dateToDay(block.start_date) - dateToDay(semester.start_date)) / totalDays) * 100}%`,
-                    width: `${((dateToDay(block.end_date) - dateToDay(block.start_date) + 1) / totalDays) * 100}%`,
-                  }}
-                >
-                  <span className="truncate">{block.name}</span>
-                </div>
-              );
-            })}
-          </div>
-          <div className="text-base-content/60 flex justify-between text-xs">
-            <span>{semester.start_date}</span>
-            <span>{semester.end_date}</span>
-          </div>
-        </div>
-      ) : null}
+      <h3 className="text-sm font-semibold">Блоки семестра</h3>
       {blocks.length === 0 ? (
         <p className="text-base-content/60 text-sm">
           Блоков нет. Курсы по умолчанию относятся ко всему семестру.
         </p>
       ) : null}
       <fieldset disabled={isPending} className="flex min-w-0 flex-col gap-2">
-        {sortedBlocks.map((block, index) => (
+        {sortedBlocks.map((block) => (
           <div
             key={block.id}
-            className="border-base-300 rounded-box flex min-w-0 flex-wrap items-end gap-2 border p-2"
+            className="border-base-300 rounded-box flex min-w-0 flex-nowrap items-end gap-2 border p-2"
           >
-            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs">
-              <span>Блок {index + 1}: название</span>
+            <label className="flex min-w-0 flex-[1.2] flex-col gap-1 text-xs">
+              <span>Название</span>
               <input
-                className="input input-bordered input-sm w-full min-w-32"
+                className="input input-bordered input-sm w-full"
                 value={block.name}
                 onChange={(event) =>
                   handleChange(block.id, { name: event.target.value })
                 }
               />
             </label>
-            <label className="flex min-w-0 flex-col gap-1 text-xs">
-              <span>Начало блока {index + 1}</span>
-              <input
-                type="date"
-                className="input input-bordered input-sm w-full [color-scheme:inherit]"
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs">
+              <span>Начало</span>
+              <DateInput
+                showWeekday
+                value={block.start_date}
                 min={semester.start_date}
                 max={semester.end_date}
-                value={block.start_date}
-                onChange={(event) =>
-                  handleChange(block.id, { start_date: event.target.value })
+                onChange={(start_date) =>
+                  handleChange(block.id, { start_date })
                 }
               />
             </label>
-            <label className="flex min-w-0 flex-col gap-1 text-xs">
-              <span>Окончание блока {index + 1}</span>
-              <input
-                type="date"
-                className="input input-bordered input-sm w-full [color-scheme:inherit]"
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs">
+              <span>Окончание</span>
+              <DateInput
+                showWeekday
+                value={block.end_date}
                 min={semester.start_date}
                 max={semester.end_date}
-                value={block.end_date}
-                onChange={(event) =>
-                  handleChange(block.id, { end_date: event.target.value })
-                }
+                onChange={(end_date) => handleChange(block.id, { end_date })}
               />
             </label>
             <button
               type="button"
-              className="btn btn-ghost btn-error btn-sm"
+              className="btn btn-ghost btn-error btn-sm shrink-0"
               onClick={() => handleDelete(block.id)}
             >
-              Удалить блок {index + 1}
+              Удалить
             </button>
           </div>
         ))}
       </fieldset>
+      <button
+        type="button"
+        className="btn btn-outline btn-sm self-start"
+        disabled={isPending}
+        onClick={handleAddBlock}
+      >
+        Добавить блок
+      </button>
       {validationError || actionError ? (
         <p className="text-error text-sm">{actionError || validationError}</p>
       ) : null}
@@ -260,12 +223,6 @@ export function SemesterBlocksEditor() {
         <div className="alert alert-error alert-soft text-sm">
           Ошибка сохранения блоков: {formatApiErrorMessage(error)}
         </div>
-      ) : null}
-      {blocks.length > 0 && !availablePeriod && !validationError ? (
-        <p className="text-base-content/60 text-xs">
-          Нет свободных дат для нового блока. Сначала сократите существующий
-          блок.
-        </p>
       ) : null}
       {draft !== null ? (
         <div className="flex flex-wrap items-center gap-2">

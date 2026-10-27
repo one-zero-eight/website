@@ -17,6 +17,7 @@ export function resolveSessionWindow(
   config: TimetableViewConfig,
   audience: string[],
   active?: SchemaDateRange | null,
+  blockId?: string | null,
 ): SchemaDateRange | null {
   const termRange = termSemesterRange(config);
   const groupToProgram = buildGroupToProgramMap(config);
@@ -26,7 +27,9 @@ export function resolveSessionWindow(
         programSemesterRange(groupToProgram.get(group), termRange),
       )
     : [termRange];
-  if (active) windows.push(active);
+  const window = sessionWindowRange(config, active, blockId);
+  if (blockId != null && !window) return null;
+  if (window) windows.push(window);
 
   const first = windows[0];
   if (!first) return null;
@@ -41,17 +44,26 @@ export function resolveSessionWindow(
   return { start_date: start, end_date: end };
 }
 
-/** Match the stored explicit range, not the audience-clipped effective window. */
+/** Resolve a stored block reference, never infer one from custom dates. */
 export function matchSessionBlock(
   config: TimetableViewConfig,
-  active?: SchemaDateRange | null,
+  blockId?: string | null,
 ): SchemaTermBlock | null {
-  if (!active) return null;
-  return (
-    (config.term.blocks ?? []).find(
-      (block) =>
-        block.start_date === active.start_date &&
-        block.end_date === active.end_date,
-    ) ?? null
-  );
+  if (blockId == null) return null;
+  return config.term.blocks?.find((block) => block.id === blockId) ?? null;
+}
+
+/** The explicit series bounds before intersecting audience teaching windows. */
+export function sessionWindowRange(
+  config: TimetableViewConfig,
+  active?: SchemaDateRange | null,
+  blockId?: string | null,
+): SchemaDateRange | null {
+  if (blockId != null) {
+    const block = matchSessionBlock(config, blockId);
+    return block
+      ? { start_date: block.start_date, end_date: block.end_date }
+      : null;
+  }
+  return active ?? null;
 }

@@ -25,84 +25,10 @@ import {
   weekdayToKey,
   WeeklySlotRow,
 } from "./sessionSeriesRows.tsx";
+import { sessionWindowRange } from "./sessionWindows.ts";
 import type { Meeting, MeetingOverrideField } from "./timetableViewerModel.ts";
 
 export type SessionPlacement = "weekly" | "dates_pattern";
-
-export function SeriesNotesField({
-  notes,
-  onChange,
-  disabled,
-}: {
-  notes: string;
-  onChange: (notes: string) => void;
-  disabled?: boolean;
-}) {
-  return (
-    <label className="flex flex-col gap-1">
-      <span className="text-sm font-medium">Заметки серии</span>
-      <textarea
-        className="textarea textarea-bordered w-full"
-        rows={3}
-        value={notes}
-        disabled={disabled}
-        placeholder="Для всех занятий серии"
-        onChange={(event) => onChange(event.target.value)}
-      />
-    </label>
-  );
-}
-
-export function SessionNotesOverrideField({
-  notes,
-  seriesNotes,
-  onChange,
-  disabled,
-}: {
-  notes: string | null;
-  seriesNotes: string;
-  onChange: (notes: string | null) => void;
-  disabled?: boolean;
-}) {
-  const inherited = notes === null;
-  return (
-    <div className="flex min-w-0 flex-col gap-1">
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Заметки занятия</span>
-        <textarea
-          className={cn(
-            "textarea textarea-bordered w-full",
-            !inherited && "border-primary/50",
-          )}
-          rows={2}
-          value={notes ?? seriesNotes}
-          disabled={disabled}
-          placeholder="Заметки для этой даты"
-          onChange={(event) => onChange(event.target.value)}
-        />
-      </label>
-      <div className="flex flex-wrap items-center justify-between gap-1 text-xs">
-        <span className="text-base-content/60">
-          {inherited
-            ? "Из заметок серии"
-            : notes === ""
-              ? "Заметки серии скрыты"
-              : "Только для этой даты"}
-        </span>
-        {!inherited ? (
-          <button
-            type="button"
-            className="text-primary cursor-pointer hover:underline"
-            disabled={disabled}
-            onClick={() => onChange(null)}
-          >
-            Использовать заметки серии
-          </button>
-        ) : null}
-      </div>
-    </div>
-  );
-}
 
 export function SessionPlacementToggle({
   placement,
@@ -154,10 +80,12 @@ export function SessionSeriesEditor({
   onWeeklySlotsChange,
   occurrences,
   onOccurrencesChange,
-  notes = "",
-  onNotesChange,
   audienceTokens,
   active,
+  blockId = null,
+  originalActive,
+  originalBlockId,
+  onSessionWindowChange,
   weeklyContextForIndex,
   courseInstructors,
   instructorPool,
@@ -181,6 +109,7 @@ export function SessionSeriesEditor({
   newWeeklyDefaults,
   addButtonClassName = "btn btn-outline btn-sm self-start",
   disabled,
+  showPlacementToggle = true,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
@@ -192,16 +121,24 @@ export function SessionSeriesEditor({
   beforePlacement?: ReactNode;
   /** Audience / actions opposite the title or placement toggle. */
   afterPlacement?: ReactNode;
+  /** Hide built-in Еженедельно/Даты when the parent already renders it. */
+  showPlacementToggle?: boolean;
   weeklySlots: SchemaWeeklyPatternSlot[];
   onWeeklySlotsChange: (slots: SchemaWeeklyPatternSlot[]) => void;
   occurrences: SchemaSessionOccurrence[];
   onOccurrencesChange: (occurrences: SchemaSessionOccurrence[]) => void;
-  notes?: string;
-  onNotesChange?: (notes: string) => void;
   audienceTokens: string[];
   active?: SchemaDateRange | null;
+  blockId?: string | null;
+  originalActive?: SchemaDateRange | null;
+  originalBlockId?: string | null;
+  onSessionWindowChange?: (window: {
+    active: SchemaDateRange | null;
+    block_id: string | null;
+  }) => void;
   weeklyContextForIndex?: (index: number) => {
     active?: SchemaDateRange | null;
+    blockId?: string | null;
     audienceTokens: string[];
   };
   courseInstructors?: SchemaCourseConfig["instructors"];
@@ -292,13 +229,13 @@ export function SessionSeriesEditor({
     );
   }
 
-  const toggle = (
+  const toggle = showPlacementToggle ? (
     <SessionPlacementToggle
       placement={placement}
       onChange={onPlacementChange}
       disabled={placementDisabled || disabled}
     />
-  );
+  ) : null;
 
   const rows =
     placement === "dates_pattern" ? (
@@ -351,24 +288,6 @@ export function SessionSeriesEditor({
                   }}
                   onRemove={() => handleRemoveOccurrence(index)}
                 />
-                {!locked ? (
-                  <div className="px-3 pb-3">
-                    <SessionNotesOverrideField
-                      notes={occurrence.notes ?? null}
-                      seriesNotes={notes}
-                      disabled={disabled || deleted}
-                      onChange={(value) =>
-                        onOccurrencesChange(
-                          occurrences.map((item, itemIndex) =>
-                            itemIndex === index
-                              ? { ...item, notes: value }
-                              : item,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                ) : null}
               </div>
             </div>
           );
@@ -400,6 +319,7 @@ export function SessionSeriesEditor({
             !deleted;
           const context = weeklyContextForIndex?.(index) ?? {
             active,
+            blockId,
             audienceTokens,
           };
           const original = originalWeeklySlots?.[index];
@@ -420,10 +340,18 @@ export function SessionSeriesEditor({
                     index,
                     deletedWeekly,
                     lockedRowCount,
-                    active,
+                    sessionWindowRange(
+                      config,
+                      context.active ?? active,
+                      context.blockId ?? blockId,
+                    ),
                   )}
                   slot={slot}
-                  active={context.active}
+                  active={context.active ?? active}
+                  blockId={context.blockId ?? blockId}
+                  onSessionWindowChange={
+                    locked ? undefined : onSessionWindowChange
+                  }
                   audienceTokens={context.audienceTokens}
                   courseInstructors={courseInstructors}
                   instructorPool={instructorPool}
@@ -438,6 +366,16 @@ export function SessionSeriesEditor({
                     isFocus: Boolean(showFocusRing && focusIndex === index),
                     cancelChecked: marksDisabled || deleted || locked,
                     weekdayLabel: originalWeekdayLabel,
+                    config,
+                    window: {
+                      active: context.active ?? active ?? null,
+                      block_id: context.blockId ?? blockId ?? null,
+                    },
+                    originalWindow: {
+                      active: originalActive ?? active ?? null,
+                      block_id: originalBlockId ?? blockId ?? null,
+                    },
+                    onRestoreWindow: onSessionWindowChange,
                     onRestore: (next) => {
                       const list = [...weeklySlots];
                       list[index] = next;
@@ -474,53 +412,37 @@ export function SessionSeriesEditor({
       </div>
     );
 
-  return (
-    <div className="flex flex-col gap-2">
-      {onNotesChange ? (
-        <SeriesNotesField
-          notes={notes}
-          onChange={onNotesChange}
-          disabled={disabled}
-        />
-      ) : null}
-      {beforePlacement ? (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            {beforePlacement}
-            {afterPlacement ? (
-              <div className="flex flex-wrap items-center gap-1">
-                {afterPlacement}
-              </div>
-            ) : null}
-          </div>
-          <div
-            className={cn(
-              "flex flex-col gap-2",
-              disabled && "pointer-events-none opacity-50",
-            )}
-          >
-            {toggle}
-            {rows}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-2">
+  const header =
+    beforePlacement || afterPlacement || toggle ? (
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {beforePlacement ??
+          (toggle ? (
             <div className={cn(disabled && "pointer-events-none opacity-50")}>
               {toggle}
             </div>
+          ) : (
+            <span />
+          ))}
+        {afterPlacement ? (
+          <div className="flex flex-wrap items-center gap-1">
             {afterPlacement}
           </div>
-          <div
-            className={cn(
-              "flex flex-col gap-2",
-              disabled && "pointer-events-none opacity-50",
-            )}
-          >
-            {rows}
-          </div>
-        </>
-      )}
+        ) : null}
+      </div>
+    ) : null;
+
+  return (
+    <div className="flex flex-col gap-2">
+      {header}
+      <div
+        className={cn(
+          "flex flex-col gap-2",
+          disabled && "pointer-events-none opacity-50",
+        )}
+      >
+        {beforePlacement && toggle ? toggle : null}
+        {rows}
+      </div>
     </div>
   );
 }

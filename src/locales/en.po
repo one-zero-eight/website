@@ -7,15 +7,15 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
 
-#: src/components/when2meet/MeetingPage.tsx:1262
+#: src/components/when2meet/MeetingPage.tsx:1263
 msgid " — {hoveredAvailableCount, plural, one {# available} other {# available}}"
 msgstr " — {hoveredAvailableCount, plural, one {# available} other {# available}}"
 
-#: src/components/when2meet/MeetingPage.tsx:1756
+#: src/components/when2meet/MeetingPage.tsx:1761
 msgid " — No one is allowed here"
 msgstr " — No one is allowed here"
 
-#: src/components/when2meet/MeetingPage.tsx:1758
+#: src/components/when2meet/MeetingPage.tsx:1763
 msgid " — No one is available"
 msgstr " — No one is available"
 
@@ -55,15 +55,15 @@ msgstr "- Thinking"
 msgid "\"{meetingName}\" was moved to the archive."
 msgstr "\"{meetingName}\" was moved to the archive."
 
-#: src/components/when2meet/MeetingPage.tsx:182
+#: src/components/when2meet/MeetingPage.tsx:183
 msgid "\"{meetingName}\" was removed."
 msgstr "\"{meetingName}\" was removed."
 
-#: src/components/when2meet/CreationPage.tsx:301
+#: src/components/when2meet/CreationPage.tsx:313
 msgid "\"{trimmedName}\" is ready for participants."
 msgstr "\"{trimmedName}\" is ready for participants."
 
-#: src/components/when2meet/CreationPage.tsx:261
+#: src/components/when2meet/CreationPage.tsx:273
 msgid "\"{trimmedName}\" was saved."
 msgstr "\"{trimmedName}\" was saved."
 
@@ -83,7 +83,7 @@ msgstr "(no places left)"
 msgid "(p. {currentDocumentPage} in file)"
 msgstr "(p. {currentDocumentPage} in file)"
 
-#: src/components/when2meet/MeetingPage.tsx:1837
+#: src/components/when2meet/MeetingPage.tsx:1842
 msgid "(you)"
 msgstr "(you)"
 
@@ -296,27 +296,27 @@ msgstr "{joinsCount, plural, one {# join} other {# joins}}"
 msgid "{minutes}m"
 msgstr "{minutes}m"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1253
+#: src/components/when2meet/AvailabilitySelector.tsx:1250
 msgid "{monthDay}, {time}: {availableCount, plural, one {# available} other {# available}}"
 msgstr "{monthDay}, {time}: {availableCount, plural, one {# available} other {# available}}"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1252
+#: src/components/when2meet/AvailabilitySelector.tsx:1249
 msgid "{monthDay}, {time}: {availableCount, plural, one {# available} other {# available}} · {calendarEventSummary}"
 msgstr "{monthDay}, {time}: {availableCount, plural, one {# available} other {# available}} · {calendarEventSummary}"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1246
+#: src/components/when2meet/AvailabilitySelector.tsx:1243
 msgid "{monthDay}, {time}: selected meeting time"
 msgstr "{monthDay}, {time}: selected meeting time"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1244
+#: src/components/when2meet/AvailabilitySelector.tsx:1241
 msgid "{monthDay}, {time}: selecting meeting time"
 msgstr "{monthDay}, {time}: selecting meeting time"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1250
+#: src/components/when2meet/AvailabilitySelector.tsx:1247
 msgid "{monthDay}, {time}: your availability is not selected"
 msgstr "{monthDay}, {time}: your availability is not selected"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1249
+#: src/components/when2meet/AvailabilitySelector.tsx:1246
 msgid "{monthDay}, {time}: your availability is selected"
 msgstr "{monthDay}, {time}: your availability is selected"
 
@@ -341,7 +341,7 @@ msgstr "{previewPageCount} of {preparedFilePagesCount} pages"
 msgid "{printSheetsCount, plural, one {Print # sheet} other {Print # sheets}}"
 msgstr "{printSheetsCount, plural, one {Print # sheet} other {Print # sheets}}"
 
-#: src/components/when2meet/MeetingPage.tsx:1257
+#: src/components/when2meet/MeetingPage.tsx:1258
 msgid "{responsesCount, plural, one {# response} other {# responses}}"
 msgstr "{responsesCount, plural, one {# response} other {# responses}}"
 
@@ -551,7 +551,7 @@ msgid "Academic group not found."
 msgstr "Academic group not found."
 
 #: src/components/admin/AdminPredefinedPage.tsx:127
-#: src/components/admin/AdminUserDetails.tsx:355
+#: src/components/admin/AdminUserDetails.tsx:366
 msgid "Academic groups"
 msgstr "Academic groups"
 
@@ -784,8 +784,8 @@ msgstr "All 0h"
 msgid "All games"
 msgstr "All games"
 
-#: src/components/when2meet/CreationPage.tsx:529
-#: src/components/when2meet/MeetingPage.tsx:1276
+#: src/components/when2meet/CreationPage.tsx:541
+#: src/components/when2meet/MeetingPage.tsx:1277
 msgid "All meetings"
 msgstr "All meetings"
 
@@ -825,7 +825,7 @@ msgstr "Amazing discovery! You've found the exclusive Ryan Gosling resource link
 msgid "An admin needs to review your changes before they go live."
 msgstr "An admin needs to review your changes before they go live."
 
-#: src/components/admin/AdminUserDetails.tsx:217
+#: src/components/admin/AdminUserDetails.tsx:218
 msgid "Analytics"
 msgstr "Analytics"
 
@@ -889,12 +889,12 @@ msgid "Archive meeting"
 msgstr "Archive meeting"
 
 #: src/components/when2meet/MeetingItem.tsx:30
-#: src/components/when2meet/MeetingPage.tsx:1295
+#: src/components/when2meet/MeetingPage.tsx:1300
 #: src/components/when2meet/MeetingsTabs.tsx:8
 msgid "Archived"
 msgstr "Archived"
 
-#: src/components/when2meet/MeetingPage.tsx:1157
+#: src/components/when2meet/MeetingPage.tsx:1158
 msgid "Are you sure you want to delete \"{meetingName}\"? It will be removed from your meetings list."
 msgstr "Are you sure you want to delete \"{meetingName}\"? It will be removed from your meetings list."
 
@@ -978,7 +978,7 @@ msgstr "Automatic conversion of PDF, Word, Excel, images, and more for printing"
 msgid "Automatically detects the document edges and crops the PDF to match."
 msgstr "Automatically detects the document edges and crops the PDF to match."
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1469
+#: src/components/when2meet/AvailabilitySelector.tsx:1466
 msgid "Availability"
 msgstr "Availability"
 
@@ -1012,7 +1012,7 @@ msgstr "Back"
 msgid "Back to Club"
 msgstr "Back to Club"
 
-#: src/components/when2meet/CreationPage.tsx:521
+#: src/components/when2meet/CreationPage.tsx:533
 msgid "Back to meeting"
 msgstr "Back to meeting"
 
@@ -1099,7 +1099,7 @@ msgstr "Book auditoriums and meeting rooms in Innopolis University."
 msgid "Book more in <0>Music Room bot</0>"
 msgstr "Book more in <0>Music Room bot</0>"
 
-#: src/components/when2meet/MeetingPage.tsx:1672
+#: src/components/when2meet/MeetingPage.tsx:1677
 #: src/components/when2meet/MeetingRoomModal.tsx:266
 msgid "Book room"
 msgstr "Book room"
@@ -1114,7 +1114,7 @@ msgstr "Book the Music room in Innopolis."
 msgid "Book this room"
 msgstr "Book this room"
 
-#: src/components/when2meet/MeetingPage.tsx:1554
+#: src/components/when2meet/MeetingPage.tsx:1559
 msgid "Booked room"
 msgstr "Booked room"
 
@@ -1130,7 +1130,7 @@ msgstr "Booking calendar"
 msgid "Booking details"
 msgstr "Booking details"
 
-#: src/components/when2meet/MeetingPage.tsx:1589
+#: src/components/when2meet/MeetingPage.tsx:1594
 msgid "Booking time differs from the selected meeting time."
 msgstr "Booking time differs from the selected meeting time."
 
@@ -1202,8 +1202,8 @@ msgstr "Calendar"
 msgid "Calendar deletion failed"
 msgstr "Calendar deletion failed"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1496
-#: src/components/when2meet/AvailabilitySelector.tsx:1507
+#: src/components/when2meet/AvailabilitySelector.tsx:1493
+#: src/components/when2meet/AvailabilitySelector.tsx:1504
 msgid "Calendar events"
 msgstr "Calendar events"
 
@@ -1275,18 +1275,18 @@ msgstr "Can be played now"
 #: src/components/toast/ConfirmDialog.tsx:23
 #: src/components/toast/ToastProvider.test.ts:130
 #: src/components/web-print/PrintPage.tsx:505
-#: src/components/web-print/ScanPage.tsx:694
-#: src/components/web-print/ScanPage.tsx:758
+#: src/components/web-print/ScanPage.tsx:688
+#: src/components/web-print/ScanPage.tsx:752
 #: src/components/when2meet/ArchiveMeetingButton.test.ts:44
 #: src/components/when2meet/ArchiveMeetingButton.tsx:40
-#: src/components/when2meet/CreationPage.tsx:349
-#: src/components/when2meet/CreationPage.tsx:353
+#: src/components/when2meet/CreationPage.tsx:361
+#: src/components/when2meet/CreationPage.tsx:365
 #: src/components/when2meet/MeetingMobileBar.tsx:237
-#: src/components/when2meet/MeetingPage.tsx:961
-#: src/components/when2meet/MeetingPage.tsx:1159
-#: src/components/when2meet/MeetingPage.tsx:1411
-#: src/components/when2meet/MeetingPage.tsx:1639
 #: src/components/when2meet/MeetingName.tsx:126
+#: src/components/when2meet/MeetingPage.tsx:962
+#: src/components/when2meet/MeetingPage.tsx:1160
+#: src/components/when2meet/MeetingPage.tsx:1416
+#: src/components/when2meet/MeetingPage.tsx:1644
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -1316,7 +1316,7 @@ msgstr "Cancel submission"
 msgid "Cancel the pending submission? The draft will stay."
 msgstr "Cancel the pending submission? The draft will stay."
 
-#: src/components/when2meet/MeetingPage.tsx:1656
+#: src/components/when2meet/MeetingPage.tsx:1661
 msgid "Cancel the room booking before changing the meeting time."
 msgstr "Cancel the room booking before changing the meeting time."
 
@@ -1340,7 +1340,12 @@ msgstr "Cannot check out"
 msgid "Cannot decline without feedback"
 msgstr "Cannot decline without feedback"
 
-#: src/components/when2meet/MeetingPage.tsx:1055
+#: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:148
+#: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:177
+msgid "Cannot delete a block referenced by series: {references}. Change their windows first."
+msgstr "Cannot delete a block referenced by series: {references}. Change their windows first."
+
+#: src/components/when2meet/MeetingPage.tsx:1056
 msgid "Cannot select a past time"
 msgstr "Cannot select a past time"
 
@@ -1393,14 +1398,18 @@ msgid "Change Medical Group"
 msgstr "Change Medical Group"
 
 #: src/components/when2meet/MeetingMobileBar.tsx:209
-#: src/components/when2meet/MeetingPage.tsx:1433
+#: src/components/when2meet/MeetingPage.tsx:1438
 msgid "Change my availability"
 msgstr "Change my availability"
 
-#: src/components/when2meet/MeetingPage.tsx:1670
+#: src/components/when2meet/MeetingPage.tsx:1675
 #: src/components/when2meet/MeetingRoomModal.tsx:266
 msgid "Change room"
 msgstr "Change room"
+
+#: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:205
+msgid "Changing block dates automatically updates bound series windows. Custom windows and explicit meeting dates are not moved."
+msgstr "Changing block dates automatically updates bound series windows. Custom windows and explicit meeting dates are not moved."
 
 #: src/components/clubs/constants.ts:83
 msgid "Channel"
@@ -1486,11 +1495,11 @@ msgstr "Checking your workouts <0>can take up to 2 weeks.</0>"
 msgid "Chill day"
 msgstr "Chill day"
 
-#: src/components/when2meet/MeetingPage.tsx:1056
+#: src/components/when2meet/MeetingPage.tsx:1057
 msgid "Choose a meeting start time in the future."
 msgstr "Choose a meeting start time in the future."
 
-#: src/components/when2meet/MeetingPage.tsx:1085
+#: src/components/when2meet/MeetingPage.tsx:1086
 msgid "Choose a meeting time on the grid first."
 msgstr "Choose a meeting time on the grid first."
 
@@ -1498,16 +1507,16 @@ msgstr "Choose a meeting time on the grid first."
 msgid "Choose a source to restore the draft from."
 msgstr "Choose a source to restore the draft from."
 
-#: src/components/when2meet/CreationPage.tsx:249
-#: src/components/when2meet/CreationPage.tsx:300
+#: src/components/when2meet/CreationPage.tsx:261
+#: src/components/when2meet/CreationPage.tsx:312
 msgid "Choose allowed timeslots on the meeting page."
 msgstr "Choose allowed timeslots on the meeting page."
 
-#: src/components/when2meet/CreationPage.tsx:187
+#: src/components/when2meet/CreationPage.tsx:199
 msgid "Choose at least one date."
 msgstr "Choose at least one date."
 
-#: src/components/when2meet/MeetingPage.tsx:989
+#: src/components/when2meet/MeetingPage.tsx:990
 msgid "Choose at least one timeslot."
 msgstr "Choose at least one timeslot."
 
@@ -1520,7 +1529,7 @@ msgstr "Choose color"
 msgid "Choose file"
 msgstr "Choose file"
 
-#: src/components/when2meet/MeetingPage.tsx:1651
+#: src/components/when2meet/MeetingPage.tsx:1656
 msgid "Choose meeting time"
 msgstr "Choose meeting time"
 
@@ -1529,7 +1538,7 @@ msgid "Chrome extension"
 msgstr "Chrome extension"
 
 #: src/components/when2meet/MeetingMobileBar.tsx:112
-#: src/components/when2meet/MeetingPage.tsx:1348
+#: src/components/when2meet/MeetingPage.tsx:1353
 msgid "Clear all"
 msgstr "Clear all"
 
@@ -1704,7 +1713,7 @@ msgstr "Code from TV"
 msgid "Collapse"
 msgstr "Collapse"
 
-#: src/components/admin/AdminUserDetails.tsx:266
+#: src/components/admin/AdminUserDetails.tsx:277
 #: src/components/admin/utils.ts:35
 #: src/components/admin/utils.ts:50
 #: src/components/dashboard/AccountWidget.tsx:14
@@ -1836,7 +1845,7 @@ msgstr "Continue"
 msgid "Convenient tools for Moodle, InNoHassle and other services at Innopolis University."
 msgstr "Convenient tools for Moodle, InNoHassle and other services at Innopolis University."
 
-#: src/components/when2meet/MeetingPage.tsx:1396
+#: src/components/when2meet/MeetingPage.tsx:1401
 msgid "Copied"
 msgstr "Copied"
 
@@ -1907,7 +1916,7 @@ msgstr "Could not add game"
 msgid "Could not check access"
 msgstr "Could not check access"
 
-#: src/components/when2meet/MeetingPage.tsx:1142
+#: src/components/when2meet/MeetingPage.tsx:1143
 msgid "Could not copy link to clipboard."
 msgstr "Could not copy link to clipboard."
 
@@ -2000,7 +2009,7 @@ msgstr "Course:"
 #: src/components/events/drafts/CreateDraftModal.tsx:197
 #: src/components/tabletennis/CreateTournamentForm.tsx:130
 #: src/components/tabletennis/TabletennisTournaments.tsx:225
-#: src/components/when2meet/CreationPage.tsx:451
+#: src/components/when2meet/CreationPage.tsx:463
 msgid "Create"
 msgstr "Create"
 
@@ -2150,6 +2159,10 @@ msgstr "Currently impersonating {0}"
 msgid "Custom display label"
 msgstr "Custom display label"
 
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:150
+msgid "Custom window"
+msgstr "Custom window"
+
 #: src/components/sport/sport-checkin-utils.ts:136
 msgid "Daily limit for the same sport: 2 sport hours (usually 1 training)."
 msgstr "Daily limit for the same sport: 2 sport hours (usually 1 training)."
@@ -2231,7 +2244,7 @@ msgstr "Define rules for your room"
 #: src/components/tabletennis/ValidationMatches.tsx:709
 #: src/components/toast/ToastProvider.test.ts:73
 #: src/components/toast/ToastProvider.test.ts:129
-#: src/components/when2meet/MeetingPage.tsx:1158
+#: src/components/when2meet/MeetingPage.tsx:1159
 msgid "Delete"
 msgstr "Delete"
 
@@ -2273,7 +2286,7 @@ msgstr "Delete column"
 msgid "Delete draft"
 msgstr "Delete draft"
 
-#: src/components/when2meet/MeetingPage.tsx:1722
+#: src/components/when2meet/MeetingPage.tsx:1727
 msgid "Delete event"
 msgstr "Delete event"
 
@@ -2295,7 +2308,7 @@ msgstr "Delete language"
 msgid "Delete language <0>{0}</0>?"
 msgstr "Delete language <0>{0}</0>?"
 
-#: src/components/when2meet/MeetingPage.tsx:1156
+#: src/components/when2meet/MeetingPage.tsx:1157
 msgid "Delete meeting"
 msgstr "Delete meeting"
 
@@ -2360,7 +2373,7 @@ msgstr "Depersonate"
 #: src/components/sport/SportStudentTrainingModal.tsx:328
 #: src/components/sport/SportStudentTrainingModal.tsx:335
 #: src/components/sport/SportStudentTrainingModal.tsx:344
-#: src/components/when2meet/CreationPage.tsx:385
+#: src/components/when2meet/CreationPage.tsx:397
 msgid "Description"
 msgstr "Description"
 
@@ -2564,7 +2577,7 @@ msgstr "Edit Club"
 msgid "Edit draft"
 msgstr "Edit draft"
 
-#: src/components/when2meet/MeetingPage.tsx:1691
+#: src/components/when2meet/MeetingPage.tsx:1696
 msgid "Edit event"
 msgstr "Edit event"
 
@@ -2585,7 +2598,7 @@ msgstr "Edit info"
 msgid "Edit link"
 msgstr "Edit link"
 
-#: src/components/when2meet/CreationPage.tsx:535
+#: src/components/when2meet/CreationPage.tsx:547
 msgid "Edit meeting"
 msgstr "Edit meeting"
 
@@ -2614,7 +2627,11 @@ msgstr "Edit the spreadsheet or share the join link with students."
 msgid "Edit this calendar"
 msgstr "Edit this calendar"
 
-#: src/components/admin/AdminUserDetails.tsx:255
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:199
+msgid "Effective window for the selected groups:"
+msgstr "Effective window for the selected groups:"
+
+#: src/components/admin/AdminUserDetails.tsx:266
 #: src/components/clubs/EditClubPage.tsx:976
 msgid "Email"
 msgstr "Email"
@@ -2628,6 +2645,10 @@ msgstr "Empty group"
 msgid "End"
 msgstr "End"
 
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:172
+msgid "End (inclusive)"
+msgstr "End (inclusive)"
+
 #: src/components/sport/SportOverviewSection.tsx:645
 msgid "End date"
 msgstr "End date"
@@ -2636,7 +2657,7 @@ msgstr "End date"
 msgid "End time must be after the start time."
 msgstr "End time must be after the start time."
 
-#: src/components/when2meet/CreationPage.tsx:190
+#: src/components/when2meet/CreationPage.tsx:202
 msgid "End time must be later than start time."
 msgstr "End time must be later than start time."
 
@@ -2706,6 +2727,10 @@ msgstr "Enter the code from the TV screen."
 #: src/components/room-booking/timeline/BookingModal.tsx:866
 msgid "Enter title..."
 msgstr "Enter title..."
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:55
+msgid "Enter valid start and end dates."
+msgstr "Enter valid start and end dates."
 
 #: src/app/routes/guard.google.files.$slug.join.tsx:94
 msgid "Enter your Gmail address to get access to the Google Spreadsheet"
@@ -2794,17 +2819,17 @@ msgstr "Equipment"
 #: src/components/when2meet/CreationPage.tsx:140
 #: src/components/when2meet/CreationPage.tsx:152
 #: src/components/when2meet/CreationPage.tsx:162
-#: src/components/when2meet/CreationPage.tsx:289
-#: src/components/when2meet/MeetingPage.tsx:151
-#: src/components/when2meet/MeetingPage.tsx:169
-#: src/components/when2meet/MeetingPage.tsx:186
-#: src/components/when2meet/MeetingPage.tsx:205
-#: src/components/when2meet/MeetingPage.tsx:468
-#: src/components/when2meet/MeetingPage.tsx:989
-#: src/components/when2meet/MeetingPage.tsx:1085
-#: src/components/when2meet/MeetingPage.tsx:1142
-#: src/components/when2meet/MeetingRoomModal.tsx:189
+#: src/components/when2meet/CreationPage.tsx:301
 #: src/components/when2meet/MeetingName.tsx:35
+#: src/components/when2meet/MeetingPage.tsx:152
+#: src/components/when2meet/MeetingPage.tsx:170
+#: src/components/when2meet/MeetingPage.tsx:187
+#: src/components/when2meet/MeetingPage.tsx:206
+#: src/components/when2meet/MeetingPage.tsx:469
+#: src/components/when2meet/MeetingPage.tsx:990
+#: src/components/when2meet/MeetingPage.tsx:1086
+#: src/components/when2meet/MeetingPage.tsx:1143
+#: src/components/when2meet/MeetingRoomModal.tsx:189
 msgid "Error"
 msgstr "Error"
 
@@ -2873,7 +2898,7 @@ msgstr "Every criterion requires proof"
 msgid "Every group needs at least 2 players."
 msgstr "Every group needs at least 2 players."
 
-#: src/components/when2meet/MeetingPage.tsx:1117
+#: src/components/when2meet/MeetingPage.tsx:1118
 msgid "Everyone can now see the final meeting time."
 msgstr "Everyone can now see the final meeting time."
 
@@ -3070,8 +3095,8 @@ msgstr "Filters"
 msgid "Final"
 msgstr "Final"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1529
-#: src/components/when2meet/AvailabilitySelector.tsx:1535
+#: src/components/when2meet/AvailabilitySelector.tsx:1526
+#: src/components/when2meet/AvailabilitySelector.tsx:1532
 msgid "Final time"
 msgstr "Final time"
 
@@ -3113,7 +3138,7 @@ msgstr "Finished trainings from the last 8 weeks. Click a training to view or up
 msgid "Firefox extension"
 msgstr "Firefox extension"
 
-#: src/components/admin/AdminUserDetails.tsx:289
+#: src/components/admin/AdminUserDetails.tsx:300
 msgid "First name"
 msgstr "First name"
 
@@ -3457,19 +3482,19 @@ msgid "Hidden from calendar"
 msgstr "Hidden from calendar"
 
 #: src/components/when2meet/MeetingMobileBar.tsx:193
-#: src/components/when2meet/MeetingPage.tsx:1741
+#: src/components/when2meet/MeetingPage.tsx:1746
 msgid "Hide all"
 msgstr "Hide all"
 
-#: src/components/when2meet/MeetingPage.tsx:1490
+#: src/components/when2meet/MeetingPage.tsx:1495
 msgid "Hide best time"
 msgstr "Hide best time"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1478
+#: src/components/when2meet/AvailabilitySelector.tsx:1475
 msgid "Hide calendar events"
 msgstr "Hide calendar events"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1516
+#: src/components/when2meet/AvailabilitySelector.tsx:1513
 msgid "Hide final meeting time"
 msgstr "Hide final meeting time"
 
@@ -3477,7 +3502,7 @@ msgstr "Hide final meeting time"
 msgid "Hide from calendar"
 msgstr "Hide from calendar"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1448
+#: src/components/when2meet/AvailabilitySelector.tsx:1445
 msgid "Hide other participants' availability"
 msgstr "Hide other participants' availability"
 
@@ -3533,8 +3558,8 @@ msgstr "How to Register Your Club"
 msgid "I can help you to book the music room."
 msgstr "I can help you to book the music room."
 
-#: src/components/admin/AdminUserDetails.tsx:206
-#: src/components/admin/AdminUserDetails.tsx:288
+#: src/components/admin/AdminUserDetails.tsx:207
+#: src/components/admin/AdminUserDetails.tsx:299
 msgid "ID"
 msgstr "ID"
 
@@ -3621,6 +3646,10 @@ msgstr "In storage"
 msgid "Inactive"
 msgstr "Inactive"
 
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:203
+msgid "inclusive; days: {dayCount}"
+msgstr "inclusive; days: {dayCount}"
+
 #: src/components/web-print/PrintPage.tsx:187
 msgid "Incorrect page range format."
 msgstr "Incorrect page range format."
@@ -3654,7 +3683,7 @@ msgstr "Initializing TV..."
 msgid "Inline code"
 msgstr "Inline code"
 
-#: src/components/admin/AdminUserDetails.tsx:208
+#: src/components/admin/AdminUserDetails.tsx:209
 #: src/components/admin/utils.ts:51
 msgid "InNoHassle admin"
 msgstr "InNoHassle admin"
@@ -3679,7 +3708,7 @@ msgstr "InNoHassle Tools is a browser extension that provides convenient tools f
 msgid "Innopoints Rewards"
 msgstr "Innopoints Rewards"
 
-#: src/components/admin/AdminUserDetails.tsx:254
+#: src/components/admin/AdminUserDetails.tsx:265
 msgid "Innopolis"
 msgstr "Innopolis"
 
@@ -3848,7 +3877,7 @@ msgstr "Keep submitted logo"
 msgid "Label (Optional)"
 msgstr "Label (Optional)"
 
-#: src/components/admin/AdminUserDetails.tsx:290
+#: src/components/admin/AdminUserDetails.tsx:301
 msgid "Last name"
 msgstr "Last name"
 
@@ -4183,7 +4212,7 @@ msgstr "Meet new people, make friends, and participate in activities that make y
 msgid "Meet new students, make connections, and build relationships that will help you down the line when looking for a job."
 msgstr "Meet new students, make connections, and build relationships that will help you down the line when looking for a job."
 
-#: src/components/when2meet/MeetingPage.tsx:367
+#: src/components/when2meet/MeetingPage.tsx:368
 msgid "Meeting"
 msgstr "Meeting"
 
@@ -4192,25 +4221,25 @@ msgstr "Meeting"
 msgid "Meeting archived"
 msgstr "Meeting archived"
 
-#: src/components/when2meet/CreationPage.tsx:298
+#: src/components/when2meet/CreationPage.tsx:310
 msgid "Meeting created"
 msgstr "Meeting created"
 
-#: src/components/when2meet/MeetingPage.tsx:182
+#: src/components/when2meet/MeetingPage.tsx:183
 msgid "Meeting deleted"
 msgstr "Meeting deleted"
 
-#: src/components/when2meet/CreationPage.tsx:361
+#: src/components/when2meet/CreationPage.tsx:373
 #: src/components/when2meet/MeetingName.tsx:85
 msgid "Meeting name"
 msgstr "Meeting name"
 
-#: src/components/when2meet/CreationPage.tsx:183
+#: src/components/when2meet/CreationPage.tsx:195
 #: src/components/when2meet/MeetingName.tsx:106
 msgid "Meeting name should contain at least 3 symbols."
 msgstr "Meeting name should contain at least 3 symbols."
 
-#: src/components/when2meet/MeetingPage.tsx:1198
+#: src/components/when2meet/MeetingPage.tsx:1199
 msgid "Meeting not found or has no configured dates."
 msgstr "Meeting not found or has no configured dates."
 
@@ -4222,22 +4251,26 @@ msgstr "Meeting room booking was canceled."
 msgid "Meeting room was changed."
 msgstr "Meeting room was changed."
 
-#: src/components/when2meet/MeetingPage.tsx:1226
+#: src/components/when2meet/MeetingPage.tsx:1227
 msgid "Meeting start time must be in the future"
 msgstr "Meeting start time must be in the future"
 
-#: src/components/when2meet/MeetingPage.tsx:1116
+#: src/components/when2meet/MeetingPage.tsx:1117
 msgid "Meeting time saved"
 msgstr "Meeting time saved"
 
-#: src/components/when2meet/CreationPage.tsx:248
-#: src/components/when2meet/CreationPage.tsx:261
+#: src/components/when2meet/CreationPage.tsx:260
+#: src/components/when2meet/CreationPage.tsx:273
 msgid "Meeting updated"
 msgstr "Meeting updated"
 
-#: src/components/when2meet/CreationPage.tsx:289
+#: src/components/when2meet/CreationPage.tsx:301
 msgid "Meeting was created without an id."
 msgstr "Meeting was created without an id."
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:206
+msgid "meetings: {occurrenceCount}"
+msgstr "meetings: {occurrenceCount}"
 
 #: src/app/routes/_with_menu/menu.tsx:15
 msgid "Menu"
@@ -4255,7 +4288,7 @@ msgstr "Merch of the club"
 msgid "Min"
 msgstr "Min"
 
-#: src/components/when2meet/MeetingPage.tsx:1505
+#: src/components/when2meet/MeetingPage.tsx:1510
 msgid "Minimum participants"
 msgstr "Minimum participants"
 
@@ -4366,7 +4399,7 @@ msgstr "My meetings"
 msgid "My upcoming trainings"
 msgstr "My upcoming trainings"
 
-#: src/components/admin/AdminUserDetails.tsx:256
+#: src/components/admin/AdminUserDetails.tsx:267
 #: src/components/calendar/import/ImportModal.tsx:163
 #: src/components/clubs/ClubPage.tsx:278
 #: src/components/clubs/EditClubPage.tsx:963
@@ -4389,7 +4422,7 @@ msgstr "Name for your calendar..."
 msgid "Name or email..."
 msgstr "Name or email..."
 
-#: src/components/when2meet/CreationPage.tsx:370
+#: src/components/when2meet/CreationPage.tsx:382
 msgid "Name your meeting"
 msgstr "Name your meeting"
 
@@ -4437,7 +4470,7 @@ msgstr "New guests will get {newRole, select, writer {Writer} other {Reader}} ac
 msgid "New logo submitted (preview failed to load)"
 msgstr "New logo submitted (preview failed to load)"
 
-#: src/components/when2meet/CreationPage.tsx:537
+#: src/components/when2meet/CreationPage.tsx:549
 msgid "New meeting"
 msgstr "New meeting"
 
@@ -4457,7 +4490,7 @@ msgstr "New tab"
 msgid "New Year countdown"
 msgstr "New Year countdown"
 
-#: src/components/when2meet/CreationPage.tsx:449
+#: src/components/when2meet/CreationPage.tsx:461
 #: src/components/when2meet/MeetingRoomModal.tsx:374
 msgid "Next"
 msgstr "Next"
@@ -4480,7 +4513,7 @@ msgstr "Next reservations"
 msgid "Nickname or email"
 msgstr "Nickname or email"
 
-#: src/components/admin/AdminUserDetails.tsx:38
+#: src/components/admin/AdminUserDetails.tsx:39
 msgid "No"
 msgstr "No"
 
@@ -4499,6 +4532,10 @@ msgstr "No active tournament at the moment."
 #: src/components/tabletennis/TabletennisTournaments.tsx:235
 msgid "No active tournaments. Create one to start managing groups and the qualification bracket."
 msgstr "No active tournaments. Create one to start managing groups and the qualification bracket."
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:193
+msgid "No additional restriction; using groups' teaching periods."
+msgstr "No additional restriction; using groups' teaching periods."
 
 #: src/components/events/submissions/SubmissionsPage.tsx:29
 msgid "No approved submissions."
@@ -4559,7 +4596,7 @@ msgstr "No data for the selected period"
 msgid "No date"
 msgstr "No date"
 
-#: src/components/when2meet/utils/slots.ts:136
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:212
 msgid "No dates"
 msgstr "No dates"
 
@@ -4709,11 +4746,11 @@ msgstr "No meetings match your search."
 msgid "No one has joined yet"
 msgstr "No one has joined yet"
 
-#: src/components/when2meet/MeetingPage.tsx:1900
+#: src/components/when2meet/MeetingPage.tsx:1905
 msgid "No one is allowed here"
 msgstr "No one is allowed here"
 
-#: src/components/when2meet/MeetingPage.tsx:1902
+#: src/components/when2meet/MeetingPage.tsx:1907
 msgid "No one is available"
 msgstr "No one is available"
 
@@ -4721,7 +4758,7 @@ msgstr "No one is available"
 msgid "No page specified"
 msgstr "No page specified"
 
-#: src/components/when2meet/MeetingPage.tsx:1793
+#: src/components/when2meet/MeetingPage.tsx:1798
 msgid "No participants found."
 msgstr "No participants found."
 
@@ -4749,7 +4786,7 @@ msgstr "No places left for this training."
 msgid "No players match the current filters"
 msgstr "No players match the current filters"
 
-#: src/components/admin/AdminUserDetails.tsx:361
+#: src/components/admin/AdminUserDetails.tsx:372
 msgid "No predefined groups for this user."
 msgstr "No predefined groups for this user."
 
@@ -4757,7 +4794,7 @@ msgstr "No predefined groups for this user."
 msgid "No predefined users."
 msgstr "No predefined users."
 
-#: src/components/admin/AdminUserDetails.tsx:282
+#: src/components/admin/AdminUserDetails.tsx:293
 msgid "No preferences."
 msgstr "No preferences."
 
@@ -4793,7 +4830,7 @@ msgstr "No rooms found."
 msgid "No scan yet"
 msgstr "No scan yet"
 
-#: src/components/when2meet/MeetingPage.tsx:1772
+#: src/components/when2meet/MeetingPage.tsx:1777
 msgid "No slot selected"
 msgstr "No slot selected"
 
@@ -4848,11 +4885,11 @@ msgstr "None"
 msgid "Not a sport club"
 msgstr "Not a sport club"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1242
+#: src/components/when2meet/AvailabilitySelector.tsx:1239
 msgid "not available for this meeting"
 msgstr "not available for this meeting"
 
-#: src/components/when2meet/MeetingPage.tsx:1227
+#: src/components/when2meet/MeetingPage.tsx:1228
 msgid "Not available for this meeting"
 msgstr "Not available for this meeting"
 
@@ -5001,7 +5038,7 @@ msgid "Open bracket"
 msgstr "Open bracket"
 
 #: src/components/room-booking/bookings-list/BookingsListPage.tsx:113
-#: src/components/when2meet/MeetingPage.tsx:1575
+#: src/components/when2meet/MeetingPage.tsx:1580
 msgid "Open details"
 msgstr "Open details"
 
@@ -5028,11 +5065,11 @@ msgstr "Open Telegram bot"
 msgid "Open your calendar settings to add a calendar by URL."
 msgstr "Open your calendar settings to add a calendar by URL."
 
-#: src/components/when2meet/CreationPage.tsx:389
+#: src/components/when2meet/CreationPage.tsx:401
 msgid "Optional meeting details"
 msgstr "Optional meeting details"
 
-#: src/components/when2meet/MeetingPage.tsx:1475
+#: src/components/when2meet/MeetingPage.tsx:1480
 msgid "Options"
 msgstr "Options"
 
@@ -5060,7 +5097,7 @@ msgstr "Other applications: find in settings"
 msgid "Other materials related to the activities of the club"
 msgstr "Other materials related to the activities of the club"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1463
+#: src/components/when2meet/AvailabilitySelector.tsx:1460
 msgid "Other participants"
 msgstr "Other participants"
 
@@ -5089,7 +5126,7 @@ msgstr "Outdated"
 msgid "Outlook API is currently unavailable"
 msgstr "Outlook API is currently unavailable"
 
-#: src/components/when2meet/MeetingPage.tsx:1843
+#: src/components/when2meet/MeetingPage.tsx:1848
 msgid "Owner"
 msgstr "Owner"
 
@@ -5119,11 +5156,11 @@ msgstr "Paper unknown"
 msgid "Parsing activity link"
 msgstr "Parsing activity link"
 
-#: src/components/when2meet/MeetingPage.tsx:166
+#: src/components/when2meet/MeetingPage.tsx:167
 msgid "Participant removed"
 msgstr "Participant removed"
 
-#: src/components/when2meet/MeetingPage.tsx:166
+#: src/components/when2meet/MeetingPage.tsx:167
 msgid "Participant was removed."
 msgstr "Participant was removed."
 
@@ -5132,7 +5169,7 @@ msgstr "Participant was removed."
 msgid "Participants"
 msgstr "Participants"
 
-#: src/components/when2meet/MeetingPage.tsx:1013
+#: src/components/when2meet/MeetingPage.tsx:1014
 msgid "Participants can now add their availability."
 msgstr "Participants can now add their availability."
 
@@ -5196,7 +5233,7 @@ msgstr "Personal calendar"
 msgid "Photo"
 msgstr "Photo"
 
-#: src/components/admin/AdminUserDetails.tsx:302
+#: src/components/admin/AdminUserDetails.tsx:313
 msgid "Photo URL"
 msgstr "Photo URL"
 
@@ -5206,7 +5243,7 @@ msgstr "Photo URL"
 msgid "Pick the registered player who played as <0>{0}</0>. They get the guest's games in every tournament and the rating ({1}); the guest is deleted."
 msgstr "Pick the registered player who played as <0>{0}</0>. They get the guest's games in every tournament and the rating ({1}); the guest is deleted."
 
-#: src/components/when2meet/CreationPage.tsx:430
+#: src/components/when2meet/CreationPage.tsx:442
 msgid "Pick timeslots on the next step"
 msgstr "Pick timeslots on the next step"
 
@@ -5311,7 +5348,7 @@ msgid "Predefined data updated"
 msgstr "Predefined data updated"
 
 #: src/app/routes/_with_menu/admin/predefined.tsx:18
-#: src/components/admin/AdminUserDetails.tsx:343
+#: src/components/admin/AdminUserDetails.tsx:354
 msgid "Predefined groups"
 msgstr "Predefined groups"
 
@@ -5319,7 +5356,7 @@ msgstr "Predefined groups"
 msgid "Predefined users"
 msgstr "Predefined users"
 
-#: src/components/admin/AdminUserDetails.tsx:275
+#: src/components/admin/AdminUserDetails.tsx:286
 msgid "Preferences"
 msgstr "Preferences"
 
@@ -5672,8 +5709,8 @@ msgstr "Reload the page after the connection is restored."
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:97
 #: src/components/tabletennis/PlayersField.tsx:414
 #: src/components/tabletennis/ValidationMatches.tsx:247
-#: src/components/web-print/ScanPage.tsx:773
-#: src/components/when2meet/MeetingPage.tsx:960
+#: src/components/web-print/ScanPage.tsx:767
+#: src/components/when2meet/MeetingPage.tsx:961
 msgid "Remove"
 msgstr "Remove"
 
@@ -5687,7 +5724,7 @@ msgstr "Remove {0}"
 msgid "Remove {0} from the tournament?"
 msgstr "Remove {0} from the tournament?"
 
-#: src/components/when2meet/MeetingPage.tsx:958
+#: src/components/when2meet/MeetingPage.tsx:959
 msgid "Remove {participantName} from the meeting?"
 msgstr "Remove {participantName} from the meeting?"
 
@@ -5715,7 +5752,7 @@ msgstr "Remove highlight"
 msgid "Remove last page"
 msgstr "Remove last page"
 
-#: src/components/web-print/ScanPage.tsx:742
+#: src/components/web-print/ScanPage.tsx:736
 msgid "Remove last page?"
 msgstr "Remove last page?"
 
@@ -5723,7 +5760,7 @@ msgstr "Remove last page?"
 msgid "Remove link"
 msgstr "Remove link"
 
-#: src/components/when2meet/MeetingPage.tsx:956
+#: src/components/when2meet/MeetingPage.tsx:957
 msgid "Remove participant"
 msgstr "Remove participant"
 
@@ -5740,7 +5777,7 @@ msgstr "Remove this calendar"
 msgid "Remove this event from the public calendar? This cannot be undone from here."
 msgstr "Remove this event from the public calendar? This cannot be undone from here."
 
-#: src/components/when2meet/MeetingPage.tsx:959
+#: src/components/when2meet/MeetingPage.tsx:960
 msgid "Remove this participant from the meeting?"
 msgstr "Remove this participant from the meeting?"
 
@@ -5840,7 +5877,7 @@ msgstr "Reset to results"
 msgid "Resources & Links"
 msgstr "Resources & Links"
 
-#: src/components/when2meet/MeetingPage.tsx:1733
+#: src/components/when2meet/MeetingPage.tsx:1738
 msgid "Responses"
 msgstr "Responses"
 
@@ -5984,7 +6021,7 @@ msgstr "Room booking"
 msgid "Room booking relies on the Outlook calendar service, which appears to be down right now. We have been notified about this."
 msgstr "Room booking relies on the Outlook calendar service, which appears to be down right now. We have been notified about this."
 
-#: src/components/when2meet/MeetingPage.tsx:463
+#: src/components/when2meet/MeetingPage.tsx:464
 msgid "Room booking removed"
 msgstr "Room booking removed"
 
@@ -6021,7 +6058,7 @@ msgstr "Room TV"
 msgid "Room was booked for the meeting."
 msgstr "Room was booked for the meeting."
 
-#: src/components/when2meet/MeetingPage.tsx:1305
+#: src/components/when2meet/MeetingPage.tsx:1310
 msgid "Room: {bookedRoomTitle}"
 msgstr "Room: {bookedRoomTitle}"
 
@@ -6050,7 +6087,7 @@ msgstr "Rules of room booking in Innopolis University."
 msgid "Ryan Gosling winks"
 msgstr "Ryan Gosling winks"
 
-#: src/components/when2meet/CreationPage.tsx:407
+#: src/components/when2meet/CreationPage.tsx:419
 msgid "Same hours every day"
 msgstr "Same hours every day"
 
@@ -6059,7 +6096,7 @@ msgstr "Same hours every day"
 #: src/components/events/drafts/DraftPage.tsx:561
 #: src/components/events/drafts/EditDraftInfoModal.tsx:179
 #: src/components/tabletennis/PlayerActionMenu.tsx:310
-#: src/components/when2meet/CreationPage.tsx:465
+#: src/components/when2meet/CreationPage.tsx:477
 #: src/components/when2meet/MeetingName.tsx:117
 msgid "Save"
 msgstr "Save"
@@ -6078,14 +6115,14 @@ msgstr "Save Changes"
 msgid "Save correction"
 msgstr "Save correction"
 
-#: src/components/when2meet/MeetingPage.tsx:1629
+#: src/components/when2meet/MeetingPage.tsx:1634
 msgid "Save meeting time"
 msgstr "Save meeting time"
 
 #: src/components/when2meet/MeetingMobileBar.tsx:124
 #: src/components/when2meet/MeetingMobileBar.tsx:249
-#: src/components/when2meet/MeetingPage.tsx:1359
-#: src/components/when2meet/MeetingPage.tsx:1422
+#: src/components/when2meet/MeetingPage.tsx:1364
+#: src/components/when2meet/MeetingPage.tsx:1427
 msgid "Save timeslots"
 msgstr "Save timeslots"
 
@@ -6101,7 +6138,7 @@ msgstr "Saving..."
 msgid "Saving…"
 msgstr "Saving…"
 
-#: src/components/web-print/ScanPage.tsx:711
+#: src/components/web-print/ScanPage.tsx:705
 #: src/components/web-print/WebPrintLandingPage.tsx:52
 #: src/components/web-print/WebPrintTabs.tsx:14
 msgid "Scan"
@@ -6124,7 +6161,7 @@ msgid "Scan from both sides"
 msgstr "Scan from both sides"
 
 #: src/components/web-print/ScanPage.tsx:488
-#: src/components/web-print/ScanPage.tsx:709
+#: src/components/web-print/ScanPage.tsx:703
 msgid "Scan next page"
 msgstr "Scan next page"
 
@@ -6242,7 +6279,7 @@ msgstr "Search games by name"
 msgid "Search meeting name..."
 msgstr "Search meeting name..."
 
-#: src/components/when2meet/MeetingPage.tsx:1782
+#: src/components/when2meet/MeetingPage.tsx:1787
 msgid "Search participants..."
 msgstr "Search participants..."
 
@@ -6312,7 +6349,7 @@ msgstr "Select a user to impersonate."
 msgid "Select Target Time"
 msgstr "Select Target Time"
 
-#: src/components/when2meet/MeetingPage.tsx:1446
+#: src/components/when2meet/MeetingPage.tsx:1451
 msgid "Select the timeslots that participants can choose, then click Save timeslots."
 msgstr "Select the timeslots that participants can choose, then click Save timeslots."
 
@@ -6323,6 +6360,10 @@ msgstr "Select your training type"
 #: src/components/dashboard/links/CustomSelect.tsx:86
 msgid "Select..."
 msgstr "Select..."
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:189
+msgid "Selected bounds:"
+msgstr "Selected bounds:"
 
 #: src/components/web-print/ScanPage.tsx:156
 msgid "Selected scanner is offline"
@@ -6338,7 +6379,7 @@ msgstr "Selected scanner is offline. Choose another one."
 msgid "Selected: {0} ({1})"
 msgstr "Selected: {0} ({1})"
 
-#: src/components/when2meet/MeetingPage.tsx:1605
+#: src/components/when2meet/MeetingPage.tsx:1610
 msgid "Selected: {pendingMeetingTimeLabel}"
 msgstr "Selected: {pendingMeetingTimeLabel}"
 
@@ -6367,6 +6408,14 @@ msgstr "Self-sport: {0}h"
 #: src/components/clubs/HowToCreateClubPage.tsx:96
 msgid "Semestral Budget"
 msgstr "Semestral Budget"
+
+#: src/components/schedule-assistant/settings/courses/CourseBlocksEditor.tsx:21
+msgid "Series blocks"
+msgstr "Series blocks"
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:105
+msgid "Series window"
+msgstr "Series window"
 
 #: src/app/routes/_with_menu/board-games/index.tsx:21
 msgid "Service for board games reservation."
@@ -6425,7 +6474,7 @@ msgstr "Several players have this nickname, pick one"
 msgid "Share a join link; respondents sign in via SSO and get the role you choose"
 msgstr "Share a join link; respondents sign in via SSO and get the role you choose"
 
-#: src/components/when2meet/MeetingPage.tsx:1385
+#: src/components/when2meet/MeetingPage.tsx:1390
 msgid "Share link"
 msgstr "Share link"
 
@@ -6474,11 +6523,11 @@ msgstr "Show all ({resourceCount})"
 msgid "Show all {0} places"
 msgstr "Show all {0} places"
 
-#: src/components/when2meet/MeetingPage.tsx:1491
+#: src/components/when2meet/MeetingPage.tsx:1496
 msgid "Show best time"
 msgstr "Show best time"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1479
+#: src/components/when2meet/AvailabilitySelector.tsx:1476
 msgid "Show calendar events"
 msgstr "Show calendar events"
 
@@ -6486,7 +6535,7 @@ msgstr "Show calendar events"
 msgid "Show employers that you're ambitious, broad-minded, and an active person who takes advantage of opportunities."
 msgstr "Show employers that you're ambitious, broad-minded, and an active person who takes advantage of opportunities."
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1517
+#: src/components/when2meet/AvailabilitySelector.tsx:1514
 msgid "Show final meeting time"
 msgstr "Show final meeting time"
 
@@ -6507,7 +6556,7 @@ msgstr "Show on map"
 msgid "Show on timeline"
 msgstr "Show on timeline"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1449
+#: src/components/when2meet/AvailabilitySelector.tsx:1446
 msgid "Show other participants' availability"
 msgstr "Show other participants' availability"
 
@@ -6571,7 +6620,6 @@ msgid "Slug <0>*</0>"
 msgstr "Slug <0>*</0>"
 
 #: src/components/web-print/ScanPage.tsx:652
-#: src/components/web-print/ScanPage.tsx:658
 msgid "Smart crop"
 msgstr "Smart crop"
 
@@ -6660,7 +6708,7 @@ msgctxt "club type"
 msgid "Sport"
 msgstr "Sport"
 
-#: src/components/admin/AdminUserDetails.tsx:247
+#: src/components/admin/AdminUserDetails.tsx:248
 msgid "Sport admin"
 msgstr "Sport admin"
 
@@ -6741,7 +6789,7 @@ msgstr "Spreadsheet URL is required"
 msgid "Spreadsheets owned by a service account so only Guard can grant access"
 msgstr "Spreadsheets owned by a service account so only Guard can grant access"
 
-#: src/components/admin/AdminUserDetails.tsx:262
+#: src/components/admin/AdminUserDetails.tsx:273
 #: src/components/admin/utils.ts:33
 #: src/components/admin/utils.ts:48
 #: src/components/dashboard/AccountWidget.tsx:12
@@ -6757,6 +6805,10 @@ msgstr "Standings"
 #: src/components/timer/TimerPage.tsx:272
 msgid "Start"
 msgstr "Start"
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:157
+msgid "Start (inclusive)"
+msgstr "Start (inclusive)"
 
 #. placeholder {0}: getName(picked[0]!)
 #. placeholder {1}: getName(picked[1]!)
@@ -6868,7 +6920,7 @@ msgstr "Stopping booking..."
 msgid "Strikethrough"
 msgstr "Strikethrough"
 
-#: src/components/admin/AdminUserDetails.tsx:258
+#: src/components/admin/AdminUserDetails.tsx:269
 #: src/components/admin/utils.ts:34
 #: src/components/admin/utils.ts:49
 #: src/components/dashboard/AccountWidget.tsx:13
@@ -6997,19 +7049,19 @@ msgstr "Switch language"
 msgid "Switch theme"
 msgstr "Switch theme"
 
-#: src/components/admin/AdminUserDetails.tsx:329
+#: src/components/admin/AdminUserDetails.tsx:340
 msgid "Sync error"
 msgstr "Sync error"
 
-#: src/components/admin/AdminUserDetails.tsx:325
+#: src/components/admin/AdminUserDetails.tsx:336
 msgid "Sync status code"
 msgstr "Sync status code"
 
-#: src/components/admin/AdminUserDetails.tsx:321
+#: src/components/admin/AdminUserDetails.tsx:332
 msgid "Sync success"
 msgstr "Sync success"
 
-#: src/components/admin/AdminUserDetails.tsx:333
+#: src/components/admin/AdminUserDetails.tsx:344
 msgid "Sync updated at"
 msgstr "Sync updated at"
 
@@ -7058,11 +7110,11 @@ msgstr "Take actions based on search results or suggestions."
 msgid "Taken"
 msgstr "Taken"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1423
+#: src/components/when2meet/AvailabilitySelector.tsx:1420
 msgid "Tap a slot or hold and drag to mark your availability. Swipe to scroll."
 msgstr "Tap a slot or hold and drag to mark your availability. Swipe to scroll."
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1414
+#: src/components/when2meet/AvailabilitySelector.tsx:1411
 msgid "Tap a slot or hold and drag to select the meeting time. Swipe to scroll."
 msgstr "Tap a slot or hold and drag to select the meeting time. Swipe to scroll."
 
@@ -7109,7 +7161,7 @@ msgstr "Technical"
 msgid "Tel: {phoneNumber}"
 msgstr "Tel: {phoneNumber}"
 
-#: src/components/admin/AdminUserDetails.tsx:287
+#: src/components/admin/AdminUserDetails.tsx:298
 #: src/components/layout/MorePage.tsx:36
 #: src/components/onboarding/OnboardingProgress.tsx:8
 msgid "Telegram"
@@ -7186,7 +7238,7 @@ msgstr "Text"
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 
-#: src/components/when2meet/MeetingPage.tsx:464
+#: src/components/when2meet/MeetingPage.tsx:465
 msgid "The booking no longer exists in Room Booking, so it was removed from the meeting."
 msgstr "The booking no longer exists in Room Booking, so it was removed from the meeting."
 
@@ -7273,6 +7325,10 @@ msgstr "The reservation was removed."
 msgid "The scanner returned nothing. Please try to scan again."
 msgstr "The scanner returned nothing. Please try to scan again."
 
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:68
+msgid "The selected block does not exist."
+msgstr "The selected block does not exist."
+
 #: src/components/when2meet/utils/meeting-time-selection.ts:6
 msgid "The selected start time has passed. Choose another time."
 msgstr "The selected start time has passed. Choose another time."
@@ -7282,9 +7338,17 @@ msgstr "The selected start time has passed. Choose another time."
 msgid "The selected time must be in the future"
 msgstr "The selected time must be in the future"
 
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:70
+msgid "The series window does not overlap the selected groups' teaching period."
+msgstr "The series window does not overlap the selected groups' teaching period."
+
 #: src/app/routes/forms.submit.tsx:131
 msgid "The slug parameter is missing or invalid."
 msgstr "The slug parameter is missing or invalid."
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:57
+msgid "The start date must not be after the end date."
+msgstr "The start date must not be after the end date."
 
 #: src/components/timer/lib/useTimer.ts:148
 msgid "The timer paused"
@@ -7359,7 +7423,7 @@ msgstr "This logo change will be cancelled when you save."
 msgid "This page is available only for InNoHassle admins."
 msgstr "This page is available only for InNoHassle admins."
 
-#: src/components/when2meet/MeetingPage.tsx:1567
+#: src/components/when2meet/MeetingPage.tsx:1572
 msgid "This room booking no longer exists."
 msgstr "This room booking no longer exists."
 
@@ -7396,7 +7460,7 @@ msgstr "This will be uploaded when you save changes below."
 msgid "This will create a link that automatically fills in the respondent's email address when they open the form."
 msgstr "This will create a link that automatically fills in the respondent's email address when they open the form."
 
-#: src/components/web-print/ScanPage.tsx:747
+#: src/components/web-print/ScanPage.tsx:741
 msgid "This will permanently remove the last scanned page from the document. Are you sure?"
 msgstr "This will permanently remove the last scanned page from the document. Are you sure?"
 
@@ -7448,7 +7512,7 @@ msgstr "Timer set to maximum (99:59:59)"
 msgid "Timer title..."
 msgstr "Timer title..."
 
-#: src/components/when2meet/MeetingPage.tsx:1012
+#: src/components/when2meet/MeetingPage.tsx:1013
 msgid "Timeslots saved"
 msgstr "Timeslots saved"
 
@@ -7633,7 +7697,7 @@ msgstr "Two printers are available on campus right now:"
 msgid "Type"
 msgstr "Type"
 
-#: src/components/when2meet/MeetingPage.tsx:1562
+#: src/components/when2meet/MeetingPage.tsx:1567
 msgid "Unable to load booking details."
 msgstr "Unable to load booking details."
 
@@ -7774,8 +7838,8 @@ msgstr "Update status"
 msgid "Update the club information below"
 msgstr "Update the club information below"
 
-#: src/components/admin/AdminUserDetails.tsx:270
-#: src/components/admin/AdminUserDetails.tsx:317
+#: src/components/admin/AdminUserDetails.tsx:281
+#: src/components/admin/AdminUserDetails.tsx:328
 msgid "Updated at"
 msgstr "Updated at"
 
@@ -7862,7 +7926,7 @@ msgstr "User email"
 msgid "User email is required for impersonation."
 msgstr "User email is required for impersonation."
 
-#: src/components/admin/AdminUserDetails.tsx:350
+#: src/components/admin/AdminUserDetails.tsx:361
 msgid "User groups"
 msgstr "User groups"
 
@@ -7874,7 +7938,7 @@ msgstr "User not found"
 msgid "User profile"
 msgstr "User profile"
 
-#: src/components/admin/AdminUserDetails.tsx:292
+#: src/components/admin/AdminUserDetails.tsx:303
 msgid "Username"
 msgstr "Username"
 
@@ -7899,7 +7963,7 @@ msgstr "Verify your groups"
 msgid "View"
 msgstr "View"
 
-#: src/components/when2meet/MeetingPage.tsx:1741
+#: src/components/when2meet/MeetingPage.tsx:1746
 msgid "View all"
 msgstr "View all"
 
@@ -8003,7 +8067,7 @@ msgstr "Waiting for the activity link"
 #: src/components/web-print/FileDropzone.tsx:348
 #: src/components/web-print/PrintPage.tsx:677
 #: src/components/web-print/PrintPage.tsx:685
-#: src/components/web-print/ScanPage.tsx:731
+#: src/components/web-print/ScanPage.tsx:725
 msgid "Warning"
 msgstr "Warning"
 
@@ -8077,11 +8141,11 @@ msgstr "Website"
 msgid "Website: <0>1519.innopolis.university</0>"
 msgstr "Website: <0>1519.innopolis.university</0>"
 
-#: src/components/admin/AdminUserDetails.tsx:227
+#: src/components/admin/AdminUserDetails.tsx:228
 msgid "Webvisor (innohassle.ru)"
 msgstr "Webvisor (innohassle.ru)"
 
-#: src/components/admin/AdminUserDetails.tsx:237
+#: src/components/admin/AdminUserDetails.tsx:238
 msgid "Webvisor (sport.innopolis.university)"
 msgstr "Webvisor (sport.innopolis.university)"
 
@@ -8123,7 +8187,7 @@ msgstr "What is it?"
 msgid "When available"
 msgstr "When available"
 
-#: src/components/when2meet/CreationPage.tsx:401
+#: src/components/when2meet/CreationPage.tsx:413
 msgid "When can people meet?"
 msgstr "When can people meet?"
 
@@ -8138,6 +8202,14 @@ msgstr "Who is it?"
 #: src/components/about/AboutPage.tsx:32
 msgid "Who we are"
 msgstr "Who we are"
+
+#: src/components/schedule-assistant/settings/courses/CourseBlocksEditor.tsx:38
+msgid "Whole semester"
+msgstr "Whole semester"
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:139
+msgid "Whole semester (groups' teaching period)"
+msgstr "Whole semester (groups' teaching period)"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:22
 msgid "Why Create a Club?"
@@ -8195,11 +8267,11 @@ msgstr "Yellow (for students)"
 msgid "Yellow access level (for students)"
 msgstr "Yellow access level (for students)"
 
-#: src/components/admin/AdminUserDetails.tsx:38
+#: src/components/admin/AdminUserDetails.tsx:39
 msgid "Yes"
 msgstr "Yes"
 
-#: src/components/when2meet/MeetingPage.tsx:547
+#: src/components/when2meet/MeetingPage.tsx:548
 msgid "You"
 msgstr "You"
 
@@ -8326,7 +8398,7 @@ msgstr "You need <0>at least two responsible clubmates</0> to set up a club. Thi
 msgid "You will see room cleaning and linen change schedules in your personal calendar."
 msgstr "You will see room cleaning and linen change schedules in your personal calendar."
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1440
+#: src/components/when2meet/AvailabilitySelector.tsx:1437
 msgid "Your"
 msgstr "Your"
 

@@ -46,7 +46,7 @@ export type EditableSessionEvent = {
   end_time: string;
   room: string | null;
   instructor: string | null;
-  /** Null inherits the series; an empty string explicitly hides its notes. */
+  /** Null inherits course notes; an empty string explicitly hides them. */
   notes: string | null;
   cancelled: boolean;
   weeklyBase?: Pick<
@@ -120,17 +120,25 @@ export function expandWeeklySlotsToEvents({
   weeklySlots,
   audienceTokens,
   active,
+  blockId,
 }: {
   config: SchemaScheduleConfig;
   weeklySlots: SchemaWeeklyPatternSlot[];
   audienceTokens: string[];
   active?: SchemaDateRange | null;
+  blockId?: string | null;
 }): EditableSessionEvent[] {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
   const events: EditableSessionEvent[] = [];
 
   for (const [slotIdx, slot] of weeklySlots.entries()) {
-    const dates = activeWeeklySlotDates(config, slot, audienceTokens, active);
+    const dates = activeWeeklySlotDates(
+      config,
+      slot,
+      audienceTokens,
+      active,
+      blockId,
+    );
     for (const patternDate of dates) {
       const resolved = resolveWeeklyMeetingFields(slot, patternDate, config);
       const base = resolveWeeklyMeetingFields(
@@ -170,6 +178,94 @@ export function expandWeeklySlotsToEvents({
     const byDate = a.date.localeCompare(b.date);
     if (byDate !== 0) return byDate;
     return toUiTime(a.start_time).localeCompare(toUiTime(b.start_time));
+  });
+}
+
+/** True when the concrete row still matches the template base it was expanded from. */
+export function eventFollowsWeeklyBase(event: EditableSessionEvent): boolean {
+  const base = event.weeklyBase;
+  if (!base || event.source.kind !== "weekly") return false;
+  if (event.cancelled || event.notes !== null) return false;
+  if (event.date !== base.date) return false;
+  if (!timesEqual(event.start_time, base.start_time)) return false;
+  if (!timesEqual(event.end_time, base.end_time)) return false;
+  if (!roomsEqual(event.room, base.room)) return false;
+  if (!instructorsEqual(event.instructor, base.instructor)) return false;
+  return true;
+}
+
+/**
+ * Re-expand weekly slots after a template edit: rows that still followed
+ * `weeklyBase` pick up the new template; overridden rows keep their values.
+ */
+export function expandWeeklySlotsPreservingEventOverrides({
+  config,
+  weeklySlots,
+  previousEvents,
+  audienceTokens,
+  active,
+  blockId,
+}: {
+  config: SchemaScheduleConfig;
+  weeklySlots: SchemaWeeklyPatternSlot[];
+  previousEvents: EditableSessionEvent[];
+  audienceTokens: string[];
+  active?: SchemaDateRange | null;
+  blockId?: string | null;
+}): EditableSessionEvent[] {
+  const startingDay = config.term.starting_day ?? Weekday.MONDAY;
+  const nextSlots = structuredClone(weeklySlots);
+  const eventsBySlot = new Map<number, EditableSessionEvent[]>();
+  for (const event of previousEvents) {
+    if (event.source.kind !== "weekly") continue;
+    const list = eventsBySlot.get(event.source.slotIdx) ?? [];
+    list.push(event);
+    eventsBySlot.set(event.source.slotIdx, list);
+  }
+
+  for (const [slotIdx, slot] of nextSlots.entries()) {
+    const slotEvents = eventsBySlot.get(slotIdx) ?? [];
+    const touchedWeeks = new Set(
+      slotEvents
+        .filter((event) => event.source.kind === "weekly")
+        .map((event) =>
+          weekStartForDate(
+            (
+              event.source as Extract<
+                EditableSessionEventSource,
+                { kind: "weekly" }
+              >
+            ).patternDate,
+            startingDay,
+          ),
+        ),
+    );
+    const byWeek = new Map<string, SchemaWeeklyPatternSlotEdit>();
+
+    // Keep edits for weeks outside the currently expanded editor window.
+    for (const edit of slot.edits || []) {
+      const weekKey = weekStartForDate(edit.select_week, startingDay);
+      if (touchedWeeks.has(weekKey)) continue;
+      byWeek.set(weekKey, edit);
+    }
+
+    for (const event of slotEvents) {
+      if (event.source.kind !== "weekly") continue;
+      if (eventFollowsWeeklyBase(event)) continue;
+      const edit = buildWeeklyEditFromEvent(slot, event, startingDay);
+      if (!edit) continue;
+      byWeek.set(weekStartForDate(edit.select_week, startingDay), edit);
+    }
+
+    slot.edits = byWeek.size ? [...byWeek.values()] : null;
+  }
+
+  return expandWeeklySlotsToEvents({
+    config,
+    weeklySlots: nextSlots,
+    audienceTokens,
+    active,
+    blockId,
   });
 }
 
@@ -500,13 +596,13 @@ export function editableEventsToDraftMeetings({
   meeting,
   meetingRef,
   audienceTokens,
-  seriesNotes = "",
+  courseNotes = "",
 }: {
   events: EditableSessionEvent[];
   meeting: Meeting;
   meetingRef: MeetingRef;
   audienceTokens: string[];
-  seriesNotes?: string;
+  courseNotes?: string;
 }): Meeting[] {
   return events
     .filter((event) => !event.cancelled)
@@ -523,7 +619,7 @@ export function editableEventsToDraftMeetings({
         end: toUiTime(event.end_time) || undefined,
         room: String(event.room || "").trim(),
         instructors: event.instructor || "",
-        notes: event.notes ?? seriesNotes,
+        notes: event.notes ?? courseNotes,
         instructor_pool: meeting.instructor_pool || [],
         section: meeting.section,
         pattern_date:
@@ -554,6 +650,7 @@ export function applyEditableEventsToCourse({
   audience,
   notes,
   active,
+  blockId,
   placement,
   weeklySlots,
   events,
@@ -564,6 +661,7 @@ export function applyEditableEventsToCourse({
   audience?: string[];
   notes?: string;
   active?: SchemaDateRange | null;
+  blockId?: string | null;
   placement: "weekly" | "dates_pattern";
   weeklySlots: SchemaWeeklyPatternSlot[];
   events: EditableSessionEvent[];
@@ -573,6 +671,7 @@ export function applyEditableEventsToCourse({
       audience,
       notes,
       active,
+      block_id: blockId,
       weeklyPattern: serializeWeeklyEventsToSlots({
         originalSlots: weeklySlots,
         events,
@@ -586,6 +685,7 @@ export function applyEditableEventsToCourse({
     audience,
     notes,
     active,
+    block_id: blockId,
     dates_pattern: serializeOccurrenceEvents(events),
     weeklyPattern: null,
   });

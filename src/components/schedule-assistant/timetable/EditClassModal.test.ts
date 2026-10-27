@@ -8,6 +8,9 @@ import {
   type SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { EditClassModal } from "./EditClassModal.tsx";
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
+const i18n = setupI18n({ locale: "en", messages: {} });
 import { buildMeetingPickerIndex } from "./meetingPickerIndex.ts";
 import { buildMeetings } from "./timetableViewerModel.ts";
 
@@ -32,9 +35,17 @@ vi.mock("./EditClassAudienceModal.tsx", () => ({
   EditClassPerGroupModal: () => null,
 }));
 vi.mock("./SessionSeriesEditor.tsx", () => ({
-  SessionSeriesEditor: ({ active }: { active?: SchemaDateRange | null }) =>
-    createElement("span", { "data-template-active": JSON.stringify(active) }),
-  SeriesNotesField: () => null,
+  SessionSeriesEditor: ({
+    active,
+    blockId,
+  }: {
+    active?: SchemaDateRange | null;
+    blockId?: string | null;
+  }) =>
+    createElement("span", {
+      "data-template-active": JSON.stringify(active),
+      "data-block-id": blockId ?? "",
+    }),
   SessionPlacementToggle: ({
     onChange,
   }: {
@@ -96,10 +107,10 @@ function configFor(): SchemaScheduleConfig {
             audience: ["G"],
             per_group: false,
             instructor_pool: [],
-            sessions: [first, second].map((active) => ({
+            sessions: ["first", "second"].map((block_id) => ({
               audience: ["G"],
-              notes: "Keep",
-              active,
+              active: null,
+              block_id,
               weekly_pattern: [
                 {
                   weekday: Weekday.TUESDAY,
@@ -134,24 +145,22 @@ async function mount(config: SchemaScheduleConfig) {
   const root = createRoot(container);
   await act(async () =>
     root.render(
-      createElement(EditClassModal, {
-        open: true,
-        onOpenChange: vi.fn(),
-        meeting,
-        config,
-        meetings,
-        meetingPickerIndex: buildMeetingPickerIndex(meetings),
-      }),
+      createElement(
+        I18nProvider,
+        { i18n },
+        createElement(EditClassModal, {
+          open: true,
+          onOpenChange: vi.fn(),
+          meeting,
+          config,
+          meetings,
+          meetingPickerIndex: buildMeetingPickerIndex(meetings),
+        }),
+      ),
     ),
   );
   return {
     container,
-    select: async (value: string) =>
-      act(async () => {
-        const select = container.querySelector("select")!;
-        select.value = value;
-        select.dispatchEvent(new Event("change", { bubbles: true }));
-      }),
     click: async (label: string) =>
       act(async () =>
         [...container.querySelectorAll("button")]
@@ -163,39 +172,26 @@ async function mount(config: SchemaScheduleConfig) {
 }
 
 describe("EditClassModal session windows", () => {
-  it("saves a range-only edit to the exact selected series without rewriting co-teachers or inactive edits", async () => {
+  it("expands the meeting series within its frozen block window", async () => {
     const config = configFor();
-    const source = structuredClone(config.courses![0]);
     const editor = await mount(config);
     try {
+      expect(editor.container.querySelector("select")).toBeNull();
       expect(
         editor.container
           .querySelector("[data-event-dates]")
           ?.getAttribute("data-event-dates"),
       ).toBe("2026-09-22,2026-09-29");
-      await editor.select("block:0");
       expect(
         editor.container
           .querySelector("[data-template-active]")
           ?.getAttribute("data-template-active"),
-      ).toBe(JSON.stringify(first));
+      ).toBe("null");
       expect(
         editor.container
-          .querySelector("[data-event-dates]")
-          ?.getAttribute("data-event-dates"),
-      ).toBe("2026-09-01,2026-09-08,2026-09-15");
-      await editor.click("Сохранить");
-      expect(mocks.showError).not.toHaveBeenCalled();
-      expect(mocks.mutate).toHaveBeenCalledOnce();
-      const updated = mocks.mutate.mock.lastCall![0].body as SchemaCourseConfig;
-      expect(updated.components[0].sessions![0]).toEqual(
-        source.components[0].sessions![0],
-      );
-      expect(updated.components[0].sessions![1]).toEqual({
-        ...source.components[0].sessions![1],
-        active: first,
-      });
-      expect(config.courses![0]).toEqual(source);
+          .querySelector("[data-block-id]")
+          ?.getAttribute("data-block-id"),
+      ).toBe("second");
     } finally {
       await editor.cleanup();
     }
@@ -220,7 +216,10 @@ describe("EditClassModal session windows", () => {
       await editor.click("To dates");
       await editor.click("Сохранить");
       const updated = mocks.mutate.mock.lastCall![0].body as SchemaCourseConfig;
-      expect(updated.components[0].sessions![1].active).toEqual(second);
+      expect(updated.components[0].sessions![1]).toMatchObject({
+        active: null,
+        block_id: "second",
+      });
       expect(updated.components[0].sessions![1].weekly_pattern).toEqual([]);
       expect(
         updated.components[0].sessions![1].dates_pattern?.map(

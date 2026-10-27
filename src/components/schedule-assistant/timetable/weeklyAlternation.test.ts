@@ -315,6 +315,50 @@ describe("weekly alternation", () => {
     expect(restored.edits).toEqual(current.edits);
   });
 
+  it("highlights and restores a block window change on the frequency control", () => {
+    const slot = alternating();
+    const config = {
+      ...configFor(),
+      term: {
+        ...configFor().term,
+        blocks: [
+          {
+            id: "first",
+            name: "Блок 1",
+            start_date: "2026-09-01",
+            end_date: "2026-09-15",
+          },
+          {
+            id: "second",
+            name: "Блок 2",
+            start_date: "2026-09-16",
+            end_date: "2026-09-30",
+          },
+        ],
+      },
+    };
+    let restoredWindow = {
+      active: null as null,
+      block_id: "second" as string | null,
+    };
+    const marks = weeklyRowMarks({
+      current: slot,
+      original: slot,
+      weekdayLabel: "Вт",
+      config,
+      window: { active: null, block_id: "second" },
+      originalWindow: { active: null, block_id: "first" },
+      onRestore: () => undefined,
+      onRestoreWindow: (window) => {
+        restoredWindow = window;
+      },
+    });
+    expect(marks.alternation?.mark).toBe("changed");
+    expect(marks.alternation?.originalLabel).toContain("Блок 1");
+    marks.alternation?.onRestore?.();
+    expect(restoredWindow).toEqual({ active: null, block_id: "first" });
+  });
+
   it("materializes only active dates and detects lossy reverse conversion", () => {
     const config = configFor();
     const events = expandWeeklySlotsToEvents({

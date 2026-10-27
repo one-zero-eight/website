@@ -323,6 +323,7 @@ type TimetableViewerProps = {
   returnFromChecks?: boolean;
   personalGroups?: string[];
   personalLessons?: PersonalLessonsState;
+  userEmail?: string | null;
   sidebarAction?: "composer" | "student";
   showDashboardBack?: boolean;
 } & (
@@ -343,6 +344,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
     returnFromChecks,
     personalGroups = EMPTY_PERSONAL_GROUPS,
     personalLessons,
+    userEmail,
     sidebarAction,
     showDashboardBack = false,
   } = props;
@@ -1839,6 +1841,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
                       personalLessons={personalLessons}
                       ownGroups={ownGroups}
                       courseColors={courseColors}
+                      userEmail={userEmail}
                       sidebarAction={sidebarAction}
                     />
                   </div>
@@ -1869,6 +1872,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
             personalLessons={personalLessons}
             ownGroups={ownGroups}
             courseColors={courseColors}
+            userEmail={userEmail}
             sidebarAction={sidebarAction}
           />
         ) : null}
@@ -1899,6 +1903,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
               personalLessons={personalLessons}
               ownGroups={ownGroups}
               courseColors={courseColors}
+              userEmail={userEmail}
               sidebarAction={sidebarAction}
             />
           </DetailFullscreenModal>
@@ -2339,6 +2344,7 @@ type TimetableDetailPanelProps = {
   personalLessons?: PersonalLessonsState;
   ownGroups?: PersonalTimetableGroup[];
   courseColors?: Record<string, { bg: string; border: string }>;
+  userEmail?: string | null;
   sidebarAction?: "composer" | "student";
 };
 
@@ -2365,6 +2371,7 @@ function timetableDetailPanelPropsEqual(
     prev.personalLessons === next.personalLessons &&
     prev.ownGroups === next.ownGroups &&
     prev.courseColors === next.courseColors &&
+    prev.userEmail === next.userEmail &&
     prev.sidebarAction === next.sidebarAction
   );
 }
@@ -2413,6 +2420,7 @@ function TimetableMobileDetailModal({
   personalLessons,
   ownGroups = [],
   courseColors = {},
+  userEmail,
   sidebarAction,
 }: {
   allMeetings: Meeting[];
@@ -2431,6 +2439,7 @@ function TimetableMobileDetailModal({
   personalLessons?: PersonalLessonsState;
   ownGroups?: PersonalTimetableGroup[];
   courseColors?: Record<string, { bg: string; border: string }>;
+  userEmail?: string | null;
   sidebarAction?: "composer" | "student";
 }) {
   const selection = useSelectionSnapshot();
@@ -2469,6 +2478,7 @@ function TimetableMobileDetailModal({
         personalLessons={personalLessons}
         ownGroups={ownGroups}
         courseColors={courseColors}
+        userEmail={userEmail}
         sidebarAction={sidebarAction}
       />
     </DetailFullscreenModal>
@@ -2494,6 +2504,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   personalLessons,
   ownGroups = [],
   courseColors = {},
+  userEmail,
   sidebarAction,
 }: TimetableDetailPanelProps) {
   const editConfig = useContext(TimetableEditConfigContext);
@@ -2575,6 +2586,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
           personalLessons={personalLessons}
           ownGroups={ownGroups}
           courseColors={courseColors}
+          userEmail={userEmail}
           sidebarAction={sidebarAction}
         />
       ) : selection ? (
@@ -3883,10 +3895,12 @@ const MeetingCard = memo(function MeetingCard({
       ref={meetingRef}
       data-meeting-id={m.instance_id}
       className={clsx(
-        "meeting relative rounded-lg",
+        // z-[2] keeps absolute multi-row cards above later slot cells (wide
+        // sticky overflow must not drop stacking or the fill gets covered).
+        "meeting relative z-[2] rounded-lg",
         GROUPS_MEETING_CLASS,
         spansMultipleRows && "w-auto!",
-        isWideCell ? "overflow-visible" : "z-[2] overflow-hidden",
+        isWideCell ? "overflow-visible" : "overflow-hidden",
         meetingHighlightClass,
       )}
       style={{

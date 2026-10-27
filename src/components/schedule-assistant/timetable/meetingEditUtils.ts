@@ -21,6 +21,7 @@ import {
   buildAudienceSelectorTree,
   minimizeAudienceTokens,
 } from "./audienceSelectorTree.ts";
+import { sessionWindowRange } from "./sessionWindows.ts";
 import {
   add90m,
   dayKey,
@@ -695,6 +696,7 @@ export function applySeriesScheduleToCourse(
     audience?: string[];
     notes?: string;
     active?: SchemaDateRange | null;
+    block_id?: string | null;
     dates_pattern?: SchemaSessionOccurrence[] | null;
     weeklyPattern?: SchemaWeeklyPatternSlot[] | null;
   },
@@ -715,7 +717,8 @@ export function applySeriesScheduleToCourse(
     );
   }
 
-  if (update.notes !== undefined) series.notes = update.notes;
+  if (update.notes !== undefined) nextCourse.notes = update.notes;
+  if (update.block_id !== undefined) series.block_id = update.block_id;
   if (update.active !== undefined)
     series.active = structuredClone(update.active);
 
@@ -838,7 +841,7 @@ export function applyMeetingEditsToCourse(
         config,
         slot,
         audienceTokens,
-        ctx.series.active,
+        sessionWindowRange(config, ctx.series.active, ctx.series.block_id),
       )) {
         if (date < meetingDate) continue;
         applyWeeklySingleEdit(slot, date, startingDay, { cancel: true });
@@ -877,7 +880,7 @@ export function applyMeetingEditsToCourse(
     (ctx.series.audience?.length
       ? ctx.series.audience
       : ctx.component.audience) || [],
-    ctx.series.active,
+    sessionWindowRange(config, ctx.series.active, ctx.series.block_id),
   );
   return nextCourse;
 }

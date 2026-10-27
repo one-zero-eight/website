@@ -7,6 +7,9 @@ import {
   type SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { ComponentSessionsEditor } from "./ComponentSessionsEditor.tsx";
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
+const i18n = setupI18n({ locale: "en", messages: {} });
 
 vi.mock(
   "@/components/schedule-assistant/timetable/SessionSeriesEditor.tsx",
@@ -46,7 +49,6 @@ const config = {
 } as unknown as SchemaScheduleConfig;
 const weekly: SchemaComponentSessionSeries = {
   audience: [],
-  notes: "",
   weekly_pattern: [
     {
       weekday: Weekday.TUESDAY,
@@ -77,7 +79,9 @@ async function mount(initial: SchemaComponentSessionSeries) {
   document.body.append(container);
   const root = createRoot(container);
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-  await act(async () => root.render(createElement(Editor)));
+  await act(async () =>
+    root.render(createElement(I18nProvider, { i18n }, createElement(Editor))),
+  );
   return {
     saved: () => saved[0],
     placement: () =>
@@ -124,7 +128,6 @@ describe("course settings schedule conversion", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const initial: SchemaComponentSessionSeries = {
       audience: [],
-      notes: "",
       dates_pattern: [
         { date: "2026-09-15", start_time: "09:00:00", end_time: "10:30:00" },
       ],

@@ -372,7 +372,7 @@ export function resolveWeeklyMeetingFields(
   slot: SchemaWeeklyPatternSlot,
   date: string,
   config: SchemaScheduleConfig,
-  seriesNotes = "",
+  courseNotes = "",
 ) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
   const edit = findEditForMeetingDate(date, slot.edits, startingDay);
@@ -383,7 +383,7 @@ export function resolveWeeklyMeetingFields(
       end: String(slot.end_time).slice(0, 5),
       room: slot.room ?? "",
       instructors: slot.instructor ?? "",
-      notes: edit.notes ?? seriesNotes,
+      notes: edit.notes ?? courseNotes,
       cancelled: true,
     };
   }
@@ -410,7 +410,7 @@ export function resolveWeeklyMeetingFields(
     end: resolvedEnd,
     room: resolvedRoom || "",
     instructors: resolvedInstructor,
-    notes: edit?.notes ?? seriesNotes,
+    notes: edit?.notes ?? courseNotes,
     cancelled: false,
   };
 }
@@ -468,9 +468,10 @@ export function activeWeeklySlotDates(
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[],
   active?: SchemaDateRange | null,
+  blockId?: string | null,
 ): string[] {
   const weekday = weeklyPatternDayKey(String(slot.weekday));
-  const range = resolveSessionWindow(config, audienceTokens, active);
+  const range = resolveSessionWindow(config, audienceTokens, active, blockId);
   if (!weekday || !range) return [];
   return semesterDatesForWeekday(config, weekday, range).filter((date) =>
     isWeeklySlotActiveOnDate(
@@ -500,10 +501,16 @@ export function countWeeklyPatternSlotOccurrences(
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[],
   active?: SchemaDateRange | null,
+  blockId?: string | null,
 ): number {
-  return activeWeeklySlotDates(config, slot, audienceTokens, active).filter(
-    (date) => !resolveWeeklyMeetingFields(slot, date, config).cancelled,
-  ).length;
+  return activeWeeklySlotDates(
+    config,
+    slot,
+    audienceTokens,
+    active,
+    blockId,
+  ).filter((date) => !resolveWeeklyMeetingFields(slot, date, config).cancelled)
+    .length;
 }
 
 export function toMinutes(timeStr: string) {
@@ -864,7 +871,7 @@ export function buildMeetingsForCourse(
             : undefined,
           room: occurrence.room ?? "",
           instructors: occurrence.instructor ?? "",
-          notes: occurrence.notes ?? series.notes ?? "",
+          notes: occurrence.notes ?? course.notes ?? "",
           ...("instructor_pool" in component
             ? { instructor_pool: component.instructor_pool as unknown[] }
             : {}),
@@ -880,13 +887,14 @@ export function buildMeetingsForCourse(
           slot,
           audienceTokens,
           series.active,
+          series.block_id,
         );
         for (const date of dates) {
           const resolved = resolveWeeklyMeetingFields(
             slot,
             date,
             config,
-            series.notes ?? "",
+            course.notes ?? "",
           );
           if (resolved.cancelled) {
             flat.push({

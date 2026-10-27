@@ -8,7 +8,6 @@ import {
   CourseComponentsAccordionList,
   DetailField,
   DetailSection,
-  MeetingAudienceInline,
   SeriesScheduleItemsList,
 } from "@/components/schedule-assistant/courses/CourseComponentDetailsView.tsx";
 import {
@@ -18,8 +17,6 @@ import {
 import { ComponentEditModal } from "@/components/schedule-assistant/settings/courses/ComponentEditModal.tsx";
 import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/ui/cn";
-import Tooltip from "@/components/common/Tooltip.tsx";
-
 import {
   courseDisplayTitle,
   findMeetingForComponent,
@@ -34,10 +31,15 @@ import {
   MeetingMetadataField,
   MeetingMetadataLabels,
   MeetingMetadataRow,
-  meetingMetadataGridClass,
   meetingMetadataSubgridClass,
   meetingMetadataOverrideClass,
 } from "./MeetingMetadata.tsx";
+import {
+  formatMeetingDateShort,
+  formatMeetingInstructorsLabel,
+  MeetingInstanceMetadata,
+  shortMeetingWeekday,
+} from "./MeetingInstanceMetadata.tsx";
 import {
   buildInstructorLabelById,
   dayKey,
@@ -46,23 +48,6 @@ import {
   weekdayLabelRu,
   type Meeting,
 } from "./timetableViewerModel.ts";
-
-function formatMeetingDate(date: string) {
-  const value = new Date(`${date}T12:00:00`);
-  return new Intl.DateTimeFormat("ru-RU", {
-    day: "numeric",
-    month: "short",
-    ...(value.getFullYear() !== new Date().getFullYear()
-      ? { year: "numeric" as const }
-      : {}),
-  }).format(value);
-}
-
-function shortMeetingWeekday(date: string) {
-  return new Intl.DateTimeFormat("ru-RU", { weekday: "short" })
-    .format(new Date(`${date}T12:00:00`))
-    .replace(/^./u, (letter) => letter.toUpperCase());
-}
 
 function MeetingDateListItem({
   meeting,
@@ -73,7 +58,10 @@ function MeetingDateListItem({
   config: SchemaScheduleConfig;
   instructorLabels: Record<string, string>;
 }) {
-  const instructors = formatInstructors(meeting.instructors, instructorLabels);
+  const instructors = formatMeetingInstructorsLabel(
+    meeting.instructors,
+    instructorLabels,
+  );
   const audienceItems = listAudienceInlineItems(config, meeting.groups);
   const overrides = new Set(meeting.override_fields);
   return (
@@ -90,7 +78,7 @@ function MeetingDateListItem({
                 )}
               >
                 {shortMeetingWeekday(meeting.date)},{" "}
-                {formatMeetingDate(meeting.date)}
+                {formatMeetingDateShort(meeting.date)}
               </span>
               {meeting.cancelled ? (
                 <span className="badge badge-error badge-xs">Отменено</span>
@@ -136,22 +124,6 @@ function MeetingDateListItem({
       />
     </span>
   );
-}
-
-function formatInstructors(
-  instructors: string | string[],
-  instructorLabelById: Record<string, string>,
-) {
-  const list =
-    typeof instructors === "string"
-      ? instructors.trim()
-        ? [instructors]
-        : []
-      : instructors;
-  if (!list?.length) return "—";
-  return list
-    .map((id) => resolveInstructorLabel(String(id), instructorLabelById))
-    .join(", ");
 }
 
 function meetingsForSchedule(
@@ -359,17 +331,6 @@ export function MeetingDetailPanel({
 
   const courseTitle = courseDisplayTitle(course, meeting);
 
-  const timeRange = meeting.end
-    ? `${meeting.start}–${meeting.end}`
-    : meeting.start || "—";
-  const dateLabel = meeting.date ? formatMeetingDate(meeting.date) : "—";
-  const weekdayLabel = meeting.date ? shortMeetingWeekday(meeting.date) : "";
-  const room = String(meeting.room || "").trim() || "—";
-  const instructors = formatInstructors(
-    meeting.instructors,
-    instructorLabelById,
-  );
-
   const staff = (course?.instructors ?? []).filter(
     (entry) => String(entry.id || "").trim() && String(entry.role || "").trim(),
   );
@@ -414,65 +375,22 @@ export function MeetingDetailPanel({
           </button>
         ) : null}
       </div>
-      <div className={cn(meetingMetadataGridClass, "gap-y-0.5")}>
-        <MeetingMetadataRow
-          left={
-            <MeetingMetadataField
-              kind="schedule"
-              weekly={meetingRef?.kind === "wp"}
-              title="Дата и время"
-              iconTooltip={(icon) => (
-                <Tooltip content={schedule}>{icon}</Tooltip>
-              )}
-            >
-              {weekdayLabel ? `${weekdayLabel}, ` : ""}
-              {dateLabel} {timeRange}
-            </MeetingMetadataField>
-          }
-          right={
-            <MeetingMetadataField kind="room" title="Локация">
-              {room}
-            </MeetingMetadataField>
-          }
-        />
-        <MeetingMetadataRow
-          left={
-            <MeetingMetadataField kind="audience" title="Группы">
-              <MeetingAudienceInline
-                config={config}
-                groupIds={meeting.groups || []}
-              />
-            </MeetingMetadataField>
-          }
-          right={
-            <MeetingMetadataField kind="instructor" title="Преподаватели">
-              {onSelectInstructor ? (
-                <span className="inline-flex flex-wrap gap-x-2">
-                  {(Array.isArray(meeting.instructors)
-                    ? meeting.instructors
-                    : [meeting.instructors]
-                  )
-                    .filter(Boolean)
-                    .map((id) => (
-                      <button
-                        key={id}
-                        type="button"
-                        className="hover:text-primary text-left underline decoration-dotted underline-offset-2"
-                        onClick={() => onSelectInstructor(id)}
-                      >
-                        {resolveInstructorLabel(id, instructorLabelById)}
-                      </button>
-                    ))}
-                </span>
-              ) : (
-                instructors
-              )}
-            </MeetingMetadataField>
-          }
+      <div className="flex flex-col gap-0.5">
+        <MeetingInstanceMetadata
+          config={config}
+          date={meeting.date}
+          start={meeting.start}
+          end={meeting.end}
+          room={meeting.room}
+          groups={meeting.groups}
+          instructors={meeting.instructors}
+          weekly={meetingRef?.kind === "wp"}
+          scheduleTooltip={schedule}
+          onSelectInstructor={onSelectInstructor}
         />
         <button
           type="button"
-          className="text-base-content/60 hover:text-primary col-span-2 flex items-center gap-1.5 justify-self-start rounded-md text-xs transition-colors"
+          className="text-base-content/60 hover:text-primary flex items-center gap-1.5 justify-self-start rounded-md text-xs transition-colors"
           onClick={() =>
             setExpandedMeetingId(datesOpen ? null : meeting.instance_id)
           }
@@ -492,7 +410,7 @@ export function MeetingDetailPanel({
         {datesOpen ? (
           <SeriesScheduleItemsList
             items={scheduleItems}
-            className="col-span-2 min-w-0"
+            className="min-w-0"
             sharedColumns
             showNavigationTitle={false}
             onNavigateToMeeting={(nextMeeting) => {
@@ -526,6 +444,18 @@ export function MeetingDetailPanel({
       <DetailField label="Короткое название" truncate>
         {courseShortName}
       </DetailField>
+      {course?.moodle_url?.trim() ? (
+        <DetailField label="Moodle">
+          <a
+            className="link link-primary wrap-anywhere"
+            href={course.moodle_url.trim()}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {course.moodle_url.trim()}
+          </a>
+        </DetailField>
+      ) : null}
       <DetailField label="Преподаватели">
         {staff.length ? (
           <span className="flex flex-col gap-0.5">

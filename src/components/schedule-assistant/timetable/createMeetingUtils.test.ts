@@ -51,13 +51,11 @@ function componentFor(): SchemaComponent {
     sessions: [
       {
         audience: ["G"],
-        notes: "first",
         active: first,
         weekly_pattern: [slot],
       },
       {
         audience: ["G"],
-        notes: "second",
         active: second,
         dates_pattern: [
           { date: "2026-09-22", start_time: "09:00:00", end_time: "10:30:00" },
@@ -175,7 +173,6 @@ describe("weekly progress on relevant dates", () => {
     component.sessions = [
       {
         audience: ["G"],
-        notes: "",
         active: null,
         weekly_pattern: [
           { ...slot, alternation: { anchor_week: "2026-08-31" } },

@@ -11,7 +11,7 @@ import {
   type TermWeekdayKey,
 } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { InstructorPicker } from "@/components/schedule-assistant/timetable/InstructorPicker.tsx";
-import { DateInput } from "@/components/schedule-assistant/timetable/DateInput.tsx";
+import { DateInput } from "@/components/schedule-assistant/DateInput.tsx";
 import {
   CUSTOM_TIME_OPTION_VALUE,
   customTimeOptionLabel,
@@ -40,7 +40,11 @@ import { instructorValue } from "@/components/schedule-assistant/timetable/sessi
 import { SessionEventCard } from "@/components/schedule-assistant/timetable/SessionEventCard.tsx";
 import { cn } from "@/lib/ui/cn";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
-import { resolveSessionWindow } from "./sessionWindows.ts";
+import {
+  matchSessionBlock,
+  resolveSessionWindow,
+  sessionWindowRange,
+} from "./sessionWindows.ts";
 import {
   formatDisplayDate,
   inactiveWeeklySlotEdits,
@@ -48,6 +52,20 @@ import {
 } from "./timetableViewerModel.ts";
 import { weeklyPickerSlots } from "./meetingPickerSchedule.ts";
 import { expandWeeklySlotsToEvents } from "./editableSessionEvents.ts";
+import {
+  autoUpdate,
+  flip,
+  FloatingFocusManager,
+  FloatingPortal,
+  offset,
+  shift,
+  size,
+  useClick,
+  useDismiss,
+  useFloating,
+  useInteractions,
+  useRole,
+} from "@floating-ui/react";
 import {
   useCallback,
   useEffect,
@@ -58,6 +76,25 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+
+export type SessionWindowValue = {
+  active: SchemaDateRange | null;
+  block_id: string | null;
+};
+
+export function sessionWindowSummaryLabel(
+  config: SchemaScheduleConfig,
+  active?: SchemaDateRange | null,
+  blockId?: string | null,
+): string {
+  if (blockId) {
+    return matchSessionBlock(config, blockId)?.name ?? blockId;
+  }
+  if (active?.start_date && active?.end_date) {
+    return `${formatDisplayDate(active.start_date)}–${formatDisplayDate(active.end_date)}`;
+  }
+  return "весь семестр";
+}
 
 export type SessionRowFieldMark = "changed" | "overridden";
 
@@ -391,83 +428,223 @@ export function WeeklyAlternationFields({
   config,
   slot,
   audienceTokens,
-  active,
+  active = null,
+  blockId = null,
   onChange,
+  onSessionWindowChange,
 }: {
   config: SchemaScheduleConfig;
   slot: SchemaWeeklyPatternSlot;
   audienceTokens: string[];
   active?: SchemaDateRange | null;
+  blockId?: string | null;
   onChange: (slot: SchemaWeeklyPatternSlot) => void;
+  onSessionWindowChange?: (window: SessionWindowValue) => void;
 }) {
+  const [open, setOpen] = useState(false);
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
-  const window = resolveSessionWindow(config, audienceTokens, active);
+  const window = resolveSessionWindow(config, audienceTokens, active, blockId);
   const ignoredEdits = inactiveWeeklySlotEdits(config, slot);
   const preview = expandWeeklySlotsToEvents({
     config,
     weeklySlots: [slot],
     audienceTokens,
     active,
+    blockId,
   })
     .filter((event) => !event.cancelled)
     .slice(0, 6);
+  const frequencyLabel = slot.alternation ? "Через неделю" : "Каждую неделю";
+  const windowLabel = sessionWindowSummaryLabel(config, active, blockId);
+  const triggerLabel = `${frequencyLabel}, ${windowLabel}`;
+  const blocks = config.term.blocks ?? [];
+  const windowKey = blockId
+    ? `block:${blockId}`
+    : active
+      ? "custom"
+      : "semester";
+  const canEditWindow = Boolean(onSessionWindowChange);
+
+  const { refs, floatingStyles, context } = useFloating({
+    open,
+    onOpenChange: setOpen,
+    placement: "bottom-start",
+    middleware: [
+      offset(4),
+      flip(),
+      shift({ padding: 8 }),
+      size({
+        apply({ rects, elements }) {
+          Object.assign(elements.floating.style, {
+            width: `${rects.reference.width}px`,
+          });
+        },
+      }),
+    ],
+    whileElementsMounted: autoUpdate,
+  });
+  const click = useClick(context);
+  const dismiss = useDismiss(context);
+  const role = useRole(context, { role: "dialog" });
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    click,
+    dismiss,
+    role,
+  ]);
+
+  function handleFrequencyChange(next: "weekly" | "alternate") {
+    if ((next === "alternate") === Boolean(slot.alternation)) return;
+    onChange({
+      ...slot,
+      alternation:
+        next === "alternate"
+          ? {
+              anchor_week: weekStartForDate(
+                window?.start_date || config.term.semester.start_date,
+                startingDay,
+              ),
+            }
+          : null,
+    });
+  }
+
+  function handleWindowChange(nextKey: string) {
+    if (!onSessionWindowChange) return;
+    if (nextKey === "semester") {
+      onSessionWindowChange({ active: null, block_id: null });
+      return;
+    }
+    if (nextKey.startsWith("block:")) {
+      onSessionWindowChange({
+        active: null,
+        block_id: nextKey.slice("block:".length),
+      });
+    }
+  }
 
   return (
     <div className="flex flex-col gap-2">
-      <SelectDropdown
-        value={slot.alternation ? "alternate" : "weekly"}
-        options={[
-          { value: "weekly", label: "Каждую неделю" },
-          { value: "alternate", label: "Через неделю" },
-        ]}
-        onChange={(value) => {
-          if ((value === "alternate") === Boolean(slot.alternation)) return;
-          onChange({
-            ...slot,
-            alternation:
-              value === "alternate"
-                ? {
-                    anchor_week: weekStartForDate(
-                      window?.start_date || config.term.semester.start_date,
-                      startingDay,
-                    ),
-                  }
-                : null,
-          });
-        }}
-        className="w-full min-w-0"
-        triggerClassName="btn-sm w-full justify-between"
-      />
-      {slot.alternation ? (
-        <>
-          <label className="flex flex-col gap-1 text-xs">
-            Опорная активная неделя
-            <DateInput
-              value={slot.alternation.anchor_week}
-              onChange={(date) => {
-                if (!date) return;
-                onChange({
-                  ...slot,
-                  alternation: {
-                    anchor_week: weekStartForDate(date, startingDay),
-                  },
-                });
-              }}
-            />
-          </label>
-          <p className="text-base-content/60 text-xs">
-            Фаза на весь учебный период: каждые 14 дней до и после опорной
-            недели, а не начиная с этой даты.
-          </p>
-          <p className="text-base-content/70 text-xs">
-            Даты занятий:{" "}
-            {preview.length
-              ? preview.map((event) => formatDisplayDate(event.date)).join(", ")
-              : "нет в учебном периоде"}
-            .
-          </p>
-        </>
-      ) : null}
+      <div className="relative w-full min-w-0 shrink-0">
+        <button
+          type="button"
+          ref={refs.setReference}
+          className="select select-bordered select-xs btn-sm flex h-8 min-h-8 w-full cursor-pointer items-center justify-between px-3 text-left text-sm font-normal"
+          {...getReferenceProps()}
+        >
+          <span className="truncate">{triggerLabel}</span>
+        </button>
+        {open ? (
+          <FloatingPortal>
+            <FloatingFocusManager context={context} modal={false}>
+              <div
+                ref={refs.setFloating}
+                style={floatingStyles}
+                className="border-base-300 bg-base-100 rounded-box z-50 flex flex-col gap-3 border p-3 shadow-lg"
+                {...getFloatingProps()}
+              >
+                <div className="flex flex-col gap-1">
+                  <div className="text-base-content/60 text-xs font-medium uppercase">
+                    Период
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    {(
+                      [
+                        { key: "semester", label: "Весь семестр" },
+                        ...blocks.map((block) => ({
+                          key: `block:${block.id}`,
+                          label: block.name,
+                        })),
+                        ...(windowKey === "custom"
+                          ? [
+                              {
+                                key: "custom",
+                                label: windowLabel,
+                              },
+                            ]
+                          : []),
+                      ] as { key: string; label: string }[]
+                    ).map((option) => (
+                      <button
+                        key={option.key}
+                        type="button"
+                        disabled={
+                          option.key === "custom" ||
+                          (!canEditWindow && option.key !== windowKey)
+                        }
+                        className={cn(
+                          "btn btn-ghost btn-sm justify-start font-normal",
+                          option.key === windowKey && "btn-active",
+                        )}
+                        onClick={() => handleWindowChange(option.key)}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-base-content/60 text-xs font-medium uppercase">
+                    Очерёдность
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    {(
+                      [
+                        { key: "weekly", label: "Каждую неделю" },
+                        { key: "alternate", label: "Через неделю" },
+                      ] as const
+                    ).map((option) => (
+                      <button
+                        key={option.key}
+                        type="button"
+                        className={cn(
+                          "btn btn-ghost btn-sm justify-start font-normal",
+                          (option.key === "alternate") ===
+                            Boolean(slot.alternation) && "btn-active",
+                        )}
+                        onClick={() => handleFrequencyChange(option.key)}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {slot.alternation ? (
+                  <div className="border-base-300 flex flex-col gap-2 border-t pt-2">
+                    <label className="flex flex-col gap-1 text-xs">
+                      Опорная активная неделя
+                      <DateInput
+                        value={slot.alternation.anchor_week}
+                        onChange={(date) => {
+                          if (!date) return;
+                          onChange({
+                            ...slot,
+                            alternation: {
+                              anchor_week: weekStartForDate(date, startingDay),
+                            },
+                          });
+                        }}
+                      />
+                    </label>
+                    <p className="text-base-content/60 text-xs">
+                      Фаза на весь учебный период: каждые 14 дней до и после
+                      опорной недели, а не начиная с этой даты.
+                    </p>
+                    <p className="text-base-content/70 text-xs">
+                      Даты занятий:{" "}
+                      {preview.length
+                        ? preview
+                            .map((event) => formatDisplayDate(event.date))
+                            .join(", ")
+                        : "нет в учебном периоде"}
+                      .
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            </FloatingFocusManager>
+          </FloatingPortal>
+        ) : null}
+      </div>
       {ignoredEdits.length ? (
         <p className="text-warning text-xs">
           Разовые изменения неактивных недель ({ignoredEdits.length}) сохранены,
@@ -768,6 +945,8 @@ export function WeeklySlotRow({
   slot,
   audienceTokens,
   active,
+  blockId = null,
+  onSessionWindowChange,
   courseInstructors,
   instructorPool,
   excludeRef,
@@ -785,6 +964,8 @@ export function WeeklySlotRow({
   slot: SchemaWeeklyPatternSlot;
   audienceTokens: string[];
   active?: SchemaDateRange | null;
+  blockId?: string | null;
+  onSessionWindowChange?: (window: SessionWindowValue) => void;
   courseInstructors?: SchemaCourseConfig["instructors"];
   instructorPool?: unknown[] | null;
   excludeRef?: MeetingRef | null;
@@ -799,6 +980,7 @@ export function WeeklySlotRow({
   const weekdayOptions = weekdayOptionsForConfig(config);
   const start = toUiTime(slot.start_time);
   const end = toUiTime(slot.end_time);
+  const resolvedActive = sessionWindowRange(config, active, blockId);
 
   return (
     <SessionEventCard deleted={deleted} highlighted={highlighted}>
@@ -864,7 +1046,7 @@ export function WeeklySlotRow({
         </div>
         <div
           className={cn(
-            "sm:col-span-2",
+            "flex flex-col gap-2 sm:col-span-2",
             deleted && "pointer-events-none opacity-60",
           )}
         >
@@ -873,8 +1055,10 @@ export function WeeklySlotRow({
               config={config}
               slot={slot}
               active={active}
+              blockId={blockId}
               audienceTokens={audienceTokens}
               onChange={onChange}
+              onSessionWindowChange={onSessionWindowChange}
             />
           </FieldMark>
           <FieldMark hint={deleted ? undefined : fieldMarks?.room}>
@@ -886,7 +1070,7 @@ export function WeeklySlotRow({
               value={String(slot.room || "")}
               weekday={weekdayKey}
               weeklySlot={slot}
-              active={active}
+              active={resolvedActive}
               start={start}
               end={end}
               audienceTokens={audienceTokens}
@@ -910,7 +1094,7 @@ export function WeeklySlotRow({
               value={instructorValue(slot.instructor)}
               weekday={weekdayKey}
               weeklySlot={slot}
-              active={active}
+              active={resolvedActive}
               start={start}
               end={end}
               audienceTokens={audienceTokens}

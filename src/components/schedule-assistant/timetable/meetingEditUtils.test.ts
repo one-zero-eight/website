@@ -34,7 +34,6 @@ function configFor(): SchemaScheduleConfig {
             audience: ["G"],
             sessions: [first, second].map((active) => ({
               audience: ["G"],
-              notes: "Keep",
               active,
               weekly_pattern: [
                 {

@@ -7,6 +7,7 @@ import {
   SectionConfigDefault_layoutAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
 import { CompactColorPicker } from "@/components/common/CompactColorPicker.tsx";
+import { DateInput } from "@/components/schedule-assistant/DateInput.tsx";
 import { CourseBlocksEditor } from "@/components/schedule-assistant/settings/courses/CourseBlocksEditor.tsx";
 import { SemesterBlocksEditor } from "@/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx";
 import { validateSemesterBlocks } from "@/components/schedule-assistant/settings/semester/semesterBlocks.ts";
@@ -43,7 +44,6 @@ import {
   useStudentGroup,
   useTrack,
   useUpdateProgramMutation,
-  useUpdateCourseMutation,
   useUpdateTermMutation,
   useInstructorsQuery,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
@@ -718,30 +718,6 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
     isError: isSaveError,
     error: saveError,
   } = usePatchCourseMutation(courseName);
-  const {
-    mutate: updateCourseBlocks,
-    isPending: isSavingBlocks,
-    isError: isBlocksSaveError,
-    error: blocksSaveError,
-    reset: resetBlocksMutation,
-  } = useUpdateCourseMutation();
-  const [blocksDraft, setBlocksDraft] = useState<{
-    courseIndex: number;
-    value: string[] | null;
-  } | null>(null);
-  const hasBlocksDraft = blocksDraft?.courseIndex === courseIndex;
-  const blocksValue = hasBlocksDraft
-    ? blocksDraft.value
-    : (course?.blocks ?? null);
-  const blocksDirty =
-    hasBlocksDraft &&
-    JSON.stringify(blocksValue) !== JSON.stringify(course?.blocks ?? null);
-  const blocksFieldId = useId();
-  const { setFieldDirty } = useSettingsSaveStatusContext();
-  useEffect(() => {
-    setFieldDirty(blocksFieldId, blocksDirty);
-    return () => setFieldDirty(blocksFieldId, false);
-  }, [blocksDirty, blocksFieldId, setFieldDirty]);
   const { mutate: deleteCourse, isPending: isDeleting } =
     useDeleteCourseMutation();
   const { mutate: createStudentGroup } = useCreateStudentGroupMutation();
@@ -792,6 +768,17 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
   const shortNameRuField = useBlurSaveField(
     course?.short_name_ru ?? "",
     (value) => patchCourse({ short_name_ru: value.trim() || null }),
+  );
+  const [notesEditing, setNotesEditing] = useState(false);
+  useEffect(() => {
+    setNotesEditing(false);
+  }, [courseIndex, courseName]);
+  const notesField = useBlurSaveField(course?.notes ?? "", (value) =>
+    patchCourse({ notes: value }),
+  );
+  const notesValue = course?.notes ?? "";
+  const moodleUrlField = useBlurSaveField(course?.moodle_url ?? "", (value) =>
+    patchCourse({ moodle_url: value.trim() || null }),
   );
   const sectionOptions = useMemo(() => {
     return getScheduleSections(config)
@@ -848,6 +835,44 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
             <input className={detailInputClass} {...shortNameRuField} />
           </label>
           <div className={`${detailControlClass} shrink-0`}>
+            <div className="flex items-center justify-between gap-2">
+              <span className={detailLabelUpperClass}>Заметки</span>
+              {!notesEditing ? (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-xs btn-square"
+                  title={notesValue.trim() ? "Редактировать" : "Добавить"}
+                  onClick={() => setNotesEditing(true)}
+                >
+                  <span className="icon-[material-symbols--edit-outline-rounded] text-base" />
+                </button>
+              ) : null}
+            </div>
+            {notesEditing ? (
+              <textarea
+                className={`${detailTimeSlotsTextareaClass} min-h-20 resize-y`}
+                rows={3}
+                autoFocus
+                {...notesField}
+                onBlur={(event) => {
+                  notesField.onBlur(event);
+                  setNotesEditing(false);
+                }}
+              />
+            ) : notesValue.trim() ? (
+              <p className="text-sm whitespace-pre-wrap">{notesValue}</p>
+            ) : null}
+          </div>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Ссылка на Moodle</span>
+            <input
+              className={detailInputClass}
+              type="url"
+              placeholder="https://"
+              {...moodleUrlField}
+            />
+          </label>
+          <div className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Цвет</span>
             <CompactColorPicker
               value={course?.color}
@@ -857,51 +882,8 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
             />
           </div>
 
-          <CourseBlocksEditor
-            blocks={term?.blocks ?? []}
-            value={blocksValue}
-            disabled={isSavingBlocks}
-            onChange={(value) => setBlocksDraft({ courseIndex, value })}
-          />
-          {hasBlocksDraft ? (
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                disabled={!blocksDirty || isSavingBlocks || isSavingCourse}
-                onClick={() => {
-                  if (!course || !blocksDirty) return;
-                  updateCourseBlocks(
-                    {
-                      params: { path: { course_name: course.name } },
-                      body: { ...course, blocks: blocksValue },
-                    },
-                    { onSuccess: () => setBlocksDraft(null) },
-                  );
-                }}
-              >
-                {isSavingBlocks ? (
-                  <span className="loading loading-spinner loading-sm" />
-                ) : null}
-                Сохранить блоки курса
-              </button>
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                disabled={isSavingBlocks}
-                onClick={() => {
-                  setBlocksDraft(null);
-                  resetBlocksMutation();
-                }}
-              >
-                Отменить
-              </button>
-            </div>
-          ) : null}
-          {isBlocksSaveError ? (
-            <div className="alert alert-error alert-soft text-sm">
-              Блоки курса не сохранены: {formatApiErrorMessage(blocksSaveError)}
-            </div>
+          {course ? (
+            <CourseBlocksEditor blocks={term?.blocks ?? []} course={course} />
           ) : null}
           {isSavingCourse ? (
             <span className="loading loading-spinner loading-sm" />
@@ -2187,24 +2169,18 @@ export function SemesterDetails() {
       </label>
       <label className={`${detailControlClass} shrink-0`}>
         <span className={detailLabelUpperClass}>Начало периода</span>
-        <input
-          type="date"
-          className={detailInputClass}
+        <DateInput
           value={startDate}
           disabled={isSavingDates}
-          onChange={(event) =>
-            handleDateChange("start_date", event.target.value)
-          }
+          onChange={(value) => handleDateChange("start_date", value)}
         />
       </label>
       <label className={`${detailControlClass} shrink-0`}>
         <span className={detailLabelUpperClass}>Окончание периода</span>
-        <input
-          type="date"
-          className={detailInputClass}
+        <DateInput
           value={endDate}
           disabled={isSavingDates}
-          onChange={(event) => handleDateChange("end_date", event.target.value)}
+          onChange={(value) => handleDateChange("end_date", value)}
         />
       </label>
       {dateDraft ? (

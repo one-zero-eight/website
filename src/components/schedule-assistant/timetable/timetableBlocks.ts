@@ -53,14 +53,35 @@ export function blockForWeekBoundary(
   );
 }
 
+type CourseWithSeriesBlocks = {
+  components: { sessions?: { block_id?: string | null }[] | null }[];
+};
+
+export function courseBlockIds(course: CourseWithSeriesBlocks): string[] {
+  return [
+    ...new Set(
+      course.components.flatMap((component) =>
+        (component.sessions ?? []).flatMap((series) =>
+          series.block_id != null ? [series.block_id] : [],
+        ),
+      ),
+    ),
+  ];
+}
+
 export function courseMatchesBlock(
-  course: { blocks?: string[] | null },
+  course: CourseWithSeriesBlocks,
   blockId: string,
 ) {
+  if (blockId === "all") return true;
+  const sessions = course.components.flatMap(
+    (component) => component.sessions ?? [],
+  );
   return (
-    blockId === "all" ||
-    !course.blocks?.length ||
-    course.blocks.includes(blockId)
+    !sessions.length ||
+    sessions.some(
+      (series) => series.block_id == null || series.block_id === blockId,
+    )
   );
 }
 

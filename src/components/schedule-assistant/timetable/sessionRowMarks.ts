@@ -1,17 +1,43 @@
 import type {
+  SchemaScheduleConfig,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
 import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 
 import {
+  sessionWindowSummaryLabel,
   toUiTime,
   weekdayToKey,
   type SessionRowFieldMarks,
+  type SessionWindowValue,
 } from "./sessionSeriesRows.tsx";
 import { instructorValue } from "./sessionSeriesValidation.ts";
 import type { MeetingOverrideField } from "./timetableViewerModel.ts";
 import { formatDisplayDate } from "./timetableViewerModel.ts";
+
+function sessionWindowsEqual(
+  left: SessionWindowValue,
+  right: SessionWindowValue,
+) {
+  return (
+    left.block_id === right.block_id &&
+    (left.active?.start_date ?? null) === (right.active?.start_date ?? null) &&
+    (left.active?.end_date ?? null) === (right.active?.end_date ?? null)
+  );
+}
+
+function frequencyWindowLabel(
+  config: SchemaScheduleConfig | undefined,
+  alternation: SchemaWeeklyPatternSlot["alternation"],
+  window: SessionWindowValue,
+) {
+  const frequency = alternation
+    ? `Через неделю · ${formatDisplayDate(alternation.anchor_week)}`
+    : "Каждую неделю";
+  if (!config) return frequency;
+  return `${frequency}, ${sessionWindowSummaryLabel(config, window.active, window.block_id)}`;
+}
 
 export function normalizeOccurrence(occurrence: SchemaSessionOccurrence) {
   return {
@@ -106,6 +132,10 @@ export function weeklyRowMarks({
   cancelChecked = false,
   weekdayLabel,
   onRestore,
+  config,
+  window,
+  originalWindow,
+  onRestoreWindow,
 }: {
   current: SchemaWeeklyPatternSlot;
   original?: SchemaWeeklyPatternSlot;
@@ -114,6 +144,10 @@ export function weeklyRowMarks({
   cancelChecked?: boolean;
   weekdayLabel: string;
   onRestore: (next: SchemaWeeklyPatternSlot) => void;
+  config?: SchemaScheduleConfig;
+  window?: SessionWindowValue;
+  originalWindow?: SessionWindowValue;
+  onRestoreWindow?: (window: SessionWindowValue) => void;
 }): SessionRowFieldMarks {
   if (cancelChecked || !original) return {};
 
@@ -138,21 +172,33 @@ export function weeklyRowMarks({
     return undefined;
   };
 
+  const currentWindow = window ?? { active: null, block_id: null };
+  const baselineWindow = originalWindow ?? currentWindow;
+  const alternationChanged =
+    JSON.stringify(cur.alternation) !== JSON.stringify(orig.alternation);
+  const windowChanged = !sessionWindowsEqual(currentWindow, baselineWindow);
+
   return {
     alternation:
-      JSON.stringify(cur.alternation) !== JSON.stringify(orig.alternation)
+      alternationChanged || windowChanged
         ? {
             mark: "changed",
-            originalLabel: orig.alternation
-              ? `Через неделю · ${formatDisplayDate(orig.alternation.anchor_week)}`
-              : "Каждую неделю",
-            onRestore: () =>
-              onRestore({
-                ...current,
-                alternation: original.alternation
-                  ? { ...original.alternation }
-                  : null,
-              }),
+            originalLabel: frequencyWindowLabel(
+              config,
+              original.alternation,
+              baselineWindow,
+            ),
+            onRestore: () => {
+              if (alternationChanged) {
+                onRestore({
+                  ...current,
+                  alternation: original.alternation
+                    ? { ...original.alternation }
+                    : null,
+                });
+              }
+              if (windowChanged) onRestoreWindow?.(baselineWindow);
+            },
           }
         : undefined,
     weekday: hint(

@@ -9,6 +9,7 @@ import {
   listPersonalMeetingsByDay,
   nearestPersonalMeeting,
   personalTimetableGroups,
+  resolvePersonalInstructorId,
   shouldAutoNavigatePersonalGroups,
 } from "./timetablePersonalization.ts";
 import {
@@ -33,10 +34,18 @@ const publicData: SchemaPublicTimetable = {
     ],
   },
   students_groups: [{ code: "A", name: "Group A" }],
+  instructors: [
+    {
+      id: "teacher",
+      name_en: "Teacher",
+      email: "teacher@innopolis.ru",
+    },
+  ],
   courses: [
     {
       name: "Math",
       section_code: "core",
+      notes: "Bring a laptop",
       components: [
         {
           tag: "lec",
@@ -44,7 +53,6 @@ const publicData: SchemaPublicTimetable = {
           sessions: [
             {
               audience: ["B"],
-              notes: "Bring a laptop",
               dates_pattern: [
                 {
                   date: "2026-09-07",
@@ -154,10 +162,59 @@ describe("personal timetable navigation", () => {
         [wed, monLate, nextWeek, otherGroup, monEarly],
         ["B"],
         "2026-09-07",
-      ).map((day) => [day.date, day.meetings.map((item) => item.instance_id)]),
+      ).map((day) => [
+        day.date,
+        day.meetings.map((item) => item.meeting.instance_id),
+      ]),
     ).toEqual([
       ["2026-09-07", ["mon-early", "mon-late"]],
       ["2026-09-09", ["wed"]],
+    ]);
+  });
+  it("labels studying groups and merges teaching meetings by email", () => {
+    const studying = {
+      ...meeting,
+      instance_id: "study",
+      instructors: "other",
+    };
+    const teaching = {
+      ...meeting,
+      instance_id: "teach",
+      groups: ["A"],
+      instructors: "teacher",
+    };
+    const both = {
+      ...meeting,
+      instance_id: "both",
+      start: "12:00",
+      instructors: "teacher",
+    };
+    expect(resolvePersonalInstructorId(config, "teacher@innopolis.ru")).toBe(
+      "teacher",
+    );
+    expect(
+      listPersonalMeetingsByDay(
+        [teaching, studying, both],
+        ["B"],
+        "2026-09-07",
+        {
+          groupLabelsById: new Map([["B", "Group B"]]),
+          instructors: config.instructors,
+          instructorId: "teacher",
+        },
+      ).map((day) =>
+        day.meetings.map((item) => [
+          item.meeting.instance_id,
+          item.roles,
+          item.ownGroupLabels,
+        ]),
+      ),
+    ).toEqual([
+      [
+        ["study", ["studying"], ["Group B"]],
+        ["teach", ["teaching"], []],
+        ["both", ["studying", "teaching"], ["Group B"]],
+      ],
     ]);
   });
   it("auto-navigates once, after readiness, without overriding users or deep links", () => {

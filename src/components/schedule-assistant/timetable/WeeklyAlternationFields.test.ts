@@ -8,33 +8,7 @@ import {
 } from "@/api/schedule-assistant/types.ts";
 import { WeeklyAlternationFields } from "./sessionSeriesRows.tsx";
 
-vi.mock("@/components/common/SelectDropdown.tsx", () => ({
-  SelectDropdown: ({
-    value,
-    onChange,
-    options,
-  }: {
-    value: string;
-    onChange: (value: string) => void;
-    options: { value: string; label: string }[];
-  }) =>
-    createElement(
-      "select",
-      {
-        value,
-        onChange: (event: { target: { value: string } }) =>
-          onChange(event.target.value),
-      },
-      options.map((option) =>
-        createElement(
-          "option",
-          { key: option.value, value: option.value },
-          option.label,
-        ),
-      ),
-    ),
-}));
-vi.mock("./DateInput.tsx", () => ({
+vi.mock("@/components/schedule-assistant/DateInput.tsx", () => ({
   DateInput: ({
     value,
     onChange,
@@ -62,13 +36,27 @@ const config = {
     starting_day: Weekday.MONDAY,
     days: [Weekday.TUESDAY],
     sections: [],
+    blocks: [
+      {
+        id: "first",
+        name: "Блок 1",
+        start_date: "2026-09-01",
+        end_date: "2026-09-15",
+      },
+      {
+        id: "second",
+        name: "Блок 2",
+        start_date: "2026-09-16",
+        end_date: "2026-09-30",
+      },
+    ],
   },
   students_groups: [],
   courses: [],
 } as unknown as SchemaScheduleConfig;
 
 describe("weekly alternation editor", () => {
-  it("toggles, previews, changes phase and reopens without dropping inactive edits", async () => {
+  it("shows window in the trigger and edits frequency plus block in the popup", async () => {
     const original: SchemaWeeklyPatternSlot = {
       weekday: Weekday.TUESDAY,
       start_time: "09:00:00",
@@ -76,12 +64,18 @@ describe("weekly alternation editor", () => {
       edits: [{ select_week: "2026-09-07", cancel: true }],
     };
     let saved = original;
+    let windowValue = { active: null as null, block_id: null as string | null };
     function Editor({ initial }: { initial: SchemaWeeklyPatternSlot }) {
       const [slot, setSlot] = useState(initial);
       return createElement(WeeklyAlternationFields, {
         config,
         slot,
         audienceTokens: [],
+        active: windowValue.active,
+        blockId: windowValue.block_id,
+        onSessionWindowChange: (next) => {
+          windowValue = next;
+        },
         onChange: (next) => {
           saved = next;
           setSlot(next);
@@ -92,30 +86,42 @@ describe("weekly alternation editor", () => {
     document.body.append(container);
     const root = createRoot(container);
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-    async function select(selector: string, value: string) {
+    async function openPopup() {
       await act(async () => {
-        const input = container.querySelector<HTMLSelectElement>(selector)!;
-        input.value = value;
-        input.dispatchEvent(new Event("change", { bubbles: true }));
+        container.querySelector("button")!.click();
+      });
+    }
+    async function clickLabel(label: string) {
+      await act(async () => {
+        [...document.body.querySelectorAll("button")]
+          .find((button) => button.textContent === label)!
+          .click();
       });
     }
     try {
       await act(async () =>
         root.render(createElement(Editor, { initial: original })),
       );
-      expect(container.textContent).toContain("Каждую неделю");
-      expect(container.querySelector("[data-anchor]")).toBeNull();
-      await select("select", "alternate");
+      expect(container.textContent).toContain("Каждую неделю, весь семестр");
+      await openPopup();
+      await clickLabel("Через неделю");
       expect(saved.alternation).toEqual({ anchor_week: "2026-08-31" });
-      expect(container.textContent).toContain("не начиная с этой даты");
-      expect(container.textContent).toContain("неактивных недель (1)");
-      expect(container.textContent).toContain("01.09");
-      expect(container.textContent).toContain("15.09");
-      await select("[data-anchor]", "2026-09-07");
+      expect(document.body.textContent).toContain("не начиная с этой даты");
+      expect(document.body.textContent).toContain("неактивных недель (1)");
+      expect(document.body.textContent).toContain("01.09");
+      expect(document.body.textContent).toContain("15.09");
+      await act(async () => {
+        const input =
+          document.body.querySelector<HTMLSelectElement>("[data-anchor]")!;
+        input.value = "2026-09-07";
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
       expect(saved.alternation).toEqual({ anchor_week: "2026-09-07" });
-      expect(container.textContent).not.toContain("неактивных недель (1)");
-      expect(container.textContent).toContain("22.09");
+      expect(document.body.textContent).not.toContain("неактивных недель (1)");
+      expect(document.body.textContent).toContain("22.09");
       expect(saved.edits).toEqual(original.edits);
+      await clickLabel("Блок 1");
+      expect(windowValue).toEqual({ active: null, block_id: "first" });
       await act(async () =>
         root.render(
           createElement(Editor, {
@@ -124,13 +130,12 @@ describe("weekly alternation editor", () => {
           }),
         ),
       );
-      expect(
-        container.querySelector<HTMLSelectElement>("[data-anchor]")?.value,
-      ).toBe("2026-09-07");
-      await select("select", "weekly");
+      expect(container.textContent).toContain("Через неделю, Блок 1");
+      await openPopup();
+      await clickLabel("Каждую неделю");
       expect(saved.alternation).toBeNull();
       expect(saved.edits).toEqual(original.edits);
-      expect(container.querySelector("[data-anchor]")).toBeNull();
+      expect(document.body.querySelector("[data-anchor]")).toBeNull();
     } finally {
       await act(async () => root.unmount());
       container.remove();

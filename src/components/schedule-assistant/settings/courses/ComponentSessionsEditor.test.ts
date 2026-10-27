@@ -7,6 +7,9 @@ import {
   type SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { ComponentSessionsEditor } from "./ComponentSessionsEditor.tsx";
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
+const i18n = setupI18n({ locale: "en", messages: {} });
 
 vi.mock(
   "@/components/schedule-assistant/timetable/SessionSeriesEditor.tsx",
@@ -65,9 +68,9 @@ const config = {
   courses: [],
 } as unknown as SchemaScheduleConfig;
 const weekly: SchemaComponentSessionSeries = {
-  notes: "Keep notes",
   audience: ["G"],
-  active: first,
+  active: null,
+  block_id: "first",
   weekly_pattern: [
     {
       weekday: Weekday.TUESDAY,
@@ -110,74 +113,18 @@ async function mount(series: SchemaComponentSessionSeries) {
   }
   const container = document.createElement("div");
   const root = createRoot(container);
-  await act(async () => root.render(createElement(Harness)));
+  await act(async () =>
+    root.render(createElement(I18nProvider, { i18n }, createElement(Harness))),
+  );
   return {
     container,
     onChange,
     onValidityChange,
-    duplicate: async () =>
-      act(async () => {
-        const select = [...container.querySelectorAll("select")].find(
-          (select) =>
-            select.closest("label")?.textContent?.includes("Дублировать"),
-        )!;
-        select.value = "1";
-        select.dispatchEvent(new Event("change", { bubbles: true }));
-      }),
     cleanup: async () => act(async () => root.unmount()),
   };
 }
 
-describe("ComponentSessionsEditor block duplication", () => {
-  it("copies notes, audience and weekly pattern without obsolete edits or source mutation", async () => {
-    const editor = await mount(structuredClone(weekly));
-    await editor.duplicate();
-    const sessions = editor.onChange.mock
-      .lastCall![0] as SchemaComponentSessionSeries[];
-    expect(sessions).toHaveLength(2);
-    expect(sessions[0]).toEqual(weekly);
-    expect(sessions[1]).toMatchObject({
-      notes: weekly.notes,
-      audience: ["G"],
-      active: second,
-      dates_pattern: null,
-    });
-    expect(sessions[1].weekly_pattern![0]).toMatchObject({
-      weekday: Weekday.TUESDAY,
-      room: "108",
-      instructor: "Teacher",
-      edits: [{ select_week: "2026-09-21", cancel: false, room: "new" }],
-    });
-    expect(sessions[1].weekly_pattern).not.toBe(sessions[0].weekly_pattern);
-    await editor.cleanup();
-  });
-
-  it("never invents or shifts calendar dates when duplicating explicit occurrences", async () => {
-    const source = {
-      ...weekly,
-      weekly_pattern: null,
-      dates_pattern: [
-        {
-          date: "2026-09-08",
-          start_time: "09:00:00",
-          end_time: "10:30:00",
-          room: "108",
-        },
-      ],
-    };
-    const editor = await mount(source);
-    await editor.duplicate();
-    const duplicate = editor.onChange.mock.lastCall![0][1];
-    expect(duplicate).toMatchObject({
-      active: second,
-      weekly_pattern: null,
-      dates_pattern: [],
-      audience: ["G"],
-    });
-    expect(editor.container.textContent).toContain("Добавьте даты вручную");
-    await editor.cleanup();
-  });
-
+describe("ComponentSessionsEditor", () => {
   it("leaves a newly added explicit date empty until the user chooses a calendar day", async () => {
     const editor = await mount({
       ...weekly,
@@ -204,12 +151,9 @@ describe("ComponentSessionsEditor block duplication", () => {
     });
     expect(editor.onValidityChange).toHaveBeenLastCalledWith(false);
     expect(editor.container.textContent).toContain("Даты вне периода серии");
-    const duplicateSelect = [
-      ...editor.container.querySelectorAll("select"),
-    ].find((select) =>
-      select.closest("label")?.textContent?.includes("Дублировать"),
-    )!;
-    expect(duplicateSelect.disabled).toBe(true);
+    expect(editor.container.textContent).not.toContain(
+      "Дублировать серию в другой блок",
+    );
     await editor.cleanup();
   });
 });

@@ -80,6 +80,7 @@ export type CourseComponentCreateOption = {
 };
 
 export type CreateMeetingDraft = {
+  block_id?: string | null;
   active?: SchemaDateRange | null;
   notes?: string;
   courseIdx: number;
@@ -267,6 +268,7 @@ function placementProgress(
         { ...slot, alternation: null },
         audience,
         series.active,
+        series.block_id,
       )) {
         addPlacement(date);
       }
@@ -314,6 +316,7 @@ function semesterOccurrenceCount(
           slot,
           audienceTokens,
           series.active,
+          series.block_id,
         ),
       0,
     );
@@ -353,13 +356,16 @@ export function findMatchingSessionSeries(
   config: SchemaScheduleConfig,
   sectionCode: string,
   active?: SchemaDateRange | null,
+  blockId?: string | null,
 ): SchemaComponentSessionSeries | null {
   const tree = buildAudienceSelectorTree(config, { sectionCode });
   const targetAudience = minimizeAudienceTokens(audience, tree);
   if (!targetAudience.length) return null;
 
-  const sessions = (component.sessions || []).filter((series) =>
-    sessionActiveEqual(series.active, active),
+  const sessions = (component.sessions || []).filter(
+    (series) =>
+      (series.block_id ?? null) === (blockId ?? null) &&
+      sessionActiveEqual(series.active, active),
   );
   if (!sessions.length) return null;
 
@@ -476,6 +482,7 @@ function findOrCreateSessionSeries(
   config: SchemaScheduleConfig,
   sectionCode: string,
   active?: SchemaDateRange | null,
+  blockId?: string | null,
 ): SchemaComponentSessionSeries {
   const matched = findMatchingSessionSeries(
     component,
@@ -483,13 +490,14 @@ function findOrCreateSessionSeries(
     config,
     sectionCode,
     active,
+    blockId,
   );
   if (matched) return matched;
 
   if (!component.sessions) component.sessions = [];
   const created: SchemaComponentSessionSeries = {
     active: active ? structuredClone(active) : null,
-    notes: "",
+    block_id: blockId ?? null,
     audience: seriesAudienceForCreate(component, audience, config, sectionCode),
     weekly_pattern: [],
     dates_pattern: [],
@@ -504,6 +512,7 @@ export function previewCreateSeriesAction(
   config: SchemaScheduleConfig,
   sectionCode: string,
   active?: SchemaDateRange | null,
+  blockId?: string | null,
 ): CreateSeriesAction {
   return findMatchingSessionSeries(
     component,
@@ -511,6 +520,7 @@ export function previewCreateSeriesAction(
     config,
     sectionCode,
     active,
+    blockId,
   )
     ? "append"
     : "create";
@@ -708,6 +718,7 @@ export function defaultCreatePlacement(
   config: SchemaScheduleConfig,
   layoutMode: TimetableLayoutMode,
   active?: SchemaDateRange | null,
+  blockId?: string | null,
 ): CreatePlacement {
   const layoutDefault = placementFromLayout(layoutMode);
   if (!course || componentIdx == null || componentIdx < 0) return layoutDefault;
@@ -721,6 +732,7 @@ export function defaultCreatePlacement(
     config,
     course.section_code,
     active,
+    blockId,
   );
   if (matched) return seriesPlacement(matched) ?? layoutDefault;
   return layoutDefault;
@@ -925,9 +937,10 @@ export function applyCreateMeetingToCourse(
     config,
     course.section_code,
     draft.active,
+    draft.block_id,
   );
 
-  if (draft.notes !== undefined) series.notes = draft.notes;
+  if (draft.notes !== undefined) nextCourse.notes = draft.notes;
 
   if (draft.placement === "dates_pattern") {
     const items = (draft.occurrences ?? []).filter((occurrence) =>

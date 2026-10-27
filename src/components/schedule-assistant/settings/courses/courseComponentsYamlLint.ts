@@ -105,8 +105,8 @@ const courseComponentsRootSchema = {
       type: "object",
       additionalProperties: false,
       properties: {
-        notes: { type: "string", default: "" },
         active: { anyOf: [{ type: "null" }, { $ref: "#/$defs/dateRange" }] },
+        block_id: { anyOf: [{ type: "null" }, { type: "string" }] },
         audience: {
           type: "array",
           items: { type: "string" },

@@ -2,9 +2,7 @@ import { describe, expect, it } from "vitest";
 import { validateCourseComponentsYaml } from "./courseComponentsYamlLint.ts";
 
 function yamlForActive(active: unknown) {
-  return JSON.stringify([
-    { tag: "lec", sessions: [{ audience: [], notes: "Block series", active }] },
-  ]);
+  return JSON.stringify([{ tag: "lec", sessions: [{ audience: [], active }] }]);
 }
 
 describe("course component series periods in YAML", () => {

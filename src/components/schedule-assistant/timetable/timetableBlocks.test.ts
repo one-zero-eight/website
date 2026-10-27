@@ -204,12 +204,16 @@ describe("timetable block helpers", () => {
   });
 
   it("matches unrestricted courses and explicit block memberships", () => {
-    for (const course of [{}, { blocks: null }, { blocks: [] }]) {
+    for (const course of [
+      { components: [] },
+      { components: [{ sessions: [{ block_id: null }] }] },
+    ]) {
       expect(courseMatchesBlock(course, "first")).toBe(true);
     }
-    expect(courseMatchesBlock({ blocks: ["first"] }, "first")).toBe(true);
-    expect(courseMatchesBlock({ blocks: ["first"] }, "second")).toBe(false);
-    expect(courseMatchesBlock({ blocks: ["first"] }, "all")).toBe(true);
+    const course = { components: [{ sessions: [{ block_id: "first" }] }] };
+    expect(courseMatchesBlock(course, "first")).toBe(true);
+    expect(courseMatchesBlock(course, "second")).toBe(false);
+    expect(courseMatchesBlock(course, "all")).toBe(true);
   });
 
   it("compares range dates rather than references and treats null as unset", () => {
@@ -270,8 +274,8 @@ describe("block-specific unarranged lessons", () => {
       per_group: true,
       audience: ["G1", "G2"],
       sessions: [
-        { audience: ["G1"], active: first, weekly_pattern: [slot], notes: "" },
-        { audience: ["G2"], active: second, weekly_pattern: [slot], notes: "" },
+        { audience: ["G1"], active: first, weekly_pattern: [slot] },
+        { audience: ["G2"], active: second, weekly_pattern: [slot] },
       ],
     });
     for (const [active, missingGroup] of [

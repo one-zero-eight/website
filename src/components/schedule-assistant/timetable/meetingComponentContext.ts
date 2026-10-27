@@ -108,6 +108,7 @@ export function countComponentPlacement(
           slot,
           audienceTokens,
           series.active,
+          series.block_id,
         ),
       0,
     );

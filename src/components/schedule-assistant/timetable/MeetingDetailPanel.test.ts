@@ -19,6 +19,7 @@ const config: TimetableViewConfig = {
     {
       name: "Math",
       section_code: "core",
+      moodle_url: "https://moodle.example/course/1",
       instructors: [],
       components: [{ tag: "lec", audience: [], sessions: [] }],
     },
@@ -56,5 +57,6 @@ describe("public meeting details", () => {
     expect(html).not.toContain("<script>");
     expect(html).not.toContain("Редактировать");
     expect(html).toContain("Компоненты курса");
+    expect(html).toContain("https://moodle.example/course/1");
   });
 });

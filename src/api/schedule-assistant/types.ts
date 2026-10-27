@@ -1432,7 +1432,12 @@ export interface components {
        * @default []
        */
       audience: string[];
-      /** @description Explicit inclusive teaching window intersected with audience dates; null preserves audience semester behavior */
+      /**
+       * Block Id
+       * @description Term block whose current dates define the teaching window; mutually exclusive with active
+       */
+      block_id?: string | null;
+      /** @description Custom inclusive teaching window for series without block_id; null uses the audience semester */
       active?: components["schemas"]["DateRange"] | null;
       /**
        * Weekly Pattern
@@ -1444,12 +1449,6 @@ export interface components {
        * @description Concrete placed meetings (for electives and other calendar-date series)
        */
       dates_pattern?: components["schemas"]["SessionOccurrence"][] | null;
-      /**
-       * Notes
-       * @description Public notes inherited by occurrences without their own override
-       * @default
-       */
-      notes: string;
     };
     /** ConflictHit */
     ConflictHit: {
@@ -1489,11 +1488,6 @@ export interface components {
        */
       name: string;
       /**
-       * Blocks
-       * @description Course pool/filter metadata only; null means whole semester, non-null must be nonempty unique known block ids
-       */
-      blocks?: string[] | null;
-      /**
        * Color
        * @description Optional display color in #RRGGBB format
        */
@@ -1518,6 +1512,17 @@ export interface components {
        * @description Short Russian display name
        */
       short_name_ru?: string | null;
+      /**
+       * Notes
+       * @description Public notes inherited by meetings without their own override
+       * @default
+       */
+      notes: string;
+      /**
+       * Moodle Url
+       * @description Optional Moodle course URL
+       */
+      moodle_url?: string | null;
       /**
        * Instructors
        * @description Subject-level staff with roles; preferred in event instructor pickers
@@ -2368,6 +2373,12 @@ export interface components {
     PublicComponentSessionSeries: {
       /** Audience */
       audience?: string[];
+      /**
+       * Block Id
+       * @description Reference to a term block; use its current dates intersected with audience semester.
+       */
+      block_id?: string | null;
+      /** @description Custom dates only, for series without a block_id. */
       active?: components["schemas"]["PublicDateRange"] | null;
       /** Weekly Pattern */
       weekly_pattern?:
@@ -2375,12 +2386,6 @@ export interface components {
         | null;
       /** Dates Pattern */
       dates_pattern?: components["schemas"]["PublicSessionOccurrence"][] | null;
-      /**
-       * Notes
-       * @description Public notes inherited by occurrences without their own override.
-       * @default
-       */
-      notes: string;
     };
     /** PublicCourse */
     PublicCourse: {
@@ -2390,7 +2395,10 @@ export interface components {
       color?: string | null;
       /** Section Code */
       section_code: string;
-      /** Blocks */
+      /**
+       * Blocks
+       * @description Distinct session block_id values, derived at read time; null if none are bound.
+       */
       blocks?: string[] | null;
       /** Short Name */
       short_name?: string | null;
@@ -2398,6 +2406,17 @@ export interface components {
       name_ru?: string | null;
       /** Short Name Ru */
       short_name_ru?: string | null;
+      /**
+       * Notes
+       * @description Public notes inherited by meetings without their own override.
+       * @default
+       */
+      notes: string;
+      /**
+       * Moodle Url
+       * @description Optional Moodle course URL.
+       */
+      moodle_url?: string | null;
       /** Instructors */
       instructors?: components["schemas"]["PublicCourseInstructor"][];
       /** Components */
@@ -2495,7 +2514,7 @@ export interface components {
       instructor?: string | string[] | null;
       /**
        * Notes
-       * @description Null inherits series notes; an empty string suppresses them.
+       * @description Null inherits course notes; an empty string suppresses them.
        */
       notes?: string | null;
     };
@@ -2625,7 +2644,7 @@ export interface components {
       instructor?: string | string[] | null;
       /**
        * Notes
-       * @description Null inherits series notes; an empty string suppresses them.
+       * @description Null inherits course notes; an empty string suppresses them.
        */
       notes?: string | null;
     };
@@ -3027,7 +3046,7 @@ export interface components {
       instructor?: string | string[] | null;
       /**
        * Notes
-       * @description Public notes: None inherits series notes; an empty string suppresses them
+       * @description Public notes: None inherits course notes; an empty string suppresses them
        */
       notes?: string | null;
     };
@@ -3124,7 +3143,7 @@ export interface components {
     TermBlock: {
       /**
        * Id
-       * @description Stable block identifier used only by course pool metadata
+       * @description Stable block identifier referenced by session series
        */
       id: string;
       /**
@@ -3156,7 +3175,7 @@ export interface components {
       semester: components["schemas"]["DateRange"];
       /**
        * Blocks
-       * @description Named teaching presets; changing these does not rewrite session active dates
+       * @description Named inclusive teaching windows resolved live by session block_id
        */
       blocks?: components["schemas"]["TermBlock"][];
       /**
@@ -3462,7 +3481,7 @@ export interface components {
       instructor?: string | string[] | null;
       /**
        * Notes
-       * @description Public notes: None inherits series notes; an empty string suppresses them
+       * @description Public notes: None inherits course notes; an empty string suppresses them
        */
       notes?: string | null;
     };

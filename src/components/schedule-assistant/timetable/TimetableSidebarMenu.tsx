@@ -40,6 +40,8 @@ import {
 } from "./unarrangedLessons.ts";
 import {
   listPersonalMeetingsByDay,
+  resolvePersonalInstructorId,
+  type PersonalMeetingEntry,
   type PersonalTimetableGroup,
 } from "./timetablePersonalization.ts";
 import { useSelectionStore } from "./timetableSelectionStore.ts";
@@ -502,23 +504,25 @@ function isPersonalMeetingPast(meeting: Meeting, today: string, nowHm: string) {
 }
 
 function PersonalMeetingCard({
-  meeting,
+  entry,
   courseColors,
   instructorLabels,
   muted = false,
   onSelect,
 }: {
-  meeting: Meeting;
+  entry: PersonalMeetingEntry;
   courseColors: Record<string, { bg: string; border: string }>;
   instructorLabels: Record<string, string>;
   muted?: boolean;
   onSelect: (meeting: Meeting) => void;
 }) {
+  const { meeting, roles } = entry;
   const selectionStore = useSelectionStore();
   const colors = colorBySubject(meeting.course, courseColors);
   const timeRange = meeting.end
     ? `${meeting.start}–${meeting.end}`
     : meeting.start;
+  const isTeaching = roles.includes("teaching");
   const instructorIds = (
     typeof meeting.instructors === "string"
       ? meeting.instructors
@@ -566,30 +570,32 @@ function PersonalMeetingCard({
             </span>
           </>
         ) : null}
-        {instructorIds.map((id) => {
-          const label = resolveInstructorLabel(id, instructorLabels);
-          return (
-            <span
-              key={id}
-              className="inline-flex min-w-0 items-center gap-x-1.5"
-            >
-              <span className="text-base-content/35">·</span>
-              <span
-                className={cn(personalLinkClass, "truncate")}
-                title={label}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  selectionStore.setSelection({
-                    type: "instructor",
-                    value: id,
-                  });
-                }}
-              >
-                {label}
-              </span>
-            </span>
-          );
-        })}
+        {!isTeaching
+          ? instructorIds.map((id) => {
+              const label = resolveInstructorLabel(id, instructorLabels);
+              return (
+                <span
+                  key={id}
+                  className="inline-flex min-w-0 items-center gap-x-1.5"
+                >
+                  <span className="text-base-content/35">·</span>
+                  <span
+                    className={cn(personalLinkClass, "truncate")}
+                    title={label}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      selectionStore.setSelection({
+                        type: "instructor",
+                        value: id,
+                      });
+                    }}
+                  >
+                    {label}
+                  </span>
+                </span>
+              );
+            })
+          : null}
       </div>
     </div>
   );
@@ -634,13 +640,13 @@ function PersonalWeekDays({
               {personalDayHeading(day.date)}
             </div>
             <ul className="flex flex-col gap-1.5">
-              {day.meetings.map((meeting) => (
-                <li key={meeting.instance_id}>
+              {day.meetings.map((entry) => (
+                <li key={entry.meeting.instance_id}>
                   <PersonalMeetingCard
-                    meeting={meeting}
+                    entry={entry}
                     courseColors={courseColors}
                     instructorLabels={instructorLabels}
-                    muted={isPersonalMeetingPast(meeting, today, nowHm)}
+                    muted={isPersonalMeetingPast(entry.meeting, today, nowHm)}
                     onSelect={onNavigateToMeeting}
                   />
                 </li>
@@ -660,6 +666,7 @@ function PersonalLessonsSection({
   weekStart,
   courseColors,
   config,
+  userEmail,
   onNavigateToMeeting,
 }: {
   state: PersonalLessonsState;
@@ -668,6 +675,7 @@ function PersonalLessonsSection({
   weekStart: string;
   courseColors: Record<string, { bg: string; border: string }>;
   config: SchemaScheduleConfig;
+  userEmail?: string | null;
   onNavigateToMeeting: (meeting: Meeting) => void;
 }) {
   const instructorLabels = useMemo(
@@ -678,6 +686,22 @@ function PersonalLessonsSection({
     () => ownGroups.map((group) => group.groupId),
     [ownGroups],
   );
+  const groupLabelsById = useMemo(
+    () => new Map(ownGroups.map((group) => [group.groupId, group.label])),
+    [ownGroups],
+  );
+  const instructorId = useMemo(
+    () => resolvePersonalInstructorId(config, userEmail),
+    [config, userEmail],
+  );
+  const listOptions = useMemo(
+    () => ({
+      groupLabelsById,
+      instructors: config.instructors,
+      instructorId,
+    }),
+    [groupLabelsById, config.instructors, instructorId],
+  );
   const today = todayIsoDate();
   const nowHm = localNowTimeHm();
   const nextWeekStart = useMemo(
@@ -687,16 +711,21 @@ function PersonalLessonsSection({
   const days = useMemo(
     () =>
       state.kind === "ready"
-        ? listPersonalMeetingsByDay(meetings, groupIds, weekStart)
+        ? listPersonalMeetingsByDay(meetings, groupIds, weekStart, listOptions)
         : [],
-    [state.kind, meetings, groupIds, weekStart],
+    [state.kind, meetings, groupIds, weekStart, listOptions],
   );
   const nextWeekDays = useMemo(
     () =>
       state.kind === "ready"
-        ? listPersonalMeetingsByDay(meetings, groupIds, nextWeekStart)
+        ? listPersonalMeetingsByDay(
+            meetings,
+            groupIds,
+            nextWeekStart,
+            listOptions,
+          )
         : [],
-    [state.kind, meetings, groupIds, nextWeekStart],
+    [state.kind, meetings, groupIds, nextWeekStart, listOptions],
   );
   const [nextWeekOpen, setNextWeekOpen] = useState(false);
   const weekCount = days.reduce((count, day) => count + day.meetings.length, 0);
@@ -748,10 +777,38 @@ function PersonalLessonsSection({
         </div>
       ) : state.kind === "empty" ? (
         <p className="text-base-content/65 text-sm leading-relaxed">
-          Ваши группы пока не найдены. Можно просматривать всё расписание.
+          Ваши группы и занятия преподавателя пока не найдены. Можно
+          просматривать всё расписание.
         </p>
       ) : (
         <div className="flex min-h-0 flex-1 [scrollbar-width:thin] flex-col gap-3 overflow-y-auto">
+          {ownGroups.length || instructorId ? (
+            <div className="flex flex-col gap-1">
+              {ownGroups.length ? (
+                <div className="flex min-w-0 flex-wrap items-center gap-1">
+                  <span className="text-base-content/45 text-[0.625rem] font-semibold tracking-wide uppercase">
+                    Группы
+                  </span>
+                  {ownGroups.map((group) => (
+                    <span
+                      key={group.groupId}
+                      className="bg-base-200 text-base-content/80 rounded px-1.5 py-0.5 text-[0.625rem] leading-tight font-medium"
+                      title={`${group.sectionCode} · ${group.programCode}`}
+                    >
+                      {group.label}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              {instructorId ? (
+                <div className="text-base-content/55 text-[0.625rem] leading-tight">
+                  <span className="font-semibold text-[#7c3aed]">Веду</span>
+                  <span className="text-base-content/35"> · </span>
+                  занятия, где вы преподаватель
+                </div>
+              ) : null}
+            </div>
+          ) : null}
           {!days.length ? (
             <p className="text-base-content/65 text-sm leading-relaxed">
               На этой неделе занятий нет.
@@ -820,6 +877,7 @@ export function TimetableSidebarMenu({
   personalLessons,
   ownGroups = [],
   courseColors = {},
+  userEmail,
   sidebarAction,
 }: {
   meetings: Meeting[];
@@ -835,6 +893,7 @@ export function TimetableSidebarMenu({
   personalLessons?: PersonalLessonsState;
   ownGroups?: PersonalTimetableGroup[];
   courseColors?: Record<string, { bg: string; border: string }>;
+  userEmail?: string | null;
   sidebarAction?: "composer" | "student";
 }) {
   const [page, setPage] = useState<"menu" | "unarranged">("menu");
@@ -884,6 +943,7 @@ export function TimetableSidebarMenu({
           weekStart={activeDate}
           courseColors={courseColors}
           config={config}
+          userEmail={userEmail}
           onNavigateToMeeting={onNavigateToMeeting}
         />
       ) : null}

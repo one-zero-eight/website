@@ -1,3 +1,4 @@
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import type { ConfigLoadResult } from "@/components/schedule-assistant/settings/ConfigLoadModal.tsx";
 import {
   useConfig,
@@ -26,7 +27,7 @@ export function SemesterTabContent() {
     } catch (e: unknown) {
       return {
         ok: false,
-        message: `Ошибка загрузки YAML: ${(e as Error)?.message || String(e)}`,
+        message: `Ошибка загрузки YAML: ${formatApiErrorMessage(e)}`,
       };
     }
   }

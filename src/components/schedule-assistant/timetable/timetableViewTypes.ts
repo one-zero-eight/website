@@ -32,8 +32,10 @@ export type TimetableViewCourse = Pick<
   | "name_ru"
   | "short_name_ru"
   | "instructors"
-  | "blocks"
-> & { components: TimetableViewComponent[] };
+> &
+  Partial<Pick<SchemaCourseConfig, "notes" | "moodle_url">> & {
+    components: TimetableViewComponent[];
+  };
 
 export type TimetableViewInstructor = Omit<
   SchemaInstructor,

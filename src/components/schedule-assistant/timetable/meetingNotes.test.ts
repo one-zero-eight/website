@@ -39,10 +39,11 @@ const slot = {
 };
 
 describe("meeting note inheritance", () => {
-  it("preserves existing dated notes when creating another event in the series", () => {
+  it("preserves existing dated notes when creating another event in the course", () => {
     const course: SchemaCourseConfig = {
       name: "Math",
       section_code: "core",
+      notes: "Original course",
       instructors: [],
       components: [
         {
@@ -53,7 +54,6 @@ describe("meeting note inheritance", () => {
           sessions: [
             {
               audience: ["G1"],
-              notes: "Original series",
               dates_pattern: [
                 {
                   date: "2026-09-07",
@@ -79,7 +79,7 @@ describe("meeting note inheritance", () => {
       componentIdx: 0,
       audience: ["G1"],
       placement: "dates_pattern",
-      notes: "Updated series",
+      notes: "Updated course",
       occurrences: [
         {
           date: "2026-09-14",
@@ -90,17 +90,17 @@ describe("meeting note inheritance", () => {
       ],
     });
     const series = saved?.components[0].sessions?.[0];
-    expect(series?.notes).toBe("Updated series");
+    expect(saved?.notes).toBe("Updated course");
     expect(series?.dates_pattern?.map((item) => item.notes)).toEqual([
       "Existing override",
       "",
     ]);
-    expect(course.components[0].sessions?.[0].notes).toBe("Original series");
+    expect(course.notes).toBe("Original course");
   });
   it("inherits, overrides, suppresses and resets weekly notes", () => {
     expect(
-      resolveWeeklyMeetingFields(slot, "2026-09-07", config, "Series").notes,
-    ).toBe("Series");
+      resolveWeeklyMeetingFields(slot, "2026-09-07", config, "Course").notes,
+    ).toBe("Course");
     for (const notes of ["Date note", "", null]) {
       const result = resolveWeeklyMeetingFields(
         {
@@ -109,9 +109,9 @@ describe("meeting note inheritance", () => {
         },
         "2026-09-07",
         config,
-        "Series",
+        "Course",
       );
-      expect(result.notes).toBe(notes ?? "Series");
+      expect(result.notes).toBe(notes ?? "Course");
     }
   });
   it("keeps date-specific text when an event is moved", () => {
@@ -129,7 +129,7 @@ describe("meeting note inheritance", () => {
       },
       "2026-09-07",
       config,
-      "Series",
+      "Course",
     );
     expect(result.date).toBe("2026-09-08");
     expect(result.notes).toBe("Bring laptop\nRoom changed");
@@ -141,6 +141,7 @@ describe("meeting note inheritance", () => {
         {
           name: "Math",
           section_code: "core",
+          notes: "Course",
           instructors: [],
           components: [
             {
@@ -150,7 +151,6 @@ describe("meeting note inheritance", () => {
               sessions: [
                 {
                   audience: ["G1"],
-                  notes: "Series",
                   weekly_pattern: [
                     {
                       ...slot,
@@ -186,13 +186,13 @@ describe("meeting note inheritance", () => {
     ).toHaveLength(2);
     expect(
       meetings.find((meeting) => meeting.date === "2026-09-08")?.notes,
-    ).toBe("Series");
+    ).toBe("Course");
     expect(
       meetings.find((meeting) => meeting.date === "2026-09-09")?.notes,
     ).toBe("<script>text only</script>");
     expect(
       meetings.find((meeting) => meeting.date === "2026-09-07")?.notes,
-    ).toBe("Series");
+    ).toBe("Course");
     expect(
       meetings.find((meeting) => meeting.date === "2026-09-14")?.notes,
     ).toBe("");

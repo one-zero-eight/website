@@ -7,6 +7,9 @@ import {
   type SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { CreateClassModal } from "./CreateClassModal.tsx";
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
+const i18n = setupI18n({ locale: "en", messages: {} });
 import { buildMeetingPickerIndex } from "./meetingPickerIndex.ts";
 import { buildMeetings } from "./timetableViewerModel.ts";
 
@@ -36,15 +39,18 @@ vi.mock("./EditClassAudienceModal.tsx", () => ({
 vi.mock("./SessionSeriesEditor.tsx", () => ({
   SessionSeriesEditor: ({
     active,
+    blockId,
     weeklySlots,
     lockedRowCount,
   }: {
     active: unknown;
+    blockId?: string | null;
     weeklySlots: unknown[];
     lockedRowCount: number;
   }) =>
     createElement("div", {
       "data-active": JSON.stringify(active),
+      "data-block-id": blockId ?? "",
       "data-row-count": weeklySlots.length,
       "data-locked-count": lockedRowCount,
     }),
@@ -78,10 +84,10 @@ function configFor(): SchemaScheduleConfig {
             audience: ["G"],
             per_group: false,
             instructor_pool: [],
-            sessions: [first, second].map((active, index) => ({
+            sessions: [first, second].map((_, index) => ({
               audience: ["G"],
-              notes: `Block ${index + 1}`,
-              active,
+              active: null,
+              block_id: index === 0 ? "first" : "second",
               weekly_pattern: [
                 {
                   weekday: Weekday.TUESDAY,
@@ -113,26 +119,31 @@ it("creates inside the default block without leaking same-audience sibling rows"
   try {
     await act(async () =>
       root.render(
-        createElement(CreateClassModal, {
-          open: true,
-          onOpenChange: vi.fn(),
-          config,
-          meetings,
-          meetingPickerIndex: buildMeetingPickerIndex(meetings),
-          layoutMode: "groups",
-          cellContext: {
-            weekday: "Tue",
-            time: "11:00",
-            date: "2026-09-22",
-            groupId: "G",
-          },
-          preset: { courseIdx: 0, componentIdx: 0, audience: ["G"] },
-          defaultActive: second,
-        }),
+        createElement(
+          I18nProvider,
+          { i18n },
+          createElement(CreateClassModal, {
+            open: true,
+            onOpenChange: vi.fn(),
+            config,
+            meetings,
+            meetingPickerIndex: buildMeetingPickerIndex(meetings),
+            layoutMode: "groups",
+            cellContext: {
+              weekday: "Tue",
+              time: "11:00",
+              date: "2026-09-22",
+              groupId: "G",
+            },
+            preset: { courseIdx: 0, componentIdx: 0, audience: ["G"] },
+            defaultBlockId: "second",
+          }),
+        ),
       ),
     );
     const editor = container.querySelector("[data-active]")!;
-    expect(editor.getAttribute("data-active")).toBe(JSON.stringify(second));
+    expect(editor.getAttribute("data-active")).toBe("null");
+    expect(editor.getAttribute("data-block-id")).toBe("second");
     expect(editor.getAttribute("data-row-count")).toBe("3");
     expect(editor.getAttribute("data-locked-count")).toBe("1");
     await act(async () =>
@@ -148,8 +159,8 @@ it("creates inside the default block without leaking same-audience sibling rows"
       original.components[0].sessions![0],
     );
     expect(updated.components[0].sessions![1]).toMatchObject({
-      active: second,
-      notes: "Block 2",
+      active: null,
+      block_id: "second",
     });
     expect(updated.components[0].sessions![1].weekly_pattern).toHaveLength(2);
     expect(
@@ -158,23 +169,7 @@ it("creates inside the default block without leaking same-audience sibling rows"
       ),
     ).not.toContain("block-1");
     expect(mocks.courses[0]).toEqual(original);
-
-    await act(async () => {
-      const select = container.querySelector("select")!;
-      select.value = "block:0";
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    await act(async () =>
-      [...container.querySelectorAll("button")]
-        .find((button) => button.textContent === "Добавить")!
-        .click(),
-    );
-    const switched = mocks.mutate.mock.lastCall![0].body as SchemaCourseConfig;
-    expect(switched.components[0].sessions![0].active).toEqual(first);
-    expect(switched.components[0].sessions![0].weekly_pattern).toHaveLength(2);
-    expect(switched.components[0].sessions![1]).toEqual(
-      original.components[0].sessions![1],
-    );
+    expect(container.querySelector("select")).toBeNull();
   } finally {
     await act(async () => root.unmount());
   }

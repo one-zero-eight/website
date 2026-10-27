@@ -3,6 +3,9 @@ import { createRoot } from "react-dom/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SemesterBlocksEditor } from "./SemesterBlocksEditor.tsx";
 import { splitSemesterInTwo } from "./semesterBlocks.ts";
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
+const i18n = setupI18n({ locale: "en", messages: {} });
 
 const mocks = vi.hoisted(() => ({
   config: {
@@ -15,7 +18,10 @@ const mocks = vi.hoisted(() => ({
         end_date: string;
       }[],
     },
-    courses: [] as { name: string; blocks: string[] | null }[],
+    courses: [] as {
+      name: string;
+      components: { tag: string; sessions: { block_id: string | null }[] }[];
+    }[],
   },
   updateTerm: vi.fn(),
   setFieldDirty: vi.fn(),
@@ -39,6 +45,21 @@ vi.mock(
     }),
   }),
 );
+vi.mock("@/components/schedule-assistant/DateInput.tsx", () => ({
+  DateInput: ({
+    value,
+    onChange,
+  }: {
+    value: string;
+    onChange: (value: string) => void;
+  }) =>
+    createElement("input", {
+      "data-date-input": true,
+      value,
+      onChange: (event: { target: { value: string } }) =>
+        onChange(event.target.value),
+    }),
+}));
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -46,7 +67,15 @@ async function mount() {
   const container = document.createElement("div");
   document.body.append(container);
   const root = createRoot(container);
-  await act(async () => root.render(createElement(SemesterBlocksEditor)));
+  await act(async () =>
+    root.render(
+      createElement(
+        I18nProvider,
+        { i18n },
+        createElement(SemesterBlocksEditor),
+      ),
+    ),
+  );
   return {
     container,
     click: async (text: string) =>
@@ -56,13 +85,20 @@ async function mount() {
           .click();
       }),
     rerender: async () =>
-      act(async () => root.render(createElement(SemesterBlocksEditor))),
+      act(async () =>
+        root.render(
+          createElement(
+            I18nProvider,
+            { i18n },
+            createElement(SemesterBlocksEditor),
+          ),
+        ),
+      ),
     changeDate: async (index: number, value: string) =>
       act(async () => {
-        const input =
-          container.querySelectorAll<HTMLInputElement>('input[type="date"]')[
-            index
-          ];
+        const input = container.querySelectorAll<HTMLInputElement>(
+          "input[data-date-input]",
+        )[index];
         Object.getOwnPropertyDescriptor(
           HTMLInputElement.prototype,
           "value",
@@ -85,50 +121,70 @@ beforeEach(() => {
 });
 
 describe("SemesterBlocksEditor", () => {
-  it("keeps splitting local until explicit save and submits ordered blocks", async () => {
+  it("keeps added blocks local until explicit save and submits ordered blocks", async () => {
     const editor = await mount();
-    await editor.click("Разделить семестр пополам");
+    await editor.click("Добавить блок");
     expect(mocks.updateTerm).not.toHaveBeenCalled();
     expect(
-      editor.container.querySelectorAll('input[type="date"]'),
-    ).toHaveLength(4);
-    await editor.click("Сохранить блоки");
-    expect(mocks.updateTerm.mock.calls[0][0].body.blocks).toEqual(
-      splitSemesterInTwo(mocks.config.term.semester),
+      editor.container.querySelectorAll("input[data-date-input]"),
+    ).toHaveLength(2);
+    expect(editor.container.textContent).not.toContain(
+      "Разделить семестр пополам",
     );
+    expect(editor.container.textContent).not.toContain(
+      "Нет свободных дат для нового блока",
+    );
+    await editor.click("Сохранить блоки");
+    expect(mocks.updateTerm.mock.calls[0][0].body.blocks).toEqual([
+      expect.objectContaining({
+        name: "Блок 1",
+        start_date: "2026-09-01",
+        end_date: "2026-09-30",
+      }),
+    ]);
     await editor.cleanup();
   });
 
   it("blocks deleting a referenced course block with a clear message", async () => {
     mocks.config.term.blocks = splitSemesterInTwo(mocks.config.term.semester);
-    mocks.config.courses = [{ name: "Algorithms", blocks: ["block-1"] }];
+    mocks.config.courses = [
+      {
+        name: "Algorithms",
+        components: [{ tag: "lec", sessions: [{ block_id: "block-1" }] }],
+      },
+    ];
     const editor = await mount();
-    await editor.click("Удалить блок 1");
-    expect(editor.container.textContent).toContain("Нельзя удалить блок");
+    await editor.click("Удалить");
+    expect(editor.container.textContent).toContain(
+      "Cannot delete a block referenced by series",
+    );
     expect(editor.container.textContent).toContain("Algorithms");
     expect(
-      editor.container.querySelectorAll('input[type="date"]'),
+      editor.container.querySelectorAll("input[data-date-input]"),
     ).toHaveLength(4);
     expect(mocks.updateTerm).not.toHaveBeenCalled();
     await editor.cleanup();
   });
 
   it("rejects overlapping bounds and preserves drafts after a failed save", async () => {
+    mocks.config.term.blocks = splitSemesterInTwo(mocks.config.term.semester);
     const editor = await mount();
-    await editor.click("Разделить семестр пополам");
     await editor.changeDate(1, "2026-09-16");
     expect(editor.container.textContent).toContain(
       "блоки не должны пересекаться",
     );
     await editor.click("Сохранить блоки");
     expect(mocks.updateTerm).not.toHaveBeenCalled();
-    await editor.changeDate(1, "2026-09-15");
+    await editor.changeDate(1, "2026-09-14");
     await editor.click("Сохранить блоки");
     expect(mocks.updateTerm).toHaveBeenCalledTimes(1);
+    expect(mocks.updateTerm.mock.calls[0][0].body.blocks[0].end_date).toBe(
+      "2026-09-14",
+    );
     mocks.isError = true;
     await editor.rerender();
     expect(
-      editor.container.querySelectorAll('input[type="date"]'),
+      editor.container.querySelectorAll("input[data-date-input]"),
     ).toHaveLength(4);
     expect(editor.container.textContent).toContain("Ошибка сохранения блоков");
     expect(mocks.setFieldDirty).toHaveBeenCalledWith(expect.any(String), true);

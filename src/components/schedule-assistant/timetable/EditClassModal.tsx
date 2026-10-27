@@ -33,26 +33,26 @@ import {
   serializeWeeklyEventsToSlots,
   WEEKLY_CONVERSION_WARNING,
   expandOccurrencesToEvents,
+  expandWeeklySlotsPreservingEventOverrides,
   expandWeeklySlotsToEvents,
   initialSelectedEventKey,
   validateEditableEvents,
   type EditableSessionEvent,
 } from "./editableSessionEvents.ts";
-import { SessionWindowFields } from "./SessionWindowFields.tsx";
-import { resolveSessionWindow } from "./sessionWindows.ts";
+import { resolveSessionWindow, sessionWindowRange } from "./sessionWindows.ts";
 import { EditableSessionEventsEditor } from "./EditableSessionEventsEditor.tsx";
 import {
   formatAudienceTokensLabel,
   isMeetingAudienceOverridden,
   meetingAudienceEqual,
   meetingEditOriginalValues,
-  meetingInstructorsLabel,
   parseMeetingInstanceId,
   perGroupAudienceOptions,
   resolveEndTimeForStart,
   sessionActiveEqual,
   applySeriesScheduleToCourse,
 } from "./meetingEditUtils.ts";
+import { MeetingInstanceMetadata } from "./MeetingInstanceMetadata.tsx";
 import {
   buildMeetingPickerIndex,
   type MeetingPickerIndex,
@@ -62,13 +62,11 @@ import { toApiTime } from "./sessionSeriesRows.tsx";
 import {
   SessionPlacementToggle,
   SessionSeriesEditor,
-  SeriesNotesField,
   type SessionPlacement,
 } from "./SessionSeriesEditor.tsx";
 import { type Meeting } from "./timetableViewerModel.ts";
 import { normalizeWeeklySlot } from "./sessionRowMarks.ts";
 import { weeklySlotExcludeRef } from "./meetingEditUtils.ts";
-import { formatDisplayDate } from "./timetableViewerModel.ts";
 
 function cloneWeeklySlots(
   items: SchemaWeeklyPatternSlot[] | null | undefined,
@@ -96,9 +94,12 @@ export function EditClassModal({
   const { showError } = useToast();
   const [dismissed, setDismissed] = useState(false);
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
-  const [notes, setNotes] = useState("");
-  const [active, setActive] = useState<SchemaDateRange | null>(null);
-  const [windowValid, setWindowValid] = useState(true);
+  const [storedActive, setActive] = useState<SchemaDateRange | null>(null);
+  const [blockId, setBlockId] = useState<string | null>(null);
+  const active = useMemo(
+    () => sessionWindowRange(config, storedActive, blockId),
+    [config, storedActive, blockId],
+  );
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
   const [events, setEvents] = useState<EditableSessionEvent[]>([]);
   const [originalEvents, setOriginalEvents] = useState<EditableSessionEvent[]>(
@@ -116,11 +117,15 @@ export function EditClassModal({
     [meeting],
   );
 
+  const meetingCourse = useMemo(() => {
+    if (!meeting || !courses) return null;
+    return courses.find((item) => item.name === meeting.course) ?? null;
+  }, [courses, meeting]);
+
   const meetingComponent = useMemo(() => {
-    if (!meeting || !courses || !meetingRef) return null;
-    const course = courses.find((item) => item.name === meeting.course);
-    return course?.components?.[meetingRef.componentIdx] ?? null;
-  }, [courses, meeting, meetingRef]);
+    if (!meetingCourse || !meetingRef) return null;
+    return meetingCourse.components?.[meetingRef.componentIdx] ?? null;
+  }, [meetingCourse, meetingRef]);
 
   const meetingSeries = useMemo(() => {
     if (!meetingComponent || !meetingRef) return null;
@@ -165,10 +170,10 @@ export function EditClassModal({
       meeting,
       meetingRef,
       audienceTokens: audienceValue,
-      seriesNotes: notes,
+      courseNotes: meetingCourse?.notes ?? "",
     });
     return [...stripped, ...drafts];
-  }, [audienceValue, events, meeting, meetingRef, meetings, notes]);
+  }, [audienceValue, events, meeting, meetingCourse, meetingRef, meetings]);
 
   const conflictMeetingIndex = useMemo(
     () => buildMeetingPickerIndex(conflictMeetings),
@@ -189,9 +194,8 @@ export function EditClassModal({
       }),
     );
     setAudienceValue(audience);
-    setNotes(meetingSeries?.notes ?? "");
     setActive(meetingSeries?.active ?? null);
-    setWindowValid(true);
+    setBlockId(meetingSeries?.block_id ?? null);
 
     const initialPlacement: SessionPlacement =
       meetingRef.kind === "occ" ? "dates_pattern" : "weekly";
@@ -252,13 +256,22 @@ export function EditClassModal({
       weeklySlots: slots,
       audienceTokens: audience,
       active: meetingSeries?.active,
+      blockId: meetingSeries?.block_id,
     });
     setWeeklySlots(slots);
     setOriginalWeeklySlots(structuredClone(slots));
     setEvents(expanded);
     setOriginalEvents(structuredClone(expanded));
     setFocusKey(initialSelectedEventKey(meeting, expanded));
-  }, [config, meeting, meetingRef, meetingSeries, open, originals]);
+  }, [
+    config,
+    meeting,
+    meetingCourse,
+    meetingRef,
+    meetingSeries,
+    open,
+    originals,
+  ]);
 
   function handlePlacementChange(next: SessionPlacement) {
     if (next === placement) return;
@@ -282,7 +295,8 @@ export function EditClassModal({
       config,
       weeklySlots,
       audienceTokens: audienceValue,
-      active,
+      active: storedActive,
+      blockId,
     }).map((event) => {
       const matching = events.find((candidate) =>
         eventSchedulesEqual(
@@ -304,7 +318,8 @@ export function EditClassModal({
       config,
       weeklySlots: nextSlots,
       audienceTokens: audienceValue,
-      active,
+      active: storedActive,
+      blockId,
     });
     if (
       !eventSchedulesEqual(events, nextEvents) &&
@@ -335,11 +350,50 @@ export function EditClassModal({
   function handleWeeklySlotsChange(slots: SchemaWeeklyPatternSlot[]) {
     setWeeklySlots(slots);
     setEvents(
-      expandWeeklySlotsToEvents({
+      expandWeeklySlotsPreservingEventOverrides({
         config,
         weeklySlots: slots,
+        previousEvents: events,
         audienceTokens: audienceValue,
-        active,
+        active: storedActive,
+        blockId,
+      }),
+    );
+  }
+
+  function handleSessionWindowChange(next: {
+    active: SchemaDateRange | null;
+    block_id: string | null;
+  }) {
+    if (
+      sessionActiveEqual(storedActive, next.active) &&
+      (blockId ?? null) === (next.block_id ?? null)
+    ) {
+      return;
+    }
+    setActive(next.active);
+    setBlockId(next.block_id);
+    if (placement !== "weekly") return;
+    // Avoid rewriting an untouched template during a window-only edit.
+    const previousEvents = expandWeeklySlotsToEvents({
+      config,
+      weeklySlots,
+      audienceTokens: audienceValue,
+      active: storedActive,
+      blockId,
+    });
+    const nextSlots = eventsEqual(events, previousEvents)
+      ? weeklySlots
+      : editableWeeklySlots;
+    setWeeklySlots(nextSlots);
+    setEvents(
+      expandWeeklySlotsPreservingEventOverrides({
+        config,
+        weeklySlots: nextSlots,
+        previousEvents: events,
+        audienceTokens: audienceValue,
+        active: next.active,
+        blockId: next.block_id,
       }),
     );
   }
@@ -349,36 +403,13 @@ export function EditClassModal({
     if (placement !== "weekly") return;
     setWeeklySlots(editableWeeklySlots);
     setEvents(
-      expandWeeklySlotsToEvents({
+      expandWeeklySlotsPreservingEventOverrides({
         config,
         weeklySlots: editableWeeklySlots,
+        previousEvents: events,
         audienceTokens: audience,
-        active,
-      }),
-    );
-  }
-
-  function handleActiveChange(nextActive: SchemaDateRange | null) {
-    if (sessionActiveEqual(active, nextActive)) return;
-    setActive(nextActive);
-    if (placement !== "weekly") return;
-    // Avoid rewriting an untouched template during a range-only edit.
-    const previousEvents = expandWeeklySlotsToEvents({
-      config,
-      weeklySlots,
-      audienceTokens: audienceValue,
-      active,
-    });
-    const nextSlots = eventsEqual(events, previousEvents)
-      ? weeklySlots
-      : editableWeeklySlots;
-    setWeeklySlots(nextSlots);
-    setEvents(
-      expandWeeklySlotsToEvents({
-        config,
-        weeklySlots: nextSlots,
-        audienceTokens: audienceValue,
-        active: nextActive,
+        active: storedActive,
+        blockId,
       }),
     );
   }
@@ -397,7 +428,7 @@ export function EditClassModal({
   }
 
   function handleSubmit() {
-    if (isPending || !windowValid) return;
+    if (isPending) return;
     if (!meeting || !meetingRef || !courses || !originals) return;
     const course = courses.find((item) => item.name === meeting.course);
     if (!course) {
@@ -413,7 +444,12 @@ export function EditClassModal({
       return;
     }
 
-    const sessionWindow = resolveSessionWindow(config, audienceValue, active);
+    const sessionWindow = resolveSessionWindow(
+      config,
+      audienceValue,
+      storedActive,
+      blockId,
+    );
     const seriesError =
       sessionWindow &&
       placement === "weekly" &&
@@ -433,13 +469,7 @@ export function EditClassModal({
     const scheduleDirty =
       templateChanged || !eventsEqual(events, originalEvents);
 
-    const notesChanged = notes !== (meetingSeries?.notes ?? "");
-    if (
-      !audienceChanged &&
-      !scheduleDirty &&
-      !notesChanged &&
-      sessionActiveEqual(active, meetingSeries?.active)
-    ) {
+    if (!audienceChanged && !scheduleDirty) {
       showError("Ошибка", "Нет изменений для сохранения.");
       return;
     }
@@ -452,7 +482,8 @@ export function EditClassModal({
             config,
             weeklySlots,
             audienceTokens: audienceValue,
-            active,
+            active: storedActive,
+            blockId,
           })
         : originalEvents;
     const schedulePayloadChanged =
@@ -463,8 +494,8 @@ export function EditClassModal({
       config,
       {
         audience: audienceChanged ? audienceValue : undefined,
-        notes,
-        active,
+        active: storedActive,
+        block_id: blockId,
         weeklyPattern:
           placement === "weekly" && schedulePayloadChanged
             ? serializeWeeklyEventsToSlots({
@@ -500,8 +531,7 @@ export function EditClassModal({
 
   if (!meeting || !originals) return null;
 
-  const instructorsLabel = meetingInstructorsLabel(meeting.instructors);
-  const title = `${meeting.course} (${meeting.tag})`;
+  const meetingTitle = `${meeting.course} (${meeting.tag})`;
   const audienceChanged = !meetingAudienceEqual(
     audienceValue,
     originals.audience,
@@ -513,11 +543,7 @@ export function EditClassModal({
   const audienceDisplayLabel = formatAudienceTokensLabel(config, audienceValue);
   const scheduleChanged =
     templateChanged || !eventsEqual(events, originalEvents);
-  const notesChanged = notes !== (meetingSeries?.notes ?? "");
-  const activeChanged = !sessionActiveEqual(active, meetingSeries?.active);
-  const canSave =
-    windowValid &&
-    (audienceChanged || scheduleChanged || notesChanged || activeChanged);
+  const canSave = audienceChanged || scheduleChanged;
   const groupsOverridden = isMeetingAudienceOverridden(
     config,
     meetingComponent,
@@ -528,9 +554,9 @@ export function EditClassModal({
     : "";
 
   function restoreScheduleOriginals() {
-    setActive(meetingSeries?.active ?? null);
-    setNotes(meetingSeries?.notes ?? "");
     setPlacement(meetingRef?.kind === "occ" ? "dates_pattern" : "weekly");
+    setActive(meetingSeries?.active ?? null);
+    setBlockId(meetingSeries?.block_id ?? null);
     setWeeklySlots(structuredClone(originalWeeklySlots));
     setEvents(
       meetingRef?.kind === "wp"
@@ -539,6 +565,7 @@ export function EditClassModal({
             weeklySlots: originalWeeklySlots,
             audienceTokens: audienceValue,
             active: meetingSeries?.active,
+            blockId: meetingSeries?.block_id,
           })
         : structuredClone(originalEvents),
     );
@@ -551,86 +578,33 @@ export function EditClassModal({
         if (!next) handleClose();
         else onOpenChange(next);
       }}
-      title="Редактировать занятие"
+      title={
+        <div className="min-w-0">
+          <div>{meetingTitle}</div>
+          <MeetingInstanceMetadata
+            className="text-base-content/80 mt-1.5 font-normal"
+            config={config}
+            date={meeting.date}
+            start={meeting.start}
+            end={meeting.end}
+            room={meeting.room}
+            groups={meeting.groups}
+            instructors={meeting.instructors}
+            weekly={meetingRef?.kind === "wp"}
+          />
+        </div>
+      }
       closeOnOutsidePress={!isPending && !audienceModalOpen}
       overlayClassName="!flex items-start justify-center overflow-hidden py-4"
       containerClassName="max-h-[calc(100dvh-2rem)] max-w-xl overflow-y-auto"
     >
-      <div className="flex flex-col gap-3">
-        <div className="rounded-box border-base-300 bg-base-100 border px-3 py-2 text-sm">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="font-medium">{title}</div>
-          </div>
-          <div className="text-base-content/70 mt-1">
-            {formatDisplayDate(meeting.date)} {meeting.start}
-            {meeting.room ? ` · ${meeting.room}` : ""}
-            {instructorsLabel ? ` · ${instructorsLabel}` : ""}
-          </div>
-        </div>
-
-        <SessionWindowFields
-          config={config}
-          audience={audienceValue}
-          active={active}
-          onChange={handleActiveChange}
-          disabled={isPending}
-          onValidityChange={setWindowValid}
-        />
-
-        <SeriesNotesField
-          notes={notes}
-          onChange={setNotes}
-          disabled={isPending}
-        />
-
-        {placement === "weekly" ? (
-          <details className="rounded-box border-base-300 border p-3">
-            <summary className="cursor-pointer text-sm font-medium">
-              Шаблон на период серии
-            </summary>
-            <div className="mt-3">
-              <SessionSeriesEditor
-                config={config}
-                active={active}
-                meetings={meetings}
-                meetingIndex={_meetingPickerIndex}
-                placement={placement}
-                onPlacementChange={handlePlacementChange}
-                weeklySlots={editableWeeklySlots}
-                onWeeklySlotsChange={handleWeeklySlotsChange}
-                originalWeeklySlots={originalWeeklySlots}
-                occurrences={[]}
-                onOccurrencesChange={(occurrences) =>
-                  setEvents(expandOccurrencesToEvents(occurrences))
-                }
-                audienceTokens={audienceValue}
-                courseInstructors={courseInstructors}
-                instructorPool={meetingComponent?.instructor_pool}
-                excludeRefForWeekly={(index) =>
-                  meetingRef ? weeklySlotExcludeRef(meetingRef, index) : null
-                }
-              />
-            </div>
-          </details>
-        ) : null}
-
-        <EditableSessionEventsEditor
-          config={config}
-          active={active}
-          meetings={conflictMeetings}
-          meetingIndex={conflictMeetingIndex}
-          events={events}
-          onEventsChange={setEvents}
-          originalEvents={originalEvents}
-          seriesNotes={notes}
-          audienceTokens={audienceValue}
-          courseInstructors={courseInstructors}
-          instructorPool={meetingComponent?.instructor_pool}
-          meetingRef={meetingRef}
-          focusKey={focusKey}
-          allowAddOccurrence={placement === "dates_pattern"}
-          afterHeader={
-            <div className="flex flex-wrap items-center gap-2">
+      <div className="mt-3 flex flex-col gap-3">
+        <details className="rounded-box border-base-300 border p-3">
+          <summary className="cursor-pointer text-sm font-medium">
+            Шаблон серии
+          </summary>
+          <div className="mt-3 flex flex-col gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <EditClassAudienceSummaryRow
                 config={config}
                 tokens={audienceValue}
@@ -664,7 +638,51 @@ export function EditClassModal({
                 onChange={handlePlacementChange}
               />
             </div>
-          }
+            {placement === "weekly" ? (
+              <SessionSeriesEditor
+                config={config}
+                active={storedActive}
+                blockId={blockId}
+                originalActive={meetingSeries?.active}
+                originalBlockId={meetingSeries?.block_id}
+                onSessionWindowChange={handleSessionWindowChange}
+                meetings={meetings}
+                meetingIndex={_meetingPickerIndex}
+                placement={placement}
+                onPlacementChange={handlePlacementChange}
+                showPlacementToggle={false}
+                weeklySlots={editableWeeklySlots}
+                onWeeklySlotsChange={handleWeeklySlotsChange}
+                originalWeeklySlots={originalWeeklySlots}
+                occurrences={[]}
+                onOccurrencesChange={(occurrences) =>
+                  setEvents(expandOccurrencesToEvents(occurrences))
+                }
+                audienceTokens={audienceValue}
+                courseInstructors={courseInstructors}
+                instructorPool={meetingComponent?.instructor_pool}
+                excludeRefForWeekly={(index) =>
+                  meetingRef ? weeklySlotExcludeRef(meetingRef, index) : null
+                }
+              />
+            ) : null}
+          </div>
+        </details>
+
+        <EditableSessionEventsEditor
+          config={config}
+          active={active}
+          meetings={conflictMeetings}
+          meetingIndex={conflictMeetingIndex}
+          events={events}
+          onEventsChange={setEvents}
+          originalEvents={originalEvents}
+          audienceTokens={audienceValue}
+          courseInstructors={courseInstructors}
+          instructorPool={meetingComponent?.instructor_pool}
+          meetingRef={meetingRef}
+          focusKey={focusKey}
+          allowAddOccurrence={placement === "dates_pattern"}
         />
 
         {perGroup ? (
@@ -689,7 +707,7 @@ export function EditClassModal({
         )}
 
         <div className="mt-1 flex items-center justify-end gap-3">
-          {scheduleChanged || notesChanged || activeChanged ? (
+          {scheduleChanged ? (
             <button
               type="button"
               className="text-base-content/50 hover:text-base-content/80 text-sm"

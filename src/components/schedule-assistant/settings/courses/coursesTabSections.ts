@@ -9,9 +9,8 @@ import type {
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
-import { matchesCourseBlockFilter } from "./courseBlockFilter.ts";
 import { sortSemesterBlocks } from "@/components/schedule-assistant/settings/semester/semesterBlocks.ts";
-import type { BlockFilterValue } from "@/components/schedule-assistant/BlockFilter.tsx";
+import { courseBlockIds } from "@/components/schedule-assistant/timetable/timetableBlocks.ts";
 import type { SettingsListRow } from "@/components/schedule-assistant/settings/useSelection.tsx";
 
 /** Курс в сводке по секциям на вкладке «Курсы» (id = `course-${courseIndex}`). */
@@ -19,7 +18,11 @@ export type CourseUsageRow = SettingsListRow & {
   courseIndex: number;
   colorKey: string;
   color: string | null;
-  blockLabels: string[];
+  /**
+   * `null` — «Весь семестр». Иначе слоты в порядке блоков семестра: отсутствующий
+   * блок рендерится невидимым, чтобы «Блок 1» оставался левее «Блок 2».
+   */
+  blockSlots: { name: string; present: boolean }[] | null;
 };
 
 /** Курсы, привязанные к конкретной студенческой группе. */
@@ -77,6 +80,7 @@ function buildCourseUsageRows(
       const components = (course?.components || [])
         .map((comp) => comp?.tag)
         .filter(Boolean);
+      const blockIds = courseBlockIds(course);
       return {
         id: `course-${index}`,
         title:
@@ -91,17 +95,12 @@ function buildCourseUsageRows(
         courseIndex: index,
         colorKey: course.name,
         color: course.color ?? null,
-        blockLabels:
-          course.blocks == null
-            ? ["Весь семестр"]
-            : (course.blocks ?? []).map((id) => {
-                const index = sortedBlocks.findIndex(
-                  (block) => block.id === id,
-                );
-                return index >= 0
-                  ? `Блок ${index + 1}: ${sortedBlocks[index].name}`
-                  : `Неизвестный блок: ${id}`;
-              }),
+        blockSlots: !blockIds.length
+          ? null
+          : sortedBlocks.map((block) => ({
+              name: block.name,
+              present: blockIds.includes(block.id),
+            })),
       };
     },
   );
@@ -114,14 +113,8 @@ export type CoursesTabSectionsResult = {
 
 export function buildCoursesTabSections(
   config: SchemaScheduleConfig | null,
-  blockFilter: BlockFilterValue = "all",
 ): CoursesTabSectionsResult {
-  const courseItems = buildCourseUsageRows(config).filter((row) =>
-    matchesCourseBlockFilter(
-      config?.courses?.[row.courseIndex]?.blocks ?? null,
-      blockFilter,
-    ),
-  );
+  const courseItems = buildCourseUsageRows(config);
 
   const courseByIndex = new Map<number, CourseUsageRow>();
   for (const item of courseItems) {

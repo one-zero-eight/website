@@ -1,4 +1,5 @@
 import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
+import { resolveTimetableInstructor } from "./instructorDetails.ts";
 import type { TimetableViewConfig } from "./timetableViewTypes.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
 
@@ -7,6 +8,15 @@ export type PersonalTimetableGroup = {
   label: string;
   sectionCode: string;
   programCode: string;
+};
+
+export type PersonalMeetingRole = "studying" | "teaching";
+
+export type PersonalMeetingEntry = {
+  meeting: Meeting;
+  roles: PersonalMeetingRole[];
+  /** Own student groups that attend this meeting (labels). */
+  ownGroupLabels: string[];
 };
 
 /** Follow timetable hierarchy order, not the order returned by personal lookup. */
@@ -40,6 +50,37 @@ export function personalTimetableGroups(
     }
   }
   return groups;
+}
+
+/** Match the signed-in email (or other identity token) to a timetable instructor. */
+export function resolvePersonalInstructorId(
+  config: TimetableViewConfig,
+  identityToken: string | null | undefined,
+): string | undefined {
+  if (!identityToken?.trim()) return undefined;
+  return resolveTimetableInstructor(config.instructors ?? [], identityToken)
+    ?.id;
+}
+
+function meetingInstructorTokens(meeting: Meeting): string[] {
+  if (typeof meeting.instructors === "string") {
+    return meeting.instructors ? [meeting.instructors] : [];
+  }
+  return (meeting.instructors ?? []).filter(Boolean);
+}
+
+function meetingTaughtByInstructor(
+  meeting: Meeting,
+  instructors: NonNullable<TimetableViewConfig["instructors"]>,
+  instructorId: string,
+): boolean {
+  return meetingInstructorTokens(meeting).some((assignment) => {
+    const resolved = resolveTimetableInstructor(instructors, assignment);
+    if (resolved) return resolved.id === instructorId;
+    return (
+      assignment.trim().toLocaleLowerCase() === instructorId.toLocaleLowerCase()
+    );
+  });
 }
 
 /** Prefer this week, then the nearest available teaching week, skipping cancellations. */
@@ -92,7 +133,7 @@ export function shouldAutoNavigatePersonalGroups({
 
 export type PersonalMeetingsDay = {
   date: string;
-  meetings: Meeting[];
+  meetings: PersonalMeetingEntry[];
 };
 
 /** Personal meetings for one teaching week, grouped by calendar day. */
@@ -100,21 +141,44 @@ export function listPersonalMeetingsByDay(
   meetings: readonly Meeting[],
   groupIds: readonly string[],
   weekStart: string,
+  options?: {
+    groupLabelsById?: ReadonlyMap<string, string>;
+    instructors?: TimetableViewConfig["instructors"];
+    instructorId?: string;
+  },
 ): PersonalMeetingsDay[] {
-  if (!groupIds.length || !weekStart) return [];
+  const instructorId = options?.instructorId?.trim();
+  if ((!groupIds.length && !instructorId) || !weekStart) return [];
   const own = new Set(groupIds);
+  const instructors = options?.instructors ?? [];
+  const groupLabelsById = options?.groupLabelsById;
   const weekStartMs = new Date(`${weekStart}T00:00:00Z`).getTime();
   if (Number.isNaN(weekStartMs)) return [];
   const weekEndMs = weekStartMs + 7 * 86_400_000;
-  const byDate = new Map<string, Meeting[]>();
+  const byDate = new Map<string, PersonalMeetingEntry[]>();
   for (const meeting of meetings) {
     if (meeting.cancelled) continue;
-    if (!meeting.groups.some((groupId) => own.has(groupId))) continue;
     const time = new Date(`${meeting.date}T00:00:00Z`).getTime();
     if (time < weekStartMs || time >= weekEndMs) continue;
+    const studyingGroups = meeting.groups.filter((groupId) => own.has(groupId));
+    const studying = studyingGroups.length > 0;
+    const teaching =
+      !!instructorId &&
+      meetingTaughtByInstructor(meeting, instructors, instructorId);
+    if (!studying && !teaching) continue;
+    const roles: PersonalMeetingRole[] = [];
+    if (studying) roles.push("studying");
+    if (teaching) roles.push("teaching");
+    const entry: PersonalMeetingEntry = {
+      meeting,
+      roles,
+      ownGroupLabels: studyingGroups.map(
+        (groupId) => groupLabelsById?.get(groupId) || groupId,
+      ),
+    };
     const day = byDate.get(meeting.date);
-    if (day) day.push(meeting);
-    else byDate.set(meeting.date, [meeting]);
+    if (day) day.push(entry);
+    else byDate.set(meeting.date, [entry]);
   }
   return [...byDate.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
@@ -122,8 +186,8 @@ export function listPersonalMeetingsByDay(
       date,
       meetings: dayMeetings.sort(
         (a, b) =>
-          a.start.localeCompare(b.start) ||
-          a.instance_id.localeCompare(b.instance_id),
+          a.meeting.start.localeCompare(b.meeting.start) ||
+          a.meeting.instance_id.localeCompare(b.meeting.instance_id),
       ),
     }));
 }

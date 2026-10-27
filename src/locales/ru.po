@@ -7,15 +7,15 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Language: ru\n"
 
-#: src/components/when2meet/MeetingPage.tsx:1262
+#: src/components/when2meet/MeetingPage.tsx:1263
 msgid " — {hoveredAvailableCount, plural, one {# available} other {# available}}"
 msgstr " — {hoveredAvailableCount, plural, one {# доступен} few {# доступны} many {# доступны} other {# доступны}}"
 
-#: src/components/when2meet/MeetingPage.tsx:1756
+#: src/components/when2meet/MeetingPage.tsx:1761
 msgid " — No one is allowed here"
 msgstr " — Здесь никому нельзя"
 
-#: src/components/when2meet/MeetingPage.tsx:1758
+#: src/components/when2meet/MeetingPage.tsx:1763
 msgid " — No one is available"
 msgstr " — Никто не доступен"
 
@@ -55,15 +55,15 @@ msgstr "- Думаю"
 msgid "\"{meetingName}\" was moved to the archive."
 msgstr "Встреча «{meetingName}» перенесена в архив."
 
-#: src/components/when2meet/MeetingPage.tsx:182
+#: src/components/when2meet/MeetingPage.tsx:183
 msgid "\"{meetingName}\" was removed."
 msgstr "Встреча «{meetingName}» удалена."
 
-#: src/components/when2meet/CreationPage.tsx:301
+#: src/components/when2meet/CreationPage.tsx:313
 msgid "\"{trimmedName}\" is ready for participants."
 msgstr "Встреча «{trimmedName}» готова к участию."
 
-#: src/components/when2meet/CreationPage.tsx:261
+#: src/components/when2meet/CreationPage.tsx:273
 msgid "\"{trimmedName}\" was saved."
 msgstr "Встреча «{trimmedName}» сохранена."
 
@@ -83,7 +83,7 @@ msgstr "(мест нет)"
 msgid "(p. {currentDocumentPage} in file)"
 msgstr "(стр. {currentDocumentPage} в файле)"
 
-#: src/components/when2meet/MeetingPage.tsx:1837
+#: src/components/when2meet/MeetingPage.tsx:1842
 msgid "(you)"
 msgstr "(вы)"
 
@@ -296,27 +296,27 @@ msgstr "{joinsCount, plural, one {# подключение} few {# подклю�
 msgid "{minutes}m"
 msgstr "{minutes} мин"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1253
+#: src/components/when2meet/AvailabilitySelector.tsx:1250
 msgid "{monthDay}, {time}: {availableCount, plural, one {# available} other {# available}}"
 msgstr "{monthDay}, {time}: {availableCount, plural, one {# доступен} few {# доступны} many {# доступны} other {# доступны}}"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1252
+#: src/components/when2meet/AvailabilitySelector.tsx:1249
 msgid "{monthDay}, {time}: {availableCount, plural, one {# available} other {# available}} · {calendarEventSummary}"
 msgstr "{monthDay}, {time}: {availableCount, plural, one {# доступен} few {# доступны} many {# доступны} other {# доступны}} · {calendarEventSummary}"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1246
+#: src/components/when2meet/AvailabilitySelector.tsx:1243
 msgid "{monthDay}, {time}: selected meeting time"
 msgstr "{monthDay}, {time}: выбранное время встречи"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1244
+#: src/components/when2meet/AvailabilitySelector.tsx:1241
 msgid "{monthDay}, {time}: selecting meeting time"
 msgstr "{monthDay}, {time}: выбор времени встречи"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1250
+#: src/components/when2meet/AvailabilitySelector.tsx:1247
 msgid "{monthDay}, {time}: your availability is not selected"
 msgstr "{monthDay}, {time}: ваша доступность не отмечена"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1249
+#: src/components/when2meet/AvailabilitySelector.tsx:1246
 msgid "{monthDay}, {time}: your availability is selected"
 msgstr "{monthDay}, {time}: ваша доступность отмечена"
 
@@ -341,7 +341,7 @@ msgstr "Страниц: {previewPageCount} из {preparedFilePagesCount}"
 msgid "{printSheetsCount, plural, one {Print # sheet} other {Print # sheets}}"
 msgstr "{printSheetsCount, plural, one {Напечатать # лист} few {Напечатать # листа} many {Напечатать # листов} other {Напечатать # листов}}"
 
-#: src/components/when2meet/MeetingPage.tsx:1257
+#: src/components/when2meet/MeetingPage.tsx:1258
 msgid "{responsesCount, plural, one {# response} other {# responses}}"
 msgstr "{responsesCount, plural, one {# ответ} few {# ответа} many {# ответов} other {# ответов}}"
 
@@ -551,7 +551,7 @@ msgid "Academic group not found."
 msgstr "Академическая группа не найдена."
 
 #: src/components/admin/AdminPredefinedPage.tsx:127
-#: src/components/admin/AdminUserDetails.tsx:355
+#: src/components/admin/AdminUserDetails.tsx:366
 msgid "Academic groups"
 msgstr "Академические группы"
 
@@ -784,8 +784,8 @@ msgstr "Все 0 ч"
 msgid "All games"
 msgstr "Все игры"
 
-#: src/components/when2meet/CreationPage.tsx:529
-#: src/components/when2meet/MeetingPage.tsx:1276
+#: src/components/when2meet/CreationPage.tsx:541
+#: src/components/when2meet/MeetingPage.tsx:1277
 msgid "All meetings"
 msgstr "Все встречи"
 
@@ -825,7 +825,7 @@ msgstr "Вот это открытие! Вы нашли эксклюзивную
 msgid "An admin needs to review your changes before they go live."
 msgstr "Перед публикацией ваши изменения должен проверить администратор."
 
-#: src/components/admin/AdminUserDetails.tsx:217
+#: src/components/admin/AdminUserDetails.tsx:218
 msgid "Analytics"
 msgstr "Аналитика"
 
@@ -889,12 +889,12 @@ msgid "Archive meeting"
 msgstr "Перенести встречу в архив"
 
 #: src/components/when2meet/MeetingItem.tsx:30
-#: src/components/when2meet/MeetingPage.tsx:1295
+#: src/components/when2meet/MeetingPage.tsx:1300
 #: src/components/when2meet/MeetingsTabs.tsx:8
 msgid "Archived"
 msgstr "Архив"
 
-#: src/components/when2meet/MeetingPage.tsx:1157
+#: src/components/when2meet/MeetingPage.tsx:1158
 msgid "Are you sure you want to delete \"{meetingName}\"? It will be removed from your meetings list."
 msgstr "Удалить встречу «{meetingName}»? Она исчезнет из вашего списка встреч."
 
@@ -978,7 +978,7 @@ msgstr "Автоматическая конвертация PDF, Word, Excel, и
 msgid "Automatically detects the document edges and crops the PDF to match."
 msgstr "Автоматически определяет края документа и обрезает PDF по ним."
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1469
+#: src/components/when2meet/AvailabilitySelector.tsx:1466
 msgid "Availability"
 msgstr "Общие таймслоты"
 
@@ -1012,7 +1012,7 @@ msgstr "Назад"
 msgid "Back to Club"
 msgstr "Назад к клубу"
 
-#: src/components/when2meet/CreationPage.tsx:521
+#: src/components/when2meet/CreationPage.tsx:533
 msgid "Back to meeting"
 msgstr "Назад к встрече"
 
@@ -1099,7 +1099,7 @@ msgstr "Бронируйте аудитории и переговорные в �
 msgid "Book more in <0>Music Room bot</0>"
 msgstr "Забронировать в <0>Music Room bot</0>"
 
-#: src/components/when2meet/MeetingPage.tsx:1672
+#: src/components/when2meet/MeetingPage.tsx:1677
 #: src/components/when2meet/MeetingRoomModal.tsx:266
 msgid "Book room"
 msgstr "Забронировать комнату"
@@ -1114,7 +1114,7 @@ msgstr "Забронируйте музкомнату в Иннополисе."
 msgid "Book this room"
 msgstr "Забронировать эту комнату"
 
-#: src/components/when2meet/MeetingPage.tsx:1554
+#: src/components/when2meet/MeetingPage.tsx:1559
 msgid "Booked room"
 msgstr "Забронированная комната"
 
@@ -1130,7 +1130,7 @@ msgstr "Календарь бронирований"
 msgid "Booking details"
 msgstr "Детали бронирования"
 
-#: src/components/when2meet/MeetingPage.tsx:1589
+#: src/components/when2meet/MeetingPage.tsx:1594
 msgid "Booking time differs from the selected meeting time."
 msgstr "Время бронирования отличается от выбранного времени встречи."
 
@@ -1202,8 +1202,8 @@ msgstr "Календарь"
 msgid "Calendar deletion failed"
 msgstr "Не удалось удалить календарь"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1496
-#: src/components/when2meet/AvailabilitySelector.tsx:1507
+#: src/components/when2meet/AvailabilitySelector.tsx:1493
+#: src/components/when2meet/AvailabilitySelector.tsx:1504
 msgid "Calendar events"
 msgstr "События календаря"
 
@@ -1275,18 +1275,18 @@ msgstr "Можно играть сейчас"
 #: src/components/toast/ConfirmDialog.tsx:23
 #: src/components/toast/ToastProvider.test.ts:130
 #: src/components/web-print/PrintPage.tsx:505
-#: src/components/web-print/ScanPage.tsx:694
-#: src/components/web-print/ScanPage.tsx:758
+#: src/components/web-print/ScanPage.tsx:688
+#: src/components/web-print/ScanPage.tsx:752
 #: src/components/when2meet/ArchiveMeetingButton.test.ts:44
 #: src/components/when2meet/ArchiveMeetingButton.tsx:40
-#: src/components/when2meet/CreationPage.tsx:349
-#: src/components/when2meet/CreationPage.tsx:353
+#: src/components/when2meet/CreationPage.tsx:361
+#: src/components/when2meet/CreationPage.tsx:365
 #: src/components/when2meet/MeetingMobileBar.tsx:237
-#: src/components/when2meet/MeetingPage.tsx:961
-#: src/components/when2meet/MeetingPage.tsx:1159
-#: src/components/when2meet/MeetingPage.tsx:1411
-#: src/components/when2meet/MeetingPage.tsx:1639
 #: src/components/when2meet/MeetingName.tsx:126
+#: src/components/when2meet/MeetingPage.tsx:962
+#: src/components/when2meet/MeetingPage.tsx:1160
+#: src/components/when2meet/MeetingPage.tsx:1416
+#: src/components/when2meet/MeetingPage.tsx:1644
 msgid "Cancel"
 msgstr "Отмена"
 
@@ -1316,7 +1316,7 @@ msgstr "Отозвать заявку"
 msgid "Cancel the pending submission? The draft will stay."
 msgstr "Отозвать заявку, ожидающую рассмотрения? Черновик сохранится."
 
-#: src/components/when2meet/MeetingPage.tsx:1656
+#: src/components/when2meet/MeetingPage.tsx:1661
 msgid "Cancel the room booking before changing the meeting time."
 msgstr "Отмените бронирование комнаты, прежде чем менять время встречи."
 
@@ -1340,7 +1340,12 @@ msgstr "Нельзя отменить запись"
 msgid "Cannot decline without feedback"
 msgstr "Нельзя отклонить без комментария"
 
-#: src/components/when2meet/MeetingPage.tsx:1055
+#: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:148
+#: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:177
+msgid "Cannot delete a block referenced by series: {references}. Change their windows first."
+msgstr "Нельзя удалить блок, на который ссылаются серии: {references}. Сначала измените их периоды."
+
+#: src/components/when2meet/MeetingPage.tsx:1056
 msgid "Cannot select a past time"
 msgstr "Нельзя выбрать время в прошлом"
 
@@ -1393,14 +1398,18 @@ msgid "Change Medical Group"
 msgstr "Изменить медицинскую группу"
 
 #: src/components/when2meet/MeetingMobileBar.tsx:209
-#: src/components/when2meet/MeetingPage.tsx:1433
+#: src/components/when2meet/MeetingPage.tsx:1438
 msgid "Change my availability"
 msgstr "Изменить мои таймслоты"
 
-#: src/components/when2meet/MeetingPage.tsx:1670
+#: src/components/when2meet/MeetingPage.tsx:1675
 #: src/components/when2meet/MeetingRoomModal.tsx:266
 msgid "Change room"
 msgstr "Сменить комнату"
+
+#: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:205
+msgid "Changing block dates automatically updates bound series windows. Custom windows and explicit meeting dates are not moved."
+msgstr "Изменение дат блока автоматически обновляет периоды привязанных серий. Произвольные периоды и конкретные даты занятий не сдвигаются."
 
 #: src/components/clubs/constants.ts:83
 msgid "Channel"
@@ -1486,11 +1495,11 @@ msgstr "Проверка ваших тренировок <0>может заня�
 msgid "Chill day"
 msgstr "Сегодня чиллим"
 
-#: src/components/when2meet/MeetingPage.tsx:1056
+#: src/components/when2meet/MeetingPage.tsx:1057
 msgid "Choose a meeting start time in the future."
 msgstr "Выберите время начала встречи в будущем."
 
-#: src/components/when2meet/MeetingPage.tsx:1085
+#: src/components/when2meet/MeetingPage.tsx:1086
 msgid "Choose a meeting time on the grid first."
 msgstr "Сначала выберите время встречи на сетке."
 
@@ -1498,16 +1507,16 @@ msgstr "Сначала выберите время встречи на сетк�
 msgid "Choose a source to restore the draft from."
 msgstr "Выберите источник для восстановления черновика."
 
-#: src/components/when2meet/CreationPage.tsx:249
-#: src/components/when2meet/CreationPage.tsx:300
+#: src/components/when2meet/CreationPage.tsx:261
+#: src/components/when2meet/CreationPage.tsx:312
 msgid "Choose allowed timeslots on the meeting page."
 msgstr "Выберите разрешённые слоты на странице встречи."
 
-#: src/components/when2meet/CreationPage.tsx:187
+#: src/components/when2meet/CreationPage.tsx:199
 msgid "Choose at least one date."
 msgstr "Выберите хотя бы одну дату."
 
-#: src/components/when2meet/MeetingPage.tsx:989
+#: src/components/when2meet/MeetingPage.tsx:990
 msgid "Choose at least one timeslot."
 msgstr "Выберите хотя бы один слот."
 
@@ -1520,7 +1529,7 @@ msgstr "Выберите цвет"
 msgid "Choose file"
 msgstr "Выберите файл"
 
-#: src/components/when2meet/MeetingPage.tsx:1651
+#: src/components/when2meet/MeetingPage.tsx:1656
 msgid "Choose meeting time"
 msgstr "Выбрать лучшее время"
 
@@ -1529,7 +1538,7 @@ msgid "Chrome extension"
 msgstr "Расширение для Chrome"
 
 #: src/components/when2meet/MeetingMobileBar.tsx:112
-#: src/components/when2meet/MeetingPage.tsx:1348
+#: src/components/when2meet/MeetingPage.tsx:1353
 msgid "Clear all"
 msgstr "Очистить всё"
 
@@ -1704,7 +1713,7 @@ msgstr "Код с ТВ"
 msgid "Collapse"
 msgstr "Свернуть"
 
-#: src/components/admin/AdminUserDetails.tsx:266
+#: src/components/admin/AdminUserDetails.tsx:277
 #: src/components/admin/utils.ts:35
 #: src/components/admin/utils.ts:50
 #: src/components/dashboard/AccountWidget.tsx:14
@@ -1836,7 +1845,7 @@ msgstr "Продолжить"
 msgid "Convenient tools for Moodle, InNoHassle and other services at Innopolis University."
 msgstr "Удобные инструменты для Moodle, InNoHassle и других сервисов Университета Иннополис."
 
-#: src/components/when2meet/MeetingPage.tsx:1396
+#: src/components/when2meet/MeetingPage.tsx:1401
 msgid "Copied"
 msgstr "Скопировано"
 
@@ -1907,7 +1916,7 @@ msgstr "Не удалось добавить игру"
 msgid "Could not check access"
 msgstr "Не удалось проверить доступ"
 
-#: src/components/when2meet/MeetingPage.tsx:1142
+#: src/components/when2meet/MeetingPage.tsx:1143
 msgid "Could not copy link to clipboard."
 msgstr "Не удалось скопировать ссылку в буфер обмена."
 
@@ -2000,7 +2009,7 @@ msgstr "Курс:"
 #: src/components/events/drafts/CreateDraftModal.tsx:197
 #: src/components/tabletennis/CreateTournamentForm.tsx:130
 #: src/components/tabletennis/TabletennisTournaments.tsx:225
-#: src/components/when2meet/CreationPage.tsx:451
+#: src/components/when2meet/CreationPage.tsx:463
 msgid "Create"
 msgstr "Создать"
 
@@ -2150,6 +2159,10 @@ msgstr "Вы действуете от имени {0}"
 msgid "Custom display label"
 msgstr "Своя подпись"
 
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:150
+msgid "Custom window"
+msgstr "Свой период"
+
 #: src/components/sport/sport-checkin-utils.ts:136
 msgid "Daily limit for the same sport: 2 sport hours (usually 1 training)."
 msgstr "Дневной лимит для одного вида спорта: 2 спортивных часа (обычно 1 тренировка)."
@@ -2231,7 +2244,7 @@ msgstr "Задайте правила для своей комнаты"
 #: src/components/tabletennis/ValidationMatches.tsx:709
 #: src/components/toast/ToastProvider.test.ts:73
 #: src/components/toast/ToastProvider.test.ts:129
-#: src/components/when2meet/MeetingPage.tsx:1158
+#: src/components/when2meet/MeetingPage.tsx:1159
 msgid "Delete"
 msgstr "Удалить"
 
@@ -2273,7 +2286,7 @@ msgstr "Удалить столбец"
 msgid "Delete draft"
 msgstr "Удалить черновик"
 
-#: src/components/when2meet/MeetingPage.tsx:1722
+#: src/components/when2meet/MeetingPage.tsx:1727
 msgid "Delete event"
 msgstr "Удалить событие"
 
@@ -2295,7 +2308,7 @@ msgstr "Удалить язык"
 msgid "Delete language <0>{0}</0>?"
 msgstr "Удалить язык <0>{0}</0>?"
 
-#: src/components/when2meet/MeetingPage.tsx:1156
+#: src/components/when2meet/MeetingPage.tsx:1157
 msgid "Delete meeting"
 msgstr "Удалить встречу"
 
@@ -2360,7 +2373,7 @@ msgstr "Вернуться к своему аккаунту"
 #: src/components/sport/SportStudentTrainingModal.tsx:328
 #: src/components/sport/SportStudentTrainingModal.tsx:335
 #: src/components/sport/SportStudentTrainingModal.tsx:344
-#: src/components/when2meet/CreationPage.tsx:385
+#: src/components/when2meet/CreationPage.tsx:397
 msgid "Description"
 msgstr "Описание"
 
@@ -2564,7 +2577,7 @@ msgstr "Редактировать клуб"
 msgid "Edit draft"
 msgstr "Редактировать черновик"
 
-#: src/components/when2meet/MeetingPage.tsx:1691
+#: src/components/when2meet/MeetingPage.tsx:1696
 msgid "Edit event"
 msgstr "Редактировать"
 
@@ -2585,7 +2598,7 @@ msgstr "Редактировать информацию"
 msgid "Edit link"
 msgstr "Редактировать ссылку"
 
-#: src/components/when2meet/CreationPage.tsx:535
+#: src/components/when2meet/CreationPage.tsx:547
 msgid "Edit meeting"
 msgstr "Редактировать встречу"
 
@@ -2614,7 +2627,11 @@ msgstr "Отредактируйте таблицу или поделитесь 
 msgid "Edit this calendar"
 msgstr "Редактировать календарь"
 
-#: src/components/admin/AdminUserDetails.tsx:255
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:199
+msgid "Effective window for the selected groups:"
+msgstr "Фактический период с учётом выбранных групп:"
+
+#: src/components/admin/AdminUserDetails.tsx:266
 #: src/components/clubs/EditClubPage.tsx:976
 msgid "Email"
 msgstr "Почта"
@@ -2628,6 +2645,10 @@ msgstr "Пустая группа"
 msgid "End"
 msgstr "Конец"
 
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:172
+msgid "End (inclusive)"
+msgstr "Окончание (включительно)"
+
 #: src/components/sport/SportOverviewSection.tsx:645
 msgid "End date"
 msgstr "Дата окончания"
@@ -2636,7 +2657,7 @@ msgstr "Дата окончания"
 msgid "End time must be after the start time."
 msgstr "Время окончания должно быть позже времени начала."
 
-#: src/components/when2meet/CreationPage.tsx:190
+#: src/components/when2meet/CreationPage.tsx:202
 msgid "End time must be later than start time."
 msgstr "Время окончания должно быть позже времени начала."
 
@@ -2706,6 +2727,10 @@ msgstr "Введите код с экрана ТВ."
 #: src/components/room-booking/timeline/BookingModal.tsx:866
 msgid "Enter title..."
 msgstr "Введите название..."
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:55
+msgid "Enter valid start and end dates."
+msgstr "Укажите корректные даты начала и окончания."
 
 #: src/app/routes/guard.google.files.$slug.join.tsx:94
 msgid "Enter your Gmail address to get access to the Google Spreadsheet"
@@ -2794,17 +2819,17 @@ msgstr "Оборудование"
 #: src/components/when2meet/CreationPage.tsx:140
 #: src/components/when2meet/CreationPage.tsx:152
 #: src/components/when2meet/CreationPage.tsx:162
-#: src/components/when2meet/CreationPage.tsx:289
-#: src/components/when2meet/MeetingPage.tsx:151
-#: src/components/when2meet/MeetingPage.tsx:169
-#: src/components/when2meet/MeetingPage.tsx:186
-#: src/components/when2meet/MeetingPage.tsx:205
-#: src/components/when2meet/MeetingPage.tsx:468
-#: src/components/when2meet/MeetingPage.tsx:989
-#: src/components/when2meet/MeetingPage.tsx:1085
-#: src/components/when2meet/MeetingPage.tsx:1142
-#: src/components/when2meet/MeetingRoomModal.tsx:189
+#: src/components/when2meet/CreationPage.tsx:301
 #: src/components/when2meet/MeetingName.tsx:35
+#: src/components/when2meet/MeetingPage.tsx:152
+#: src/components/when2meet/MeetingPage.tsx:170
+#: src/components/when2meet/MeetingPage.tsx:187
+#: src/components/when2meet/MeetingPage.tsx:206
+#: src/components/when2meet/MeetingPage.tsx:469
+#: src/components/when2meet/MeetingPage.tsx:990
+#: src/components/when2meet/MeetingPage.tsx:1086
+#: src/components/when2meet/MeetingPage.tsx:1143
+#: src/components/when2meet/MeetingRoomModal.tsx:189
 msgid "Error"
 msgstr "Ошибка"
 
@@ -2873,7 +2898,7 @@ msgstr "Каждый критерий требует подтверждения"
 msgid "Every group needs at least 2 players."
 msgstr "В каждой группе нужно минимум 2 игрока."
 
-#: src/components/when2meet/MeetingPage.tsx:1117
+#: src/components/when2meet/MeetingPage.tsx:1118
 msgid "Everyone can now see the final meeting time."
 msgstr "Теперь всем видно окончательное время встречи."
 
@@ -3070,8 +3095,8 @@ msgstr "Фильтры"
 msgid "Final"
 msgstr "Финал"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1529
-#: src/components/when2meet/AvailabilitySelector.tsx:1535
+#: src/components/when2meet/AvailabilitySelector.tsx:1526
+#: src/components/when2meet/AvailabilitySelector.tsx:1532
 msgid "Final time"
 msgstr "Итоговое время"
 
@@ -3113,7 +3138,7 @@ msgstr "Завершённые тренировки за последние 8 н
 msgid "Firefox extension"
 msgstr "Расширение для Firefox"
 
-#: src/components/admin/AdminUserDetails.tsx:289
+#: src/components/admin/AdminUserDetails.tsx:300
 msgid "First name"
 msgstr "Имя"
 
@@ -3457,19 +3482,19 @@ msgid "Hidden from calendar"
 msgstr "Скрыто из календаря"
 
 #: src/components/when2meet/MeetingMobileBar.tsx:193
-#: src/components/when2meet/MeetingPage.tsx:1741
+#: src/components/when2meet/MeetingPage.tsx:1746
 msgid "Hide all"
 msgstr "Скрыть всех"
 
-#: src/components/when2meet/MeetingPage.tsx:1490
+#: src/components/when2meet/MeetingPage.tsx:1495
 msgid "Hide best time"
 msgstr "Скрыть лучшее время"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1478
+#: src/components/when2meet/AvailabilitySelector.tsx:1475
 msgid "Hide calendar events"
 msgstr "Скрыть события календаря"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1516
+#: src/components/when2meet/AvailabilitySelector.tsx:1513
 msgid "Hide final meeting time"
 msgstr "Скрыть окончательное время встречи"
 
@@ -3477,7 +3502,7 @@ msgstr "Скрыть окончательное время встречи"
 msgid "Hide from calendar"
 msgstr "Скрыть из календаря"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1448
+#: src/components/when2meet/AvailabilitySelector.tsx:1445
 msgid "Hide other participants' availability"
 msgstr "Скрыть доступность других участников"
 
@@ -3533,8 +3558,8 @@ msgstr "Как зарегистрировать клуб"
 msgid "I can help you to book the music room."
 msgstr "Я могу помочь забронировать музкомнату."
 
-#: src/components/admin/AdminUserDetails.tsx:206
-#: src/components/admin/AdminUserDetails.tsx:288
+#: src/components/admin/AdminUserDetails.tsx:207
+#: src/components/admin/AdminUserDetails.tsx:299
 msgid "ID"
 msgstr "ID"
 
@@ -3621,6 +3646,10 @@ msgstr "На складе"
 msgid "Inactive"
 msgstr "Неактивно"
 
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:203
+msgid "inclusive; days: {dayCount}"
+msgstr "включительно; дней: {dayCount}"
+
 #: src/components/web-print/PrintPage.tsx:187
 msgid "Incorrect page range format."
 msgstr "Неверный формат диапазона страниц."
@@ -3654,7 +3683,7 @@ msgstr "Инициализация ТВ..."
 msgid "Inline code"
 msgstr "Инлайн-код"
 
-#: src/components/admin/AdminUserDetails.tsx:208
+#: src/components/admin/AdminUserDetails.tsx:209
 #: src/components/admin/utils.ts:51
 msgid "InNoHassle admin"
 msgstr "Админка InNoHassle"
@@ -3679,7 +3708,7 @@ msgstr "InNoHassle Tools — браузерное расширение с удо
 msgid "Innopoints Rewards"
 msgstr "Награды Innopoints"
 
-#: src/components/admin/AdminUserDetails.tsx:254
+#: src/components/admin/AdminUserDetails.tsx:265
 msgid "Innopolis"
 msgstr "Иннополис"
 
@@ -3848,7 +3877,7 @@ msgstr "Оставить отправленный логотип"
 msgid "Label (Optional)"
 msgstr "Подпись (необязательно)"
 
-#: src/components/admin/AdminUserDetails.tsx:290
+#: src/components/admin/AdminUserDetails.tsx:301
 msgid "Last name"
 msgstr "Фамилия"
 
@@ -4183,7 +4212,7 @@ msgstr "Знакомьтесь, заводите друзей и участву�
 msgid "Meet new students, make connections, and build relationships that will help you down the line when looking for a job."
 msgstr "Знакомьтесь со студентами, расширяйте связи и стройте отношения, полезные при поиске работы."
 
-#: src/components/when2meet/MeetingPage.tsx:367
+#: src/components/when2meet/MeetingPage.tsx:368
 msgid "Meeting"
 msgstr "Встреча"
 
@@ -4192,25 +4221,25 @@ msgstr "Встреча"
 msgid "Meeting archived"
 msgstr "Встреча перенесена в архив"
 
-#: src/components/when2meet/CreationPage.tsx:298
+#: src/components/when2meet/CreationPage.tsx:310
 msgid "Meeting created"
 msgstr "Встреча создана"
 
-#: src/components/when2meet/MeetingPage.tsx:182
+#: src/components/when2meet/MeetingPage.tsx:183
 msgid "Meeting deleted"
 msgstr "Встреча удалена"
 
-#: src/components/when2meet/CreationPage.tsx:361
+#: src/components/when2meet/CreationPage.tsx:373
 #: src/components/when2meet/MeetingName.tsx:85
 msgid "Meeting name"
 msgstr "Название встречи"
 
-#: src/components/when2meet/CreationPage.tsx:183
+#: src/components/when2meet/CreationPage.tsx:195
 #: src/components/when2meet/MeetingName.tsx:106
 msgid "Meeting name should contain at least 3 symbols."
 msgstr "Название встречи должно содержать не менее 3 символов."
 
-#: src/components/when2meet/MeetingPage.tsx:1198
+#: src/components/when2meet/MeetingPage.tsx:1199
 msgid "Meeting not found or has no configured dates."
 msgstr "Встреча не найдена или даты не настроены."
 
@@ -4222,22 +4251,26 @@ msgstr "Бронирование комнаты для встречи отмен
 msgid "Meeting room was changed."
 msgstr "Комната для встречи изменена."
 
-#: src/components/when2meet/MeetingPage.tsx:1226
+#: src/components/when2meet/MeetingPage.tsx:1227
 msgid "Meeting start time must be in the future"
 msgstr "Время начала встречи должно быть в будущем"
 
-#: src/components/when2meet/MeetingPage.tsx:1116
+#: src/components/when2meet/MeetingPage.tsx:1117
 msgid "Meeting time saved"
 msgstr "Время встречи сохранено"
 
-#: src/components/when2meet/CreationPage.tsx:248
-#: src/components/when2meet/CreationPage.tsx:261
+#: src/components/when2meet/CreationPage.tsx:260
+#: src/components/when2meet/CreationPage.tsx:273
 msgid "Meeting updated"
 msgstr "Встреча обновлена"
 
-#: src/components/when2meet/CreationPage.tsx:289
+#: src/components/when2meet/CreationPage.tsx:301
 msgid "Meeting was created without an id."
 msgstr "Встреча создана без id."
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:206
+msgid "meetings: {occurrenceCount}"
+msgstr "занятий: {occurrenceCount}"
 
 #: src/app/routes/_with_menu/menu.tsx:15
 msgid "Menu"
@@ -4255,7 +4288,7 @@ msgstr "Мерч клуба"
 msgid "Min"
 msgstr "Мин."
 
-#: src/components/when2meet/MeetingPage.tsx:1505
+#: src/components/when2meet/MeetingPage.tsx:1510
 msgid "Minimum participants"
 msgstr "Минимум участников"
 
@@ -4366,7 +4399,7 @@ msgstr "Мои встречи"
 msgid "My upcoming trainings"
 msgstr "Мои ближайшие тренировки"
 
-#: src/components/admin/AdminUserDetails.tsx:256
+#: src/components/admin/AdminUserDetails.tsx:267
 #: src/components/calendar/import/ImportModal.tsx:163
 #: src/components/clubs/ClubPage.tsx:278
 #: src/components/clubs/EditClubPage.tsx:963
@@ -4389,7 +4422,7 @@ msgstr "Название календаря..."
 msgid "Name or email..."
 msgstr "Имя или email..."
 
-#: src/components/when2meet/CreationPage.tsx:370
+#: src/components/when2meet/CreationPage.tsx:382
 msgid "Name your meeting"
 msgstr "Назовите встречу"
 
@@ -4437,7 +4470,7 @@ msgstr "Новые гости получат права {newRole, select, writer
 msgid "New logo submitted (preview failed to load)"
 msgstr "Новый логотип отправлен (предпросмотр не загрузился)"
 
-#: src/components/when2meet/CreationPage.tsx:537
+#: src/components/when2meet/CreationPage.tsx:549
 msgid "New meeting"
 msgstr "Новая встреча"
 
@@ -4457,7 +4490,7 @@ msgstr "Новая вкладка"
 msgid "New Year countdown"
 msgstr "До Нового года"
 
-#: src/components/when2meet/CreationPage.tsx:449
+#: src/components/when2meet/CreationPage.tsx:461
 #: src/components/when2meet/MeetingRoomModal.tsx:374
 msgid "Next"
 msgstr "Далее"
@@ -4480,7 +4513,7 @@ msgstr "Следующие бронирования"
 msgid "Nickname or email"
 msgstr "Никнейм или email"
 
-#: src/components/admin/AdminUserDetails.tsx:38
+#: src/components/admin/AdminUserDetails.tsx:39
 msgid "No"
 msgstr "Нет"
 
@@ -4499,6 +4532,10 @@ msgstr "Сейчас нет активного турнира."
 #: src/components/tabletennis/TabletennisTournaments.tsx:235
 msgid "No active tournaments. Create one to start managing groups and the qualification bracket."
 msgstr "Нет активных турниров. Создайте турнир, чтобы начать группы и квалификацию."
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:193
+msgid "No additional restriction; using groups' teaching periods."
+msgstr "Без дополнительного ограничения; используются учебные периоды групп."
 
 #: src/components/events/submissions/SubmissionsPage.tsx:29
 msgid "No approved submissions."
@@ -4559,7 +4596,7 @@ msgstr "Нет данных за выбранный период"
 msgid "No date"
 msgstr "Без даты"
 
-#: src/components/when2meet/utils/slots.ts:136
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:212
 msgid "No dates"
 msgstr "Нет дат"
 
@@ -4709,11 +4746,11 @@ msgstr "Нет встреч по вашему запросу."
 msgid "No one has joined yet"
 msgstr "Пока никто не присоединился"
 
-#: src/components/when2meet/MeetingPage.tsx:1900
+#: src/components/when2meet/MeetingPage.tsx:1905
 msgid "No one is allowed here"
 msgstr "Здесь никому нельзя"
 
-#: src/components/when2meet/MeetingPage.tsx:1902
+#: src/components/when2meet/MeetingPage.tsx:1907
 msgid "No one is available"
 msgstr "Никто не доступен"
 
@@ -4721,7 +4758,7 @@ msgstr "Никто не доступен"
 msgid "No page specified"
 msgstr "Страница не указана"
 
-#: src/components/when2meet/MeetingPage.tsx:1793
+#: src/components/when2meet/MeetingPage.tsx:1798
 msgid "No participants found."
 msgstr "Участники не найдены."
 
@@ -4749,7 +4786,7 @@ msgstr "На эту тренировку больше нет мест."
 msgid "No players match the current filters"
 msgstr "Нет игроков по текущим фильтрам"
 
-#: src/components/admin/AdminUserDetails.tsx:361
+#: src/components/admin/AdminUserDetails.tsx:372
 msgid "No predefined groups for this user."
 msgstr "Нет предопределённых групп для этого пользователя."
 
@@ -4757,7 +4794,7 @@ msgstr "Нет предопределённых групп для этого п�
 msgid "No predefined users."
 msgstr "Нет предустановленных пользователей."
 
-#: src/components/admin/AdminUserDetails.tsx:282
+#: src/components/admin/AdminUserDetails.tsx:293
 msgid "No preferences."
 msgstr "Нет предпочтений."
 
@@ -4793,7 +4830,7 @@ msgstr "Комнаты не найдены."
 msgid "No scan yet"
 msgstr "Сканирования ещё не было"
 
-#: src/components/when2meet/MeetingPage.tsx:1772
+#: src/components/when2meet/MeetingPage.tsx:1777
 msgid "No slot selected"
 msgstr "Слот не выбран"
 
@@ -4848,11 +4885,11 @@ msgstr "Нет"
 msgid "Not a sport club"
 msgstr "Не спортивный клуб"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1242
+#: src/components/when2meet/AvailabilitySelector.tsx:1239
 msgid "not available for this meeting"
 msgstr "недоступно для этой встречи"
 
-#: src/components/when2meet/MeetingPage.tsx:1227
+#: src/components/when2meet/MeetingPage.tsx:1228
 msgid "Not available for this meeting"
 msgstr "Недоступно для этой встречи"
 
@@ -5001,7 +5038,7 @@ msgid "Open bracket"
 msgstr "Открыть турнирную сетку"
 
 #: src/components/room-booking/bookings-list/BookingsListPage.tsx:113
-#: src/components/when2meet/MeetingPage.tsx:1575
+#: src/components/when2meet/MeetingPage.tsx:1580
 msgid "Open details"
 msgstr "Открыть подробности"
 
@@ -5028,11 +5065,11 @@ msgstr "Открыть Telegram-бота"
 msgid "Open your calendar settings to add a calendar by URL."
 msgstr "Откройте настройки календаря, чтобы добавить календарь по URL."
 
-#: src/components/when2meet/CreationPage.tsx:389
+#: src/components/when2meet/CreationPage.tsx:401
 msgid "Optional meeting details"
 msgstr "Дополнительные детали встречи"
 
-#: src/components/when2meet/MeetingPage.tsx:1475
+#: src/components/when2meet/MeetingPage.tsx:1480
 msgid "Options"
 msgstr "Параметры"
 
@@ -5060,7 +5097,7 @@ msgstr "Другие приложения: найдите в настройка�
 msgid "Other materials related to the activities of the club"
 msgstr "Другие материалы, связанные с деятельностью клуба"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1463
+#: src/components/when2meet/AvailabilitySelector.tsx:1460
 msgid "Other participants"
 msgstr "Другие участники"
 
@@ -5089,7 +5126,7 @@ msgstr "Устарело"
 msgid "Outlook API is currently unavailable"
 msgstr "API Outlook сейчас недоступно"
 
-#: src/components/when2meet/MeetingPage.tsx:1843
+#: src/components/when2meet/MeetingPage.tsx:1848
 msgid "Owner"
 msgstr "Владелец"
 
@@ -5119,11 +5156,11 @@ msgstr "Бумага неизвестна"
 msgid "Parsing activity link"
 msgstr "Разбор ссылки на активность"
 
-#: src/components/when2meet/MeetingPage.tsx:166
+#: src/components/when2meet/MeetingPage.tsx:167
 msgid "Participant removed"
 msgstr "Участник удалён"
 
-#: src/components/when2meet/MeetingPage.tsx:166
+#: src/components/when2meet/MeetingPage.tsx:167
 msgid "Participant was removed."
 msgstr "Участник удалён."
 
@@ -5132,7 +5169,7 @@ msgstr "Участник удалён."
 msgid "Participants"
 msgstr "Участники"
 
-#: src/components/when2meet/MeetingPage.tsx:1013
+#: src/components/when2meet/MeetingPage.tsx:1014
 msgid "Participants can now add their availability."
 msgstr "Теперь участники могут указать удобное время."
 
@@ -5196,7 +5233,7 @@ msgstr "Личный календарь"
 msgid "Photo"
 msgstr "Фото"
 
-#: src/components/admin/AdminUserDetails.tsx:302
+#: src/components/admin/AdminUserDetails.tsx:313
 msgid "Photo URL"
 msgstr "URL фото"
 
@@ -5206,7 +5243,7 @@ msgstr "URL фото"
 msgid "Pick the registered player who played as <0>{0}</0>. They get the guest's games in every tournament and the rating ({1}); the guest is deleted."
 msgstr "Выберите зарегистрированного игрока, который играл под именем <0>{0}</0>. Ему будут переданы игры гостя во всех турнирах и рейтинг ({1}); гость будет удалён."
 
-#: src/components/when2meet/CreationPage.tsx:430
+#: src/components/when2meet/CreationPage.tsx:442
 msgid "Pick timeslots on the next step"
 msgstr "Выберите слоты на следующем шаге"
 
@@ -5311,7 +5348,7 @@ msgid "Predefined data updated"
 msgstr "Предопределённые данные обновлены"
 
 #: src/app/routes/_with_menu/admin/predefined.tsx:18
-#: src/components/admin/AdminUserDetails.tsx:343
+#: src/components/admin/AdminUserDetails.tsx:354
 msgid "Predefined groups"
 msgstr "Предустановленные группы"
 
@@ -5319,7 +5356,7 @@ msgstr "Предустановленные группы"
 msgid "Predefined users"
 msgstr "Предустановленные пользователи"
 
-#: src/components/admin/AdminUserDetails.tsx:275
+#: src/components/admin/AdminUserDetails.tsx:286
 msgid "Preferences"
 msgstr "Предпочтения"
 
@@ -5672,8 +5709,8 @@ msgstr "Обновите страницу после восстановлени�
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:97
 #: src/components/tabletennis/PlayersField.tsx:414
 #: src/components/tabletennis/ValidationMatches.tsx:247
-#: src/components/web-print/ScanPage.tsx:773
-#: src/components/when2meet/MeetingPage.tsx:960
+#: src/components/web-print/ScanPage.tsx:767
+#: src/components/when2meet/MeetingPage.tsx:961
 msgid "Remove"
 msgstr "Удалить"
 
@@ -5687,7 +5724,7 @@ msgstr "Удалить {0}"
 msgid "Remove {0} from the tournament?"
 msgstr "Удалить игрока {0} из турнира?"
 
-#: src/components/when2meet/MeetingPage.tsx:958
+#: src/components/when2meet/MeetingPage.tsx:959
 msgid "Remove {participantName} from the meeting?"
 msgstr "Удалить участника {participantName} из встречи?"
 
@@ -5715,7 +5752,7 @@ msgstr "Убрать выделение"
 msgid "Remove last page"
 msgstr "Удалить последнюю страницу"
 
-#: src/components/web-print/ScanPage.tsx:742
+#: src/components/web-print/ScanPage.tsx:736
 msgid "Remove last page?"
 msgstr "Удалить последнюю страницу?"
 
@@ -5723,7 +5760,7 @@ msgstr "Удалить последнюю страницу?"
 msgid "Remove link"
 msgstr "Удалить ссылку"
 
-#: src/components/when2meet/MeetingPage.tsx:956
+#: src/components/when2meet/MeetingPage.tsx:957
 msgid "Remove participant"
 msgstr "Удалить участника"
 
@@ -5740,7 +5777,7 @@ msgstr "Удалить этот календарь"
 msgid "Remove this event from the public calendar? This cannot be undone from here."
 msgstr "Убрать это мероприятие из публичного календаря? Отсюда это нельзя будет отменить."
 
-#: src/components/when2meet/MeetingPage.tsx:959
+#: src/components/when2meet/MeetingPage.tsx:960
 msgid "Remove this participant from the meeting?"
 msgstr "Удалить этого участника из встречи?"
 
@@ -5840,7 +5877,7 @@ msgstr "Сбросить к результатам"
 msgid "Resources & Links"
 msgstr "Ресурсы и ссылки"
 
-#: src/components/when2meet/MeetingPage.tsx:1733
+#: src/components/when2meet/MeetingPage.tsx:1738
 msgid "Responses"
 msgstr "Участники"
 
@@ -5984,7 +6021,7 @@ msgstr "Бронирование"
 msgid "Room booking relies on the Outlook calendar service, which appears to be down right now. We have been notified about this."
 msgstr "Бронирование комнат зависит от календаря Outlook, который сейчас, похоже, недоступен. Мы уже получили уведомление об этом."
 
-#: src/components/when2meet/MeetingPage.tsx:463
+#: src/components/when2meet/MeetingPage.tsx:464
 msgid "Room booking removed"
 msgstr "Бронирование комнаты удалено"
 
@@ -6021,7 +6058,7 @@ msgstr "ТВ комнаты"
 msgid "Room was booked for the meeting."
 msgstr "Комната забронирована для встречи."
 
-#: src/components/when2meet/MeetingPage.tsx:1305
+#: src/components/when2meet/MeetingPage.tsx:1310
 msgid "Room: {bookedRoomTitle}"
 msgstr "Аудитория: {bookedRoomTitle}"
 
@@ -6050,7 +6087,7 @@ msgstr "Правила бронирования аудиторий в Униве
 msgid "Ryan Gosling winks"
 msgstr "Райан Гослинг подмигивает"
 
-#: src/components/when2meet/CreationPage.tsx:407
+#: src/components/when2meet/CreationPage.tsx:419
 msgid "Same hours every day"
 msgstr "Одинаковые часы каждый день"
 
@@ -6059,7 +6096,7 @@ msgstr "Одинаковые часы каждый день"
 #: src/components/events/drafts/DraftPage.tsx:561
 #: src/components/events/drafts/EditDraftInfoModal.tsx:179
 #: src/components/tabletennis/PlayerActionMenu.tsx:310
-#: src/components/when2meet/CreationPage.tsx:465
+#: src/components/when2meet/CreationPage.tsx:477
 #: src/components/when2meet/MeetingName.tsx:117
 msgid "Save"
 msgstr "Сохранить"
@@ -6078,14 +6115,14 @@ msgstr "Сохранить изменения"
 msgid "Save correction"
 msgstr "Сохранить исправление"
 
-#: src/components/when2meet/MeetingPage.tsx:1629
+#: src/components/when2meet/MeetingPage.tsx:1634
 msgid "Save meeting time"
 msgstr "Сохранить время встречи"
 
 #: src/components/when2meet/MeetingMobileBar.tsx:124
 #: src/components/when2meet/MeetingMobileBar.tsx:249
-#: src/components/when2meet/MeetingPage.tsx:1359
-#: src/components/when2meet/MeetingPage.tsx:1422
+#: src/components/when2meet/MeetingPage.tsx:1364
+#: src/components/when2meet/MeetingPage.tsx:1427
 msgid "Save timeslots"
 msgstr "Сохранить слоты"
 
@@ -6101,7 +6138,7 @@ msgstr "Сохранение..."
 msgid "Saving…"
 msgstr "Сохранение…"
 
-#: src/components/web-print/ScanPage.tsx:711
+#: src/components/web-print/ScanPage.tsx:705
 #: src/components/web-print/WebPrintLandingPage.tsx:52
 #: src/components/web-print/WebPrintTabs.tsx:14
 msgid "Scan"
@@ -6124,7 +6161,7 @@ msgid "Scan from both sides"
 msgstr "Сканировать с обеих сторон"
 
 #: src/components/web-print/ScanPage.tsx:488
-#: src/components/web-print/ScanPage.tsx:709
+#: src/components/web-print/ScanPage.tsx:703
 msgid "Scan next page"
 msgstr "Сканировать следующую страницу"
 
@@ -6242,7 +6279,7 @@ msgstr "Поиск игр по названию"
 msgid "Search meeting name..."
 msgstr "Поиск по названию встречи..."
 
-#: src/components/when2meet/MeetingPage.tsx:1782
+#: src/components/when2meet/MeetingPage.tsx:1787
 msgid "Search participants..."
 msgstr "Поиск участников..."
 
@@ -6312,7 +6349,7 @@ msgstr "Выберите пользователя для имперсонаци�
 msgid "Select Target Time"
 msgstr "Выберите целевое время"
 
-#: src/components/when2meet/MeetingPage.tsx:1446
+#: src/components/when2meet/MeetingPage.tsx:1451
 msgid "Select the timeslots that participants can choose, then click Save timeslots."
 msgstr "Выберите интервалы, доступные участникам, затем нажмите «Сохранить интервалы»."
 
@@ -6323,6 +6360,10 @@ msgstr "Выберите тип тренировки"
 #: src/components/dashboard/links/CustomSelect.tsx:86
 msgid "Select..."
 msgstr "Выберите..."
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:189
+msgid "Selected bounds:"
+msgstr "Выбранные границы:"
 
 #: src/components/web-print/ScanPage.tsx:156
 msgid "Selected scanner is offline"
@@ -6338,7 +6379,7 @@ msgstr "Выбранный сканер недоступен. Выберите �
 msgid "Selected: {0} ({1})"
 msgstr "Выбрано: {0} ({1})"
 
-#: src/components/when2meet/MeetingPage.tsx:1605
+#: src/components/when2meet/MeetingPage.tsx:1610
 msgid "Selected: {pendingMeetingTimeLabel}"
 msgstr "Выбрано: {pendingMeetingTimeLabel}"
 
@@ -6367,6 +6408,14 @@ msgstr "Селф-спорт: {0}ч"
 #: src/components/clubs/HowToCreateClubPage.tsx:96
 msgid "Semestral Budget"
 msgstr "Бюджет на семестр"
+
+#: src/components/schedule-assistant/settings/courses/CourseBlocksEditor.tsx:21
+msgid "Series blocks"
+msgstr "Блоки серий"
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:105
+msgid "Series window"
+msgstr "Период серии"
 
 #: src/app/routes/_with_menu/board-games/index.tsx:21
 msgid "Service for board games reservation."
@@ -6425,7 +6474,7 @@ msgstr "Такой никнейм есть у нескольких игроко�
 msgid "Share a join link; respondents sign in via SSO and get the role you choose"
 msgstr "Поделитесь ссылкой: пользователи войдут через SSO и получат выбранную вами роль"
 
-#: src/components/when2meet/MeetingPage.tsx:1385
+#: src/components/when2meet/MeetingPage.tsx:1390
 msgid "Share link"
 msgstr "Поделиться"
 
@@ -6474,11 +6523,11 @@ msgstr "Показать все ({resourceCount})"
 msgid "Show all {0} places"
 msgstr "Показать все места ({0})"
 
-#: src/components/when2meet/MeetingPage.tsx:1491
+#: src/components/when2meet/MeetingPage.tsx:1496
 msgid "Show best time"
 msgstr "Показать лучшее время"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1479
+#: src/components/when2meet/AvailabilitySelector.tsx:1476
 msgid "Show calendar events"
 msgstr "Показать события календаря"
 
@@ -6486,7 +6535,7 @@ msgstr "Показать события календаря"
 msgid "Show employers that you're ambitious, broad-minded, and an active person who takes advantage of opportunities."
 msgstr "Покажите работодателям, что вы амбициозны, открыты и активно пользуетесь возможностями."
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1517
+#: src/components/when2meet/AvailabilitySelector.tsx:1514
 msgid "Show final meeting time"
 msgstr "Показать окончательное время встречи"
 
@@ -6507,7 +6556,7 @@ msgstr "Показать на карте"
 msgid "Show on timeline"
 msgstr "Показать на таймлайне"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1449
+#: src/components/when2meet/AvailabilitySelector.tsx:1446
 msgid "Show other participants' availability"
 msgstr "Показать доступность других участников"
 
@@ -6571,7 +6620,6 @@ msgid "Slug <0>*</0>"
 msgstr "Slug <0>*</0>"
 
 #: src/components/web-print/ScanPage.tsx:652
-#: src/components/web-print/ScanPage.tsx:658
 msgid "Smart crop"
 msgstr "Умная обрезка"
 
@@ -6660,7 +6708,7 @@ msgctxt "club type"
 msgid "Sport"
 msgstr "Спортивные"
 
-#: src/components/admin/AdminUserDetails.tsx:247
+#: src/components/admin/AdminUserDetails.tsx:248
 msgid "Sport admin"
 msgstr "Админ спорта"
 
@@ -6741,7 +6789,7 @@ msgstr "Укажите URL таблицы"
 msgid "Spreadsheets owned by a service account so only Guard can grant access"
 msgstr "Таблицы принадлежат сервисному аккаунту, поэтому доступ может выдавать только Guard"
 
-#: src/components/admin/AdminUserDetails.tsx:262
+#: src/components/admin/AdminUserDetails.tsx:273
 #: src/components/admin/utils.ts:33
 #: src/components/admin/utils.ts:48
 #: src/components/dashboard/AccountWidget.tsx:12
@@ -6757,6 +6805,10 @@ msgstr "Турнирная таблица"
 #: src/components/timer/TimerPage.tsx:272
 msgid "Start"
 msgstr "Старт"
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:157
+msgid "Start (inclusive)"
+msgstr "Начало (включительно)"
 
 #. placeholder {0}: getName(picked[0]!)
 #. placeholder {1}: getName(picked[1]!)
@@ -6868,7 +6920,7 @@ msgstr "Остановка бронирования..."
 msgid "Strikethrough"
 msgstr "Зачёркнутый"
 
-#: src/components/admin/AdminUserDetails.tsx:258
+#: src/components/admin/AdminUserDetails.tsx:269
 #: src/components/admin/utils.ts:34
 #: src/components/admin/utils.ts:49
 #: src/components/dashboard/AccountWidget.tsx:13
@@ -6997,19 +7049,19 @@ msgstr "Сменить язык"
 msgid "Switch theme"
 msgstr "Сменить тему"
 
-#: src/components/admin/AdminUserDetails.tsx:329
+#: src/components/admin/AdminUserDetails.tsx:340
 msgid "Sync error"
 msgstr "Ошибка синхронизации"
 
-#: src/components/admin/AdminUserDetails.tsx:325
+#: src/components/admin/AdminUserDetails.tsx:336
 msgid "Sync status code"
 msgstr "Код статуса синхронизации"
 
-#: src/components/admin/AdminUserDetails.tsx:321
+#: src/components/admin/AdminUserDetails.tsx:332
 msgid "Sync success"
 msgstr "Успешная синхронизация"
 
-#: src/components/admin/AdminUserDetails.tsx:333
+#: src/components/admin/AdminUserDetails.tsx:344
 msgid "Sync updated at"
 msgstr "Синхронизация обновлена"
 
@@ -7058,11 +7110,11 @@ msgstr "Выполняйте действия по результатам пои
 msgid "Taken"
 msgstr "Выдано"
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1423
+#: src/components/when2meet/AvailabilitySelector.tsx:1420
 msgid "Tap a slot or hold and drag to mark your availability. Swipe to scroll."
 msgstr "Нажмите на слот или удерживайте и протяните, чтобы отметить доступность. Свайп — прокрутка."
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1414
+#: src/components/when2meet/AvailabilitySelector.tsx:1411
 msgid "Tap a slot or hold and drag to select the meeting time. Swipe to scroll."
 msgstr "Нажмите на слот или удерживайте и протяните, чтобы выбрать время встречи. Свайп — прокрутка."
 
@@ -7109,7 +7161,7 @@ msgstr "Технические"
 msgid "Tel: {phoneNumber}"
 msgstr "Тел.: {phoneNumber}"
 
-#: src/components/admin/AdminUserDetails.tsx:287
+#: src/components/admin/AdminUserDetails.tsx:298
 #: src/components/layout/MorePage.tsx:36
 #: src/components/onboarding/OnboardingProgress.tsx:8
 msgid "Telegram"
@@ -7186,7 +7238,7 @@ msgstr "Текст"
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "<0>Пропущенная из‑за болезни неделя</0> <1>компенсируется двумя спортивными часами.</1>"
 
-#: src/components/when2meet/MeetingPage.tsx:464
+#: src/components/when2meet/MeetingPage.tsx:465
 msgid "The booking no longer exists in Room Booking, so it was removed from the meeting."
 msgstr "Бронирование больше не существует в сервисе Room Booking, поэтому оно удалено из встречи."
 
@@ -7273,6 +7325,10 @@ msgstr "Бронирование удалено."
 msgid "The scanner returned nothing. Please try to scan again."
 msgstr "Сканер не вернул изображение. Попробуйте отсканировать ещё раз."
 
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:68
+msgid "The selected block does not exist."
+msgstr "Выбранный блок не существует."
+
 #: src/components/when2meet/utils/meeting-time-selection.ts:6
 msgid "The selected start time has passed. Choose another time."
 msgstr "Выбранное время начала уже прошло. Выберите другое время."
@@ -7282,9 +7338,17 @@ msgstr "Выбранное время начала уже прошло. Выбе
 msgid "The selected time must be in the future"
 msgstr "Выбранное время должно быть в будущем"
 
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:70
+msgid "The series window does not overlap the selected groups' teaching period."
+msgstr "Период серии не пересекается с учебным периодом выбранных групп."
+
 #: src/app/routes/forms.submit.tsx:131
 msgid "The slug parameter is missing or invalid."
 msgstr "Параметр slug отсутствует или некорректен."
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:57
+msgid "The start date must not be after the end date."
+msgstr "Начало периода должно быть не позже окончания."
 
 #: src/components/timer/lib/useTimer.ts:148
 msgid "The timer paused"
@@ -7359,7 +7423,7 @@ msgstr "Это изменение логотипа будет отменено �
 msgid "This page is available only for InNoHassle admins."
 msgstr "Эта страница доступна только админам InNoHassle."
 
-#: src/components/when2meet/MeetingPage.tsx:1567
+#: src/components/when2meet/MeetingPage.tsx:1572
 msgid "This room booking no longer exists."
 msgstr "Этого бронирования комнаты больше нет."
 
@@ -7396,7 +7460,7 @@ msgstr "Это будет загружено при сохранении изм�
 msgid "This will create a link that automatically fills in the respondent's email address when they open the form."
 msgstr "Будет создана ссылка, которая автоматически подставит email респондента при открытии формы."
 
-#: src/components/web-print/ScanPage.tsx:747
+#: src/components/web-print/ScanPage.tsx:741
 msgid "This will permanently remove the last scanned page from the document. Are you sure?"
 msgstr "Последняя отсканированная страница будет безвозвратно удалена из документа. Продолжить?"
 
@@ -7448,7 +7512,7 @@ msgstr "Таймер установлен на максимум (99:59:59)"
 msgid "Timer title..."
 msgstr "Название таймера..."
 
-#: src/components/when2meet/MeetingPage.tsx:1012
+#: src/components/when2meet/MeetingPage.tsx:1013
 msgid "Timeslots saved"
 msgstr "Временные слоты сохранены"
 
@@ -7633,7 +7697,7 @@ msgstr "Сейчас в кампусе доступны два принтера:
 msgid "Type"
 msgstr "Тип"
 
-#: src/components/when2meet/MeetingPage.tsx:1562
+#: src/components/when2meet/MeetingPage.tsx:1567
 msgid "Unable to load booking details."
 msgstr "Не удалось загрузить детали бронирования."
 
@@ -7774,8 +7838,8 @@ msgstr "Обновить статус"
 msgid "Update the club information below"
 msgstr "Обновите информацию о клубе ниже"
 
-#: src/components/admin/AdminUserDetails.tsx:270
-#: src/components/admin/AdminUserDetails.tsx:317
+#: src/components/admin/AdminUserDetails.tsx:281
+#: src/components/admin/AdminUserDetails.tsx:328
 msgid "Updated at"
 msgstr "Обновлено"
 
@@ -7862,7 +7926,7 @@ msgstr "Email пользователя"
 msgid "User email is required for impersonation."
 msgstr "Для имперсонации нужен email пользователя."
 
-#: src/components/admin/AdminUserDetails.tsx:350
+#: src/components/admin/AdminUserDetails.tsx:361
 msgid "User groups"
 msgstr "Группы пользователя"
 
@@ -7874,7 +7938,7 @@ msgstr "Пользователь не найден"
 msgid "User profile"
 msgstr "Профиль пользователя"
 
-#: src/components/admin/AdminUserDetails.tsx:292
+#: src/components/admin/AdminUserDetails.tsx:303
 msgid "Username"
 msgstr "Имя пользователя"
 
@@ -7899,7 +7963,7 @@ msgstr "Проверьте свои группы"
 msgid "View"
 msgstr "Просмотр"
 
-#: src/components/when2meet/MeetingPage.tsx:1741
+#: src/components/when2meet/MeetingPage.tsx:1746
 msgid "View all"
 msgstr "Показать всех"
 
@@ -8003,7 +8067,7 @@ msgstr "Ожидание ссылки на активность"
 #: src/components/web-print/FileDropzone.tsx:348
 #: src/components/web-print/PrintPage.tsx:677
 #: src/components/web-print/PrintPage.tsx:685
-#: src/components/web-print/ScanPage.tsx:731
+#: src/components/web-print/ScanPage.tsx:725
 msgid "Warning"
 msgstr "Предупреждение"
 
@@ -8077,11 +8141,11 @@ msgstr "Сайт"
 msgid "Website: <0>1519.innopolis.university</0>"
 msgstr "Сайт: <0>1519.innopolis.university</0>"
 
-#: src/components/admin/AdminUserDetails.tsx:227
+#: src/components/admin/AdminUserDetails.tsx:228
 msgid "Webvisor (innohassle.ru)"
 msgstr "Вебвизор (innohassle.ru)"
 
-#: src/components/admin/AdminUserDetails.tsx:237
+#: src/components/admin/AdminUserDetails.tsx:238
 msgid "Webvisor (sport.innopolis.university)"
 msgstr "Вебвизор (sport.innopolis.university)"
 
@@ -8123,7 +8187,7 @@ msgstr "Что это?"
 msgid "When available"
 msgstr "Когда доступно"
 
-#: src/components/when2meet/CreationPage.tsx:401
+#: src/components/when2meet/CreationPage.tsx:413
 msgid "When can people meet?"
 msgstr "Когда люди могут встретиться?"
 
@@ -8138,6 +8202,14 @@ msgstr "Кто это?"
 #: src/components/about/AboutPage.tsx:32
 msgid "Who we are"
 msgstr "Кто мы"
+
+#: src/components/schedule-assistant/settings/courses/CourseBlocksEditor.tsx:38
+msgid "Whole semester"
+msgstr "Весь семестр"
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:139
+msgid "Whole semester (groups' teaching period)"
+msgstr "Весь семестр (учебный период групп)"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:22
 msgid "Why Create a Club?"
@@ -8195,11 +8267,11 @@ msgstr "Жёлтый (для студентов)"
 msgid "Yellow access level (for students)"
 msgstr "Жёлтый уровень доступа (для студентов)"
 
-#: src/components/admin/AdminUserDetails.tsx:38
+#: src/components/admin/AdminUserDetails.tsx:39
 msgid "Yes"
 msgstr "Да"
 
-#: src/components/when2meet/MeetingPage.tsx:547
+#: src/components/when2meet/MeetingPage.tsx:548
 msgid "You"
 msgstr "Вы"
 
@@ -8326,7 +8398,7 @@ msgstr "Нужно <0>как минимум два ответственных у
 msgid "You will see room cleaning and linen change schedules in your personal calendar."
 msgstr "Расписание уборки и смены белья появится в вашем личном календаре."
 
-#: src/components/when2meet/AvailabilitySelector.tsx:1440
+#: src/components/when2meet/AvailabilitySelector.tsx:1437
 msgid "Your"
 msgstr "Ваши таймслоты"
 

@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { TimetableViewer } from "./TimetableWorkspace.tsx";
 import { publicTimetableConfig } from "./publicTimetableConfig.ts";
 import type { PersonalLessonsState } from "./TimetableSidebarMenu.tsx";
+import { resolvePersonalInstructorId } from "./timetablePersonalization.ts";
 
 const NO_GROUPS: string[] = [];
 
@@ -19,12 +20,13 @@ export function PublicTimetablePage({
   const timetable = $scheduleAssistant.useQuery("get", "/timetable");
   const { data: me } = $accounts.useQuery("get", "/users/me");
   const [token] = useMyAccessToken();
-  const { data: scheduleAssistantMe } = $scheduleAssistant.useQuery(
+  const scheduleAssistantMeQuery = $scheduleAssistant.useQuery(
     "get",
     "/me",
     {},
     { enabled: !!token },
   );
+  const scheduleAssistantMe = scheduleAssistantMeQuery.data;
   const groupsOptions = $scheduleAssistant.queryOptions(
     "get",
     "/me/student-groups",
@@ -42,6 +44,11 @@ export function PublicTimetablePage({
     [timetable.data],
   );
   const groups = me && token ? (personalGroups.data ?? NO_GROUPS) : NO_GROUPS;
+  const userEmail = scheduleAssistantMe?.email ?? null;
+  const personalInstructorId = useMemo(
+    () => (config ? resolvePersonalInstructorId(config, userEmail) : undefined),
+    [config, userEmail],
+  );
   const showComposerLink = !!scheduleAssistantMe?.is_moderator;
 
   const personalLessons = useMemo((): PersonalLessonsState => {
@@ -61,11 +68,28 @@ export function PublicTimetablePage({
     if (personalGroups.isPending) {
       return { kind: "pending" };
     }
-    if (!groups.length) {
+    // Instructor identity comes from /me; wait only when groups alone are empty.
+    if (
+      !groups.length &&
+      token &&
+      !scheduleAssistantMeQuery.isFetched &&
+      !scheduleAssistantMeQuery.isError
+    ) {
+      return { kind: "pending" };
+    }
+    if (!groups.length && !personalInstructorId) {
       return { kind: "empty" };
     }
     return { kind: "ready" };
-  }, [me, personalGroups, groups.length]);
+  }, [
+    me,
+    personalGroups,
+    token,
+    scheduleAssistantMeQuery.isFetched,
+    scheduleAssistantMeQuery.isError,
+    groups.length,
+    personalInstructorId,
+  ]);
 
   if (timetable.isPending) {
     return (
@@ -100,6 +124,7 @@ export function PublicTimetablePage({
       config={config!}
       personalGroups={groups}
       personalLessons={personalLessons}
+      userEmail={userEmail}
       sidebarAction={showComposerLink ? "composer" : undefined}
       showDashboardBack
       focusMeetingId={focusMeetingId}
