@@ -7,6 +7,9 @@ settings:
 overrides:
   '@codemirror/view': 6.43.0
 
+patchedDependencies:
+  vite-plugin-mkcert@2.0.0: 4ebcccabf62b4bff45a586404ad7166a266383218fff890d769e33e89bb329c3
+
 importers:
 
   .:
@@ -313,7 +316,7 @@ importers:
         version: 2.1.0(vite@8.0.13(@types/node@25.8.0)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.9.0))
       vite-plugin-mkcert:
         specifier: ^2.0.0
-        version: 2.0.0(vite@8.0.13(@types/node@25.8.0)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.9.0))
+        version: 2.0.0(patch_hash=8a912b844b0124ae1e624654e0dd459569820c36096f5de7a4bed2d271560cd5)(vite@8.0.13(@types/node@25.8.0)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.9.0))
       vite-plugin-pwa:
         specifier: ^1.3.0
         version: 1.3.0(vite@8.0.13(@types/node@25.8.0)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.9.0))(workbox-build@7.3.0)(workbox-window@7.4.1)
@@ -11432,7 +11435,7 @@ snapshots:
       html-minifier-terser: 7.2.0
       vite: 8.0.13(@types/node@25.8.0)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.9.0)
 
-  vite-plugin-mkcert@2.0.0(vite@8.0.13(@types/node@25.8.0)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.9.0)):
+  vite-plugin-mkcert@2.0.0(patch_hash=8a912b844b0124ae1e624654e0dd459569820c36096f5de7a4bed2d271560cd5)(vite@8.0.13(@types/node@25.8.0)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.46.2)(yaml@2.9.0)):
     dependencies:
       debug: 4.4.3(supports-color@10.2.2)
       supports-color: 10.2.2
