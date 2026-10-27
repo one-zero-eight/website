@@ -3,7 +3,7 @@
   "version": "1.7.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@11.1.2",
+  "packageManager": "pnpm@12.15.0",
   "scripts": {
     "dev": "vite dev --port 3000 --host",
     "build": "pnpm gen:sitemap && vite build",
