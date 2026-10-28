@@ -1,4 +1,6 @@
 import { cn } from "@/lib/ui/cn";
+import { useLingui } from "@lingui/react/macro";
+import { meetingCourseTitle } from "./localizedNames.ts";
 import { meetingColorStyle } from "./timetableGroupsGridLayout.ts";
 import { Fragment, memo } from "react";
 
@@ -51,7 +53,7 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
   onOpenMeetingEdit?: (meeting: Meeting) => void;
   disableSelect?: boolean;
 }) {
-  const courseTitle = String(meeting.course || "").trim() || "—";
+  const courseTitle = meetingCourseTitle(meeting) || "—";
   const key = meetingSelectionKey(meeting);
   const mainLabel = meetingCalendarMainLabel(meeting);
   const groupsLabel = meetingCalendarGroupsLabel(meeting);
@@ -59,7 +61,9 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
   const bits = useMeetingHighlightBits(meeting);
   const isSelected = (bits & 1) !== 0;
   const isRelated = (bits & 2) !== 0;
+  const { t } = useLingui();
   const canEdit = !!parseMeetingInstanceId(meeting.instance_id);
+  const notes = meeting.notes;
 
   return (
     <button
@@ -100,9 +104,9 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
       {groupsLabel ? (
         <span className="font-normal text-[#4f5c6d]"> ({groupsLabel})</span>
       ) : null}
-      {meeting.notes ? (
+      {notes ? (
         <span className="ml-1 font-normal text-[#4f5c6d]">
-          · Заметка: {meeting.notes}
+          · {t`Note: ${notes}`}
         </span>
       ) : null}
     </button>

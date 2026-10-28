@@ -12,9 +12,11 @@ export default defineConfig({
       path: "<rootDir>/src/locales/{locale}",
       include: ["src"],
       exclude: [
-        "src/components/schedule-assistant/**",
+        "src/components/schedule-assistant/{bookings,checks,config,preferences}/**",
+        "src/components/schedule-assistant/settings/*/**",
+        "src/components/schedule-assistant/settings/!(weekdays).{ts,tsx}",
+        "src/components/schedule-assistant/{CopyableTextModal,DetailFullscreenModal,MainFloatingMenu}.tsx",
         "src/app/routes/schedule-assistant/**",
-        "src/app/routes/timetable.tsx",
       ],
     },
   ],

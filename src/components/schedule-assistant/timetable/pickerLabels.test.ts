@@ -9,21 +9,15 @@ const FRIDAYS = ["2026-09-04", "2026-09-11", "2026-09-18"];
 
 describe("formatPickerLoadHint", () => {
   it.each([
-    [0, "занятий"],
-    [1, "занятие"],
-    [2, "занятия"],
-    [4, "занятия"],
-    [5, "занятий"],
-    [11, "занятий"],
-    [12, "занятий"],
-    [14, "занятий"],
-    [21, "занятие"],
-    [22, "занятия"],
-    [25, "занятий"],
-    [111, "занятий"],
-  ])("uses Russian plural for %i lessons", (count, noun) => {
+    [0, "classes"],
+    [1, "class"],
+    [2, "classes"],
+    [5, "classes"],
+    [11, "classes"],
+    [21, "classes"],
+  ])("uses plural for %i lessons", (count, noun) => {
     expect(formatPickerLoadHint([FRIDAYS[0]], () => count, false)).toBe(
-      `${count} ${noun} за день`,
+      `${count} ${noun} per day`,
     );
   });
 
@@ -34,13 +28,13 @@ describe("formatPickerLoadHint", () => {
       "2026-09-18": 3,
     };
     expect(formatPickerLoadHint(FRIDAYS, (date) => loads[date], true)).toBe(
-      "2–5 занятий по пятницам",
+      "2–5 classes on Fridays",
     );
   });
 
   it("does not repeat an equal range", () => {
     expect(formatPickerLoadHint(FRIDAYS, () => 3, true)).toBe(
-      "3 занятия по пятницам",
+      "3 classes on Fridays",
     );
   });
 
@@ -51,7 +45,7 @@ describe("formatPickerLoadHint", () => {
         (date) => (date === FRIDAYS[0] ? 2 : 0),
         true,
       ),
-    ).toBe("0–2 занятия по пятницам");
+    ).toBe("0–2 classes on Fridays");
   });
 
   it("labels moved sessions on mixed weekdays without a weekly claim", () => {
@@ -61,20 +55,20 @@ describe("formatPickerLoadHint", () => {
         (date) => (date === FRIDAYS[0] ? 2 : 5),
         true,
       ),
-    ).toBe("2–5 занятий в дни проведения");
+    ).toBe("2–5 classes on class days");
   });
 
   it.each([
-    ["2026-09-07", "понедельникам"],
-    ["2026-09-08", "вторникам"],
-    ["2026-09-09", "средам"],
-    ["2026-09-10", "четвергам"],
-    ["2026-09-11", "пятницам"],
-    ["2026-09-12", "субботам"],
-    ["2026-09-13", "воскресеньям"],
+    ["2026-09-07", "Mondays"],
+    ["2026-09-08", "Tuesdays"],
+    ["2026-09-09", "Wednesdays"],
+    ["2026-09-10", "Thursdays"],
+    ["2026-09-11", "Fridays"],
+    ["2026-09-12", "Saturdays"],
+    ["2026-09-13", "Sundays"],
   ])("labels the actual weekday of %s", (date, weekday) => {
     expect(formatPickerLoadHint([date], () => 1, true)).toBe(
-      `1 занятие по ${weekday}`,
+      `1 class on ${weekday}`,
     );
   });
 
@@ -82,7 +76,7 @@ describe("formatPickerLoadHint", () => {
     const countForDate = vi.fn(() => 4);
     expect(
       formatPickerLoadHint([FRIDAYS[0], FRIDAYS[0]], countForDate, false),
-    ).toBe("4 занятия за день");
+    ).toBe("4 classes per day");
     expect(countForDate).toHaveBeenCalledTimes(1);
   });
 
@@ -91,7 +85,7 @@ describe("formatPickerLoadHint", () => {
     (weekly) => {
       const countForDate = vi.fn(() => 0);
       expect(formatPickerLoadHint([], countForDate, weekly)).toBe(
-        "Нет дат проведения",
+        "No class dates",
       );
       expect(countForDate).not.toHaveBeenCalled();
     },
@@ -116,6 +110,6 @@ describe("formatPickerConflictDates", () => {
   });
 
   it("handles missing dates without implying weekly conflicts", () => {
-    expect(formatPickerConflictDates([])).toBe("Нет дат проведения");
+    expect(formatPickerConflictDates([])).toBe("No class dates");
   });
 });

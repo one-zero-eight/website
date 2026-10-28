@@ -44,6 +44,7 @@ import {
   useInteractions,
   useTransitionStyles,
 } from "@floating-ui/react";
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   type ReactNode,
   useEffect,
@@ -176,6 +177,7 @@ export function SeriesScheduleItemsList({
   sharedColumns?: boolean;
   showNavigationTitle?: boolean;
 }) {
+  const { t } = useLingui();
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentRef = useRef<HTMLElement | null>(null);
   const [currentOffscreen, setCurrentOffscreen] = useState<
@@ -285,6 +287,9 @@ export function SeriesScheduleItemsList({
           };
 
           if (canNavigate) {
+            const navigationTarget = item.meeting!.date
+              ? formatDisplayDate(item.meeting!.date)
+              : item.primary;
             return (
               <button
                 key={`${index}-${item.primary}-${item.meeting!.instance_id}`}
@@ -292,9 +297,7 @@ export function SeriesScheduleItemsList({
                 type="button"
                 className={rowClass}
                 title={
-                  showNavigationTitle
-                    ? `Перейти к ${item.meeting!.date ? formatDisplayDate(item.meeting!.date) : item.primary}`
-                    : undefined
+                  showNavigationTitle ? t`Go to ${navigationTarget}` : undefined
                 }
                 onClick={(event) => {
                   event.preventDefault();
@@ -331,7 +334,7 @@ export function SeriesScheduleItemsList({
             scrollToCurrent();
           }}
           onMouseDown={(event) => event.stopPropagation()}
-          title="К выбранному выше"
+          title={t`Go to selected above`}
         >
           <span className="icon-[material-symbols--arrow-upward-rounded] text-2xl" />
         </button>
@@ -346,7 +349,7 @@ export function SeriesScheduleItemsList({
             scrollToCurrent();
           }}
           onMouseDown={(event) => event.stopPropagation()}
-          title="К выбранному ниже"
+          title={t`Go to selected below`}
         >
           <span className="icon-[material-symbols--arrow-downward-rounded] text-2xl" />
         </button>
@@ -379,7 +382,7 @@ export function ComponentSeriesList({
           compact ? "mb-1" : "mb-1.5",
         )}
       >
-        Серии
+        <Trans>Series</Trans>
       </div>
       <div
         className={cn(
@@ -619,6 +622,7 @@ export function CourseComponentDetailsFields({
   onNavigateToMeeting?: (meeting: Meeting) => void;
   compact?: boolean;
 }) {
+  const { t } = useLingui();
   const placement = countComponentPlacement(config, component);
   const targetLabel = formatComponentTarget(component);
   const placedLabel = formatComponentPlaced(placement);
@@ -647,22 +651,24 @@ export function CourseComponentDetailsFields({
   return (
     <>
       {showPlanningDetails && goalParts.length ? (
-        <DetailField label="Цель" compact={compact}>
+        <DetailField label={t`Goal`} compact={compact}>
           {goalParts.join(" · ")}
         </DetailField>
       ) : null}
       {showPlanningDetails && component.per_group ? (
-        <DetailField label="Режим" compact={compact}>
-          <span className="badge badge-ghost badge-sm">по группам</span>
+        <DetailField label={t`Mode`} compact={compact}>
+          <span className="badge badge-ghost badge-sm">
+            <Trans>by groups</Trans>
+          </span>
         </DetailField>
       ) : null}
       {showPlanningDetails && component.expected_enrollment != null ? (
-        <DetailField label="Набор" compact={compact}>
+        <DetailField label={t`Enrollment`} compact={compact}>
           {component.expected_enrollment}
         </DetailField>
       ) : null}
       {showPlanningDetails && poolEntries.length ? (
-        <DetailField label="Кто может вести" compact={compact}>
+        <DetailField label={t`Who can teach`} compact={compact}>
           <span className="inline-flex flex-col gap-0.5">
             {poolEntries.map((entry) => (
               <span key={entry}>{entry}</span>
@@ -671,7 +677,7 @@ export function CourseComponentDetailsFields({
         </DetailField>
       ) : null}
       {showGroups && groupIds.length ? (
-        <DetailField label="Группы" compact={compact}>
+        <DetailField label={t`Groups`} compact={compact}>
           <MeetingAudienceInline config={config} groupIds={groupIds} />
         </DetailField>
       ) : null}

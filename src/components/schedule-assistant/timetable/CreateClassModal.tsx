@@ -1,6 +1,6 @@
 import type {
-  SchemaDateRange,
   SchemaScheduleConfig,
+  SchemaSessionActiveWindow,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
@@ -17,6 +17,7 @@ import {
 import { termWeekdayKeyToWeekday } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
+import { Trans, useLingui } from "@lingui/react/macro";
 import clsx from "clsx";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
@@ -58,7 +59,7 @@ import { audienceSummaryHintProps } from "./audienceSummaryHints.ts";
 import { suggestBestRoomId } from "./roomPickerOptions.ts";
 import { weeklyPickerSlots } from "./meetingPickerSchedule.ts";
 import { validateSessionSeriesDraft } from "./sessionSeriesValidation.ts";
-import { resolveSessionWindow, sessionWindowRange } from "./sessionWindows.ts";
+import { activeForBlock, resolveSessionWindow } from "./sessionWindows.ts";
 import {
   expandOccurrencesToEvents,
   expandWeeklySlotsToEvents,
@@ -88,18 +89,8 @@ function occurrencesChanged(
   original: SchemaSessionOccurrence[],
 ) {
   return (
-    JSON.stringify(
-      current.map((occurrence) => ({
-        ...normalizeOccurrence(occurrence),
-        notes: occurrence.notes ?? null,
-      })),
-    ) !==
-    JSON.stringify(
-      original.map((occurrence) => ({
-        ...normalizeOccurrence(occurrence),
-        notes: occurrence.notes ?? null,
-      })),
-    )
+    JSON.stringify(current.map(normalizeOccurrence)) !==
+    JSON.stringify(original.map(normalizeOccurrence))
   );
 }
 
@@ -193,7 +184,7 @@ export function CreateClassModal({
   layoutMode,
   viewContext,
   preset,
-  defaultActive = null,
+  defaultSessionActive = null,
   defaultBlockId = null,
   onCreated,
 }: {
@@ -206,10 +197,11 @@ export function CreateClassModal({
   layoutMode: TimetableLayoutMode;
   viewContext?: CreateMeetingViewContext;
   preset?: CreateMeetingPreset | null;
-  defaultActive?: SchemaDateRange | null;
+  defaultSessionActive?: SchemaSessionActiveWindow | null;
   defaultBlockId?: string | null;
   onCreated?: () => void;
 }) {
+  const { t, i18n } = useLingui();
   const { data: courses } = useCoursesQuery();
   const { mutate, isPending } = useUpdateCourseMutation();
   const { showError } = useToast();
@@ -217,20 +209,14 @@ export function CreateClassModal({
 
   const [courseComponentKey, setCourseComponentKey] = useState("");
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
-  const [storedActive, setActive] = useState<SchemaDateRange | null>(
-    defaultActive,
+  const initialSessionActive =
+    defaultSessionActive ??
+    (defaultBlockId ? activeForBlock(defaultBlockId) : null);
+  const [storedActive, setActive] = useState<SchemaSessionActiveWindow | null>(
+    initialSessionActive,
   );
-  const [blockId, setBlockId] = useState<string | null>(defaultBlockId);
-  const [originalActive, setOriginalActive] = useState<SchemaDateRange | null>(
-    defaultActive,
-  );
-  const [originalBlockId, setOriginalBlockId] = useState<string | null>(
-    defaultBlockId,
-  );
-  const active = useMemo(
-    () => sessionWindowRange(config, storedActive, blockId),
-    [config, storedActive, blockId],
-  );
+  const [originalActive, setOriginalActive] =
+    useState<SchemaSessionActiveWindow | null>(initialSessionActive);
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
   const [placement, setPlacement] = useState<CreatePlacement>(() =>
     layoutMode === "calendar" ? "dates_pattern" : "weekly",
@@ -288,9 +274,17 @@ export function CreateClassModal({
         ...viewContext,
         groupId: cellContext?.groupId ?? viewContext?.groupId,
       },
-      active,
+      storedActive,
     );
-  }, [active, cellContext?.groupId, config, courses, viewContext]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    storedActive,
+    cellContext?.groupId,
+    config,
+    courses,
+    viewContext,
+    i18n.locale,
+  ]);
 
   const courseComponentDropdownOptions = useMemo(
     () => toSelectOptions(createOptions),
@@ -324,11 +318,9 @@ export function CreateClassModal({
       config,
       selectedCourse.section_code,
       storedActive,
-      blockId,
     );
   }, [
     storedActive,
-    blockId,
     audienceValue,
     config,
     selectedComponent,
@@ -347,7 +339,6 @@ export function CreateClassModal({
     sectionCode: string,
     preserveDraft = false,
     nextActive = storedActive,
-    nextBlockId = blockId,
   ) {
     if (!cellContext) return;
     const seededWeekly = seedWeeklyFromCell(config, cellContext, audience);
@@ -364,7 +355,6 @@ export function CreateClassModal({
             config,
             sectionCode,
             nextActive,
-            nextBlockId,
           )
         : null;
     const covering =
@@ -385,7 +375,6 @@ export function CreateClassModal({
 
     if (!preserveDraft) {
       setOriginalActive(nextActive);
-      setOriginalBlockId(nextBlockId);
     }
     const addedOccurrences = preserveDraft
       ? occurrences.slice(seriesBaselineOccurrences)
@@ -424,6 +413,8 @@ export function CreateClassModal({
 
   const seededOpenKeyRef = useRef("");
 
+  const initialActiveKey = JSON.stringify(initialSessionActive ?? null);
+
   useEffect(() => {
     if (!open || !cellContext) {
       seededOpenKeyRef.current = "";
@@ -435,18 +426,15 @@ export function CreateClassModal({
       cellContext.time,
       cellContext.groupId ?? "",
       (preset?.audience ?? []).join("|"),
-      defaultActive?.start_date ?? "",
-      defaultActive?.end_date ?? "",
+      initialActiveKey,
       defaultBlockId ?? "",
     ].join("::");
     if (seededOpenKeyRef.current === seedKey) return;
     seededOpenKeyRef.current = seedKey;
 
     setCourseComponentKey(presetKey);
-    setActive(defaultActive);
-    setBlockId(defaultBlockId);
-    setOriginalActive(defaultActive);
-    setOriginalBlockId(defaultBlockId);
+    setActive(initialSessionActive);
+    setOriginalActive(initialSessionActive);
 
     // Seed the final audience immediately (preset or component default) so
     // room/instructor autofill never runs against the cell's single group.
@@ -486,8 +474,7 @@ export function CreateClassModal({
         audience,
         courses[parsed.courseIdx].section_code,
         false,
-        defaultActive,
-        defaultBlockId,
+        initialSessionActive,
       );
     } else {
       setWeeklySlots([seedWeeklyFromCell(config, cellContext, audience)]);
@@ -513,8 +500,7 @@ export function CreateClassModal({
     open,
     preset,
     presetKey,
-    defaultActive?.start_date,
-    defaultActive?.end_date,
+    initialActiveKey,
     defaultBlockId,
   ]);
 
@@ -555,7 +541,6 @@ export function CreateClassModal({
       courses[parsed.courseIdx].section_code,
       false,
       storedActive,
-      blockId,
     );
   }
 
@@ -594,7 +579,6 @@ export function CreateClassModal({
         config,
         layoutMode,
         storedActive,
-        blockId,
       ),
     );
     // Do not depend on config/selectedCourse identity: optimistic cache
@@ -602,7 +586,6 @@ export function CreateClassModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     storedActive,
-    blockId,
     audienceValue,
     layoutMode,
     open,
@@ -644,14 +627,14 @@ export function CreateClassModal({
           slot,
           audienceValue,
           "room",
-          active,
+          storedActive,
         );
         const instructorSlots = weeklyPickerSlots(
           config,
           slot,
           audienceValue,
           "instructor",
-          active,
+          storedActive,
         );
         if (!start) return slots;
 
@@ -758,7 +741,7 @@ export function CreateClassModal({
       return list;
     });
   }, [
-    active,
+    storedActive,
     audienceValue,
     cellContext?.date,
     config,
@@ -860,17 +843,17 @@ export function CreateClassModal({
   function handleSubmit() {
     if (isPending) return;
     if (!cellContext || !courses || !parsedComponent || !selectedCourse) {
-      showError("Ошибка", "Выберите предмет и компонент.");
+      showError(t`Error`, t`Select a course and component.`);
       return;
     }
     if (!courseComponentKey) {
-      showError("Ошибка", "Выберите предмет и компонент.");
+      showError(t`Error`, t`Select a course and component.`);
       return;
     }
     if (!audienceValue.length) {
       showError(
-        "Ошибка",
-        perGroup ? "Выберите группу." : "Укажите хотя бы одну группу.",
+        t`Error`,
+        perGroup ? t`Select a group.` : t`Specify at least one group.`,
       );
       return;
     }
@@ -883,7 +866,7 @@ export function CreateClassModal({
       deletedOccurrenceIndexes,
     });
     if (seriesError) {
-      showError("Ошибка", seriesError);
+      showError(t`Error`, seriesError);
       return;
     }
 
@@ -901,7 +884,6 @@ export function CreateClassModal({
       config,
       audienceValue,
       storedActive,
-      blockId,
     );
     const draftEvents =
       placement === "weekly"
@@ -910,7 +892,6 @@ export function CreateClassModal({
             weeklySlots: activeWeeklySlots,
             audienceTokens: audienceValue,
             active: storedActive,
-            blockId,
           })
         : expandOccurrencesToEvents(activeOccurrences);
     const windowError =
@@ -921,7 +902,7 @@ export function CreateClassModal({
         ? null
         : validateEditableEvents(draftEvents, sessionWindow);
     if (windowError) {
-      showError("Ошибка", windowError);
+      showError(t`Error`, windowError);
       return;
     }
 
@@ -939,7 +920,6 @@ export function CreateClassModal({
             config,
             {
               active: storedActive,
-              block_id: blockId,
               weeklyPattern:
                 placement === "weekly" ? activeWeeklySlots : undefined,
               dates_pattern:
@@ -951,7 +931,6 @@ export function CreateClassModal({
             componentIdx: parsedComponent.componentIdx,
             audience: audienceValue,
             active: storedActive,
-            block_id: blockId,
             placement,
             weeklySlots: placement === "weekly" ? activeWeeklySlots : undefined,
             occurrences:
@@ -959,7 +938,7 @@ export function CreateClassModal({
           });
 
     if (!updatedCourse) {
-      showError("Ошибка", "Не удалось создать занятие.");
+      showError(t`Error`, t`Failed to create the class.`);
       return;
     }
 
@@ -981,6 +960,8 @@ export function CreateClassModal({
 
   if (!cellContext) return null;
 
+  const statusLabel = selectedOption?.statusLabel ?? "";
+
   const createGroupTokens = cellContext.groupId ? [cellContext.groupId] : [];
   const createEndTime = resolveEndTimeForStart(
     config,
@@ -997,7 +978,9 @@ export function CreateClassModal({
       }}
       title={
         <div className="min-w-0">
-          <div>Создать занятие</div>
+          <div>
+            <Trans>Create class</Trans>
+          </div>
           <MeetingInstanceMetadata
             className="text-base-content/80 mt-1.5 font-normal"
             config={config}
@@ -1015,11 +998,11 @@ export function CreateClassModal({
       containerClassName="max-h-[calc(100dvh-2rem)] max-w-xl overflow-y-auto"
     >
       <div className="flex flex-col gap-3">
-        <CreateClassField label="Предмет · компонент">
+        <CreateClassField label={t`Course · component`}>
           <CreateClassDropdown
             value={courseComponentKey}
             onChange={handleCourseComponentChange}
-            placeholder="Выберите предмет и компонент"
+            placeholder={t`Select a course and component`}
             options={courseComponentDropdownOptions}
           />
           {selectedOption ? (
@@ -1027,14 +1010,17 @@ export function CreateClassModal({
               {selectedOption.modeLabel
                 ? `${selectedOption.modeLabel} · `
                 : null}
-              расписание: {selectedOption.statusLabel}
-              {seriesAction === "append"
-                ? " · добавится в существующую серию"
-                : " · будет создана новая серия"}
+              <Trans>schedule: {statusLabel}</Trans>
+              {" · "}
+              {seriesAction === "append" ? (
+                <Trans>will be added to the existing series</Trans>
+              ) : (
+                <Trans>a new series will be created</Trans>
+              )}
             </p>
           ) : (
             <p className="text-base-content/55 text-xs">
-              Точка: не расставлено / частично / всё расставлено.
+              <Trans>Dot: not scheduled / partially / fully scheduled.</Trans>
             </p>
           )}
         </CreateClassField>
@@ -1070,12 +1056,9 @@ export function CreateClassModal({
         <SessionSeriesEditor
           config={config}
           active={storedActive}
-          blockId={blockId}
           originalActive={originalActive}
-          originalBlockId={originalBlockId}
-          onSessionWindowChange={({ active: nextActive, block_id }) => {
+          onSessionWindowChange={({ active: nextActive }) => {
             setActive(nextActive);
-            setBlockId(block_id);
             if (selectedComponent && selectedCourse) {
               seedSeriesDraft(
                 selectedComponent,
@@ -1083,7 +1066,6 @@ export function CreateClassModal({
                 selectedCourse.section_code,
                 true,
                 nextActive,
-                block_id,
               );
             }
           }}
@@ -1100,14 +1082,12 @@ export function CreateClassModal({
             return series
               ? {
                   active: series.active,
-                  blockId: series.block_id,
                   audienceTokens: series.audience?.length
                     ? series.audience
                     : (selectedComponent?.audience ?? []),
                 }
               : {
                   active: storedActive,
-                  blockId,
                   audienceTokens: audienceValue,
                 };
           }}
@@ -1261,7 +1241,7 @@ export function CreateClassModal({
               disabled={isPending}
               onClick={restoreExistingSeriesChanges}
             >
-              Сбросить изменения
+              <Trans>Reset changes</Trans>
             </button>
           ) : null}
           <button
@@ -1270,7 +1250,7 @@ export function CreateClassModal({
             disabled={isPending}
             onClick={handleClose}
           >
-            Отмена
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="button"
@@ -1279,7 +1259,11 @@ export function CreateClassModal({
             onClick={handleSubmit}
           >
             <span className={cn(isPending && "invisible")}>
-              {seriesAction === "append" ? "Добавить" : "Создать"}
+              {seriesAction === "append" ? (
+                <Trans>Add</Trans>
+              ) : (
+                <Trans>Create</Trans>
+              )}
             </span>
             {isPending ? (
               <span className="loading loading-spinner loading-sm absolute inset-0 m-auto" />

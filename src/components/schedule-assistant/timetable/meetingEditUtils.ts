@@ -1,12 +1,13 @@
 import type {
   SchemaCourseConfig,
-  SchemaDateRange,
   SchemaScheduleConfig,
+  SchemaSessionActiveWindow,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
   SchemaWeeklyPatternSlotEdit,
 } from "@/api/schedule-assistant/types.ts";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
+import { t } from "@lingui/core/macro";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import {
   expandStudentGroupSelectors,
@@ -21,13 +22,14 @@ import {
   buildAudienceSelectorTree,
   minimizeAudienceTokens,
 } from "./audienceSelectorTree.ts";
-import { sessionWindowRange } from "./sessionWindows.ts";
+import { blockIdFromActive } from "./sessionWindows.ts";
 import {
   add90m,
   dayKey,
   normalizedTermDays,
   activeWeeklySlotDates,
   weekStartForDate,
+  weekdayLabel,
   weeklyPatternDayKey,
   type Meeting,
 } from "./timetableViewerModel.ts";
@@ -131,12 +133,14 @@ export type MeetingOriginalValues = {
 };
 
 export function sessionActiveEqual(
-  left: SchemaDateRange | null | undefined,
-  right: SchemaDateRange | null | undefined,
+  left: SchemaSessionActiveWindow | null | undefined,
+  right: SchemaSessionActiveWindow | null | undefined,
 ) {
+  if (left == null || right == null) return left == right;
+  if ("block" in left || "block" in right)
+    return blockIdFromActive(left) === blockIdFromActive(right);
   return (
-    (left?.start_date ?? null) === (right?.start_date ?? null) &&
-    (left?.end_date ?? null) === (right?.end_date ?? null)
+    left.start_date === right.start_date && left.end_date === right.end_date
   );
 }
 
@@ -499,7 +503,7 @@ function weeklyMeetingDatesForSlot(
   config: SchemaScheduleConfig,
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[] = [],
-  active?: SchemaDateRange | null,
+  active?: SchemaSessionActiveWindow | null,
 ): string[] {
   return activeWeeklySlotDates(config, slot, audienceTokens, active);
 }
@@ -548,7 +552,7 @@ function preservePastWeeksBeforeDate(
     room: string | null;
     instructor: string | string[] | null;
   },
-  active?: SchemaDateRange | null,
+  active?: SchemaSessionActiveWindow | null,
 ) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
   for (const date of activeWeeklySlotDates(
@@ -575,7 +579,7 @@ function applyWeeklyFutureScope(
   meetingDate: string,
   mutator: (slot: SchemaWeeklyPatternSlot) => void,
   audienceTokens: string[],
-  active?: SchemaDateRange | null,
+  active?: SchemaSessionActiveWindow | null,
 ) {
   const snapshot = {
     weekday: weeklyPatternDayKey(String(slot.weekday)) || dayKey(meetingDate),
@@ -695,8 +699,7 @@ export function applySeriesScheduleToCourse(
   update: {
     audience?: string[];
     notes?: string;
-    active?: SchemaDateRange | null;
-    block_id?: string | null;
+    active?: SchemaSessionActiveWindow | null;
     dates_pattern?: SchemaSessionOccurrence[] | null;
     weeklyPattern?: SchemaWeeklyPatternSlot[] | null;
   },
@@ -718,7 +721,6 @@ export function applySeriesScheduleToCourse(
   }
 
   if (update.notes !== undefined) nextCourse.notes = update.notes;
-  if (update.block_id !== undefined) series.block_id = update.block_id;
   if (update.active !== undefined)
     series.active = structuredClone(update.active);
 
@@ -732,7 +734,6 @@ export function applySeriesScheduleToCourse(
       ),
       room: String(occurrence.room || "").trim() || null,
       instructor: occurrence.instructor ?? null,
-      notes: occurrence.notes ?? null,
     }));
   }
 
@@ -841,7 +842,7 @@ export function applyMeetingEditsToCourse(
         config,
         slot,
         audienceTokens,
-        sessionWindowRange(config, ctx.series.active, ctx.series.block_id),
+        ctx.series.active,
       )) {
         if (date < meetingDate) continue;
         applyWeeklySingleEdit(slot, date, startingDay, { cancel: true });
@@ -880,7 +881,7 @@ export function applyMeetingEditsToCourse(
     (ctx.series.audience?.length
       ? ctx.series.audience
       : ctx.component.audience) || [],
-    sessionWindowRange(config, ctx.series.active, ctx.series.block_id),
+    ctx.series.active,
   );
   return nextCourse;
 }
@@ -891,8 +892,7 @@ function weeklyEditHasOnlyCancel(edit: SchemaWeeklyPatternSlotEdit) {
     !edit.date &&
     !edit.start_time &&
     !edit.room &&
-    (edit.instructor === undefined || edit.instructor === null) &&
-    edit.notes == null
+    (edit.instructor === undefined || edit.instructor === null)
   );
 }
 
@@ -977,16 +977,7 @@ export function meetingInstructorsLabel(
 export function weekdayOptionsForConfig(config: SchemaScheduleConfig) {
   return normalizedTermDays(config).map((day) => ({
     key: day,
-    label:
-      {
-        Mon: "Понедельник",
-        Tue: "Вторник",
-        Wed: "Среда",
-        Thu: "Четверг",
-        Fri: "Пятница",
-        Sat: "Суббота",
-        Sun: "Воскресенье",
-      }[day] ?? day,
+    label: weekdayLabel(day),
   }));
 }
 
@@ -1035,9 +1026,9 @@ export function parseTimeRangeQuery(query: string): {
 
 export function customTimeOptionLabel(query: string): string {
   const { start, end } = parseTimeRangeQuery(query);
-  if (start && end) return `Другое время (${start}–${end})`;
-  if (start) return `Другое время (${start}-...)`;
-  return "Другое время";
+  if (start && end) return t`Other time (${start}–${end})`;
+  if (start) return t`Other time (${start}-...)`;
+  return t`Other time`;
 }
 
 export function timeOptionsForConfig(

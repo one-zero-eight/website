@@ -1,4 +1,9 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  localizedSectionName,
+  meetingCourseShortTitle,
+  meetingCourseTitle,
+} from "./localizedNames.ts";
 import { scheduleAssistantFetch } from "@/api/schedule-assistant";
 import {
   SchemaScheduleConfig as EditableScheduleConfig,
@@ -16,6 +21,8 @@ import {
 import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
+import { t } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import clsx from "clsx";
 import {
   memo,
@@ -139,7 +146,6 @@ import {
 } from "./timetableTodayHighlight.ts";
 import {
   WEEK_RELATIVE_DOT_CLASS,
-  WEEK_RELATIVE_LABELS,
   buildColumns,
   buildCourseColors,
   buildGrid,
@@ -160,11 +166,12 @@ import {
   rebuildMeetingsForChangedCourses,
   resolveInstructorLabel,
   roomFillPercent,
-  scheduleAssistantDetailTooltips,
+  scheduleAssistantDetailTooltip,
   todayIsoDate,
   weekIndexForDate,
+  weekRelativeLabel,
   weekRelativeToToday,
-  weekdayLabelRu,
+  weekdayLabel,
   type BuiltGrid,
   type Column,
   type Meeting,
@@ -354,7 +361,10 @@ export function TimetableViewer(props: TimetableViewerProps) {
       ? ACTIVE_TAB_STORAGE_KEY
       : "public:timetable-active-tab";
   const { showError } = useToast();
-  const [msg, setMsg] = useState("");
+  const { t, i18n } = useLingui();
+  const [notice, setNotice] = useState<
+    { kind: "empty" } | { kind: "error"; message: string } | null
+  >(null);
   const [weeks, setWeeks] = useState<WeekRange[]>([]);
   const [weekIndex, setWeekIndex] = useState(0);
   const teachingBlocks = config?.term.blocks ?? [];
@@ -395,7 +405,8 @@ export function TimetableViewer(props: TimetableViewerProps) {
   >({});
   const instructorLabelById = useMemo(
     () => (config ? buildInstructorLabelById(config) : {}),
-    [config],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [config, i18n.locale],
   );
   const [isMiddleDragScrolling, setIsMiddleDragScrolling] = useState(false);
   const [scrollToMeetingId, setScrollToMeetingId] = useState<string | null>(
@@ -497,9 +508,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
         parseAs: "blob",
       });
       if (downloadError || !data) {
-        throw (
-          downloadError ?? new Error("Не удалось экспортировать расписание")
-        );
+        throw downloadError ?? new Error(t`Failed to export the timetable`);
       }
       const disposition = response.headers.get("content-disposition") ?? "";
       const utfMatch = /filename\*=UTF-8''([^;]+)/i.exec(disposition);
@@ -517,11 +526,11 @@ export function TimetableViewer(props: TimetableViewerProps) {
       link.click();
       URL.revokeObjectURL(url);
     } catch (e) {
-      showError("Ошибка экспорта", formatApiErrorMessage(e));
+      showError(t`Export error`, formatApiErrorMessage(e));
     } finally {
       setExportPending(false);
     }
-  }, [config, exportPending, isUtilizationTab, showError]);
+  }, [config, exportPending, isUtilizationTab, showError, t]);
 
   useEffect(() => {
     if (isUtilizationTab && layoutMode === "calendar") {
@@ -542,7 +551,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
       setWeekIndex(0);
       activeWeekStartRef.current = null;
       coursesSnapshotRef.current = null;
-      setMsg("");
+      setNotice(null);
       return;
     }
 
@@ -596,20 +605,16 @@ export function TimetableViewer(props: TimetableViewerProps) {
           setWeeks([]);
           setColumns([]);
           coursesSnapshotRef.current = null;
-          setMsg(
-            props.mode === "view"
-              ? "В расписании пока нет занятий."
-              : "В config.yaml не найдено занятий.",
-          );
+          setNotice({ kind: "empty" });
           return;
         }
         if (!config.term)
           throw new Error(
-            "config.yaml не похож на конфиг расписания (нет term).",
+            t`config.yaml does not look like a schedule config (no term).`,
           );
         const cols = buildColumns(config);
         if (!cols.length)
-          throw new Error("Не удалось построить колонки групп из config.");
+          throw new Error(t`Failed to build group columns from the config.`);
 
         const nextWeeks = coursesUnchanged
           ? null
@@ -679,11 +684,14 @@ export function TimetableViewer(props: TimetableViewerProps) {
               : nextGroupSize,
           );
           setColumns((prev) => (columnsEqual(prev, cols) ? prev : cols));
-          setMsg("");
+          setNotice(null);
         });
       } catch (e: unknown) {
         if (rebuildId === meetingsRebuildIdRef.current) {
-          setMsg(String((e as Error)?.message || e));
+          setNotice({
+            kind: "error",
+            message: String((e as Error)?.message || e),
+          });
         }
       }
     }, 0);
@@ -691,7 +699,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
     return () => {
       window.clearTimeout(timer);
     };
-  }, [config, selectionStore, props.mode]);
+  }, [config, selectionStore, t]);
 
   useEffect(() => {
     function handleGlobalEsc(event: KeyboardEvent) {
@@ -830,6 +838,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
       activeTab,
       activeProgramCode ?? undefined,
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     layoutMode,
     isUtilizationTab,
@@ -838,6 +847,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
     weeks,
     activeTab,
     activeProgramCode,
+    i18n.locale,
   ]);
 
   const showCalendarCourseLegend =
@@ -851,6 +861,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
       programCode: activeProgramCode,
       instructorLabelById,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     showCalendarCourseLegend,
     config,
@@ -858,6 +869,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
     activeTab,
     activeProgramCode,
     instructorLabelById,
+    i18n.locale,
   ]);
 
   // Sticky day-row `top` uses --sa-grid-header-height. Measuring thead on open
@@ -1524,14 +1536,19 @@ export function TimetableViewer(props: TimetableViewerProps) {
   if (!config) {
     return (
       <div className="text-base-content/70 flex h-full items-center justify-center p-4 text-sm">
-        Загрузите config.yaml во вкладке «Настройки».
+        <Trans>Upload config.yaml in the “Settings” tab.</Trans>
       </div>
     );
   }
 
+  const weekNumber = weekIndex + 1;
+  const weekCount = weeks.length;
+  const weekRange = weeks[weekIndex]
+    ? formatCalendarWeekRange(weeks[weekIndex]!.start, weeks[weekIndex]!.end)
+    : "";
   const weekLabel = !weeks.length
-    ? "Нет недель"
-    : `Нед. ${weekIndex + 1}/${weeks.length}: ${formatCalendarWeekRange(weeks[weekIndex]!.start, weeks[weekIndex]!.end)}`;
+    ? t`No weeks`
+    : t`Week ${weekNumber}/${weekCount}: ${weekRange}`;
   const weekRelative: WeekRelativePosition | null = weeks[weekIndex]
     ? weekRelativeToToday(weeks[weekIndex]!)
     : null;
@@ -1548,16 +1565,20 @@ export function TimetableViewer(props: TimetableViewerProps) {
           <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-3 px-4 pt-4 pb-0">
             <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[minmax(0,1fr)]">
               <div className="-ml-4 flex min-h-0 min-w-0 flex-col overflow-hidden">
-                {msg ? (
+                {notice ? (
                   <div
                     className={cn(
                       "alert alert-soft mx-2 mt-2 shrink-0 py-2 text-sm",
-                      msg === "В расписании пока нет занятий."
+                      notice.kind === "empty" && props.mode === "view"
                         ? "alert-info"
                         : "alert-error",
                     )}
                   >
-                    {msg}
+                    {notice.kind === "error"
+                      ? notice.message
+                      : props.mode === "view"
+                        ? t`There are no classes in the timetable yet.`
+                        : t`No classes found in config.yaml.`}
                   </div>
                 ) : null}
 
@@ -1569,7 +1590,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
                   {!personalLessons && ownGroups.length ? (
                     <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[#d8dfeb] px-2 py-1 text-xs">
                       <span className="font-semibold text-emerald-700">
-                        Мои группы
+                        <Trans>My groups</Trans>
                       </span>
                       {ownGroups.map((group) => (
                         <button
@@ -1617,7 +1638,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
                           <button
                             type="button"
                             className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                            title="Предыдущая неделя"
+                            title={t`Previous week`}
                             disabled={weekIndex <= 0 || !weeks.length}
                             onClick={() => {
                               if (weekIndex > 0) setWeekIndex((i) => i - 1);
@@ -1634,7 +1655,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
                           <button
                             type="button"
                             className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                            title="Следующая неделя"
+                            title={t`Next week`}
                             disabled={
                               weekIndex >= weeks.length - 1 || !weeks.length
                             }
@@ -1647,9 +1668,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
                           </button>
                         </div>
                         {weekRelative ? (
-                          <Tooltip
-                            content={`${WEEK_RELATIVE_LABELS[weekRelative]} неделя`}
-                          >
+                          <Tooltip content={weekRelativeLabel(weekRelative)}>
                             <span className="inline-flex size-5 shrink-0 items-center justify-center">
                               <span
                                 className={clsx(
@@ -1674,7 +1693,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
                           onClick={handleToolbarCreateClick}
                         >
                           <span className="icon-[material-symbols--add-rounded] text-base" />
-                          Добавить занятие
+                          <Trans>Add class</Trans>
                         </button>
                       ) : null}
                       {!isLgUp ? (
@@ -1684,7 +1703,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
                           onClick={() => setMobileMenuOpen(true)}
                         >
                           <span className="icon-[material-symbols--playlist-add-check-rounded] text-base" />
-                          Меню
+                          <Trans>Menu</Trans>
                         </button>
                       ) : null}
                       {editConfig ? (
@@ -1693,8 +1712,8 @@ export function TimetableViewer(props: TimetableViewerProps) {
                           className="btn btn-xs btn-ghost gap-1"
                           title={
                             isUtilizationTab
-                              ? "Экспорт недоступен на вкладках преподавателей и локаций"
-                              : "Экспорт всех разделов в XLSX"
+                              ? t`Export is not available on the instructor and location tabs`
+                              : t`Export all sections to XLSX`
                           }
                           disabled={
                             isUtilizationTab || exportPending || !config
@@ -1708,7 +1727,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
                           ) : (
                             <span className="icon-[material-symbols--download-rounded] text-base" />
                           )}
-                          Экспорт XLSX
+                          <Trans>Export XLSX</Trans>
                         </button>
                       ) : null}
                       <TimetableLayoutSelector
@@ -1739,7 +1758,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
                       } as React.CSSProperties
                     }
                   >
-                    {!grid && !msg ? (
+                    {!grid && !notice ? (
                       <div className="text-base-content/60 flex h-full min-h-48 items-center justify-center gap-2 text-sm">
                         <span className="skeleton h-24 w-3/4" />
                       </div>
@@ -1880,7 +1899,7 @@ export function TimetableViewer(props: TimetableViewerProps) {
           <DetailFullscreenModal
             open={mobileMenuOpen}
             onOpenChange={setMobileMenuOpen}
-            title="Меню"
+            title={t`Menu`}
           >
             <TimetableSidebarMenu
               activeDate={weeks[weekIndex]?.start ?? todayIsoDate()}
@@ -2072,7 +2091,7 @@ function TimetableMainGrid({
     return (
       <div className="text-base-content/60 flex h-full min-h-48 items-center justify-center gap-2 text-sm">
         <span className="loading loading-spinner loading-sm" />
-        Загрузка таблицы…
+        <Trans>Loading table…</Trans>
       </div>
     );
   }
@@ -2162,14 +2181,15 @@ function TimetableTabSelector({
   activeTab: InnerTab;
   onTabChange: (tab: InnerTab) => void;
 }) {
+  const { t } = useLingui();
   const sections = getScheduleSections(config);
   const options: { value: InnerTab; label: string }[] = [
     ...sections.map((section) => ({
       value: section.code,
-      label: section.name,
+      label: localizedSectionName(section),
     })),
-    { value: "instructor", label: "По преподавателям" },
-    { value: "room", label: "По локациям" },
+    { value: "instructor", label: t`By instructors` },
+    { value: "room", label: t`By locations` },
   ];
 
   return (
@@ -2177,7 +2197,7 @@ function TimetableTabSelector({
       value={activeTab}
       onChange={onTabChange}
       options={options}
-      placeholder="Режим таблицы"
+      placeholder={t`Table mode`}
       triggerClassName="w-[10.5rem]"
       menuClassName="min-w-[12rem]"
       placement="bottom-end"
@@ -2378,17 +2398,20 @@ function timetableDetailPanelPropsEqual(
 
 function selectionStubLabel(selection: Selection): string {
   if (!selection) return "";
+  const value = selection.value;
   switch (selection.type) {
-    case "meeting":
-      return selection.course ? `Занятие · ${selection.course}` : "Занятие";
+    case "meeting": {
+      const course = selection.course;
+      return course ? t`Class · ${course}` : t`Class`;
+    }
     case "program":
-      return `Программа · ${selection.value}`;
+      return t`Program · ${value}`;
     case "group":
-      return `Группа · ${selection.value}`;
+      return t`Group · ${value}`;
     case "instructor":
-      return `Преподаватель · ${selection.value}`;
+      return t`Instructor · ${value}`;
     case "room":
-      return `Локация · ${selection.value}`;
+      return t`Location · ${value}`;
   }
 }
 
@@ -2396,9 +2419,9 @@ function timetableDetailTitle(
   selection: Selection,
   selectedMeeting: Meeting | null,
 ): string {
-  if (!selection) return "Ничего не выбрано";
+  if (!selection) return t`Nothing selected`;
   if (selectedMeeting) {
-    return `${selectedMeeting.course || "—"} (${selectedMeeting.tag || "—"})`;
+    return `${meetingCourseTitle(selectedMeeting) || "—"} (${selectedMeeting.tag || "—"})`;
   }
   return selectionStubLabel(selection);
 }
@@ -2442,6 +2465,7 @@ function TimetableMobileDetailModal({
   userEmail?: string | null;
   sidebarAction?: "composer" | "student";
 }) {
+  const { i18n } = useLingui();
   const selection = useSelectionSnapshot();
 
   const selectedMeeting = useMemo(() => {
@@ -2451,6 +2475,11 @@ function TimetableMobileDetailModal({
       null
     );
   }, [allMeetings, selection]);
+  const title = useMemo(
+    () => timetableDetailTitle(selection, selectedMeeting),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selection, selectedMeeting, i18n.locale],
+  );
 
   return (
     <DetailFullscreenModal
@@ -2458,7 +2487,7 @@ function TimetableMobileDetailModal({
       onOpenChange={(open) => {
         if (!open) clearSelection();
       }}
-      title={timetableDetailTitle(selection, selectedMeeting)}
+      title={title}
     >
       <TimetableDetailPanel
         allMeetings={allMeetings}
@@ -2507,6 +2536,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   userEmail,
   sidebarAction,
 }: TimetableDetailPanelProps) {
+  const { i18n } = useLingui();
   const editConfig = useContext(TimetableEditConfigContext);
   const selection = useSelectionSnapshot();
   const selectionStore = useSelectionStore();
@@ -2524,7 +2554,11 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
     return !!parseMeetingInstanceId(selectedMeeting.instance_id);
   }, [selectedMeeting]);
 
-  const title = timetableDetailTitle(selection, selectedMeeting);
+  const title = useMemo(
+    () => timetableDetailTitle(selection, selectedMeeting),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selection, selectedMeeting, i18n.locale],
+  );
   const showEditButton =
     !!editConfig && canEditSelectedMeeting && !editModalOpen;
   return (
@@ -2538,7 +2572,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
             onClick={clearSelection}
           >
             <span className="icon-[material-symbols--arrow-back-rounded] text-lg" />
-            Меню
+            <Trans>Menu</Trans>
           </button>
           <div
             className="detail-title text-base-content min-w-0 text-lg leading-snug font-semibold [overflow-wrap:anywhere]"
@@ -2591,17 +2625,18 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
         />
       ) : selection ? (
         <p className="text-base-content/60 text-sm leading-relaxed">
-          Детали этого выбора появятся позже.
+          <Trans>Details for this selection will appear later.</Trans>
         </p>
       ) : (
         <div className="border-base-300 bg-base-200/40 rounded-box flex flex-col items-center gap-3 border border-dashed px-4 py-10 text-center">
           <span className="icon-[material-symbols--touch-app-outline-rounded] text-base-content/35 text-4xl" />
           <div className="text-base-content text-sm font-medium">
-            Панель деталей пуста
+            <Trans>Details panel is empty</Trans>
           </div>
           <p className="text-base-content/60 max-w-56 text-xs leading-relaxed">
-            Кликните по ячейке или заголовку в расписании — здесь появятся
-            детали.
+            <Trans>
+              Click a cell or a header in the timetable to see details here.
+            </Trans>
           </p>
         </div>
       )}
@@ -2654,7 +2689,7 @@ const CoreYearHeadCell = memo(function CoreYearHeadCell({
       <span
         className={GROUPS_PROGRAM_TITLE_STICKY_CLASS}
         style={GROUPS_PROGRAM_TITLE_STICKY_STYLE}
-        title={scheduleAssistantDetailTooltips.program}
+        title={scheduleAssistantDetailTooltip("program")}
       >
         {yearLabel}
       </span>
@@ -2679,6 +2714,7 @@ const CoreGroupHeadCell = memo(function CoreGroupHeadCell({
   programSeparator?: boolean;
   compact?: boolean;
 }) {
+  const { t } = useLingui();
   const highlight = useGroupHeaderHighlight(groupId, yearLabel);
   const personal = usePersonalGroup(groupId);
   return (
@@ -2701,7 +2737,7 @@ const CoreGroupHeadCell = memo(function CoreGroupHeadCell({
       ) : null}
       <span
         className="block w-full"
-        title={personal ? "Моя группа" : scheduleAssistantDetailTooltips.group}
+        title={personal ? t`My group` : scheduleAssistantDetailTooltip("group")}
       >
         {groupLabel}
       </span>
@@ -2790,7 +2826,7 @@ const UtilResourceHeadCell = memo(function UtilResourceHeadCell({
     >
       <span
         className="block w-full"
-        title={scheduleAssistantDetailTooltips.resource}
+        title={scheduleAssistantDetailTooltip("resource")}
       >
         {label}
       </span>
@@ -3089,7 +3125,7 @@ function CoreGroupsTable({
             style={GROUPS_DAY_ROW_STICKY_STYLE}
           >
             <span className="day-label sticky left-[9px] z-[7] inline-block bg-inherit pr-1">
-              {weekdayLabelRu(day)}
+              {weekdayLabel(day)}
             </span>
           </td>
         </tr>,
@@ -3131,7 +3167,7 @@ function CoreGroupsTable({
                 GROUPS_HEAD_PAD,
               )}
             >
-              День
+              <Trans>Day</Trans>
             </th>
           </tr>
         </thead>
@@ -3166,7 +3202,7 @@ function CoreGroupsTable({
             )}
             style={{ ...GROUPS_DAY_ROW_STICKY_STYLE, zIndex: 21 }}
           >
-            {weekdayLabelRu(preparedRow.day)}
+            {weekdayLabel(preparedRow.day)}
           </td>
           {yearLabels.map((yearLabel, yearIndex) => {
             const timeCols = prepared.showProgramTimeColumn[yearLabel] ? 1 : 0;
@@ -3556,7 +3592,7 @@ function CoreGroupsTable({
             )}
             rowSpan={2}
           >
-            День
+            <Trans>Day</Trans>
           </th>
           {yearLabels.map((yearLabel, yearIndex) => {
             const timeCols = prepared.showProgramTimeColumn[yearLabel] ? 1 : 0;
@@ -3643,10 +3679,10 @@ const MeetingCard = memo(function MeetingCard({
   const m = row.sample;
   const canEdit = !!parseMeetingInstanceId(m.instance_id);
   const count = row.count;
-  const fullCourseTitle = String(m.course || "").trim() || "—";
-  const shortCourseTitle = String(m.course_short_name || "").trim();
-  const courseTitle =
-    (preferShortCourseName ? shortCourseTitle : "") || fullCourseTitle;
+  const fullCourseTitle = meetingCourseTitle(m) || "—";
+  const courseTitle = preferShortCourseName
+    ? meetingCourseShortTitle(m) || "—"
+    : fullCourseTitle;
   const colors = colorBySubject(m.course || courseTitle, courseColors);
   const roomLoadLabel = meetingRoomLoadLabel(
     m,
@@ -3748,7 +3784,7 @@ const MeetingCard = memo(function MeetingCard({
             {count > 1 ? ` x${count}` : ""}
             {m.notes ? (
               <span className="ml-1 text-[9px] font-normal text-[#4f5c6d]">
-                · Заметка
+                · <Trans>Note</Trans>
               </span>
             ) : null}
           </div>
@@ -3819,7 +3855,7 @@ const MeetingCard = memo(function MeetingCard({
             {roomIdTrim ? (
               <span
                 className={clsx(roomClickableClass, "inline min-w-0 truncate")}
-                title={scheduleAssistantDetailTooltips.room}
+                title={scheduleAssistantDetailTooltip("room")}
                 onClick={(ev) => {
                   ev.stopPropagation();
                   selectRoomCell(m.room);
@@ -3981,12 +4017,12 @@ function renderUtilizationRows(args: {
         { sensitivity: "base" },
       ),
     );
-    headerTitle = "Преподаватели";
+    headerTitle = t`Instructors`;
   } else {
     resourceCols = Array.from(
       new Set(weekMeetings.map((m) => m.room).filter(Boolean)),
     ).sort();
-    headerTitle = "Локации";
+    headerTitle = t`Locations`;
   }
 
   const rows: React.ReactNode[] = [];
@@ -4001,7 +4037,7 @@ function renderUtilizationRows(args: {
           )}
           rowSpan={2}
         >
-          День / время
+          <Trans>Day / time</Trans>
         </th>
         <th
           className={clsx(
@@ -4015,12 +4051,12 @@ function renderUtilizationRows(args: {
       </tr>
       <tr key="uh2">
         {resourceCols.map((col) => {
-          const cap = roomCapacityById?.[col];
+          const capacity = roomCapacityById?.[col] ?? "-";
           const onSelectResource =
             mode === "instructor" ? selectInstructorHeader : selectRoomHeader;
           const label =
             mode === "room"
-              ? `${col} (вм. ${cap ?? "-"})`
+              ? t`${col} (cap. ${capacity})`
               : resolveInstructorLabel(col, instructorLabelById);
           return (
             <UtilResourceHeadCell
@@ -4045,7 +4081,7 @@ function renderUtilizationRows(args: {
           colSpan={resourceCols.length + 1}
         >
           <span className="day-label sticky left-[9px] z-[7] inline-block bg-inherit pr-1">
-            {weekdayLabelRu(day)}
+            {weekdayLabel(day)}
           </span>
         </td>
       </tr>,
@@ -4153,9 +4189,10 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
   groupSizeById,
   instructorLabelById,
 }: UtilizationMeetingCardProps) {
+  const { t } = useLingui();
   const m = row.sample;
   const canEdit = !!parseMeetingInstanceId(m.instance_id);
-  const courseTitle = String(m.course || "").trim() || "—";
+  const courseTitle = meetingCourseTitle(m) || "—";
   const colors = colorBySubject(m.course || courseTitle, courseColors);
   const editable = !!useContext(TimetableEditConfigContext);
   const roomLoad = editable
@@ -4185,6 +4222,8 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
   const instructorLabels = instructorIds.map((id) =>
     resolveInstructorLabel(id, instructorLabelById),
   );
+  const fillPercent = roomFillPercent(m, roomCapacityById, groupSizeById);
+  const fillLabel = t`fill ${fillPercent}`;
 
   return (
     <div
@@ -4230,7 +4269,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
               {courseTitle} ({m.tag}){row.count > 1 ? ` x${row.count}` : ""}
               {m.notes ? (
                 <span className="ml-1 text-[9px] font-normal text-[#4f5c6d]">
-                  · Заметка
+                  · <Trans>Note</Trans>
                 </span>
               ) : null}
             </div>
@@ -4253,7 +4292,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
             title={
               mode === "instructor"
                 ? `${m.groups.join(", ")} | ${roomLoad}`
-                : `${m.groups.join(", ")} | ${roomLoad} | заполн. ${roomFillPercent(m, roomCapacityById, groupSizeById)} | ${instructorLabels.join(" / ")}`
+                : `${m.groups.join(", ")} | ${roomLoad} | ${fillLabel} | ${instructorLabels.join(" / ")}`
             }
           >
             {mode === "instructor" ? (
@@ -4262,7 +4301,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
                 {roomIdTrim ? (
                   <span
                     className={clsx(roomClickableClass, "inline")}
-                    title={scheduleAssistantDetailTooltips.room}
+                    title={scheduleAssistantDetailTooltip("room")}
                     onClick={(ev) => {
                       ev.stopPropagation();
                       selectRoomCell(m.room);
@@ -4280,7 +4319,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
                 {roomIdTrim ? (
                   <span
                     className={clsx(roomClickableClass, "inline")}
-                    title={scheduleAssistantDetailTooltips.room}
+                    title={scheduleAssistantDetailTooltip("room")}
                     onClick={(ev) => {
                       ev.stopPropagation();
                       selectRoomCell(m.room);
@@ -4291,13 +4330,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
                 ) : (
                   roomLoad
                 )}{" "}
-                {editable ? (
-                  <>
-                    | заполн.{" "}
-                    {roomFillPercent(m, roomCapacityById, groupSizeById)}{" "}
-                  </>
-                ) : null}
-                |{" "}
+                {editable ? <>| {fillLabel} </> : null}|{" "}
                 {instructorIds.length
                   ? instructorIds.map((name, idx) => {
                       const label = instructorLabels[idx]!;

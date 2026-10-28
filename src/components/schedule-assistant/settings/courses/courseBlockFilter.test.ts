@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { CourseBlocksEditor } from "./CourseBlocksEditor.tsx";
 import { buildCoursesTabSections } from "./coursesTabSections.ts";
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import { activeForBlock } from "@/components/schedule-assistant/timetable/sessionWindows.ts";
 
 const blocks = [
   {
@@ -27,19 +28,35 @@ const config = {
     {
       name: "Only second",
       section_code: "main",
-      components: [{ tag: "lec", sessions: [{ block_id: "b" }] }],
+      components: [
+        {
+          tag: "lec",
+          sessions: [
+            {
+              active: activeForBlock("b"),
+            },
+          ],
+        },
+      ],
     },
     {
       name: "Full semester",
       section_code: "main",
-      components: [{ tag: "lec", sessions: [{ block_id: null }] }],
+      components: [{ tag: "lec", sessions: [{ active: null }] }],
     },
     {
       name: "Merged",
       section_code: "main",
       components: ["lec", "tut", "lab"].map((tag) => ({
         tag,
-        sessions: [{ block_id: "a" }, { block_id: "b" }],
+        sessions: [
+          {
+            active: activeForBlock("a"),
+          },
+          {
+            active: activeForBlock("b"),
+          },
+        ],
       })),
     },
   ],

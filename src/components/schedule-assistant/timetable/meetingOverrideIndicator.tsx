@@ -1,20 +1,24 @@
+import { i18n } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import type { MeetingOverrideField } from "./timetableViewerModel.ts";
 
-export const MEETING_OVERRIDE_FIELD_LABELS: Record<
-  MeetingOverrideField,
-  string
-> = {
-  room: "локация",
-  time: "время",
-  weekday: "день недели",
-  instructor: "преподаватель",
-};
+const MEETING_OVERRIDE_FIELD_LABELS = {
+  room: msg`location`,
+  time: msg`time`,
+  weekday: msg`weekday`,
+  instructor: msg`instructor`,
+} satisfies Record<MeetingOverrideField, unknown>;
+
+export function meetingOverrideFieldLabel(field: MeetingOverrideField) {
+  return i18n._(MEETING_OVERRIDE_FIELD_LABELS[field]);
+}
 
 export function formatMeetingOverrideFields(
   fields: MeetingOverrideField[] | undefined,
 ) {
   if (!fields?.length) return "";
-  return fields.map((field) => MEETING_OVERRIDE_FIELD_LABELS[field]).join(", ");
+  return fields.map(meetingOverrideFieldLabel).join(", ");
 }
 
 export function MeetingOverrideIndicator({
@@ -24,21 +28,23 @@ export function MeetingOverrideIndicator({
   fields: MeetingOverrideField[] | undefined;
   compact?: boolean;
 }) {
+  const { t } = useLingui();
   if (!fields?.length) return null;
 
-  const title = `Переопределено: ${formatMeetingOverrideFields(fields)}`;
+  const overriddenFields = formatMeetingOverrideFields(fields);
+  const title = t`Overridden: ${overriddenFields}`;
 
   if (compact) {
     return (
       <span className="badge badge-info badge-xs shrink-0" title={title}>
-        переопр.
+        <Trans>override</Trans>
       </span>
     );
   }
 
   return (
     <span className="badge badge-info badge-sm shrink-0" title={title}>
-      переопр.: {formatMeetingOverrideFields(fields)}
+      <Trans>override: {overriddenFields}</Trans>
     </span>
   );
 }

@@ -2,12 +2,14 @@ import type {
   SchemaCourseConfig,
   SchemaDateRange,
   SchemaScheduleConfig,
+  SchemaSessionActiveWindow,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
   SchemaWeeklyPatternSlotEdit,
 } from "@/api/schedule-assistant/types.ts";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
 import { termWeekdayKeyToWeekday } from "@/components/schedule-assistant/settings/weekdays.ts";
+import { t } from "@lingui/core/macro";
 import { dayKey, findEditForMeetingDate } from "./timetableViewerModel.ts";
 
 import {
@@ -46,8 +48,6 @@ export type EditableSessionEvent = {
   end_time: string;
   room: string | null;
   instructor: string | null;
-  /** Null inherits course notes; an empty string explicitly hides them. */
-  notes: string | null;
   cancelled: boolean;
   weeklyBase?: Pick<
     EditableSessionEvent,
@@ -61,7 +61,6 @@ export type EditableSessionEventPatch = {
   end_time?: string;
   room?: string | null;
   instructor?: string | null;
-  notes?: string | null;
   cancelled?: boolean;
 };
 
@@ -120,25 +119,17 @@ export function expandWeeklySlotsToEvents({
   weeklySlots,
   audienceTokens,
   active,
-  blockId,
 }: {
   config: SchemaScheduleConfig;
   weeklySlots: SchemaWeeklyPatternSlot[];
   audienceTokens: string[];
-  active?: SchemaDateRange | null;
-  blockId?: string | null;
+  active?: SchemaSessionActiveWindow | null;
 }): EditableSessionEvent[] {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
   const events: EditableSessionEvent[] = [];
 
   for (const [slotIdx, slot] of weeklySlots.entries()) {
-    const dates = activeWeeklySlotDates(
-      config,
-      slot,
-      audienceTokens,
-      active,
-      blockId,
-    );
+    const dates = activeWeeklySlotDates(config, slot, audienceTokens, active);
     for (const patternDate of dates) {
       const resolved = resolveWeeklyMeetingFields(slot, patternDate, config);
       const base = resolveWeeklyMeetingFields(
@@ -166,9 +157,6 @@ export function expandWeeklySlotsToEvents({
         end_time: toApiTime(resolved.end),
         room: String(resolved.room || "").trim() || null,
         instructor: normalizeInstructor(resolved.instructors),
-        notes:
-          findEditForMeetingDate(patternDate, slot.edits, startingDay)?.notes ??
-          null,
         cancelled: Boolean(resolved.cancelled),
       });
     }
@@ -185,7 +173,7 @@ export function expandWeeklySlotsToEvents({
 export function eventFollowsWeeklyBase(event: EditableSessionEvent): boolean {
   const base = event.weeklyBase;
   if (!base || event.source.kind !== "weekly") return false;
-  if (event.cancelled || event.notes !== null) return false;
+  if (event.cancelled) return false;
   if (event.date !== base.date) return false;
   if (!timesEqual(event.start_time, base.start_time)) return false;
   if (!timesEqual(event.end_time, base.end_time)) return false;
@@ -204,14 +192,12 @@ export function expandWeeklySlotsPreservingEventOverrides({
   previousEvents,
   audienceTokens,
   active,
-  blockId,
 }: {
   config: SchemaScheduleConfig;
   weeklySlots: SchemaWeeklyPatternSlot[];
   previousEvents: EditableSessionEvent[];
   audienceTokens: string[];
-  active?: SchemaDateRange | null;
-  blockId?: string | null;
+  active?: SchemaSessionActiveWindow | null;
 }): EditableSessionEvent[] {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
   const nextSlots = structuredClone(weeklySlots);
@@ -265,7 +251,6 @@ export function expandWeeklySlotsPreservingEventOverrides({
     weeklySlots: nextSlots,
     audienceTokens,
     active,
-    blockId,
   });
 }
 
@@ -286,7 +271,6 @@ export function expandOccurrencesToEvents(
       end_time: toApiTime(occurrence.end_time),
       room: String(occurrence.room || "").trim() || null,
       instructor: normalizeInstructor(occurrence.instructor),
-      notes: occurrence.notes ?? null,
       cancelled: false,
     };
   });
@@ -304,14 +288,12 @@ export function eventsToOccurrences(
       end_time: event.end_time,
       room: event.room,
       instructor: event.instructor,
-      notes: event.notes,
     }));
 }
 
 /** A proposed weekly conversion; callers must confirm if expansion changes the schedule. */
 export function eventsToWeeklySlots(
   events: EditableSessionEvent[],
-  startingDay: Weekday = Weekday.MONDAY,
 ): SchemaWeeklyPatternSlot[] {
   const slots = new Map<string, SchemaWeeklyPatternSlot>();
   for (const event of events) {
@@ -325,18 +307,7 @@ export function eventsToWeeklySlots(
       edits: null,
     };
     const key = JSON.stringify(base);
-    const slot = slots.get(key) ?? base;
-    if (event.notes !== null) {
-      slot.edits = [
-        ...(slot.edits ?? []),
-        {
-          select_week: weekStartForDate(event.date, startingDay),
-          notes: event.notes,
-          cancel: false,
-        },
-      ];
-    }
-    slots.set(key, slot);
+    if (!slots.has(key)) slots.set(key, base);
   }
   return [...slots.values()];
 }
@@ -359,8 +330,9 @@ export function eventSchedulesEqual(
   return JSON.stringify(signatures(left)) === JSON.stringify(signatures(right));
 }
 
-export const WEEKLY_CONVERSION_WARNING =
-  "Преобразование в еженедельный шаблон изменит набор дат занятий. Могут добавиться занятия на ранее неактивных неделях или исчезнуть разовые исключения. Применить преобразование?";
+export function weeklyConversionWarning(): string {
+  return t`Converting to a weekly template will change the set of class dates. Classes may be added on previously inactive weeks, or one-off exceptions may disappear. Apply the conversion?`;
+}
 
 export function createOccurrenceEvent(
   defaults?: Partial<EditableSessionEvent>,
@@ -378,7 +350,6 @@ export function createOccurrenceEvent(
     end_time: defaults?.end_time ?? "10:30:00",
     room: defaults?.room ?? null,
     instructor: defaults?.instructor ?? null,
-    notes: defaults?.notes ?? null,
     cancelled: false,
   };
 }
@@ -406,7 +377,6 @@ export function patchEditableEvents(
       ...(patch.instructor !== undefined
         ? { instructor: normalizeInstructor(patch.instructor) }
         : null),
-      ...(patch.notes !== undefined ? { notes: patch.notes } : null),
       ...(patch.cancelled !== undefined
         ? { cancelled: Boolean(patch.cancelled) }
         : null),
@@ -419,7 +389,7 @@ function weeklyEditIsNoOp(
   patternDate: string,
   event: EditableSessionEvent,
 ): boolean {
-  if (event.cancelled || event.notes !== null) return false;
+  if (event.cancelled) return false;
   if (event.date !== patternDate) return false;
   if (!timesEqual(event.start_time, slot.start_time)) return false;
   if (!timesEqual(event.end_time, slot.end_time)) return false;
@@ -444,7 +414,6 @@ function buildWeeklyEditFromEvent(
       : null),
     select_week: selectWeek,
     cancel: Boolean(event.cancelled),
-    notes: event.notes,
   };
   if (event.cancelled) return edit;
 
@@ -540,7 +509,6 @@ export function serializeOccurrenceEvents(
       end_time: toApiTime(event.end_time),
       room: event.room,
       instructor: event.instructor,
-      notes: event.notes,
     }));
 }
 
@@ -549,23 +517,25 @@ export function validateEditableEvents(
   sessionWindow?: SchemaDateRange | null,
 ): string | null {
   if (sessionWindow === null) {
-    return "Период серии не пересекается с учебным периодом выбранных групп.";
+    return t`The series period does not overlap the study period of the selected groups.`;
   }
   const active = events.filter((event) => !event.cancelled);
-  if (!active.length) return "Добавьте хотя бы одно занятие.";
+  if (!active.length) return t`Add at least one class.`;
   for (const [index, event] of active.entries()) {
-    if (!String(event.date || "").trim()) {
-      return `Укажите дату для строки ${index + 1}.`;
+    const row = index + 1;
+    const date = event.date;
+    if (!String(date || "").trim()) {
+      return t`Enter a date for row ${row}.`;
     }
     if (!normalizeTypedHhmm(event.start_time).slice(0, 5)) {
-      return `Укажите время для строки ${index + 1}.`;
+      return t`Enter a time for row ${row}.`;
     }
     if (
       sessionWindow &&
       (event.date < sessionWindow.start_date ||
         event.date > sessionWindow.end_date)
     ) {
-      return `Дата ${event.date} в строке ${index + 1} вне периода серии.`;
+      return t`Date ${date} in row ${row} is outside the series period.`;
     }
   }
   return null;
@@ -585,7 +555,6 @@ export function eventsEqual(
     if (!timesEqual(left.end_time, right.end_time)) return false;
     if (!roomsEqual(left.room, right.room)) return false;
     if (!instructorsEqual(left.instructor, right.instructor)) return false;
-    if (left.notes !== right.notes) return false;
     if (Boolean(left.cancelled) !== Boolean(right.cancelled)) return false;
   }
   return true;
@@ -611,7 +580,9 @@ export function editableEventsToDraftMeetings({
       return {
         instance_id: instanceId,
         course: meeting.course,
+        course_name_ru: meeting.course_name_ru,
         course_short_name: meeting.course_short_name,
+        course_short_name_ru: meeting.course_short_name_ru,
         tag: meeting.tag,
         groups: audienceTokens,
         date: event.date,
@@ -619,7 +590,7 @@ export function editableEventsToDraftMeetings({
         end: toUiTime(event.end_time) || undefined,
         room: String(event.room || "").trim(),
         instructors: event.instructor || "",
-        notes: event.notes ?? courseNotes,
+        notes: courseNotes,
         instructor_pool: meeting.instructor_pool || [],
         section: meeting.section,
         pattern_date:
@@ -650,7 +621,6 @@ export function applyEditableEventsToCourse({
   audience,
   notes,
   active,
-  blockId,
   placement,
   weeklySlots,
   events,
@@ -660,8 +630,7 @@ export function applyEditableEventsToCourse({
   config: SchemaScheduleConfig;
   audience?: string[];
   notes?: string;
-  active?: SchemaDateRange | null;
-  blockId?: string | null;
+  active?: SchemaSessionActiveWindow | null;
   placement: "weekly" | "dates_pattern";
   weeklySlots: SchemaWeeklyPatternSlot[];
   events: EditableSessionEvent[];
@@ -671,7 +640,6 @@ export function applyEditableEventsToCourse({
       audience,
       notes,
       active,
-      block_id: blockId,
       weeklyPattern: serializeWeeklyEventsToSlots({
         originalSlots: weeklySlots,
         events,
@@ -685,7 +653,6 @@ export function applyEditableEventsToCourse({
     audience,
     notes,
     active,
-    block_id: blockId,
     dates_pattern: serializeOccurrenceEvents(events),
     weeklyPattern: null,
   });

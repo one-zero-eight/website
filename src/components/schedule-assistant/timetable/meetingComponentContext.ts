@@ -1,3 +1,5 @@
+import { plural, t } from "@lingui/core/macro";
+
 import type {
   TimetableViewConfig as SchemaScheduleConfig,
   TimetableViewCourse as SchemaCourseConfig,
@@ -11,6 +13,7 @@ import type {
 import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import {
   TERM_WEEKDAY_LABEL_RU,
+  termWeekdayShortLabel,
   type TermWeekdayKey,
 } from "@/components/schedule-assistant/settings/weekdays.ts";
 
@@ -24,7 +27,7 @@ import {
   dayKey,
   formatDisplayDate,
   resolveInstructorLabel,
-  weekdayLabelRu,
+  weekdayLabel,
 } from "./timetableViewerModel.ts";
 
 function formatScheduleDateTimeParts(
@@ -37,7 +40,7 @@ function formatScheduleDateTimeParts(
   primaryTime?: string;
 } {
   const iso = dateIso.trim();
-  const weekday = iso ? weekdayLabelRu(dayKey(iso)) : "";
+  const weekday = iso ? weekdayLabel(dayKey(iso)) : "";
   const dateLabel = iso ? formatDisplayDate(iso, { withYear: false }) : "—";
   const joined = (() => {
     if (!weekday && !time) return dateLabel;
@@ -108,7 +111,6 @@ export function countComponentPlacement(
           slot,
           audienceTokens,
           series.active,
-          series.block_id,
         ),
       0,
     );
@@ -126,10 +128,12 @@ export function formatComponentTarget(
   component: SchemaComponent | null | undefined,
 ): string | null {
   if (component?.per_week != null) {
-    return `${component.per_week} / неделю`;
+    const perWeek = component.per_week;
+    return t`${perWeek} / week`;
   }
   if (component?.per_semester != null) {
-    return `${component.per_semester} / семестр`;
+    const perSemester = component.per_semester;
+    return t`${perSemester} / semester`;
   }
   return null;
 }
@@ -140,32 +144,21 @@ export function formatComponentPlaced(
   const placed =
     counts.weeklyOccurrences + counts.occurrences || counts.seriesCount;
   if (!placed) return null;
-  return `размещено ${placed} ${pluralizeZanyatiya(placed)}`;
+  return plural(placed, {
+    one: "# class scheduled",
+    other: "# classes scheduled",
+  });
 }
 
-function pluralizeZanyatiya(n: number): string {
-  return pluralizeRu(n, "занятие", "занятия", "занятий");
+function formatDateCount(dateCount: number): string {
+  return plural(dateCount, { one: "# date", other: "# dates" });
 }
 
-function pluralizeDaty(n: number): string {
-  return pluralizeRu(n, "дата", "даты", "дат");
-}
-
-function formatTimesPerWeek(n: number): string {
-  return `${n} ${pluralizeRu(n, "раз", "раза", "раз")} в неделю`;
-}
-
-function pluralizeRu(
-  n: number,
-  one: string,
-  few: string,
-  many: string,
-): string {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return one;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
-  return many;
+function formatTimesPerWeek(timesPerWeek: number): string {
+  return plural(timesPerWeek, {
+    one: "# time per week",
+    other: "# times per week",
+  });
 }
 
 /**
@@ -276,22 +269,6 @@ export function componentAudienceDiffersFromMeeting(
     .map((id) => String(id || "").trim())
     .filter(Boolean);
   return !sameStringSet(expanded, meeting);
-}
-
-export function courseDisplayTitle(
-  course: SchemaCourseConfig | null,
-  meeting: Meeting,
-): string {
-  return (
-    String(
-      course?.name_ru ||
-        course?.short_name_ru ||
-        course?.name ||
-        meeting.course_short_name ||
-        meeting.course ||
-        "",
-    ).trim() || "—"
-  );
 }
 
 export type ComponentSeriesTooltipItem = {
@@ -442,7 +419,8 @@ export function listComponentSeriesDisplayItems(
 
     let label = formatSeriesAudienceLabel(config, tokens);
     if (!label || label === "—") {
-      label = `Серия ${seriesIdx + 1}`;
+      const seriesNumber = seriesIdx + 1;
+      label = t`Series ${seriesNumber}`;
     }
     usedLabels.set(label, (usedLabels.get(label) ?? 0) + 1);
 
@@ -536,9 +514,9 @@ function formatWeeklySlotTooltipItem(
   slot: SchemaWeeklyPatternSlot,
   resolveLabel: (id: string) => string,
 ): ComponentSeriesTooltipItem {
-  const day = TERM_WEEKDAY_LABEL_RU[weekdayKeyFromApi(slot.weekday)];
+  const day = termWeekdayShortLabel(weekdayKeyFromApi(slot.weekday));
   const time = formatTimeRange(slot.start_time, slot.end_time);
-  const primary = day && time ? `${day} ${time}` : day || time || "Слот";
+  const primary = day && time ? `${day} ${time}` : day || time || t`Slot`;
   const previewParts: string[] = [];
   const instructor = formatInstructorField(slot.instructor, resolveLabel);
   if (instructor) previewParts.push(instructor);
@@ -577,7 +555,7 @@ function formatOccurrenceTooltipItem(
   if (room) previewParts.push(room);
   return {
     ...parts,
-    primary: parts.primary || time || "Дата",
+    primary: parts.primary || time || t`Date`,
     weekly: false,
     room,
     instructor,
@@ -636,11 +614,11 @@ function seriesSecondaryFromConfig(
       return {
         secondary:
           formatSingleOccurrence(occurrences[0]!.occurrence, resolveLabel) ||
-          "1 дата",
+          formatDateCount(1),
       };
     }
     return {
-      secondary: `${occurrences.length} ${pluralizeDaty(occurrences.length)}`,
+      secondary: formatDateCount(occurrences.length),
       secondaryTooltipItems: occurrences.map(({ occurrence, sourceIdx }) => ({
         ...formatOccurrenceTooltipItem(occurrence, resolveLabel),
         sourceIdx,
@@ -652,7 +630,8 @@ function seriesSecondaryFromConfig(
     if (weekly.length === 1) {
       return {
         secondary:
-          formatSingleWeeklySlot(weekly[0]!, resolveLabel) || "1 раз в неделю",
+          formatSingleWeeklySlot(weekly[0]!, resolveLabel) ||
+          formatTimesPerWeek(1),
       };
     }
     return {
@@ -717,14 +696,14 @@ function formatSeriesScheduleKind(
     String(occurrence.date || "").trim(),
   ).length;
   if (occCount > 1) {
-    return `${occCount} ${pluralizeDaty(occCount)}`;
+    return formatDateCount(occCount);
   }
   if (occCount === 1) {
     return undefined;
   }
   const weekly = series.weekly_pattern ?? [];
   if (weekly.length === 1) {
-    return TERM_WEEKDAY_LABEL_RU[weekdayKeyFromApi(weekly[0]!.weekday)];
+    return termWeekdayShortLabel(weekdayKeyFromApi(weekly[0]!.weekday));
   }
   if (weekly.length > 1) {
     return formatTimesPerWeek(weekly.length);
@@ -743,7 +722,7 @@ function formatSeriesSecondary(
     ).length;
     const weeklyCount = (series.weekly_pattern ?? []).length;
     // Multi-date / multi-slot: only the count; details live in tooltip.
-    if (occCount > 1) return `${occCount} ${pluralizeDaty(occCount)}`;
+    if (occCount > 1) return formatDateCount(occCount);
     if (weeklyCount > 1) return formatTimesPerWeek(weeklyCount);
   }
 
@@ -871,7 +850,8 @@ export function listComponentSeriesNavItemsForRef(
     const tokens = seriesAudienceTokens(component!, series, representative);
     let label = formatSeriesAudienceLabel(config, tokens);
     if (!label || label === "—") {
-      label = `Серия ${seriesIdx + 1}`;
+      const seriesNumber = seriesIdx + 1;
+      label = t`Series ${seriesNumber}`;
     }
     usedLabels.set(label, (usedLabels.get(label) ?? 0) + 1);
 

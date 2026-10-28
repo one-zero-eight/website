@@ -1,12 +1,20 @@
 import { act, createElement, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   Weekday,
   type SchemaScheduleConfig,
   type SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
-import { WeeklyAlternationFields } from "./sessionSeriesRows.tsx";
+import {
+  WeeklyAlternationFields,
+  type SessionWindowValue,
+} from "./sessionSeriesRows.tsx";
+import { activeForBlock } from "./sessionWindows.ts";
+
+const i18n = setupI18n({ locale: "en", messages: {} });
 
 vi.mock("@/components/schedule-assistant/DateInput.tsx", () => ({
   DateInput: ({
@@ -64,7 +72,7 @@ describe("weekly alternation editor", () => {
       edits: [{ select_week: "2026-09-07", cancel: true }],
     };
     let saved = original;
-    let windowValue = { active: null as null, block_id: null as string | null };
+    let windowValue: SessionWindowValue = { active: null };
     function Editor({ initial }: { initial: SchemaWeeklyPatternSlot }) {
       const [slot, setSlot] = useState(initial);
       return createElement(WeeklyAlternationFields, {
@@ -72,7 +80,6 @@ describe("weekly alternation editor", () => {
         slot,
         audienceTokens: [],
         active: windowValue.active,
-        blockId: windowValue.block_id,
         onSessionWindowChange: (next) => {
           windowValue = next;
         },
@@ -100,14 +107,22 @@ describe("weekly alternation editor", () => {
     }
     try {
       await act(async () =>
-        root.render(createElement(Editor, { initial: original })),
+        root.render(
+          createElement(
+            I18nProvider,
+            { i18n },
+            createElement(Editor, { initial: original }),
+          ),
+        ),
       );
-      expect(container.textContent).toContain("Каждую неделю, весь семестр");
+      expect(container.textContent).toContain("Every week, whole semester");
       await openPopup();
-      await clickLabel("Через неделю");
+      await clickLabel("Every other week");
       expect(saved.alternation).toEqual({ anchor_week: "2026-08-31" });
-      expect(document.body.textContent).toContain("не начиная с этой даты");
-      expect(document.body.textContent).toContain("неактивных недель (1)");
+      expect(document.body.textContent).toContain(
+        "not starting from this date",
+      );
+      expect(document.body.textContent).toContain("inactive weeks (1)");
       expect(document.body.textContent).toContain("01.09");
       expect(document.body.textContent).toContain("15.09");
       await act(async () => {
@@ -117,22 +132,26 @@ describe("weekly alternation editor", () => {
         input.dispatchEvent(new Event("change", { bubbles: true }));
       });
       expect(saved.alternation).toEqual({ anchor_week: "2026-09-07" });
-      expect(document.body.textContent).not.toContain("неактивных недель (1)");
+      expect(document.body.textContent).not.toContain("inactive weeks (1)");
       expect(document.body.textContent).toContain("22.09");
       expect(saved.edits).toEqual(original.edits);
       await clickLabel("Блок 1");
-      expect(windowValue).toEqual({ active: null, block_id: "first" });
+      expect(windowValue).toEqual({ active: activeForBlock("first") });
       await act(async () =>
         root.render(
-          createElement(Editor, {
-            key: "reopen",
-            initial: structuredClone(saved),
-          }),
+          createElement(
+            I18nProvider,
+            { i18n },
+            createElement(Editor, {
+              key: "reopen",
+              initial: structuredClone(saved),
+            }),
+          ),
         ),
       );
-      expect(container.textContent).toContain("Через неделю, Блок 1");
+      expect(container.textContent).toContain("Every other week, Блок 1");
       await openPopup();
-      await clickLabel("Каждую неделю");
+      await clickLabel("Every week");
       expect(saved.alternation).toBeNull();
       expect(saved.edits).toEqual(original.edits);
       expect(document.body.querySelector("[data-anchor]")).toBeNull();

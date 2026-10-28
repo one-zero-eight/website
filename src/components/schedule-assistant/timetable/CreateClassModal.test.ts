@@ -11,6 +11,7 @@ import { setupI18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 const i18n = setupI18n({ locale: "en", messages: {} });
 import { buildMeetingPickerIndex } from "./meetingPickerIndex.ts";
+import { activeForBlock } from "./sessionWindows.ts";
 import { buildMeetings } from "./timetableViewerModel.ts";
 
 const mocks = vi.hoisted(() => ({
@@ -39,18 +40,15 @@ vi.mock("./EditClassAudienceModal.tsx", () => ({
 vi.mock("./SessionSeriesEditor.tsx", () => ({
   SessionSeriesEditor: ({
     active,
-    blockId,
     weeklySlots,
     lockedRowCount,
   }: {
     active: unknown;
-    blockId?: string | null;
     weeklySlots: unknown[];
     lockedRowCount: number;
   }) =>
     createElement("div", {
       "data-active": JSON.stringify(active),
-      "data-block-id": blockId ?? "",
       "data-row-count": weeklySlots.length,
       "data-locked-count": lockedRowCount,
     }),
@@ -86,8 +84,7 @@ function configFor(): SchemaScheduleConfig {
             instructor_pool: [],
             sessions: [first, second].map((_, index) => ({
               audience: ["G"],
-              active: null,
-              block_id: index === 0 ? "first" : "second",
+              active: activeForBlock(index === 0 ? "first" : "second"),
               weekly_pattern: [
                 {
                   weekday: Weekday.TUESDAY,
@@ -142,13 +139,14 @@ it("creates inside the default block without leaking same-audience sibling rows"
       ),
     );
     const editor = container.querySelector("[data-active]")!;
-    expect(editor.getAttribute("data-active")).toBe("null");
-    expect(editor.getAttribute("data-block-id")).toBe("second");
+    expect(editor.getAttribute("data-active")).toBe(
+      JSON.stringify(activeForBlock("second")),
+    );
     expect(editor.getAttribute("data-row-count")).toBe("3");
     expect(editor.getAttribute("data-locked-count")).toBe("1");
     await act(async () =>
       [...container.querySelectorAll("button")]
-        .find((button) => button.textContent === "Добавить")!
+        .find((button) => button.textContent === "Add")!
         .click(),
     );
     expect(mocks.showError).not.toHaveBeenCalled();
@@ -159,8 +157,7 @@ it("creates inside the default block without leaking same-audience sibling rows"
       original.components[0].sessions![0],
     );
     expect(updated.components[0].sessions![1]).toMatchObject({
-      active: null,
-      block_id: "second",
+      active: activeForBlock("second"),
     });
     expect(updated.components[0].sessions![1].weekly_pattern).toHaveLength(2);
     expect(

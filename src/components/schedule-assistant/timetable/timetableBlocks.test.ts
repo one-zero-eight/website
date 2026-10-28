@@ -7,6 +7,7 @@ import {
   type SchemaTermBlock,
   type SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
+import { activeForBlock } from "./sessionWindows.ts";
 import {
   blockForWeekBoundary,
   buildTeachingWeeks,
@@ -206,11 +207,21 @@ describe("timetable block helpers", () => {
   it("matches unrestricted courses and explicit block memberships", () => {
     for (const course of [
       { components: [] },
-      { components: [{ sessions: [{ block_id: null }] }] },
+      { components: [{ sessions: [{ active: null }] }] },
     ]) {
       expect(courseMatchesBlock(course, "first")).toBe(true);
     }
-    const course = { components: [{ sessions: [{ block_id: "first" }] }] };
+    const course = {
+      components: [
+        {
+          sessions: [
+            {
+              active: activeForBlock("first"),
+            },
+          ],
+        },
+      ],
+    };
     expect(courseMatchesBlock(course, "first")).toBe(true);
     expect(courseMatchesBlock(course, "second")).toBe(false);
     expect(courseMatchesBlock(course, "all")).toBe(true);

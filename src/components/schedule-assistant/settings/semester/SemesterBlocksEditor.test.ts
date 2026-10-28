@@ -1,6 +1,8 @@
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { SchemaSessionActiveWindow } from "@/api/schedule-assistant/types.ts";
+import { activeForBlock } from "@/components/schedule-assistant/timetable/sessionWindows.ts";
 import { SemesterBlocksEditor } from "./SemesterBlocksEditor.tsx";
 import { splitSemesterInTwo } from "./semesterBlocks.ts";
 import { setupI18n } from "@lingui/core";
@@ -20,7 +22,10 @@ const mocks = vi.hoisted(() => ({
     },
     courses: [] as {
       name: string;
-      components: { tag: string; sessions: { block_id: string | null }[] }[];
+      components: {
+        tag: string;
+        sessions: { active?: SchemaSessionActiveWindow | null }[];
+      }[];
     }[],
   },
   updateTerm: vi.fn(),
@@ -137,7 +142,8 @@ describe("SemesterBlocksEditor", () => {
     await editor.click("Сохранить блоки");
     expect(mocks.updateTerm.mock.calls[0][0].body.blocks).toEqual([
       expect.objectContaining({
-        name: "Блок 1",
+        name: "Block 1",
+        name_ru: "Блок 1",
         start_date: "2026-09-01",
         end_date: "2026-09-30",
       }),
@@ -150,7 +156,16 @@ describe("SemesterBlocksEditor", () => {
     mocks.config.courses = [
       {
         name: "Algorithms",
-        components: [{ tag: "lec", sessions: [{ block_id: "block-1" }] }],
+        components: [
+          {
+            tag: "lec",
+            sessions: [
+              {
+                active: activeForBlock("block-1"),
+              },
+            ],
+          },
+        ],
       },
     ];
     const editor = await mount();

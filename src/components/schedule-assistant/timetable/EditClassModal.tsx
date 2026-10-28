@@ -1,8 +1,9 @@
 import type {
-  SchemaDateRange,
   SchemaScheduleConfig,
+  SchemaSessionActiveWindow,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
+import { meetingCourseTitle } from "./localizedNames.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import {
   useCoursesQuery,
@@ -10,6 +11,7 @@ import {
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { termWeekdayKeyToWeekday } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { useToast } from "@/components/toast";
+import { Trans, useLingui } from "@lingui/react/macro";
 import clsx from "clsx";
 import { useEffect, useMemo, useState } from "react";
 
@@ -31,7 +33,7 @@ import {
   eventsToOccurrences,
   eventsToWeeklySlots,
   serializeWeeklyEventsToSlots,
-  WEEKLY_CONVERSION_WARNING,
+  weeklyConversionWarning,
   expandOccurrencesToEvents,
   expandWeeklySlotsPreservingEventOverrides,
   expandWeeklySlotsToEvents,
@@ -89,16 +91,18 @@ export function EditClassModal({
   meetings: Meeting[];
   meetingPickerIndex: MeetingPickerIndex;
 }) {
+  const { t } = useLingui();
   const { data: courses } = useCoursesQuery();
   const { mutate, isPending } = useUpdateCourseMutation();
   const { showError } = useToast();
   const [dismissed, setDismissed] = useState(false);
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
-  const [storedActive, setActive] = useState<SchemaDateRange | null>(null);
-  const [blockId, setBlockId] = useState<string | null>(null);
-  const active = useMemo(
-    () => sessionWindowRange(config, storedActive, blockId),
-    [config, storedActive, blockId],
+  const [storedActive, setActive] = useState<SchemaSessionActiveWindow | null>(
+    null,
+  );
+  const resolvedWindow = useMemo(
+    () => sessionWindowRange(config, storedActive),
+    [config, storedActive],
   );
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
   const [events, setEvents] = useState<EditableSessionEvent[]>([]);
@@ -195,7 +199,6 @@ export function EditClassModal({
     );
     setAudienceValue(audience);
     setActive(meetingSeries?.active ?? null);
-    setBlockId(meetingSeries?.block_id ?? null);
 
     const initialPlacement: SessionPlacement =
       meetingRef.kind === "occ" ? "dates_pattern" : "weekly";
@@ -256,7 +259,6 @@ export function EditClassModal({
       weeklySlots: slots,
       audienceTokens: audience,
       active: meetingSeries?.active,
-      blockId: meetingSeries?.block_id,
     });
     setWeeklySlots(slots);
     setOriginalWeeklySlots(structuredClone(slots));
@@ -296,15 +298,6 @@ export function EditClassModal({
       weeklySlots,
       audienceTokens: audienceValue,
       active: storedActive,
-      blockId,
-    }).map((event) => {
-      const matching = events.find((candidate) =>
-        eventSchedulesEqual(
-          [{ ...candidate, notes: null }],
-          [{ ...event, notes: null }],
-        ),
-      );
-      return matching ? { ...event, notes: matching.notes } : event;
     });
     const nextSlots =
       weeklySlots.length && eventSchedulesEqual(events, cachedEvents)
@@ -313,17 +306,16 @@ export function EditClassModal({
             events: cachedEvents,
             config,
           })
-        : eventsToWeeklySlots(events, config.term.starting_day);
+        : eventsToWeeklySlots(events);
     const nextEvents = expandWeeklySlotsToEvents({
       config,
       weeklySlots: nextSlots,
       audienceTokens: audienceValue,
       active: storedActive,
-      blockId,
     });
     if (
       !eventSchedulesEqual(events, nextEvents) &&
-      !window.confirm(WEEKLY_CONVERSION_WARNING)
+      !window.confirm(weeklyConversionWarning())
     )
       return;
     setWeeklySlots(nextSlots);
@@ -356,23 +348,17 @@ export function EditClassModal({
         previousEvents: events,
         audienceTokens: audienceValue,
         active: storedActive,
-        blockId,
       }),
     );
   }
 
   function handleSessionWindowChange(next: {
-    active: SchemaDateRange | null;
-    block_id: string | null;
+    active: SchemaSessionActiveWindow | null;
   }) {
-    if (
-      sessionActiveEqual(storedActive, next.active) &&
-      (blockId ?? null) === (next.block_id ?? null)
-    ) {
+    if (sessionActiveEqual(storedActive, next.active)) {
       return;
     }
     setActive(next.active);
-    setBlockId(next.block_id);
     if (placement !== "weekly") return;
     // Avoid rewriting an untouched template during a window-only edit.
     const previousEvents = expandWeeklySlotsToEvents({
@@ -380,7 +366,6 @@ export function EditClassModal({
       weeklySlots,
       audienceTokens: audienceValue,
       active: storedActive,
-      blockId,
     });
     const nextSlots = eventsEqual(events, previousEvents)
       ? weeklySlots
@@ -393,7 +378,6 @@ export function EditClassModal({
         previousEvents: events,
         audienceTokens: audienceValue,
         active: next.active,
-        blockId: next.block_id,
       }),
     );
   }
@@ -409,7 +393,6 @@ export function EditClassModal({
         previousEvents: events,
         audienceTokens: audience,
         active: storedActive,
-        blockId,
       }),
     );
   }
@@ -432,14 +415,14 @@ export function EditClassModal({
     if (!meeting || !meetingRef || !courses || !originals) return;
     const course = courses.find((item) => item.name === meeting.course);
     if (!course) {
-      showError("Ошибка", "Курс не найден в конфигурации.");
+      showError(t`Error`, t`Course not found in the configuration.`);
       return;
     }
 
     if (!audienceValue.length) {
       showError(
-        "Ошибка",
-        perGroup ? "Выберите группу." : "Укажите хотя бы одну группу.",
+        t`Error`,
+        perGroup ? t`Select a group.` : t`Specify at least one group.`,
       );
       return;
     }
@@ -448,7 +431,6 @@ export function EditClassModal({
       config,
       audienceValue,
       storedActive,
-      blockId,
     );
     const seriesError =
       sessionWindow &&
@@ -458,7 +440,7 @@ export function EditClassModal({
         ? null
         : validateEditableEvents(events, sessionWindow);
     if (seriesError) {
-      showError("Ошибка", seriesError);
+      showError(t`Error`, seriesError);
       return;
     }
 
@@ -470,7 +452,7 @@ export function EditClassModal({
       templateChanged || !eventsEqual(events, originalEvents);
 
     if (!audienceChanged && !scheduleDirty) {
-      showError("Ошибка", "Нет изменений для сохранения.");
+      showError(t`Error`, t`No changes to save.`);
       return;
     }
 
@@ -483,7 +465,6 @@ export function EditClassModal({
             weeklySlots,
             audienceTokens: audienceValue,
             active: storedActive,
-            blockId,
           })
         : originalEvents;
     const schedulePayloadChanged =
@@ -495,7 +476,6 @@ export function EditClassModal({
       {
         audience: audienceChanged ? audienceValue : undefined,
         active: storedActive,
-        block_id: blockId,
         weeklyPattern:
           placement === "weekly" && schedulePayloadChanged
             ? serializeWeeklyEventsToSlots({
@@ -516,7 +496,7 @@ export function EditClassModal({
     );
 
     if (!updatedCourse) {
-      showError("Ошибка", "Не удалось применить изменение к занятию.");
+      showError(t`Error`, t`Failed to apply the change to the class.`);
       return;
     }
 
@@ -531,7 +511,7 @@ export function EditClassModal({
 
   if (!meeting || !originals) return null;
 
-  const meetingTitle = `${meeting.course} (${meeting.tag})`;
+  const meetingTitle = `${meetingCourseTitle(meeting)} (${meeting.tag})`;
   const audienceChanged = !meetingAudienceEqual(
     audienceValue,
     originals.audience,
@@ -556,7 +536,6 @@ export function EditClassModal({
   function restoreScheduleOriginals() {
     setPlacement(meetingRef?.kind === "occ" ? "dates_pattern" : "weekly");
     setActive(meetingSeries?.active ?? null);
-    setBlockId(meetingSeries?.block_id ?? null);
     setWeeklySlots(structuredClone(originalWeeklySlots));
     setEvents(
       meetingRef?.kind === "wp"
@@ -565,7 +544,6 @@ export function EditClassModal({
             weeklySlots: originalWeeklySlots,
             audienceTokens: audienceValue,
             active: meetingSeries?.active,
-            blockId: meetingSeries?.block_id,
           })
         : structuredClone(originalEvents),
     );
@@ -601,7 +579,7 @@ export function EditClassModal({
       <div className="mt-3 flex flex-col gap-3">
         <details className="rounded-box border-base-300 border p-3">
           <summary className="cursor-pointer text-sm font-medium">
-            Шаблон серии
+            <Trans>Series template</Trans>
           </summary>
           <div className="mt-3 flex flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -642,9 +620,7 @@ export function EditClassModal({
               <SessionSeriesEditor
                 config={config}
                 active={storedActive}
-                blockId={blockId}
                 originalActive={meetingSeries?.active}
-                originalBlockId={meetingSeries?.block_id}
                 onSessionWindowChange={handleSessionWindowChange}
                 meetings={meetings}
                 meetingIndex={_meetingPickerIndex}
@@ -671,7 +647,7 @@ export function EditClassModal({
 
         <EditableSessionEventsEditor
           config={config}
-          active={active}
+          active={resolvedWindow}
           meetings={conflictMeetings}
           meetingIndex={conflictMeetingIndex}
           events={events}
@@ -714,7 +690,7 @@ export function EditClassModal({
               disabled={isPending}
               onClick={restoreScheduleOriginals}
             >
-              Сбросить изменения
+              <Trans>Reset changes</Trans>
             </button>
           ) : null}
           <button
@@ -723,7 +699,7 @@ export function EditClassModal({
             disabled={isPending}
             onClick={handleClose}
           >
-            Закрыть
+            <Trans>Close</Trans>
           </button>
           <button
             type="button"
@@ -731,7 +707,9 @@ export function EditClassModal({
             disabled={isPending || !canSave}
             onClick={handleSubmit}
           >
-            <span className={clsx(isPending && "invisible")}>Сохранить</span>
+            <span className={clsx(isPending && "invisible")}>
+              <Trans>Save</Trans>
+            </span>
             {isPending ? (
               <span className="loading loading-spinner loading-sm absolute inset-0 m-auto" />
             ) : null}

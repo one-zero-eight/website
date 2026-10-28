@@ -15,15 +15,16 @@ import {
   useRole,
 } from "@floating-ui/react";
 import {
-  TERM_WEEKDAY_LABEL_RU,
+  termWeekdayShortLabel,
   type TermWeekdayKey,
 } from "@/components/schedule-assistant/settings/weekdays.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { cn } from "@/lib/ui/cn";
+import { useLingui } from "@lingui/react/macro";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { DayPicker } from "react-day-picker";
-import { ru } from "react-day-picker/locale";
+import { enGB, ru } from "react-day-picker/locale";
 import "react-day-picker/style.css";
 
 const ISO_WEEKDAY_TO_KEY: TermWeekdayKey[] = [
@@ -44,7 +45,7 @@ function weekdayLabelFromIso(iso: string): string | null {
   const parsed = moment(raw, "YYYY-MM-DD", true);
   if (!parsed.isValid()) return null;
   const key = ISO_WEEKDAY_TO_KEY[parsed.day()];
-  return key ? TERM_WEEKDAY_LABEL_RU[key] : null;
+  return key ? termWeekdayShortLabel(key) : null;
 }
 
 const DISPLAY_FORMATS = [
@@ -89,6 +90,8 @@ function localDateToIso(date: Date): string {
   return moment(date).format("YYYY-MM-DD");
 }
 
+type DateInputError = "required" | "invalid" | "out_of_range";
+
 function isIsoInRange(iso: string, min?: string, max?: string): boolean {
   if (min && iso < min.slice(0, 10)) return false;
   if (max && iso > max.slice(0, 10)) return false;
@@ -100,7 +103,7 @@ export function DateInput({
   onChange,
   className,
   disabled = false,
-  placeholder = "дд.мм.гггг",
+  placeholder,
   showWeekday = false,
   weekdayOverridden = false,
   min,
@@ -162,7 +165,7 @@ function DateInputContent({
   onChange,
   className,
   disabled = false,
-  placeholder = "дд.мм.гггг",
+  placeholder,
   showWeekday = false,
   weekdayOverridden = false,
   min,
@@ -178,10 +181,11 @@ function DateInputContent({
   min?: string;
   max?: string;
 }) {
+  const { t, i18n } = useLingui();
   const nodeId = useFloatingNodeId();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<string | null>(null);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<DateInputError | null>(null);
   const [month, setMonth] = useState<Date>(
     () => isoToLocalDate(value) ?? new Date(),
   );
@@ -194,11 +198,19 @@ function DateInputContent({
       )
     : null;
   const minDate = isoToLocalDate(min ?? "");
+  const errorMessage =
+    error === "required"
+      ? t`Enter a date`
+      : error === "invalid"
+        ? t`Invalid date`
+        : error === "out_of_range"
+          ? t`Date is outside the allowed period`
+          : "";
   const maxDate = isoToLocalDate(max ?? "");
 
   useEffect(() => {
     setDraft(null);
-    setError("");
+    setError(null);
     const next = isoToLocalDate(value);
     if (next) setMonth(next);
   }, [value]);
@@ -227,22 +239,22 @@ function DateInputContent({
     const trimmed = raw.trim();
     if (!trimmed) {
       setDraft("");
-      setError("Укажите дату");
+      setError("required");
       return false;
     }
     const iso = parseDdMmYyyyToIso(trimmed);
     if (!iso) {
       setDraft(trimmed);
-      setError("Некорректная дата");
+      setError("invalid");
       return false;
     }
     if (!isIsoInRange(iso, min, max)) {
       setDraft(trimmed);
-      setError("Дата вне допустимого периода");
+      setError("out_of_range");
       return false;
     }
     setDraft(null);
-    setError("");
+    setError(null);
     if (iso !== value) onChange(iso);
     else setDraft(null);
     const next = isoToLocalDate(iso);
@@ -255,7 +267,7 @@ function DateInputContent({
     const iso = localDateToIso(date);
     if (!isIsoInRange(iso, min, max)) return;
     setDraft(null);
-    setError("");
+    setError(null);
     setMonth(date);
     setOpen(false);
     if (iso !== value) onChange(iso);
@@ -269,7 +281,7 @@ function DateInputContent({
             type="text"
             inputMode="numeric"
             disabled={disabled}
-            placeholder={placeholder}
+            placeholder={placeholder ?? t`dd.mm.yyyy`}
             className={cn(
               "input input-bordered input-xs h-8 min-h-8 w-full text-sm",
               showWeekday ? "pr-16" : "pr-9",
@@ -278,7 +290,7 @@ function DateInputContent({
             value={display}
             onChange={(event) => {
               setDraft(event.target.value);
-              if (error) setError("");
+              if (error) setError(null);
             }}
             onBlur={() => commitText(display)}
             onKeyDown={(event) => {
@@ -291,7 +303,7 @@ function DateInputContent({
           {weekdayLabel ? (
             weekdayOverridden ? (
               <Tooltip
-                content="День недели отличается от шаблона"
+                content={t`Weekday differs from the template`}
                 className="absolute top-1/2 right-8 -translate-y-1/2"
               >
                 <span className="text-base-content/55 cursor-help text-xs font-medium underline decoration-sky-400 decoration-wavy decoration-1 underline-offset-2">
@@ -308,14 +320,16 @@ function DateInputContent({
             type="button"
             disabled={disabled}
             className="btn btn-ghost btn-xs btn-square absolute top-1/2 right-0.5 h-7 min-h-7 w-7 -translate-y-1/2"
-            title="Календарь"
+            title={t`Calendar`}
             ref={refs.setReference}
             {...getReferenceProps()}
           >
             <span className="icon-[material-symbols--calendar-month-outline-rounded] text-base" />
           </button>
         </div>
-        {error ? <div className="text-error text-xs">{error}</div> : null}
+        {errorMessage ? (
+          <div className="text-error text-xs">{errorMessage}</div>
+        ) : null}
         {open ? (
           <FloatingPortal>
             <div
@@ -326,7 +340,7 @@ function DateInputContent({
             >
               <DayPicker
                 mode="single"
-                locale={ru}
+                locale={i18n.locale === "ru" ? ru : enGB}
                 month={month}
                 onMonthChange={setMonth}
                 selected={selected}

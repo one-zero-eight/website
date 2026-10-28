@@ -1,4 +1,5 @@
 import type { TimetableViewConfig as SchemaScheduleConfig } from "./timetableViewTypes.ts";
+import { i18n } from "@lingui/core";
 import { listAudienceInlineItems } from "./meetingAudienceSummary.ts";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {
@@ -8,43 +9,38 @@ import {
 } from "./timetableViewerModel.ts";
 
 const monthAliases = [
-  ["январь", "января", "янв"],
-  ["февраль", "февраля", "фев", "февр"],
-  ["март", "марта", "мар"],
-  ["апрель", "апреля", "апр"],
-  ["май", "мая"],
-  ["июнь", "июня", "июн"],
-  ["июль", "июля", "июл"],
-  ["август", "августа", "авг"],
-  ["сентябрь", "сентября", "сен", "сент"],
-  ["октябрь", "октября", "окт"],
-  ["ноябрь", "ноября", "ноя", "нояб"],
-  ["декабрь", "декабря", "дек"],
+  ["январь", "января", "янв", "january", "jan"],
+  ["февраль", "февраля", "фев", "февр", "february", "feb"],
+  ["март", "марта", "мар", "march", "mar"],
+  ["апрель", "апреля", "апр", "april", "apr"],
+  ["май", "мая", "may"],
+  ["июнь", "июня", "июн", "june", "jun"],
+  ["июль", "июля", "июл", "july", "jul"],
+  ["август", "августа", "авг", "august", "aug"],
+  ["сентябрь", "сентября", "сен", "сент", "september", "sep", "sept"],
+  ["октябрь", "октября", "окт", "october", "oct"],
+  ["ноябрь", "ноября", "ноя", "нояб", "november", "nov"],
+  ["декабрь", "декабря", "дек", "december", "dec"],
 ];
 const monthByAlias = new Map(
   monthAliases.flatMap((aliases, index) =>
     aliases.map((alias) => [alias, index + 1] as const),
   ),
 );
-const weekdays = [
-  "воскресенье",
-  "понедельник",
-  "вторник",
-  "среда",
-  "четверг",
-  "пятница",
-  "суббота",
+const weekdayAliases = [
+  ["воскресенье", "sunday"],
+  ["понедельник", "monday"],
+  ["вторник", "tuesday"],
+  ["среда", "wednesday"],
+  ["четверг", "thursday"],
+  ["пятница", "friday"],
+  ["суббота", "saturday"],
 ];
-const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-const currentYearDateFormatter = new Intl.DateTimeFormat("ru-RU", {
-  day: "numeric",
-  month: "short",
-});
-const weekdayFormatter = new Intl.DateTimeFormat("ru-RU", { weekday: "short" });
+const weekdayByAlias = new Map(
+  weekdayAliases.flatMap((aliases, index) =>
+    aliases.map((alias) => [alias, index] as const),
+  ),
+);
 
 export type TimetableSearchEntry = {
   meeting: Meeting;
@@ -70,8 +66,12 @@ export function parseTimetableSearchQuery(query: string) {
   let date: { day: number; month: number; year?: number } | undefined;
   const iso = /(?:^|\s)(\d{4})-(\d{2})-(\d{2})(?=\s|$)/;
   const numeric = /(?:^|\s)(\d{1,2})\.(\d{1,2})(?:\.(\d{4}))?(?=\s|$)/;
+  const monthPattern = [...monthByAlias.keys()].join("|");
   const named = new RegExp(
-    `(?:^|\\s)(\\d{1,2})\\s+(${[...monthByAlias.keys()].join("|")})\\.?(?:\\s+(\\d{4}))?(?=\\s|$)`,
+    `(?:^|\\s)(\\d{1,2})\\s+(${monthPattern})\\.?(?:\\s+(\\d{4}))?(?=\\s|$)`,
+  );
+  const namedMonthFirst = new RegExp(
+    `(?:^|\\s)(${monthPattern})\\.?\\s+(\\d{1,2})(?:,?\\s+(\\d{4}))?(?=\\s|$)`,
   );
   if (iso.test(text)) {
     text = text.replace(iso, (_, year, month, day) => {
@@ -87,8 +87,17 @@ export function parseTimetableSearchQuery(query: string) {
       };
       return " ";
     });
-  } else {
+  } else if (named.test(text)) {
     text = text.replace(named, (_, day, month, year) => {
+      date = {
+        day: Number(day),
+        month: monthByAlias.get(month)!,
+        year: year ? Number(year) : undefined,
+      };
+      return " ";
+    });
+  } else {
+    text = text.replace(namedMonthFirst, (_, month, day, year) => {
       date = {
         day: Number(day),
         month: monthByAlias.get(month)!,
@@ -98,10 +107,10 @@ export function parseTimetableSearchQuery(query: string) {
     });
   }
   const words = text.split(/\s+/).filter(Boolean);
-  const weekdayWord = words.find((word) => weekdays.includes(word));
+  const weekdayWord = words.find((word) => weekdayByAlias.has(word));
   return {
     date,
-    weekday: weekdayWord ? weekdays.indexOf(weekdayWord) : undefined,
+    weekday: weekdayWord ? weekdayByAlias.get(weekdayWord) : undefined,
     words: words.filter((word) => word !== weekdayWord),
     hasQuery: Boolean(query.trim()),
   };
@@ -112,6 +121,18 @@ export function buildTimetableSearchEntries(
   instructorLabels: Record<string, string>,
   config: SchemaScheduleConfig,
 ): TimetableSearchEntry[] {
+  const dateFormatter = new Intl.DateTimeFormat(i18n.locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  const currentYearDateFormatter = new Intl.DateTimeFormat(i18n.locale, {
+    day: "numeric",
+    month: "short",
+  });
+  const weekdayFormatter = new Intl.DateTimeFormat(i18n.locale, {
+    weekday: "short",
+  });
   return meetings
     .filter((meeting) => !meeting.cancelled)
     .map((meeting) => {
@@ -157,7 +178,9 @@ export function buildTimetableSearchEntries(
         weekday: date.getDay(),
         searchText: [
           meeting.course,
+          meeting.course_name_ru,
           meeting.course_short_name,
+          meeting.course_short_name_ru,
           meeting.tag,
           meeting.groups.join(" "),
           details,

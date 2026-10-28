@@ -1,5 +1,7 @@
 import { act, createElement, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { describe, expect, it, vi } from "vitest";
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 
@@ -7,6 +9,8 @@ import { EditableSessionEventsEditor } from "./EditableSessionEventsEditor.tsx";
 import { buildMeetingPickerIndex } from "./meetingPickerIndex.ts";
 import type { EditableSessionEvent } from "./editableSessionEvents.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
+
+const i18n = setupI18n({ locale: "en", messages: {} });
 
 vi.mock("./sessionSeriesRows.tsx", () => ({
   FieldMark: ({ children }: { children: ReactNode }) => children,
@@ -49,30 +53,37 @@ describe("window-aware new occurrences", () => {
     try {
       await act(async () =>
         root.render(
-          createElement(EditableSessionEventsEditor, {
-            config: {
-              term: {
-                semester: { start_date: "2026-09-01", end_date: "2026-09-30" },
-                sections: [],
-              },
-              students_groups: [],
-            } as unknown as SchemaScheduleConfig,
-            meetings: [],
-            meetingIndex: null,
-            events: [],
-            originalEvents: [],
-            audienceTokens: [],
-            onEventsChange,
-            meetingRef: null,
-            focusKey: null,
-            allowAddOccurrence: true,
-            active,
-          }),
+          createElement(
+            I18nProvider,
+            { i18n },
+            createElement(EditableSessionEventsEditor, {
+              config: {
+                term: {
+                  semester: {
+                    start_date: "2026-09-01",
+                    end_date: "2026-09-30",
+                  },
+                  sections: [],
+                },
+                students_groups: [],
+              } as unknown as SchemaScheduleConfig,
+              meetings: [],
+              meetingIndex: null,
+              events: [],
+              originalEvents: [],
+              audienceTokens: [],
+              onEventsChange,
+              meetingRef: null,
+              focusKey: null,
+              allowAddOccurrence: true,
+              active,
+            }),
+          ),
         ),
       );
       await act(async () =>
         [...container.querySelectorAll("button")]
-          .find((button) => button.textContent?.includes("Добавить дату"))!
+          .find((button) => button.textContent?.includes("Add date"))!
           .click(),
       );
       expect(onEventsChange.mock.lastCall![0][0].date).toBe(active.start_date);
@@ -121,25 +132,29 @@ describe("bulk resource picker selection", () => {
     try {
       await act(async () =>
         root.render(
-          createElement(EditableSessionEventsEditor, {
-            config: {
-              term: { days: ["friday"] },
-            } as unknown as SchemaScheduleConfig,
-            meetings,
-            meetingIndex: buildMeetingPickerIndex(meetings),
-            events,
-            originalEvents: events,
-            onEventsChange,
-            audienceTokens: [],
-            meetingRef: {
-              kind: "occ",
-              courseIdx: 0,
-              componentIdx: 0,
-              seriesIdx: 0,
-              occIdx: 0,
-            },
-            focusKey: null,
-          }),
+          createElement(
+            I18nProvider,
+            { i18n },
+            createElement(EditableSessionEventsEditor, {
+              config: {
+                term: { days: ["friday"] },
+              } as unknown as SchemaScheduleConfig,
+              meetings,
+              meetingIndex: buildMeetingPickerIndex(meetings),
+              events,
+              originalEvents: events,
+              onEventsChange,
+              audienceTokens: [],
+              meetingRef: {
+                kind: "occ",
+                courseIdx: 0,
+                componentIdx: 0,
+                seriesIdx: 0,
+                occIdx: 0,
+              },
+              focusKey: null,
+            }),
+          ),
         ),
       );
       const scopes = (attribute: string) =>

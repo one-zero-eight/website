@@ -38,8 +38,8 @@ const slot = {
   end_time: "10:30:00",
 };
 
-describe("meeting note inheritance", () => {
-  it("preserves existing dated notes when creating another event in the course", () => {
+describe("course notes", () => {
+  it("updates course notes when creating another event in the course", () => {
     const course: SchemaCourseConfig = {
       name: "Math",
       section_code: "core",
@@ -59,7 +59,6 @@ describe("meeting note inheritance", () => {
                   date: "2026-09-07",
                   start_time: "09:00:00",
                   end_time: "10:30:00",
-                  notes: "Existing override",
                 },
               ],
             },
@@ -85,63 +84,40 @@ describe("meeting note inheritance", () => {
           date: "2026-09-14",
           start_time: "09:00:00",
           end_time: "10:30:00",
-          notes: "",
         },
       ],
     });
     const series = saved?.components[0].sessions?.[0];
     expect(saved?.notes).toBe("Updated course");
-    expect(series?.dates_pattern?.map((item) => item.notes)).toEqual([
-      "Existing override",
-      "",
+    expect(series?.dates_pattern?.map((item) => item.date)).toEqual([
+      "2026-09-07",
+      "2026-09-14",
     ]);
     expect(course.notes).toBe("Original course");
   });
-  it("inherits, overrides, suppresses and resets weekly notes", () => {
-    expect(
-      resolveWeeklyMeetingFields(slot, "2026-09-07", config, "Course").notes,
-    ).toBe("Course");
-    for (const notes of ["Date note", "", null]) {
+  it("shows course notes on weekly meetings, including moved and cancelled ones", () => {
+    for (const edit of [
+      null,
+      { select_week: "2026-09-07", cancel: false, date: "2026-09-08" },
+      { select_week: "2026-09-07", cancel: true },
+    ]) {
       const result = resolveWeeklyMeetingFields(
-        {
-          ...slot,
-          edits: [{ select_week: "2026-09-07", cancel: false, notes }],
-        },
+        { ...slot, edits: edit ? [edit] : null },
         "2026-09-07",
         config,
-        "Course",
+        "Bring laptop\nRoom changed",
       );
-      expect(result.notes).toBe(notes ?? "Course");
+      expect(result.notes).toBe("Bring laptop\nRoom changed");
     }
   });
-  it("keeps date-specific text when an event is moved", () => {
-    const result = resolveWeeklyMeetingFields(
-      {
-        ...slot,
-        edits: [
-          {
-            select_week: "2026-09-07",
-            cancel: false,
-            date: "2026-09-08",
-            notes: "Bring laptop\nRoom changed",
-          },
-        ],
-      },
-      "2026-09-07",
-      config,
-      "Course",
-    );
-    expect(result.date).toBe("2026-09-08");
-    expect(result.notes).toBe("Bring laptop\nRoom changed");
-  });
-  it("builds notes for concrete dates and weekly events without losing explicit blanks", () => {
+  it("builds every concrete and weekly meeting with the course notes", () => {
     const meetings = buildMeetings({
       ...config,
       courses: [
         {
           name: "Math",
           section_code: "core",
-          notes: "Course",
+          notes: "<script>text only</script>",
           instructors: [],
           components: [
             {
@@ -155,22 +131,19 @@ describe("meeting note inheritance", () => {
                     {
                       ...slot,
                       edits: [
-                        { select_week: "2026-09-14", cancel: false, notes: "" },
+                        {
+                          select_week: "2026-09-14",
+                          cancel: false,
+                          room: "104",
+                        },
                       ],
                     },
                   ],
                   dates_pattern: [
                     {
-                      date: "2026-09-08",
-                      start_time: "09:00:00",
-                      end_time: "10:30:00",
-                      notes: null,
-                    },
-                    {
                       date: "2026-09-09",
                       start_time: "09:00:00",
                       end_time: "10:30:00",
-                      notes: "<script>text only</script>",
                     },
                   ],
                 },
@@ -185,16 +158,12 @@ describe("meeting note inheritance", () => {
       mergedMeetingsForCell([first, { ...first, notes: "Different note" }]),
     ).toHaveLength(2);
     expect(
-      meetings.find((meeting) => meeting.date === "2026-09-08")?.notes,
-    ).toBe("Course");
-    expect(
-      meetings.find((meeting) => meeting.date === "2026-09-09")?.notes,
-    ).toBe("<script>text only</script>");
-    expect(
-      meetings.find((meeting) => meeting.date === "2026-09-07")?.notes,
-    ).toBe("Course");
-    expect(
-      meetings.find((meeting) => meeting.date === "2026-09-14")?.notes,
-    ).toBe("");
+      meetings.map((meeting) => [meeting.date, meeting.notes]).sort(),
+    ).toEqual([
+      ["2026-09-07", "<script>text only</script>"],
+      ["2026-09-09", "<script>text only</script>"],
+      ["2026-09-14", "<script>text only</script>"],
+      ["2026-09-21", "<script>text only</script>"],
+    ]);
   });
 });

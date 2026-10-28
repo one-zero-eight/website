@@ -727,17 +727,21 @@ export function useAddSection() {
   } = useUpdateTermMutation();
 
   const addSection = useCallback(
-    (section: { code: string; name: string }, onSuccess?: () => void) => {
+    (
+      section: { code: string; name: string; name_ru: string },
+      onSuccess?: () => void,
+    ) => {
       if (!term) return;
       const code = section.code.trim();
       const name = section.name.trim();
+      const nameRu = section.name_ru.trim();
       if (!code || !name) return;
       if ((term.sections ?? []).some((candidate) => candidate.code === code))
         return;
       const nextTerm = structuredClone(term);
       nextTerm.sections = [
         ...(nextTerm.sections ?? []),
-        { code, name, programs: [] },
+        { code, name, name_ru: nameRu || null, programs: [] },
       ];
       updateTerm(
         { body: nextTerm },

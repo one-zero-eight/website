@@ -1,6 +1,6 @@
 import type {
-  SchemaDateRange,
   SchemaScheduleConfig,
+  SchemaSessionActiveWindow,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
@@ -122,7 +122,7 @@ export function weeklyPickerSlots(
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[],
   resource: "room" | "instructor",
-  active?: SchemaDateRange | null,
+  active?: SchemaSessionActiveWindow | null,
 ): MeetingPickerSlot[] {
   return activeWeeklySlotDates(config, slot, audienceTokens, active).flatMap(
     (date) => {

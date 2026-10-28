@@ -219,7 +219,7 @@ describe("picker schedule", () => {
       includeInstructorIds: ["teacher"],
     });
     expect(options.find((option) => option.value === "teacher")?.hint).toBe(
-      "0–1 занятие по пятницам",
+      "0–1 class on Fridays",
     );
     const info = instructorAvailabilityForSlot({
       config,
@@ -278,7 +278,7 @@ describe("picker schedule", () => {
       end: "17:30",
     });
     expect(options.find((option) => option.value === "304")?.hint).toBe(
-      "Вместимость 25 · 0–1 занятие по пятницам",
+      "Capacity 25 · 0–1 class on Fridays",
     );
     const daily = buildRoomPickerOptions({
       config,
@@ -289,7 +289,7 @@ describe("picker schedule", () => {
       end: "17:30",
     });
     expect(daily.find((option) => option.value === "304")?.hint).toBe(
-      "Вместимость 25 · 1 занятие за день",
+      "Capacity 25 · 1 class per day",
     );
   });
 
@@ -341,7 +341,7 @@ describe("picker schedule", () => {
       start: "16:00",
     });
     expect(options.find((option) => option.value === "304")?.hint).toBe(
-      "Вместимость 25 · Нет дат проведения",
+      "Capacity 25 · No class dates",
     );
   });
 

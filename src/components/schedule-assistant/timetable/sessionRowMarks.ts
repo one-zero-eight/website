@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+
 import type {
   SchemaScheduleConfig,
   SchemaSessionOccurrence,
@@ -12,6 +14,7 @@ import {
   type SessionRowFieldMarks,
   type SessionWindowValue,
 } from "./sessionSeriesRows.tsx";
+import { sessionActiveEqual } from "./meetingEditUtils.ts";
 import { instructorValue } from "./sessionSeriesValidation.ts";
 import type { MeetingOverrideField } from "./timetableViewerModel.ts";
 import { formatDisplayDate } from "./timetableViewerModel.ts";
@@ -20,11 +23,7 @@ function sessionWindowsEqual(
   left: SessionWindowValue,
   right: SessionWindowValue,
 ) {
-  return (
-    left.block_id === right.block_id &&
-    (left.active?.start_date ?? null) === (right.active?.start_date ?? null) &&
-    (left.active?.end_date ?? null) === (right.active?.end_date ?? null)
-  );
+  return sessionActiveEqual(left.active, right.active);
 }
 
 function frequencyWindowLabel(
@@ -32,11 +31,14 @@ function frequencyWindowLabel(
   alternation: SchemaWeeklyPatternSlot["alternation"],
   window: SessionWindowValue,
 ) {
+  const anchorWeek = alternation
+    ? formatDisplayDate(alternation.anchor_week)
+    : "";
   const frequency = alternation
-    ? `Через неделю · ${formatDisplayDate(alternation.anchor_week)}`
-    : "Каждую неделю";
+    ? t`Every other week · ${anchorWeek}`
+    : t`Every week`;
   if (!config) return frequency;
-  return `${frequency}, ${sessionWindowSummaryLabel(config, window.active, window.block_id)}`;
+  return `${frequency}, ${sessionWindowSummaryLabel(config, window.active)}`;
 }
 
 export function normalizeOccurrence(occurrence: SchemaSessionOccurrence) {
@@ -172,7 +174,7 @@ export function weeklyRowMarks({
     return undefined;
   };
 
-  const currentWindow = window ?? { active: null, block_id: null };
+  const currentWindow = window ?? { active: null };
   const baselineWindow = originalWindow ?? currentWindow;
   const alternationChanged =
     JSON.stringify(cur.alternation) !== JSON.stringify(orig.alternation);

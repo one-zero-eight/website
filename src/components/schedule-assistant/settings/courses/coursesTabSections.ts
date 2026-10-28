@@ -10,6 +10,7 @@ import type {
 } from "@/api/schedule-assistant/types.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import { sortSemesterBlocks } from "@/components/schedule-assistant/settings/semester/semesterBlocks.ts";
+import { localizedBlockName } from "@/components/schedule-assistant/timetable/localizedNames.ts";
 import { courseBlockIds } from "@/components/schedule-assistant/timetable/timetableBlocks.ts";
 import type { SettingsListRow } from "@/components/schedule-assistant/settings/useSelection.tsx";
 
@@ -98,7 +99,7 @@ function buildCourseUsageRows(
         blockSlots: !blockIds.length
           ? null
           : sortedBlocks.map((block) => ({
-              name: block.name,
+              name: localizedBlockName(block),
               present: blockIds.includes(block.id),
             })),
       };

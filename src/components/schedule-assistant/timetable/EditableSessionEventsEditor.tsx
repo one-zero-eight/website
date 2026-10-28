@@ -32,6 +32,7 @@ import {
 } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { SessionEventCard } from "@/components/schedule-assistant/timetable/SessionEventCard.tsx";
 import { cn } from "@/lib/ui/cn";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { resolveSessionWindow } from "./sessionWindows.ts";
 import {
   memo,
@@ -76,7 +77,11 @@ function SelectionBar({
           className="text-base-content/70 hover:text-base-content cursor-pointer text-sm hover:underline"
           onClick={onToggleAll}
         >
-          {selectedCount > 0 ? "Снять выбор" : "Выбрать все"}
+          {selectedCount > 0 ? (
+            <Trans>Clear selection</Trans>
+          ) : (
+            <Trans>Select all</Trans>
+          )}
         </button>
         {onSelectFollowing ? (
           <button
@@ -84,13 +89,13 @@ function SelectionBar({
             className="text-base-content/70 hover:text-base-content cursor-pointer text-sm hover:underline"
             onClick={onSelectFollowing}
           >
-            Выбрать это и все последующие
+            <Trans>Select this and all following</Trans>
           </button>
         ) : null}
       </div>
       {selectedCount > 0 ? (
         <span className="text-base-content/70 ml-auto shrink-0 text-sm">
-          Выбрано: {selectedCount}
+          <Trans>Selected: {selectedCount}</Trans>
         </span>
       ) : null}
     </div>
@@ -182,6 +187,7 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
   excludeInstanceId: string | null;
   pickerSelection?: Meeting[];
 }) {
+  const { t } = useLingui();
   const cancelled = event.cancelled;
   const weekday = eventWeekdayKey(event.date, config);
   const start = toUiTime(event.start_time);
@@ -272,10 +278,10 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
           className="btn btn-ghost btn-sm btn-square shrink-0"
           title={
             cancelled
-              ? "Восстановить"
+              ? t`Restore`
               : event.source.kind === "weekly"
-                ? "Отменить занятие"
-                : "Удалить дату"
+                ? t`Cancel class`
+                : t`Delete date`
           }
           onClick={(clickEvent) => {
             clickEvent.preventDefault();
@@ -353,7 +359,11 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
       </div>
       {cancelled ? (
         <div className="text-error/80 text-xs sm:col-span-2">
-          {event.source.kind === "weekly" ? "Отменено" : "Удалено"}
+          {event.source.kind === "weekly" ? (
+            <Trans>Cancelled</Trans>
+          ) : (
+            <Trans>Deleted</Trans>
+          )}
         </div>
       ) : null}
     </div>
@@ -678,7 +688,7 @@ export function EditableSessionEventsEditor({
           }}
         >
           <span className="icon-[material-symbols--add-rounded] text-base" />
-          Добавить дату
+          <Trans>Add date</Trans>
         </button>
       ) : null}
     </div>

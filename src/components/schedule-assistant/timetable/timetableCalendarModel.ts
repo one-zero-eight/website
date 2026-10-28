@@ -1,4 +1,6 @@
 import type { TimetableViewConfig as SchemaScheduleConfig } from "./timetableViewTypes.ts";
+import { t } from "@lingui/core/macro";
+import { meetingCourseShortTitle } from "./localizedNames.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 
@@ -14,7 +16,7 @@ import {
 } from "./programTimeSlots.ts";
 import {
   DAY_NAMES,
-  WEEKDAY_LABEL_RU,
+  weekdayLabel,
   filterMeetingsByTab,
   formatDisplayDate,
   normalizedTermDays,
@@ -84,9 +86,7 @@ export function formatCalendarWeekRange(start: string, end: string) {
 export const MEETING_CALENDAR_GROUPS_LIMIT = 3;
 
 export function meetingCalendarMainLabel(meeting: Meeting) {
-  const course = String(
-    meeting.course_short_name || meeting.course || "",
-  ).trim();
+  const course = meetingCourseShortTitle(meeting);
   const room = String(meeting.room || "").trim();
   return [course, room].filter(Boolean).join(" ") || "—";
 }
@@ -98,9 +98,7 @@ export function meetingCalendarGroupsLabel(
   const list = (meeting.groups || []).filter(Boolean);
   if (!list.length) return null;
 
-  const shortName = String(meeting.course_short_name ?? "")
-    .trim()
-    .toLowerCase();
+  const shortName = meetingCourseShortTitle(meeting).toLowerCase();
   if (list.length === 1 && shortName) {
     const onlyGroup = list[0]!.trim().toLowerCase();
     if (onlyGroup === shortName) return null;
@@ -229,27 +227,30 @@ export function buildCalendarGrid(
     );
   }
 
-  const weekBlocks: CalendarWeekBlock[] = weeks.map((week, index) => ({
-    key: week.key,
-    weekNumber: index + 1,
-    weekLabel: `Неделя ${index + 1}`,
-    weekRangeLabel: formatCalendarWeekRange(week.start, week.end),
-    weekRelative: weekRelativeToToday(week, today),
-    days: allowedDays.map((day) => {
-      const date = dateForWeekDay(week.start, day);
-      return {
-        key: `${week.key}-${date}`,
-        day,
-        date,
-        headerLabel: WEEKDAY_LABEL_RU[day],
-        dateLabel: formatCalendarDate(date),
-        isToday: date === today,
-        isInactive:
-          programSemester != null &&
-          (date < programSemester.start || date > programSemester.end),
-      };
-    }),
-  }));
+  const weekBlocks: CalendarWeekBlock[] = weeks.map((week, index) => {
+    const weekNumber = index + 1;
+    return {
+      key: week.key,
+      weekNumber,
+      weekLabel: t`Week ${weekNumber}`,
+      weekRangeLabel: formatCalendarWeekRange(week.start, week.end),
+      weekRelative: weekRelativeToToday(week, today),
+      days: allowedDays.map((day) => {
+        const date = dateForWeekDay(week.start, day);
+        return {
+          key: `${week.key}-${date}`,
+          day,
+          date,
+          headerLabel: weekdayLabel(day),
+          dateLabel: formatCalendarDate(date),
+          isToday: date === today,
+          isInactive:
+            programSemester != null &&
+            (date < programSemester.start || date > programSemester.end),
+        };
+      }),
+    };
+  });
 
   return { slots, weeks: weekBlocks, cells };
 }

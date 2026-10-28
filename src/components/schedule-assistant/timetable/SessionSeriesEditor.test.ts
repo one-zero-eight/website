@@ -1,5 +1,7 @@
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { expect, it, vi } from "vitest";
 import {
   Weekday,
@@ -8,6 +10,8 @@ import {
   type SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
 import { SessionSeriesEditor } from "./SessionSeriesEditor.tsx";
+
+const i18n = setupI18n({ locale: "en", messages: {} });
 
 vi.mock("./sessionSeriesRows.tsx", async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -53,28 +57,32 @@ it("keeps locked sibling row picker context separate from current-window draft c
   try {
     await act(async () =>
       root.render(
-        createElement(SessionSeriesEditor, {
-          config,
-          meetings: [],
-          meetingIndex: null,
-          placement: "weekly",
-          onPlacementChange: vi.fn(),
-          weeklySlots: [
-            { ...slot, room: "sibling" },
-            { ...slot, room: "current" },
-            { ...slot, room: "new" },
-          ],
-          onWeeklySlotsChange: vi.fn(),
-          occurrences: [],
-          onOccurrencesChange: vi.fn(),
-          audienceTokens: ["G"],
-          active: second,
-          lockedRowCount: 1,
-          weeklyContextForIndex: (index) =>
-            index === 0
-              ? { active: first, audienceTokens: ["G", "Sibling"] }
-              : { active: second, audienceTokens: ["G"] },
-        }),
+        createElement(
+          I18nProvider,
+          { i18n },
+          createElement(SessionSeriesEditor, {
+            config,
+            meetings: [],
+            meetingIndex: null,
+            placement: "weekly",
+            onPlacementChange: vi.fn(),
+            weeklySlots: [
+              { ...slot, room: "sibling" },
+              { ...slot, room: "current" },
+              { ...slot, room: "new" },
+            ],
+            onWeeklySlotsChange: vi.fn(),
+            occurrences: [],
+            onOccurrencesChange: vi.fn(),
+            audienceTokens: ["G"],
+            active: second,
+            lockedRowCount: 1,
+            weeklyContextForIndex: (index) =>
+              index === 0
+                ? { active: first, audienceTokens: ["G", "Sibling"] }
+                : { active: second, audienceTokens: ["G"] },
+          }),
+        ),
       ),
     );
     const sibling = container.querySelector('[data-row-room="sibling"]')!;

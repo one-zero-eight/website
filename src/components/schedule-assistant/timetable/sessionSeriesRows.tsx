@@ -1,7 +1,7 @@
 import type {
   SchemaCourseConfig,
-  SchemaDateRange,
   SchemaScheduleConfig,
+  SchemaSessionActiveWindow,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
@@ -39,8 +39,14 @@ import {
 import { instructorValue } from "@/components/schedule-assistant/timetable/sessionSeriesValidation.ts";
 import { SessionEventCard } from "@/components/schedule-assistant/timetable/SessionEventCard.tsx";
 import { cn } from "@/lib/ui/cn";
+import { i18n } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
+import { localizedBlockName } from "@/components/schedule-assistant/timetable/localizedNames.ts";
 import {
+  activeForBlock,
+  blockIdFromActive,
   matchSessionBlock,
   resolveSessionWindow,
   sessionWindowRange,
@@ -78,22 +84,23 @@ import {
 } from "react";
 
 export type SessionWindowValue = {
-  active: SchemaDateRange | null;
-  block_id: string | null;
+  active: SchemaSessionActiveWindow | null;
 };
 
 export function sessionWindowSummaryLabel(
   config: SchemaScheduleConfig,
-  active?: SchemaDateRange | null,
-  blockId?: string | null,
+  active?: SchemaSessionActiveWindow | null,
 ): string {
+  const blockId = blockIdFromActive(active);
   if (blockId) {
-    return matchSessionBlock(config, blockId)?.name ?? blockId;
+    const block = matchSessionBlock(config, blockId);
+    return block ? localizedBlockName(block) : blockId;
   }
-  if (active?.start_date && active?.end_date) {
-    return `${formatDisplayDate(active.start_date)}–${formatDisplayDate(active.end_date)}`;
+  const resolved = sessionWindowRange(config, active);
+  if (resolved?.start_date && resolved?.end_date) {
+    return `${formatDisplayDate(resolved.start_date)}–${formatDisplayDate(resolved.end_date)}`;
   }
-  return "весь семестр";
+  return i18n._(msg`whole semester`);
 }
 
 export type SessionRowFieldMark = "changed" | "overridden";
@@ -151,7 +158,7 @@ export function FieldMark({
       </div>
       {mark === "changed" && hint?.originalLabel != null && hint.onRestore ? (
         <div className="text-base-content/55 mt-1 text-xs">
-          Было:{" "}
+          <Trans>Was:</Trans>{" "}
           <button
             type="button"
             className="hover:text-base-content cursor-pointer underline decoration-dotted underline-offset-2"
@@ -162,7 +169,7 @@ export function FieldMark({
         </div>
       ) : mark === "overridden" ? (
         <div className="text-info/80 mt-1 text-xs">
-          переопределено в шаблоне
+          <Trans>overridden in template</Trans>
         </div>
       ) : null}
     </div>
@@ -216,6 +223,7 @@ export function SlotTimeFields({
   audienceTokens?: string[];
   onChange: (next: { start_time: string; end_time: string }) => void;
 }) {
+  const { t } = useLingui();
   const timeOptions = timeOptionsForConfig(config, audienceTokens);
   const start = toUiTime(startTime);
   const end = toUiTime(endTime);
@@ -255,15 +263,15 @@ export function SlotTimeFields({
     const parsedEnd = endRaw ? parseLooseTimeToken(endRaw) : undefined;
 
     const nextStartError = !startRaw
-      ? "Укажите время"
+      ? t`Enter a time`
       : parsedStart
         ? ""
-        : "Некорректное время";
+        : t`Invalid time`;
     const nextEndError = !endRaw
-      ? "Укажите время"
+      ? t`Enter a time`
       : parsedEnd
         ? ""
-        : "Некорректное время";
+        : t`Invalid time`;
 
     if (nextStartError || nextEndError) {
       setDraftStart(startRaw);
@@ -358,7 +366,7 @@ export function SlotTimeFields({
           value: slot.value,
           label: slot.label,
         }))}
-        placeholder="Время"
+        placeholder={t`Time`}
         className="w-full min-w-0"
         triggerClassName="btn-sm w-full justify-between"
         searchable
@@ -411,8 +419,8 @@ export function SlotTimeFields({
               {startError && endError && startError === endError
                 ? startError
                 : [
-                    startError && `Начало: ${startError}`,
-                    endError && `Конец: ${endError}`,
+                    startError && t`Start: ${startError}`,
+                    endError && t`End: ${endError}`,
                   ]
                     .filter(Boolean)
                     .join(" · ")}
@@ -429,41 +437,47 @@ export function WeeklyAlternationFields({
   slot,
   audienceTokens,
   active = null,
-  blockId = null,
   onChange,
   onSessionWindowChange,
 }: {
   config: SchemaScheduleConfig;
   slot: SchemaWeeklyPatternSlot;
   audienceTokens: string[];
-  active?: SchemaDateRange | null;
-  blockId?: string | null;
+  active?: SchemaSessionActiveWindow | null;
   onChange: (slot: SchemaWeeklyPatternSlot) => void;
   onSessionWindowChange?: (window: SessionWindowValue) => void;
 }) {
+  const { t } = useLingui();
   const [open, setOpen] = useState(false);
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
-  const window = resolveSessionWindow(config, audienceTokens, active, blockId);
+  const window = resolveSessionWindow(config, audienceTokens, active);
   const ignoredEdits = inactiveWeeklySlotEdits(config, slot);
   const preview = expandWeeklySlotsToEvents({
     config,
     weeklySlots: [slot],
     audienceTokens,
     active,
-    blockId,
   })
     .filter((event) => !event.cancelled)
     .slice(0, 6);
-  const frequencyLabel = slot.alternation ? "Через неделю" : "Каждую неделю";
-  const windowLabel = sessionWindowSummaryLabel(config, active, blockId);
+  const frequencyLabel = slot.alternation ? t`Every other week` : t`Every week`;
+  const windowLabel = sessionWindowSummaryLabel(config, active);
   const triggerLabel = `${frequencyLabel}, ${windowLabel}`;
   const blocks = config.term.blocks ?? [];
-  const windowKey = blockId
-    ? `block:${blockId}`
+  const boundBlockId = blockIdFromActive(active);
+  const windowKey = boundBlockId
+    ? `block:${boundBlockId}`
     : active
       ? "custom"
       : "semester";
   const canEditWindow = Boolean(onSessionWindowChange);
+  const previewDates = preview.length
+    ? preview.map((event) => formatDisplayDate(event.date)).join(", ")
+    : t`none in the study period`;
+  const ignoredCount = ignoredEdits.length;
+  const ignoredDates = ignoredEdits
+    .map((edit) => formatDisplayDate(edit.select_week))
+    .join(", ");
 
   const { refs, floatingStyles, context } = useFloating({
     open,
@@ -511,13 +525,12 @@ export function WeeklyAlternationFields({
   function handleWindowChange(nextKey: string) {
     if (!onSessionWindowChange) return;
     if (nextKey === "semester") {
-      onSessionWindowChange({ active: null, block_id: null });
+      onSessionWindowChange({ active: null });
       return;
     }
     if (nextKey.startsWith("block:")) {
       onSessionWindowChange({
-        active: null,
-        block_id: nextKey.slice("block:".length),
+        active: activeForBlock(nextKey.slice("block:".length)),
       });
     }
   }
@@ -544,15 +557,15 @@ export function WeeklyAlternationFields({
               >
                 <div className="flex flex-col gap-1">
                   <div className="text-base-content/60 text-xs font-medium uppercase">
-                    Период
+                    <Trans>Period</Trans>
                   </div>
                   <div className="flex flex-col gap-0.5">
                     {(
                       [
-                        { key: "semester", label: "Весь семестр" },
+                        { key: "semester", label: t`Whole semester` },
                         ...blocks.map((block) => ({
                           key: `block:${block.id}`,
-                          label: block.name,
+                          label: localizedBlockName(block),
                         })),
                         ...(windowKey === "custom"
                           ? [
@@ -584,13 +597,13 @@ export function WeeklyAlternationFields({
                 </div>
                 <div className="flex flex-col gap-1">
                   <div className="text-base-content/60 text-xs font-medium uppercase">
-                    Очерёдность
+                    <Trans>Frequency</Trans>
                   </div>
                   <div className="flex flex-col gap-0.5">
                     {(
                       [
-                        { key: "weekly", label: "Каждую неделю" },
-                        { key: "alternate", label: "Через неделю" },
+                        { key: "weekly", label: t`Every week` },
+                        { key: "alternate", label: t`Every other week` },
                       ] as const
                     ).map((option) => (
                       <button
@@ -611,7 +624,7 @@ export function WeeklyAlternationFields({
                 {slot.alternation ? (
                   <div className="border-base-300 flex flex-col gap-2 border-t pt-2">
                     <label className="flex flex-col gap-1 text-xs">
-                      Опорная активная неделя
+                      <Trans>Anchor active week</Trans>
                       <DateInput
                         value={slot.alternation.anchor_week}
                         onChange={(date) => {
@@ -626,17 +639,14 @@ export function WeeklyAlternationFields({
                       />
                     </label>
                     <p className="text-base-content/60 text-xs">
-                      Фаза на весь учебный период: каждые 14 дней до и после
-                      опорной недели, а не начиная с этой даты.
+                      <Trans>
+                        The phase covers the whole study period: every 14 days
+                        before and after the anchor week, not starting from this
+                        date.
+                      </Trans>
                     </p>
                     <p className="text-base-content/70 text-xs">
-                      Даты занятий:{" "}
-                      {preview.length
-                        ? preview
-                            .map((event) => formatDisplayDate(event.date))
-                            .join(", ")
-                        : "нет в учебном периоде"}
-                      .
+                      <Trans>Class dates: {previewDates}.</Trans>
                     </p>
                   </div>
                 ) : null}
@@ -647,12 +657,10 @@ export function WeeklyAlternationFields({
       </div>
       {ignoredEdits.length ? (
         <p className="text-warning text-xs">
-          Разовые изменения неактивных недель ({ignoredEdits.length}) сохранены,
-          но не применяются:{" "}
-          {ignoredEdits
-            .map((edit) => formatDisplayDate(edit.select_week))
-            .join(", ")}
-          .
+          <Trans>
+            One-off changes for inactive weeks ({ignoredCount}) are saved but
+            not applied: {ignoredDates}.
+          </Trans>
         </p>
       ) : null}
     </div>
@@ -709,7 +717,7 @@ export function draftMeetingsFromOccurrences(
     const instructors = occurrence.instructor ?? [];
     result.push({
       instance_id: `draft:occ:${index}`,
-      course: "это же занятие",
+      course: i18n._(msg`this same class`),
       tag: "",
       groups: [],
       date,
@@ -731,7 +739,7 @@ export function draftMeetingsFromWeeklySlots(
   skipIndex: number,
   deleted: Set<number>,
   lockedRowCount = 0,
-  active?: SchemaDateRange | null,
+  active?: SchemaSessionActiveWindow | null,
 ): Meeting[] {
   return expandWeeklySlotsToEvents({
     config,
@@ -757,7 +765,7 @@ export function draftMeetingsFromWeeklySlots(
       return [
         {
           instance_id: `draft:${event.key}`,
-          course: "это же занятие",
+          course: i18n._(msg`this same class`),
           tag: "",
           groups: audienceTokens,
           date: event.date,
@@ -802,7 +810,7 @@ export function RoomSelect({
   value: string;
   weekday: TermWeekdayKey;
   weeklySlot?: SchemaWeeklyPatternSlot;
-  active?: SchemaDateRange | null;
+  active?: SchemaSessionActiveWindow | null;
   date?: string;
   start: string;
   end: string;
@@ -811,6 +819,7 @@ export function RoomSelect({
   excludeInstanceId?: string | null;
   onChange: (room: string) => void;
 }) {
+  const { t } = useLingui();
   const [statusReady, setStatusReady] = useState(false);
 
   useEffect(() => {
@@ -926,7 +935,7 @@ export function RoomSelect({
       options={menuOptions}
       triggerOption={options.find((option) => option.value === value)}
       onOpenChange={setPickerOpen}
-      placeholder="Локация"
+      placeholder={t`Location`}
       searchable
       matchTriggerWidth={false}
       showHintOnTrigger
@@ -945,7 +954,6 @@ export function WeeklySlotRow({
   slot,
   audienceTokens,
   active,
-  blockId = null,
   onSessionWindowChange,
   courseInstructors,
   instructorPool,
@@ -963,8 +971,7 @@ export function WeeklySlotRow({
   extraMeetings?: Meeting[];
   slot: SchemaWeeklyPatternSlot;
   audienceTokens: string[];
-  active?: SchemaDateRange | null;
-  blockId?: string | null;
+  active?: SchemaSessionActiveWindow | null;
   onSessionWindowChange?: (window: SessionWindowValue) => void;
   courseInstructors?: SchemaCourseConfig["instructors"];
   instructorPool?: unknown[] | null;
@@ -976,11 +983,12 @@ export function WeeklySlotRow({
   highlighted?: boolean;
   fieldMarks?: SessionRowFieldMarks;
 }) {
+  const { t } = useLingui();
   const weekdayKey = weekdayToKey(slot.weekday);
   const weekdayOptions = weekdayOptionsForConfig(config);
   const start = toUiTime(slot.start_time);
   const end = toUiTime(slot.end_time);
-  const resolvedActive = sessionWindowRange(config, active, blockId);
+  const resolvedActive = sessionWindowRange(config, active);
 
   return (
     <SessionEventCard deleted={deleted} highlighted={highlighted}>
@@ -1005,7 +1013,7 @@ export function WeeklySlotRow({
                   value: option.key,
                   label: option.label,
                 }))}
-                placeholder="День"
+                placeholder={t`Day`}
                 className="w-full min-w-0"
                 triggerClassName="btn-sm w-full justify-between"
               />
@@ -1027,7 +1035,7 @@ export function WeeklySlotRow({
                 "btn btn-ghost btn-sm btn-square pointer-events-auto shrink-0",
                 deleted && "text-base-content",
               )}
-              title={deleted ? "Вернуть слот" : "Удалить слот"}
+              title={deleted ? t`Restore slot` : t`Delete slot`}
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -1055,7 +1063,6 @@ export function WeeklySlotRow({
               config={config}
               slot={slot}
               active={active}
-              blockId={blockId}
               audienceTokens={audienceTokens}
               onChange={onChange}
               onSessionWindowChange={onSessionWindowChange}
@@ -1108,7 +1115,11 @@ export function WeeklySlotRow({
           </FieldMark>
         </div>
       </div>
-      {deleted ? <div className="text-error/80 text-xs">Удалено</div> : null}
+      {deleted ? (
+        <div className="text-error/80 text-xs">
+          <Trans>Deleted</Trans>
+        </div>
+      ) : null}
     </SessionEventCard>
   );
 }
@@ -1146,6 +1157,7 @@ export function OccurrenceRow({
   highlighted?: boolean;
   fieldMarks?: SessionRowFieldMarks;
 }) {
+  const { t } = useLingui();
   const start = toUiTime(occurrence.start_time);
   const end = toUiTime(occurrence.end_time);
   const weekdayKey = (
@@ -1188,7 +1200,7 @@ export function OccurrenceRow({
                 "btn btn-ghost btn-sm btn-square pointer-events-auto shrink-0",
                 deleted && "text-base-content",
               )}
-              title={deleted ? "Вернуть дату" : "Удалить дату"}
+              title={deleted ? t`Restore date` : t`Delete date`}
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -1258,7 +1270,11 @@ export function OccurrenceRow({
           </FieldMark>
         </div>
       </div>
-      {deleted ? <div className="text-error/80 text-xs">Удалено</div> : null}
+      {deleted ? (
+        <div className="text-error/80 text-xs">
+          <Trans>Deleted</Trans>
+        </div>
+      ) : null}
     </SessionEventCard>
   );
 }

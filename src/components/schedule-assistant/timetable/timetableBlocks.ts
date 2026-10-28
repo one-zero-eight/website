@@ -1,7 +1,9 @@
 import type {
   SchemaDateRange,
+  SchemaSessionActiveWindow,
   SchemaTermBlock,
 } from "@/api/schedule-assistant/types.ts";
+import { blockIdFromActive } from "./sessionWindows.ts";
 import type { TimetableViewConfig } from "./timetableViewTypes.ts";
 import {
   buildWeeks,
@@ -54,16 +56,19 @@ export function blockForWeekBoundary(
 }
 
 type CourseWithSeriesBlocks = {
-  components: { sessions?: { block_id?: string | null }[] | null }[];
+  components: {
+    sessions?: { active?: SchemaSessionActiveWindow | null }[] | null;
+  }[];
 };
 
 export function courseBlockIds(course: CourseWithSeriesBlocks): string[] {
   return [
     ...new Set(
       course.components.flatMap((component) =>
-        (component.sessions ?? []).flatMap((series) =>
-          series.block_id != null ? [series.block_id] : [],
-        ),
+        (component.sessions ?? []).flatMap((series) => {
+          const blockId = blockIdFromActive(series.active);
+          return blockId ? [blockId] : [];
+        }),
       ),
     ),
   ];
@@ -79,9 +84,10 @@ export function courseMatchesBlock(
   );
   return (
     !sessions.length ||
-    sessions.some(
-      (series) => series.block_id == null || series.block_id === blockId,
-    )
+    sessions.some((series) => {
+      const seriesBlockId = blockIdFromActive(series.active);
+      return seriesBlockId == null || seriesBlockId === blockId;
+    })
   );
 }
 

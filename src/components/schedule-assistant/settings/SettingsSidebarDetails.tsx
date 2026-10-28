@@ -3,6 +3,7 @@ import { $scheduleAssistant } from "@/api/schedule-assistant";
 import {
   SchemaInstructor,
   SchemaRoomAttributeDef,
+  SchemaSectionConfig,
   SchemaSectionProgram,
   SectionConfigDefault_layoutAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
@@ -2082,6 +2083,43 @@ export function InstructorDetails({
   );
 }
 
+function SectionNameInputs({
+  section,
+  sectionIndex,
+  patchTerm,
+}: {
+  section: SchemaSectionConfig;
+  sectionIndex: number;
+  patchTerm: ReturnType<typeof usePatchTermMutation>["patchTerm"];
+}) {
+  function patchSection(patch: Partial<SchemaSectionConfig>) {
+    patchTerm((current) => {
+      const next = structuredClone(current);
+      const target = next.sections?.[sectionIndex];
+      if (!target) return current;
+      Object.assign(target, patch);
+      return next;
+    });
+  }
+  const nameField = useBlurSaveField(section.name, (value) => {
+    const name = value.trim();
+    if (name) patchSection({ name });
+  });
+  const nameRuField = useBlurSaveField(section.name_ru ?? "", (value) =>
+    patchSection({ name_ru: value.trim() || null }),
+  );
+
+  return (
+    <>
+      <span className="text-sm font-medium whitespace-nowrap">
+        {section.code}
+      </span>
+      <input className={detailInputClass} required {...nameField} />
+      <input className={detailInputClass} {...nameRuField} />
+    </>
+  );
+}
+
 export function SemesterDetails() {
   const { term, isPending, isError, error } = useSemesterSettings();
   const {
@@ -2298,6 +2336,22 @@ export function SemesterDetails() {
           onKeyDown={handleEscapeBlur}
         />
       </label>
+      <div className={`${detailControlClass} shrink-0`}>
+        <span className={detailLabelUpperClass}>Названия секций</span>
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2">
+          <span />
+          <span className="text-base-content/60 text-xs">EN</span>
+          <span className="text-base-content/60 text-xs">RU</span>
+          {(term?.sections ?? []).map((section, sectionIndex) => (
+            <SectionNameInputs
+              key={section.code || sectionIndex}
+              section={section}
+              sectionIndex={sectionIndex}
+              patchTerm={patchTerm}
+            />
+          ))}
+        </div>
+      </div>
       <div className={`${detailControlClass} shrink-0 pb-1`}>
         <span className={detailLabelUpperClass}>Вид таблицы по умолчанию</span>
         <div className="grid w-fit grid-cols-[auto_auto] items-center gap-x-2 gap-y-2 p-0.5">

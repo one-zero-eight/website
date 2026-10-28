@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
 
 /** Ключи дней недели в конфиге (`config.term.days`), как в Python-модели. */
@@ -32,6 +33,26 @@ export const TERM_WEEKDAY_LABEL_EN: Record<TermWeekdayKey, string> = {
   Sat: "Sat",
   Sun: "Sun",
 };
+
+/** Short weekday label in the active locale. */
+export function termWeekdayShortLabel(key: TermWeekdayKey): string {
+  switch (key) {
+    case "Mon":
+      return t`Mon`;
+    case "Tue":
+      return t`Tue`;
+    case "Wed":
+      return t`Wed`;
+    case "Thu":
+      return t`Thu`;
+    case "Fri":
+      return t`Fri`;
+    case "Sat":
+      return t`Sat`;
+    case "Sun":
+      return t`Sun`;
+  }
+}
 
 const TERM_KEY_TO_WEEKDAY: Record<TermWeekdayKey, Weekday> = {
   Mon: Weekday.MONDAY,

@@ -1,3 +1,4 @@
+import { localizedSectionName } from "./localizedNames.ts";
 import type {
   TimetableViewConfig as SchemaScheduleConfig,
   TimetableViewComponent as SchemaComponent,
@@ -15,10 +16,10 @@ import {
   usePatchCourseMutation,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { ComponentEditModal } from "@/components/schedule-assistant/settings/courses/ComponentEditModal.tsx";
-import { useEffect, useState, type ReactNode } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/ui/cn";
 import {
-  courseDisplayTitle,
   findMeetingForComponent,
   formatComponentProgressHint,
   listComponentSeriesNavItemsForRef,
@@ -43,9 +44,9 @@ import {
 import {
   buildInstructorLabelById,
   dayKey,
-  everyWeekdayPhraseRu,
+  everyWeekdayPhrase,
   resolveInstructorLabel,
-  weekdayLabelRu,
+  weekdayLabel,
   type Meeting,
 } from "./timetableViewerModel.ts";
 
@@ -58,6 +59,7 @@ function MeetingDateListItem({
   config: SchemaScheduleConfig;
   instructorLabels: Record<string, string>;
 }) {
+  const { t } = useLingui();
   const instructors = formatMeetingInstructorsLabel(
     meeting.instructors,
     instructorLabels,
@@ -81,7 +83,9 @@ function MeetingDateListItem({
                 {formatMeetingDateShort(meeting.date)}
               </span>
               {meeting.cancelled ? (
-                <span className="badge badge-error badge-xs">Отменено</span>
+                <span className="badge badge-error badge-xs">
+                  <Trans>Cancelled</Trans>
+                </span>
               ) : null}
               <span
                 className={cn(
@@ -97,7 +101,7 @@ function MeetingDateListItem({
         }
         right={
           <MeetingMetadataField kind="room" overridden={overrides.has("room")}>
-            {meeting.room || "Без локации"}
+            {meeting.room || t`No location`}
           </MeetingMetadataField>
         }
       />
@@ -109,7 +113,7 @@ function MeetingDateListItem({
                 labels={audienceItems.map((item) => item.label)}
               />
             ) : (
-              "Без групп"
+              t`No groups`
             )}
           </MeetingMetadataField>
         }
@@ -118,7 +122,7 @@ function MeetingDateListItem({
             kind="instructor"
             overridden={overrides.has("instructor")}
           >
-            {instructors === "—" ? "Без преподавателя" : instructors}
+            {instructors === "—" ? t`No instructor` : instructors}
           </MeetingMetadataField>
         }
       />
@@ -154,19 +158,25 @@ function meetingsForSchedule(
     });
 }
 
-function resolveMeetingSchedule(meeting: Meeting): ReactNode {
+function MeetingScheduleSummary({ meeting }: { meeting: Meeting }) {
+  const { t } = useLingui();
   const ref = parseMeetingInstanceId(meeting.instance_id);
-  const weekday = dayKey(meeting.date);
+  const day = dayKey(meeting.date);
+  const weekday = weekdayLabel(day);
 
   if (meeting.cancelled) {
-    return <span className="badge badge-error badge-sm">Отменено</span>;
+    return (
+      <span className="badge badge-error badge-sm">
+        <Trans>Cancelled</Trans>
+      </span>
+    );
   }
-  if (ref?.kind === "occ") return "На определенные даты";
+  if (ref?.kind === "occ") return t`On specific dates`;
   if (ref?.kind === "wp")
     return meeting.alternation
-      ? `Через неделю · ${weekdayLabelRu(weekday)}`
-      : everyWeekdayPhraseRu(weekday);
-  return weekdayLabelRu(weekday);
+      ? t`Every other week · ${weekday}`
+      : everyWeekdayPhrase(day);
+  return weekday;
 }
 
 function CourseComponentsAccordion({
@@ -190,6 +200,7 @@ function CourseComponentsAccordion({
   instructorLabelById: Record<string, string>;
   onNavigateToMeeting: (meeting: Meeting) => void;
 }) {
+  const { t } = useLingui();
   const [openIdx, setOpenIdx] = useState<number | null>(currentComponentIdx);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   useEffect(() => {
@@ -200,11 +211,12 @@ function CourseComponentsAccordion({
 
   return (
     <>
-      <DetailSection title="Компоненты курса" />
+      <DetailSection title={t`Course components`} />
       <CourseComponentsAccordionList>
         {components.map((sibling, idx) => {
+          const componentNumber = idx + 1;
           const tag =
-            String(sibling.tag || "").trim() || `Компонент ${idx + 1}`;
+            String(sibling.tag || "").trim() || t`Component ${componentNumber}`;
           const open = openIdx === idx;
           const isCurrent = idx === currentComponentIdx;
           const hint = canEdit
@@ -240,7 +252,7 @@ function CourseComponentsAccordion({
                   <button
                     type="button"
                     className="btn btn-ghost btn-xs btn-square"
-                    title="Редактировать"
+                    title={t`Edit`}
                     onClick={() => setEditIndex(idx)}
                   >
                     <span className="icon-[material-symbols--edit-outline-rounded] text-base" />
@@ -325,20 +337,30 @@ export function MeetingDetailPanel({
   onEdit?: () => void;
   onSelectInstructor?: (instructorId: string) => void;
 }) {
+  const { t } = useLingui();
   const instructorLabelById = buildInstructorLabelById(config);
   const { course } = resolveCourseAndComponent(config, meeting);
   const meetingRef = parseMeetingInstanceId(meeting.instance_id);
-
-  const courseTitle = courseDisplayTitle(course, meeting);
 
   const staff = (course?.instructors ?? []).filter(
     (entry) => String(entry.id || "").trim() && String(entry.role || "").trim(),
   );
   const siblings = course?.components ?? [];
-  const courseShortName =
-    String(course?.short_name || course?.short_name_ru || "").trim() || "—";
+  const sectionCode = String(course?.section_code ?? meeting.section ?? "");
+  const section = (config.term.sections ?? []).find(
+    (candidate) => candidate.code === sectionCode,
+  );
+  const courseFields = [
+    { label: t`Title`, value: course?.name ?? meeting.course },
+    { label: t`Title (RU)`, value: course?.name_ru },
+    { label: t`Short name`, value: course?.short_name },
+    { label: t`Short name (RU)`, value: course?.short_name_ru },
+    {
+      label: t`Section`,
+      value: section ? localizedSectionName(section) : sectionCode,
+    },
+  ];
 
-  const schedule = resolveMeetingSchedule(meeting);
   const [expandedMeetingId, setExpandedMeetingId] = useState<string | null>(
     null,
   );
@@ -356,13 +378,13 @@ export function MeetingDetailPanel({
     <div className="flex min-h-0 flex-1 flex-col gap-1 text-sm" id="detailList">
       {meeting.cancelled ? (
         <div className="alert alert-warning mb-2 py-2 text-sm">
-          Это занятие отменено в конфигурации.
+          <Trans>This class is cancelled in the configuration.</Trans>
         </div>
       ) : null}
 
       <div className="mt-3 mb-1.5 flex items-center justify-between gap-2 first:mt-0">
         <span className="text-base-content/55 text-xs font-semibold tracking-wide uppercase">
-          Занятие
+          <Trans>Class</Trans>
         </span>
         {onEdit ? (
           <button
@@ -371,7 +393,7 @@ export function MeetingDetailPanel({
             onClick={onEdit}
           >
             <span className="icon-[material-symbols--edit-outline-rounded] text-sm" />
-            Редактировать
+            <Trans>Edit</Trans>
           </button>
         ) : null}
       </div>
@@ -385,7 +407,7 @@ export function MeetingDetailPanel({
           groups={meeting.groups}
           instructors={meeting.instructors}
           weekly={meetingRef?.kind === "wp"}
-          scheduleTooltip={schedule}
+          scheduleTooltip={<MeetingScheduleSummary meeting={meeting} />}
           onSelectInstructor={onSelectInstructor}
         />
         <button
@@ -396,7 +418,7 @@ export function MeetingDetailPanel({
           }
         >
           <span className="icon-[material-symbols--calendar-month-outline-rounded] text-sm" />
-          {datesOpen ? "Скрыть даты" : "Показать даты"}
+          {datesOpen ? t`Hide dates` : t`Show dates`}
           <span>{scheduleMeetings.length}</span>
           <span
             className={cn(
@@ -432,18 +454,17 @@ export function MeetingDetailPanel({
 
       {meeting.notes?.trim() ? (
         <>
-          <DetailSection title="Заметка" />
+          <DetailSection title={t`Note`} />
           <p className="wrap-anywhere whitespace-pre-wrap">{meeting.notes}</p>
         </>
       ) : null}
 
-      <DetailSection title="Предмет" />
-      <DetailField label="Название" truncate>
-        {courseTitle}
-      </DetailField>
-      <DetailField label="Короткое название" truncate>
-        {courseShortName}
-      </DetailField>
+      <DetailSection title={t`Course`} />
+      {courseFields.map((field) => (
+        <DetailField key={field.label} label={field.label} truncate>
+          {String(field.value ?? "").trim() || "—"}
+        </DetailField>
+      ))}
       {course?.moodle_url?.trim() ? (
         <DetailField label="Moodle">
           <a
@@ -456,7 +477,7 @@ export function MeetingDetailPanel({
           </a>
         </DetailField>
       ) : null}
-      <DetailField label="Преподаватели">
+      <DetailField label={t`Instructors`}>
         {staff.length ? (
           <span className="flex flex-col gap-0.5">
             {staff.map((entry) => (

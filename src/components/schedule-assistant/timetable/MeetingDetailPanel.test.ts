@@ -1,3 +1,5 @@
+import { i18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -45,18 +47,22 @@ const meeting: Meeting = {
 describe("public meeting details", () => {
   it("renders without a query provider or editor and safely displays full notes", () => {
     const html = renderToStaticMarkup(
-      createElement(MeetingDetailPanel, {
-        config,
-        meeting,
-        allMeetings: [meeting],
-        onNavigateToMeeting: () => {},
-      }),
+      createElement(
+        I18nProvider,
+        { i18n },
+        createElement(MeetingDetailPanel, {
+          config,
+          meeting,
+          allMeetings: [meeting],
+          onNavigateToMeeting: () => {},
+        }),
+      ),
     );
     expect(html).toContain("Bring a laptop");
     expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
     expect(html).not.toContain("<script>");
-    expect(html).not.toContain("Редактировать");
-    expect(html).toContain("Компоненты курса");
+    expect(html).not.toContain("Edit");
+    expect(html).toContain("Course components");
     expect(html).toContain("https://moodle.example/course/1");
   });
 });

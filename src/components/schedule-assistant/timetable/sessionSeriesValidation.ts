@@ -2,6 +2,7 @@ import type {
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
+import { t } from "@lingui/core/macro";
 
 import { normalizeTypedHhmm } from "./meetingEditUtils.ts";
 
@@ -30,13 +31,14 @@ export function validateSessionSeriesDraft({
     const active = occurrences.filter(
       (_, index) => !deletedOccurrenceIndexes?.has(index),
     );
-    if (!active.length) return "Добавьте хотя бы одну дату.";
+    if (!active.length) return t`Add at least one date.`;
     for (const [index, occurrence] of active.entries()) {
+      const row = index + 1;
       if (!String(occurrence.date || "").trim()) {
-        return `Укажите дату для строки ${index + 1}.`;
+        return t`Enter a date for row ${row}.`;
       }
       if (!normalizeTypedHhmm(occurrence.start_time).slice(0, 5)) {
-        return `Укажите время для строки ${index + 1}.`;
+        return t`Enter a time for row ${row}.`;
       }
     }
     return null;
@@ -45,13 +47,14 @@ export function validateSessionSeriesDraft({
   const active = weeklySlots.filter(
     (_, index) => !deletedWeeklyIndexes?.has(index),
   );
-  if (!active.length) return "Добавьте хотя бы один слот.";
+  if (!active.length) return t`Add at least one slot.`;
   for (const [index, slot] of active.entries()) {
+    const row = index + 1;
     if (!slot.weekday) {
-      return `Укажите день для строки ${index + 1}.`;
+      return t`Enter a day for row ${row}.`;
     }
     if (!normalizeTypedHhmm(slot.start_time).slice(0, 5)) {
-      return `Укажите время для строки ${index + 1}.`;
+      return t`Enter a time for row ${row}.`;
     }
   }
   return null;

@@ -3,6 +3,7 @@ import { navigateToSignIn } from "@/api/accounts/sign-in.tsx";
 import { useMyAccessToken } from "@/api/helpers/access-token.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client.ts";
 import { $scheduleAssistant } from "@/api/schedule-assistant";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { TimetableViewer } from "./TimetableWorkspace.tsx";
@@ -17,6 +18,7 @@ export function PublicTimetablePage({
 }: {
   focusMeetingId?: string;
 }) {
+  const { t } = useLingui();
   const timetable = $scheduleAssistant.useQuery("get", "/timetable");
   const { data: me } = $accounts.useQuery("get", "/users/me");
   const [token] = useMyAccessToken();
@@ -101,18 +103,16 @@ export function PublicTimetablePage({
   }
 
   if (timetable.isError) {
+    const errorMessage = formatApiErrorMessage(timetable.error);
     return (
       <div className="alert alert-error m-4 flex flex-wrap gap-2">
-        <span>
-          Не удалось загрузить расписание:{" "}
-          {formatApiErrorMessage(timetable.error)}
-        </span>
+        <span>{t`Failed to load the timetable: ${errorMessage}`}</span>
         <button
           type="button"
           className="btn btn-sm"
           onClick={() => void timetable.refetch()}
         >
-          Повторить
+          <Trans>Retry</Trans>
         </button>
       </div>
     );

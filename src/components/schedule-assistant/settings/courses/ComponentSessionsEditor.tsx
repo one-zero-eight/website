@@ -36,14 +36,13 @@ import {
 import { cn } from "@/lib/ui/cn";
 import { resolveSessionWindow } from "@/components/schedule-assistant/timetable/sessionWindows.ts";
 import { dateToDay } from "@/components/schedule-assistant/settings/semester/semesterBlocks.ts";
-import { Weekday } from "@/api/schedule-assistant/types.ts";
 import {
   expandWeeklySlotsToEvents,
   expandOccurrencesToEvents,
   eventsToOccurrences,
   eventsToWeeklySlots,
   eventSchedulesEqual,
-  WEEKLY_CONVERSION_WARNING,
+  weeklyConversionWarning,
 } from "@/components/schedule-assistant/timetable/editableSessionEvents.ts";
 import {
   useEffect,
@@ -58,7 +57,6 @@ function emptySeries(): SchemaComponentSessionSeries {
   return {
     audience: [],
     active: null,
-    block_id: null,
     weekly_pattern: [],
     dates_pattern: null,
   };
@@ -77,12 +75,7 @@ function outsideWindowDates(
   audience: string[],
   deleted?: Set<number>,
 ): string[] {
-  const range = resolveSessionWindow(
-    config,
-    audience,
-    series.active,
-    series.block_id,
-  );
+  const range = resolveSessionWindow(config, audience, series.active);
   return (series.dates_pattern ?? [])
     .filter(
       (occurrence, index) =>
@@ -351,7 +344,6 @@ export function ComponentSessionsEditor({
         config,
         seriesAudience(series, componentGroups),
         series.active,
-        series.block_id,
       ) != null &&
         outsideWindowDates(
           config,
@@ -470,7 +462,7 @@ export function ComponentSessionsEditor({
     index: number,
     patch: Partial<SchemaComponentSessionSeries>,
   ) {
-    if ("active" in patch || "block_id" in patch || "audience" in patch)
+    if ("active" in patch || "audience" in patch)
       modeStashRef.current.delete(index);
     onChange(
       list.map((series, i) => (i === index ? { ...series, ...patch } : series)),
@@ -530,15 +522,7 @@ export function ComponentSessionsEditor({
     if (!series || seriesMode(series) === mode) return;
     const stash = { ...modeStashRef.current.get(index) };
     const audienceTokens = seriesAudience(series, componentGroups);
-    if (
-      !resolveSessionWindow(
-        config,
-        audienceTokens,
-        series.active,
-        series.block_id,
-      )
-    )
-      return;
+    if (!resolveSessionWindow(config, audienceTokens, series.active)) return;
     if (
       outsideWindowDates(
         config,
@@ -560,22 +544,18 @@ export function ComponentSessionsEditor({
       const weekly =
         stash.weekly_pattern ??
         (sourceEvents.length
-          ? eventsToWeeklySlots(
-              sourceEvents,
-              config.term.starting_day ?? Weekday.MONDAY,
-            )
+          ? eventsToWeeklySlots(sourceEvents)
           : [emptyWeeklySlot(config, audienceTokens)]);
       const expanded = expandWeeklySlotsToEvents({
         config,
         active: series.active,
-        blockId: series.block_id,
         weeklySlots: weekly,
         audienceTokens,
       });
       if (
         series.dates_pattern != null &&
         !eventSchedulesEqual(sourceEvents, expanded) &&
-        !window.confirm(WEEKLY_CONVERSION_WARNING)
+        !window.confirm(weeklyConversionWarning())
       )
         return;
       modeStashRef.current.set(index, stash);
@@ -600,7 +580,6 @@ export function ComponentSessionsEditor({
           expandWeeklySlotsToEvents({
             config,
             active: series.active,
-            blockId: series.block_id,
             weeklySlots: weekly,
             audienceTokens,
           }),
@@ -654,16 +633,13 @@ export function ComponentSessionsEditor({
             <SessionSeriesEditor
               config={config}
               active={series.active}
-              blockId={series.block_id}
               originalActive={baselineSeries?.active}
-              originalBlockId={baselineSeries?.block_id}
               onSessionWindowChange={
                 seriesDeleted
                   ? undefined
                   : (window) =>
                       updateSeries(seriesIndex, {
                         active: window.active,
-                        block_id: window.block_id,
                       })
               }
               meetings={meetings}

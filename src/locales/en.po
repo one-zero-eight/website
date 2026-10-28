@@ -200,6 +200,10 @@ msgstr "{0}h"
 msgid "{alias} — Not in schedule"
 msgstr "{alias} — Not in schedule"
 
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:84
+msgid "{audienceSize, plural, one {# student} other {# students}}"
+msgstr "{audienceSize, plural, one {# student} other {# students}}"
+
 #: src/components/when2meet/MeetingMobileBar.tsx:42
 msgid "{availableCount, plural, one {# available:} other {# available:}}"
 msgstr "{availableCount, plural, one {# available:} other {# available:}}"
@@ -216,9 +220,21 @@ msgstr "{capacity, plural, one {{enrolledCount} / # student} other {{enrolledCou
 msgid "{capacity, plural, one {# seat} other {# seats}}"
 msgstr "{capacity, plural, one {# seat} other {# seats}}"
 
+#: src/components/schedule-assistant/timetable/RoomAvailabilityStatusMark.tsx:85
+msgid "{capacity} < {needed} needed"
+msgstr "{capacity} < {needed} needed"
+
 #: src/components/room-booking/access-level-label.ts:33
 msgid "{capacity} people"
 msgstr "{capacity} people"
+
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:108
+msgid "{classCount, plural, one {# class} other {# classes}}"
+msgstr "{classCount, plural, one {# class} other {# classes}}"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4059
+msgid "{col} (cap. {capacity})"
+msgstr "{col} (cap. {capacity})"
 
 #: src/components/clubs/ClubsAdminPage.tsx:74
 #: src/components/clubs/ClubsSidebar.tsx:28
@@ -230,6 +246,10 @@ msgstr "{count, plural, one {# club found} other {# clubs found}}"
 #: src/components/clubs/constants.ts:49
 msgid "{count, plural, one {# club} other {# clubs}}"
 msgstr "{count, plural, one {# club} other {# clubs}}"
+
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:154
+msgid "{dateCount, plural, one {# date} other {# dates}}"
+msgstr "{dateCount, plural, one {# date} other {# dates}}"
 
 #: src/components/dashboard/CountdownWidget.tsx:112
 msgid "{days, plural, one {# day} other {# days}}, {hours, plural, one {# hour} other {# hours}}, {minutes, plural, one {# minute} other {# minutes}}, {seconds, plural, one {# second} other {# seconds}}"
@@ -292,6 +312,10 @@ msgstr "{hours}h"
 msgid "{joinsCount, plural, one {# join} other {# joins}}"
 msgstr "{joinsCount, plural, one {# join} other {# joins}}"
 
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:43
+msgid "{maximum, plural, one {{countLabel} class} other {{countLabel} classes}}"
+msgstr "{maximum, plural, one {{countLabel} class} other {{countLabel} classes}}"
+
 #: src/components/room-booking/utils.ts:15
 msgid "{minutes}m"
 msgstr "{minutes}m"
@@ -324,6 +348,18 @@ msgstr "{monthDay}, {time}: your availability is selected"
 msgid "{pageCount, plural, one {# page} other {# pages}}"
 msgstr "{pageCount, plural, one {# page} other {# pages}}"
 
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:136
+msgid "{perSemester} / semester"
+msgstr "{perSemester} / semester"
+
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:132
+msgid "{perWeek} / week"
+msgstr "{perWeek} / week"
+
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:147
+msgid "{placed, plural, one {# class scheduled} other {# classes scheduled}}"
+msgstr "{placed, plural, one {# class scheduled} other {# classes scheduled}}"
+
 #. placeholder {0}: training.max_checkins
 #: src/components/sport/SportStudentTrainingModal.tsx:212
 msgid "{placesFree} / {0} free"
@@ -353,6 +389,10 @@ msgstr "{size} KB"
 msgid "{size} MB"
 msgstr "{size} MB"
 
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:158
+msgid "{timesPerWeek, plural, one {# time per week} other {# times per week}}"
+msgstr "{timesPerWeek, plural, one {# time per week} other {# times per week}}"
+
 #: src/components/sport/SportHistoryPage.tsx:369
 msgid "{totalScore}/{maxScore} {totalScore, plural, one {point} other {points}}"
 msgstr "{totalScore}/{maxScore} {totalScore, plural, one {point} other {points}}"
@@ -370,9 +410,17 @@ msgstr "*based on <0>Eduwiki</0>"
 #~ msgid "#RRGGBB"
 #~ msgstr "#RRGGBB"
 
+#: src/components/schedule-assistant/timetable/SessionSeriesEditor.tsx:303
+msgid "+ Date"
+msgstr "+ Date"
+
 #: src/components/tabletennis/ValidationMatches.tsx:514
 msgid "+ New group"
 msgstr "+ New group"
+
+#: src/components/schedule-assistant/timetable/SessionSeriesEditor.tsx:397
+msgid "+ Slot"
+msgstr "+ Slot"
 
 #: src/components/timer/components/AddTimeButtons.tsx:28
 msgid "+{minutes} min"
@@ -441,6 +489,10 @@ msgstr "<0>reimbursement</0> — if you participate in events, you can apply for
 #: src/components/scholarship/ScholarshipPage.tsx:118
 msgid "<0>support</0> — if you require financial assistance due to personal or unexpected reasons, you can <1>submit a financial support application</1> to 319."
 msgstr "<0>support</0> — if you require financial assistance due to personal or unexpected reasons, you can <1>submit a financial support application</1> to 319."
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:822
+msgid "<0>Teaching</0><1> · </1>classes where you are the instructor"
+msgstr "<0>Teaching</0><1> · </1>classes where you are the instructor"
 
 #: src/components/sport/SportSchedulePage.tsx:58
 msgid "<0>To remove</0> the DEBTOR status you should clear the debt bar, attending <1>on trainings</1>.<2/>Closing the debt is <3>required to pass the sport course</3>."
@@ -526,6 +578,10 @@ msgstr "6 pages"
 #: src/components/web-print/LayoutSelector.tsx:39
 msgid "9 pages"
 msgstr "9 pages"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1018
+msgid "a new series will be created"
+msgstr "a new series will be created"
 
 #: src/components/clubs/ClubPage.tsx:165
 #: src/components/clubs/EditClubPage.tsx:900
@@ -614,6 +670,7 @@ msgstr "Active tournaments"
 msgid "Activity link"
 msgstr "Activity link"
 
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1263
 #: src/components/sport/SportTrainerTrainingModal.tsx:601
 #: src/components/tabletennis/LiveTournament.tsx:280
 msgid "Add"
@@ -623,9 +680,25 @@ msgstr "Add"
 msgid "Add {maxHours}"
 msgstr "Add {maxHours}"
 
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:523
+msgid "Add at least one class."
+msgstr "Add at least one class."
+
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:34
+msgid "Add at least one date."
+msgstr "Add at least one date."
+
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:50
+msgid "Add at least one slot."
+msgstr "Add at least one slot."
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:746
 msgid "Add board game"
 msgstr "Add board game"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1696
+msgid "Add class"
+msgstr "Add class"
 
 #: src/components/events/drafts/DraftHostsSection.tsx:449
 msgid "Add club"
@@ -638,6 +711,10 @@ msgstr "Add column left"
 #: src/components/editor/menus/EditorMenuItems.tsx:110
 msgid "Add column right"
 msgstr "Add column right"
+
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:691
+msgid "Add date"
+msgstr "Add date"
 
 #: src/components/admin/AddPredefinedEmailForm.tsx:47
 msgid "Add email"
@@ -767,6 +844,10 @@ msgstr "Advanced"
 msgid "AI Assistant:"
 msgstr "AI Assistant:"
 
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:86
+msgid "Alias"
+msgstr "Alias"
+
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:214
 msgid "All"
 msgstr "All"
@@ -828,6 +909,10 @@ msgstr "An admin needs to review your changes before they go live."
 #: src/components/admin/AdminUserDetails.tsx:218
 msgid "Analytics"
 msgstr "Analytics"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:625
+msgid "Anchor active week"
+msgstr "Anchor active week"
 
 #: src/components/web-print/ScanPage.tsx:608
 msgid "Applicable only for automatic mode"
@@ -1169,6 +1254,11 @@ msgstr "Bullet list"
 msgid "Busy"
 msgstr "Busy"
 
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:101
+#: src/components/schedule-assistant/timetable/RoomAvailabilityStatusMark.tsx:90
+msgid "Busy at the selected time on {conflictDateCount} of {checkedDateCount} dates"
+msgstr "Busy at the selected time on {conflictDateCount} of {checkedDateCount} dates"
+
 #: src/components/clubs/ClubLeaguePage.tsx:205
 msgid "Buying food for events is prohibited now."
 msgstr "Buying food for events is prohibited now."
@@ -1176,6 +1266,36 @@ msgstr "Buying food for events is prohibited now."
 #: src/components/tabletennis/Registration.tsx:44
 msgid "By clicking the button, you agree to be displayed in the overall player chart"
 msgstr "By clicking the button, you agree to be displayed in the overall player chart"
+
+#: src/components/schedule-assistant/timetable/TimetableLayoutSelector.tsx:19
+msgid "By days"
+msgstr "By days"
+
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:23
+msgid "by group"
+msgstr "by group"
+
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:661
+#: src/components/schedule-assistant/timetable/createMeetingUtils.ts:651
+#: src/components/schedule-assistant/timetable/unarrangedLessons.ts:258
+msgid "by groups"
+msgstr "by groups"
+
+#: src/components/schedule-assistant/timetable/TimetableLayoutSelector.tsx:17
+msgid "By groups"
+msgstr "By groups"
+
+#: src/components/schedule-assistant/timetable/TimetableLayoutSelector.tsx:18
+msgid "By groups (compact)"
+msgstr "By groups (compact)"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2191
+msgid "By instructors"
+msgstr "By instructors"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2192
+msgid "By locations"
+msgstr "By locations"
 
 #: src/components/tabletennis/ValidationMatches.tsx:411
 msgid "By rating"
@@ -1193,6 +1313,7 @@ msgstr "Calculate your scholarship at Innopolis University. Type your marks for 
 #: src/components/events/EventsTabs.tsx:11
 #: src/components/layout/BottomNavigation.tsx:43
 #: src/components/music-room/MusicRoomPageTabs.tsx:8
+#: src/components/schedule-assistant/DateInput.tsx:323
 #: src/components/schedule/EventGroupPage.tsx:97
 #: src/components/sport/SportTabs.tsx:15
 msgid "Calendar"
@@ -1261,6 +1382,10 @@ msgstr "Can be played now"
 #: src/components/room-booking/timeline/BookingModal.tsx:701
 #: src/components/room-booking/timeline/BookingModal.tsx:735
 #: src/components/room-booking/timeline/BookingTimeline.tsx:738
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1253
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:236
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:296
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:73
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:86
 #: src/components/tabletennis/ArchivedTournament.tsx:65
 #: src/components/tabletennis/CreateTournamentForm.tsx:120
@@ -1293,6 +1418,10 @@ msgstr "Cancel"
 #: src/components/when2meet/MeetingRoomModal.tsx:235
 msgid "Cancel booking"
 msgstr "Cancel booking"
+
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:283
+msgid "Cancel class"
+msgstr "Cancel class"
 
 #: src/components/tabletennis/ValidationMatches.tsx:707
 msgid "Cancel match"
@@ -1328,6 +1457,12 @@ msgstr "Cancel the room booking for this meeting?"
 msgid "Cancel this match"
 msgstr "Cancel this match"
 
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:363
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:87
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:170
+msgid "Cancelled"
+msgstr "Cancelled"
+
 #: src/components/sport/SportStudentTrainingModal.tsx:261
 msgid "Cannot check in"
 msgstr "Cannot check in"
@@ -1342,8 +1477,8 @@ msgstr "Cannot decline without feedback"
 
 #: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:148
 #: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:177
-msgid "Cannot delete a block referenced by series: {references}. Change their windows first."
-msgstr "Cannot delete a block referenced by series: {references}. Change their windows first."
+#~ msgid "Cannot delete a block referenced by series: {references}. Change their windows first."
+#~ msgstr "Cannot delete a block referenced by series: {references}. Change their windows first."
 
 #: src/components/when2meet/MeetingPage.tsx:1056
 msgid "Cannot select a past time"
@@ -1358,6 +1493,10 @@ msgstr "Cannot set the timer to 0 seconds"
 #: src/components/room-booking/rooms-list/RoomsList.tsx:69
 msgid "Capacity"
 msgstr "Capacity"
+
+#: src/components/schedule-assistant/timetable/roomPickerOptions.ts:566
+msgid "Capacity {capacity}"
+msgstr "Capacity {capacity}"
 
 #: src/components/events/drafts/CreateDraftModal.tsx:80
 #: src/components/events/drafts/EditDraftInfoModal.tsx:94
@@ -1408,8 +1547,8 @@ msgid "Change room"
 msgstr "Change room"
 
 #: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:205
-msgid "Changing block dates automatically updates bound series windows. Custom windows and explicit meeting dates are not moved."
-msgstr "Changing block dates automatically updates bound series windows. Custom windows and explicit meeting dates are not moved."
+#~ msgid "Changing block dates automatically updates bound series windows. Custom windows and explicit meeting dates are not moved."
+#~ msgstr "Changing block dates automatically updates bound series windows. Custom windows and explicit meeting dates are not moved."
 
 #: src/components/clubs/constants.ts:83
 msgid "Channel"
@@ -1537,6 +1676,23 @@ msgstr "Choose meeting time"
 msgid "Chrome extension"
 msgstr "Chrome extension"
 
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:387
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2405
+msgid "Class"
+msgstr "Class"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2405
+msgid "Class · {course}"
+msgstr "Class · {course}"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:647
+msgid "Class dates: {previewDates}."
+msgstr "Class dates: {previewDates}."
+
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:88
+msgid "Classes this semester"
+msgstr "Classes this semester"
+
 #: src/components/when2meet/MeetingMobileBar.tsx:112
 #: src/components/when2meet/MeetingPage.tsx:1353
 msgid "Clear all"
@@ -1555,13 +1711,19 @@ msgid "Clear input"
 msgstr "Clear input"
 
 #: src/components/clubs/EditClubPage.tsx:754
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:81
 msgid "Clear selection"
 msgstr "Clear selection"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2637
+msgid "Click a cell or a header in the timetable to see details here."
+msgstr "Click a cell or a header in the timetable to see details here."
 
 #: src/components/editor/extensions/image/ImageUploadPlaceholderNodeView.tsx:90
 msgid "Click to upload or paste an image"
 msgstr "Click to upload or paste an image"
 
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
 #: src/components/sport/SportOverviewSection.tsx:669
 #: src/components/sport/SportStudentTrainingModal.tsx:362
 #: src/components/sport/SportTrainerAttendanceModal.tsx:148
@@ -1763,12 +1925,20 @@ msgstr "Complete the official registration form with all required information ab
 msgid "Completed tournaments"
 msgstr "Completed tournaments"
 
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:219
+msgid "Component {componentNumber}"
+msgstr "Component {componentNumber}"
+
 #: src/components/calendar/CalendarViewer.tsx:723
 #: src/components/calendar/CalendarViewer.tsx:866
 #: src/components/calendar/ConfigCalendarDialog.tsx:43
 #: src/components/layout/UserMenu.tsx:138
 msgid "Config & Export"
 msgstr "Config & Export"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:613
+msgid "config.yaml does not look like a schedule config (no term)."
+msgstr "config.yaml does not look like a schedule config (no term)."
 
 #: src/components/web-print/FileDropzone.tsx:231
 msgid "Configure settings and start scanning — preview will appear here"
@@ -1844,6 +2014,10 @@ msgstr "Continue"
 #: src/app/routes/_with_menu/extension.tsx:19
 msgid "Convenient tools for Moodle, InNoHassle and other services at Innopolis University."
 msgstr "Convenient tools for Moodle, InNoHassle and other services at Innopolis University."
+
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:334
+msgid "Converting to a weekly template will change the set of class dates. Classes may be added on previously inactive weeks, or one-off exceptions may disappear. Apply the conversion?"
+msgstr "Converting to a weekly template will change the set of class dates. Classes may be added on previously inactive weeks, or one-off exceptions may disappear. Apply the conversion?"
 
 #: src/components/when2meet/MeetingPage.tsx:1401
 msgid "Copied"
@@ -2001,12 +2175,33 @@ msgstr "Couldn't connect to InNoHassle servers"
 msgid "Countdown Timer"
 msgstr "Countdown Timer"
 
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:462
+msgid "Course"
+msgstr "Course"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1001
+msgid "Course · component"
+msgstr "Course · component"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:214
+msgid "Course components"
+msgstr "Course components"
+
+#: src/components/schedule-assistant/timetable/CalendarCourseLegendPanel.tsx:36
+msgid "Course name"
+msgstr "Course name"
+
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:418
+msgid "Course not found in the configuration."
+msgstr "Course not found in the configuration."
+
 #: src/components/scholarship/ScholarshipCalculator.tsx:228
 msgid "Course:"
 msgstr "Course:"
 
 #: src/components/clubs/AddClubDialog.tsx:178
 #: src/components/events/drafts/CreateDraftModal.tsx:197
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1265
 #: src/components/tabletennis/CreateTournamentForm.tsx:130
 #: src/components/tabletennis/TabletennisTournaments.tsx:225
 #: src/components/when2meet/CreationPage.tsx:463
@@ -2028,6 +2223,10 @@ msgstr "Create a new protected spreadsheet from scratch"
 #: src/components/clubs/HowToCreateClubPage.tsx:226
 msgid "Create an <0>avatar or logo</0> for your club."
 msgstr "Create an <0>avatar or logo</0> for your club."
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:982
+msgid "Create class"
+msgstr "Create class"
 
 #: src/components/events/drafts/CreateDraftModal.tsx:97
 #: src/components/events/drafts/DraftsPage.tsx:116
@@ -2150,6 +2349,10 @@ msgstr "Current sport hours: {earned} out of {required} + {debt} (debt) {totalRe
 msgid "Current Trainings"
 msgstr "Current Trainings"
 
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:1064
+msgid "Current week"
+msgstr "Current week"
+
 #. placeholder {0}: impersonatingUser.name
 #: src/components/admin/ImpersonateCard.tsx:28
 msgid "Currently impersonating {0}"
@@ -2160,8 +2363,8 @@ msgid "Custom display label"
 msgstr "Custom display label"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:150
-msgid "Custom window"
-msgstr "Custom window"
+#~ msgid "Custom window"
+#~ msgstr "Custom window"
 
 #: src/components/sport/sport-checkin-utils.ts:136
 msgid "Daily limit for the same sport: 2 sport hours (usually 1 training)."
@@ -2177,9 +2380,43 @@ msgstr "Daily limit: 4 sport hours (usually 2 trainings)."
 msgid "Dashboard"
 msgstr "Dashboard"
 
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:558
+msgid "Date"
+msgstr "Date"
+
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:538
+msgid "Date {date} in row {row} is outside the series period."
+msgstr "Date {date} in row {row} is outside the series period."
+
 #: src/components/tabletennis/CreateTournamentForm.tsx:103
 msgid "Date <0>(optional, today if empty)</0>"
 msgstr "Date <0>(optional, today if empty)</0>"
+
+#: src/components/schedule-assistant/timetable/MeetingInstanceMetadata.tsx:104
+msgid "Date and time"
+msgstr "Date and time"
+
+#: src/components/schedule-assistant/DateInput.tsx:207
+msgid "Date is outside the allowed period"
+msgstr "Date is outside the allowed period"
+
+#: src/components/schedule-assistant/timetable/SessionSeriesEditor.tsx:65
+msgid "Dates"
+msgstr "Dates"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1014
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:3170
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:3595
+msgid "Day"
+msgstr "Day"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4040
+msgid "Day / time"
+msgstr "Day / time"
+
+#: src/components/schedule-assistant/DateInput.tsx:284
+msgid "dd.mm.yyyy"
+msgstr "dd.mm.yyyy"
 
 #: src/components/sport/SportOverviewSection.tsx:130
 msgid "Deadline:"
@@ -2281,6 +2518,11 @@ msgstr "Delete calendar"
 msgid "Delete column"
 msgstr "Delete column"
 
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:284
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1201
+msgid "Delete date"
+msgstr "Delete date"
+
 #: src/components/events/drafts/DraftPage.tsx:297
 #: src/components/events/drafts/DraftPage.tsx:697
 msgid "Delete draft"
@@ -2327,6 +2569,10 @@ msgstr "Delete row"
 msgid "Delete sheet"
 msgstr "Delete sheet"
 
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1036
+msgid "Delete slot"
+msgstr "Delete slot"
+
 #. placeholder {0}: getName(scoring.p1)
 #. placeholder {1}: getName(scoring.p2)
 #: src/components/tabletennis/ValidationMatches.tsx:708
@@ -2358,6 +2604,12 @@ msgstr "Delete tournament"
 #: src/components/board-games/UserReservationDetailsModal.tsx:72
 msgid "Delete your reservation for {gameTitle}? This action cannot be undone."
 msgstr "Delete your reservation for {gameTitle}? This action cannot be undone."
+
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:365
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1118
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1273
+msgid "Deleted"
+msgstr "Deleted"
 
 #: src/components/room-booking/timeline/BookingModal.tsx:748
 msgid "Deleting booking..."
@@ -2400,6 +2652,14 @@ msgstr "Detailed criteria for earning points in the league, categorized by club 
 #: src/components/clubs/ClubCard.tsx:95
 msgid "Details"
 msgstr "Details"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2628
+msgid "Details for this selection will appear later."
+msgstr "Details for this selection will appear later."
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2634
+msgid "Details panel is empty"
+msgstr "Details panel is empty"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:32
 msgid "Develop Soft Skills"
@@ -2459,6 +2719,10 @@ msgstr "Dorm"
 #: src/app/routes/_with_menu/dorms.tsx:23
 msgid "Dorms"
 msgstr "Dorms"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1023
+msgid "Dot: not scheduled / partially / fully scheduled."
+msgstr "Dot: not scheduled / partially / fully scheduled."
 
 #: src/components/tabletennis/PlayerActionMenu.tsx:179
 msgid "Downgrade to Beginner"
@@ -2545,6 +2809,8 @@ msgstr "Earned sport hours could not be loaded."
 #: src/components/clubs/ClubAdminCard.tsx:71
 #: src/components/events/drafts/DraftPage.tsx:580
 #: src/components/room-booking/timeline/BookingModal.tsx:787
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:255
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:396
 msgid "Edit"
 msgstr "Edit"
 
@@ -2627,12 +2893,17 @@ msgstr "Edit the spreadsheet or share the join link with students."
 msgid "Edit this calendar"
 msgstr "Edit this calendar"
 
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:76
+msgid "Edit: {prefix}"
+msgstr "Edit: {prefix}"
+
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:199
-msgid "Effective window for the selected groups:"
-msgstr "Effective window for the selected groups:"
+#~ msgid "Effective window for the selected groups:"
+#~ msgstr "Effective window for the selected groups:"
 
 #: src/components/admin/AdminUserDetails.tsx:266
 #: src/components/clubs/EditClubPage.tsx:976
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:79
 msgid "Email"
 msgstr "Email"
 
@@ -2646,8 +2917,8 @@ msgid "End"
 msgstr "End"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:172
-msgid "End (inclusive)"
-msgstr "End (inclusive)"
+#~ msgid "End (inclusive)"
+#~ msgstr "End (inclusive)"
 
 #: src/components/sport/SportOverviewSection.tsx:645
 msgid "End date"
@@ -2660,6 +2931,10 @@ msgstr "End time must be after the start time."
 #: src/components/when2meet/CreationPage.tsx:202
 msgid "End time must be later than start time."
 msgstr "End time must be later than start time."
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:421
+msgid "End: {endError}"
+msgstr "End: {endError}"
 
 #: src/components/events/drafts/CreateDraftModal.tsx:121
 #: src/components/events/drafts/EditDraftInfoModal.tsx:135
@@ -2679,6 +2954,7 @@ msgid "Enrolled trainings could not be loaded."
 msgstr "Enrolled trainings could not be loaded."
 
 #: src/components/events/shared/EnrollmentFields.tsx:82
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:666
 msgid "Enrollment"
 msgstr "Enrollment"
 
@@ -2695,9 +2971,33 @@ msgstr "Enrollment URL"
 msgid "Enrollment URL is required for external enrollment."
 msgstr "Enrollment URL is required for external enrollment."
 
+#: src/components/schedule-assistant/DateInput.tsx:203
+msgid "Enter a date"
+msgstr "Enter a date"
+
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:528
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:38
+msgid "Enter a date for row {row}."
+msgstr "Enter a date for row {row}."
+
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:54
+msgid "Enter a day for row {row}."
+msgstr "Enter a day for row {row}."
+
 #: src/components/forms/FormsPage.tsx:178
 msgid "Enter a form URL to generate a link with the respondent's email pre-filled"
 msgstr "Enter a form URL to generate a link with the respondent's email pre-filled"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:264
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:269
+msgid "Enter a time"
+msgstr "Enter a time"
+
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:531
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:41
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:57
+msgid "Enter a time for row {row}."
+msgstr "Enter a time for row {row}."
 
 #: src/components/admin/usePredefinedDataEditor.ts:65
 msgid "Enter a valid email."
@@ -2729,8 +3029,8 @@ msgid "Enter title..."
 msgstr "Enter title..."
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:55
-msgid "Enter valid start and end dates."
-msgstr "Enter valid start and end dates."
+#~ msgid "Enter valid start and end dates."
+#~ msgstr "Enter valid start and end dates."
 
 #: src/app/routes/guard.google.files.$slug.join.tsx:94
 msgid "Enter your Gmail address to get access to the Google Spreadsheet"
@@ -2785,6 +3085,19 @@ msgstr "Equipment"
 #: src/components/events/submissions/SubmissionPage.tsx:105
 #: src/components/events/submissions/SubmissionPage.tsx:119
 #: src/components/forms/FormsPage.tsx:36
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:846
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:850
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:855
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:869
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:905
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:941
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:171
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:303
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:418
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:424
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:443
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:455
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:499
 #: src/components/sport/SportOverviewSection.tsx:266
 #: src/components/sport/SportOverviewSection.tsx:463
 #: src/components/sport/SportOverviewSection.tsx:576
@@ -2894,9 +3207,88 @@ msgstr "Events"
 msgid "Every criterion requires proof"
 msgstr "Every criterion requires proof"
 
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:101
+msgid "every Friday"
+msgstr "every Friday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:77
+msgid "Every Friday"
+msgstr "Every Friday"
+
 #: src/components/tabletennis/ValidationMatches.tsx:536
 msgid "Every group needs at least 2 players."
 msgstr "Every group needs at least 2 players."
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:93
+msgid "every Monday"
+msgstr "every Monday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:69
+msgid "Every Monday"
+msgstr "Every Monday"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:461
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:604
+msgid "Every other week"
+msgstr "Every other week"
+
+#: src/components/schedule-assistant/timetable/sessionRowMarks.ts:38
+msgid "Every other week · {anchorWeek}"
+msgstr "Every other week · {anchorWeek}"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:177
+msgid "Every other week · {weekday}"
+msgstr "Every other week · {weekday}"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:103
+msgid "every Saturday"
+msgstr "every Saturday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:79
+msgid "Every Saturday"
+msgstr "Every Saturday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:105
+msgid "every Sunday"
+msgstr "every Sunday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:81
+msgid "Every Sunday"
+msgstr "Every Sunday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:99
+msgid "every Thursday"
+msgstr "every Thursday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:75
+msgid "Every Thursday"
+msgstr "Every Thursday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:95
+msgid "every Tuesday"
+msgstr "every Tuesday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:71
+msgid "Every Tuesday"
+msgstr "Every Tuesday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:97
+msgid "every Wednesday"
+msgstr "every Wednesday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:73
+msgid "Every Wednesday"
+msgstr "Every Wednesday"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:90
+msgid "every week"
+msgstr "every week"
+
+#: src/components/schedule-assistant/timetable/sessionRowMarks.ts:39
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:461
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:603
+msgid "Every week"
+msgstr "Every week"
 
 #: src/components/when2meet/MeetingPage.tsx:1118
 msgid "Everyone can now see the final meeting time."
@@ -2905,6 +3297,10 @@ msgstr "Everyone can now see the final meeting time."
 #: src/components/tabletennis/QualificationMatches.tsx:226
 msgid "Everyone plays. Group winners are seeded first, then second places and so on. 1st seed meets the last one, players from the same group are kept apart in the first round."
 msgstr "Everyone plays. Group winners are seeded first, then second places and so on. 1st seed meets the last one, players from the same group are kept apart in the first round."
+
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:98
+msgid "Everything is scheduled"
+msgstr "Everything is scheduled"
 
 #: src/components/search/SearchExample.tsx:32
 msgid "Example: <0>{example}</0>"
@@ -2936,10 +3332,22 @@ msgstr "Explore schedules"
 msgid "Export"
 msgstr "Export"
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1716
+msgid "Export all sections to XLSX"
+msgstr "Export all sections to XLSX"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:529
+msgid "Export error"
+msgstr "Export error"
+
 #: src/components/maps/viewer/MapView.tsx:158
 #: src/components/maps/viewer/MapView.tsx:169
 msgid "Export failed"
 msgstr "Export failed"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1715
+msgid "Export is not available on the instructor and location tabs"
+msgstr "Export is not available on the instructor and location tabs"
 
 #: src/components/calendar/ExportModal.tsx:143
 msgid "Export Moodle deadlines"
@@ -2965,6 +3373,10 @@ msgstr "Export sport trainings"
 #: src/components/calendar/ExportModal.tsx:154
 msgid "Export to your calendar"
 msgstr "Export to your calendar"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1730
+msgid "Export XLSX"
+msgstr "Export XLSX"
 
 #: src/components/music-room/MusicRoomPage.tsx:104
 msgid "Export your personal calendar"
@@ -3002,9 +3414,25 @@ msgstr "External URL"
 msgid "Fail"
 msgstr "Fail"
 
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:499
+msgid "Failed to apply the change to the class."
+msgstr "Failed to apply the change to the class."
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:617
+msgid "Failed to build group columns from the config."
+msgstr "Failed to build group columns from the config."
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:941
+msgid "Failed to create the class."
+msgstr "Failed to create the class."
+
 #: src/components/editor/menus/ImageMenuItems.tsx:68
 msgid "Failed to download image"
 msgstr "Failed to download image"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:511
+msgid "Failed to export the timetable"
+msgstr "Failed to export the timetable"
 
 #: src/components/guard/CopySheetPage.tsx:89
 msgid "Failed to extract Spreadsheet ID"
@@ -3022,9 +3450,17 @@ msgstr "Failed to load event."
 msgid "Failed to load submission."
 msgstr "Failed to load submission."
 
+#: src/components/schedule-assistant/timetable/PublicTimetablePage.tsx:109
+msgid "Failed to load the timetable: {errorMessage}"
+msgstr "Failed to load the timetable: {errorMessage}"
+
 #: src/components/room-booking/tv/TvCalendarViewer.tsx:53
 msgid "Failed to load TV page"
 msgstr "Failed to load TV page"
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:783
+msgid "Failed to load your groups: {errorMessage}"
+msgstr "Failed to load your groups: {errorMessage}"
 
 #: src/components/sport/SportOverviewSection.tsx:464
 msgid "Failed to submit medical group change request."
@@ -3080,6 +3516,10 @@ msgstr "File has not yet been uploaded"
 #: src/components/web-print/FileDropzone.tsx:47
 msgid "File is too large!"
 msgstr "File is too large!"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4226
+msgid "fill {fillPercent}"
+msgstr "fill {fillPercent}"
 
 #: src/components/dashboard/links/Links.tsx:141
 msgid "Filter"
@@ -3162,6 +3602,10 @@ msgstr "For the first semester — scholarship from the admissions department."
 msgid "For the next semesters — using the following formula:"
 msgstr "For the next semesters — using the following formula:"
 
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:29
+msgid "Forbidden time"
+msgstr "Forbidden time"
+
 #: src/app/routes/forms.submit.tsx:122
 #: src/app/routes/forms.submit.tsx:141
 #: src/app/routes/forms.submit.tsx:155
@@ -3187,9 +3631,25 @@ msgstr "Forms"
 msgid "Founder"
 msgstr "Founder"
 
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:598
+msgid "Frequency"
+msgstr "Frequency"
+
 #: src/app/routes/_with_menu/sport/faq.tsx:22
 msgid "Frequently asked questions about sport at Innopolis University."
 msgstr "Frequently asked questions about sport at Innopolis University."
+
+#: src/components/schedule-assistant/settings/weekdays.ts:49
+msgid "Fri"
+msgstr "Fri"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:55
+msgid "Friday"
+msgstr "Friday"
+
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:27
+msgid "from component"
+msgstr "from component"
 
 #: src/components/events/event/EventPage.tsx:349
 msgid "Full"
@@ -3203,9 +3663,17 @@ msgstr "Full and short official names"
 msgid "Full name"
 msgstr "Full name"
 
+#: src/components/schedule-assistant/timetable/createMeetingUtils.ts:576
+msgid "fully scheduled"
+msgstr "fully scheduled"
+
 #: src/components/events/shared/EventsByDate.tsx:126
 msgid "Future"
 msgstr "Future"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:1068
+msgid "Future week"
+msgstr "Future week"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:42
 msgid "Gain Practical Experience"
@@ -3330,6 +3798,10 @@ msgstr "Gmail is required"
 msgid "Go To"
 msgstr "Go To"
 
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:300
+msgid "Go to {navigationTarget}"
+msgstr "Go to {navigationTarget}"
+
 #: src/components/dashboard/DashboardPage.tsx:48
 msgid "Go to calendar"
 msgstr "Go to calendar"
@@ -3351,6 +3823,14 @@ msgstr "Go to profile"
 msgid "Go to Registration Form"
 msgstr "Go to Registration Form"
 
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:337
+msgid "Go to selected above"
+msgstr "Go to selected above"
+
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:352
+msgid "Go to selected below"
+msgstr "Go to selected below"
+
 #: src/components/calendar/CalendarEventPopover.tsx:281
 msgid "Go to source"
 msgstr "Go to source"
@@ -3367,6 +3847,10 @@ msgstr "Go to your dashboard"
 msgid "Go today"
 msgstr "Go today"
 
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:654
+msgid "Goal"
+msgstr "Goal"
+
 #: src/components/calendar/ExportModal.tsx:106
 msgid "Google Calendar"
 msgstr "Google Calendar"
@@ -3375,11 +3859,17 @@ msgstr "Google Calendar"
 msgid "Green"
 msgstr "Green"
 
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:31
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:277
 #: src/components/schedule/EventGroupPage.tsx:30
 #: src/components/schedule/EventGroupPage.tsx:36
 #: src/components/schedule/EventGroupPage.tsx:67
 msgid "Group"
 msgstr "Group"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2410
+msgid "Group · {value}"
+msgstr "Group · {value}"
 
 #: src/components/tabletennis/ValidationMatches.tsx:1255
 msgid "Group {name}"
@@ -3403,6 +3893,13 @@ msgid "Group stage"
 msgstr "Group stage"
 
 #: src/components/onboarding/OnboardingProgress.tsx:10
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:680
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:31
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:55
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:185
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:251
+#: src/components/schedule-assistant/timetable/MeetingInstanceMetadata.tsx:117
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:807
 #: src/components/tabletennis/ValidationMatches.tsx:329
 #: src/components/tabletennis/ValidationMatches.tsx:380
 msgid "Groups"
@@ -3493,6 +3990,11 @@ msgstr "Hide best time"
 #: src/components/when2meet/AvailabilitySelector.tsx:1475
 msgid "Hide calendar events"
 msgstr "Hide calendar events"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:421
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:451
+msgid "Hide dates"
+msgstr "Hide dates"
 
 #: src/components/when2meet/AvailabilitySelector.tsx:1513
 msgid "Hide final meeting time"
@@ -3625,6 +4127,10 @@ msgstr "Important Rules"
 msgid "Importing {0} / {1}"
 msgstr "Importing {0} / {1}"
 
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:28
+msgid "In component"
+msgstr "In component"
+
 #: src/components/clubs/ClubLeaguePage.tsx:76
 msgid "In controversial situations decision is made by <0>@T_Konovalov</0>"
 msgstr "In controversial situations decision is made by <0>@T_Konovalov</0>"
@@ -3641,14 +4147,23 @@ msgstr "In favorites"
 msgid "In storage"
 msgstr "In storage"
 
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:25
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:56
+msgid "in template"
+msgstr "in template"
+
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:277
+msgid "In template: {patternLabel}"
+msgstr "In template: {patternLabel}"
+
 #: src/components/clubs/ClubAdminCard.tsx:53
 #: src/components/clubs/ClubPage.tsx:133
 msgid "Inactive"
 msgstr "Inactive"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:203
-msgid "inclusive; days: {dayCount}"
-msgstr "inclusive; days: {dayCount}"
+#~ msgid "inclusive; days: {dayCount}"
+#~ msgstr "inclusive; days: {dayCount}"
 
 #: src/components/web-print/PrintPage.tsx:187
 msgid "Incorrect page range format."
@@ -3757,6 +4272,30 @@ msgstr "Install the extension for Firefox-based browsers from our servers (suppo
 msgid "Instructions"
 msgstr "Instructions"
 
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:10
+msgid "instructor"
+msgstr "instructor"
+
+#: src/components/schedule-assistant/timetable/CalendarCourseLegendPanel.tsx:39
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:68
+#: src/components/schedule-assistant/timetable/InstructorPicker.tsx:201
+msgid "Instructor"
+msgstr "Instructor"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2412
+msgid "Instructor · {value}"
+msgstr "Instructor · {value}"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:480
+#: src/components/schedule-assistant/timetable/MeetingInstanceMetadata.tsx:138
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4020
+msgid "Instructors"
+msgstr "Instructors"
+
+#: src/components/schedule-assistant/timetable/RoomAvailabilityStatusMark.tsx:84
+msgid "Insufficient capacity"
+msgstr "Insufficient capacity"
+
 #: src/components/extension/ExtensionPage.tsx:43
 msgid "Integrated AI search engine for all Moodle materials"
 msgstr "Integrated AI search engine for all Moodle materials"
@@ -3768,6 +4307,10 @@ msgstr "Introduction to <0/> countdown"
 #: src/components/dashboard/CountdownWidget.tsx:43
 msgid "Introduction to 108 countdown"
 msgstr "Introduction to 108 countdown"
+
+#: src/components/schedule-assistant/DateInput.tsx:205
+msgid "Invalid date"
+msgstr "Invalid date"
 
 #: src/components/events/drafts/CreateDraftModal.tsx:77
 #: src/components/events/drafts/EditDraftInfoModal.tsx:91
@@ -3786,6 +4329,11 @@ msgstr "Invalid host"
 #: src/components/events/drafts/DraftLinksSection.tsx:140
 msgid "Invalid link"
 msgstr "Invalid link"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:267
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:272
+msgid "Invalid time"
+msgstr "Invalid time"
 
 #: src/components/events/drafts/DraftHostsSection.tsx:537
 msgid "Invite"
@@ -4034,6 +4582,10 @@ msgstr "Loading current booking details..."
 msgid "Loading search results..."
 msgstr "Loading search results..."
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2094
+msgid "Loading table…"
+msgstr "Loading table…"
+
 #: src/components/about/TeamMembers.tsx:218
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:197
 msgid "Loading..."
@@ -4043,10 +4595,20 @@ msgstr "Loading..."
 msgid "Locales"
 msgstr "Locales"
 
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:7
+msgid "location"
+msgstr "location"
+
 #: src/components/events/shared/LocationField.tsx:73
+#: src/components/schedule-assistant/timetable/MeetingInstanceMetadata.tsx:128
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:936
 #: src/components/sport/SportStudentTrainingModal.tsx:269
 msgid "Location"
 msgstr "Location"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2414
+msgid "Location · {value}"
+msgstr "Location · {value}"
 
 #: src/components/maps/viewer/MapView.tsx:105
 msgid "Location access denied"
@@ -4056,6 +4618,7 @@ msgstr "Location access denied"
 msgid "Location unavailable"
 msgstr "Location unavailable"
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4025
 #: src/components/web-print/WebPrintLandingPage.tsx:63
 msgid "Locations"
 msgstr "Locations"
@@ -4269,10 +4832,15 @@ msgid "Meeting was created without an id."
 msgstr "Meeting was created without an id."
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:206
-msgid "meetings: {occurrenceCount}"
-msgstr "meetings: {occurrenceCount}"
+#~ msgid "meetings: {occurrenceCount}"
+#~ msgstr "meetings: {occurrenceCount}"
 
 #: src/app/routes/_with_menu/menu.tsx:15
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:937
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:953
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1706
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1902
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2575
 msgid "Menu"
 msgstr "Menu"
 
@@ -4300,6 +4868,7 @@ msgstr "Minutes"
 msgid "Missing a training session may lead to certain consequences, including temporary restrictions on future training check-ins."
 msgstr "Missing a training session may lead to certain consequences, including temporary restrictions on future training check-ins."
 
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:659
 #: src/components/web-print/ScanPage.tsx:555
 msgid "Mode"
 msgstr "Mode"
@@ -4311,6 +4880,14 @@ msgstr "Moderator feedback"
 #: src/components/clubs/EditClubPage.tsx:1308
 msgid "Modified"
 msgstr "Modified"
+
+#: src/components/schedule-assistant/settings/weekdays.ts:41
+msgid "Mon"
+msgstr "Mon"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:47
+msgid "Monday"
+msgstr "Monday"
 
 #: src/components/calendar/CalendarViewer.tsx:77
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:301
@@ -4387,6 +4964,14 @@ msgstr "My bookings"
 msgid "My dashboard"
 msgstr "My dashboard"
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2740
+msgid "My group"
+msgstr "My group"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1593
+msgid "My groups"
+msgstr "My groups"
+
 #: src/components/tabletennis/TabletennisTabs.tsx:14
 msgid "My matches"
 msgstr "My matches"
@@ -4404,6 +4989,7 @@ msgstr "My upcoming trainings"
 #: src/components/clubs/ClubPage.tsx:278
 #: src/components/clubs/EditClubPage.tsx:963
 #: src/components/events/drafts/DraftHostsSection.tsx:560
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:73
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:338
 msgid "Name"
 msgstr "Name"
@@ -4447,6 +5033,10 @@ msgstr "Network error: {message}"
 #: src/components/clubs/HowToCreateClubPage.tsx:37
 msgid "Networking Opportunities"
 msgstr "Networking Opportunities"
+
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:27
+msgid "Neutral time"
+msgstr "Neutral time"
 
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:420
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:428
@@ -4509,6 +5099,11 @@ msgstr "Next page"
 msgid "Next reservations"
 msgstr "Next reservations"
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:858
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1658
+msgid "Next week"
+msgstr "Next week"
+
 #: src/components/tabletennis/MergeGuestModal.tsx:107
 msgid "Nickname or email"
 msgstr "Nickname or email"
@@ -4534,12 +5129,16 @@ msgid "No active tournaments. Create one to start managing groups and the qualif
 msgstr "No active tournaments. Create one to start managing groups and the qualification bracket."
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:193
-msgid "No additional restriction; using groups' teaching periods."
-msgstr "No additional restriction; using groups' teaching periods."
+#~ msgid "No additional restriction; using groups' teaching periods."
+#~ msgstr "No additional restriction; using groups' teaching periods."
 
 #: src/components/events/submissions/SubmissionsPage.tsx:29
 msgid "No approved submissions."
 msgstr "No approved submissions."
+
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:91
+msgid "No assigned classes."
+msgstr "No assigned classes."
 
 #: src/components/sport/SportTrainerTrainingModal.tsx:421
 msgid "No attendees match the selected hour filters."
@@ -4549,6 +5148,10 @@ msgstr "No attendees match the selected hour filters."
 #: src/components/sport/SportTrainerTrainingModal.tsx:425
 msgid "No attendees yet."
 msgstr "No attendees yet."
+
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:137
+msgid "No audience to schedule"
+msgstr "No audience to schedule"
 
 #: src/components/guard/BannedList.tsx:33
 msgid "No banned users"
@@ -4566,6 +5169,29 @@ msgstr "No changes to review"
 msgid "No changes to review for this club."
 msgstr "No changes to review for this club."
 
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:455
+msgid "No changes to save."
+msgstr "No changes to save."
+
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:91
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:30
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:52
+#: src/components/schedule-assistant/timetable/RoomAvailabilityStatusMark.tsx:80
+msgid "No class dates"
+msgstr "No class dates"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1581
+msgid "No classes found in config.yaml."
+msgstr "No classes found in config.yaml."
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:868
+msgid "No classes next week."
+msgstr "No classes next week."
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:835
+msgid "No classes this week."
+msgstr "No classes this week."
+
 #: src/components/events/drafts/DraftHostsSection.tsx:512
 msgid "No clubs available to invite."
 msgstr "No clubs available to invite."
@@ -4579,6 +5205,10 @@ msgstr "No clubs found"
 #: src/components/clubs/ClubsAdminPage.tsx:114
 msgid "No clubs match your search"
 msgstr "No clubs match your search"
+
+#: src/components/schedule-assistant/timetable/CalendarCourseLegendPanel.tsx:21
+msgid "No courses for the selected program."
+msgstr "No courses for the selected program."
 
 #: src/components/sport/SportTrainerPage.tsx:188
 msgid "No current trainings"
@@ -4596,7 +5226,7 @@ msgstr "No data for the selected period"
 msgid "No date"
 msgstr "No date"
 
-#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:212
+#: src/components/when2meet/utils/slots.ts:136
 msgid "No dates"
 msgstr "No dates"
 
@@ -4679,6 +5309,11 @@ msgstr "No GPS signal"
 msgid "No group stage was played in this tournament."
 msgstr "No group stage was played in this tournament."
 
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:124
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:116
+msgid "No groups"
+msgstr "No groups"
+
 #: src/components/schedule/SchedulePage.tsx:204
 msgid "No groups found"
 msgstr "No groups found"
@@ -4694,6 +5329,16 @@ msgstr "No hosts yet"
 #: src/components/events/drafts/DraftHostsSection.tsx:286
 msgid "No hosts yet."
 msgstr "No hosts yet."
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:125
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:435
+msgid "No instructor"
+msgstr "No instructor"
+
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:93
+#: src/components/schedule-assistant/timetable/RoomAvailabilityStatusMark.tsx:82
+msgid "No issues"
+msgstr "No issues"
 
 #: src/components/guard/JoinsList.tsx:50
 msgid "No joins match your search"
@@ -4719,6 +5364,12 @@ msgstr "No links yet."
 #: src/components/events/submissions/SubmissionPage.tsx:326
 msgid "No links."
 msgstr "No links."
+
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:125
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:104
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:400
+msgid "No location"
+msgstr "No location"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:329
 msgid "No logo"
@@ -4875,10 +5526,18 @@ msgstr "No users found."
 msgid "No users in this group."
 msgstr "No users in this group."
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1550
+msgid "No weeks"
+msgstr "No weeks"
+
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:303
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:304
 msgid "None"
 msgstr "None"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:474
+msgid "none in the study period"
+msgstr "none in the study period"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:294
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:295
@@ -4921,6 +5580,10 @@ msgstr "Not removed"
 msgid "Not saved"
 msgstr "Not saved"
 
+#: src/components/schedule-assistant/timetable/createMeetingUtils.ts:574
+msgid "not scheduled"
+msgstr "not scheduled"
+
 #: src/components/when2meet/MeetingItem.tsx:61
 msgid "Not selected"
 msgstr "Not selected"
@@ -4934,12 +5597,29 @@ msgid "Not your groups? <0>Change them in schedule</0>."
 msgstr "Not your groups? <0>Change them in schedule</0>."
 
 #: src/components/editor/extensions/Callout.ts:21
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:457
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:3787
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4272
 msgid "Note"
 msgstr "Note"
 
 #: src/components/editor/extensions/Callout.ts:20
 msgid "NOTE"
 msgstr "NOTE"
+
+#: src/components/schedule-assistant/timetable/TimetableCalendarTable.tsx:109
+msgid "Note: {notes}"
+msgstr "Note: {notes}"
+
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:381
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:293
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:108
+msgid "Nothing found"
+msgstr "Nothing found"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2422
+msgid "Nothing selected"
+msgstr "Nothing selected"
 
 #: src/components/sport/SportTrainerBaamImportButton.tsx:146
 msgid "Nothing to import"
@@ -4971,9 +5651,17 @@ msgstr "OK"
 msgid "Okay"
 msgstr "Okay"
 
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:41
+msgid "on class days"
+msgstr "on class days"
+
 #: src/components/about/AboutPage.tsx:224
 msgid "On February 6, 2023, we held our first club presentation. We now run this event every year."
 msgstr "On February 6, 2023, we held our first club presentation. We now run this event every year."
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:16
+msgid "on Fridays"
+msgstr "on Fridays"
 
 #: src/components/events/shared/EnrollmentFields.tsx:98
 msgid "On InNoHassle"
@@ -4988,6 +5676,42 @@ msgstr "On InNoHassle · {capacity} participants"
 #: src/components/events/submissions/SubmissionPage.tsx:183
 msgid "On InNoHassle · unlimited"
 msgstr "On InNoHassle · unlimited"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:8
+msgid "on Mondays"
+msgstr "on Mondays"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:18
+msgid "on Saturdays"
+msgstr "on Saturdays"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:174
+msgid "On specific dates"
+msgstr "On specific dates"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:20
+msgid "on Sundays"
+msgstr "on Sundays"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:14
+msgid "on Thursdays"
+msgstr "on Thursdays"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:10
+msgid "on Tuesdays"
+msgstr "on Tuesdays"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:12
+msgid "on Wednesdays"
+msgstr "on Wednesdays"
+
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:34
+msgid "one of {trimmed}"
+msgstr "one of {trimmed}"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:658
+msgid "One-off changes for inactive weeks ({ignoredCount}) are saved but not applied: {ignoredDates}."
+msgstr "One-off changes for inactive weeks ({ignoredCount}) are saved but not applied: {ignoredDates}."
 
 #: src/app/routes/_with_menu/about.tsx:17
 msgid "one-zero-eight team is the community of students of Innopolis University passionate about technology"
@@ -5086,12 +5810,17 @@ msgid "Organizer"
 msgstr "Organizer"
 
 #: src/components/common/CompactColorPicker.tsx:179
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:836
 msgid "Other"
 msgstr "Other"
 
 #: src/components/calendar/ExportModal.tsx:110
 msgid "Other applications: find in settings"
 msgstr "Other applications: find in settings"
+
+#: src/components/schedule-assistant/timetable/meetingAudienceSummary.ts:195
+msgid "Other groups"
+msgstr "Other groups"
 
 #: src/components/clubs/ClubLeaguePage.tsx:192
 msgid "Other materials related to the activities of the club"
@@ -5100,6 +5829,18 @@ msgstr "Other materials related to the activities of the club"
 #: src/components/when2meet/AvailabilitySelector.tsx:1460
 msgid "Other participants"
 msgstr "Other participants"
+
+#: src/components/schedule-assistant/timetable/meetingEditUtils.ts:1031
+msgid "Other time"
+msgstr "Other time"
+
+#: src/components/schedule-assistant/timetable/meetingEditUtils.ts:1030
+msgid "Other time ({start}-...)"
+msgstr "Other time ({start}-...)"
+
+#: src/components/schedule-assistant/timetable/meetingEditUtils.ts:1029
+msgid "Other time ({start}–{end})"
+msgstr "Other time ({start}–{end})"
 
 #: src/components/about/AboutPage.tsx:175
 msgid "Our areas of interest include product engineering, NLP, robotics, and whatever else comes our way. We are constantly expanding our skills through hands-on experience, including hackathons."
@@ -5125,6 +5866,24 @@ msgstr "Outdated"
 #: src/components/room-booking/timeline/OutlookDownScreen.tsx:9
 msgid "Outlook API is currently unavailable"
 msgstr "Outlook API is currently unavailable"
+
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:111
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:278
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:170
+msgid "overridden in template"
+msgstr "overridden in template"
+
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:35
+msgid "Overridden: {overriddenFields}"
+msgstr "Overridden: {overriddenFields}"
+
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:40
+msgid "override"
+msgstr "override"
+
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:47
+msgid "override: {overriddenFields}"
+msgstr "override: {overriddenFields}"
 
 #: src/components/when2meet/MeetingPage.tsx:1848
 msgid "Owner"
@@ -5155,6 +5914,10 @@ msgstr "Paper unknown"
 #: src/components/sport/SportOverviewSection.tsx:393
 msgid "Parsing activity link"
 msgstr "Parsing activity link"
+
+#: src/components/schedule-assistant/timetable/createMeetingUtils.ts:575
+msgid "partially scheduled"
+msgstr "partially scheduled"
 
 #: src/components/when2meet/MeetingPage.tsx:167
 msgid "Participant removed"
@@ -5188,6 +5951,10 @@ msgstr "Past"
 #: src/components/sport/SportTrainerPage.tsx:222
 msgid "Past Trainings"
 msgstr "Past Trainings"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:1066
+msgid "Past week"
+msgstr "Past week"
 
 #: src/components/forms/FormUrlInput.tsx:58
 msgid "Paste from clipboard"
@@ -5224,6 +5991,14 @@ msgstr "Pending invitations"
 #: src/components/events/shared/EventSummaryCard.tsx:53
 msgid "Pending Review"
 msgstr "Pending Review"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:42
+msgid "per day"
+msgstr "per day"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:558
+msgid "Period"
+msgstr "Period"
 
 #: src/app/routes/_with_menu/calendar.tsx:17
 msgid "Personal calendar"
@@ -5339,6 +6114,10 @@ msgstr "Please, reload the page."
 msgid "Points"
 msgstr "Points"
 
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:76
+msgid "Position"
+msgstr "Position"
+
 #: src/components/admin/AdminTabs.tsx:14
 msgid "Predefined"
 msgstr "Predefined"
@@ -5363,6 +6142,10 @@ msgstr "Preferences"
 #: src/components/board-games/UserReservationDetailsModal.tsx:363
 msgid "Preferred pickup time"
 msgstr "Preferred pickup time"
+
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:26
+msgid "Preferred time"
+msgstr "Preferred time"
 
 #: src/components/clubs/EditClubPage.tsx:914
 #: src/components/search/IframePreviewCard.tsx:95
@@ -5391,6 +6174,10 @@ msgstr "Previous page"
 #: src/components/board-games/BoardGamesPage.tsx:107
 msgid "Previous reservations"
 msgstr "Previous reservations"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1641
+msgid "Previous week"
+msgstr "Previous week"
 
 #: src/components/web-print/WebPrintLandingPage.tsx:37
 #: src/components/web-print/WebPrintTabs.tsx:11
@@ -5475,6 +6262,10 @@ msgstr "Processing…"
 msgid "Profile"
 msgstr "Profile"
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2408
+msgid "Program · {value}"
+msgstr "Program · {value}"
+
 #: src/components/clubs/HowToCreateClubPage.tsx:124
 msgid "Programming Languages, Robotics, Web Development, AI/ML"
 msgstr "Programming Languages, Robotics, Web Development, AI/ML"
@@ -5506,6 +6297,10 @@ msgstr "Pts"
 #: src/components/events/drafts/RestoreDraftModal.tsx:49
 msgid "Public"
 msgstr "Public"
+
+#: src/app/routes/timetable.tsx:29
+msgid "Public class timetable of Innopolis University: groups, instructors and rooms."
+msgstr "Public class timetable of Innopolis University: groups, instructors and rooms."
 
 #: src/components/events/submissions/SubmissionPage.tsx:188
 msgid "Publish this event? This cannot be undone from here."
@@ -5864,6 +6659,11 @@ msgstr "Reserve game"
 msgid "Reserved"
 msgstr "Reserved"
 
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1244
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:693
+msgid "Reset changes"
+msgstr "Reset changes"
+
 #: src/components/maps/viewer/MapView.tsx:247
 msgid "Reset north"
 msgstr "Reset north"
@@ -5883,13 +6683,22 @@ msgstr "Responses"
 
 #: src/components/events/drafts/DraftPage.tsx:332
 #: src/components/events/drafts/DraftPage.tsx:671
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:281
 msgid "Restore"
 msgstr "Restore"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1201
+msgid "Restore date"
+msgstr "Restore date"
 
 #: src/components/events/drafts/DraftPage.tsx:327
 #: src/components/events/drafts/RestoreDraftModal.tsx:25
 msgid "Restore draft"
 msgstr "Restore draft"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1036
+msgid "Restore slot"
+msgstr "Restore slot"
 
 #: src/components/sport/SportHistoryPage.tsx:390
 msgid "Result"
@@ -5916,6 +6725,8 @@ msgstr "Retake"
 #: src/components/events/event/EventPage.tsx:157
 #: src/components/events/submissions/SubmissionPage.tsx:154
 #: src/components/events/submissions/SubmissionsPage.tsx:83
+#: src/components/schedule-assistant/timetable/PublicTimetablePage.tsx:115
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/sport/SportStudentTrainingModal.tsx:413
 #: src/components/sport/SportStudentTrainingModal.tsx:462
@@ -6087,14 +6898,29 @@ msgstr "Rules of room booking in Innopolis University."
 msgid "Ryan Gosling winks"
 msgstr "Ryan Gosling winks"
 
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:40
+msgid "Same as component"
+msgstr "Same as component"
+
 #: src/components/when2meet/CreationPage.tsx:419
 msgid "Same hours every day"
 msgstr "Same hours every day"
+
+#: src/components/schedule-assistant/settings/weekdays.ts:51
+msgid "Sat"
+msgstr "Sat"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:57
+msgid "Saturday"
+msgstr "Saturday"
 
 #: src/components/events/drafts/DraftHostsSection.tsx:602
 #: src/components/events/drafts/DraftLinksSection.tsx:351
 #: src/components/events/drafts/DraftPage.tsx:561
 #: src/components/events/drafts/EditDraftInfoModal.tsx:179
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:243
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:310
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:711
 #: src/components/tabletennis/PlayerActionMenu.tsx:310
 #: src/components/when2meet/CreationPage.tsx:477
 #: src/components/when2meet/MeetingName.tsx:117
@@ -6204,6 +7030,10 @@ msgstr "Schedule could not be loaded."
 msgid "Schedule of classes and events at Innopolis University. Find your group and see the calendar with all classes."
 msgstr "Schedule of classes and events at Innopolis University. Find your group and see the calendar with all classes."
 
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1013
+msgid "schedule: {statusLabel}"
+msgstr "schedule: {statusLabel}"
+
 #: src/app/routes/_with_menu/scholarship.tsx:23
 msgid "Scholarship"
 msgstr "Scholarship"
@@ -6270,6 +7100,14 @@ msgstr "Search clubs..."
 msgid "Search email"
 msgstr "Search email"
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:258
+msgid "Search events…"
+msgstr "Search events…"
+
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:289
+msgid "Search for a group, program, section or @selector…"
+msgstr "Search for a group, program, section or @selector…"
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:431
 #: src/components/board-games/BoardGamesPage.tsx:262
 msgid "Search games by name"
@@ -6304,9 +7142,17 @@ msgstr "Search users"
 msgid "Search..."
 msgstr "Search..."
 
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:88
+msgid "Search…"
+msgstr "Search…"
+
 #: src/components/timer/components/TimerInput.tsx:34
 msgid "Seconds"
 msgstr "Seconds"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:359
+msgid "Section"
+msgstr "Section"
 
 #: src/components/scholarship/ScholarshipPage.tsx:132
 msgid "See more information about scholarships in <0>Student's Handbook</0>."
@@ -6329,13 +7175,37 @@ msgstr "See your scholarship for the current semester on the <0>My University</0
 msgid "seed {0}"
 msgstr "seed {0}"
 
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1005
+msgid "Select a course and component"
+msgstr "Select a course and component"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:846
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:850
+msgid "Select a course and component."
+msgstr "Select a course and component."
+
 #: src/components/clubs/EditClubPage.tsx:707
 msgid "Select a file to preview"
 msgstr "Select a file to preview"
 
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:38
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:285
+msgid "Select a group"
+msgstr "Select a group"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:856
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:303
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:425
+msgid "Select a group."
+msgstr "Select a group."
+
 #: src/components/admin/AdminRoomsPage.tsx:92
 msgid "Select a room."
 msgstr "Select a room."
+
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:78
+msgid "Select a series, then click an empty slot."
+msgstr "Select a series, then click an empty slot."
 
 #: src/components/timer/components/CustomTimeModal.tsx:107
 msgid "Select a specific date and time in the future. The timer will count down until that moment."
@@ -6345,6 +7215,10 @@ msgstr "Select a specific date and time in the future. The timer will count down
 msgid "Select a user to impersonate."
 msgstr "Select a user to impersonate."
 
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:83
+msgid "Select all"
+msgstr "Select all"
+
 #: src/components/timer/components/CustomTimeModal.tsx:102
 msgid "Select Target Time"
 msgstr "Select Target Time"
@@ -6352,6 +7226,10 @@ msgstr "Select Target Time"
 #: src/components/when2meet/MeetingPage.tsx:1451
 msgid "Select the timeslots that participants can choose, then click Save timeslots."
 msgstr "Select the timeslots that participants can choose, then click Save timeslots."
+
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:92
+msgid "Select this and all following"
+msgstr "Select this and all following"
 
 #: src/components/sport/SportOverviewSection.tsx:348
 msgid "Select your training type"
@@ -6361,9 +7239,13 @@ msgstr "Select your training type"
 msgid "Select..."
 msgstr "Select..."
 
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:191
+msgid "Selected"
+msgstr "Selected"
+
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:189
-msgid "Selected bounds:"
-msgstr "Selected bounds:"
+#~ msgid "Selected bounds:"
+#~ msgstr "Selected bounds:"
 
 #: src/components/web-print/ScanPage.tsx:156
 msgid "Selected scanner is offline"
@@ -6382,6 +7264,10 @@ msgstr "Selected: {0} ({1})"
 #: src/components/when2meet/MeetingPage.tsx:1610
 msgid "Selected: {pendingMeetingTimeLabel}"
 msgstr "Selected: {pendingMeetingTimeLabel}"
+
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:98
+msgid "Selected: {selectedCount}"
+msgstr "Selected: {selectedCount}"
 
 #: src/components/sport/SportOverviewSection.tsx:306
 msgid "Self Sport Upload"
@@ -6409,13 +7295,26 @@ msgstr "Self-sport: {0}h"
 msgid "Semestral Budget"
 msgstr "Semestral Budget"
 
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:385
+msgid "Series"
+msgstr "Series"
+
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:423
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:854
+msgid "Series {seriesNumber}"
+msgstr "Series {seriesNumber}"
+
 #: src/components/schedule-assistant/settings/courses/CourseBlocksEditor.tsx:21
-msgid "Series blocks"
-msgstr "Series blocks"
+#~ msgid "Series blocks"
+#~ msgstr "Series blocks"
+
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:582
+msgid "Series template"
+msgstr "Series template"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:105
-msgid "Series window"
-msgstr "Series window"
+#~ msgid "Series window"
+#~ msgstr "Series window"
 
 #: src/app/routes/_with_menu/board-games/index.tsx:21
 msgid "Service for board games reservation."
@@ -6506,6 +7405,15 @@ msgstr "Short Description"
 msgid "Short game description"
 msgstr "Short game description"
 
+#: src/components/schedule-assistant/timetable/CalendarCourseLegendPanel.tsx:33
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:356
+msgid "Short name"
+msgstr "Short name"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:357
+msgid "Short name (RU)"
+msgstr "Short name (RU)"
+
 #: src/components/web-print/PrintPage.tsx:47
 msgid "Show 319 on map"
 msgstr "Show 319 on map"
@@ -6531,6 +7439,15 @@ msgstr "Show best time"
 msgid "Show calendar events"
 msgstr "Show calendar events"
 
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:421
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:452
+msgid "Show dates"
+msgstr "Show dates"
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:446
+msgid "Show dates (→), collapse (←)"
+msgstr "Show dates (→), collapse (←)"
+
 #: src/components/clubs/HowToCreateClubPage.tsx:53
 msgid "Show employers that you're ambitious, broad-minded, and an active person who takes advantage of opportunities."
 msgstr "Show employers that you're ambitious, broad-minded, and an active person who takes advantage of opportunities."
@@ -6539,9 +7456,29 @@ msgstr "Show employers that you're ambitious, broad-minded, and an active person
 msgid "Show final meeting time"
 msgstr "Show final meeting time"
 
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:119
+msgid "Show group in the details panel"
+msgstr "Show group in the details panel"
+
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:280
 msgid "Show hidden"
 msgstr "Show hidden"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:123
+msgid "Show in the details panel"
+msgstr "Show in the details panel"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:128
+msgid "Show instructor “{name}” in the details panel"
+msgstr "Show instructor “{name}” in the details panel"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:117
+msgid "Show instructor in the details panel"
+msgstr "Show instructor in the details panel"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:115
+msgid "Show location in the details panel"
+msgstr "Show location in the details panel"
 
 #: src/components/maps/viewer/MapView.tsx:282
 msgid "Show my location"
@@ -6564,6 +7501,10 @@ msgstr "Show other participants' availability"
 msgid "Show preview"
 msgstr "Show preview"
 
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:121
+msgid "Show program in the details panel"
+msgstr "Show program in the details panel"
+
 #: src/components/tabletennis/TabletennisTournaments.tsx:334
 msgid "Show top 3 only"
 msgstr "Show top 3 only"
@@ -6572,8 +7513,13 @@ msgstr "Show top 3 only"
 msgid "Show VK Zone on map"
 msgstr "Show VK Zone on map"
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:471
+msgid "Showing the first 50 of {resultCount}. Refine your search."
+msgstr "Showing the first 50 of {resultCount}. Refine your search."
+
 #: src/components/common/SignInButton.tsx:25
 #: src/components/onboarding/OnboardingProgress.tsx:7
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:772
 msgid "Sign in"
 msgstr "Sign in"
 
@@ -6599,6 +7545,10 @@ msgstr "Sign in and see your schedule at Innopolis University."
 msgid "Sign in to get access"
 msgstr "Sign in to get access"
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:765
+msgid "Sign in to highlight your groups."
+msgstr "Sign in to highlight your groups."
+
 #: src/components/onboarding/OnboardingSteps.tsx:27
 msgid "Sign in via Innopolis SSO"
 msgstr "Sign in via Innopolis SSO"
@@ -6610,6 +7560,10 @@ msgstr "Sign out"
 #: src/components/onboarding/OnboardingSteps.tsx:262
 msgid "Skip"
 msgstr "Skip"
+
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:519
+msgid "Slot"
+msgstr "Slot"
 
 #: src/components/clubs/EditClubPage.tsx:830
 msgid "Slug"
@@ -6683,6 +7637,12 @@ msgstr "Special rules apply"
 #: src/components/web-print/PrintPage.tsx:628
 msgid "Specific pages"
 msgstr "Specific pages"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:856
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:171
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:425
+msgid "Specify at least one group."
+msgstr "Specify at least one group."
 
 #: src/app/routes/_with_menu/dorms.tsx:19
 msgid "Split duties in your dormitory room."
@@ -6807,8 +7767,8 @@ msgid "Start"
 msgstr "Start"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:157
-msgid "Start (inclusive)"
-msgstr "Start (inclusive)"
+#~ msgid "Start (inclusive)"
+#~ msgstr "Start (inclusive)"
 
 #. placeholder {0}: getName(picked[0]!)
 #. placeholder {1}: getName(picked[1]!)
@@ -6839,6 +7799,10 @@ msgstr "Start time cannot be in the past."
 #: src/components/timer/components/CustomTimeModal.tsx:167
 msgid "Start Timer"
 msgstr "Start Timer"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:420
+msgid "Start: {startError}"
+msgstr "Start: {startError}"
 
 #: src/components/events/drafts/CreateDraftModal.tsx:108
 #: src/components/events/drafts/EditDraftInfoModal.tsx:122
@@ -7041,6 +8005,14 @@ msgstr "Suggestions could not be loaded."
 msgid "Summer countdown"
 msgstr "Summer countdown"
 
+#: src/components/schedule-assistant/settings/weekdays.ts:53
+msgid "Sun"
+msgstr "Sun"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:59
+msgid "Sunday"
+msgstr "Sunday"
+
 #: src/components/layout/SwitchLocaleButton.tsx:10
 msgid "Switch language"
 msgstr "Switch language"
@@ -7072,6 +8044,10 @@ msgstr "System <0>automatically set the number of hours</0> you have accumulated
 #: src/components/editor/menus/BlockTypeDropdown.tsx:116
 msgid "Table"
 msgstr "Table"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2200
+msgid "Table mode"
+msgstr "Table mode"
 
 #: src/app/routes/_with_menu/tabletennis/index.tsx:59
 #: src/app/routes/_with_menu/tabletennis/matches.tsx:17
@@ -7313,6 +8289,10 @@ msgstr "The organiser is forming the groups."
 msgid "The person has to register in table tennis first."
 msgstr "The person has to register in table tennis first."
 
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:640
+msgid "The phase covers the whole study period: every 14 days before and after the anchor week, not starting from this date."
+msgstr "The phase covers the whole study period: every 14 days before and after the anchor week, not starting from this date."
+
 #: src/components/tabletennis/PlayerActionMenu.tsx:279
 msgid "The rating must be a whole number from 0."
 msgstr "The rating must be a whole number from 0."
@@ -7326,8 +8306,8 @@ msgid "The scanner returned nothing. Please try to scan again."
 msgstr "The scanner returned nothing. Please try to scan again."
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:68
-msgid "The selected block does not exist."
-msgstr "The selected block does not exist."
+#~ msgid "The selected block does not exist."
+#~ msgstr "The selected block does not exist."
 
 #: src/components/when2meet/utils/meeting-time-selection.ts:6
 msgid "The selected start time has passed. Choose another time."
@@ -7338,17 +8318,21 @@ msgstr "The selected start time has passed. Choose another time."
 msgid "The selected time must be in the future"
 msgstr "The selected time must be in the future"
 
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:520
+msgid "The series period does not overlap the study period of the selected groups."
+msgstr "The series period does not overlap the study period of the selected groups."
+
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:70
-msgid "The series window does not overlap the selected groups' teaching period."
-msgstr "The series window does not overlap the selected groups' teaching period."
+#~ msgid "The series window does not overlap the selected groups' teaching period."
+#~ msgstr "The series window does not overlap the selected groups' teaching period."
 
 #: src/app/routes/forms.submit.tsx:131
 msgid "The slug parameter is missing or invalid."
 msgstr "The slug parameter is missing or invalid."
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:57
-msgid "The start date must not be after the end date."
-msgstr "The start date must not be after the end date."
+#~ msgid "The start date must not be after the end date."
+#~ msgstr "The start date must not be after the end date."
 
 #: src/components/timer/lib/useTimer.ts:148
 msgid "The timer paused"
@@ -7379,6 +8363,14 @@ msgstr "The website is updated."
 msgid "There are no active reservations."
 msgstr "There are no active reservations."
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1580
+msgid "There are no classes in the timetable yet."
+msgstr "There are no classes in the timetable yet."
+
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:101
+msgid "There are no components without slots in this section."
+msgstr "There are no components without slots in this section."
+
 #: src/components/board-games/ReservationsAdminPage.tsx:210
 msgid "There are no reservations yet."
 msgstr "There are no reservations yet."
@@ -7390,6 +8382,10 @@ msgstr "There is no file to be printed!"
 #: src/components/clubs/HowToCreateClubPage.tsx:205
 msgid "Think about your <0>aims and goals</0> to keep your club going purposefully. Consider writing mission and vision statements to clarify your club's purpose."
 msgstr "Think about your <0>aims and goals</0> to keep your club going purposefully. Consider writing mission and vision statements to clarify your club's purpose."
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:381
+msgid "This class is cancelled in the configuration."
+msgstr "This class is cancelled in the configuration."
 
 #: src/components/clubs/ClubPage.tsx:92
 msgid "This club has changes waiting for admin review."
@@ -7426,6 +8422,11 @@ msgstr "This page is available only for InNoHassle admins."
 #: src/components/when2meet/MeetingPage.tsx:1572
 msgid "This room booking no longer exists."
 msgstr "This room booking no longer exists."
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:718
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:766
+msgid "this same class"
+msgstr "this same class"
 
 #: src/components/account/MyTokenPage.tsx:67
 msgid "This token gives an application full access to your account."
@@ -7464,7 +8465,20 @@ msgstr "This will create a link that automatically fills in the respondent's ema
 msgid "This will permanently remove the last scanned page from the document. Are you sure?"
 msgstr "This will permanently remove the last scanned page from the document. Are you sure?"
 
+#: src/components/schedule-assistant/settings/weekdays.ts:47
+msgid "Thu"
+msgstr "Thu"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:53
+msgid "Thursday"
+msgstr "Thursday"
+
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:8
+msgid "time"
+msgstr "time"
+
 #: src/components/room-booking/tv/RoomTvPage.tsx:200
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:367
 msgid "Time"
 msgstr "Time"
 
@@ -7516,6 +8530,14 @@ msgstr "Timer title..."
 msgid "Timeslots saved"
 msgstr "Timeslots saved"
 
+#: src/app/routes/timetable.tsx:26
+msgid "Timetable"
+msgstr "Timetable"
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:999
+msgid "Timetable composer"
+msgstr "Timetable composer"
+
 #: src/components/editor/extensions/Callout.ts:28
 msgid "Tip"
 msgstr "Tip"
@@ -7529,8 +8551,13 @@ msgstr "TIP"
 #: src/components/clubs/EditClubPage.tsx:814
 #: src/components/guard/CreateSheetPage.tsx:101
 #: src/components/room-booking/tv/RoomTvPage.tsx:194
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:354
 msgid "Title"
 msgstr "Title"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:355
+msgid "Title (RU)"
+msgstr "Title (RU)"
 
 #: src/components/clubs/AddClubDialog.tsx:89
 msgid "Title <0>*</0>"
@@ -7580,6 +8607,7 @@ msgstr "To teach student club leaders to run reports"
 
 #: src/components/calendar/CalendarViewer.tsx:697
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:297
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:647
 #: src/components/sport/SportSchedulePage.tsx:237
 msgid "Today"
 msgstr "Today"
@@ -7620,6 +8648,12 @@ msgstr "Tournament not found."
 #: src/components/tabletennis/TabletennisTabs.tsx:17
 msgid "Tournaments"
 msgstr "Tournaments"
+
+#: src/components/schedule-assistant/timetable/audienceSelectorTree.ts:86
+#: src/components/schedule-assistant/timetable/meetingAudienceSummary.ts:103
+#: src/components/schedule-assistant/timetable/meetingAudienceSummary.ts:156
+msgid "Track"
+msgstr "Track"
 
 #: src/components/sport/SportProfilePage.tsx:19
 #: src/components/sport/SportTabs.tsx:25
@@ -7671,6 +8705,14 @@ msgstr "Try again"
 #: src/components/layout/Offline.tsx:61
 msgid "Try to disable VPN and connect to University WiFi, then reload the page."
 msgstr "Try to disable VPN and connect to University WiFi, then reload the page."
+
+#: src/components/schedule-assistant/settings/weekdays.ts:43
+msgid "Tue"
+msgstr "Tue"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:49
+msgid "Tuesday"
+msgstr "Tuesday"
 
 #. placeholder {0}: lastApproval.roomId
 #. placeholder {1}: new Date(lastApproval.at).toLocaleString(i18n.locale, { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", })
@@ -7729,6 +8771,10 @@ msgstr "Unban user"
 #: src/components/editor/menus/EditorMenuItems.tsx:55
 msgid "Underline"
 msgstr "Underline"
+
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:28
+msgid "Undesirable time"
+msgstr "Undesirable time"
 
 #: src/components/editor/menus/EditorMenuItems.tsx:129
 msgid "Undo"
@@ -7795,6 +8841,11 @@ msgstr "Unpublished"
 msgid "Unsaved changes"
 msgstr "Unsaved changes"
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:984
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:57
+msgid "Unscheduled"
+msgstr "Unscheduled"
+
 #: src/components/clubs/ClubLeaguePage.tsx:162
 msgid "Unspent points from last semester expire"
 msgstr "Unspent points from last semester expire"
@@ -7854,6 +8905,10 @@ msgstr "Upgrade to Advanced"
 #: src/components/web-print/WebPrintLandingPage.tsx:40
 msgid "Upload a file, pick a printer, send the job"
 msgstr "Upload a file, pick a printer, send the job"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1539
+msgid "Upload config.yaml in the “Settings” tab."
+msgstr "Upload config.yaml in the “Settings” tab."
 
 #: src/components/clubs/EditClubPage.tsx:652
 msgid "Upload new logo"
@@ -7966,6 +9021,10 @@ msgstr "View"
 #: src/components/when2meet/MeetingPage.tsx:1746
 msgid "View all"
 msgstr "View all"
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:1011
+msgid "View as student"
+msgstr "View as student"
 
 #: src/components/sport/SportTrainerTrainingModal.tsx:142
 msgid "View attendee"
@@ -8085,6 +9144,13 @@ msgctxt "callout"
 msgid "WARNING"
 msgstr "WARNING"
 
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:97
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:203
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:264
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:159
+msgid "Was:"
+msgstr "Was:"
+
 #: src/components/about/AboutPage.tsx:201
 msgid "We are an official Innopolis University club. The <0/> community strives to improve the place where we live and grow. We often host movie nights, club presentations, and workshops."
 msgstr "We are an official Innopolis University club. The <0/> community strives to improve the place where we live and grow. We often host movie nights, club presentations, and workshops."
@@ -8149,6 +9215,14 @@ msgstr "Webvisor (innohassle.ru)"
 msgid "Webvisor (sport.innopolis.university)"
 msgstr "Webvisor (sport.innopolis.university)"
 
+#: src/components/schedule-assistant/settings/weekdays.ts:45
+msgid "Wed"
+msgstr "Wed"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:51
+msgid "Wednesday"
+msgstr "Wednesday"
+
 #: src/components/calendar/CalendarViewer.tsx:76
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:300
 msgid "Week"
@@ -8160,9 +9234,29 @@ msgstr "Week"
 msgid "Week {week}"
 msgstr "Week {week}"
 
+#: src/components/schedule-assistant/timetable/timetableCalendarModel.ts:235
+msgid "Week {weekNumber}"
+msgstr "Week {weekNumber}"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1551
+msgid "Week {weekNumber}/{weekCount}: {weekRange}"
+msgstr "Week {weekNumber}/{weekCount}: {weekRange}"
+
 #: src/components/tabletennis/DrawTable.tsx:27
 msgid "Week of {day}"
 msgstr "Week of {day}"
+
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:9
+msgid "weekday"
+msgstr "weekday"
+
+#: src/components/schedule-assistant/DateInput.tsx:306
+msgid "Weekday differs from the template"
+msgstr "Weekday differs from the template"
+
+#: src/components/schedule-assistant/timetable/SessionSeriesEditor.tsx:54
+msgid "Weekly"
+msgstr "Weekly"
 
 #: src/components/about/AboutPage.tsx:23
 msgid "Welcome to <0/><1>one-zero-eight</1> community!"
@@ -8191,9 +9285,17 @@ msgstr "When available"
 msgid "When can people meet?"
 msgstr "When can people meet?"
 
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:215
+msgid "When opened:"
+msgstr "When opened:"
+
 #: src/components/clubs/HowToCreateClubPage.tsx:113
 msgid "When registering your club, you'll need to choose one of the following categories. Each type has specific criteria in the Club League."
 msgstr "When registering your club, you'll need to choose one of the following categories. Each type has specific criteria in the Club League."
+
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:671
+msgid "Who can teach"
+msgstr "Who can teach"
 
 #: src/components/tabletennis/PlayersField.tsx:429
 msgid "Who is it?"
@@ -8203,17 +9305,25 @@ msgstr "Who is it?"
 msgid "Who we are"
 msgstr "Who we are"
 
-#: src/components/schedule-assistant/settings/courses/CourseBlocksEditor.tsx:38
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:101
+msgid "whole semester"
+msgstr "whole semester"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:563
 msgid "Whole semester"
 msgstr "Whole semester"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:139
-msgid "Whole semester (groups' teaching period)"
-msgstr "Whole semester (groups' teaching period)"
+#~ msgid "Whole semester (groups' teaching period)"
+#~ msgstr "Whole semester (groups' teaching period)"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:22
 msgid "Why Create a Club?"
 msgstr "Why Create a Club?"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1016
+msgid "will be added to the existing series"
+msgstr "will be added to the existing series"
 
 #: src/components/tabletennis/TabletennisPage.tsx:142
 msgid "Win rate"
@@ -8411,6 +9521,10 @@ msgstr "Your avatar"
 msgid "Your changes have been saved."
 msgstr "Your changes have been saved."
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:754
+msgid "Your classes"
+msgstr "Your classes"
+
 #: src/components/clubs/ClubsListPage.tsx:142
 msgid "Your club"
 msgstr "Your club"
@@ -8434,6 +9548,10 @@ msgstr "Your GPA:"
 #: src/components/schedule/group-card/FavoriteButton.tsx:20
 msgid "Your group from official lists"
 msgstr "Your group from official lists"
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:795
+msgid "Your groups and teaching classes were not found yet. You can still browse the whole timetable."
+msgstr "Your groups and teaching classes were not found yet. You can still browse the whole timetable."
 
 #: src/components/sport/sport-checkin-utils.ts:94
 msgid "Your medical group ({medicalGroup}) is not eligible for this training."

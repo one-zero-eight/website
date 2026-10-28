@@ -1,3 +1,5 @@
+import { i18n } from "@lingui/core";
+import { useLingui } from "@lingui/react/macro";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/ui/cn";
 import Tooltip from "@/components/common/Tooltip.tsx";
@@ -16,7 +18,7 @@ import {
 
 export function formatMeetingDateShort(date: string) {
   const value = new Date(`${date}T12:00:00`);
-  return new Intl.DateTimeFormat("ru-RU", {
+  return new Intl.DateTimeFormat(i18n.locale, {
     day: "numeric",
     month: "short",
     ...(value.getFullYear() !== new Date().getFullYear()
@@ -26,7 +28,7 @@ export function formatMeetingDateShort(date: string) {
 }
 
 export function shortMeetingWeekday(date: string) {
-  return new Intl.DateTimeFormat("ru-RU", { weekday: "short" })
+  return new Intl.DateTimeFormat(i18n.locale, { weekday: "short" })
     .format(new Date(`${date}T12:00:00`))
     .replace(/^./u, (letter) => letter.toUpperCase());
 }
@@ -77,6 +79,7 @@ export function MeetingInstanceMetadata({
   showInstructor?: boolean;
   className?: string;
 }) {
+  const { t } = useLingui();
   const instructorLabelById = buildInstructorLabelById(config);
   const timeRange = end ? `${start || ""}–${end}` : start?.trim() || "—";
   const dateLabel = date ? formatMeetingDateShort(date) : "—";
@@ -98,7 +101,7 @@ export function MeetingInstanceMetadata({
     <MeetingMetadataField
       kind="schedule"
       weekly={weekly}
-      title="Дата и время"
+      title={t`Date and time`}
       iconTooltip={
         scheduleTooltip
           ? (icon) => <Tooltip content={scheduleTooltip}>{icon}</Tooltip>
@@ -111,7 +114,7 @@ export function MeetingInstanceMetadata({
   );
 
   const audienceField = (
-    <MeetingMetadataField kind="audience" title="Группы">
+    <MeetingMetadataField kind="audience" title={t`Groups`}>
       <MeetingAudienceInline config={config} groupIds={groups || []} />
     </MeetingMetadataField>
   );
@@ -122,7 +125,7 @@ export function MeetingInstanceMetadata({
         left={scheduleField}
         right={
           showRoom ? (
-            <MeetingMetadataField kind="room" title="Локация">
+            <MeetingMetadataField kind="room" title={t`Location`}>
               {roomLabel}
             </MeetingMetadataField>
           ) : undefined
@@ -132,7 +135,7 @@ export function MeetingInstanceMetadata({
         left={audienceField}
         right={
           showInstructor ? (
-            <MeetingMetadataField kind="instructor" title="Преподаватели">
+            <MeetingMetadataField kind="instructor" title={t`Instructors`}>
               {onSelectInstructor && instructorIds.length ? (
                 <span className="inline-flex flex-wrap gap-x-2">
                   {instructorIds.map((id) => (

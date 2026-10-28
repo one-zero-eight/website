@@ -19,6 +19,7 @@ import {
   expandWeeklySlotsToEvents,
   serializeWeeklyEventsToSlots,
 } from "./editableSessionEvents.ts";
+import { activeForBlock } from "./sessionWindows.ts";
 import {
   applyMeetingEditsToCourse,
   applySeriesScheduleToCourse,
@@ -28,6 +29,7 @@ import { applyCreateMeetingToCourse } from "./createMeetingUtils.ts";
 import { weeklyPickerSlots } from "./meetingPickerSchedule.ts";
 import { draftMeetingsFromWeeklySlots } from "./sessionSeriesRows.tsx";
 import { normalizeWeeklySlot, weeklyRowMarks } from "./sessionRowMarks.ts";
+import type { SessionWindowValue } from "./sessionSeriesRows.tsx";
 import { roomAvailabilityForSlot } from "./roomPickerOptions.ts";
 import { instructorAvailabilityForSlot } from "./instructorPickerOptions.ts";
 import { countCourseLessonsByInstructor } from "@/components/schedule-assistant/settings/courses/courseInstructorLessonCounts.ts";
@@ -337,17 +339,16 @@ describe("weekly alternation", () => {
         ],
       },
     };
-    let restoredWindow = {
-      active: null as null,
-      block_id: "second" as string | null,
+    let restoredWindow: SessionWindowValue = {
+      active: activeForBlock("second"),
     };
     const marks = weeklyRowMarks({
       current: slot,
       original: slot,
       weekdayLabel: "Вт",
       config,
-      window: { active: null, block_id: "second" },
-      originalWindow: { active: null, block_id: "first" },
+      window: { active: activeForBlock("second") },
+      originalWindow: { active: activeForBlock("first") },
       onRestore: () => undefined,
       onRestoreWindow: (window) => {
         restoredWindow = window;
@@ -356,7 +357,7 @@ describe("weekly alternation", () => {
     expect(marks.alternation?.mark).toBe("changed");
     expect(marks.alternation?.originalLabel).toContain("Блок 1");
     marks.alternation?.onRestore?.();
-    expect(restoredWindow).toEqual({ active: null, block_id: "first" });
+    expect(restoredWindow).toEqual({ active: activeForBlock("first") });
   });
 
   it("materializes only active dates and detects lossy reverse conversion", () => {

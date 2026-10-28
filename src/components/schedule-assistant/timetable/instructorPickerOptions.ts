@@ -1,4 +1,8 @@
 import { createElement } from "react";
+import {
+  localizedInstructorName,
+  meetingCourseShortTitle,
+} from "./localizedNames.ts";
 
 import {
   InstructorSlotPreferenceLevel,
@@ -104,13 +108,7 @@ export function countInstructorDailyLoad(
 export function instructorPickerLabel(
   instructor: Pick<SchemaInstructor, "id" | "name_en" | "name_ru" | "email">,
 ): string {
-  return (
-    instructor.name_en?.trim() ||
-    instructor.name_ru?.trim() ||
-    instructor.email?.trim() ||
-    String(instructor.id || "").trim() ||
-    ""
-  );
+  return localizedInstructorName(instructor);
 }
 
 function normalizeHhmm(value: string | undefined): string {
@@ -142,8 +140,7 @@ function resolveMeetingEnd(
 }
 
 function conflictMeetingLabel(meeting: Meeting): string {
-  const title =
-    String(meeting.course_short_name || meeting.course || "").trim() || "—";
+  const title = meetingCourseShortTitle(meeting) || "—";
   const tag = String(meeting.tag || "").trim();
   return tag ? `${title} (${tag})` : title;
 }

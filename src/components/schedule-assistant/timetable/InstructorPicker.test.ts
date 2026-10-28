@@ -1,3 +1,5 @@
+import { i18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { beforeEach, expect, it, vi } from "vitest";
@@ -36,23 +38,27 @@ it("checks instructors only on source dates inside the selected session window",
   try {
     await act(async () =>
       root.render(
-        createElement(InstructorPicker, {
-          config,
-          meetings: [],
-          meetingIndex: null,
-          value: "",
-          weekday: "Tue",
-          weeklySlot: {
-            weekday: Weekday.TUESDAY,
-            start_time: "09:00:00",
-            end_time: "10:30:00",
-          },
-          audienceTokens: [],
-          active,
-          start: "09:00",
-          end: "10:30",
-          onChange: vi.fn(),
-        }),
+        createElement(
+          I18nProvider,
+          { i18n },
+          createElement(InstructorPicker, {
+            config,
+            meetings: [],
+            meetingIndex: null,
+            value: "",
+            weekday: "Tue",
+            weeklySlot: {
+              weekday: Weekday.TUESDAY,
+              start_time: "09:00:00",
+              end_time: "10:30:00",
+            },
+            audienceTokens: [],
+            active,
+            start: "09:00",
+            end: "10:30",
+            onChange: vi.fn(),
+          }),
+        ),
       ),
     );
     expect(mocks.buildOptions).toHaveBeenCalled();

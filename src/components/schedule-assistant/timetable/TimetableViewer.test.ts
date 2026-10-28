@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 afterEach(() => vi.unstubAllGlobals());
 import { Weekday } from "@/api/schedule-assistant/types.ts";
 import { ToastProvider } from "@/components/toast";
+import { i18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import {
   COMPACT_GROUPS_SLOT_ROW_CLASS,
   GROUPS_MEETING_BODY_CLASS,
@@ -81,17 +83,16 @@ describe("read-only timetable capability boundary", () => {
       }));
       const html = renderToStaticMarkup(
         createElement(
-          ToastProvider,
-          null,
-          createElement(TimetableViewer, { mode: "view", config }),
+          I18nProvider,
+          { i18n },
+          createElement(
+            ToastProvider,
+            null,
+            createElement(TimetableViewer, { mode: "view", config }),
+          ),
         ),
       );
-      for (const label of [
-        "Добавить занятие",
-        "Редактировать",
-        "Экспорт XLSX",
-        "Нераспределённые",
-      ])
+      for (const label of ["Add class", "Edit", "Export XLSX", "Unscheduled"])
         expect(html).not.toContain(label);
     },
   );

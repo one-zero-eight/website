@@ -101,12 +101,23 @@ const courseComponentsRootSchema = {
         end_date: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$" },
       },
     },
+    blockRef: {
+      type: "object",
+      additionalProperties: false,
+      required: ["block"],
+      properties: { block: { type: "string", minLength: 1 } },
+    },
     componentSessionSeries: {
       type: "object",
       additionalProperties: false,
       properties: {
-        active: { anyOf: [{ type: "null" }, { $ref: "#/$defs/dateRange" }] },
-        block_id: { anyOf: [{ type: "null" }, { type: "string" }] },
+        active: {
+          anyOf: [
+            { type: "null" },
+            { $ref: "#/$defs/dateRange" },
+            { $ref: "#/$defs/blockRef" },
+          ],
+        },
         audience: {
           type: "array",
           items: { type: "string" },

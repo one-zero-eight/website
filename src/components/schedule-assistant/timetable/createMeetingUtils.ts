@@ -2,12 +2,13 @@ import type {
   SchemaComponent,
   SchemaComponentSessionSeries,
   SchemaCourseConfig,
-  SchemaDateRange,
   SchemaScheduleConfig,
+  SchemaSessionActiveWindow,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
+import { t } from "@lingui/core/macro";
 import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { termWeekdayKeyToWeekday } from "@/components/schedule-assistant/settings/weekdays.ts";
@@ -80,8 +81,7 @@ export type CourseComponentCreateOption = {
 };
 
 export type CreateMeetingDraft = {
-  block_id?: string | null;
-  active?: SchemaDateRange | null;
+  active?: SchemaSessionActiveWindow | null;
   notes?: string;
   courseIdx: number;
   componentIdx: number;
@@ -228,7 +228,7 @@ function placementProgress(
   component: SchemaComponent,
   sessions: SchemaComponentSessionSeries[],
   config: SchemaScheduleConfig,
-  active?: SchemaDateRange | null,
+  active?: SchemaSessionActiveWindow | null,
 ) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
   const countsByWeek = new Map<string, number>();
@@ -268,7 +268,6 @@ function placementProgress(
         { ...slot, alternation: null },
         audience,
         series.active,
-        series.block_id,
       )) {
         addPlacement(date);
       }
@@ -316,7 +315,6 @@ function semesterOccurrenceCount(
           slot,
           audienceTokens,
           series.active,
-          series.block_id,
         ),
       0,
     );
@@ -355,17 +353,14 @@ export function findMatchingSessionSeries(
   audience: string[],
   config: SchemaScheduleConfig,
   sectionCode: string,
-  active?: SchemaDateRange | null,
-  blockId?: string | null,
+  active?: SchemaSessionActiveWindow | null,
 ): SchemaComponentSessionSeries | null {
   const tree = buildAudienceSelectorTree(config, { sectionCode });
   const targetAudience = minimizeAudienceTokens(audience, tree);
   if (!targetAudience.length) return null;
 
-  const sessions = (component.sessions || []).filter(
-    (series) =>
-      (series.block_id ?? null) === (blockId ?? null) &&
-      sessionActiveEqual(series.active, active),
+  const sessions = (component.sessions || []).filter((series) =>
+    sessionActiveEqual(series.active, active),
   );
   if (!sessions.length) return null;
 
@@ -481,8 +476,7 @@ function findOrCreateSessionSeries(
   audience: string[],
   config: SchemaScheduleConfig,
   sectionCode: string,
-  active?: SchemaDateRange | null,
-  blockId?: string | null,
+  active?: SchemaSessionActiveWindow | null,
 ): SchemaComponentSessionSeries {
   const matched = findMatchingSessionSeries(
     component,
@@ -490,14 +484,12 @@ function findOrCreateSessionSeries(
     config,
     sectionCode,
     active,
-    blockId,
   );
   if (matched) return matched;
 
   if (!component.sessions) component.sessions = [];
   const created: SchemaComponentSessionSeries = {
     active: active ? structuredClone(active) : null,
-    block_id: blockId ?? null,
     audience: seriesAudienceForCreate(component, audience, config, sectionCode),
     weekly_pattern: [],
     dates_pattern: [],
@@ -511,8 +503,7 @@ export function previewCreateSeriesAction(
   audience: string[],
   config: SchemaScheduleConfig,
   sectionCode: string,
-  active?: SchemaDateRange | null,
-  blockId?: string | null,
+  active?: SchemaSessionActiveWindow | null,
 ): CreateSeriesAction {
   return findMatchingSessionSeries(
     component,
@@ -520,7 +511,6 @@ export function previewCreateSeriesAction(
     config,
     sectionCode,
     active,
-    blockId,
   )
     ? "append"
     : "create";
@@ -531,7 +521,7 @@ export function componentScheduleStatus(
   config: SchemaScheduleConfig,
   sectionCode: string,
   focusGroupId?: string,
-  active?: SchemaDateRange | null,
+  active?: SchemaSessionActiveWindow | null,
 ): ComponentScheduleStatus {
   if (component.per_group && !focusGroupId) {
     const pool = expandedAudience(config, component.audience || []);
@@ -581,9 +571,9 @@ export function componentScheduleStatus(
 export function componentScheduleStatusLabel(
   status: ComponentScheduleStatus,
 ): string {
-  if (status === "empty") return "не расставлено";
-  if (status === "partial") return "частично расставлено";
-  return "всё расставлено";
+  if (status === "empty") return t`not scheduled`;
+  if (status === "partial") return t`partially scheduled`;
+  return t`fully scheduled`;
 }
 
 /** Placed/target for a component, optionally scoped to one per_group audience. */
@@ -592,7 +582,7 @@ export function componentProgressHint(
   config: SchemaScheduleConfig,
   sectionCode: string,
   focusGroupId?: string,
-  active?: SchemaDateRange | null,
+  active?: SchemaSessionActiveWindow | null,
 ): string {
   const relevant = relevantSessionsForProgress(
     component,
@@ -615,7 +605,7 @@ export function courseComponentOptions(
   courses: SchemaCourseConfig[],
   config?: SchemaScheduleConfig,
   view?: CreateMeetingViewContext,
-  active?: SchemaDateRange | null,
+  active?: SchemaSessionActiveWindow | null,
 ): CourseComponentCreateOption[] {
   const options: CourseComponentCreateOption[] = [];
   const focusGroupId = view?.groupId;
@@ -658,7 +648,7 @@ export function courseComponentOptions(
             )
           : "create";
       const statusLabel = componentScheduleStatusLabel(status);
-      const modeLabel = perGroup ? "по группам" : "";
+      const modeLabel = perGroup ? t`by groups` : "";
 
       options.push({
         value: `${courseIdx}:${componentIdx}`,
@@ -717,8 +707,7 @@ export function defaultCreatePlacement(
   audience: string[],
   config: SchemaScheduleConfig,
   layoutMode: TimetableLayoutMode,
-  active?: SchemaDateRange | null,
-  blockId?: string | null,
+  active?: SchemaSessionActiveWindow | null,
 ): CreatePlacement {
   const layoutDefault = placementFromLayout(layoutMode);
   if (!course || componentIdx == null || componentIdx < 0) return layoutDefault;
@@ -732,7 +721,6 @@ export function defaultCreatePlacement(
     config,
     course.section_code,
     active,
-    blockId,
   );
   if (matched) return seriesPlacement(matched) ?? layoutDefault;
   return layoutDefault;
@@ -745,7 +733,7 @@ export function createWouldUseOccurrences(
   audience: string[],
   config: SchemaScheduleConfig,
   layoutMode: TimetableLayoutMode,
-  active?: SchemaDateRange | null,
+  active?: SchemaSessionActiveWindow | null,
 ): boolean {
   return (
     defaultCreatePlacement(
@@ -833,7 +821,7 @@ export function suggestPlacementResources({
   componentIdx: number;
   audience: string[];
   layoutMode: TimetableLayoutMode;
-  active?: SchemaDateRange | null;
+  active?: SchemaSessionActiveWindow | null;
 }): PlacementResourceSuggestion {
   const component = course.components?.[componentIdx];
   if (!component || !audience.length) {
@@ -937,7 +925,6 @@ export function applyCreateMeetingToCourse(
     config,
     course.section_code,
     draft.active,
-    draft.block_id,
   );
 
   if (draft.notes !== undefined) nextCourse.notes = draft.notes;
@@ -958,7 +945,6 @@ export function applyCreateMeetingToCourse(
         ),
         room: String(occurrence.room || "").trim() || null,
         instructor: occurrence.instructor ?? null,
-        notes: occurrence.notes ?? null,
       })),
     ];
     return nextCourse;

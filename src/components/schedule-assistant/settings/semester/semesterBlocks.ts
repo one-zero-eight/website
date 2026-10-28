@@ -81,13 +81,15 @@ export function splitSemesterInTwo(semester: SemesterPeriod): SemesterBlock[] {
   return [
     {
       id: "block-1",
-      name: "Блок 1",
+      name: "Block 1",
+      name_ru: "Блок 1",
       start_date: semester.start_date,
       end_date: dayToDate(midpoint),
     },
     {
       id: "block-2",
-      name: "Блок 2",
+      name: "Block 2",
+      name_ru: "Блок 2",
       start_date: dayToDate(midpoint + 1),
       end_date: semester.end_date,
     },

@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+
 /** Shared compact-audience hint props for edit / create / series. */
 export function audienceSummaryHintProps({
   perGroup,
@@ -18,24 +20,24 @@ export function audienceSummaryHintProps({
 } {
   const trimmed = componentLabel.trim();
   const patternLabelPrefix = perGroup
-    ? "по группам"
+    ? t`by group`
     : context === "template"
-      ? "в шаблоне"
+      ? t`in template`
       : context === "series"
-        ? "у компонента"
-        : "В компоненте";
+        ? t`from component`
+        : t`In component`;
 
   return {
-    labelPrefix: perGroup ? "Группа" : "Группы",
+    labelPrefix: perGroup ? t`Group` : t`Groups`,
     patternLabelPrefix,
     patternLabel:
-      perGroup && trimmed ? `одна из ${trimmed}` : trimmed || undefined,
+      perGroup && trimmed ? t`one of ${trimmed}` : trimmed || undefined,
     emptyLabel:
       emptyLabel ??
       (perGroup
-        ? "Выберите группу"
+        ? t`Select a group`
         : context === "series"
-          ? "Как у компонента"
+          ? t`Same as component`
           : "—"),
   };
 }

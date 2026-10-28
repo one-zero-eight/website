@@ -1,11 +1,15 @@
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { describe, expect, it, vi } from "vitest";
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import { InstructorPicker } from "./InstructorPicker.tsx";
 import { RoomSelect } from "./sessionSeriesRows.tsx";
 import { buildMeetingPickerIndex } from "./meetingPickerIndex.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
+
+const i18n = setupI18n({ locale: "en", messages: {} });
 
 const { buildOptions } = vi.hoisted(() => ({
   buildOptions: vi.fn(({ selection }: { selection?: Meeting[] }) => [
@@ -69,9 +73,13 @@ describe("resource picker conflict scope", () => {
         onChange: vi.fn(),
       };
       const render = (pickerSelection?: Meeting[]) =>
-        kind === "room"
-          ? createElement(RoomSelect, { ...props, pickerSelection })
-          : createElement(InstructorPicker, { ...props, pickerSelection });
+        createElement(
+          I18nProvider,
+          { i18n },
+          kind === "room"
+            ? createElement(RoomSelect, { ...props, pickerSelection })
+            : createElement(InstructorPicker, { ...props, pickerSelection }),
+        );
       try {
         await act(async () => root.render(render()));
         buildOptions.mockClear();

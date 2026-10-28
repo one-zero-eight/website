@@ -1,12 +1,13 @@
 import type {
   SchemaCourseConfig,
-  SchemaDateRange,
   SchemaScheduleConfig,
+  SchemaSessionActiveWindow,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
-import { TERM_WEEKDAY_LABEL_RU } from "@/components/schedule-assistant/settings/weekdays.ts";
+import { termWeekdayShortLabel } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { cn } from "@/lib/ui/cn";
+import { Trans } from "@lingui/react/macro";
 import { useMemo, type ReactNode } from "react";
 
 import type { MeetingRef } from "./meetingEditUtils.ts";
@@ -50,7 +51,7 @@ export function SessionPlacementToggle({
         disabled={disabled}
         onClick={() => onChange("weekly")}
       >
-        Еженедельно
+        <Trans>Weekly</Trans>
       </button>
       <button
         type="button"
@@ -61,7 +62,7 @@ export function SessionPlacementToggle({
         disabled={disabled}
         onClick={() => onChange("dates_pattern")}
       >
-        Даты
+        <Trans>Dates</Trans>
       </button>
     </div>
   );
@@ -82,9 +83,7 @@ export function SessionSeriesEditor({
   onOccurrencesChange,
   audienceTokens,
   active,
-  blockId = null,
   originalActive,
-  originalBlockId,
   onSessionWindowChange,
   weeklyContextForIndex,
   courseInstructors,
@@ -128,17 +127,13 @@ export function SessionSeriesEditor({
   occurrences: SchemaSessionOccurrence[];
   onOccurrencesChange: (occurrences: SchemaSessionOccurrence[]) => void;
   audienceTokens: string[];
-  active?: SchemaDateRange | null;
-  blockId?: string | null;
-  originalActive?: SchemaDateRange | null;
-  originalBlockId?: string | null;
+  active?: SchemaSessionActiveWindow | null;
+  originalActive?: SchemaSessionActiveWindow | null;
   onSessionWindowChange?: (window: {
-    active: SchemaDateRange | null;
-    block_id: string | null;
+    active: SchemaSessionActiveWindow | null;
   }) => void;
   weeklyContextForIndex?: (index: number) => {
-    active?: SchemaDateRange | null;
-    blockId?: string | null;
+    active?: SchemaSessionActiveWindow | null;
     audienceTokens: string[];
   };
   courseInstructors?: SchemaCourseConfig["instructors"];
@@ -305,7 +300,7 @@ export function SessionSeriesEditor({
             ])
           }
         >
-          + Дата
+          <Trans>+ Date</Trans>
         </button>
       </div>
     ) : (
@@ -319,12 +314,11 @@ export function SessionSeriesEditor({
             !deleted;
           const context = weeklyContextForIndex?.(index) ?? {
             active,
-            blockId,
             audienceTokens,
           };
           const original = originalWeeklySlots?.[index];
           const originalWeekdayLabel = original
-            ? TERM_WEEKDAY_LABEL_RU[weekdayToKey(String(original.weekday))]
+            ? termWeekdayShortLabel(weekdayToKey(String(original.weekday)))
             : "";
           return (
             <div key={`wp-${index}`} className={rowFocusClass(index, deleted)}>
@@ -340,15 +334,10 @@ export function SessionSeriesEditor({
                     index,
                     deletedWeekly,
                     lockedRowCount,
-                    sessionWindowRange(
-                      config,
-                      context.active ?? active,
-                      context.blockId ?? blockId,
-                    ),
+                    sessionWindowRange(config, context.active ?? active),
                   )}
                   slot={slot}
                   active={context.active ?? active}
-                  blockId={context.blockId ?? blockId}
                   onSessionWindowChange={
                     locked ? undefined : onSessionWindowChange
                   }
@@ -369,11 +358,9 @@ export function SessionSeriesEditor({
                     config,
                     window: {
                       active: context.active ?? active ?? null,
-                      block_id: context.blockId ?? blockId ?? null,
                     },
                     originalWindow: {
                       active: originalActive ?? active ?? null,
-                      block_id: originalBlockId ?? blockId ?? null,
                     },
                     onRestoreWindow: onSessionWindowChange,
                     onRestore: (next) => {
@@ -407,7 +394,7 @@ export function SessionSeriesEditor({
             ])
           }
         >
-          + Слот
+          <Trans>+ Slot</Trans>
         </button>
       </div>
     );

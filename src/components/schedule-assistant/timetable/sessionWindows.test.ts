@@ -24,7 +24,11 @@ import {
   roomAvailabilityForSlot,
   roomPickerDatesForEdit,
 } from "./roomPickerOptions.ts";
-import { matchSessionBlock, resolveSessionWindow } from "./sessionWindows.ts";
+import {
+  activeForBlock,
+  matchSessionBlock,
+  resolveSessionWindow,
+} from "./sessionWindows.ts";
 import {
   activeWeeklySlotDates,
   buildMeetings,
@@ -89,6 +93,7 @@ function configFor(): SchemaScheduleConfig {
       {
         name: "Math",
         section_code: "core",
+        notes: "",
         components: [
           {
             tag: "lec",
@@ -209,33 +214,35 @@ describe("session windows", () => {
     const config = configFor();
     const series = {
       audience: ["G1"],
-      active: null,
-      block_id: "first",
+      active: activeForBlock("first"),
       weekly_pattern: [slot],
     };
     config.courses![0].components[0].sessions = [series];
     expect(matchSessionBlock(config, "first")?.id).toBe("first");
     expect(matchSessionBlock(config, "second")?.id).toBe("second");
     expect(matchSessionBlock(config, null)).toBeNull();
-    expect(resolveSessionWindow(config, ["G1"], null, "missing")).toBeNull();
-    expect(resolveSessionWindow(config, ["G1"], null, "first")).toEqual(first);
+    expect(
+      resolveSessionWindow(config, ["G1"], activeForBlock("missing")),
+    ).toBeNull();
+    expect(
+      resolveSessionWindow(config, ["G1"], activeForBlock("first")),
+    ).toEqual(first);
     expect(buildMeetings(config).map((meeting) => meeting.date)).toEqual([
       "2026-09-01",
       "2026-09-08",
       "2026-09-15",
     ]);
     config.term.blocks![0].end_date = "2026-09-08";
-    expect(resolveSessionWindow(config, ["G1"], null, "first")?.end_date).toBe(
-      "2026-09-08",
-    );
+    expect(
+      resolveSessionWindow(config, ["G1"], activeForBlock("first"))?.end_date,
+    ).toBe("2026-09-08");
     expect(buildMeetings(config).map((meeting) => meeting.date)).toEqual([
       "2026-09-01",
       "2026-09-08",
     ]);
     expect(series).toEqual({
       audience: ["G1"],
-      active: null,
-      block_id: "first",
+      active: activeForBlock("first"),
       weekly_pattern: [slot],
     });
     expect(resolveSessionWindow(config, ["G1"], first)).toEqual(first);
@@ -520,13 +527,11 @@ describe("session window consumers", () => {
               tag: "lec",
               sessions: [
                 {
-                  active: null,
-                  block_id: "first",
+                  active: activeForBlock("first"),
                   weekly_pattern: [slot],
                 },
                 {
-                  active: null,
-                  block_id: "second",
+                  active: activeForBlock("second"),
                   weekly_pattern: [slot],
                 },
               ],
@@ -537,8 +542,8 @@ describe("session window consumers", () => {
     };
     const view = publicTimetableConfig(data);
     expect(view.term.blocks).toEqual(config.term.blocks);
-    expect(view.courses![0].components[0].sessions![1].block_id).toEqual(
-      "second",
+    expect(view.courses![0].components[0].sessions![1].active).toEqual(
+      activeForBlock("second"),
     );
     expect(
       buildMeetings(view).map((meeting) => [meeting.date, meeting.notes]),
@@ -552,7 +557,7 @@ describe("session window consumers", () => {
     data.term.blocks = [];
     expect(matchSessionBlock(publicTimetableConfig(data), "first")).toBeNull();
     delete data.term.blocks;
-    data.courses![0].components[0].sessions![0].block_id = null;
+    data.courses![0].components[0].sessions![0].active = null;
     const fullTermView = publicTimetableConfig(data);
     expect(fullTermView.term.blocks).toEqual([]);
     expect(

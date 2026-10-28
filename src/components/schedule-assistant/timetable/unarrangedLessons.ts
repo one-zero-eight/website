@@ -4,6 +4,12 @@ import type {
   SchemaDateRange,
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
+import { i18n } from "@lingui/core";
+import { t } from "@lingui/core/macro";
+import {
+  localizedCourseName,
+  localizedCourseShortName,
+} from "./localizedNames.ts";
 import {
   buildAudienceSelectorTree,
   minimizeAudienceTokens,
@@ -65,7 +71,7 @@ const STATUS_RANK: Record<ComponentScheduleStatus, number> = {
 };
 
 function courseTitle(course: SchemaCourseConfig) {
-  return String(course.short_name || course.name || "").trim() || "—";
+  return localizedCourseShortName(course) || localizedCourseName(course) || "—";
 }
 
 function componentLabel(
@@ -116,7 +122,7 @@ function buildSessionItem(params: {
     key,
     courseIdx: params.courseIdx,
     componentIdx: params.componentIdx,
-    courseName: String(params.course.name || "").trim(),
+    courseName: localizedCourseName(params.course),
     shortName,
     tag,
     componentLabel: label,
@@ -132,6 +138,9 @@ function buildSessionItem(params: {
       shortName,
       tag,
       params.course.name,
+      params.course.name_ru,
+      params.course.short_name,
+      params.course.short_name_ru,
       audienceLabel,
       progressHint,
     ]
@@ -231,7 +240,7 @@ export function buildUnarrangedComponentGroups(
         if (a.status !== b.status) {
           return STATUS_RANK[a.status] - STATUS_RANK[b.status];
         }
-        return a.audienceLabel.localeCompare(b.audienceLabel, "ru");
+        return a.audienceLabel.localeCompare(b.audienceLabel, i18n.locale);
       });
       const componentStatus = componentScheduleStatus(
         component,
@@ -246,7 +255,7 @@ export function buildUnarrangedComponentGroups(
       const shortName = courseTitle(course);
       const tag = String(component.tag || "").trim() || "—";
       const perGroup = Boolean(component.per_group);
-      const modeLabel = perGroup ? "по группам" : "";
+      const modeLabel = perGroup ? t`by groups` : "";
       const instructorLabel = formatInstructorPoolEntries(
         component.instructor_pool ?? [],
         (id) => resolveInstructorLabel(id, instructorLabelById),
@@ -283,7 +292,7 @@ export function buildUnarrangedComponentGroups(
     if (a.componentStatus !== b.componentStatus) {
       return STATUS_RANK[a.componentStatus] - STATUS_RANK[b.componentStatus];
     }
-    return a.label.localeCompare(b.label, "ru");
+    return a.label.localeCompare(b.label, i18n.locale);
   });
 }
 

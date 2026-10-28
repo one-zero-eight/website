@@ -200,6 +200,10 @@ msgstr "{0} ч"
 msgid "{alias} — Not in schedule"
 msgstr "{alias} — нет в расписании"
 
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:84
+msgid "{audienceSize, plural, one {# student} other {# students}}"
+msgstr "{audienceSize, plural, one {# студ.} few {# студ.} many {# студ.} other {# студ.}}"
+
 #: src/components/when2meet/MeetingMobileBar.tsx:42
 msgid "{availableCount, plural, one {# available:} other {# available:}}"
 msgstr "{availableCount, plural, one {# доступен:} few {# доступны:} many {# доступны:} other {# доступны:}}"
@@ -216,9 +220,21 @@ msgstr "{capacity, plural, one {{enrolledCount} / # студент} few {{enroll
 msgid "{capacity, plural, one {# seat} other {# seats}}"
 msgstr "{capacity, plural, one {# место} few {# места} many {# мест} other {# места}}"
 
+#: src/components/schedule-assistant/timetable/RoomAvailabilityStatusMark.tsx:85
+msgid "{capacity} < {needed} needed"
+msgstr "{capacity} < нужно {needed}"
+
 #: src/components/room-booking/access-level-label.ts:33
 msgid "{capacity} people"
 msgstr "{capacity} чел."
+
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:108
+msgid "{classCount, plural, one {# class} other {# classes}}"
+msgstr "{classCount, plural, one {# занятие} few {# занятия} many {# занятий} other {# занятия}}"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4059
+msgid "{col} (cap. {capacity})"
+msgstr "{col} (вм. {capacity})"
 
 #: src/components/clubs/ClubsAdminPage.tsx:74
 #: src/components/clubs/ClubsSidebar.tsx:28
@@ -230,6 +246,10 @@ msgstr "{count, plural, one {# клуб найден} few {# клуба найд
 #: src/components/clubs/constants.ts:49
 msgid "{count, plural, one {# club} other {# clubs}}"
 msgstr "{count, plural, one {# клуб} few {# клуба} many {# клубов} other {# клубов}}"
+
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:154
+msgid "{dateCount, plural, one {# date} other {# dates}}"
+msgstr "{dateCount, plural, one {# дата} few {# даты} many {# дат} other {# даты}}"
 
 #: src/components/dashboard/CountdownWidget.tsx:112
 msgid "{days, plural, one {# day} other {# days}}, {hours, plural, one {# hour} other {# hours}}, {minutes, plural, one {# minute} other {# minutes}}, {seconds, plural, one {# second} other {# seconds}}"
@@ -292,6 +312,10 @@ msgstr "{hours} ч"
 msgid "{joinsCount, plural, one {# join} other {# joins}}"
 msgstr "{joinsCount, plural, one {# подключение} few {# подключения} many {# подключений} other {# подключения}}"
 
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:43
+msgid "{maximum, plural, one {{countLabel} class} other {{countLabel} classes}}"
+msgstr "{maximum, plural, one {{countLabel} занятие} few {{countLabel} занятия} many {{countLabel} занятий} other {{countLabel} занятия}}"
+
 #: src/components/room-booking/utils.ts:15
 msgid "{minutes}m"
 msgstr "{minutes} мин"
@@ -324,6 +348,18 @@ msgstr "{monthDay}, {time}: ваша доступность отмечена"
 msgid "{pageCount, plural, one {# page} other {# pages}}"
 msgstr "{pageCount, plural, one {# страница} few {# страницы} many {# страниц} other {# страниц}}"
 
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:136
+msgid "{perSemester} / semester"
+msgstr "{perSemester} / семестр"
+
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:132
+msgid "{perWeek} / week"
+msgstr "{perWeek} / неделю"
+
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:147
+msgid "{placed, plural, one {# class scheduled} other {# classes scheduled}}"
+msgstr "{placed, plural, one {размещено # занятие} few {размещено # занятия} many {размещено # занятий} other {размещено # занятия}}"
+
 #. placeholder {0}: training.max_checkins
 #: src/components/sport/SportStudentTrainingModal.tsx:212
 msgid "{placesFree} / {0} free"
@@ -353,6 +389,10 @@ msgstr "{size} КБ"
 msgid "{size} MB"
 msgstr "{size} МБ"
 
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:158
+msgid "{timesPerWeek, plural, one {# time per week} other {# times per week}}"
+msgstr "{timesPerWeek, plural, one {# раз в неделю} few {# раза в неделю} many {# раз в неделю} other {# раза в неделю}}"
+
 #: src/components/sport/SportHistoryPage.tsx:369
 msgid "{totalScore}/{maxScore} {totalScore, plural, one {point} other {points}}"
 msgstr "{totalScore}/{maxScore} {totalScore, plural, one {балл} few {балла} many {баллов} other {балла}}"
@@ -370,9 +410,17 @@ msgstr "*на основе <0>Eduwiki</0>"
 #~ msgid "#RRGGBB"
 #~ msgstr "#RRGGBB"
 
+#: src/components/schedule-assistant/timetable/SessionSeriesEditor.tsx:303
+msgid "+ Date"
+msgstr "+ Дата"
+
 #: src/components/tabletennis/ValidationMatches.tsx:514
 msgid "+ New group"
 msgstr "+ Новая группа"
+
+#: src/components/schedule-assistant/timetable/SessionSeriesEditor.tsx:397
+msgid "+ Slot"
+msgstr "+ Слот"
 
 #: src/components/timer/components/AddTimeButtons.tsx:28
 msgid "+{minutes} min"
@@ -441,6 +489,10 @@ msgstr "<0>компенсация</0> — если вы участвуете в 
 #: src/components/scholarship/ScholarshipPage.tsx:118
 msgid "<0>support</0> — if you require financial assistance due to personal or unexpected reasons, you can <1>submit a financial support application</1> to 319."
 msgstr "<0>поддержка</0> — если нужна финансовая помощь по личным или непредвиденным причинам, вы можете <1>подать заявку на финансовую поддержку</1> в 319."
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:822
+msgid "<0>Teaching</0><1> · </1>classes where you are the instructor"
+msgstr "<0>Веду</0><1> · </1>занятия, где вы преподаватель"
 
 #: src/components/sport/SportSchedulePage.tsx:58
 msgid "<0>To remove</0> the DEBTOR status you should clear the debt bar, attending <1>on trainings</1>.<2/>Closing the debt is <3>required to pass the sport course</3>."
@@ -526,6 +578,10 @@ msgstr "6 страниц"
 #: src/components/web-print/LayoutSelector.tsx:39
 msgid "9 pages"
 msgstr "9 страниц"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1018
+msgid "a new series will be created"
+msgstr "будет создана новая серия"
 
 #: src/components/clubs/ClubPage.tsx:165
 #: src/components/clubs/EditClubPage.tsx:900
@@ -614,6 +670,7 @@ msgstr "Активные турниры"
 msgid "Activity link"
 msgstr "Ссылка на активность"
 
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1263
 #: src/components/sport/SportTrainerTrainingModal.tsx:601
 #: src/components/tabletennis/LiveTournament.tsx:280
 msgid "Add"
@@ -623,9 +680,25 @@ msgstr "Добавить"
 msgid "Add {maxHours}"
 msgstr "Добавить {maxHours}"
 
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:523
+msgid "Add at least one class."
+msgstr "Добавьте хотя бы одно занятие."
+
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:34
+msgid "Add at least one date."
+msgstr "Добавьте хотя бы одну дату."
+
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:50
+msgid "Add at least one slot."
+msgstr "Добавьте хотя бы один слот."
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:746
 msgid "Add board game"
 msgstr "Добавить игру"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1696
+msgid "Add class"
+msgstr "Добавить занятие"
 
 #: src/components/events/drafts/DraftHostsSection.tsx:449
 msgid "Add club"
@@ -638,6 +711,10 @@ msgstr "Добавить столбец слева"
 #: src/components/editor/menus/EditorMenuItems.tsx:110
 msgid "Add column right"
 msgstr "Добавить столбец справа"
+
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:691
+msgid "Add date"
+msgstr "Добавить дату"
 
 #: src/components/admin/AddPredefinedEmailForm.tsx:47
 msgid "Add email"
@@ -767,6 +844,10 @@ msgstr "Продвинутые"
 msgid "AI Assistant:"
 msgstr "ИИ-ассистент:"
 
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:86
+msgid "Alias"
+msgstr "Alias"
+
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:214
 msgid "All"
 msgstr "Все"
@@ -828,6 +909,10 @@ msgstr "Перед публикацией ваши изменения долже
 #: src/components/admin/AdminUserDetails.tsx:218
 msgid "Analytics"
 msgstr "Аналитика"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:625
+msgid "Anchor active week"
+msgstr "Опорная активная неделя"
 
 #: src/components/web-print/ScanPage.tsx:608
 msgid "Applicable only for automatic mode"
@@ -1169,6 +1254,11 @@ msgstr "Маркированный список"
 msgid "Busy"
 msgstr "Занято"
 
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:101
+#: src/components/schedule-assistant/timetable/RoomAvailabilityStatusMark.tsx:90
+msgid "Busy at the selected time on {conflictDateCount} of {checkedDateCount} dates"
+msgstr "В выбранное время занято в {conflictDateCount} из {checkedDateCount} дат"
+
 #: src/components/clubs/ClubLeaguePage.tsx:205
 msgid "Buying food for events is prohibited now."
 msgstr "Покупка еды для мероприятий сейчас запрещена."
@@ -1176,6 +1266,36 @@ msgstr "Покупка еды для мероприятий сейчас зап�
 #: src/components/tabletennis/Registration.tsx:44
 msgid "By clicking the button, you agree to be displayed in the overall player chart"
 msgstr "Нажимая кнопку, вы соглашаетесь на отображение в общей таблице игроков"
+
+#: src/components/schedule-assistant/timetable/TimetableLayoutSelector.tsx:19
+msgid "By days"
+msgstr "По дням"
+
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:23
+msgid "by group"
+msgstr "по группам"
+
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:661
+#: src/components/schedule-assistant/timetable/createMeetingUtils.ts:651
+#: src/components/schedule-assistant/timetable/unarrangedLessons.ts:258
+msgid "by groups"
+msgstr "по группам"
+
+#: src/components/schedule-assistant/timetable/TimetableLayoutSelector.tsx:17
+msgid "By groups"
+msgstr "По группам"
+
+#: src/components/schedule-assistant/timetable/TimetableLayoutSelector.tsx:18
+msgid "By groups (compact)"
+msgstr "По группам (компактно)"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2191
+msgid "By instructors"
+msgstr "По преподавателям"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2192
+msgid "By locations"
+msgstr "По локациям"
 
 #: src/components/tabletennis/ValidationMatches.tsx:411
 msgid "By rating"
@@ -1193,6 +1313,7 @@ msgstr "Рассчитайте стипендию в Университете И
 #: src/components/events/EventsTabs.tsx:11
 #: src/components/layout/BottomNavigation.tsx:43
 #: src/components/music-room/MusicRoomPageTabs.tsx:8
+#: src/components/schedule-assistant/DateInput.tsx:323
 #: src/components/schedule/EventGroupPage.tsx:97
 #: src/components/sport/SportTabs.tsx:15
 msgid "Calendar"
@@ -1261,6 +1382,10 @@ msgstr "Можно играть сейчас"
 #: src/components/room-booking/timeline/BookingModal.tsx:701
 #: src/components/room-booking/timeline/BookingModal.tsx:735
 #: src/components/room-booking/timeline/BookingTimeline.tsx:738
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1253
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:236
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:296
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:73
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:86
 #: src/components/tabletennis/ArchivedTournament.tsx:65
 #: src/components/tabletennis/CreateTournamentForm.tsx:120
@@ -1293,6 +1418,10 @@ msgstr "Отмена"
 #: src/components/when2meet/MeetingRoomModal.tsx:235
 msgid "Cancel booking"
 msgstr "Отменить бронирование"
+
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:283
+msgid "Cancel class"
+msgstr "Отменить занятие"
 
 #: src/components/tabletennis/ValidationMatches.tsx:707
 msgid "Cancel match"
@@ -1328,6 +1457,12 @@ msgstr "Отменить бронирование комнаты для этой
 msgid "Cancel this match"
 msgstr "Отменить этот матч"
 
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:363
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:87
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:170
+msgid "Cancelled"
+msgstr "Отменено"
+
 #: src/components/sport/SportStudentTrainingModal.tsx:261
 msgid "Cannot check in"
 msgstr "Нельзя записаться"
@@ -1342,8 +1477,8 @@ msgstr "Нельзя отклонить без комментария"
 
 #: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:148
 #: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:177
-msgid "Cannot delete a block referenced by series: {references}. Change their windows first."
-msgstr "Нельзя удалить блок, на который ссылаются серии: {references}. Сначала измените их периоды."
+#~ msgid "Cannot delete a block referenced by series: {references}. Change their windows first."
+#~ msgstr "Нельзя удалить блок, на который ссылаются серии: {references}. Сначала измените их периоды."
 
 #: src/components/when2meet/MeetingPage.tsx:1056
 msgid "Cannot select a past time"
@@ -1358,6 +1493,10 @@ msgstr "Нельзя поставить таймер на 0 секунд"
 #: src/components/room-booking/rooms-list/RoomsList.tsx:69
 msgid "Capacity"
 msgstr "Вместимость"
+
+#: src/components/schedule-assistant/timetable/roomPickerOptions.ts:566
+msgid "Capacity {capacity}"
+msgstr "Вместимость {capacity}"
 
 #: src/components/events/drafts/CreateDraftModal.tsx:80
 #: src/components/events/drafts/EditDraftInfoModal.tsx:94
@@ -1408,8 +1547,8 @@ msgid "Change room"
 msgstr "Сменить комнату"
 
 #: src/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx:205
-msgid "Changing block dates automatically updates bound series windows. Custom windows and explicit meeting dates are not moved."
-msgstr "Изменение дат блока автоматически обновляет периоды привязанных серий. Произвольные периоды и конкретные даты занятий не сдвигаются."
+#~ msgid "Changing block dates automatically updates bound series windows. Custom windows and explicit meeting dates are not moved."
+#~ msgstr "Изменение дат блока автоматически обновляет периоды привязанных серий. Произвольные периоды и конкретные даты занятий не сдвигаются."
 
 #: src/components/clubs/constants.ts:83
 msgid "Channel"
@@ -1537,6 +1676,23 @@ msgstr "Выбрать лучшее время"
 msgid "Chrome extension"
 msgstr "Расширение для Chrome"
 
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:387
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2405
+msgid "Class"
+msgstr "Занятие"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2405
+msgid "Class · {course}"
+msgstr "Занятие · {course}"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:647
+msgid "Class dates: {previewDates}."
+msgstr "Даты занятий: {previewDates}."
+
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:88
+msgid "Classes this semester"
+msgstr "Занятия за семестр"
+
 #: src/components/when2meet/MeetingMobileBar.tsx:112
 #: src/components/when2meet/MeetingPage.tsx:1353
 msgid "Clear all"
@@ -1555,13 +1711,19 @@ msgid "Clear input"
 msgstr "Очистить поле"
 
 #: src/components/clubs/EditClubPage.tsx:754
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:81
 msgid "Clear selection"
 msgstr "Сбросить выбор"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2637
+msgid "Click a cell or a header in the timetable to see details here."
+msgstr "Кликните по ячейке или заголовку в расписании — здесь появятся детали."
 
 #: src/components/editor/extensions/image/ImageUploadPlaceholderNodeView.tsx:90
 msgid "Click to upload or paste an image"
 msgstr "Нажмите, чтобы загрузить, или вставьте изображение"
 
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
 #: src/components/sport/SportOverviewSection.tsx:669
 #: src/components/sport/SportStudentTrainingModal.tsx:362
 #: src/components/sport/SportTrainerAttendanceModal.tsx:148
@@ -1763,12 +1925,20 @@ msgstr "Заполните официальную форму регистрац�
 msgid "Completed tournaments"
 msgstr "Завершённые турниры"
 
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:219
+msgid "Component {componentNumber}"
+msgstr "Компонент {componentNumber}"
+
 #: src/components/calendar/CalendarViewer.tsx:723
 #: src/components/calendar/CalendarViewer.tsx:866
 #: src/components/calendar/ConfigCalendarDialog.tsx:43
 #: src/components/layout/UserMenu.tsx:138
 msgid "Config & Export"
 msgstr "Настройки и экспорт"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:613
+msgid "config.yaml does not look like a schedule config (no term)."
+msgstr "config.yaml не похож на конфиг расписания (нет term)."
 
 #: src/components/web-print/FileDropzone.tsx:231
 msgid "Configure settings and start scanning — preview will appear here"
@@ -1844,6 +2014,10 @@ msgstr "Продолжить"
 #: src/app/routes/_with_menu/extension.tsx:19
 msgid "Convenient tools for Moodle, InNoHassle and other services at Innopolis University."
 msgstr "Удобные инструменты для Moodle, InNoHassle и других сервисов Университета Иннополис."
+
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:334
+msgid "Converting to a weekly template will change the set of class dates. Classes may be added on previously inactive weeks, or one-off exceptions may disappear. Apply the conversion?"
+msgstr "Преобразование в еженедельный шаблон изменит набор дат занятий. Могут добавиться занятия на ранее неактивных неделях или исчезнуть разовые исключения. Применить преобразование?"
 
 #: src/components/when2meet/MeetingPage.tsx:1401
 msgid "Copied"
@@ -2001,12 +2175,33 @@ msgstr "Не удалось подключиться к серверам InNoHas
 msgid "Countdown Timer"
 msgstr "Таймер"
 
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:462
+msgid "Course"
+msgstr "Предмет"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1001
+msgid "Course · component"
+msgstr "Предмет · компонент"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:214
+msgid "Course components"
+msgstr "Компоненты курса"
+
+#: src/components/schedule-assistant/timetable/CalendarCourseLegendPanel.tsx:36
+msgid "Course name"
+msgstr "Название курса"
+
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:418
+msgid "Course not found in the configuration."
+msgstr "Курс не найден в конфигурации."
+
 #: src/components/scholarship/ScholarshipCalculator.tsx:228
 msgid "Course:"
 msgstr "Курс:"
 
 #: src/components/clubs/AddClubDialog.tsx:178
 #: src/components/events/drafts/CreateDraftModal.tsx:197
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1265
 #: src/components/tabletennis/CreateTournamentForm.tsx:130
 #: src/components/tabletennis/TabletennisTournaments.tsx:225
 #: src/components/when2meet/CreationPage.tsx:463
@@ -2028,6 +2223,10 @@ msgstr "Создать новую защищённую таблицу с нул�
 #: src/components/clubs/HowToCreateClubPage.tsx:226
 msgid "Create an <0>avatar or logo</0> for your club."
 msgstr "Создайте <0>логотип</0> для клуба."
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:982
+msgid "Create class"
+msgstr "Создать занятие"
 
 #: src/components/events/drafts/CreateDraftModal.tsx:97
 #: src/components/events/drafts/DraftsPage.tsx:116
@@ -2150,6 +2349,10 @@ msgstr "Спортивные часы: {earned} из {required} + {debt} (дол
 msgid "Current Trainings"
 msgstr "Текущие тренировки"
 
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:1064
+msgid "Current week"
+msgstr "Текущая неделя"
+
 #. placeholder {0}: impersonatingUser.name
 #: src/components/admin/ImpersonateCard.tsx:28
 msgid "Currently impersonating {0}"
@@ -2160,8 +2363,8 @@ msgid "Custom display label"
 msgstr "Своя подпись"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:150
-msgid "Custom window"
-msgstr "Свой период"
+#~ msgid "Custom window"
+#~ msgstr "Свой период"
 
 #: src/components/sport/sport-checkin-utils.ts:136
 msgid "Daily limit for the same sport: 2 sport hours (usually 1 training)."
@@ -2177,9 +2380,43 @@ msgstr "Дневной лимит: 4 спортивных часа (обычно
 msgid "Dashboard"
 msgstr "Главная"
 
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:558
+msgid "Date"
+msgstr "Дата"
+
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:538
+msgid "Date {date} in row {row} is outside the series period."
+msgstr "Дата {date} в строке {row} вне периода серии."
+
 #: src/components/tabletennis/CreateTournamentForm.tsx:103
 msgid "Date <0>(optional, today if empty)</0>"
 msgstr "Дата <0>(необязательно, по умолчанию — сегодня)</0>"
+
+#: src/components/schedule-assistant/timetable/MeetingInstanceMetadata.tsx:104
+msgid "Date and time"
+msgstr "Дата и время"
+
+#: src/components/schedule-assistant/DateInput.tsx:207
+msgid "Date is outside the allowed period"
+msgstr "Дата вне допустимого периода"
+
+#: src/components/schedule-assistant/timetable/SessionSeriesEditor.tsx:65
+msgid "Dates"
+msgstr "Даты"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1014
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:3170
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:3595
+msgid "Day"
+msgstr "День"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4040
+msgid "Day / time"
+msgstr "День / время"
+
+#: src/components/schedule-assistant/DateInput.tsx:284
+msgid "dd.mm.yyyy"
+msgstr "дд.мм.гггг"
 
 #: src/components/sport/SportOverviewSection.tsx:130
 msgid "Deadline:"
@@ -2281,6 +2518,11 @@ msgstr "Удалить календарь"
 msgid "Delete column"
 msgstr "Удалить столбец"
 
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:284
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1201
+msgid "Delete date"
+msgstr "Удалить дату"
+
 #: src/components/events/drafts/DraftPage.tsx:297
 #: src/components/events/drafts/DraftPage.tsx:697
 msgid "Delete draft"
@@ -2327,6 +2569,10 @@ msgstr "Удалить строку"
 msgid "Delete sheet"
 msgstr "Удалить таблицу"
 
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1036
+msgid "Delete slot"
+msgstr "Удалить слот"
+
 #. placeholder {0}: getName(scoring.p1)
 #. placeholder {1}: getName(scoring.p2)
 #: src/components/tabletennis/ValidationMatches.tsx:708
@@ -2358,6 +2604,12 @@ msgstr "Удалить турнир"
 #: src/components/board-games/UserReservationDetailsModal.tsx:72
 msgid "Delete your reservation for {gameTitle}? This action cannot be undone."
 msgstr "Удалить ваше бронирование игры «{gameTitle}»? Это действие нельзя отменить."
+
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:365
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1118
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1273
+msgid "Deleted"
+msgstr "Удалено"
 
 #: src/components/room-booking/timeline/BookingModal.tsx:748
 msgid "Deleting booking..."
@@ -2400,6 +2652,14 @@ msgstr "Подробные критерии начисления баллов в
 #: src/components/clubs/ClubCard.tsx:95
 msgid "Details"
 msgstr "Подробнее"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2628
+msgid "Details for this selection will appear later."
+msgstr "Детали этого выбора появятся позже."
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2634
+msgid "Details panel is empty"
+msgstr "Панель деталей пуста"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:32
 msgid "Develop Soft Skills"
@@ -2459,6 +2719,10 @@ msgstr "Общежитие"
 #: src/app/routes/_with_menu/dorms.tsx:23
 msgid "Dorms"
 msgstr "Dorms"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1023
+msgid "Dot: not scheduled / partially / fully scheduled."
+msgstr "Точка: не расставлено / частично / всё расставлено."
 
 #: src/components/tabletennis/PlayerActionMenu.tsx:179
 msgid "Downgrade to Beginner"
@@ -2545,6 +2809,8 @@ msgstr "Не удалось загрузить заработанные спор
 #: src/components/clubs/ClubAdminCard.tsx:71
 #: src/components/events/drafts/DraftPage.tsx:580
 #: src/components/room-booking/timeline/BookingModal.tsx:787
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:255
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:396
 msgid "Edit"
 msgstr "Редактировать"
 
@@ -2627,12 +2893,17 @@ msgstr "Отредактируйте таблицу или поделитесь 
 msgid "Edit this calendar"
 msgstr "Редактировать календарь"
 
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:76
+msgid "Edit: {prefix}"
+msgstr "Изменить: {prefix}"
+
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:199
-msgid "Effective window for the selected groups:"
-msgstr "Фактический период с учётом выбранных групп:"
+#~ msgid "Effective window for the selected groups:"
+#~ msgstr "Фактический период с учётом выбранных групп:"
 
 #: src/components/admin/AdminUserDetails.tsx:266
 #: src/components/clubs/EditClubPage.tsx:976
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:79
 msgid "Email"
 msgstr "Почта"
 
@@ -2646,8 +2917,8 @@ msgid "End"
 msgstr "Конец"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:172
-msgid "End (inclusive)"
-msgstr "Окончание (включительно)"
+#~ msgid "End (inclusive)"
+#~ msgstr "Окончание (включительно)"
 
 #: src/components/sport/SportOverviewSection.tsx:645
 msgid "End date"
@@ -2660,6 +2931,10 @@ msgstr "Время окончания должно быть позже врем�
 #: src/components/when2meet/CreationPage.tsx:202
 msgid "End time must be later than start time."
 msgstr "Время окончания должно быть позже времени начала."
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:421
+msgid "End: {endError}"
+msgstr "Конец: {endError}"
 
 #: src/components/events/drafts/CreateDraftModal.tsx:121
 #: src/components/events/drafts/EditDraftInfoModal.tsx:135
@@ -2679,6 +2954,7 @@ msgid "Enrolled trainings could not be loaded."
 msgstr "Не удалось загрузить записанные тренировки."
 
 #: src/components/events/shared/EnrollmentFields.tsx:82
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:666
 msgid "Enrollment"
 msgstr "Запись"
 
@@ -2695,9 +2971,33 @@ msgstr "URL записи"
 msgid "Enrollment URL is required for external enrollment."
 msgstr "Для внешней регистрации необходимо указать ссылку."
 
+#: src/components/schedule-assistant/DateInput.tsx:203
+msgid "Enter a date"
+msgstr "Укажите дату"
+
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:528
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:38
+msgid "Enter a date for row {row}."
+msgstr "Укажите дату для строки {row}."
+
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:54
+msgid "Enter a day for row {row}."
+msgstr "Укажите день для строки {row}."
+
 #: src/components/forms/FormsPage.tsx:178
 msgid "Enter a form URL to generate a link with the respondent's email pre-filled"
 msgstr "Введите URL формы, чтобы создать ссылку с заранее заполненным email респондента"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:264
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:269
+msgid "Enter a time"
+msgstr "Укажите время"
+
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:531
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:41
+#: src/components/schedule-assistant/timetable/sessionSeriesValidation.ts:57
+msgid "Enter a time for row {row}."
+msgstr "Укажите время для строки {row}."
 
 #: src/components/admin/usePredefinedDataEditor.ts:65
 msgid "Enter a valid email."
@@ -2729,8 +3029,8 @@ msgid "Enter title..."
 msgstr "Введите название..."
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:55
-msgid "Enter valid start and end dates."
-msgstr "Укажите корректные даты начала и окончания."
+#~ msgid "Enter valid start and end dates."
+#~ msgstr "Укажите корректные даты начала и окончания."
 
 #: src/app/routes/guard.google.files.$slug.join.tsx:94
 msgid "Enter your Gmail address to get access to the Google Spreadsheet"
@@ -2785,6 +3085,19 @@ msgstr "Оборудование"
 #: src/components/events/submissions/SubmissionPage.tsx:105
 #: src/components/events/submissions/SubmissionPage.tsx:119
 #: src/components/forms/FormsPage.tsx:36
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:846
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:850
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:855
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:869
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:905
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:941
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:171
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:303
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:418
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:424
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:443
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:455
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:499
 #: src/components/sport/SportOverviewSection.tsx:266
 #: src/components/sport/SportOverviewSection.tsx:463
 #: src/components/sport/SportOverviewSection.tsx:576
@@ -2894,9 +3207,88 @@ msgstr "Мероприятия"
 msgid "Every criterion requires proof"
 msgstr "Каждый критерий требует подтверждения"
 
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:101
+msgid "every Friday"
+msgstr "каждую пятницу"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:77
+msgid "Every Friday"
+msgstr "Каждую пятницу"
+
 #: src/components/tabletennis/ValidationMatches.tsx:536
 msgid "Every group needs at least 2 players."
 msgstr "В каждой группе нужно минимум 2 игрока."
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:93
+msgid "every Monday"
+msgstr "каждый понедельник"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:69
+msgid "Every Monday"
+msgstr "Каждый понедельник"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:461
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:604
+msgid "Every other week"
+msgstr "Через неделю"
+
+#: src/components/schedule-assistant/timetable/sessionRowMarks.ts:38
+msgid "Every other week · {anchorWeek}"
+msgstr "Через неделю · {anchorWeek}"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:177
+msgid "Every other week · {weekday}"
+msgstr "Через неделю · {weekday}"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:103
+msgid "every Saturday"
+msgstr "каждую субботу"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:79
+msgid "Every Saturday"
+msgstr "Каждую субботу"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:105
+msgid "every Sunday"
+msgstr "каждое воскресенье"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:81
+msgid "Every Sunday"
+msgstr "Каждое воскресенье"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:99
+msgid "every Thursday"
+msgstr "каждый четверг"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:75
+msgid "Every Thursday"
+msgstr "Каждый четверг"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:95
+msgid "every Tuesday"
+msgstr "каждый вторник"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:71
+msgid "Every Tuesday"
+msgstr "Каждый вторник"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:97
+msgid "every Wednesday"
+msgstr "каждую среду"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:73
+msgid "Every Wednesday"
+msgstr "Каждую среду"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:90
+msgid "every week"
+msgstr "каждую неделю"
+
+#: src/components/schedule-assistant/timetable/sessionRowMarks.ts:39
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:461
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:603
+msgid "Every week"
+msgstr "Каждую неделю"
 
 #: src/components/when2meet/MeetingPage.tsx:1118
 msgid "Everyone can now see the final meeting time."
@@ -2905,6 +3297,10 @@ msgstr "Теперь всем видно окончательное время �
 #: src/components/tabletennis/QualificationMatches.tsx:226
 msgid "Everyone plays. Group winners are seeded first, then second places and so on. 1st seed meets the last one, players from the same group are kept apart in the first round."
 msgstr "Играют все. Сначала распределяются победители групп, затем занявшие вторые места и так далее. Первый номер посева встречается с последним; игроки из одной группы не встречаются в первом раунде."
+
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:98
+msgid "Everything is scheduled"
+msgstr "Всё размещено"
 
 #: src/components/search/SearchExample.tsx:32
 msgid "Example: <0>{example}</0>"
@@ -2936,10 +3332,22 @@ msgstr "Смотреть расписания"
 msgid "Export"
 msgstr "Экспорт"
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1716
+msgid "Export all sections to XLSX"
+msgstr "Экспорт всех разделов в XLSX"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:529
+msgid "Export error"
+msgstr "Ошибка экспорта"
+
 #: src/components/maps/viewer/MapView.tsx:158
 #: src/components/maps/viewer/MapView.tsx:169
 msgid "Export failed"
 msgstr "Не удалось экспортировать"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1715
+msgid "Export is not available on the instructor and location tabs"
+msgstr "Экспорт недоступен на вкладках преподавателей и локаций"
 
 #: src/components/calendar/ExportModal.tsx:143
 msgid "Export Moodle deadlines"
@@ -2965,6 +3373,10 @@ msgstr "Экспорт спортивных тренировок"
 #: src/components/calendar/ExportModal.tsx:154
 msgid "Export to your calendar"
 msgstr "Экспорт в календарь"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1730
+msgid "Export XLSX"
+msgstr "Экспорт XLSX"
 
 #: src/components/music-room/MusicRoomPage.tsx:104
 msgid "Export your personal calendar"
@@ -3002,9 +3414,25 @@ msgstr "Внешний URL"
 msgid "Fail"
 msgstr "Не сдал"
 
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:499
+msgid "Failed to apply the change to the class."
+msgstr "Не удалось применить изменение к занятию."
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:617
+msgid "Failed to build group columns from the config."
+msgstr "Не удалось построить колонки групп из config."
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:941
+msgid "Failed to create the class."
+msgstr "Не удалось создать занятие."
+
 #: src/components/editor/menus/ImageMenuItems.tsx:68
 msgid "Failed to download image"
 msgstr "Не удалось скачать изображение"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:511
+msgid "Failed to export the timetable"
+msgstr "Не удалось экспортировать расписание"
 
 #: src/components/guard/CopySheetPage.tsx:89
 msgid "Failed to extract Spreadsheet ID"
@@ -3022,9 +3450,17 @@ msgstr "Не удалось загрузить мероприятие."
 msgid "Failed to load submission."
 msgstr "Не удалось загрузить заявку."
 
+#: src/components/schedule-assistant/timetable/PublicTimetablePage.tsx:109
+msgid "Failed to load the timetable: {errorMessage}"
+msgstr "Не удалось загрузить расписание: {errorMessage}"
+
 #: src/components/room-booking/tv/TvCalendarViewer.tsx:53
 msgid "Failed to load TV page"
 msgstr "Не удалось загрузить TV-страницу"
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:783
+msgid "Failed to load your groups: {errorMessage}"
+msgstr "Не удалось загрузить ваши группы: {errorMessage}"
 
 #: src/components/sport/SportOverviewSection.tsx:464
 msgid "Failed to submit medical group change request."
@@ -3080,6 +3516,10 @@ msgstr "Файл ещё не загружен"
 #: src/components/web-print/FileDropzone.tsx:47
 msgid "File is too large!"
 msgstr "Файл слишком большой!"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4226
+msgid "fill {fillPercent}"
+msgstr "заполн. {fillPercent}"
 
 #: src/components/dashboard/links/Links.tsx:141
 msgid "Filter"
@@ -3162,6 +3602,10 @@ msgstr "В первом семестре — стипендия от приём�
 msgid "For the next semesters — using the following formula:"
 msgstr "На следующие семестры — по следующей формуле:"
 
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:29
+msgid "Forbidden time"
+msgstr "Запрещённое время"
+
 #: src/app/routes/forms.submit.tsx:122
 #: src/app/routes/forms.submit.tsx:141
 #: src/app/routes/forms.submit.tsx:155
@@ -3187,9 +3631,25 @@ msgstr "Формы"
 msgid "Founder"
 msgstr "Основатель"
 
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:598
+msgid "Frequency"
+msgstr "Очерёдность"
+
 #: src/app/routes/_with_menu/sport/faq.tsx:22
 msgid "Frequently asked questions about sport at Innopolis University."
 msgstr "Часто задаваемые вопросы о спорте в Университете Иннополис."
+
+#: src/components/schedule-assistant/settings/weekdays.ts:49
+msgid "Fri"
+msgstr "Пт"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:55
+msgid "Friday"
+msgstr "Пятница"
+
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:27
+msgid "from component"
+msgstr "у компонента"
 
 #: src/components/events/event/EventPage.tsx:349
 msgid "Full"
@@ -3203,9 +3663,17 @@ msgstr "Полное и краткое официальные названия"
 msgid "Full name"
 msgstr "Полное имя"
 
+#: src/components/schedule-assistant/timetable/createMeetingUtils.ts:576
+msgid "fully scheduled"
+msgstr "всё расставлено"
+
 #: src/components/events/shared/EventsByDate.tsx:126
 msgid "Future"
 msgstr "Текущие"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:1068
+msgid "Future week"
+msgstr "Будущая неделя"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:42
 msgid "Gain Practical Experience"
@@ -3330,6 +3798,10 @@ msgstr "Укажите адрес Gmail"
 msgid "Go To"
 msgstr "Перейти"
 
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:300
+msgid "Go to {navigationTarget}"
+msgstr "Перейти к {navigationTarget}"
+
 #: src/components/dashboard/DashboardPage.tsx:48
 msgid "Go to calendar"
 msgstr "В календарь"
@@ -3351,6 +3823,14 @@ msgstr "Перейти в профиль"
 msgid "Go to Registration Form"
 msgstr "Перейти к форме регистрации"
 
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:337
+msgid "Go to selected above"
+msgstr "К выбранному выше"
+
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:352
+msgid "Go to selected below"
+msgstr "К выбранному ниже"
+
 #: src/components/calendar/CalendarEventPopover.tsx:281
 msgid "Go to source"
 msgstr "Перейти к источнику"
@@ -3367,6 +3847,10 @@ msgstr "Перейти в личный кабинет"
 msgid "Go today"
 msgstr "Сегодня"
 
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:654
+msgid "Goal"
+msgstr "Цель"
+
 #: src/components/calendar/ExportModal.tsx:106
 msgid "Google Calendar"
 msgstr "Google Календарь"
@@ -3375,11 +3859,17 @@ msgstr "Google Календарь"
 msgid "Green"
 msgstr "Зелёный"
 
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:31
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:277
 #: src/components/schedule/EventGroupPage.tsx:30
 #: src/components/schedule/EventGroupPage.tsx:36
 #: src/components/schedule/EventGroupPage.tsx:67
 msgid "Group"
 msgstr "Группа"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2410
+msgid "Group · {value}"
+msgstr "Группа · {value}"
 
 #: src/components/tabletennis/ValidationMatches.tsx:1255
 msgid "Group {name}"
@@ -3403,6 +3893,13 @@ msgid "Group stage"
 msgstr "Групповой этап"
 
 #: src/components/onboarding/OnboardingProgress.tsx:10
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:680
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:31
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:55
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:185
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:251
+#: src/components/schedule-assistant/timetable/MeetingInstanceMetadata.tsx:117
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:807
 #: src/components/tabletennis/ValidationMatches.tsx:329
 #: src/components/tabletennis/ValidationMatches.tsx:380
 msgid "Groups"
@@ -3493,6 +3990,11 @@ msgstr "Скрыть лучшее время"
 #: src/components/when2meet/AvailabilitySelector.tsx:1475
 msgid "Hide calendar events"
 msgstr "Скрыть события календаря"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:421
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:451
+msgid "Hide dates"
+msgstr "Скрыть даты"
 
 #: src/components/when2meet/AvailabilitySelector.tsx:1513
 msgid "Hide final meeting time"
@@ -3625,6 +4127,10 @@ msgstr "Важные правила"
 msgid "Importing {0} / {1}"
 msgstr "Импорт {0} / {1}"
 
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:28
+msgid "In component"
+msgstr "В компоненте"
+
 #: src/components/clubs/ClubLeaguePage.tsx:76
 msgid "In controversial situations decision is made by <0>@T_Konovalov</0>"
 msgstr "В спорных ситуациях решение принимает <0>@T_Konovalov</0>"
@@ -3641,14 +4147,23 @@ msgstr "В избранном"
 msgid "In storage"
 msgstr "На складе"
 
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:25
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:56
+msgid "in template"
+msgstr "в шаблоне"
+
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:277
+msgid "In template: {patternLabel}"
+msgstr "В шаблоне: {patternLabel}"
+
 #: src/components/clubs/ClubAdminCard.tsx:53
 #: src/components/clubs/ClubPage.tsx:133
 msgid "Inactive"
 msgstr "Неактивно"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:203
-msgid "inclusive; days: {dayCount}"
-msgstr "включительно; дней: {dayCount}"
+#~ msgid "inclusive; days: {dayCount}"
+#~ msgstr "включительно; дней: {dayCount}"
 
 #: src/components/web-print/PrintPage.tsx:187
 msgid "Incorrect page range format."
@@ -3757,6 +4272,30 @@ msgstr "Установите расширение для браузеров на
 msgid "Instructions"
 msgstr "Инструкции"
 
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:10
+msgid "instructor"
+msgstr "преподаватель"
+
+#: src/components/schedule-assistant/timetable/CalendarCourseLegendPanel.tsx:39
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:68
+#: src/components/schedule-assistant/timetable/InstructorPicker.tsx:201
+msgid "Instructor"
+msgstr "Преподаватель"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2412
+msgid "Instructor · {value}"
+msgstr "Преподаватель · {value}"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:480
+#: src/components/schedule-assistant/timetable/MeetingInstanceMetadata.tsx:138
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4020
+msgid "Instructors"
+msgstr "Преподаватели"
+
+#: src/components/schedule-assistant/timetable/RoomAvailabilityStatusMark.tsx:84
+msgid "Insufficient capacity"
+msgstr "Недостаточная вместимость"
+
 #: src/components/extension/ExtensionPage.tsx:43
 msgid "Integrated AI search engine for all Moodle materials"
 msgstr "Интегрированный ИИ-поиск по всем материалам Moodle"
@@ -3768,6 +4307,10 @@ msgstr "До Introduction to <0/>"
 #: src/components/dashboard/CountdownWidget.tsx:43
 msgid "Introduction to 108 countdown"
 msgstr "До Introduction to 108"
+
+#: src/components/schedule-assistant/DateInput.tsx:205
+msgid "Invalid date"
+msgstr "Некорректная дата"
 
 #: src/components/events/drafts/CreateDraftModal.tsx:77
 #: src/components/events/drafts/EditDraftInfoModal.tsx:91
@@ -3786,6 +4329,11 @@ msgstr "Некорректные данные организатора"
 #: src/components/events/drafts/DraftLinksSection.tsx:140
 msgid "Invalid link"
 msgstr "Неверная ссылка"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:267
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:272
+msgid "Invalid time"
+msgstr "Некорректное время"
 
 #: src/components/events/drafts/DraftHostsSection.tsx:537
 msgid "Invite"
@@ -4034,6 +4582,10 @@ msgstr "Загрузка деталей текущего бронировани�
 msgid "Loading search results..."
 msgstr "Загрузка результатов поиска..."
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2094
+msgid "Loading table…"
+msgstr "Загрузка таблицы…"
+
 #: src/components/about/TeamMembers.tsx:218
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:197
 msgid "Loading..."
@@ -4043,10 +4595,20 @@ msgstr "Загрузка..."
 msgid "Locales"
 msgstr "Локали"
 
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:7
+msgid "location"
+msgstr "локация"
+
 #: src/components/events/shared/LocationField.tsx:73
+#: src/components/schedule-assistant/timetable/MeetingInstanceMetadata.tsx:128
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:936
 #: src/components/sport/SportStudentTrainingModal.tsx:269
 msgid "Location"
 msgstr "Место"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2414
+msgid "Location · {value}"
+msgstr "Локация · {value}"
 
 #: src/components/maps/viewer/MapView.tsx:105
 msgid "Location access denied"
@@ -4056,6 +4618,7 @@ msgstr "Доступ к геолокации запрещён"
 msgid "Location unavailable"
 msgstr "Геолокация недоступна"
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4025
 #: src/components/web-print/WebPrintLandingPage.tsx:63
 msgid "Locations"
 msgstr "Локации"
@@ -4269,10 +4832,15 @@ msgid "Meeting was created without an id."
 msgstr "Встреча создана без id."
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:206
-msgid "meetings: {occurrenceCount}"
-msgstr "занятий: {occurrenceCount}"
+#~ msgid "meetings: {occurrenceCount}"
+#~ msgstr "занятий: {occurrenceCount}"
 
 #: src/app/routes/_with_menu/menu.tsx:15
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:937
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:953
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1706
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1902
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2575
 msgid "Menu"
 msgstr "Меню"
 
@@ -4300,6 +4868,7 @@ msgstr "Минуты"
 msgid "Missing a training session may lead to certain consequences, including temporary restrictions on future training check-ins."
 msgstr "Пропуск тренировки может повлечь последствия, в том числе временное ограничение записи на следующие тренировки."
 
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:659
 #: src/components/web-print/ScanPage.tsx:555
 msgid "Mode"
 msgstr "Режим"
@@ -4311,6 +4880,14 @@ msgstr "Отзыв модератора"
 #: src/components/clubs/EditClubPage.tsx:1308
 msgid "Modified"
 msgstr "Изменено"
+
+#: src/components/schedule-assistant/settings/weekdays.ts:41
+msgid "Mon"
+msgstr "Пн"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:47
+msgid "Monday"
+msgstr "Понедельник"
 
 #: src/components/calendar/CalendarViewer.tsx:77
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:301
@@ -4387,6 +4964,14 @@ msgstr "Мои брони"
 msgid "My dashboard"
 msgstr "Мой кабинет"
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2740
+msgid "My group"
+msgstr "Моя группа"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1593
+msgid "My groups"
+msgstr "Мои группы"
+
 #: src/components/tabletennis/TabletennisTabs.tsx:14
 msgid "My matches"
 msgstr "Мои матчи"
@@ -4404,6 +4989,7 @@ msgstr "Мои ближайшие тренировки"
 #: src/components/clubs/ClubPage.tsx:278
 #: src/components/clubs/EditClubPage.tsx:963
 #: src/components/events/drafts/DraftHostsSection.tsx:560
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:73
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:338
 msgid "Name"
 msgstr "Имя"
@@ -4447,6 +5033,10 @@ msgstr "Ошибка сети: {message}"
 #: src/components/clubs/HowToCreateClubPage.tsx:37
 msgid "Networking Opportunities"
 msgstr "Возможности для нетворкинга"
+
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:27
+msgid "Neutral time"
+msgstr "Нейтральное время"
 
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:420
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:428
@@ -4509,6 +5099,11 @@ msgstr "Следующая страница"
 msgid "Next reservations"
 msgstr "Следующие бронирования"
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:858
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1658
+msgid "Next week"
+msgstr "Следующая неделя"
+
 #: src/components/tabletennis/MergeGuestModal.tsx:107
 msgid "Nickname or email"
 msgstr "Никнейм или email"
@@ -4534,12 +5129,16 @@ msgid "No active tournaments. Create one to start managing groups and the qualif
 msgstr "Нет активных турниров. Создайте турнир, чтобы начать группы и квалификацию."
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:193
-msgid "No additional restriction; using groups' teaching periods."
-msgstr "Без дополнительного ограничения; используются учебные периоды групп."
+#~ msgid "No additional restriction; using groups' teaching periods."
+#~ msgstr "Без дополнительного ограничения; используются учебные периоды групп."
 
 #: src/components/events/submissions/SubmissionsPage.tsx:29
 msgid "No approved submissions."
 msgstr "Нет одобренных заявок."
+
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:91
+msgid "No assigned classes."
+msgstr "Назначенных занятий нет."
 
 #: src/components/sport/SportTrainerTrainingModal.tsx:421
 msgid "No attendees match the selected hour filters."
@@ -4549,6 +5148,10 @@ msgstr "Нет участников, подходящих под выбранн�
 #: src/components/sport/SportTrainerTrainingModal.tsx:425
 msgid "No attendees yet."
 msgstr "Пока нет участников."
+
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:137
+msgid "No audience to schedule"
+msgstr "Нет аудитории для размещения"
 
 #: src/components/guard/BannedList.tsx:33
 msgid "No banned users"
@@ -4566,6 +5169,29 @@ msgstr "Нет изменений для проверки"
 msgid "No changes to review for this club."
 msgstr "Нет изменений для проверки у этого клуба."
 
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:455
+msgid "No changes to save."
+msgstr "Нет изменений для сохранения."
+
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:91
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:30
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:52
+#: src/components/schedule-assistant/timetable/RoomAvailabilityStatusMark.tsx:80
+msgid "No class dates"
+msgstr "Нет дат проведения"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1581
+msgid "No classes found in config.yaml."
+msgstr "В config.yaml не найдено занятий."
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:868
+msgid "No classes next week."
+msgstr "На следующей неделе занятий нет."
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:835
+msgid "No classes this week."
+msgstr "На этой неделе занятий нет."
+
 #: src/components/events/drafts/DraftHostsSection.tsx:512
 msgid "No clubs available to invite."
 msgstr "Нет клубов для приглашения."
@@ -4579,6 +5205,10 @@ msgstr "Клубы не найдены"
 #: src/components/clubs/ClubsAdminPage.tsx:114
 msgid "No clubs match your search"
 msgstr "Нет клубов по вашему запросу"
+
+#: src/components/schedule-assistant/timetable/CalendarCourseLegendPanel.tsx:21
+msgid "No courses for the selected program."
+msgstr "Нет курсов для выбранной программы."
 
 #: src/components/sport/SportTrainerPage.tsx:188
 msgid "No current trainings"
@@ -4596,7 +5226,7 @@ msgstr "Нет данных за выбранный период"
 msgid "No date"
 msgstr "Без даты"
 
-#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:212
+#: src/components/when2meet/utils/slots.ts:136
 msgid "No dates"
 msgstr "Нет дат"
 
@@ -4679,6 +5309,11 @@ msgstr "Нет сигнала GPS"
 msgid "No group stage was played in this tournament."
 msgstr "Групповой этап в этом турнире не проводился."
 
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:124
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:116
+msgid "No groups"
+msgstr "Без групп"
+
 #: src/components/schedule/SchedulePage.tsx:204
 msgid "No groups found"
 msgstr "Группы не найдены"
@@ -4694,6 +5329,16 @@ msgstr "Пока нет организаторов"
 #: src/components/events/drafts/DraftHostsSection.tsx:286
 msgid "No hosts yet."
 msgstr "Пока нет организаторов."
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:125
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:435
+msgid "No instructor"
+msgstr "Без преподавателя"
+
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:93
+#: src/components/schedule-assistant/timetable/RoomAvailabilityStatusMark.tsx:82
+msgid "No issues"
+msgstr "Нет проблем"
 
 #: src/components/guard/JoinsList.tsx:50
 msgid "No joins match your search"
@@ -4719,6 +5364,12 @@ msgstr "Пока нет ссылок."
 #: src/components/events/submissions/SubmissionPage.tsx:326
 msgid "No links."
 msgstr "Нет ссылок."
+
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:125
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:104
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:400
+msgid "No location"
+msgstr "Без локации"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:329
 msgid "No logo"
@@ -4875,10 +5526,18 @@ msgstr "Пользователи не найдены."
 msgid "No users in this group."
 msgstr "В этой группе нет пользователей."
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1550
+msgid "No weeks"
+msgstr "Нет недель"
+
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:303
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:304
 msgid "None"
 msgstr "Нет"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:474
+msgid "none in the study period"
+msgstr "нет в учебном периоде"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:294
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:295
@@ -4921,6 +5580,10 @@ msgstr "Не удалено"
 msgid "Not saved"
 msgstr "Не сохранено"
 
+#: src/components/schedule-assistant/timetable/createMeetingUtils.ts:574
+msgid "not scheduled"
+msgstr "не расставлено"
+
 #: src/components/when2meet/MeetingItem.tsx:61
 msgid "Not selected"
 msgstr "Не выбрано"
@@ -4934,12 +5597,29 @@ msgid "Not your groups? <0>Change them in schedule</0>."
 msgstr "Не ваши группы? <0>Измените их в расписании</0>."
 
 #: src/components/editor/extensions/Callout.ts:21
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:457
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:3787
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:4272
 msgid "Note"
 msgstr "Note"
 
 #: src/components/editor/extensions/Callout.ts:20
 msgid "NOTE"
 msgstr "NOTE"
+
+#: src/components/schedule-assistant/timetable/TimetableCalendarTable.tsx:109
+msgid "Note: {notes}"
+msgstr "Заметка: {notes}"
+
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:381
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:293
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:108
+msgid "Nothing found"
+msgstr "Ничего не найдено"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2422
+msgid "Nothing selected"
+msgstr "Ничего не выбрано"
 
 #: src/components/sport/SportTrainerBaamImportButton.tsx:146
 msgid "Nothing to import"
@@ -4971,9 +5651,17 @@ msgstr "ОК"
 msgid "Okay"
 msgstr "Хорошо"
 
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:41
+msgid "on class days"
+msgstr "в дни проведения"
+
 #: src/components/about/AboutPage.tsx:224
 msgid "On February 6, 2023, we held our first club presentation. We now run this event every year."
 msgstr "6 февраля 2023 года мы провели первую презентацию клуба. Теперь это мероприятие проходит каждый год."
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:16
+msgid "on Fridays"
+msgstr "по пятницам"
 
 #: src/components/events/shared/EnrollmentFields.tsx:98
 msgid "On InNoHassle"
@@ -4988,6 +5676,42 @@ msgstr "На InNoHassle · {capacity} участников"
 #: src/components/events/submissions/SubmissionPage.tsx:183
 msgid "On InNoHassle · unlimited"
 msgstr "На InNoHassle · без ограничений"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:8
+msgid "on Mondays"
+msgstr "по понедельникам"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:18
+msgid "on Saturdays"
+msgstr "по субботам"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:174
+msgid "On specific dates"
+msgstr "На определённые даты"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:20
+msgid "on Sundays"
+msgstr "по воскресеньям"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:14
+msgid "on Thursdays"
+msgstr "по четвергам"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:10
+msgid "on Tuesdays"
+msgstr "по вторникам"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:12
+msgid "on Wednesdays"
+msgstr "по средам"
+
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:34
+msgid "one of {trimmed}"
+msgstr "одна из {trimmed}"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:658
+msgid "One-off changes for inactive weeks ({ignoredCount}) are saved but not applied: {ignoredDates}."
+msgstr "Разовые изменения неактивных недель ({ignoredCount}) сохранены, но не применяются: {ignoredDates}."
 
 #: src/app/routes/_with_menu/about.tsx:17
 msgid "one-zero-eight team is the community of students of Innopolis University passionate about technology"
@@ -5086,12 +5810,17 @@ msgid "Organizer"
 msgstr "Организатор"
 
 #: src/components/common/CompactColorPicker.tsx:179
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:836
 msgid "Other"
 msgstr "Другой"
 
 #: src/components/calendar/ExportModal.tsx:110
 msgid "Other applications: find in settings"
 msgstr "Другие приложения: найдите в настройках"
+
+#: src/components/schedule-assistant/timetable/meetingAudienceSummary.ts:195
+msgid "Other groups"
+msgstr "Другие группы"
 
 #: src/components/clubs/ClubLeaguePage.tsx:192
 msgid "Other materials related to the activities of the club"
@@ -5100,6 +5829,18 @@ msgstr "Другие материалы, связанные с деятельн�
 #: src/components/when2meet/AvailabilitySelector.tsx:1460
 msgid "Other participants"
 msgstr "Другие участники"
+
+#: src/components/schedule-assistant/timetable/meetingEditUtils.ts:1031
+msgid "Other time"
+msgstr "Другое время"
+
+#: src/components/schedule-assistant/timetable/meetingEditUtils.ts:1030
+msgid "Other time ({start}-...)"
+msgstr "Другое время ({start}-...)"
+
+#: src/components/schedule-assistant/timetable/meetingEditUtils.ts:1029
+msgid "Other time ({start}–{end})"
+msgstr "Другое время ({start}–{end})"
 
 #: src/components/about/AboutPage.tsx:175
 msgid "Our areas of interest include product engineering, NLP, robotics, and whatever else comes our way. We are constantly expanding our skills through hands-on experience, including hackathons."
@@ -5125,6 +5866,24 @@ msgstr "Устарело"
 #: src/components/room-booking/timeline/OutlookDownScreen.tsx:9
 msgid "Outlook API is currently unavailable"
 msgstr "API Outlook сейчас недоступно"
+
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:111
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:278
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:170
+msgid "overridden in template"
+msgstr "переопределено в шаблоне"
+
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:35
+msgid "Overridden: {overriddenFields}"
+msgstr "Переопределено: {overriddenFields}"
+
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:40
+msgid "override"
+msgstr "переопр."
+
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:47
+msgid "override: {overriddenFields}"
+msgstr "переопр.: {overriddenFields}"
 
 #: src/components/when2meet/MeetingPage.tsx:1848
 msgid "Owner"
@@ -5155,6 +5914,10 @@ msgstr "Бумага неизвестна"
 #: src/components/sport/SportOverviewSection.tsx:393
 msgid "Parsing activity link"
 msgstr "Разбор ссылки на активность"
+
+#: src/components/schedule-assistant/timetable/createMeetingUtils.ts:575
+msgid "partially scheduled"
+msgstr "частично расставлено"
 
 #: src/components/when2meet/MeetingPage.tsx:167
 msgid "Participant removed"
@@ -5188,6 +5951,10 @@ msgstr "Прошедшие"
 #: src/components/sport/SportTrainerPage.tsx:222
 msgid "Past Trainings"
 msgstr "Прошедшие тренировки"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:1066
+msgid "Past week"
+msgstr "Прошлая неделя"
 
 #: src/components/forms/FormUrlInput.tsx:58
 msgid "Paste from clipboard"
@@ -5224,6 +5991,14 @@ msgstr "Ожидающие приглашения"
 #: src/components/events/shared/EventSummaryCard.tsx:53
 msgid "Pending Review"
 msgstr "На рассмотрении"
+
+#: src/components/schedule-assistant/timetable/pickerLabels.ts:42
+msgid "per day"
+msgstr "за день"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:558
+msgid "Period"
+msgstr "Период"
 
 #: src/app/routes/_with_menu/calendar.tsx:17
 msgid "Personal calendar"
@@ -5339,6 +6114,10 @@ msgstr "Пожалуйста, перезагрузите страницу."
 msgid "Points"
 msgstr "Очки"
 
+#: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:76
+msgid "Position"
+msgstr "Должность"
+
 #: src/components/admin/AdminTabs.tsx:14
 msgid "Predefined"
 msgstr "Predefined"
@@ -5363,6 +6142,10 @@ msgstr "Предпочтения"
 #: src/components/board-games/UserReservationDetailsModal.tsx:363
 msgid "Preferred pickup time"
 msgstr "Предпочтительное время получения"
+
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:26
+msgid "Preferred time"
+msgstr "Предпочтительное время"
 
 #: src/components/clubs/EditClubPage.tsx:914
 #: src/components/search/IframePreviewCard.tsx:95
@@ -5391,6 +6174,10 @@ msgstr "Предыдущая страница"
 #: src/components/board-games/BoardGamesPage.tsx:107
 msgid "Previous reservations"
 msgstr "Предыдущие бронирования"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1641
+msgid "Previous week"
+msgstr "Предыдущая неделя"
 
 #: src/components/web-print/WebPrintLandingPage.tsx:37
 #: src/components/web-print/WebPrintTabs.tsx:11
@@ -5475,6 +6262,10 @@ msgstr "Обработка…"
 msgid "Profile"
 msgstr "Профиль"
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2408
+msgid "Program · {value}"
+msgstr "Программа · {value}"
+
 #: src/components/clubs/HowToCreateClubPage.tsx:124
 msgid "Programming Languages, Robotics, Web Development, AI/ML"
 msgstr "Языки программирования, робототехника, веб-разработка, ИИ/ML"
@@ -5506,6 +6297,10 @@ msgstr "Очки"
 #: src/components/events/drafts/RestoreDraftModal.tsx:49
 msgid "Public"
 msgstr "Опубликованная версия"
+
+#: src/app/routes/timetable.tsx:29
+msgid "Public class timetable of Innopolis University: groups, instructors and rooms."
+msgstr "Публичное расписание занятий Университета Иннополис: группы, преподаватели и аудитории."
 
 #: src/components/events/submissions/SubmissionPage.tsx:188
 msgid "Publish this event? This cannot be undone from here."
@@ -5864,6 +6659,11 @@ msgstr "Забронировать игру"
 msgid "Reserved"
 msgstr "Забронировано"
 
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1244
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:693
+msgid "Reset changes"
+msgstr "Сбросить изменения"
+
 #: src/components/maps/viewer/MapView.tsx:247
 msgid "Reset north"
 msgstr "Сбросить на север"
@@ -5883,13 +6683,22 @@ msgstr "Участники"
 
 #: src/components/events/drafts/DraftPage.tsx:332
 #: src/components/events/drafts/DraftPage.tsx:671
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:281
 msgid "Restore"
 msgstr "Восстановить"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1201
+msgid "Restore date"
+msgstr "Вернуть дату"
 
 #: src/components/events/drafts/DraftPage.tsx:327
 #: src/components/events/drafts/RestoreDraftModal.tsx:25
 msgid "Restore draft"
 msgstr "Восстановить черновик"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1036
+msgid "Restore slot"
+msgstr "Вернуть слот"
 
 #: src/components/sport/SportHistoryPage.tsx:390
 msgid "Result"
@@ -5916,6 +6725,8 @@ msgstr "Пересдача"
 #: src/components/events/event/EventPage.tsx:157
 #: src/components/events/submissions/SubmissionPage.tsx:154
 #: src/components/events/submissions/SubmissionsPage.tsx:83
+#: src/components/schedule-assistant/timetable/PublicTimetablePage.tsx:115
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/sport/SportStudentTrainingModal.tsx:413
 #: src/components/sport/SportStudentTrainingModal.tsx:462
@@ -6087,14 +6898,29 @@ msgstr "Правила бронирования аудиторий в Униве
 msgid "Ryan Gosling winks"
 msgstr "Райан Гослинг подмигивает"
 
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:40
+msgid "Same as component"
+msgstr "Как у компонента"
+
 #: src/components/when2meet/CreationPage.tsx:419
 msgid "Same hours every day"
 msgstr "Одинаковые часы каждый день"
+
+#: src/components/schedule-assistant/settings/weekdays.ts:51
+msgid "Sat"
+msgstr "Сб"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:57
+msgid "Saturday"
+msgstr "Суббота"
 
 #: src/components/events/drafts/DraftHostsSection.tsx:602
 #: src/components/events/drafts/DraftLinksSection.tsx:351
 #: src/components/events/drafts/DraftPage.tsx:561
 #: src/components/events/drafts/EditDraftInfoModal.tsx:179
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:243
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:310
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:711
 #: src/components/tabletennis/PlayerActionMenu.tsx:310
 #: src/components/when2meet/CreationPage.tsx:477
 #: src/components/when2meet/MeetingName.tsx:117
@@ -6204,6 +7030,10 @@ msgstr "Не удалось загрузить расписание."
 msgid "Schedule of classes and events at Innopolis University. Find your group and see the calendar with all classes."
 msgstr "Расписание занятий и мероприятий Университета Иннополис. Найдите свою группу и откройте календарь со всеми занятиями."
 
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1013
+msgid "schedule: {statusLabel}"
+msgstr "расписание: {statusLabel}"
+
 #: src/app/routes/_with_menu/scholarship.tsx:23
 msgid "Scholarship"
 msgstr "Стипендия"
@@ -6270,6 +7100,14 @@ msgstr "Поиск клубов..."
 msgid "Search email"
 msgstr "Поиск email"
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:258
+msgid "Search events…"
+msgstr "Поиск событий…"
+
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:289
+msgid "Search for a group, program, section or @selector…"
+msgstr "Поиск группы, программы, секции или @селектора…"
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:431
 #: src/components/board-games/BoardGamesPage.tsx:262
 msgid "Search games by name"
@@ -6304,9 +7142,17 @@ msgstr "Поиск пользователей"
 msgid "Search..."
 msgstr "Искать..."
 
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:88
+msgid "Search…"
+msgstr "Поиск…"
+
 #: src/components/timer/components/TimerInput.tsx:34
 msgid "Seconds"
 msgstr "Секунды"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:359
+msgid "Section"
+msgstr "Секция"
 
 #: src/components/scholarship/ScholarshipPage.tsx:132
 msgid "See more information about scholarships in <0>Student's Handbook</0>."
@@ -6329,13 +7175,37 @@ msgstr "Стипендию за текущий семестр смотрите �
 msgid "seed {0}"
 msgstr "посев {0}"
 
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1005
+msgid "Select a course and component"
+msgstr "Выберите предмет и компонент"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:846
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:850
+msgid "Select a course and component."
+msgstr "Выберите предмет и компонент."
+
 #: src/components/clubs/EditClubPage.tsx:707
 msgid "Select a file to preview"
 msgstr "Выберите файл для предпросмотра"
 
+#: src/components/schedule-assistant/timetable/audienceSummaryHints.ts:38
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:285
+msgid "Select a group"
+msgstr "Выберите группу"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:856
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:303
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:425
+msgid "Select a group."
+msgstr "Выберите группу."
+
 #: src/components/admin/AdminRoomsPage.tsx:92
 msgid "Select a room."
 msgstr "Выберите комнату."
+
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:78
+msgid "Select a series, then click an empty slot."
+msgstr "Выберите серию, затем кликните по пустому слоту."
 
 #: src/components/timer/components/CustomTimeModal.tsx:107
 msgid "Select a specific date and time in the future. The timer will count down until that moment."
@@ -6345,6 +7215,10 @@ msgstr "Выберите дату и время в будущем. Таймер 
 msgid "Select a user to impersonate."
 msgstr "Выберите пользователя для имперсонации."
 
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:83
+msgid "Select all"
+msgstr "Выбрать все"
+
 #: src/components/timer/components/CustomTimeModal.tsx:102
 msgid "Select Target Time"
 msgstr "Выберите целевое время"
@@ -6352,6 +7226,10 @@ msgstr "Выберите целевое время"
 #: src/components/when2meet/MeetingPage.tsx:1451
 msgid "Select the timeslots that participants can choose, then click Save timeslots."
 msgstr "Выберите интервалы, доступные участникам, затем нажмите «Сохранить интервалы»."
+
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:92
+msgid "Select this and all following"
+msgstr "Выбрать это и все последующие"
 
 #: src/components/sport/SportOverviewSection.tsx:348
 msgid "Select your training type"
@@ -6361,9 +7239,13 @@ msgstr "Выберите тип тренировки"
 msgid "Select..."
 msgstr "Выберите..."
 
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:191
+msgid "Selected"
+msgstr "Выбрано"
+
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:189
-msgid "Selected bounds:"
-msgstr "Выбранные границы:"
+#~ msgid "Selected bounds:"
+#~ msgstr "Выбранные границы:"
 
 #: src/components/web-print/ScanPage.tsx:156
 msgid "Selected scanner is offline"
@@ -6382,6 +7264,10 @@ msgstr "Выбрано: {0} ({1})"
 #: src/components/when2meet/MeetingPage.tsx:1610
 msgid "Selected: {pendingMeetingTimeLabel}"
 msgstr "Выбрано: {pendingMeetingTimeLabel}"
+
+#: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:98
+msgid "Selected: {selectedCount}"
+msgstr "Выбрано: {selectedCount}"
 
 #: src/components/sport/SportOverviewSection.tsx:306
 msgid "Self Sport Upload"
@@ -6409,13 +7295,26 @@ msgstr "Селф-спорт: {0}ч"
 msgid "Semestral Budget"
 msgstr "Бюджет на семестр"
 
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:385
+msgid "Series"
+msgstr "Серии"
+
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:423
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:854
+msgid "Series {seriesNumber}"
+msgstr "Серия {seriesNumber}"
+
 #: src/components/schedule-assistant/settings/courses/CourseBlocksEditor.tsx:21
-msgid "Series blocks"
-msgstr "Блоки серий"
+#~ msgid "Series blocks"
+#~ msgstr "Блоки серий"
+
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:582
+msgid "Series template"
+msgstr "Шаблон серии"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:105
-msgid "Series window"
-msgstr "Период серии"
+#~ msgid "Series window"
+#~ msgstr "Период серии"
 
 #: src/app/routes/_with_menu/board-games/index.tsx:21
 msgid "Service for board games reservation."
@@ -6506,6 +7405,15 @@ msgstr "Краткое описание"
 msgid "Short game description"
 msgstr "Краткое описание игры"
 
+#: src/components/schedule-assistant/timetable/CalendarCourseLegendPanel.tsx:33
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:356
+msgid "Short name"
+msgstr "Краткое название"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:357
+msgid "Short name (RU)"
+msgstr "Краткое название (RU)"
+
 #: src/components/web-print/PrintPage.tsx:47
 msgid "Show 319 on map"
 msgstr "Показать 319 на карте"
@@ -6531,6 +7439,15 @@ msgstr "Показать лучшее время"
 msgid "Show calendar events"
 msgstr "Показать события календаря"
 
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:421
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:452
+msgid "Show dates"
+msgstr "Показать даты"
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:446
+msgid "Show dates (→), collapse (←)"
+msgstr "Показать даты (→), свернуть (←)"
+
 #: src/components/clubs/HowToCreateClubPage.tsx:53
 msgid "Show employers that you're ambitious, broad-minded, and an active person who takes advantage of opportunities."
 msgstr "Покажите работодателям, что вы амбициозны, открыты и активно пользуетесь возможностями."
@@ -6539,9 +7456,29 @@ msgstr "Покажите работодателям, что вы амбицио�
 msgid "Show final meeting time"
 msgstr "Показать окончательное время встречи"
 
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:119
+msgid "Show group in the details panel"
+msgstr "Показать группу в панели деталей"
+
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:280
 msgid "Show hidden"
 msgstr "Показать скрытые"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:123
+msgid "Show in the details panel"
+msgstr "Показать в панели деталей"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:128
+msgid "Show instructor “{name}” in the details panel"
+msgstr "Показать преподавателя «{name}» в панели деталей"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:117
+msgid "Show instructor in the details panel"
+msgstr "Показать преподавателя в панели деталей"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:115
+msgid "Show location in the details panel"
+msgstr "Показать локацию в панели деталей"
 
 #: src/components/maps/viewer/MapView.tsx:282
 msgid "Show my location"
@@ -6564,6 +7501,10 @@ msgstr "Показать доступность других участнико�
 msgid "Show preview"
 msgstr "Показать предпросмотр"
 
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:121
+msgid "Show program in the details panel"
+msgstr "Показать программу в панели деталей"
+
 #: src/components/tabletennis/TabletennisTournaments.tsx:334
 msgid "Show top 3 only"
 msgstr "Показать только первые 3 места"
@@ -6572,8 +7513,13 @@ msgstr "Показать только первые 3 места"
 msgid "Show VK Zone on map"
 msgstr "Показать VK Zone на карте"
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:471
+msgid "Showing the first 50 of {resultCount}. Refine your search."
+msgstr "Показаны первые 50 из {resultCount}. Уточните запрос."
+
 #: src/components/common/SignInButton.tsx:25
 #: src/components/onboarding/OnboardingProgress.tsx:7
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:772
 msgid "Sign in"
 msgstr "Войти"
 
@@ -6599,6 +7545,10 @@ msgstr "Войдите и посмотрите своё расписание в 
 msgid "Sign in to get access"
 msgstr "Войдите, чтобы получить доступ"
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:765
+msgid "Sign in to highlight your groups."
+msgstr "Войдите, чтобы подсветить свои группы."
+
 #: src/components/onboarding/OnboardingSteps.tsx:27
 msgid "Sign in via Innopolis SSO"
 msgstr "Войти через Innopolis SSO"
@@ -6610,6 +7560,10 @@ msgstr "Выйти"
 #: src/components/onboarding/OnboardingSteps.tsx:262
 msgid "Skip"
 msgstr "Пропустить"
+
+#: src/components/schedule-assistant/timetable/meetingComponentContext.ts:519
+msgid "Slot"
+msgstr "Слот"
 
 #: src/components/clubs/EditClubPage.tsx:830
 msgid "Slug"
@@ -6683,6 +7637,12 @@ msgstr "Особые правила"
 #: src/components/web-print/PrintPage.tsx:628
 msgid "Specific pages"
 msgstr "Конкретные страницы"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:856
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:171
+#: src/components/schedule-assistant/timetable/EditClassModal.tsx:425
+msgid "Specify at least one group."
+msgstr "Укажите хотя бы одну группу."
 
 #: src/app/routes/_with_menu/dorms.tsx:19
 msgid "Split duties in your dormitory room."
@@ -6807,8 +7767,8 @@ msgid "Start"
 msgstr "Старт"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:157
-msgid "Start (inclusive)"
-msgstr "Начало (включительно)"
+#~ msgid "Start (inclusive)"
+#~ msgstr "Начало (включительно)"
 
 #. placeholder {0}: getName(picked[0]!)
 #. placeholder {1}: getName(picked[1]!)
@@ -6839,6 +7799,10 @@ msgstr "Время начала не может быть в прошлом."
 #: src/components/timer/components/CustomTimeModal.tsx:167
 msgid "Start Timer"
 msgstr "Запустить таймер"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:420
+msgid "Start: {startError}"
+msgstr "Начало: {startError}"
 
 #: src/components/events/drafts/CreateDraftModal.tsx:108
 #: src/components/events/drafts/EditDraftInfoModal.tsx:122
@@ -7041,6 +8005,14 @@ msgstr "Не удалось загрузить предложения."
 msgid "Summer countdown"
 msgstr "До лета"
 
+#: src/components/schedule-assistant/settings/weekdays.ts:53
+msgid "Sun"
+msgstr "Вс"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:59
+msgid "Sunday"
+msgstr "Воскресенье"
+
 #: src/components/layout/SwitchLocaleButton.tsx:10
 msgid "Switch language"
 msgstr "Сменить язык"
@@ -7072,6 +8044,10 @@ msgstr "Система <0>автоматически указала количе
 #: src/components/editor/menus/BlockTypeDropdown.tsx:116
 msgid "Table"
 msgstr "Таблица"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2200
+msgid "Table mode"
+msgstr "Режим таблицы"
 
 #: src/app/routes/_with_menu/tabletennis/index.tsx:59
 #: src/app/routes/_with_menu/tabletennis/matches.tsx:17
@@ -7313,6 +8289,10 @@ msgstr "Организатор формирует группы."
 msgid "The person has to register in table tennis first."
 msgstr "Сначала нужно зарегистрироваться в настольном теннисе."
 
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:640
+msgid "The phase covers the whole study period: every 14 days before and after the anchor week, not starting from this date."
+msgstr "Фаза на весь учебный период: каждые 14 дней до и после опорной недели, а не начиная с этой даты."
+
 #: src/components/tabletennis/PlayerActionMenu.tsx:279
 msgid "The rating must be a whole number from 0."
 msgstr "Рейтинг должен быть целым числом от 0."
@@ -7326,8 +8306,8 @@ msgid "The scanner returned nothing. Please try to scan again."
 msgstr "Сканер не вернул изображение. Попробуйте отсканировать ещё раз."
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:68
-msgid "The selected block does not exist."
-msgstr "Выбранный блок не существует."
+#~ msgid "The selected block does not exist."
+#~ msgstr "Выбранный блок не существует."
 
 #: src/components/when2meet/utils/meeting-time-selection.ts:6
 msgid "The selected start time has passed. Choose another time."
@@ -7338,17 +8318,21 @@ msgstr "Выбранное время начала уже прошло. Выбе
 msgid "The selected time must be in the future"
 msgstr "Выбранное время должно быть в будущем"
 
-#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:70
-msgid "The series window does not overlap the selected groups' teaching period."
+#: src/components/schedule-assistant/timetable/editableSessionEvents.ts:520
+msgid "The series period does not overlap the study period of the selected groups."
 msgstr "Период серии не пересекается с учебным периодом выбранных групп."
+
+#: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:70
+#~ msgid "The series window does not overlap the selected groups' teaching period."
+#~ msgstr "Период серии не пересекается с учебным периодом выбранных групп."
 
 #: src/app/routes/forms.submit.tsx:131
 msgid "The slug parameter is missing or invalid."
 msgstr "Параметр slug отсутствует или некорректен."
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:57
-msgid "The start date must not be after the end date."
-msgstr "Начало периода должно быть не позже окончания."
+#~ msgid "The start date must not be after the end date."
+#~ msgstr "Начало периода должно быть не позже окончания."
 
 #: src/components/timer/lib/useTimer.ts:148
 msgid "The timer paused"
@@ -7379,6 +8363,14 @@ msgstr "Сайт обновлён."
 msgid "There are no active reservations."
 msgstr "Нет активных бронирований."
 
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1580
+msgid "There are no classes in the timetable yet."
+msgstr "В расписании пока нет занятий."
+
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:101
+msgid "There are no components without slots in this section."
+msgstr "В текущем разделе нет компонентов без слотов."
+
 #: src/components/board-games/ReservationsAdminPage.tsx:210
 msgid "There are no reservations yet."
 msgstr "Бронирований пока нет."
@@ -7390,6 +8382,10 @@ msgstr "Нет файла для печати!"
 #: src/components/clubs/HowToCreateClubPage.tsx:205
 msgid "Think about your <0>aims and goals</0> to keep your club going purposefully. Consider writing mission and vision statements to clarify your club's purpose."
 msgstr "Продумайте <0>цели и задачи</0>, чтобы клуб развивался осмысленно. Зафиксируйте миссию и видение."
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:381
+msgid "This class is cancelled in the configuration."
+msgstr "Это занятие отменено в конфигурации."
 
 #: src/components/clubs/ClubPage.tsx:92
 msgid "This club has changes waiting for admin review."
@@ -7426,6 +8422,11 @@ msgstr "Эта страница доступна только админам InN
 #: src/components/when2meet/MeetingPage.tsx:1572
 msgid "This room booking no longer exists."
 msgstr "Этого бронирования комнаты больше нет."
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:718
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:766
+msgid "this same class"
+msgstr "это же занятие"
 
 #: src/components/account/MyTokenPage.tsx:67
 msgid "This token gives an application full access to your account."
@@ -7464,7 +8465,20 @@ msgstr "Будет создана ссылка, которая автомати�
 msgid "This will permanently remove the last scanned page from the document. Are you sure?"
 msgstr "Последняя отсканированная страница будет безвозвратно удалена из документа. Продолжить?"
 
+#: src/components/schedule-assistant/settings/weekdays.ts:47
+msgid "Thu"
+msgstr "Чт"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:53
+msgid "Thursday"
+msgstr "Четверг"
+
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:8
+msgid "time"
+msgstr "время"
+
 #: src/components/room-booking/tv/RoomTvPage.tsx:200
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:367
 msgid "Time"
 msgstr "Время"
 
@@ -7516,6 +8530,14 @@ msgstr "Название таймера..."
 msgid "Timeslots saved"
 msgstr "Временные слоты сохранены"
 
+#: src/app/routes/timetable.tsx:26
+msgid "Timetable"
+msgstr "Расписание"
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:999
+msgid "Timetable composer"
+msgstr "Составление расписания"
+
 #: src/components/editor/extensions/Callout.ts:28
 msgid "Tip"
 msgstr "Tip"
@@ -7529,8 +8551,13 @@ msgstr "TIP"
 #: src/components/clubs/EditClubPage.tsx:814
 #: src/components/guard/CreateSheetPage.tsx:101
 #: src/components/room-booking/tv/RoomTvPage.tsx:194
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:354
 msgid "Title"
 msgstr "Название"
+
+#: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:355
+msgid "Title (RU)"
+msgstr "Название (RU)"
 
 #: src/components/clubs/AddClubDialog.tsx:89
 msgid "Title <0>*</0>"
@@ -7580,6 +8607,7 @@ msgstr "Учить лидеров студенческих клубов вест
 
 #: src/components/calendar/CalendarViewer.tsx:697
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:297
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:647
 #: src/components/sport/SportSchedulePage.tsx:237
 msgid "Today"
 msgstr "Сегодня"
@@ -7620,6 +8648,12 @@ msgstr "Турнир не найден."
 #: src/components/tabletennis/TabletennisTabs.tsx:17
 msgid "Tournaments"
 msgstr "Турниры"
+
+#: src/components/schedule-assistant/timetable/audienceSelectorTree.ts:86
+#: src/components/schedule-assistant/timetable/meetingAudienceSummary.ts:103
+#: src/components/schedule-assistant/timetable/meetingAudienceSummary.ts:156
+msgid "Track"
+msgstr "Трек"
 
 #: src/components/sport/SportProfilePage.tsx:19
 #: src/components/sport/SportTabs.tsx:25
@@ -7671,6 +8705,14 @@ msgstr "Попробовать снова"
 #: src/components/layout/Offline.tsx:61
 msgid "Try to disable VPN and connect to University WiFi, then reload the page."
 msgstr "Отключите VPN и подключитесь к Wi‑Fi университета, затем обновите страницу."
+
+#: src/components/schedule-assistant/settings/weekdays.ts:43
+msgid "Tue"
+msgstr "Вт"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:49
+msgid "Tuesday"
+msgstr "Вторник"
 
 #. placeholder {0}: lastApproval.roomId
 #. placeholder {1}: new Date(lastApproval.at).toLocaleString(i18n.locale, { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", })
@@ -7729,6 +8771,10 @@ msgstr "Разблокировать пользователя"
 #: src/components/editor/menus/EditorMenuItems.tsx:55
 msgid "Underline"
 msgstr "Подчёркнутый"
+
+#: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:28
+msgid "Undesirable time"
+msgstr "Нежелательное время"
 
 #: src/components/editor/menus/EditorMenuItems.tsx:129
 msgid "Undo"
@@ -7795,6 +8841,11 @@ msgstr "Снято с публикации"
 msgid "Unsaved changes"
 msgstr "Несохранённые изменения"
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:984
+#: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:57
+msgid "Unscheduled"
+msgstr "Неразмещённые"
+
 #: src/components/clubs/ClubLeaguePage.tsx:162
 msgid "Unspent points from last semester expire"
 msgstr "Непотраченные баллы прошлого семестра сгорают"
@@ -7854,6 +8905,10 @@ msgstr "Перевести в продвинутые"
 #: src/components/web-print/WebPrintLandingPage.tsx:40
 msgid "Upload a file, pick a printer, send the job"
 msgstr "Загрузите файл, выберите принтер, отправьте на печать"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1539
+msgid "Upload config.yaml in the “Settings” tab."
+msgstr "Загрузите config.yaml во вкладке «Настройки»."
 
 #: src/components/clubs/EditClubPage.tsx:652
 msgid "Upload new logo"
@@ -7966,6 +9021,10 @@ msgstr "Просмотр"
 #: src/components/when2meet/MeetingPage.tsx:1746
 msgid "View all"
 msgstr "Показать всех"
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:1011
+msgid "View as student"
+msgstr "Посмотреть как студент"
 
 #: src/components/sport/SportTrainerTrainingModal.tsx:142
 msgid "View attendee"
@@ -8085,6 +9144,13 @@ msgctxt "callout"
 msgid "WARNING"
 msgstr "WARNING"
 
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:97
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:203
+#: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:264
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:159
+msgid "Was:"
+msgstr "Было:"
+
 #: src/components/about/AboutPage.tsx:201
 msgid "We are an official Innopolis University club. The <0/> community strives to improve the place where we live and grow. We often host movie nights, club presentations, and workshops."
 msgstr "Мы — официальный клуб Университета Иннополис. Сообщество <0/> стремится улучшать среду, где мы живём и развиваемся. Мы часто проводим киновечера, презентации клуба и воркшопы."
@@ -8149,6 +9215,14 @@ msgstr "Вебвизор (innohassle.ru)"
 msgid "Webvisor (sport.innopolis.university)"
 msgstr "Вебвизор (sport.innopolis.university)"
 
+#: src/components/schedule-assistant/settings/weekdays.ts:45
+msgid "Wed"
+msgstr "Ср"
+
+#: src/components/schedule-assistant/timetable/timetableViewerModel.ts:51
+msgid "Wednesday"
+msgstr "Среда"
+
 #: src/components/calendar/CalendarViewer.tsx:76
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:300
 msgid "Week"
@@ -8160,9 +9234,29 @@ msgstr "Неделя"
 msgid "Week {week}"
 msgstr "Неделя {week}"
 
+#: src/components/schedule-assistant/timetable/timetableCalendarModel.ts:235
+msgid "Week {weekNumber}"
+msgstr "Неделя {weekNumber}"
+
+#: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1551
+msgid "Week {weekNumber}/{weekCount}: {weekRange}"
+msgstr "Нед. {weekNumber}/{weekCount}: {weekRange}"
+
 #: src/components/tabletennis/DrawTable.tsx:27
 msgid "Week of {day}"
 msgstr "Неделя с {day}"
+
+#: src/components/schedule-assistant/timetable/meetingOverrideIndicator.tsx:9
+msgid "weekday"
+msgstr "день недели"
+
+#: src/components/schedule-assistant/DateInput.tsx:306
+msgid "Weekday differs from the template"
+msgstr "День недели отличается от шаблона"
+
+#: src/components/schedule-assistant/timetable/SessionSeriesEditor.tsx:54
+msgid "Weekly"
+msgstr "Еженедельно"
 
 #: src/components/about/AboutPage.tsx:23
 msgid "Welcome to <0/><1>one-zero-eight</1> community!"
@@ -8191,9 +9285,17 @@ msgstr "Когда доступно"
 msgid "When can people meet?"
 msgstr "Когда люди могут встретиться?"
 
+#: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:215
+msgid "When opened:"
+msgstr "При открытии:"
+
 #: src/components/clubs/HowToCreateClubPage.tsx:113
 msgid "When registering your club, you'll need to choose one of the following categories. Each type has specific criteria in the Club League."
 msgstr "При регистрации клуба нужно выбрать одну из категорий. У каждого типа свои критерии в Club League."
+
+#: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:671
+msgid "Who can teach"
+msgstr "Кто может вести"
 
 #: src/components/tabletennis/PlayersField.tsx:429
 msgid "Who is it?"
@@ -8203,17 +9305,25 @@ msgstr "Кто это?"
 msgid "Who we are"
 msgstr "Кто мы"
 
-#: src/components/schedule-assistant/settings/courses/CourseBlocksEditor.tsx:38
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:101
+msgid "whole semester"
+msgstr "весь семестр"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:563
 msgid "Whole semester"
 msgstr "Весь семестр"
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:139
-msgid "Whole semester (groups' teaching period)"
-msgstr "Весь семестр (учебный период групп)"
+#~ msgid "Whole semester (groups' teaching period)"
+#~ msgstr "Весь семестр (учебный период групп)"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:22
 msgid "Why Create a Club?"
 msgstr "Зачем создавать клуб?"
+
+#: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1016
+msgid "will be added to the existing series"
+msgstr "добавится в существующую серию"
 
 #: src/components/tabletennis/TabletennisPage.tsx:142
 msgid "Win rate"
@@ -8411,6 +9521,10 @@ msgstr "Ваш аватар"
 msgid "Your changes have been saved."
 msgstr "Изменения сохранены."
 
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:754
+msgid "Your classes"
+msgstr "Ваши занятия"
+
 #: src/components/clubs/ClubsListPage.tsx:142
 msgid "Your club"
 msgstr "Ваш клуб"
@@ -8434,6 +9548,10 @@ msgstr "Ваш GPA:"
 #: src/components/schedule/group-card/FavoriteButton.tsx:20
 msgid "Your group from official lists"
 msgstr "Ваша группа по официальным спискам"
+
+#: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:795
+msgid "Your groups and teaching classes were not found yet. You can still browse the whole timetable."
+msgstr "Ваши группы и занятия преподавателя пока не найдены. Можно просматривать всё расписание."
 
 #: src/components/sport/sport-checkin-utils.ts:94
 msgid "Your medical group ({medicalGroup}) is not eligible for this training."

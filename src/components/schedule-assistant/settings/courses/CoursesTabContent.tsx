@@ -168,6 +168,7 @@ export function CoursesTabContent() {
           name_ru: newNameRu.trim() || null,
           short_name_ru: newShortNameRu.trim() || null,
           color: newColor,
+          notes: "",
           components: [],
         },
       },

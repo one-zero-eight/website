@@ -121,7 +121,7 @@ describe.each(pickers)("bulk $name candidates", ({ build, id }) => {
     expect(info.conflicts).toHaveLength(1);
     expect(info.conflicts[0].dates).toEqual([secondDate]);
     expect(options.find((option) => option.value === id)?.hint).toContain(
-      "0–1 занятие по пятницам",
+      "0–1 class on Fridays",
     );
   });
 
@@ -143,7 +143,7 @@ describe.each(pickers)("bulk $name candidates", ({ build, id }) => {
     expect(info.conflicts).toEqual([]);
     expect(info.checkedDates).toEqual([firstDate, secondDate]);
     expect(options.find((option) => option.value === id)?.hint).toContain(
-      "0 занятий по пятницам",
+      "0 classes on Fridays",
     );
   });
 
@@ -158,7 +158,7 @@ describe.each(pickers)("bulk $name candidates", ({ build, id }) => {
     expect(info.checkedDates).toEqual([firstDate]);
     expect(info.conflictDates).toEqual([firstDate]);
     expect(options.find((option) => option.value === id)?.hint).toContain(
-      "0 занятий по пятницам",
+      "0 classes on Fridays",
     );
   });
 
@@ -180,7 +180,7 @@ describe.each(pickers)("bulk $name candidates", ({ build, id }) => {
     expect(info.checkedDates).toEqual([firstDate]);
     expect(info.conflicts).toEqual([]);
     expect(options.find((option) => option.value === id)?.hint).toContain(
-      "0 занятий по пятницам",
+      "0 classes on Fridays",
     );
   });
 
@@ -215,7 +215,7 @@ describe.each(pickers)("bulk $name candidates", ({ build, id }) => {
     expect(empty.checkedDates).toEqual([]);
     expect(empty.conflicts).toEqual([]);
     expect(emptyOptions.find((option) => option.value === id)?.hint).toContain(
-      "Нет дат проведения",
+      "No class dates",
     );
     const normal = availability<RoomAvailabilityInfo>(build(meetings), id);
     expect(normal.status).toBe("red");

@@ -1,4 +1,5 @@
 import type { TimetableViewConfig as SchemaScheduleConfig } from "./timetableViewTypes.ts";
+import { meetingCourseTitle } from "./localizedNames.ts";
 import { cn } from "@/lib/ui/cn";
 import {
   autoUpdate,
@@ -11,6 +12,7 @@ import {
   useFloating,
   useInteractions,
 } from "@floating-ui/react";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
 import {
   useDeferredValue,
@@ -81,6 +83,7 @@ function TimetableEventSearch({
   onSelect: (meeting: Meeting) => void;
   activeDate: string;
 }) {
+  const { t, i18n } = useLingui();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -88,18 +91,20 @@ function TimetableEventSearch({
   const resultRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const instructorLabels = useMemo(
     () => buildInstructorLabelById(config),
-    [config],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [config, i18n.locale],
   );
   const [expandedSeries, setExpandedSeries] = useState<string | null>(null);
   const entries = useMemo(
     () => buildTimetableSearchEntries(meetings, instructorLabels, config),
-    [meetings, instructorLabels, config],
+    [meetings, instructorLabels, config, i18n.locale],
   );
   const deferredQuery = useDeferredValue(query);
   const results = useMemo(
     () => searchTimetableEntries(entries, deferredQuery, activeDate),
     [entries, deferredQuery, activeDate],
   );
+  const resultCount = results.length;
   const visibleSeries = useMemo(() => results.slice(0, 50), [results]);
   const resolveSeriesEntry = useMemo(() => {
     const cache = new Map<(typeof entries)[number], (typeof entries)[number]>();
@@ -110,7 +115,7 @@ function TimetableEventSearch({
       cache.set(entry, base);
       return base;
     };
-  }, [config, instructorLabels]);
+  }, [config, instructorLabels, i18n.locale]);
   const visibleResults = useMemo(
     () =>
       visibleSeries.flatMap((result) => {
@@ -250,7 +255,7 @@ function TimetableEventSearch({
           ref={inputRef}
           type="search"
           className="min-w-0 grow"
-          placeholder="Поиск событий…"
+          placeholder={t`Search events…`}
           value={query}
           onFocus={() => setOpen(true)}
           onClick={() => setOpen(true)}
@@ -285,7 +290,7 @@ function TimetableEventSearch({
           >
             {!results.length ? (
               <p className="text-base-content/60 col-span-2 px-3 py-4 text-sm">
-                Ничего не найдено
+                <Trans>Nothing found</Trans>
               </p>
             ) : (
               visibleResults.map(
@@ -353,7 +358,7 @@ function TimetableEventSearch({
                         >
                           {nested
                             ? `${weekdayLabel}, ${dateLabel}`
-                            : `${meeting.course}${meeting.tag ? ` (${meeting.tag})` : ""}`}
+                            : `${meetingCourseTitle(meeting)}${meeting.tag ? ` (${meeting.tag})` : ""}`}
                         </span>
                         {showTime ||
                         (showRoom &&
@@ -392,7 +397,7 @@ function TimetableEventSearch({
                                   kind="room"
                                   overridden={!series && overrides.has("room")}
                                 >
-                                  {meeting.room || "Без локации"}
+                                  {meeting.room || t`No location`}
                                 </MeetingMetadataField>
                               ) : null
                             }
@@ -427,7 +432,7 @@ function TimetableEventSearch({
                                     !series && overrides.has("instructor")
                                   }
                                 >
-                                  {instructorLabel || "Без преподавателя"}
+                                  {instructorLabel || t`No instructor`}
                                 </MeetingMetadataField>
                               ) : null
                             }
@@ -438,13 +443,13 @@ function TimetableEventSearch({
                         <button
                           type="button"
                           className="text-base-content/60 hover:text-primary col-span-2 flex items-center gap-1.5 justify-self-start rounded-md px-2 pb-1.5 text-xs transition-colors"
-                          title="Показать даты (→), свернуть (←)"
+                          title={t`Show dates (→), collapse (←)`}
                           onClick={() => handleToggleDates(key)}
                         >
                           <span className="icon-[material-symbols--calendar-month-outline-rounded] text-sm" />
                           {expandedSeries === key
-                            ? "Скрыть даты"
-                            : "Показать даты"}
+                            ? t`Hide dates`
+                            : t`Show dates`}
                           <span>{series.occurrences.length}</span>
                           <span
                             className={cn(
@@ -461,9 +466,11 @@ function TimetableEventSearch({
                 },
               )
             )}
-            {results.length > visibleSeries.length ? (
+            {resultCount > visibleSeries.length ? (
               <p className="text-base-content/60 col-span-2 px-3 py-2 text-xs">
-                Показаны первые 50 из {results.length}. Уточните запрос.
+                <Trans>
+                  Showing the first 50 of {resultCount}. Refine your search.
+                </Trans>
               </p>
             ) : null}
           </div>
@@ -473,14 +480,12 @@ function TimetableEventSearch({
   );
 }
 
-const personalDayFormatter = new Intl.DateTimeFormat("ru-RU", {
-  weekday: "long",
-  day: "numeric",
-  month: "short",
-});
-
-function personalDayHeading(date: string) {
-  return personalDayFormatter
+function personalDayHeading(date: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+  })
     .format(new Date(`${date}T12:00:00`))
     .replace(/^./u, (letter) => letter.toUpperCase());
 }
@@ -531,7 +536,7 @@ function PersonalMeetingCard({
       : (meeting.instructors ?? [])
   ).filter(Boolean);
   const room = String(meeting.room || "").trim();
-  const title = `${meeting.course}${meeting.tag ? ` (${meeting.tag})` : ""}`;
+  const title = `${meetingCourseTitle(meeting)}${meeting.tag ? ` (${meeting.tag})` : ""}`;
 
   return (
     <div
@@ -616,6 +621,7 @@ function PersonalWeekDays({
   nowHm: string;
   onNavigateToMeeting: (meeting: Meeting) => void;
 }) {
+  const { i18n } = useLingui();
   return (
     <>
       {days.map((day) => {
@@ -636,8 +642,12 @@ function PersonalWeekDays({
                     : "text-base-content/70",
               )}
             >
-              {isToday ? "Сегодня · " : null}
-              {personalDayHeading(day.date)}
+              {isToday ? (
+                <>
+                  <Trans>Today</Trans> ·{" "}
+                </>
+              ) : null}
+              {personalDayHeading(day.date, i18n.locale)}
             </div>
             <ul className="flex flex-col gap-1.5">
               {day.meetings.map((entry) => (
@@ -678,9 +688,11 @@ function PersonalLessonsSection({
   userEmail?: string | null;
   onNavigateToMeeting: (meeting: Meeting) => void;
 }) {
+  const { i18n } = useLingui();
   const instructorLabels = useMemo(
     () => buildInstructorLabelById(config),
-    [config],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [config, i18n.locale],
   );
   const groupIds = useMemo(
     () => ownGroups.map((group) => group.groupId),
@@ -733,11 +745,14 @@ function PersonalLessonsSection({
     (count, day) => count + day.meetings.length,
     0,
   );
+  const errorMessage = state.kind === "error" ? state.message : "";
 
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-2">
       <h3 className="flex shrink-0 items-baseline justify-between gap-2 text-sm font-semibold">
-        <span>Ваши занятия</span>
+        <span>
+          <Trans>Your classes</Trans>
+        </span>
         {state.kind === "ready" ? (
           <span className="text-base-content/45 text-xs font-medium tabular-nums">
             {weekCount}
@@ -747,14 +762,14 @@ function PersonalLessonsSection({
       {state.kind === "guest" ? (
         <div className="flex flex-col gap-2">
           <p className="text-base-content/65 text-sm leading-relaxed">
-            Войдите, чтобы подсветить свои группы.
+            <Trans>Sign in to highlight your groups.</Trans>
           </p>
           <button
             type="button"
             className="btn btn-sm btn-ghost self-start"
             onClick={state.onSignIn}
           >
-            Войти
+            <Trans>Sign in</Trans>
           </button>
         </div>
       ) : state.kind === "pending" ? (
@@ -765,20 +780,22 @@ function PersonalLessonsSection({
       ) : state.kind === "error" ? (
         <div className="flex flex-col gap-2">
           <p className="text-error text-sm leading-relaxed">
-            Не удалось загрузить ваши группы: {state.message}
+            <Trans>Failed to load your groups: {errorMessage}</Trans>
           </p>
           <button
             type="button"
             className="btn btn-sm btn-ghost self-start"
             onClick={state.onRetry}
           >
-            Повторить
+            <Trans>Retry</Trans>
           </button>
         </div>
       ) : state.kind === "empty" ? (
         <p className="text-base-content/65 text-sm leading-relaxed">
-          Ваши группы и занятия преподавателя пока не найдены. Можно
-          просматривать всё расписание.
+          <Trans>
+            Your groups and teaching classes were not found yet. You can still
+            browse the whole timetable.
+          </Trans>
         </p>
       ) : (
         <div className="flex min-h-0 flex-1 [scrollbar-width:thin] flex-col gap-3 overflow-y-auto">
@@ -787,7 +804,7 @@ function PersonalLessonsSection({
               {ownGroups.length ? (
                 <div className="flex min-w-0 flex-wrap items-center gap-1">
                   <span className="text-base-content/45 text-[0.625rem] font-semibold tracking-wide uppercase">
-                    Группы
+                    <Trans>Groups</Trans>
                   </span>
                   {ownGroups.map((group) => (
                     <span
@@ -802,16 +819,20 @@ function PersonalLessonsSection({
               ) : null}
               {instructorId ? (
                 <div className="text-base-content/55 text-[0.625rem] leading-tight">
-                  <span className="font-semibold text-[#7c3aed]">Веду</span>
-                  <span className="text-base-content/35"> · </span>
-                  занятия, где вы преподаватель
+                  <Trans>
+                    <span className="font-semibold text-[#7c3aed]">
+                      Teaching
+                    </span>
+                    <span className="text-base-content/35"> · </span>
+                    classes where you are the instructor
+                  </Trans>
                 </div>
               ) : null}
             </div>
           ) : null}
           {!days.length ? (
             <p className="text-base-content/65 text-sm leading-relaxed">
-              На этой неделе занятий нет.
+              <Trans>No classes this week.</Trans>
             </p>
           ) : (
             <PersonalWeekDays
@@ -834,7 +855,7 @@ function PersonalLessonsSection({
                 nextWeekOpen && "rotate-180",
               )}
             />
-            Следующая неделя
+            <Trans>Next week</Trans>
             {nextWeekCount ? (
               <span className="text-base-content/45 tabular-nums">
                 {nextWeekCount}
@@ -844,7 +865,7 @@ function PersonalLessonsSection({
           {nextWeekOpen ? (
             !nextWeekDays.length ? (
               <p className="text-base-content/55 text-sm leading-relaxed">
-                На следующей неделе занятий нет.
+                <Trans>No classes next week.</Trans>
               </p>
             ) : (
               <PersonalWeekDays
@@ -913,7 +934,7 @@ export function TimetableSidebarMenu({
           }}
         >
           <span className="icon-[material-symbols--arrow-back-rounded] text-lg" />
-          Меню
+          <Trans>Menu</Trans>
         </button>
         <UnarrangedLessonsPanel
           groups={groups}
@@ -928,7 +949,9 @@ export function TimetableSidebarMenu({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <h2 className="text-lg font-semibold">Меню</h2>
+      <h2 className="text-lg font-semibold">
+        <Trans>Menu</Trans>
+      </h2>
       <TimetableEventSearch
         meetings={meetings}
         config={config}
@@ -957,7 +980,9 @@ export function TimetableSidebarMenu({
           onClick={() => setPage("unarranged")}
         >
           <span className="icon-[material-symbols--playlist-add-check-rounded] shrink-0 text-xl" />
-          <span className="flex-1">Неразмещённые</span>
+          <span className="flex-1">
+            <Trans>Unscheduled</Trans>
+          </span>
           <span className="text-base-content/60 tabular-nums">
             {countUnarrangedSessions(groups)}
           </span>
@@ -970,7 +995,9 @@ export function TimetableSidebarMenu({
           className="btn btn-ghost mt-auto h-auto min-h-12 w-full shrink-0 justify-start gap-2 px-3 py-3 text-left normal-case"
         >
           <span className="icon-[mdi--calendar-edit-outline] shrink-0 text-xl" />
-          <span className="flex-1">Составление расписания</span>
+          <span className="flex-1">
+            <Trans>Timetable composer</Trans>
+          </span>
           <span className="icon-[material-symbols--chevron-right-rounded] shrink-0 text-xl" />
         </Link>
       ) : null}
@@ -980,7 +1007,9 @@ export function TimetableSidebarMenu({
           className="btn btn-ghost mt-auto h-auto min-h-12 w-full shrink-0 justify-start gap-2 px-3 py-3 text-left normal-case"
         >
           <span className="icon-[mdi--account-school-outline] shrink-0 text-xl" />
-          <span className="flex-1">Посмотреть как студент</span>
+          <span className="flex-1">
+            <Trans>View as student</Trans>
+          </span>
           <span className="icon-[material-symbols--chevron-right-rounded] shrink-0 text-xl" />
         </Link>
       ) : null}

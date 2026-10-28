@@ -6,6 +6,7 @@ import {
   type SchemaComponentSessionSeries,
   type SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
+import { activeForBlock } from "@/components/schedule-assistant/timetable/sessionWindows.ts";
 import { ComponentSessionsEditor } from "./ComponentSessionsEditor.tsx";
 import { setupI18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
@@ -69,8 +70,7 @@ const config = {
 } as unknown as SchemaScheduleConfig;
 const weekly: SchemaComponentSessionSeries = {
   audience: ["G"],
-  active: null,
-  block_id: "first",
+  active: activeForBlock("first"),
   weekly_pattern: [
     {
       weekday: Weekday.TUESDAY,

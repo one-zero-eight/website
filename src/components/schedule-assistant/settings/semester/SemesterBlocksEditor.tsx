@@ -14,6 +14,7 @@ import {
   type SemesterBlock,
   type SemesterPeriod,
 } from "./semesterBlocks.ts";
+import { blockIdFromActive } from "@/components/schedule-assistant/timetable/sessionWindows.ts";
 
 function defaultNewBlockPeriod(
   semester: SemesterPeriod,
@@ -87,7 +88,7 @@ export function SemesterBlocksEditor() {
       .flatMap((course) =>
         course.components.flatMap((component) =>
           (component.sessions ?? []).flatMap((series, index) =>
-            series.block_id != null && blockIds.includes(series.block_id)
+            blockIds.includes(blockIdFromActive(series.active) ?? "")
               ? [
                   `${course.name_ru || course.name} · ${component.tag} · ${index + 1}`,
                 ]
@@ -113,11 +114,13 @@ export function SemesterBlocksEditor() {
   function handleAddBlock() {
     if (!semester) return;
     setActionError(null);
+    const nextIndex = blocks.length + 1;
     setDraft([
       ...blocks,
       {
         id: crypto.randomUUID(),
-        name: `Блок ${blocks.length + 1}`,
+        name: `Block ${nextIndex}`,
+        name_ru: `Блок ${nextIndex}`,
         ...defaultNewBlockPeriod(semester, blocks),
       },
     ]);
@@ -143,6 +146,7 @@ export function SemesterBlocksEditor() {
           blocks: sortSemesterBlocks(draft).map((block) => ({
             ...block,
             name: block.name.trim(),
+            name_ru: block.name_ru?.trim() || null,
           })),
         },
       },
@@ -167,12 +171,22 @@ export function SemesterBlocksEditor() {
             className="border-base-300 rounded-box flex min-w-0 flex-nowrap items-end gap-2 border p-2"
           >
             <label className="flex min-w-0 flex-[1.2] flex-col gap-1 text-xs">
-              <span>Название</span>
+              <span>Название (EN)</span>
               <input
                 className="input input-bordered input-sm w-full"
                 value={block.name}
                 onChange={(event) =>
                   handleChange(block.id, { name: event.target.value })
+                }
+              />
+            </label>
+            <label className="flex min-w-0 flex-[1.2] flex-col gap-1 text-xs">
+              <span>Название (RU)</span>
+              <input
+                className="input input-bordered input-sm w-full"
+                value={block.name_ru ?? ""}
+                onChange={(event) =>
+                  handleChange(block.id, { name_ru: event.target.value })
                 }
               />
             </label>

@@ -1,4 +1,6 @@
+import { t } from "@lingui/core/macro";
 import { createElement } from "react";
+import { meetingCourseShortTitle } from "./localizedNames.ts";
 
 import type {
   SchemaDateRange,
@@ -191,8 +193,7 @@ export function timesOverlap(
 }
 
 function conflictMeetingLabel(meeting: Meeting): string {
-  const title =
-    String(meeting.course_short_name || meeting.course || "").trim() || "—";
+  const title = meetingCourseShortTitle(meeting) || "—";
   const tag = String(meeting.tag || "").trim();
   return tag ? `${title} (${tag})` : title;
 }
@@ -561,10 +562,8 @@ export function buildRoomPickerOptions({
               weekly,
             )
           : null;
-      const hint = [
-        room?.capacity != null ? `Вместимость ${room.capacity}` : null,
-        loadHint,
-      ]
+      const capacity = room?.capacity;
+      const hint = [capacity != null ? t`Capacity ${capacity}` : null, loadHint]
         .filter(Boolean)
         .join(" · ");
 

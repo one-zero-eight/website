@@ -1,5 +1,6 @@
 import type { SchemaCourseConfig } from "@/api/schedule-assistant/types.ts";
 import { Trans } from "@lingui/react/macro";
+import { localizedBlockName } from "@/components/schedule-assistant/timetable/localizedNames.ts";
 import { courseBlockIds } from "@/components/schedule-assistant/timetable/timetableBlocks.ts";
 import {
   sortSemesterBlocks,
@@ -30,7 +31,7 @@ export function CourseBlocksEditor({
                 className="badge badge-ghost"
                 title={`${block.start_date} — ${block.end_date}`}
               >
-                {block.name}
+                {localizedBlockName(block)}
               </span>
             ))
         ) : (

@@ -1,3 +1,5 @@
+import { useLingui } from "@lingui/react/macro";
+
 import type {
   SchemaCourseConfig,
   SchemaDateRange,
@@ -43,7 +45,7 @@ export function InstructorPicker({
   excludeRef,
   excludeInstanceId,
   onChange,
-  placeholder = "Преподаватель",
+  placeholder,
   allowEmpty = true,
   className,
   triggerClassName,
@@ -77,6 +79,7 @@ export function InstructorPicker({
   matchTriggerWidth?: boolean;
   showHintOnTrigger?: boolean;
 }) {
+  const { t, i18n } = useLingui();
   const [statusReady, setStatusReady] = useState(false);
 
   useEffect(() => {
@@ -157,6 +160,7 @@ export function InstructorPicker({
         }),
       ];
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       active,
       allowEmpty,
@@ -176,6 +180,7 @@ export function InstructorPicker({
       weekday,
       weeklySlot,
       audienceTokens,
+      i18n.locale,
     ],
   );
 
@@ -193,7 +198,7 @@ export function InstructorPicker({
       options={menuOptions}
       triggerOption={options.find((option) => option.value === value)}
       onOpenChange={setPickerOpen}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t`Instructor`}
       searchable
       matchTriggerWidth={matchTriggerWidth}
       showHintOnTrigger={showHintOnTrigger}
