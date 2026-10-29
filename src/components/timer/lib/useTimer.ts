@@ -2,6 +2,7 @@ import { msg, plural } from "@lingui/core/macro";
 import { useToast } from "@/components/toast";
 import { Dispatch, SetStateAction, useCallback, useRef, useState } from "react";
 import { useSaveState, useWakeLock } from "./utils";
+import { MAX_SECONDS } from "./constants";
 interface UseTimerTypes {
   title: string;
   setShowStopDialog: Dispatch<SetStateAction<boolean>>;
@@ -96,9 +97,8 @@ export const useTimer = ({
       return;
     }
 
-    const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99;
     if (totalSeconds > MAX_SECONDS) {
-      showError(msg`The maximum countdown duration is 99:99:99`);
+      showError(msg`The maximum countdown duration is 99:59:59`);
       return;
     }
 
@@ -357,7 +357,6 @@ export const useTimer = ({
   const addTimeToRunningTimer = (minutesToAdd: number) => {
     if (!isRunning) return; // Only work when timer is running (including paused state)
 
-    const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99; // 99:99:99 in seconds
     const secondsToAdd = minutesToAdd * 60;
 
     if (isPaused) {
@@ -494,8 +493,6 @@ export const useTimer = ({
         return;
       }
 
-      // Cap at 99:99:99
-      const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99;
       const cappedSeconds = Math.min(totalSeconds, MAX_SECONDS);
 
       const h = Math.floor(cappedSeconds / 3600);

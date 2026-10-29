@@ -114,8 +114,8 @@ msgid "{0, plural, one {# training} other {# trainings}}"
 msgstr ""
 
 #. placeholder {0}: Math.round(actualSecondsAdded / 60)
-#: src/components/timer/lib/useTimer.ts:392
-#: src/components/timer/lib/useTimer.ts:446
+#: src/components/timer/lib/useTimer.ts:394
+#: src/components/timer/lib/useTimer.ts:448
 msgid "{0, plural, one {Added # minute to timer} other {Added # minutes to timer}}"
 msgstr ""
 
@@ -502,7 +502,7 @@ msgstr ""
 msgid "<0>Winter break:</0> {breakDates}"
 msgstr ""
 
-#: src/components/timer/lib/constants.ts:7
+#: src/components/timer/lib/constants.ts:9
 msgid "1 hour"
 msgstr ""
 
@@ -510,7 +510,7 @@ msgstr ""
 msgid "1 page"
 msgstr ""
 
-#: src/components/timer/lib/constants.ts:8
+#: src/components/timer/lib/constants.ts:10
 msgid "1.5 hours"
 msgstr ""
 
@@ -526,7 +526,7 @@ msgstr ""
 msgid "1st Semester"
 msgstr ""
 
-#: src/components/timer/lib/constants.ts:9
+#: src/components/timer/lib/constants.ts:11
 msgid "2 hours"
 msgstr ""
 
@@ -543,7 +543,7 @@ msgstr ""
 msgid "3 days"
 msgstr ""
 
-#: src/components/timer/lib/constants.ts:5
+#: src/components/timer/lib/constants.ts:7
 msgid "30 mins"
 msgstr ""
 
@@ -563,7 +563,7 @@ msgstr ""
 msgid "404 / not found"
 msgstr ""
 
-#: src/components/timer/lib/constants.ts:6
+#: src/components/timer/lib/constants.ts:8
 msgid "45 mins"
 msgstr ""
 
@@ -1395,7 +1395,7 @@ msgstr ""
 #: src/components/tabletennis/PlayerActionMenu.tsx:229
 #: src/components/tabletennis/PlayerActionMenu.tsx:298
 #: src/components/tabletennis/QualificationMatches.tsx:339
-#: src/components/timer/components/CustomTimeModal.tsx:156
+#: src/components/timer/components/CustomTimeModal.tsx:155
 #: src/components/timer/components/StopDialog.tsx:27
 #: src/components/toast/ConfirmDialog.tsx:23
 #: src/components/toast/ToastProvider.test.ts:130
@@ -1484,7 +1484,7 @@ msgstr ""
 msgid "Cannot select a past time"
 msgstr ""
 
-#: src/components/timer/lib/useTimer.ts:68
+#: src/components/timer/lib/useTimer.ts:69
 msgid "Cannot set the timer to 0 seconds"
 msgstr ""
 
@@ -7207,7 +7207,7 @@ msgstr ""
 msgid "Select a series, then click an empty slot."
 msgstr ""
 
-#: src/components/timer/components/CustomTimeModal.tsx:107
+#: src/components/timer/components/CustomTimeModal.tsx:106
 msgid "Select a specific date and time in the future. The timer will count down until that moment."
 msgstr ""
 
@@ -7219,7 +7219,7 @@ msgstr ""
 msgid "Select all"
 msgstr ""
 
-#: src/components/timer/components/CustomTimeModal.tsx:102
+#: src/components/timer/components/CustomTimeModal.tsx:101
 msgid "Select Target Time"
 msgstr ""
 
@@ -7796,7 +7796,7 @@ msgstr ""
 msgid "Start time cannot be in the past."
 msgstr ""
 
-#: src/components/timer/components/CustomTimeModal.tsx:167
+#: src/components/timer/components/CustomTimeModal.tsx:166
 msgid "Start Timer"
 msgstr ""
 
@@ -8102,7 +8102,7 @@ msgstr ""
 msgid "Tap two players to swap them, or hold one and drag it onto another."
 msgstr ""
 
-#: src/components/timer/components/CustomTimeModal.tsx:116
+#: src/components/timer/components/CustomTimeModal.tsx:115
 msgid "Target Date & Time"
 msgstr ""
 
@@ -8258,9 +8258,9 @@ msgstr ""
 msgid "The main goal of <0/> members is improving their skills and having fun. We pass knowledge from older generations to younger ones and stay friends within the team."
 msgstr ""
 
-#: src/components/timer/components/CustomTimeModal.tsx:89
+#: src/components/timer/components/CustomTimeModal.tsx:88
 #: src/components/timer/lib/useTimer.ts:101
-msgid "The maximum countdown duration is 99:99:99"
+msgid "The maximum countdown duration is 99:59:59"
 msgstr ""
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:304
@@ -8313,8 +8313,8 @@ msgstr ""
 msgid "The selected start time has passed. Choose another time."
 msgstr ""
 
-#: src/components/timer/components/CustomTimeModal.tsx:84
-#: src/components/timer/lib/useTimer.ts:95
+#: src/components/timer/components/CustomTimeModal.tsx:83
+#: src/components/timer/lib/useTimer.ts:96
 msgid "The selected time must be in the future"
 msgstr ""
 
@@ -8342,7 +8342,7 @@ msgstr ""
 msgid "The timer resumed"
 msgstr ""
 
-#: src/components/timer/lib/useTimer.ts:84
+#: src/components/timer/lib/useTimer.ts:85
 #: src/components/timer/lib/useTimer.ts:120
 msgid "The timer started"
 msgstr ""
@@ -8486,7 +8486,7 @@ msgstr ""
 msgid "Time & date"
 msgstr ""
 
-#: src/components/timer/lib/useTimer.ts:484
+#: src/components/timer/lib/useTimer.ts:486
 msgid "Time is up!"
 msgstr ""
 
@@ -8495,7 +8495,7 @@ msgstr ""
 msgid "Time Restrictions"
 msgstr ""
 
-#: src/components/timer/components/CustomTimeModal.tsx:140
+#: src/components/timer/components/CustomTimeModal.tsx:139
 msgid "Time you will have"
 msgstr ""
 
@@ -8512,13 +8512,13 @@ msgstr ""
 msgid "Timer"
 msgstr ""
 
-#: src/components/timer/lib/useTimer.ts:369
-#: src/components/timer/lib/useTimer.ts:413
+#: src/components/timer/lib/useTimer.ts:371
+#: src/components/timer/lib/useTimer.ts:415
 msgid "Timer is already at maximum (99:59:59)"
 msgstr ""
 
-#: src/components/timer/lib/useTimer.ts:389
-#: src/components/timer/lib/useTimer.ts:443
+#: src/components/timer/lib/useTimer.ts:391
+#: src/components/timer/lib/useTimer.ts:445
 msgid "Timer set to maximum (99:59:59)"
 msgstr ""
 
