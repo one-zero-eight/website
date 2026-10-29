@@ -2,6 +2,7 @@ import { msg, plural } from "@lingui/core/macro";
 import { useToast } from "@/components/toast";
 import { Dispatch, SetStateAction, useCallback, useRef, useState } from "react";
 import { useSaveState, useWakeLock } from "./utils";
+import { MAX_TIMER_SECONDS } from "./constants";
 interface UseTimerTypes {
   title: string;
   setShowStopDialog: Dispatch<SetStateAction<boolean>>;
@@ -96,9 +97,8 @@ export const useTimer = ({
       return;
     }
 
-    const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99;
-    if (totalSeconds > MAX_SECONDS) {
-      showError(msg`The maximum countdown duration is 99:99:99`);
+    if (totalSeconds > MAX_TIMER_SECONDS) {
+      showError(msg`The maximum countdown duration is 99:59:59`);
       return;
     }
 
@@ -357,12 +357,14 @@ export const useTimer = ({
   const addTimeToRunningTimer = (minutesToAdd: number) => {
     if (!isRunning) return; // Only work when timer is running (including paused state)
 
-    const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99; // 99:99:99 in seconds
     const secondsToAdd = minutesToAdd * 60;
 
     if (isPaused) {
       // Timer is paused - update seconds left and display directly
-      const newSecondsLeft = Math.min(secondsLeft + secondsToAdd, MAX_SECONDS);
+      const newSecondsLeft = Math.min(
+        secondsLeft + secondsToAdd,
+        MAX_TIMER_SECONDS,
+      );
       const actualSecondsAdded = newSecondsLeft - secondsLeft;
 
       if (actualSecondsAdded === 0) {
@@ -385,7 +387,7 @@ export const useTimer = ({
       };
       localStorage.setItem("timerState", JSON.stringify(stateToSave));
 
-      if (newSecondsLeft >= MAX_SECONDS) {
+      if (newSecondsLeft >= MAX_TIMER_SECONDS) {
         showWarning(msg`Timer set to maximum (99:59:59)`);
       } else {
         showSuccess(
@@ -405,7 +407,7 @@ export const useTimer = ({
 
       const newSecondsLeft = Math.min(
         currentRemainingSeconds + secondsToAdd,
-        MAX_SECONDS,
+        MAX_TIMER_SECONDS,
       );
       const actualSecondsAdded = newSecondsLeft - currentRemainingSeconds;
 
@@ -439,7 +441,7 @@ export const useTimer = ({
       };
       localStorage.setItem("timerState", JSON.stringify(stateToSave));
 
-      if (newSecondsLeft >= MAX_SECONDS) {
+      if (newSecondsLeft >= MAX_TIMER_SECONDS) {
         showWarning(msg`Timer set to maximum (99:59:59)`);
       } else {
         showSuccess(
@@ -494,9 +496,7 @@ export const useTimer = ({
         return;
       }
 
-      // Cap at 99:99:99
-      const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99;
-      const cappedSeconds = Math.min(totalSeconds, MAX_SECONDS);
+      const cappedSeconds = Math.min(totalSeconds, MAX_TIMER_SECONDS);
 
       const h = Math.floor(cappedSeconds / 3600);
       const m = Math.floor((cappedSeconds % 3600) / 60);

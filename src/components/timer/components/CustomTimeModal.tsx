@@ -3,6 +3,7 @@ import { type MessageDescriptor } from "@lingui/core";
 import { Modal } from "@/components/common/Modal.tsx";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo, useState } from "react";
+import { MAX_TIMER_SECONDS } from "@/components/timer/lib/constants";
 
 interface CustomTimeModalProps {
   open: boolean;
@@ -20,13 +21,11 @@ const CustomTimeModal = ({
   const [error, setError] = useState<MessageDescriptor | null>(null);
   const [previewTime, setPreviewTime] = useState<string | null>(null);
 
-  const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99;
-
   const { minDateTime, maxDateTime } = useMemo(() => {
     const minNow = new Date();
     minNow.setSeconds(0, 0);
 
-    const maxNow = new Date(Date.now() + MAX_SECONDS * 1000);
+    const maxNow = new Date(Date.now() + MAX_TIMER_SECONDS * 1000);
 
     const formatForInput = (date: Date) => {
       const d = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -37,7 +36,7 @@ const CustomTimeModal = ({
       minDateTime: formatForInput(minNow),
       maxDateTime: formatForInput(maxNow),
     };
-  }, [MAX_SECONDS]);
+  }, []);
 
   useEffect(() => {
     if (!selectedDateTime) {
@@ -55,7 +54,7 @@ const CustomTimeModal = ({
         return;
       }
 
-      if (diff > MAX_SECONDS) {
+      if (diff > MAX_TIMER_SECONDS) {
         setPreviewTime(null);
         return;
       }
@@ -72,7 +71,7 @@ const CustomTimeModal = ({
     updatePreview();
     const interval = setInterval(updatePreview, 1000);
     return () => clearInterval(interval);
-  }, [selectedDateTime, MAX_SECONDS]);
+  }, [selectedDateTime]);
 
   const handleStart = () => {
     if (!selectedDateTime) return;
@@ -85,8 +84,8 @@ const CustomTimeModal = ({
       return;
     }
 
-    if (totalSeconds > MAX_SECONDS) {
-      setError(msg`The maximum countdown duration is 99:99:99`);
+    if (totalSeconds > MAX_TIMER_SECONDS) {
+      setError(msg`The maximum countdown duration is 99:59:59`);
       return;
     }
 
