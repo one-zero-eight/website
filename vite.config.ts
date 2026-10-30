@@ -49,7 +49,7 @@ export default defineConfig({
       registerType: "prompt",
       workbox: {
         globPatterns: ["**/*.{js,css,html,json,svg,png,woff2}"],
-        navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/assets\//],
+        navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/callback\//, /^\/assets\//],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         // API responses kept for instant loads and offline use. The matchers
         // are serialized into the service worker, so they must not reference
