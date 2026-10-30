@@ -114,8 +114,8 @@ msgid "{0, plural, one {# training} other {# trainings}}"
 msgstr "{0, plural, one {# тренировка} few {# тренировки} many {# тренировок} other {# тренировки}}"
 
 #. placeholder {0}: Math.round(actualSecondsAdded / 60)
-#: src/components/timer/lib/useTimer.ts:392
-#: src/components/timer/lib/useTimer.ts:446
+#: src/components/timer/lib/useTimer.ts:394
+#: src/components/timer/lib/useTimer.ts:448
 msgid "{0, plural, one {Added # minute to timer} other {Added # minutes to timer}}"
 msgstr "{0, plural, one {К таймеру добавлена # минута} few {К таймеру добавлено # минуты} many {К таймеру добавлено # минут} other {К таймеру добавлено # минут}}"
 
@@ -502,7 +502,7 @@ msgstr "<0>Чтобы снять</0> статус DEBTOR, нужно закры�
 msgid "<0>Winter break:</0> {breakDates}"
 msgstr "<0>Зимние каникулы:</0> {breakDates}"
 
-#: src/components/timer/lib/constants.ts:7
+#: src/components/timer/lib/constants.ts:9
 msgid "1 hour"
 msgstr "1 час"
 
@@ -510,7 +510,7 @@ msgstr "1 час"
 msgid "1 page"
 msgstr "1 страница"
 
-#: src/components/timer/lib/constants.ts:8
+#: src/components/timer/lib/constants.ts:10
 msgid "1.5 hours"
 msgstr "1,5 часа"
 
@@ -526,7 +526,7 @@ msgstr "16 страниц"
 msgid "1st Semester"
 msgstr "1-й семестр"
 
-#: src/components/timer/lib/constants.ts:9
+#: src/components/timer/lib/constants.ts:11
 msgid "2 hours"
 msgstr "2 часа"
 
@@ -543,7 +543,7 @@ msgstr "2-й семестр"
 msgid "3 days"
 msgstr "3 дня"
 
-#: src/components/timer/lib/constants.ts:5
+#: src/components/timer/lib/constants.ts:7
 msgid "30 mins"
 msgstr "30 мин"
 
@@ -563,7 +563,7 @@ msgstr "403 / доступ запрещён"
 msgid "404 / not found"
 msgstr "404 / страница не найдена"
 
-#: src/components/timer/lib/constants.ts:6
+#: src/components/timer/lib/constants.ts:8
 msgid "45 mins"
 msgstr "45 мин"
 
@@ -1395,7 +1395,7 @@ msgstr "Можно играть сейчас"
 #: src/components/tabletennis/PlayerActionMenu.tsx:229
 #: src/components/tabletennis/PlayerActionMenu.tsx:298
 #: src/components/tabletennis/QualificationMatches.tsx:339
-#: src/components/timer/components/CustomTimeModal.tsx:156
+#: src/components/timer/components/CustomTimeModal.tsx:155
 #: src/components/timer/components/StopDialog.tsx:27
 #: src/components/toast/ConfirmDialog.tsx:23
 #: src/components/toast/ToastProvider.test.ts:130
@@ -1484,7 +1484,7 @@ msgstr "Нельзя отклонить без комментария"
 msgid "Cannot select a past time"
 msgstr "Нельзя выбрать время в прошлом"
 
-#: src/components/timer/lib/useTimer.ts:68
+#: src/components/timer/lib/useTimer.ts:69
 msgid "Cannot set the timer to 0 seconds"
 msgstr "Нельзя поставить таймер на 0 секунд"
 
@@ -7207,7 +7207,7 @@ msgstr "Выберите комнату."
 msgid "Select a series, then click an empty slot."
 msgstr "Выберите серию, затем кликните по пустому слоту."
 
-#: src/components/timer/components/CustomTimeModal.tsx:107
+#: src/components/timer/components/CustomTimeModal.tsx:106
 msgid "Select a specific date and time in the future. The timer will count down until that moment."
 msgstr "Выберите дату и время в будущем. Таймер будет отсчитывать время до этого момента."
 
@@ -7219,7 +7219,7 @@ msgstr "Выберите пользователя для имперсонаци�
 msgid "Select all"
 msgstr "Выбрать все"
 
-#: src/components/timer/components/CustomTimeModal.tsx:102
+#: src/components/timer/components/CustomTimeModal.tsx:101
 msgid "Select Target Time"
 msgstr "Выберите целевое время"
 
@@ -7796,7 +7796,7 @@ msgstr "Начать квалификацию"
 msgid "Start time cannot be in the past."
 msgstr "Время начала не может быть в прошлом."
 
-#: src/components/timer/components/CustomTimeModal.tsx:167
+#: src/components/timer/components/CustomTimeModal.tsx:166
 msgid "Start Timer"
 msgstr "Запустить таймер"
 
@@ -8102,7 +8102,7 @@ msgstr "Нажмите на другого игрока, чтобы поменя
 msgid "Tap two players to swap them, or hold one and drag it onto another."
 msgstr "Нажмите на двух игроков, чтобы поменять их местами, либо зажмите одного и перетащите на другого."
 
-#: src/components/timer/components/CustomTimeModal.tsx:116
+#: src/components/timer/components/CustomTimeModal.tsx:115
 msgid "Target Date & Time"
 msgstr "Дата и время окончания"
 
@@ -8258,10 +8258,10 @@ msgstr "Главный принцип соревнования — честна�
 msgid "The main goal of <0/> members is improving their skills and having fun. We pass knowledge from older generations to younger ones and stay friends within the team."
 msgstr "Главная цель участников <0/> — развивать свои навыки и получать удовольствие от общего дела. Мы передаём знания от старших поколений младшим и поддерживаем дружеские отношения в команде."
 
-#: src/components/timer/components/CustomTimeModal.tsx:89
+#: src/components/timer/components/CustomTimeModal.tsx:88
 #: src/components/timer/lib/useTimer.ts:101
-msgid "The maximum countdown duration is 99:99:99"
-msgstr "Максимальная длительность — 99:99:99"
+msgid "The maximum countdown duration is 99:59:59"
+msgstr "Максимальная длительность — 99:59:59"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:304
 #: src/components/board-games/ReservationDetailsModal.tsx:60
@@ -8313,8 +8313,8 @@ msgstr "Сканер не вернул изображение. Попробуй�
 msgid "The selected start time has passed. Choose another time."
 msgstr "Выбранное время начала уже прошло. Выберите другое время."
 
-#: src/components/timer/components/CustomTimeModal.tsx:84
-#: src/components/timer/lib/useTimer.ts:95
+#: src/components/timer/components/CustomTimeModal.tsx:83
+#: src/components/timer/lib/useTimer.ts:96
 msgid "The selected time must be in the future"
 msgstr "Выбранное время должно быть в будущем"
 
@@ -8342,7 +8342,7 @@ msgstr "Таймер на паузе"
 msgid "The timer resumed"
 msgstr "Таймер продолжен"
 
-#: src/components/timer/lib/useTimer.ts:84
+#: src/components/timer/lib/useTimer.ts:85
 #: src/components/timer/lib/useTimer.ts:120
 msgid "The timer started"
 msgstr "Таймер запущен"
@@ -8486,7 +8486,7 @@ msgstr "Время"
 msgid "Time & date"
 msgstr "Время и дата"
 
-#: src/components/timer/lib/useTimer.ts:484
+#: src/components/timer/lib/useTimer.ts:486
 msgid "Time is up!"
 msgstr "Время вышло!"
 
@@ -8495,7 +8495,7 @@ msgstr "Время вышло!"
 msgid "Time Restrictions"
 msgstr "Ограничения по времени"
 
-#: src/components/timer/components/CustomTimeModal.tsx:140
+#: src/components/timer/components/CustomTimeModal.tsx:139
 msgid "Time you will have"
 msgstr "Время, которое у вас будет"
 
@@ -8512,13 +8512,13 @@ msgstr "Таймлайн"
 msgid "Timer"
 msgstr "Таймер"
 
-#: src/components/timer/lib/useTimer.ts:369
-#: src/components/timer/lib/useTimer.ts:413
+#: src/components/timer/lib/useTimer.ts:371
+#: src/components/timer/lib/useTimer.ts:415
 msgid "Timer is already at maximum (99:59:59)"
 msgstr "Таймер уже на максимуме (99:59:59)"
 
-#: src/components/timer/lib/useTimer.ts:389
-#: src/components/timer/lib/useTimer.ts:443
+#: src/components/timer/lib/useTimer.ts:391
+#: src/components/timer/lib/useTimer.ts:445
 msgid "Timer set to maximum (99:59:59)"
 msgstr "Таймер установлен на максимум (99:59:59)"
 
