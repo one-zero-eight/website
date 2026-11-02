@@ -80,7 +80,6 @@ export function MusicRoomPage() {
             <video
               controls
               width="704"
-              height="396"
               src="https://storage.innohassle.ru/website-static/music-room/musicroom_pathfinding.mp4"
               title={t`How to get to the Innopolis Music room?`}
               style={{
