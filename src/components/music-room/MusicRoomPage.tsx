@@ -77,14 +77,12 @@ export function MusicRoomPage() {
             </button>
           </div>
           <div className="bg-base-200 rounded-box flex w-full flex-row items-center justify-center p-4">
-            <iframe
+            <video
+              controls
               width="704"
               height="396"
-              src="https://www.youtube-nocookie.com/embed/mGfdun8ah3g"
+              src="https://storage.innohassle.ru/website-static/music-room/musicroom_pathfinding.mp4"
               title={t`How to get to the Innopolis Music room?`}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
               style={{
                 maxWidth: "100%",
                 maxHeight: "100%",
@@ -93,7 +91,7 @@ export function MusicRoomPage() {
                 height: "100%",
                 aspectRatio: "16/9",
               }}
-            ></iframe>
+            ></video>
           </div>
         </div>
         <div className="my-4 flex flex-row flex-wrap items-center">
