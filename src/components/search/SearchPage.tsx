@@ -226,7 +226,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
             ) : (
               previewSource &&
               !isMobile &&
-              "url" in previewSource && (
+              "url" in previewSource &&
+              !!previewSource.url && (
                 <IframePreviewCard
                   source={previewSource}
                   onClose={() => setPreviewSource(undefined)}

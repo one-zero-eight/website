@@ -21,6 +21,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/search/page": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Page By Url
+     * @description The text of a page of the knowledge base by the address of its original: for sites that cannot be shown in a frame.
+     */
+    get: operations["search_page_by_url"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/search/search/{search_query_id}/feedback": {
     parameters: {
       query?: never;
@@ -49,6 +69,51 @@ export interface paths {
     put?: never;
     /** Ask By Query */
     post: operations["ask_ask_by_query"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/stream": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Ask By Query Stream
+     * @description The same as POST /ask/, but the work is shown while it goes on. Events: `status` ({text}: what the agent is doing: waiting in the queue, checking, asking a helper, writing, as in the Telegram bot),
+     *     `answer` ({text}: the whole answer so far), `done` (AskResponses: the final answer with its sources), `cancelled`
+     *     ({detail}: POST /ask/{chat_id}/cancel) or `error` ({detail}). A client's questions are answered one at a time, in the
+     *     order they came: while an earlier one is not done, this one waits and sends no events.
+     */
+    post: operations["ask_ask_by_query_stream"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/{chat_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel Ask
+     * @description Cancel the work of the agent in the chat: the question being answered and the ones of this chat still waiting for
+     *     their turn. Their requests end with 409 (`/ask/stream`: a `cancelled` event). The conversation goes on as it was before
+     *     the cancelled questions; the answers already given stay in it.
+     */
+    post: operations["ask_cancel_ask"];
     delete?: never;
     options?: never;
     head?: never;
@@ -166,7 +231,10 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Batch Upsert Courses */
+    /**
+     * Batch Upsert Courses
+     * @description Accepted and dropped.
+     */
     post: operations["moodle_batch_upsert_courses"];
     delete?: never;
     options?: never;
@@ -200,7 +268,10 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Course Content */
+    /**
+     * Course Content
+     * @description Accepted and dropped.
+     */
     post: operations["moodle_course_content"];
     delete?: never;
     options?: never;
@@ -234,7 +305,10 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Content Uploaded */
+    /**
+     * Content Uploaded
+     * @description Accepted and dropped.
+     */
     post: operations["moodle_content_uploaded"];
     delete?: never;
     options?: never;
@@ -251,7 +325,10 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Run Parse Route */
+    /**
+     * Run Parse Route
+     * @description The wiki is built by `catix-wiki`, not by an endpoint.
+     */
     post: operations["run_parse_route"];
     delete?: never;
     options?: never;
@@ -269,17 +346,11 @@ export interface components {
       query: string;
       /** Answer */
       answer: string;
-      /** @description Assigned act query index */
-      act_query_id: components["schemas"]["PydanticObjectId"] | null;
-      /**
-       * Tool Calls
-       * @description Which tools were used.
-       */
+      /** Act Query Id */
+      act_query_id?: string | null;
+      /** Tool Calls */
       tool_calls: unknown[];
-      /**
-       * Messages
-       * @description Chat history for llm (do not show on frontend).
-       */
+      /** Messages */
       messages: unknown[];
     };
     /** AskResponses */
@@ -288,19 +359,13 @@ export interface components {
       query: string;
       /** Answer */
       answer: string;
-      /** @description Assigned chat index */
-      chat_id: components["schemas"]["PydanticObjectId"] | null;
-      /** @description Assigned ask query index */
-      ask_query_id: components["schemas"]["PydanticObjectId"] | null;
-      /**
-       * Search Responses
-       * @description Responses to the search query.
-       */
+      /** Chat Id */
+      chat_id?: string | null;
+      /** Ask Query Id */
+      ask_query_id?: string | null;
+      /** Search Responses */
       search_responses: components["schemas"]["SearchResponse"][];
-      /**
-       * Messages
-       * @description Chat history for llm (do not show on frontend).
-       */
+      /** Messages */
       messages: unknown[];
     };
     /** Body_ask_act_by_query */
@@ -312,7 +377,15 @@ export interface components {
     Body_ask_ask_by_query: {
       /** Query */
       query: string;
-      chat_id?: components["schemas"]["PydanticObjectId"] | null;
+      /** Chat Id */
+      chat_id?: string | null;
+    };
+    /** Body_ask_ask_by_query_stream */
+    Body_ask_ask_by_query_stream: {
+      /** Query */
+      query: string;
+      /** Chat Id */
+      chat_id?: string | null;
     };
     /** CampusLifeSource */
     CampusLifeSource: {
@@ -386,16 +459,6 @@ export interface components {
        */
       breadcrumbs: string[];
     };
-    /** FlattenInContentsWithPresignedUrl */
-    FlattenInContentsWithPresignedUrl: {
-      /** Course Id */
-      course_id: number;
-      /** Module Id */
-      module_id: number;
-      content: components["schemas"]["MoodleContentSchema-Output"];
-      /** Presigned Url */
-      presigned_url: string;
-    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -424,73 +487,6 @@ export interface components {
        *     ]
        */
       breadcrumbs: string[];
-    };
-    /** InContent */
-    InContent: {
-      /** Course Id */
-      course_id: number;
-      /** Module Id */
-      module_id: number;
-      content: components["schemas"]["MoodleContentSchema-Input"];
-    };
-    /** InContents */
-    InContents: {
-      /** Course Id */
-      course_id: number;
-      /** Module Id */
-      module_id: number;
-      /** Contents */
-      contents: components["schemas"]["MoodleContentSchema-Input"][];
-    };
-    /** InCourse */
-    InCourse: {
-      /** Id */
-      id: number;
-      /** Fullname */
-      fullname: string;
-      /** Startdate */
-      startdate: number;
-      /** Enddate */
-      enddate: number;
-      /** Coursecategory */
-      coursecategory: string;
-    };
-    /** InCourses */
-    InCourses: {
-      /** Courses */
-      courses: components["schemas"]["InCourse"][];
-    };
-    /** InModule */
-    InModule: {
-      /** Id */
-      id: number;
-      /** Name */
-      name: string;
-      /** Modname */
-      modname: string;
-      /**
-       * Contents
-       * @default []
-       */
-      contents: components["schemas"]["MoodleContentSchema-Input"][];
-    };
-    /** InSection */
-    InSection: {
-      /** Id */
-      id: number;
-      /** Summary */
-      summary: string;
-      /** Modules */
-      modules: components["schemas"]["InModule"][];
-    };
-    /** InSections */
-    InSections: {
-      /** Course Id */
-      course_id: number;
-      /** Course Fullname */
-      course_fullname: string;
-      /** Sections */
-      sections: components["schemas"]["InSection"][];
     };
     /**
      * InfoSources
@@ -521,140 +517,55 @@ export interface components {
        */
       breadcrumbs: string[];
     };
-    /** MoodleContentSchema */
-    "MoodleContentSchema-Input": {
-      /** Type */
-      type: string;
-      /** Filename */
-      filename: string;
-      /** Timecreated */
-      timecreated?: number | null;
-      /** Timemodified */
-      timemodified?: number | null;
-      /**
-       * Uploaded
-       * @default false
-       */
-      uploaded: boolean;
-    };
-    /** MoodleContentSchema */
-    "MoodleContentSchema-Output": {
-      /** Type */
-      type: string;
-      /** Filename */
-      filename: string;
-      /** Timecreated */
-      timecreated: number | null;
-      /** Timemodified */
-      timemodified: number | null;
-      /**
-       * Uploaded
-       * @default false
-       */
-      uploaded: boolean;
-    };
     /** MoodleCourse */
     MoodleCourse: {
-      /**
-       * Format: objectid
-       * @description MongoDB document ObjectID
-       * @example 5eb7cf5a86d9755df3a6c593
-       */
-      id: string;
-      /** Course Id */
-      course_id: number;
-      /** Fullname */
-      fullname: string;
-      /** Startdate */
-      startdate: number;
-      /** Enddate */
-      enddate: number;
-      /** Coursecategory */
-      coursecategory: string;
-    };
-    /** MoodleEntry */
-    MoodleEntry: {
-      /**
-       * Format: objectid
-       * @description MongoDB document ObjectID
-       * @example 5eb7cf5a86d9755df3a6c593
-       */
-      id: string;
       /** Course Id */
       course_id: number;
       /** Course Fullname */
-      course_fullname: string;
-      /** Section Id */
-      section_id: number;
-      /** Section Summary */
-      section_summary: string;
-      /** Module Id */
-      module_id: number;
-      /** Module Name */
-      module_name: string;
-      /** Module Modname */
-      module_modname: string;
-      /** Contents */
-      contents: components["schemas"]["MoodleContentSchema-Output"][];
+      course_fullname?: string | null;
     };
     /** MoodleFileSource */
     MoodleFileSource: {
       /**
        * Display Name
-       * @description Display name of the resource.
        * @default -
        */
       display_name: string;
       /**
        * Breadcrumbs
-       * @description Breadcrumbs to the resource.
        * @default [
        *       "Moodle"
        *     ]
        */
       breadcrumbs: string[];
-      /**
-       * Link
-       * @description Anchor URL to the resource on Moodle.
-       */
+      /** Link */
       link: string;
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
       type: MoodleFileSourceType;
-      /**
-       * Resource Preview Url
-       * @description URL to get the preview of the resource.
-       */
-      resource_preview_url: string | null;
-      /**
-       * Resource Download Url
-       * @description URL to download the resource.
-       */
-      resource_download_url: string | null;
-      preview_location: components["schemas"]["PdfLocation"] | null;
+      /** Resource Preview Url */
+      resource_preview_url?: string | null;
+      /** Resource Download Url */
+      resource_download_url?: string | null;
+      preview_location?: components["schemas"]["PdfLocation"] | null;
     };
     /** MoodleUnknownSource */
     MoodleUnknownSource: {
       /**
        * Display Name
-       * @description Display name of the resource.
        * @default -
        */
       display_name: string;
       /**
        * Breadcrumbs
-       * @description Breadcrumbs to the resource.
        * @default [
        *       "Moodle"
        *     ]
        */
       breadcrumbs: string[];
-      /**
-       * Link
-       * @description Anchor URL to the resource on Moodle.
-       */
+      /** Link */
       link: string;
       /**
        * @description discriminator enum property added by openapi-typescript
@@ -666,44 +577,40 @@ export interface components {
     MoodleUrlSource: {
       /**
        * Display Name
-       * @description Display name of the resource.
        * @default -
        */
       display_name: string;
       /**
        * Breadcrumbs
-       * @description Breadcrumbs to the resource.
        * @default [
        *       "Moodle"
        *     ]
        */
       breadcrumbs: string[];
-      /**
-       * Link
-       * @description Anchor URL to the resource on Moodle.
-       */
+      /** Link */
       link: string;
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
       type: MoodleUrlSourceType;
-      /**
-       * Url
-       * @description URL of the resource
-       */
+      /** Url */
       url: string;
+    };
+    /** PageText */
+    PageText: {
+      /** Title */
+      title: string;
+      /** Url */
+      url: string;
+      /** Text */
+      text: string;
     };
     /** PdfLocation */
     PdfLocation: {
-      /**
-       * Page Index
-       * @description Page index in the PDF file. Starts from 1.
-       */
+      /** Page Index */
       page_index: number;
     };
-    /** @example 5eb7cf5a86d9755df3a6c593 */
-    PydanticObjectId: string;
     /** ResidentsSource */
     ResidentsSource: {
       /**
@@ -760,15 +667,9 @@ export interface components {
     };
     /** SearchResponse */
     SearchResponse: {
-      /**
-       * Score
-       * @description Score of the search response. Multiple scores if was an aggregation of multiple chunks. Optional.
-       */
-      score: number | number[] | null;
-      /**
-       * Source
-       * @description Relevant source for the search.
-       */
+      /** Score */
+      score?: number | number[] | null;
+      /** Source */
       source:
         | components["schemas"]["EduwikiSource"]
         | components["schemas"]["CampusLifeSource"]
@@ -783,18 +684,12 @@ export interface components {
     };
     /** SearchResponses */
     SearchResponses: {
-      /**
-       * Searched For
-       * @description Text that was searched for.
-       */
+      /** Searched For */
       searched_for: string;
-      /**
-       * Responses
-       * @description Responses to the search query.
-       */
+      /** Responses */
       responses: components["schemas"]["SearchResponse"][];
-      /** @description Assigned search query index */
-      search_query_id: components["schemas"]["PydanticObjectId"] | null;
+      /** Search Query Id */
+      search_query_id?: string | null;
     };
     /** ValidationError */
     ValidationError: {
@@ -822,34 +717,22 @@ export type SchemaBodyAskActByQuery =
   components["schemas"]["Body_ask_act_by_query"];
 export type SchemaBodyAskAskByQuery =
   components["schemas"]["Body_ask_ask_by_query"];
+export type SchemaBodyAskAskByQueryStream =
+  components["schemas"]["Body_ask_ask_by_query_stream"];
 export type SchemaCampusLifeSource = components["schemas"]["CampusLifeSource"];
 export type SchemaClubsSource = components["schemas"]["ClubsSource"];
 export type SchemaEduwikiSource = components["schemas"]["EduwikiSource"];
-export type SchemaFlattenInContentsWithPresignedUrl =
-  components["schemas"]["FlattenInContentsWithPresignedUrl"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaHotelSource = components["schemas"]["HotelSource"];
-export type SchemaInContent = components["schemas"]["InContent"];
-export type SchemaInContents = components["schemas"]["InContents"];
-export type SchemaInCourse = components["schemas"]["InCourse"];
-export type SchemaInCourses = components["schemas"]["InCourses"];
-export type SchemaInModule = components["schemas"]["InModule"];
-export type SchemaInSection = components["schemas"]["InSection"];
-export type SchemaInSections = components["schemas"]["InSections"];
 export type SchemaMapsSource = components["schemas"]["MapsSource"];
-export type SchemaMoodleContentSchemaInput =
-  components["schemas"]["MoodleContentSchema-Input"];
-export type SchemaMoodleContentSchemaOutput =
-  components["schemas"]["MoodleContentSchema-Output"];
 export type SchemaMoodleCourse = components["schemas"]["MoodleCourse"];
-export type SchemaMoodleEntry = components["schemas"]["MoodleEntry"];
 export type SchemaMoodleFileSource = components["schemas"]["MoodleFileSource"];
 export type SchemaMoodleUnknownSource =
   components["schemas"]["MoodleUnknownSource"];
 export type SchemaMoodleUrlSource = components["schemas"]["MoodleUrlSource"];
+export type SchemaPageText = components["schemas"]["PageText"];
 export type SchemaPdfLocation = components["schemas"]["PdfLocation"];
-export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
 export type SchemaResidentsSource = components["schemas"]["ResidentsSource"];
 export type SchemaResourcesSource = components["schemas"]["ResourcesSource"];
 export type SchemaSearchResponse = components["schemas"]["SearchResponse"];
@@ -882,6 +765,44 @@ export interface operations {
       };
       /** @description Search timed out */
       408: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  search_page_by_url: {
+    parameters: {
+      query: {
+        url: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PageText"];
+        };
+      };
+      /** @description The knowledge base has no copy of the page */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -979,6 +900,75 @@ export interface operations {
       };
     };
   };
+  ask_ask_by_query_stream: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Body_ask_ask_by_query_stream"];
+      };
+    };
+    responses: {
+      /** @description Server-sent events: `status`, `answer`, then `done` (AskResponses) or `error` */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_cancel_ask: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   ask_act_by_query: {
     parameters: {
       query?: never;
@@ -1035,25 +1025,12 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Courses grouped by semester */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          /**
-           * @example {
-           *       "S25": [
-           *         "[S25] Mathematical Analysis II / Математический анализ II"
-           *       ],
-           *       "F20": [
-           *         "[F20] Discrete Mathematics"
-           *       ],
-           *       "F22": [
-           *         "[F22]  Philosophy II (Languages and Perceptions)"
-           *       ]
-           *     }
-           */
           "application/json": {
             [key: string]: string[];
           };
@@ -1064,7 +1041,6 @@ export interface operations {
   moodle_get_course_names_grouped: {
     parameters: {
       query: {
-        /** @example [S25] Mathematical Analysis II / Математический анализ II */
         course_fullname: string;
       };
       header?: never;
@@ -1160,7 +1136,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Success */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
@@ -1182,7 +1158,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Success */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
@@ -1202,11 +1178,13 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["InCourses"];
+        "application/json": {
+          [key: string]: unknown;
+        };
       };
     };
     responses: {
-      /** @description Success */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
@@ -1235,13 +1213,15 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Success */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["MoodleEntry"][];
+          "application/json": {
+            [key: string]: unknown;
+          }[];
         };
       };
     };
@@ -1255,11 +1235,13 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["InSections"][];
+        "application/json": {
+          [key: string]: unknown;
+        }[];
       };
     };
     responses: {
-      /** @description Success */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
@@ -1288,17 +1270,21 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["InContents"][];
+        "application/json": {
+          [key: string]: unknown;
+        }[];
       };
     };
     responses: {
-      /** @description Success */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["FlattenInContentsWithPresignedUrl"][];
+          "application/json": {
+            [key: string]: unknown;
+          }[];
         };
       };
       /** @description Validation Error */
@@ -1321,11 +1307,13 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["InContent"];
+        "application/json": {
+          [key: string]: unknown;
+        };
       };
     };
     responses: {
-      /** @description Success */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;

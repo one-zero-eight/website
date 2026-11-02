@@ -53,7 +53,8 @@ export default function SearchField({
   }, [currentQuery]);
 
   const handleSearch = () => {
-    runSearch(text);
+    if (!text.trim()) return;
+    runSearch(text.trim());
     if (setCurrentQuery && pageType === "ask") {
       setCurrentQuery("");
       setText("");

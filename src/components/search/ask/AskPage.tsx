@@ -1,9 +1,10 @@
 import { useMe } from "@/api/accounts/user.ts";
 import SearchField from "@/components/search/SearchField.tsx";
 import { AskResult } from "./AskResult";
-import { $search, searchTypes } from "@/api/search";
+import { searchTypes } from "@/api/search";
+import { useAskStream } from "./use-ask-stream";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AnimatedDots from "../AnimatedDots";
 
 type Message =
@@ -17,41 +18,17 @@ export function AskPage({ askQuery }: { askQuery: string }) {
 
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
-
   const [chatId, setChatId] = useState<string | null>(null);
 
-  const {
-    data: result,
-    error,
-    isLoading,
-  } = $search.useQuery(
-    "post",
-    "/ask/",
-    {
-      body: { query: submittedQuery ?? "", chat_id: chatId },
-    },
-    {
-      enabled: submittedQuery !== null && submittedQuery.length > 0,
-      // Disable refetch
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-    },
-  );
+  const { ask, cancel, answerText, status, isPending, error } = useAskStream();
 
-  useEffect(() => {
-    if (result) {
-      setMessages((prev) => [...prev, { role: "assistant", response: result }]);
-      setSubmittedQuery(null);
-      setChatId(result.chat_id);
-    }
-  }, [result, submittedQuery]);
-
-  const runSearch = (query: string) => {
+  const runSearch = async (query: string) => {
     setMessages((prev) => [...prev, { role: "user", content: query }]);
-    setSubmittedQuery(query);
     setInputQuery("");
+    const response = await ask(query, chatId);
+    if (!response) return;
+    setMessages((prev) => [...prev, { role: "assistant", response }]);
+    setChatId(response.chat_id ?? null);
   };
 
   return (
@@ -63,17 +40,35 @@ export function AskPage({ askQuery }: { askQuery: string }) {
         pageType="ask"
       />
 
-      {messages.length === 0 && !isLoading && !error && (
+      {messages.length === 0 && !isPending && !error && (
         <div className="flex flex-col gap-4">
           <span>AI Assistant:</span>
           <span>- Ask me anything!</span>
         </div>
       )}
 
-      {isLoading ? (
-        <div className="border-base-300 bg-base-200 text-base-content rounded-field flex self-start border! px-4 py-2">
-          <span>- Thinking</span>
-          <AnimatedDots></AnimatedDots>
+      {isPending ? (
+        <div className="flex flex-col gap-2 self-start">
+          {(answerText || status) && (
+            <div className="border-base-300 bg-base-200 text-base-content rounded-field flex max-w-full flex-col gap-2 border! px-4 py-2">
+              {answerText ? (
+                <p className="whitespace-pre-wrap">{answerText}</p>
+              ) : (
+                <div className="flex">
+                  <span>- {status}</span>
+                  <AnimatedDots></AnimatedDots>
+                </div>
+              )}
+            </div>
+          )}
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm self-start"
+            onClick={cancel}
+          >
+            <span className="icon-[material-symbols--close]" />
+            Cancel
+          </button>
         </div>
       ) : error ? (
         <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">

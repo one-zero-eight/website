@@ -35,18 +35,23 @@ const TruncatableMarkdown = ({
 
     if (!shouldTruncate) return processed;
 
+    // A snippet is a part of a page: a photo in it is detached from its caption and looks like the photo of the page's subject
+    const withoutImages = processed
+      .replace(/\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)/g, "")
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, "");
+
     // Truncation logic
-    const titleMatch = processed.match(/(^|\n)(?=#+ )/);
+    const titleMatch = withoutImages.match(/(^|\n)(?=#+ )/);
     if (titleMatch && titleMatch.index !== undefined) {
-      const slice = processed.slice(0, titleMatch.index).trim();
+      const slice = withoutImages.slice(0, titleMatch.index).trim();
       if (slice) return slice;
     }
 
-    const fallbackLine = processed
+    const fallbackLine = withoutImages
       .split("\n")
       .find((line) => line.trim() && !line.trim().startsWith("#"));
 
-    return fallbackLine ? fallbackLine.trim() : processed;
+    return fallbackLine ? fallbackLine.trim() : withoutImages;
   }, [text, shouldTruncate]);
 
   return (
