@@ -1,4 +1,5 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { isRoomTvPage } from "@/api/helpers/room-tv-auth.ts";
 
 export function AutoSignIn() {
   const { me } = useMe();
@@ -50,7 +51,7 @@ export function buildSignInURL(
 export function shouldAutoSignIn() {
   // Try to log in without interaction
   const lastLogin = localStorage.getItem("lastLogin");
-  const isOnTvPage = window.location.pathname.startsWith("/tv");
+  const isOnTvPage = isRoomTvPage();
   return (
     (lastLogin === null || Date.now() - Number(lastLogin) > 30 * 60 * 1000) && // 30 minutes
     !isOnTvPage

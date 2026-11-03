@@ -1,21 +1,23 @@
-import { appUpdateAvailableEvent } from "@/app/register-sw.ts";
+import {
+  appUpdateAvailableEvent,
+  getPendingAppUpdate,
+} from "@/app/register-sw.ts";
 import { Trans } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 import { useEffect, useState } from "react";
 
-type AppUpdateEvent = CustomEvent<{
-  reload: () => Promise<void>;
-}>;
-
 export function AppUpdatePrompt() {
-  const [reloadWebsite, setReloadWebsite] = useState<() => Promise<void>>();
+  const [reloadWebsite, setReloadWebsite] = useState<(() => void) | undefined>(
+    () => getPendingAppUpdate(),
+  );
   const [isReloading, setIsReloading] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
-    function handleAppUpdateAvailable(event: Event) {
-      setReloadWebsite(() => (event as AppUpdateEvent).detail.reload);
+    function handleAppUpdateAvailable() {
+      setReloadWebsite(() => getPendingAppUpdate());
       setIsDismissed(false);
+      setIsReloading(false);
     }
 
     window.addEventListener(appUpdateAvailableEvent, handleAppUpdateAvailable);
@@ -53,7 +55,7 @@ export function AppUpdatePrompt() {
             disabled={isReloading}
             onClick={() => {
               setIsReloading(true);
-              void reloadWebsite();
+              reloadWebsite();
             }}
           >
             {isReloading && (

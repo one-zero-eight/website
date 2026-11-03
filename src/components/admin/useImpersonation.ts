@@ -1,7 +1,10 @@
 import { $accounts, accountsTypes } from "@/api/accounts";
 import { msg } from "@lingui/core/macro";
 import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
-import { useMyAccessToken } from "@/api/helpers/access-token.ts";
+import {
+  getMyAccessToken,
+  useMyAccessToken,
+} from "@/api/helpers/access-token.ts";
 import { invalidateMySportAccessToken } from "@/api/helpers/sport-access-token.ts";
 import { getViewUserEmail, getViewUserName } from "@/components/admin/utils.ts";
 import { useToast } from "@/components/toast";
@@ -76,9 +79,11 @@ export function useImpersonation(
       return;
     }
 
+    const requestToken = getMyAccessToken();
     setIsImpersonating(true);
     const result = await refetchImpersonateToken();
     setIsImpersonating(false);
+    if (getMyAccessToken() !== requestToken) return;
 
     if (result.isError) {
       showError(msg`Error`, formatApiErrorDescriptor(result.error));
@@ -90,6 +95,10 @@ export function useImpersonation(
       return;
     }
 
+    window.dispatchEvent(new Event("auth-session-changing"));
+    await queryClient.cancelQueries();
+    if (getMyAccessToken() !== requestToken) return;
+    setStoredMe(null);
     setImpersonatingUser({
       id: targetUser.id,
       name: getViewUserName(targetUser),
@@ -106,15 +115,20 @@ export function useImpersonation(
   }
 
   async function depersonate() {
+    const requestToken = getMyAccessToken();
     setIsDepersonating(true);
     const result = await refetchDepersonate();
     setIsDepersonating(false);
+    if (getMyAccessToken() !== requestToken) return;
 
     if (result.isError) {
       showError(msg`Error`, formatApiErrorDescriptor(result.error));
       return;
     }
 
+    window.dispatchEvent(new Event("auth-session-changing"));
+    await queryClient.cancelQueries();
+    if (getMyAccessToken() !== requestToken) return;
     setImpersonatingUser(null);
     setStoredMe(null);
     setToken(null);

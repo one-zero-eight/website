@@ -43,7 +43,11 @@ export const authMiddleware: Middleware = {
     )
       return;
 
-    if (response.status === 401 && request.headers.has("Authorization")) {
+    if (
+      response.status === 401 &&
+      !request.signal.aborted &&
+      request.headers.has("Authorization")
+    ) {
       const authHeader = request.headers.get("Authorization");
       const roomTvToken = getRoomTvAccessToken();
       if (roomTvToken && authHeader === `Bearer ${roomTvToken}`) {
@@ -52,10 +56,12 @@ export const authMiddleware: Middleware = {
         );
         invalidateRoomTvAccessToken();
       } else {
-        console.log("[auth] Got 401, invalidating access token");
-        invalidateMyAccessToken();
+        const currentToken = getMyAccessToken();
+        if (currentToken && authHeader === `Bearer ${currentToken}`) {
+          console.log("[auth] Got 401, invalidating access token");
+          invalidateMyAccessToken();
+        }
       }
-      throw new Error("Unauthorized");
     }
     return response;
   },

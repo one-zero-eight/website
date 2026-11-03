@@ -27,6 +27,7 @@ import { Route as With_menuMapsRouteImport } from "./routes/_with_menu/maps";
 import { Route as With_menuFormsRouteImport } from "./routes/_with_menu/forms";
 import { Route as With_menuExtensionRouteImport } from "./routes/_with_menu/extension";
 import { Route as With_menuDormsRouteImport } from "./routes/_with_menu/dorms";
+import { Route as With_menuDebugRouteImport } from "./routes/_with_menu/debug";
 import { Route as With_menuDashboardRouteImport } from "./routes/_with_menu/dashboard";
 import { Route as With_menuCalendarRouteImport } from "./routes/_with_menu/calendar";
 import { Route as With_menuAboutRouteImport } from "./routes/_with_menu/about";
@@ -232,6 +233,11 @@ const With_menuExtensionRoute = With_menuExtensionRouteImport.update({
 const With_menuDormsRoute = With_menuDormsRouteImport.update({
   id: "/dorms",
   path: "/dorms",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
+const With_menuDebugRoute = With_menuDebugRouteImport.update({
+  id: "/debug",
+  path: "/debug",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const With_menuDashboardRoute = With_menuDashboardRouteImport.update({
@@ -641,6 +647,7 @@ export interface FileRoutesByFullPath {
   "/about": typeof With_menuAboutRoute;
   "/calendar": typeof With_menuCalendarRoute;
   "/dashboard": typeof With_menuDashboardRoute;
+  "/debug": typeof With_menuDebugRoute;
   "/dorms": typeof With_menuDormsRoute;
   "/extension": typeof With_menuExtensionRoute;
   "/forms": typeof With_menuFormsRoute;
@@ -733,6 +740,7 @@ export interface FileRoutesByTo {
   "/about": typeof With_menuAboutRoute;
   "/calendar": typeof With_menuCalendarRoute;
   "/dashboard": typeof With_menuDashboardRoute;
+  "/debug": typeof With_menuDebugRoute;
   "/dorms": typeof With_menuDormsRoute;
   "/extension": typeof With_menuExtensionRoute;
   "/forms": typeof With_menuFormsRoute;
@@ -826,6 +834,7 @@ export interface FileRoutesById {
   "/_with_menu/about": typeof With_menuAboutRoute;
   "/_with_menu/calendar": typeof With_menuCalendarRoute;
   "/_with_menu/dashboard": typeof With_menuDashboardRoute;
+  "/_with_menu/debug": typeof With_menuDebugRoute;
   "/_with_menu/dorms": typeof With_menuDormsRoute;
   "/_with_menu/extension": typeof With_menuExtensionRoute;
   "/_with_menu/forms": typeof With_menuFormsRoute;
@@ -921,6 +930,7 @@ export interface FileRouteTypes {
     | "/about"
     | "/calendar"
     | "/dashboard"
+    | "/debug"
     | "/dorms"
     | "/extension"
     | "/forms"
@@ -1013,6 +1023,7 @@ export interface FileRouteTypes {
     | "/about"
     | "/calendar"
     | "/dashboard"
+    | "/debug"
     | "/dorms"
     | "/extension"
     | "/forms"
@@ -1105,6 +1116,7 @@ export interface FileRouteTypes {
     | "/_with_menu/about"
     | "/_with_menu/calendar"
     | "/_with_menu/dashboard"
+    | "/_with_menu/debug"
     | "/_with_menu/dorms"
     | "/_with_menu/extension"
     | "/_with_menu/forms"
@@ -1348,6 +1360,13 @@ declare module "@tanstack/react-router" {
       path: "/dorms";
       fullPath: "/dorms";
       preLoaderRoute: typeof With_menuDormsRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/debug": {
+      id: "/_with_menu/debug";
+      path: "/debug";
+      fullPath: "/debug";
+      preLoaderRoute: typeof With_menuDebugRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/dashboard": {
@@ -1872,6 +1891,7 @@ interface With_menuRouteRouteChildren {
   With_menuAboutRoute: typeof With_menuAboutRoute;
   With_menuCalendarRoute: typeof With_menuCalendarRoute;
   With_menuDashboardRoute: typeof With_menuDashboardRoute;
+  With_menuDebugRoute: typeof With_menuDebugRoute;
   With_menuDormsRoute: typeof With_menuDormsRoute;
   With_menuExtensionRoute: typeof With_menuExtensionRoute;
   With_menuFormsRoute: typeof With_menuFormsRoute;
@@ -1949,6 +1969,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuAboutRoute: With_menuAboutRoute,
   With_menuCalendarRoute: With_menuCalendarRoute,
   With_menuDashboardRoute: With_menuDashboardRoute,
+  With_menuDebugRoute: With_menuDebugRoute,
   With_menuDormsRoute: With_menuDormsRoute,
   With_menuExtensionRoute: With_menuExtensionRoute,
   With_menuFormsRoute: With_menuFormsRoute,

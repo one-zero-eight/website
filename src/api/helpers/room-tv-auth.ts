@@ -8,6 +8,7 @@ import { T } from "@/lib/utils/dates";
 import { useLingui } from "@lingui/react";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
+import { isTvPath } from "@/service-worker/protocol.ts";
 
 const TOKEN_KEY = "roomTvAccessToken";
 const ROOM_ID_KEY = "roomTvId";
@@ -15,10 +16,7 @@ const DEVICE_FLOW_CODE_KEY = "roomTvDeviceFlowCode";
 const DEVICE_FLOW_SECRET_KEY = "roomTvDeviceFlowSecret";
 
 export function isRoomTvPage() {
-  return (
-    window.location.pathname === "/tv" ||
-    window.location.pathname.startsWith("/tv/")
-  );
+  return isTvPath(window.location.pathname);
 }
 
 export function getRoomTvAccessToken() {

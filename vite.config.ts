@@ -7,14 +7,10 @@ import remarkGfm from "remark-gfm";
 import { defineConfig } from "vite";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
 import mkcert from "vite-plugin-mkcert";
-import { VitePWA } from "vite-plugin-pwa";
 import { sri } from "vite-plugin-sri3";
 import { fileURLToPath, URL } from "node:url";
 import { version } from "./package.json";
-import {
-  CALENDAR_FEEDS_CACHE,
-  MAPS_CACHE,
-} from "./src/app/sw-runtime-caches.ts";
+import { serviceWorkerBuildPlugin } from "./scripts/build-service-worker";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -44,75 +40,14 @@ export default defineConfig({
     // Lingui catalogs (.po) + native macro transform
     lingui({ macroTransform: true }),
 
-    // Offline mode via PWA
-    VitePWA({
-      registerType: "prompt",
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,json,svg,png,woff2}"],
-        navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/callback\//, /^\/assets\//],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-        // API responses kept for instant loads and offline use. The matchers
-        // are serialized into the service worker, so they must not reference
-        // anything outside themselves; they check the path only, so they work
-        // with any API host from the env.
-        runtimeCaching: [
-          {
-            // Calendar feeds (.ics, and external calendars proxied through
-            // check-calendar-url-to-link), plus the schedule and when2meet
-            // requests the calendar page builds its list of feed URLs from:
-            // without them, offline, it doesn't know which feeds to show.
-            // Network first: a changed timetable must win whenever there is a
-            // connection; the cached copy is used offline or when the network
-            // is slower than the timeout.
-            urlPattern: ({ url }) =>
-              url.pathname.endsWith(".ics") ||
-              url.pathname.endsWith("/check-calendar-url-to-link") ||
-              /\/schedule\/v\d+\/(users\/me|users\/me\/predefined|event-groups\/)$/.test(
-                url.pathname,
-              ) ||
-              /\/when2meet\/v\d+\/meetings\/(participating)?$/.test(
-                url.pathname,
-              ) ||
-              /\/accounts\/v\d+\/\w*/.test(url.pathname),
-            handler: "NetworkFirst",
-            options: {
-              cacheName: CALENDAR_FEEDS_CACHE,
-              networkTimeoutSeconds: 3,
-              cacheableResponse: { statuses: [200] },
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-              },
-            },
-          },
-          {
-            // Maps: the scene list and the floor plan SVGs. They rarely
-            // change, so serve the cached copy at once and refresh it in the
-            // background for the next visit.
-            urlPattern: ({ url }) =>
-              /\/maps\/v\d+\/(scenes\/?|static\/.+\.svg)$/.test(url.pathname),
-            handler: "StaleWhileRevalidate",
-            options: {
-              cacheName: MAPS_CACHE,
-              cacheableResponse: { statuses: [200] },
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-              },
-            },
-          },
-        ],
-      },
-      manifest: false, // Manifest is already in public/manifest.json
-      includeManifestIcons: true,
-      includeAssets: "*",
-    }),
-
     // Minify the index.html
     ViteMinifyPlugin({}),
 
     // Subresource Integrity for built JS/CSS in index.html
     sri(),
+
+    // Generate the worker and integrity manifest from final build output.
+    serviceWorkerBuildPlugin(version),
   ],
 
   build: {
@@ -171,10 +106,5 @@ export default defineConfig({
         ),
       },
     ],
-  },
-
-  define: {
-    // Inject the app version variable
-    __VERSION__: JSON.stringify(version),
   },
 });

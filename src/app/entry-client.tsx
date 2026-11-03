@@ -12,6 +12,7 @@ import { SnowVisibilityProvider } from "@/components/snow/SnowContext.tsx";
 
 // Init internationalization
 initializeI18n();
+console.info("[App] Build info:", BUILD_INFO);
 
 // Init service worker
 registerServiceWorker();

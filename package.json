@@ -24,6 +24,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:sw": "playwright test --config playwright.sw.config.ts",
     "test:e2e:ui": "playwright test --ui",
     "lingui:extract": "lingui extract",
     "lingui:extract:watch": "lingui extract --watch"
@@ -129,9 +130,7 @@
     "vite-node": "^6.0.0",
     "vite-plugin-minify": "^2.1.0",
     "vite-plugin-mkcert": "^2.0.0",
-    "vite-plugin-pwa": "^1.3.0",
     "vite-plugin-sri3": "^2.0.0",
-    "workbox-window": "^7.4.1",
     "yaml": "^2.9.0",
     "zod": "^4.4.3"
   },

@@ -3,7 +3,7 @@ import { routeTree } from "./route-tree.gen.ts";
 
 export function getRouter() {
   // Create the router instance from the generated route tree
-  return createRouter({
+  const router = createRouter({
     routeTree,
 
     // Set the initial context. It will be passed in app.tsx
@@ -11,6 +11,10 @@ export function getRouter() {
       isAuthenticated: false,
     },
   });
+  router.subscribe("onResolved", () =>
+    window.dispatchEvent(new Event("sw-route-changed")),
+  );
+  return router;
 }
 
 // Register the router instance for type safety
