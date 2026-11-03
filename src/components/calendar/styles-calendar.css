@@ -117,11 +117,7 @@
     }
   }
 
-  .fc-day-today {
-    .fc-event-main {
-      display: none;
-    }
-
+  .fc-day-today:has(#today) {
     pointer-events: none;
     /* display: block; */
 
