@@ -5,56 +5,15 @@ import {
   getMusicRoomLink,
   getMyMusicRoomLink,
 } from "@/api/schedule/calendars/links.ts";
-import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ExportModal } from "@/components/calendar/ExportModal.tsx";
 import { TargetForExport } from "@/api/schedule/types.ts";
-
 export function MusicRoomPage() {
   const { t } = useLingui();
   const [exportModalOpen, setExportModalOpen] = useState(false);
   return (
     <>
       <div className="px-4">
-        <div className="my-4 grid grid-cols-1 gap-4 @xl/content:grid-cols-2">
-          <div className="flex flex-col gap-4">
-            <Link
-              to="/music-room/instructions"
-              className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
-            >
-              <div className="w-12">
-                <span className="icon-[material-symbols--quick-reference-outline-rounded] text-primary text-5xl" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <p className="text-base-content text-2xl font-semibold">
-                  <Trans>Instructions</Trans>
-                </p>
-                <p className="text-base-content/75 text-lg">
-                  <Trans>
-                    Read rules and guides on how to access the Music room. Every
-                    visitor should accept these conditions.
-                  </Trans>
-                </p>
-              </div>
-            </Link>
-          </div>
-          <div className="bg-base-200 rounded-box flex w-full flex-row items-center justify-center p-4">
-            <video
-              controls
-              width="704"
-              src="https://storage.innohassle.ru/website-static/music-room/musicroom_pathfinding.mp4"
-              title={t`How to get to the Innopolis Music room?`}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                borderRadius: "1rem",
-                width: "100%",
-                height: "100%",
-                aspectRatio: "16/9",
-              }}
-            ></video>
-          </div>
-        </div>
         <div className="my-4 flex flex-row flex-wrap items-center">
           <h2 className="flex grow text-3xl font-medium">
             <Trans>Booking calendar</Trans>
