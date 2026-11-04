@@ -76,7 +76,7 @@ export function AboutPage() {
               university tools and maintain the sports website. See the full
               project list{" "}
               <a
-                href="https://github.com/one-zero-eight/.github/blob/main/profile/README.md"
+                href="https://github.com/one-zero-eight#about-us"
                 className="link link-hover text-primary"
                 target="_blank"
                 rel="noopener noreferrer"
