@@ -42,7 +42,7 @@ msgstr ""
 
 #: src/components/search/act/ActPage.tsx:82
 #: src/components/search/ask/AskPage.tsx:83
-#: src/components/search/ask/AskResult.tsx:57
+#: src/components/search/ask/AskResult.tsx:58
 msgid "- Sorry, I can't help you with this question."
 msgstr ""
 
@@ -2150,6 +2150,10 @@ msgstr ""
 
 #: src/components/board-games/BoardGamesPage.tsx:467
 msgid "Could not reserve game"
+msgstr ""
+
+#: src/components/search/ask/AskFeedback.tsx:33
+msgid "Could not save the rating"
 msgstr ""
 
 #: src/components/sport/SportTrainerAttendanceModal.tsx:69
@@ -4489,7 +4493,7 @@ msgstr ""
 msgid "Let us know if you have ideas for our projects or run into any issues."
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:42
+#: src/components/search/ask/AskResult.tsx:43
 msgid "link"
 msgstr ""
 
@@ -6384,6 +6388,10 @@ msgstr ""
 msgid "Rating: {0}"
 msgstr ""
 
+#: src/components/search/ask/AskFeedback.tsx:44
+msgid "Rating: {chosenEmoji}"
+msgstr ""
+
 #: src/components/music-room/MusicRoomPage.tsx:46
 msgid "Read rules and guides on how to access the Music room. Every visitor should accept these conditions."
 msgstr ""
@@ -7614,7 +7622,7 @@ msgstr ""
 msgid "Sources"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:64
+#: src/components/search/ask/AskResult.tsx:65
 msgid "Sources:"
 msgstr ""
 
@@ -8210,6 +8218,14 @@ msgstr ""
 #: src/components/editor/menus/BlockTypeDropdown.tsx:34
 #: src/components/editor/menus/LinkButton.tsx:185
 msgid "Text"
+msgstr ""
+
+#: src/components/search/ask/AskFeedback.tsx:28
+msgid "Thank you, we will look into it"
+msgstr ""
+
+#: src/components/search/ask/AskFeedback.tsx:27
+msgid "Thank you!"
 msgstr ""
 
 #: src/components/sport/SportOverviewSection.tsx:611

@@ -42,7 +42,7 @@ msgstr "- Executing"
 
 #: src/components/search/act/ActPage.tsx:82
 #: src/components/search/ask/AskPage.tsx:83
-#: src/components/search/ask/AskResult.tsx:57
+#: src/components/search/ask/AskResult.tsx:58
 msgid "- Sorry, I can't help you with this question."
 msgstr "- Sorry, I can't help you with this question."
 
@@ -2151,6 +2151,10 @@ msgstr "Could not replace image"
 #: src/components/board-games/BoardGamesPage.tsx:467
 msgid "Could not reserve game"
 msgstr "Could not reserve game"
+
+#: src/components/search/ask/AskFeedback.tsx:33
+msgid "Could not save the rating"
+msgstr "Could not save the rating"
 
 #: src/components/sport/SportTrainerAttendanceModal.tsx:69
 #: src/components/sport/SportTrainerTrainingModal.tsx:204
@@ -4489,7 +4493,7 @@ msgstr "Leave your feedback and judge"
 msgid "Let us know if you have ideas for our projects or run into any issues."
 msgstr "Let us know if you have ideas for our projects or run into any issues."
 
-#: src/components/search/ask/AskResult.tsx:42
+#: src/components/search/ask/AskResult.tsx:43
 msgid "link"
 msgstr "link"
 
@@ -6384,6 +6388,10 @@ msgstr "Rating:"
 msgid "Rating: {0}"
 msgstr "Rating: {0}"
 
+#: src/components/search/ask/AskFeedback.tsx:44
+msgid "Rating: {chosenEmoji}"
+msgstr "Rating: {chosenEmoji}"
+
 #: src/components/music-room/MusicRoomPage.tsx:46
 msgid "Read rules and guides on how to access the Music room. Every visitor should accept these conditions."
 msgstr "Read rules and guides on how to access the Music room. Every visitor should accept these conditions."
@@ -7614,7 +7622,7 @@ msgstr "Sorry, this site does not support preview. Please, open it directly."
 msgid "Sources"
 msgstr "Sources"
 
-#: src/components/search/ask/AskResult.tsx:64
+#: src/components/search/ask/AskResult.tsx:65
 msgid "Sources:"
 msgstr "Sources:"
 
@@ -8211,6 +8219,14 @@ msgstr "Tentative"
 #: src/components/editor/menus/LinkButton.tsx:185
 msgid "Text"
 msgstr "Text"
+
+#: src/components/search/ask/AskFeedback.tsx:28
+msgid "Thank you, we will look into it"
+msgstr "Thank you, we will look into it"
+
+#: src/components/search/ask/AskFeedback.tsx:27
+msgid "Thank you!"
+msgstr "Thank you!"
 
 #: src/components/sport/SportOverviewSection.tsx:611
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"

@@ -3,6 +3,7 @@ import { cn } from "@/lib/ui/cn";
 import { Trans } from "@lingui/react/macro";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { AskFeedback } from "./AskFeedback";
 
 export function AskResult({
   response,
@@ -80,6 +81,10 @@ export function AskResult({
             );
           })}
         </div>
+      )}
+
+      {!hasError && response.ask_query_id && (
+        <AskFeedback askQueryId={response.ask_query_id} />
       )}
     </div>
   );

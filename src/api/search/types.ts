@@ -120,6 +120,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/ask/{ask_query_id}/feedback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add User Feedback
+     * @description A 👍 (`like`) or 👎 (`dislike`) on an answer, as under the answers of the Telegram bot: the annotation `user-feedback` on
+     *     the answer's trace in Phoenix. A second vote of the user replaces the first. An answer has an `ask_query_id` only when
+     *     tracing is on.
+     */
+    post: operations["ask_add_user_feedback"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/act/": {
     parameters: {
       query?: never;
@@ -969,6 +991,53 @@ export interface operations {
       };
     };
   };
+  ask_add_user_feedback: {
+    parameters: {
+      query: {
+        feedback: PathsAskAsk_query_idFeedbackPostParametersQueryFeedback;
+      };
+      header?: never;
+      path: {
+        ask_query_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Ask query not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description The feedback could not be saved */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   ask_act_by_query: {
     parameters: {
       query?: never;
@@ -1387,6 +1456,10 @@ export enum PathsSearchSearchGetParametersQueryResponse_types {
   link_to_source = "link_to_source",
 }
 export enum PathsSearchSearchSearch_query_idFeedbackPostParametersQueryFeedback {
+  like = "like",
+  dislike = "dislike",
+}
+export enum PathsAskAsk_query_idFeedbackPostParametersQueryFeedback {
   like = "like",
   dislike = "dislike",
 }
