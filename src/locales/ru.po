@@ -1670,7 +1670,7 @@ msgstr "Выберите файл"
 
 #: src/components/when2meet/MeetingPage.tsx:1656
 msgid "Choose meeting time"
-msgstr "Выбрать лучшее время"
+msgstr "Выбрать время встречи"
 
 #: src/components/extension/ExtensionPage.tsx:60
 msgid "Chrome extension"
