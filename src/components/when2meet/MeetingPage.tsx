@@ -1692,7 +1692,7 @@ export function MeetingPage({
                             params={{ meetingId: meetingSlug }}
                             className="btn grow gap-2"
                           >
-                            <span className="icon-[material-symbols--edit-outline] text-lg" />
+                            <span className="icon-[material-symbols--edit-outline] shrink-0 text-lg" />
                             <Trans>Edit event</Trans>
                           </Link>
                           {!needsSetup && (

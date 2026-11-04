@@ -56,7 +56,7 @@ export function ArchiveMeetingButton({
       {isPending ? (
         <span className="loading loading-spinner loading-sm" />
       ) : (
-        <span className="icon-[mdi--archive-outline] text-lg" />
+        <span className="icon-[mdi--archive-outline] shrink-0 text-lg" />
       )}
       <Trans>Archive event</Trans>
     </button>
