@@ -1407,7 +1407,7 @@ export function AvailabilitySelector({
       )}
 
       {!hideHint && intervalSelectionMode && (
-        <p className="text-base-content/60 mb-3 text-sm">
+        <p className="text-base-content/60 mb-3 text-sm md:hidden">
           <Trans>
             Tap a slot or hold and drag to select the meeting time. Swipe to
             scroll.
