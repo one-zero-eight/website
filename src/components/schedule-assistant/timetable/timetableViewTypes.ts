@@ -32,7 +32,10 @@ export type TimetableViewCourse = Pick<
   | "name_ru"
   | "short_name_ru"
   | "instructors"
-> & { components: TimetableViewComponent[] };
+> &
+  Partial<Pick<SchemaCourseConfig, "notes" | "moodle_url">> & {
+    components: TimetableViewComponent[];
+  };
 
 export type TimetableViewInstructor = Omit<
   SchemaInstructor,
@@ -43,7 +46,8 @@ export type TimetableViewConfig = {
   term: Pick<
     SchemaScheduleConfig["term"],
     "name" | "semester" | "days" | "starting_day" | "time_slots" | "sections"
-  >;
+  > &
+    Partial<Pick<SchemaScheduleConfig["term"], "blocks">>;
   courses?: TimetableViewCourse[];
   instructors?: TimetableViewInstructor[];
   rooms?: Pick<SchemaRoom, "id" | "name" | "capacity">[];

@@ -3,3 +3,4 @@
 /// <reference types="vite-plugin-pwa/react" />
 /// <reference types="mdx" />
 declare module "qrcode";
+declare module "moment/locale/ru.js";

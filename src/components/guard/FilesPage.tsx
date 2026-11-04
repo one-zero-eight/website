@@ -1,4 +1,6 @@
 import { guardTypes } from "@/api/guard";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useState } from "react";
 import { FileDetails } from "./FileDetails";
@@ -7,6 +9,7 @@ import { FilesSection } from "./FilesSection";
 import { useGuardFile, useGuardFiles, useGuardMutations } from "./hooks";
 
 export function FilesPage() {
+  useLingui();
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [filesSearch, setFilesSearch] = useState("");
   const [detailsSearch, setDetailsSearch] = useState("");
@@ -19,6 +22,7 @@ export function FilesPage() {
   const { file: selectedFile, isPending: isLoadingFile } =
     useGuardFile(selectedSlug);
   const mutations = useGuardMutations();
+  const filesErrorMessage = filesError ? formatApiErrorMessage(filesError) : "";
 
   const handleShowDetails = (slug: string) => {
     setSelectedSlug(slug);
@@ -125,7 +129,7 @@ export function FilesPage() {
           ) : filesError ? (
             <div className="alert alert-error alert-soft">
               <span>
-                Error loading files: {formatApiErrorMessage(filesError)}
+                <Trans>Error loading files: {filesErrorMessage}</Trans>
               </span>
             </div>
           ) : files.length > 0 ? (
@@ -135,7 +139,9 @@ export function FilesPage() {
               onShowDetails={handleShowDetails}
             />
           ) : (
-            <p className="text-base-content/60">No files found.</p>
+            <p className="text-base-content/60">
+              <Trans>No files found.</Trans>
+            </p>
           )}
         </FilesSection>
       )}

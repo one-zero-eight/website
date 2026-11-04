@@ -1,4 +1,8 @@
 import { $sport } from "@/api/sport";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+
+export const CHECK_IN_UNAVAILABLE_REASON = msg`Check-in is not available for this training.`;
 import type {
   SchemaApiV3RoutersGroupsGroupInfoSchema,
   SchemaStudentInfoSchema,
@@ -65,18 +69,18 @@ export function getCheckInUnavailableReason(
   group?: SchemaApiV3RoutersGroupsGroupInfoSchema,
   student?: SchemaStudentInfoSchema | null,
   dailySchedule?: SchemaTrainingInfoPersonalSchema[],
-): string | null {
+): MessageDescriptor | null {
   if (row.checked_in) return null;
 
   const { training } = row;
   if (new Date(training.end).getTime() <= Date.now()) {
-    return "This training has already ended.";
+    return msg`This training has already ended.`;
   }
   if (training.checkins_count >= training.max_checkins) {
-    return "No places left for this training.";
+    return msg`No places left for this training.`;
   }
   if (new Date(training.start).getTime() - Date.now() > CHECK_IN_WINDOW_MS) {
-    return "Check-in opens 7 days before the training.";
+    return msg`Check-in opens 7 days before the training.`;
   }
   if (row.can_check_in) return null;
 
@@ -86,7 +90,8 @@ export function getCheckInUnavailableReason(
     group.allowed_medical_groups.length > 0 &&
     !group.allowed_medical_groups.includes(student.medical_group)
   ) {
-    return `Your medical group (${student.medical_group}) is not eligible for this training.`;
+    const medicalGroup = student.medical_group;
+    return msg`Your medical group (${medicalGroup}) is not eligible for this training.`;
   }
   if (
     group &&
@@ -94,7 +99,7 @@ export function getCheckInUnavailableReason(
     group.allowed_education_level === 2 &&
     !student.is_college
   ) {
-    return "This training is for college students only.";
+    return msg`This training is for college students only.`;
   }
   if (
     group &&
@@ -102,7 +107,7 @@ export function getCheckInUnavailableReason(
     group.allowed_education_level === 1 &&
     student.is_college
   ) {
-    return "This training is for university students only.";
+    return msg`This training is for university students only.`;
   }
   if (dailySchedule) {
     const trainingDay = moscowDateKey(training.start);
@@ -117,7 +122,7 @@ export function getCheckInUnavailableReason(
       0,
     );
     if (totalHours + durationHours > 4) {
-      return "Daily limit: 4 sport hours (usually 2 trainings).";
+      return msg`Daily limit: 4 sport hours (usually 2 trainings).`;
     }
     const sameSportHours = checkedInToday.reduce(
       (hours, scheduled) =>
@@ -128,10 +133,10 @@ export function getCheckInUnavailableReason(
       0,
     );
     if (training.sport_id != null && sameSportHours + durationHours > 2) {
-      return "Daily limit for the same sport: 2 sport hours (usually 1 training).";
+      return msg`Daily limit for the same sport: 2 sport hours (usually 1 training).`;
     }
   }
-  return "Check-in is not available for this training.";
+  return CHECK_IN_UNAVAILABLE_REASON;
 }
 
 function getAcademicDuration(

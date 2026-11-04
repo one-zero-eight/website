@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { useEffect, useRef, useState } from "react";
 
 interface SearchInputProps {
@@ -7,6 +8,7 @@ interface SearchInputProps {
 export const SearchInput: React.FC<
   SearchInputProps & React.HTMLProps<HTMLDivElement>
 > = ({ searchQuery, setSearchQuery, ...props }) => {
+  const { t } = useLingui();
   const ref = useRef<HTMLInputElement>(null);
   const [readOnly, setReadOnly] = useState(true);
 
@@ -26,7 +28,7 @@ export const SearchInput: React.FC<
         spellCheck={false}
         readOnly={readOnly} // Will be reset to false after mounting
         className="border-primary bg-base-100 caret-primary rounded-field inset-0 h-10 w-full resize-none border p-3 text-base outline-hidden dark:text-white"
-        placeholder="Search services..."
+        placeholder={t`Search services...`}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />

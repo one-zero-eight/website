@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react";
 import { useEffect, useRef } from "react";
 import { z } from "zod";
 
@@ -39,10 +40,13 @@ export default function TelegramLoginButton({
   cornerRadius,
   requestAccess = true,
 }: TelegramLoginButtonProps) {
+  const { i18n } = useLingui();
+  const locale = i18n.locale;
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (ref.current === null) return;
+    const container = ref.current;
+    if (container === null) return;
 
     window.TelegramLoginWidget = {
       dataOnAuth: (user: TelegramUser) => onAuth(user),
@@ -52,6 +56,7 @@ export default function TelegramLoginButton({
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.setAttribute("data-telegram-login", botName);
     script.setAttribute("data-size", buttonSize);
+    script.setAttribute("data-lang", locale);
 
     if (cornerRadius !== undefined) {
       script.setAttribute("data-radius", cornerRadius.toString());
@@ -65,8 +70,17 @@ export default function TelegramLoginButton({
     script.setAttribute("data-onauth", "TelegramLoginWidget.dataOnAuth(user)");
     script.async = true;
 
-    ref.current.appendChild(script);
-  }, [botName, buttonSize, cornerRadius, onAuth, requestAccess, usePic, ref]);
+    container.appendChild(script);
+    return () => container.replaceChildren();
+  }, [
+    botName,
+    buttonSize,
+    cornerRadius,
+    onAuth,
+    requestAccess,
+    usePic,
+    locale,
+  ]);
 
   return <div ref={ref} className={className} />;
 }

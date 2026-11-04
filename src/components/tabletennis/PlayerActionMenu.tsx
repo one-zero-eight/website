@@ -1,59 +1,94 @@
 import { useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
+import {
+  autoUpdate,
+  flip,
+  FloatingPortal,
+  offset,
+  shift,
+  useClick,
+  useDismiss,
+  useFloating,
+  useInteractions,
+  useRole,
+} from "@floating-ui/react";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
 import {
-  formatApiErrorMessage,
+  formatApiErrorDescriptor,
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
 import { Modal } from "@/components/common/Modal.tsx";
-import { useToast } from "@/components/toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { useToast, type ToastText } from "@/components/toast";
+import { MergeGuestModal } from "./MergeGuestModal";
+import { useTabletennisRefresh } from "./useTabletennisRefresh";
 
 type SchemaPlayer = tabletennisTypes.SchemaPlayer;
 
-/** RTTF: a starting rating is a multiple of 25 and at least 100 */
-const MIN_START_RATING = 100;
-const START_RATING_STEP = 25;
+/** a beginner reaching this rating becomes advanced automatically (backend) */
+const ADVANCED_RATING = 350;
+
+/** a whole number from 0, or null */
+function parseRating(raw: string): number | null {
+  const trimmed = raw.trim();
+  if (!/^\d+$/.test(trimmed)) return null;
+  const value = Number(trimmed);
+  return Number.isSafeInteger(value) ? value : null;
+}
 
 export function PlayerActionMenu({
   player,
 }: {
   player: SchemaPlayer & { is_active: boolean };
 }) {
+  const { t } = useLingui();
+  const [menuOpen, setMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [ratingOpen, setRatingOpen] = useState(false);
-  const [rating, setRating] = useState(MIN_START_RATING);
-  const queryClient = useQueryClient();
+  const [ratingInput, setRatingInput] = useState("");
+  const [mergeOpen, setMergeOpen] = useState(false);
+  const refresh = useTabletennisRefresh();
   const { showSuccess, showError } = useToast();
+
+  // the menu is rendered in a portal, so it floats over the page instead of
+  // stretching the scrollable table it is opened from
+  const { refs, floatingStyles, context } = useFloating({
+    placement: "bottom-end",
+    open: menuOpen,
+    onOpenChange: setMenuOpen,
+    middleware: [offset(4), flip({ padding: 8 }), shift({ padding: 8 })],
+    whileElementsMounted: autoUpdate,
+  });
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    useClick(context),
+    useDismiss(context),
+    useRole(context, { role: "menu" }),
+  ]);
 
   const { mutate, isPending } = $tabletennis.useMutation("post", "/set-status");
   const { mutate: setRatingMutate, isPending: settingRating } =
     $tabletennis.useMutation("post", "/set-rating");
 
-  function refreshPlayers() {
-    queryClient.invalidateQueries({
-      queryKey: $tabletennis.queryOptions("get", "/players").queryKey,
-    });
-  }
-
-  function handleError(error: unknown, action: string) {
+  function handleError(error: unknown, action: ToastText) {
     if (isApiHttpError(error) && error.httpCode === 403) {
-      showError("Access denied", `Only administrators can ${action}`);
+      showError(msg`Access denied`, action);
     } else {
-      showError("Error", formatApiErrorMessage(error as never));
+      showError(msg`Error`, formatApiErrorDescriptor(error as never));
     }
   }
 
-  const currentStatus = player.status.toLowerCase();
-  // beginner (or no status yet) can be upgraded, advanced can be downgraded back
-  const targetStatus: "advanced" | "beginner" | null =
-    currentStatus === "beginner" || currentStatus === ""
-      ? "advanced"
-      : currentStatus === "advanced"
-        ? "beginner"
-        : null;
+  // advanced can be downgraded back, everyone else can be upgraded
+  const targetStatus: "advanced" | "beginner" =
+    player.status.toLowerCase() === "advanced" ? "beginner" : "advanced";
+
+  const rating = parseRating(ratingInput);
+
+  function openFromMenu(open: (value: boolean) => void) {
+    setMenuOpen(false);
+    open(true);
+  }
 
   function handleConfirm() {
-    if (!targetStatus) return;
     mutate(
       {
         params: {
@@ -67,90 +102,123 @@ export function PlayerActionMenu({
       {
         onSuccess: () => {
           showSuccess(
-            "Status updated",
-            `${player.nickname} is now ${targetStatus}`,
+            msg`Status updated`,
+            targetStatus === "advanced"
+              ? msg`${player.nickname} is now Advanced`
+              : msg`${player.nickname} is now Beginner`,
           );
-          refreshPlayers();
+          refresh();
           setConfirmOpen(false);
         },
-        onError: (error) => handleError(error, "change player status"),
+        onError: (error) =>
+          handleError(error, msg`Only administrators can change player status`),
       },
     );
   }
 
   function openRating() {
-    const current = Math.round(player.rating / START_RATING_STEP);
-    setRating(Math.max(MIN_START_RATING, current * START_RATING_STEP));
-    setRatingOpen(true);
+    setRatingInput(String(player.rating));
+    openFromMenu(setRatingOpen);
   }
 
-  function handleSetRating() {
+  function handleSetRating(e: React.FormEvent) {
+    e.preventDefault();
+    if (rating === null || rating === player.rating) return;
     setRatingMutate(
       {
         params: { query: { innohassle_id: player.innohassle_id, rating } },
       },
       {
         onSuccess: () => {
-          showSuccess("Rating updated", `${player.nickname}: ${rating}`);
-          refreshPlayers();
+          showSuccess(msg`Rating updated`, `${player.nickname}: ${rating}`);
+          refresh();
           setRatingOpen(false);
         },
-        onError: (error) => handleError(error, "change player rating"),
+        onError: (error) =>
+          handleError(error, msg`Only administrators can change player rating`),
       },
     );
   }
 
   return (
     <>
-      <div className="dropdown dropdown-end">
-        <button type="button" tabIndex={0} className="btn btn-ghost btn-xs">
-          <span className="icon-[material-symbols--more-vert]" />
-        </button>
-        <ul
-          tabIndex={0}
-          className="dropdown-content menu bg-base-200 rounded-box z-1 w-56 p-2 shadow-sm"
-        >
-          {targetStatus === "advanced" && (
+      <button
+        ref={refs.setReference}
+        type="button"
+        aria-label={t`Actions for ${player.nickname}`}
+        className="btn btn-ghost btn-sm btn-square"
+        {...getReferenceProps()}
+      >
+        <span className="icon-[material-symbols--more-vert] text-lg" />
+      </button>
+
+      {menuOpen && (
+        <FloatingPortal>
+          <ul
+            ref={refs.setFloating}
+            style={floatingStyles}
+            className="menu bg-base-200 rounded-box z-50 w-56 p-2 shadow-lg"
+            {...getFloatingProps()}
+          >
             <li>
-              <button type="button" onClick={() => setConfirmOpen(true)}>
-                <span className="icon-[material-symbols--upgrade] text-primary" />
-                Upgrade to Advanced
+              <button
+                type="button"
+                className="min-h-11"
+                onClick={() => openFromMenu(setConfirmOpen)}
+              >
+                <span
+                  className={
+                    targetStatus === "advanced"
+                      ? "icon-[material-symbols--upgrade] text-primary"
+                      : "icon-[material-symbols--upgrade] text-primary rotate-180"
+                  }
+                />
+                {targetStatus === "advanced" ? (
+                  <Trans>Upgrade to Advanced</Trans>
+                ) : (
+                  <Trans>Downgrade to Beginner</Trans>
+                )}
               </button>
             </li>
-          )}
-          {targetStatus === "beginner" && (
             <li>
-              <button type="button" onClick={() => setConfirmOpen(true)}>
-                <span className="icon-[material-symbols--upgrade] text-primary rotate-180" />
-                Downgrade to Beginner
+              <button type="button" className="min-h-11" onClick={openRating}>
+                <span className="icon-[mdi--star-cog-outline] text-primary" />
+                <Trans>Set rating</Trans>
               </button>
             </li>
-          )}
-          {targetStatus === null && (
-            <li className="disabled">
-              <span className="text-base-content/50">
-                Already {player.status.toLowerCase()}
-              </span>
-            </li>
-          )}
-          <li>
-            <button type="button" onClick={openRating}>
-              <span className="icon-[mdi--star-cog-outline] text-primary" />
-              Set starting rating
-            </button>
-          </li>
-        </ul>
-      </div>
+            {player.placeholder && (
+              <li>
+                <button
+                  type="button"
+                  className="min-h-11"
+                  onClick={() => openFromMenu(setMergeOpen)}
+                >
+                  <span className="icon-[mdi--account-arrow-right-outline] text-primary" />
+                  <Trans>Link to account</Trans>
+                </button>
+              </li>
+            )}
+          </ul>
+        </FloatingPortal>
+      )}
 
       <Modal
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="Confirm status change"
+        title={t`Confirm status change`}
       >
         <p className="text-base-content/80">
-          Are you sure you want to{" "}
-          {targetStatus === "beginner" ? "downgrade" : "upgrade"}{" "}
-          <strong>{player.nickname}</strong> to <strong>{targetStatus}</strong>?
+          {targetStatus === "beginner" ? (
+            <Trans>
+              Are you sure you want to downgrade{" "}
+              <strong>{player.nickname}</strong> to Beginner?
+            </Trans>
+          ) : (
+            <Trans>
+              Are you sure you want to upgrade{" "}
+              <strong>{player.nickname}</strong> to Advanced?
+            </Trans>
+          )}
         </p>
         <div className="mt-4 flex justify-end gap-2">
           <button
@@ -158,7 +226,7 @@ export function PlayerActionMenu({
             className="btn btn-ghost"
             onClick={() => setConfirmOpen(false)}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="button"
@@ -169,70 +237,81 @@ export function PlayerActionMenu({
             {isPending ? (
               <span className="loading loading-spinner loading-sm" />
             ) : (
-              "Confirm"
+              <Trans>Confirm</Trans>
             )}
           </button>
         </div>
       </Modal>
 
+      {player.placeholder && (
+        <MergeGuestModal
+          open={mergeOpen}
+          onOpenChange={setMergeOpen}
+          guest={player}
+        />
+      )}
+
       <Modal
         open={ratingOpen}
         onOpenChange={setRatingOpen}
-        title="Starting rating"
+        title={t`Set rating`}
       >
-        <p className="text-base-content/70 text-sm">
-          RTTF: the organiser assigns a newcomer&apos;s starting rating, a
-          multiple of 25 and at least 100. Current rating of{" "}
-          <strong>{player.nickname}</strong>: {player.rating}.
-        </p>
-        <div className="mt-2 flex items-center justify-center gap-2">
-          {[-100, -25].map((delta) => (
-            <button
-              key={delta}
-              type="button"
-              disabled={rating + delta < MIN_START_RATING || settingRating}
-              onClick={() => setRating(rating + delta)}
-              className="border-base-content/20 h-11 min-w-12 rounded-xl border px-2 text-sm font-medium disabled:opacity-30"
-            >
-              {delta}
-            </button>
-          ))}
-          <span className="w-20 text-center text-3xl font-semibold tabular-nums">
-            {rating}
-          </span>
-          {[25, 100].map((delta) => (
-            <button
-              key={delta}
-              type="button"
-              disabled={settingRating}
-              onClick={() => setRating(rating + delta)}
-              className="h-11 min-w-12 rounded-xl bg-[#712BB2] px-2 text-sm font-medium text-white disabled:opacity-30"
-            >
-              +{delta}
-            </button>
-          ))}
-        </div>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            className="btn btn-ghost"
-            onClick={() => setRatingOpen(false)}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleSetRating}
-            disabled={settingRating || rating === player.rating}
-          >
-            {settingRating ? (
-              <span className="loading loading-spinner loading-sm" />
-            ) : (
-              "Save"
+        <form onSubmit={handleSetRating}>
+          <p className="text-base-content/70 text-sm">
+            <Trans>
+              Current rating of <strong>{player.nickname}</strong>:{" "}
+              {player.rating}. Enter any whole number from 0.
+            </Trans>
+          </p>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={1}
+            autoFocus
+            value={ratingInput}
+            onChange={(e) => setRatingInput(e.target.value)}
+            aria-label={t`New rating`}
+            className="input input-bordered mt-3 h-14 w-full text-center text-3xl font-semibold tabular-nums"
+          />
+          {ratingInput.trim() !== "" && rating === null && (
+            <p className="text-error mt-1 text-xs">
+              <Trans>The rating must be a whole number from 0.</Trans>
+            </p>
+          )}
+          {targetStatus === "advanced" &&
+            rating !== null &&
+            player.rating < ADVANCED_RATING &&
+            rating >= ADVANCED_RATING && (
+              <p className="text-base-content/60 mt-1 text-xs">
+                <Trans>
+                  {player.nickname} will become Advanced ({ADVANCED_RATING}+).
+                </Trans>
+              </p>
             )}
-          </button>
-        </div>
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => setRatingOpen(false)}
+            >
+              <Trans>Cancel</Trans>
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={
+                settingRating || rating === null || rating === player.rating
+              }
+            >
+              {settingRating ? (
+                <span className="loading loading-spinner loading-sm" />
+              ) : (
+                <Trans>Save</Trans>
+              )}
+            </button>
+          </div>
+        </form>
       </Modal>
     </>
   );

@@ -1,3 +1,4 @@
+import "@/locales/lib";
 import { useMe } from "@/api/accounts/user.ts";
 import { AppUpdatePrompt } from "@/app/AppUpdatePrompt.tsx";
 import { AuthManager } from "@/api/helpers/AuthManager.tsx";
@@ -6,6 +7,8 @@ import { queryClient } from "@/app/query-client.ts";
 import { UserInfoTracker } from "@/app/tracking/UserInfoTracker.tsx";
 import { YandexMetrika } from "@/app/tracking/YandexMetrika.tsx";
 import { ToastContainer, ToastProvider } from "@/components/toast";
+import { i18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Register, RouterProvider } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -14,20 +17,22 @@ import { useTheme } from "@/lib/ui/use-theme.ts";
 // Root app component
 export function App({ router }: { router: Register["router"] }) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <PwaPromptProvider>
-        <ToastProvider>
-          <AppRouter router={router} />
-          <AppUpdatePrompt />
-          <ToastContainer />
-        </ToastProvider>
-      </PwaPromptProvider>
+    <I18nProvider i18n={i18n}>
+      <QueryClientProvider client={queryClient}>
+        <PwaPromptProvider>
+          <ToastProvider>
+            <AppRouter router={router} />
+            <AppUpdatePrompt />
+            <ToastContainer />
+          </ToastProvider>
+        </PwaPromptProvider>
 
-      <YandexMetrika />
-      <UserInfoTracker />
-      <ThemeChanger />
-      <AuthManager />
-    </QueryClientProvider>
+        <YandexMetrika />
+        <UserInfoTracker />
+        <ThemeChanger />
+        <AuthManager />
+      </QueryClientProvider>
+    </I18nProvider>
   );
 }
 

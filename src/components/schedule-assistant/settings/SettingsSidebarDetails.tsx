@@ -3,10 +3,15 @@ import { $scheduleAssistant } from "@/api/schedule-assistant";
 import {
   SchemaInstructor,
   SchemaRoomAttributeDef,
+  SchemaSectionConfig,
   SchemaSectionProgram,
   SectionConfigDefault_layoutAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
 import { CompactColorPicker } from "@/components/common/CompactColorPicker.tsx";
+import { DateInput } from "@/components/schedule-assistant/DateInput.tsx";
+import { CourseBlocksEditor } from "@/components/schedule-assistant/settings/courses/CourseBlocksEditor.tsx";
+import { SemesterBlocksEditor } from "@/components/schedule-assistant/settings/semester/SemesterBlocksEditor.tsx";
+import { validateSemesterBlocks } from "@/components/schedule-assistant/settings/semester/semesterBlocks.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import { colorForSubject } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
@@ -40,6 +45,7 @@ import {
   useStudentGroup,
   useTrack,
   useUpdateProgramMutation,
+  useUpdateTermMutation,
   useInstructorsQuery,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
@@ -70,6 +76,7 @@ import {
   searchInstructors,
 } from "@/components/schedule-assistant/settings/instructors/instructorsSearchUtils.ts";
 import { useBlurSaveField } from "@/components/schedule-assistant/settings/useBlurSaveField.ts";
+import { useSettingsSaveStatusContext } from "@/components/schedule-assistant/settings/settingsSaveStatus.tsx";
 import { useSelection } from "@/components/schedule-assistant/settings/useSelection.tsx";
 import {
   normalizeTermWeekdays,
@@ -89,6 +96,7 @@ import {
   useDeferredValue,
   useEffect,
   useLayoutEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -705,7 +713,12 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
   const { data: instructors = [] } = useInstructorsQuery();
   const { course, courseName, isPending, isError, error } =
     useCourse(courseIndex);
-  const { patchCourse } = usePatchCourseMutation(courseName);
+  const {
+    patchCourse,
+    isPending: isSavingCourse,
+    isError: isSaveError,
+    error: saveError,
+  } = usePatchCourseMutation(courseName);
   const { mutate: deleteCourse, isPending: isDeleting } =
     useDeleteCourseMutation();
   const { mutate: createStudentGroup } = useCreateStudentGroupMutation();
@@ -756,6 +769,17 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
   const shortNameRuField = useBlurSaveField(
     course?.short_name_ru ?? "",
     (value) => patchCourse({ short_name_ru: value.trim() || null }),
+  );
+  const [notesEditing, setNotesEditing] = useState(false);
+  useEffect(() => {
+    setNotesEditing(false);
+  }, [courseIndex, courseName]);
+  const notesField = useBlurSaveField(course?.notes ?? "", (value) =>
+    patchCourse({ notes: value }),
+  );
+  const notesValue = course?.notes ?? "";
+  const moodleUrlField = useBlurSaveField(course?.moodle_url ?? "", (value) =>
+    patchCourse({ moodle_url: value.trim() || null }),
   );
   const sectionOptions = useMemo(() => {
     return getScheduleSections(config)
@@ -812,6 +836,44 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
             <input className={detailInputClass} {...shortNameRuField} />
           </label>
           <div className={`${detailControlClass} shrink-0`}>
+            <div className="flex items-center justify-between gap-2">
+              <span className={detailLabelUpperClass}>Заметки</span>
+              {!notesEditing ? (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-xs btn-square"
+                  title={notesValue.trim() ? "Редактировать" : "Добавить"}
+                  onClick={() => setNotesEditing(true)}
+                >
+                  <span className="icon-[material-symbols--edit-outline-rounded] text-base" />
+                </button>
+              ) : null}
+            </div>
+            {notesEditing ? (
+              <textarea
+                className={`${detailTimeSlotsTextareaClass} min-h-20 resize-y`}
+                rows={3}
+                autoFocus
+                {...notesField}
+                onBlur={(event) => {
+                  notesField.onBlur(event);
+                  setNotesEditing(false);
+                }}
+              />
+            ) : notesValue.trim() ? (
+              <p className="text-sm whitespace-pre-wrap">{notesValue}</p>
+            ) : null}
+          </div>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Ссылка на Moodle</span>
+            <input
+              className={detailInputClass}
+              type="url"
+              placeholder="https://"
+              {...moodleUrlField}
+            />
+          </label>
+          <div className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Цвет</span>
             <CompactColorPicker
               value={course?.color}
@@ -820,6 +882,18 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
               triggerClassName="w-full justify-between"
             />
           </div>
+
+          {course ? (
+            <CourseBlocksEditor blocks={term?.blocks ?? []} course={course} />
+          ) : null}
+          {isSavingCourse ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : null}
+          {isSaveError ? (
+            <div className="alert alert-error alert-soft text-sm">
+              {formatApiErrorMessage(saveError)}
+            </div>
+          ) : null}
 
           <CourseInstructorsEditor
             assignments={course?.instructors ?? []}
@@ -2009,12 +2083,78 @@ export function InstructorDetails({
   );
 }
 
+function SectionNameInputs({
+  section,
+  sectionIndex,
+  patchTerm,
+}: {
+  section: SchemaSectionConfig;
+  sectionIndex: number;
+  patchTerm: ReturnType<typeof usePatchTermMutation>["patchTerm"];
+}) {
+  function patchSection(patch: Partial<SchemaSectionConfig>) {
+    patchTerm((current) => {
+      const next = structuredClone(current);
+      const target = next.sections?.[sectionIndex];
+      if (!target) return current;
+      Object.assign(target, patch);
+      return next;
+    });
+  }
+  const nameField = useBlurSaveField(section.name, (value) => {
+    const name = value.trim();
+    if (name) patchSection({ name });
+  });
+  const nameRuField = useBlurSaveField(section.name_ru ?? "", (value) =>
+    patchSection({ name_ru: value.trim() || null }),
+  );
+
+  return (
+    <>
+      <span className="text-sm font-medium whitespace-nowrap">
+        {section.code}
+      </span>
+      <input className={detailInputClass} required {...nameField} />
+      <input className={detailInputClass} {...nameRuField} />
+    </>
+  );
+}
+
 export function SemesterDetails() {
   const { term, isPending, isError, error } = useSemesterSettings();
-  const { patchTerm } = usePatchTermMutation();
+  const {
+    patchTerm,
+    isError: isSaveError,
+    error: saveError,
+  } = usePatchTermMutation();
+  const {
+    mutate: updateSemesterDates,
+    isPending: isSavingDates,
+    isError: isDatesSaveError,
+    error: datesSaveError,
+    reset: resetDatesMutation,
+  } = useUpdateTermMutation();
+  const [dateDraft, setDateDraft] = useState<{
+    start_date: string;
+    end_date: string;
+  } | null>(null);
+  const semesterDates = dateDraft ?? term?.semester;
+  const dateError = semesterDates
+    ? validateSemesterBlocks(semesterDates, term?.blocks ?? [])
+    : null;
+  const datesDirty =
+    dateDraft !== null &&
+    (dateDraft.start_date !== term?.semester.start_date ||
+      dateDraft.end_date !== term?.semester.end_date);
+  const dateFieldId = useId();
+  const { setFieldDirty } = useSettingsSaveStatusContext();
+  useEffect(() => {
+    setFieldDirty(dateFieldId, datesDirty);
+    return () => setFieldDirty(dateFieldId, false);
+  }, [dateFieldId, datesDirty, setFieldDirty]);
   const termName = String(term?.name ?? "");
-  const startDate = toDateInputValue(term?.semester?.start_date);
-  const endDate = toDateInputValue(term?.semester?.end_date);
+  const startDate = toDateInputValue(semesterDates?.start_date);
+  const endDate = toDateInputValue(semesterDates?.end_date);
   const days = normalizeTermWeekdays(term?.days);
   const startingDay =
     normalizeTermWeekdays(term?.starting_day ? [term.starting_day] : [])[0] ??
@@ -2023,24 +2163,10 @@ export function SemesterDetails() {
   const termNameField = useBlurSaveField(termName, (value) =>
     patchTerm((current) => ({ ...current, name: value })),
   );
-  const startDateField = useBlurSaveField(startDate, (value) =>
-    patchTerm((current) => ({
-      ...current,
-      semester: {
-        ...current.semester,
-        start_date: value,
-      },
-    })),
-  );
-  const endDateField = useBlurSaveField(endDate, (value) =>
-    patchTerm((current) => ({
-      ...current,
-      semester: {
-        ...current.semester,
-        end_date: value,
-      },
-    })),
-  );
+  function handleDateChange(field: "start_date" | "end_date", value: string) {
+    if (!semesterDates) return;
+    setDateDraft({ ...semesterDates, [field]: value });
+  }
   const timeSlotsField = useBlurSaveField(timeSlots, (value) =>
     patchTerm((current) => ({
       ...current,
@@ -2081,22 +2207,75 @@ export function SemesterDetails() {
       </label>
       <label className={`${detailControlClass} shrink-0`}>
         <span className={detailLabelUpperClass}>Начало периода</span>
-        <input
-          type="date"
-          className={detailInputClass}
-          {...startDateField}
-          onKeyDown={handleEscapeBlur}
+        <DateInput
+          value={startDate}
+          disabled={isSavingDates}
+          onChange={(value) => handleDateChange("start_date", value)}
         />
       </label>
       <label className={`${detailControlClass} shrink-0`}>
         <span className={detailLabelUpperClass}>Окончание периода</span>
-        <input
-          type="date"
-          className={detailInputClass}
-          {...endDateField}
-          onKeyDown={handleEscapeBlur}
+        <DateInput
+          value={endDate}
+          disabled={isSavingDates}
+          onChange={(value) => handleDateChange("end_date", value)}
         />
       </label>
+      {dateDraft ? (
+        <div className="flex flex-wrap gap-2 px-1">
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            disabled={!datesDirty || !!dateError || isSavingDates}
+            onClick={() => {
+              if (!term || !datesDirty || dateError) return;
+              updateSemesterDates(
+                {
+                  body: {
+                    ...term,
+                    semester: { ...term.semester, ...dateDraft },
+                  },
+                },
+                { onSuccess: () => setDateDraft(null) },
+              );
+            }}
+          >
+            {isSavingDates ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : null}
+            Сохранить даты семестра
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            disabled={isSavingDates}
+            onClick={() => {
+              setDateDraft(null);
+              resetDatesMutation();
+            }}
+          >
+            Отменить
+          </button>
+        </div>
+      ) : null}
+      {dateError ? (
+        <p className="text-error text-sm">Даты не сохранены: {dateError}</p>
+      ) : null}
+      {isDatesSaveError ? (
+        <div className="alert alert-error alert-soft text-sm">
+          Даты семестра не сохранены: {formatApiErrorMessage(datesSaveError)}
+        </div>
+      ) : null}
+      {isSaveError ? (
+        <div className="alert alert-error alert-soft text-sm">
+          {formatApiErrorMessage(saveError)}
+        </div>
+      ) : null}
+      <p className="text-warning px-1 text-xs">
+        Изменение дат семестра не изменяет даты блоков и периоды серий
+        существующих занятий. Проверьте их отдельно.
+      </p>
+      <SemesterBlocksEditor />
       <div className={`${detailControlClass} shrink-0`}>
         <span className={detailLabelUpperClass}>Учебные дни</span>
         <div className="flex flex-wrap gap-2">
@@ -2157,6 +2336,22 @@ export function SemesterDetails() {
           onKeyDown={handleEscapeBlur}
         />
       </label>
+      <div className={`${detailControlClass} shrink-0`}>
+        <span className={detailLabelUpperClass}>Названия секций</span>
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2">
+          <span />
+          <span className="text-base-content/60 text-xs">EN</span>
+          <span className="text-base-content/60 text-xs">RU</span>
+          {(term?.sections ?? []).map((section, sectionIndex) => (
+            <SectionNameInputs
+              key={section.code || sectionIndex}
+              section={section}
+              sectionIndex={sectionIndex}
+              patchTerm={patchTerm}
+            />
+          ))}
+        </div>
+      </div>
       <div className={`${detailControlClass} shrink-0 pb-1`}>
         <span className={detailLabelUpperClass}>Вид таблицы по умолчанию</span>
         <div className="grid w-fit grid-cols-[auto_auto] items-center gap-x-2 gap-y-2 p-0.5">

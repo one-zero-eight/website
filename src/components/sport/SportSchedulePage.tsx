@@ -1,4 +1,5 @@
 import { $clubs } from "@/api/clubs";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
@@ -43,20 +44,24 @@ export function SportSchedulePage() {
     <>
       {hoursError || semesterError ? (
         <div className="alert alert-error mb-6">
-          Sport progress could not be loaded.
+          <Trans>Sport progress could not be loaded.</Trans>
         </div>
       ) : null}
       {studentStatus?.trim().toLowerCase() === "normal" &&
       hours &&
       hours.hours_from_groups + hours.self_sport_hours < hours.debt ? (
         <div className="alert alert-error mx-auto mb-6 flex w-full max-w-xl flex-col items-start gap-2">
-          <h2 className="font-semibold">Dear student!</h2>
+          <h2 className="font-semibold">
+            <Trans>Dear student!</Trans>
+          </h2>
           <p>
-            <strong>To remove</strong> the DEBTOR status you should clear the
-            debt bar, attending <strong>on trainings</strong>.
-            <br />
-            Closing the debt is{" "}
-            <strong>required to pass the sport course</strong>.
+            <Trans>
+              <strong>To remove</strong> the DEBTOR status you should clear the
+              debt bar, attending <strong>on trainings</strong>.
+              <br />
+              Closing the debt is{" "}
+              <strong>required to pass the sport course</strong>.
+            </Trans>
           </p>
         </div>
       ) : null}
@@ -85,6 +90,7 @@ function SportCalendar({
   trainerGroupIds: ReadonlySet<number>;
   semesterEnd?: string;
 }) {
+  const { t } = useLingui();
   const [periodOffset, setPeriodOffset] = useState(0);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [attendanceOpen, setAttendanceOpen] = useState(false);
@@ -219,14 +225,16 @@ function SportCalendar({
       <div className="bg-base-100">
         <div className="-mx-4 flex flex-col gap-2">
           <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 px-4">
-            <div className="text-3xl font-medium">Trainings</div>
+            <div className="text-3xl font-medium">
+              <Trans>Trainings</Trans>
+            </div>
             <div className="flex shrink-0 items-center gap-1">
               <button
                 type="button"
                 className="btn btn-sm rounded-xl"
                 onClick={() => setPeriodOffset(0)}
               >
-                Today
+                <Trans>Today</Trans>
               </button>
               <button
                 type="button"
@@ -249,13 +257,13 @@ function SportCalendar({
             <div className="skeleton h-96 w-full" />
           ) : isError ? (
             <div className="alert alert-error mx-4">
-              Schedule could not be loaded.
+              <Trans>Schedule could not be loaded.</Trans>
             </div>
           ) : (
             <Suspense fallback={<div className="skeleton h-96 w-full" />}>
               <SportTrainingsCalendarList
                 rows={filteredSchedule}
-                emptyText="No trainings match the selected filters."
+                emptyText={t`No trainings match the selected filters.`}
                 studentId={studentId}
                 trainerGroupIds={trainerGroupIds}
                 onSelect={setSelected}
@@ -283,6 +291,7 @@ function EnrolledTrainings({
   isError: boolean;
   onSelect: (row: SchemaTrainingInfoPersonalSchema) => void;
 }) {
+  const { i18n } = useLingui();
   const { data: clubs, isError: clubsError } = $clubs.useQuery(
     "get",
     "/clubs/",
@@ -303,12 +312,16 @@ function EnrolledTrainings({
 
   return (
     <section className="mb-6 flex flex-col gap-3">
-      <h2 className="text-2xl font-medium">My upcoming trainings</h2>
+      <h2 className="text-2xl font-medium">
+        <Trans>My upcoming trainings</Trans>
+      </h2>
       {isError || clubsError ? (
         <div className="alert alert-error">
-          {isError
-            ? "Enrolled trainings could not be loaded."
-            : "Club logos could not be loaded."}
+          {isError ? (
+            <Trans>Enrolled trainings could not be loaded.</Trans>
+          ) : (
+            <Trans>Club logos could not be loaded.</Trans>
+          )}
         </div>
       ) : null}
       {isPending ? (
@@ -321,12 +334,15 @@ function EnrolledTrainings({
               training.sport_id == null
                 ? undefined
                 : clubsBySportId.get(String(training.sport_id));
-            const date = new Date(training.start).toLocaleDateString("en-US", {
-              day: "numeric",
-              month: "short",
-              weekday: "short",
-              timeZone: "Europe/Moscow",
-            });
+            const date = new Date(training.start).toLocaleDateString(
+              i18n.locale,
+              {
+                day: "numeric",
+                month: "short",
+                weekday: "short",
+                timeZone: "Europe/Moscow",
+              },
+            );
 
             return (
               <button

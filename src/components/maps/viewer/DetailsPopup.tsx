@@ -1,8 +1,15 @@
 import { mapsTypes } from "@/api/maps";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { useLingui as useLinguiRuntime } from "@lingui/react";
 import { $roomBooking } from "@/api/room-booking";
 import Tooltip from "@/components/common/Tooltip.tsx";
+import { getAreaPeople, getAreaTitle } from "@/components/maps/area-label.ts";
 import { getMapAreaUrl } from "@/components/maps/links.ts";
 import { AccessLevelIcon } from "@/components/room-booking/AccessLevelIcon.tsx";
+import {
+  accessLevelLabel,
+  capacityPeopleLabel,
+} from "@/components/room-booking/access-level-label.ts";
 import {
   arrow,
   autoUpdate,
@@ -36,6 +43,7 @@ export function DetailsPopup({
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }) {
+  const { i18n } = useLingui();
   const arrowRef = useRef<SVGSVGElement>(null);
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
@@ -83,6 +91,9 @@ export function DetailsPopup({
 
   if (!isMounted || !area) return null;
 
+  const displayTitle = getAreaTitle(area, i18n.locale);
+  const displayPeople = getAreaPeople(area.people, i18n.locale);
+
   return (
     <FloatingPortal>
       <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
@@ -94,7 +105,7 @@ export function DetailsPopup({
         >
           <div className="flex flex-row justify-between gap-2">
             <div className="text-bold flex text-xl wrap-anywhere whitespace-pre-wrap">
-              <span className="font-medium">{area.title}</span>
+              <span className="font-medium">{displayTitle}</span>
             </div>
 
             <ShareButton scene={scene} area={area} />
@@ -109,14 +120,13 @@ export function DetailsPopup({
               </p>
             </div>
           )}
-          {area.people && area.people.length >= 1 && (
+          {displayPeople.length >= 1 && (
             <div className="flex flex-row gap-2">
               <div className="w-6">
                 <span className="icon-[material-symbols--user-attributes-rounded] text-2xl" />
               </div>
               <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
-                {/* Show only English names */}
-                {area.people.filter((v) => /^[A-Za-z -]+$/.test(v)).join(",\n")}
+                {displayPeople.join(",\n")}
               </p>
             </div>
           )}
@@ -135,10 +145,12 @@ export function DetailsPopup({
 }
 
 function RoomBookingDetails({ roomId }: { roomId: string }) {
+  useLinguiRuntime();
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
     params: { query: { include_red: true } },
   });
   const room = rooms?.find((r) => r.id === roomId);
+  const accessLabel = accessLevelLabel(room?.access_level);
 
   return (
     <>
@@ -148,11 +160,11 @@ function RoomBookingDetails({ roomId }: { roomId: string }) {
             <span className="icon-[material-symbols--event-seat-outline-rounded] text-2xl" />
           </div>
           <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
-            Capacity: {room.capacity} people
+            <Trans>Capacity</Trans>: {capacityPeopleLabel(room.capacity)}
           </p>
         </div>
       )}
-      {room?.access_level && (
+      {room?.access_level && accessLabel && (
         <div className="flex flex-row gap-2">
           <div className="w-6">
             <AccessLevelIcon
@@ -161,7 +173,7 @@ function RoomBookingDetails({ roomId }: { roomId: string }) {
             />
           </div>
           <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
-            Access level: {room.access_level}
+            <Trans>Access Level</Trans>: {accessLabel}
           </p>
         </div>
       )}
@@ -174,7 +186,7 @@ function RoomBookingDetails({ roomId }: { roomId: string }) {
           params={{ room: roomId }}
           className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap underline underline-offset-2"
         >
-          Book this room
+          <Trans>Book this room</Trans>
         </Link>
       </div>
     </>
@@ -188,9 +200,10 @@ function ShareButton({
   scene: mapsTypes.SchemaScene;
   area: mapsTypes.SchemaArea;
 }) {
+  const { t } = useLingui();
   const [_, _copy] = useCopyToClipboard();
   const [copied, setCopied] = useState(false);
-  const [timer, setTimer] = useState<any>();
+  const [timer, setTimer] = useState<ReturnType<typeof setTimeout>>();
 
   const copy = () => {
     const url = getMapAreaUrl(scene, area);
@@ -212,7 +225,7 @@ function ShareButton({
     <Tooltip
       content={
         <div className={copied ? "text-green-700 dark:text-green-500" : ""}>
-          {!copied ? "Share link to this room" : "Link copied!"}
+          {!copied ? t`Share link to this room` : t`Link copied!`}
         </div>
       }
     >

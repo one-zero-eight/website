@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   SchemaHost,
   SchemaPublicHost,
@@ -8,17 +9,12 @@ import { cn } from "@/lib/ui/cn";
 import { formatEventDateTime } from "../utils/datetime";
 import { locationDisplayName } from "../utils/location";
 import { PublicHostsList, StoredHostsList } from "./HostLink";
-
 const statusClassName: Record<string, string> = {
   published: "badge-success",
   approved: "badge-success",
   pending: "badge-warning",
   declined: "badge-error",
   unpublished: "badge-ghost",
-};
-
-const statusLabel: Record<string, string> = {
-  pending: "Pending Review",
 };
 
 export function EventSummaryCard({
@@ -48,8 +44,28 @@ export function EventSummaryCard({
   footer?: React.ReactNode;
   compact?: boolean;
 }) {
+  const { t } = useLingui();
   const hostList = hosts ?? [];
   const publicHostList = publicHosts ?? [];
+
+  function getStatusLabel(value: string): string | undefined {
+    if (value === "pending") {
+      return t`Pending Review`;
+    }
+    if (value === "approved") {
+      return t`Approved`;
+    }
+    if (value === "declined") {
+      return t`Declined`;
+    }
+    if (value === "published") {
+      return t`Published`;
+    }
+    if (value === "unpublished") {
+      return t`Unpublished`;
+    }
+    return undefined;
+  }
 
   return (
     <div className="border-base-300 hover:border-primary/40 overflow-hidden rounded-2xl border transition-colors">
@@ -72,11 +88,11 @@ export function EventSummaryCard({
               className={cn(
                 "badge absolute top-2 right-2",
                 compact && "badge-sm",
-                statusLabel[status] ? null : "capitalize",
+                getStatusLabel(status) ? null : "capitalize",
                 statusClassName[status] ?? "badge-ghost",
               )}
             >
-              {statusLabel[status] ?? status}
+              {getStatusLabel(status) ?? status}
             </span>
           )}
           {invitedBy && (
@@ -86,7 +102,7 @@ export function EventSummaryCard({
                 compact && "badge-sm",
               )}
             >
-              Invited
+              <Trans>Invited</Trans>
             </span>
           )}
         </div>
@@ -100,7 +116,7 @@ export function EventSummaryCard({
               compact ? "text-sm" : "text-lg",
             )}
           >
-            {name?.trim() || "Untitled event"}
+            {name?.trim() || t`Untitled event`}
           </h3>
           {invitedBy && (
             <p
@@ -109,7 +125,7 @@ export function EventSummaryCard({
                 compact ? "text-xs" : "text-sm",
               )}
             >
-              Invited by {invitedBy}
+              <Trans>Invited by {invitedBy}</Trans>
             </p>
           )}
           <div
@@ -129,7 +145,7 @@ export function EventSummaryCard({
                 {publicHostList.length > 0 ? (
                   <PublicHostsList hosts={publicHostList} linked={false} />
                 ) : hostList.length === 0 ? (
-                  "No hosts yet"
+                  t`No hosts yet`
                 ) : (
                   <StoredHostsList
                     hosts={hostList}

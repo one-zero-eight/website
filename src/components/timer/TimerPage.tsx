@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   useFullscreen,
   useSaveState,
@@ -18,6 +19,7 @@ import { StopDialog } from "./components/StopDialog";
 import CustomTimeModal from "./components/CustomTimeModal";
 import { useFullscreenCursor } from "./lib/useFullScreenCursor";
 const TimerPage = () => {
+  const { t } = useLingui();
   const [title, setTitle] = useState<string>("");
   const [showStopDialog, setShowStopDialog] = useState<boolean>(false);
   const [showTimeUpMessage, setShowTimeUpMessage] = useState<boolean>(false);
@@ -184,7 +186,7 @@ const TimerPage = () => {
       <div className="mb-6 flex w-full flex-col items-center gap-4 p-4 md:mb-12">
         <textarea
           ref={titleRef}
-          placeholder="Timer title..."
+          placeholder={t`Timer title...`}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onInput={(e) => updateTextAreaHeight(e.target as HTMLTextAreaElement)}
@@ -204,7 +206,7 @@ const TimerPage = () => {
             onClick={() => setShowCustomTimeModal(true)}
           >
             <span className="icon-[material-symbols--calendar-today] text-lg" />
-            Until exact time
+            <Trans>Until exact time</Trans>
           </button>
         )}
       </div>
@@ -267,7 +269,7 @@ const TimerPage = () => {
                 className="btn btn-primary btn-xl"
               >
                 <span className="icon-[material-symbols--play-arrow] text-2xl sm:text-3xl" />
-                Start
+                <Trans>Start</Trans>
               </button>
             ) : (
               <>
@@ -278,7 +280,7 @@ const TimerPage = () => {
                     className="btn btn-primary btn-lg sm:btn-xl"
                   >
                     <span className="icon-[material-symbols--play-arrow] text-2xl sm:text-3xl" />
-                    Resume
+                    <Trans>Resume</Trans>
                   </button>
                 ) : (
                   <button
@@ -287,7 +289,7 @@ const TimerPage = () => {
                     className="btn btn-primary btn-outline btn-lg sm:btn-xl"
                   >
                     <span className="icon-[material-symbols--pause] text-2xl sm:text-3xl" />
-                    Pause
+                    <Trans>Pause</Trans>
                   </button>
                 )}
 
@@ -297,7 +299,7 @@ const TimerPage = () => {
                   className="btn btn-error btn-outline btn-lg sm:btn-xl"
                 >
                   <span className="icon-[material-symbols--stop] text-2xl sm:text-3xl" />
-                  Stop
+                  <Trans>Stop</Trans>
                 </button>
               </>
             )}

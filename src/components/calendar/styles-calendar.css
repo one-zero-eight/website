@@ -106,10 +106,22 @@
 
   .fc-event:has(> td.fc-list-event-title > #today) {
     pointer-events: none;
-    /* display: block; */
     padding-left: 30px;
 
     td.fc-list-event-graphic {
+      display: none;
+    }
+
+    td.fc-list-event-time {
+      display: none;
+    }
+  }
+
+  .fc-day-today:has(#today) {
+    pointer-events: none;
+    /* display: block; */
+
+    .fc-daygrid-event-dot {
       display: none;
     }
 
@@ -138,7 +150,7 @@
   }
 
   .fc-col-header-cell-cushion {
-    @apply text-base-content/50 text-lg;
+    @apply text-base-content/50 text-lg capitalize;
   }
 
   .fc-day-today {
@@ -165,7 +177,7 @@
   }
 
   .fc-list-day-text {
-    @apply font-medium;
+    @apply font-medium capitalize;
   }
 
   .fc-list-sticky .fc-list-day > * {
@@ -179,6 +191,10 @@
   .fc-list-day.fc-day-today .fc-list-day-text::after {
     content: "today";
     @apply ml-2 inline-flex h-7 w-fit items-center justify-center rounded-md bg-red-500 px-1 font-medium text-white;
+  }
+
+  &:lang(ru) .fc-list-day.fc-day-today .fc-list-day-text::after {
+    content: "сегодня";
   }
 
   .fc-daygrid-day-frame {

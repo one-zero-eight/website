@@ -1,4 +1,5 @@
 import { cn } from "@/lib/ui/cn";
+import { Trans } from "@lingui/react/macro";
 
 import type { CalendarCourseLegendRow } from "./calendarCourseLegend.ts";
 
@@ -17,7 +18,7 @@ export function CalendarCourseLegendPanel({
           className,
         )}
       >
-        Нет курсов для выбранной программы.
+        <Trans>No courses for the selected program.</Trans>
       </div>
     );
   }
@@ -28,9 +29,15 @@ export function CalendarCourseLegendPanel({
         <table className="table-xs table w-full">
           <thead className="bg-base-200 sticky top-0">
             <tr>
-              <th className="whitespace-nowrap">Short name</th>
-              <th>Course Name</th>
-              <th>Instructor</th>
+              <th className="whitespace-nowrap">
+                <Trans>Short name</Trans>
+              </th>
+              <th>
+                <Trans>Course name</Trans>
+              </th>
+              <th>
+                <Trans>Instructor</Trans>
+              </th>
             </tr>
           </thead>
           <tbody>

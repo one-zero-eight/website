@@ -8,17 +8,15 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyEditableEventsToCourse,
-  eventsEqual,
   eventsToOccurrences,
-  eventsToWeeklySlots,
   expandOccurrencesToEvents,
+  expandWeeklySlotsPreservingEventOverrides,
   expandWeeklySlotsToEvents,
   patchEditableEvents,
   serializeOccurrenceEvents,
   serializeWeeklyEventsToSlots,
 } from "./editableSessionEvents.ts";
 import { countWeeklyPatternSlotOccurrences } from "./timetableViewerModel.ts";
-import { restoreMeetingInCourse } from "./meetingEditUtils.ts";
 
 function testConfig(): SchemaScheduleConfig {
   return {
@@ -42,15 +40,12 @@ function testConfig(): SchemaScheduleConfig {
   };
 }
 
-describe("session notes", () => {
+describe("course notes", () => {
   const slot: SchemaWeeklyPatternSlot = {
     weekday: Weekday.MONDAY,
     start_time: "09:00:00",
     end_time: "10:30:00",
-    edits: [
-      { select_week: "2026-09-07", notes: "Bring a laptop", cancel: false },
-      { select_week: "2026-09-14", notes: "", cancel: false },
-    ],
+    edits: [{ select_week: "2026-09-07", room: "104", cancel: false }],
   };
   const ref = {
     kind: "wp",
@@ -60,110 +55,33 @@ describe("session notes", () => {
     slotIdx: 0,
     date: "2026-09-07",
   } as const;
-  function courseWithNotes(weeklySlot = slot): SchemaCourseConfig {
-    return {
-      name: "Math",
-      section_code: "core",
-      components: [
-        {
-          tag: "lec",
-          instructor_pool: [],
-          audience: [],
-          per_group: false,
-          sessions: [
-            {
-              audience: [],
-              notes: "Series notes",
-              weekly_pattern: [weeklySlot],
-            },
-          ],
-        },
-      ],
-    };
-  }
-  function expand(weeklySlots = [slot]) {
-    return expandWeeklySlotsToEvents({
+  const course: SchemaCourseConfig = {
+    name: "Math",
+    section_code: "core",
+    notes: "Original course",
+    components: [
+      {
+        tag: "lec",
+        instructor_pool: [],
+        audience: [],
+        per_group: false,
+        sessions: [{ audience: [], weekly_pattern: [slot] }],
+      },
+    ],
+  };
+
+  it("saves course notes without touching per-date schedule overrides", () => {
+    const events = expandWeeklySlotsToEvents({
       config: testConfig(),
-      weeklySlots,
+      weeklySlots: [slot],
       audienceTokens: [],
     });
-  }
-
-  it("keeps raw null, empty and explicit overrides through unrelated changes", () => {
-    const events = expand();
-    expect(events.map((event) => event.notes)).toEqual([
-      "Bring a laptop",
-      "",
-      null,
-      null,
-    ]);
-    const patched = patchEditableEvents(
-      events,
-      events.map((event) => event.key),
-      { room: "104", start_time: "11:00" },
-    );
-    const slots = serializeWeeklyEventsToSlots({
-      originalSlots: [slot],
-      events: patched,
-      config: testConfig(),
-    });
-    expect(expand(slots).map((event) => event.notes)).toEqual(
-      events.map((event) => event.notes),
-    );
-  });
-
-  it("detects notes-only changes, preserves whitespace and resets inheritance", () => {
-    const events = expand();
-    const updated = patchEditableEvents(events, [events[2].key], {
-      notes: "  Agenda\nhttps://example.com  ",
-    });
-    expect(eventsEqual(events, updated)).toBe(false);
-    expect(updated[2].notes).toBe("  Agenda\nhttps://example.com  ");
-    const reset = patchEditableEvents(
-      updated,
-      [events[0].key, events[1].key, events[2].key],
-      { notes: null },
-    );
-    expect(
-      serializeWeeklyEventsToSlots({
-        originalSlots: [slot],
-        events: reset,
-        config: testConfig(),
-      })[0].edits,
-    ).toBeNull();
-  });
-
-  it("preserves override states through weekly and date conversions", () => {
-    const events = expand();
-    const dates = expandOccurrencesToEvents(eventsToOccurrences(events));
-    expect(
-      serializeOccurrenceEvents(dates).map((event) => event.notes),
-    ).toEqual(["Bring a laptop", "", null, null]);
-    const weekly = eventsToWeeklySlots(dates, Weekday.SUNDAY);
-    expect(weekly).toHaveLength(1);
-    expect(weekly[0].edits?.map((edit) => edit.select_week)).toEqual([
-      "2026-09-06",
-      "2026-09-13",
-    ]);
-    const config = testConfig();
-    config.term.starting_day = Weekday.SUNDAY;
-    expect(
-      expandWeeklySlotsToEvents({
-        config,
-        weeklySlots: weekly,
-        audienceTokens: [],
-      }).map((event) => event.notes),
-    ).toEqual(["Bring a laptop", "", null, null]);
-  });
-
-  it("saves series-only edits without flattening per-date inheritance", () => {
-    const events = expand();
     for (const placement of ["weekly", "dates_pattern"] as const) {
       const next = applyEditableEventsToCourse({
-        course: courseWithNotes(),
+        course,
         meetingRef: ref,
         config: testConfig(),
-        notes: "Updated series",
+        notes: "Updated course",
         placement,
         weeklySlots: [slot],
         events:
@@ -171,48 +89,18 @@ describe("session notes", () => {
             ? events
             : expandOccurrencesToEvents(eventsToOccurrences(events)),
       });
+      expect(next?.notes).toBe("Updated course");
       const series = next?.components[0].sessions?.[0];
-      expect(series?.notes).toBe("Updated series");
-      const savedEvents =
+      const rooms =
         placement === "weekly"
-          ? expand(series?.weekly_pattern ?? [])
-          : expandOccurrencesToEvents(series?.dates_pattern ?? []);
-      expect(savedEvents.map((event) => event.notes)).toEqual([
-        "Bring a laptop",
-        "",
-        null,
-        null,
-      ]);
-    }
-  });
-
-  it.each(["Bring a laptop", ""])(
-    "retains %j notes when cancelling and restoring",
-    (notes) => {
-      const original = {
-        ...slot,
-        edits: [{ select_week: "2026-09-07", cancel: false, notes }],
-      };
-      const events = expand([original]);
-      const cancelled = patchEditableEvents(events, [events[0].key], {
-        cancelled: true,
-      });
-      const saved = serializeWeeklyEventsToSlots({
-        originalSlots: [original],
-        events: cancelled,
-        config: testConfig(),
-      });
-      const restored = restoreMeetingInCourse(
-        courseWithNotes(saved[0]),
-        ref,
-        testConfig(),
+          ? series?.weekly_pattern?.[0].edits?.map((edit) => edit.room)
+          : series?.dates_pattern?.map((occurrence) => occurrence.room);
+      expect(rooms).toEqual(
+        placement === "weekly" ? ["104"] : ["104", null, null, null],
       );
-      const edit =
-        restored?.components[0].sessions?.[0].weekly_pattern?.[0].edits?.[0];
-      expect(edit?.notes).toBe(notes);
-      expect(edit?.cancel).toBe(false);
-    },
-  );
+    }
+    expect(course.notes).toBe("Original course");
+  });
 });
 
 describe("editableSessionEvents", () => {
@@ -365,6 +253,51 @@ describe("editableSessionEvents", () => {
           edit.select_week.startsWith("2026-09-21") &&
           edit.date === "2026-09-22",
       ),
+    ).toBe(true);
+  });
+
+  it("updates synced events from a template change and keeps overrides", () => {
+    const config = testConfig();
+    const slots = [
+      {
+        weekday: Weekday.MONDAY,
+        start_time: "09:00:00",
+        end_time: "10:30:00",
+        room: "108",
+        instructor: "a@iu.ru",
+        edits: null,
+      },
+    ];
+    const events = expandWeeklySlotsToEvents({
+      config,
+      audienceTokens: [],
+      weeklySlots: slots,
+    });
+    const withOverride = patchEditableEvents(events, [events[0]!.key], {
+      room: "999",
+      instructor: "override@iu.ru",
+    });
+    const nextSlots = [
+      {
+        ...slots[0]!,
+        room: "200",
+        instructor: "b@iu.ru",
+      },
+    ];
+    const synced = expandWeeklySlotsPreservingEventOverrides({
+      config,
+      weeklySlots: nextSlots,
+      previousEvents: withOverride,
+      audienceTokens: [],
+    });
+    expect(synced[0]).toMatchObject({
+      room: "999",
+      instructor: "override@iu.ru",
+      weeklyBase: { room: "200", instructor: "b@iu.ru" },
+    });
+    expect(synced.slice(1).every((event) => event.room === "200")).toBe(true);
+    expect(
+      synced.slice(1).every((event) => event.instructor === "b@iu.ru"),
     ).toBe(true);
   });
 

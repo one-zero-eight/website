@@ -1,11 +1,16 @@
+import { t } from "@lingui/core/macro";
 import {
   PrintingOptionsNumberUpAnyOf0,
   PrintingOptionsSidesAnyOf0,
 } from "@/api/printers/types.ts";
 
 export function formatFileSize(bytes: number) {
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024) {
+    const size = (bytes / 1024).toFixed(0);
+    return t`${size} KB`;
+  }
+  const size = (bytes / 1024 / 1024).toFixed(1);
+  return t`${size} MB`;
 }
 
 function calcNumberOfPagesInRanges(ranges: string, until: number) {

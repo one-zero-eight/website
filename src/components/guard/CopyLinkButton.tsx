@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MESSAGES } from "./consts";
+import { Trans } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 
 export function CopyLinkButton({
@@ -31,7 +31,7 @@ export function CopyLinkButton({
         className,
       )}
     >
-      {copied ? MESSAGES.copySuccess : "Copy join link"}
+      {copied ? <Trans>Copied!</Trans> : <Trans>Copy join link</Trans>}
     </button>
   );
 }

@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { CalloutTypePicker } from "@/components/editor/menus/CalloutTypePicker.tsx";
 import { Editor } from "@tiptap/react";
 import { BlockTypeDropdown } from "./BlockTypeDropdown";
@@ -22,6 +23,7 @@ export function EditorMenuItems({
   editorState: EditorMenuState;
   showTextFormatting?: boolean;
 }) {
+  const { t } = useLingui();
   return (
     <>
       <BlockTypeDropdown editor={editor} />
@@ -36,35 +38,35 @@ export function EditorMenuItems({
             isActive={editorState.isBold}
             isDisabled={!editorState.canBold}
             onClick={() => editor.chain().focus().toggleBold().run()}
-            title="Bold"
+            title={t`Bold`}
             iconClassName="icon-[material-symbols--format-bold]"
           />
           <BubbleMenuButton
             isActive={editorState.isItalic}
             isDisabled={!editorState.canItalic}
             onClick={() => editor.chain().focus().toggleItalic().run()}
-            title="Italic"
+            title={t`Italic`}
             iconClassName="icon-[material-symbols--format-italic]"
           />
           <BubbleMenuButton
             isActive={editorState.isUnderline}
             isDisabled={!editorState.canUnderline}
             onClick={() => editor.chain().focus().toggleUnderline().run()}
-            title="Underline"
+            title={t`Underline`}
             iconClassName="icon-[material-symbols--format-underlined]"
           />
           <BubbleMenuButton
             isActive={editorState.isStrike}
             isDisabled={!editorState.canStrike}
             onClick={() => editor.chain().focus().toggleStrike().run()}
-            title="Strikethrough"
+            title={t`Strikethrough`}
             iconClassName="icon-[material-symbols--strikethrough-s]"
           />
           <BubbleMenuButton
             isActive={editorState.isCode}
             isDisabled={!editorState.canCode}
             onClick={() => editor.chain().focus().toggleCode().run()}
-            title="Inline code"
+            title={t`Inline code`}
             iconClassName="icon-[material-symbols--code]"
           />
 
@@ -80,38 +82,38 @@ export function EditorMenuItems({
           <BubbleMenuButton
             isDisabled={!editorState.canAddRowBefore}
             onClick={() => editor.chain().focus().addRowBefore().run()}
-            title="Add row above"
+            title={t`Add row above`}
             iconClassName="icon-[material-symbols--add-row-above-outline-rounded]"
           />
           <BubbleMenuButton
             isDisabled={!editorState.canAddRowAfter}
             onClick={() => editor.chain().focus().addRowAfter().run()}
-            title="Add row below"
+            title={t`Add row below`}
             iconClassName="icon-[material-symbols--add-row-below-outline-rounded]"
           />
           <BubbleMenuButton
             isDisabled={!editorState.canDeleteRow}
             onClick={() => editor.chain().focus().deleteRow().run()}
-            title="Delete row"
+            title={t`Delete row`}
             iconClassName="icon-[mdi--table-row-remove]"
           />
           <EditorMenuSeparator />
           <BubbleMenuButton
             isDisabled={!editorState.canAddColumnBefore}
             onClick={() => editor.chain().focus().addColumnBefore().run()}
-            title="Add column left"
+            title={t`Add column left`}
             iconClassName="icon-[material-symbols--add-column-left-outline-rounded]"
           />
           <BubbleMenuButton
             isDisabled={!editorState.canAddColumnAfter}
             onClick={() => editor.chain().focus().addColumnAfter().run()}
-            title="Add column right"
+            title={t`Add column right`}
             iconClassName="icon-[material-symbols--add-column-right-outline-rounded]"
           />
           <BubbleMenuButton
             isDisabled={!editorState.canDeleteColumn}
             onClick={() => editor.chain().focus().deleteColumn().run()}
-            title="Delete column"
+            title={t`Delete column`}
             iconClassName="icon-[mdi--table-column-remove]"
           />
         </>
@@ -124,13 +126,13 @@ export function EditorMenuItems({
       <BubbleMenuButton
         isDisabled={!editorState.canUndo}
         onClick={() => editor.chain().focus().undo().run()}
-        title="Undo"
+        title={t`Undo`}
         iconClassName="icon-[material-symbols--undo] shrink-0 text-lg"
       />
       <BubbleMenuButton
         isDisabled={!editorState.canRedo}
         onClick={() => editor.chain().focus().redo().run()}
-        title="Redo"
+        title={t`Redo`}
         iconClassName="icon-[material-symbols--redo] shrink-0 text-lg"
       />
     </>

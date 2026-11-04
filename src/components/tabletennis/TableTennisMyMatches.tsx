@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { useLingui as useLinguiRuntime } from "@lingui/react";
 import { cn } from "@/lib/ui/cn";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
 import {
@@ -10,6 +12,7 @@ import { Registration } from "./Registration";
 import { Pager } from "./Pager";
 import { pageSlice } from "./ranking";
 import { formatDay, formatDayTime } from "./format";
+import { BACKGROUND_REFETCH_MS } from "./useTabletennisRefresh";
 
 type SchemaPlayer = tabletennisTypes.SchemaPlayer;
 
@@ -21,11 +24,6 @@ type TourData = {
   name: string;
   date: string;
   players: string[];
-  games: {
-    val_game_ids: string[] | null;
-    cval_game_ids: string[] | null;
-    total_count: number;
-  };
 };
 
 type GamePlayer = {
@@ -47,17 +45,12 @@ type GameData = {
   player2: GamePlayer;
 };
 
-type GetGamesByIdResponse = {
-  total_found: number;
-  games: GameData[];
-  missing_ids: string[];
-};
-
 function gameTime(g: GameData) {
   return g.finished_at ?? g.created_at ?? null;
 }
 
 export function TableTennisMyMatches() {
+  useLinguiRuntime();
   const {
     data: playerData,
     isPending: playerPending,
@@ -71,9 +64,13 @@ export function TableTennisMyMatches() {
   if (playerError && isApiHttpError(playerErr) && playerErr.httpCode === 401) {
     return (
       <div className="px-4 py-12">
-        <h2 className="mb-4 text-3xl font-medium">Sign in to get access</h2>
+        <h2 className="mb-4 text-3xl font-medium">
+          <Trans>Sign in to get access</Trans>
+        </h2>
         <p className="text-base-content/75 mb-4 text-lg">
-          Use your Innopolis account to access table tennis features.
+          <Trans>
+            Use your Innopolis account to access InNoHassle services.
+          </Trans>
         </p>
         <SignInButton />
       </div>
@@ -98,10 +95,13 @@ export function TableTennisMyMatches() {
 }
 
 function MatchesList({ playerId }: { playerId: string }) {
+  const { t, i18n } = useLingui();
   const [page, setPage] = useState(0);
   const { data: toursData, isPending: toursPending } = $tabletennis.useQuery(
     "get",
     "/get-tours",
+    undefined,
+    { refetchInterval: BACKGROUND_REFETCH_MS },
   );
 
   const tours = useMemo(
@@ -109,34 +109,20 @@ function MatchesList({ playerId }: { playerId: string }) {
     [toursData],
   );
 
-  const allGameIds = useMemo(() => {
-    const ids: string[] = [];
-    for (const t of tours) {
-      if (t.games?.val_game_ids) ids.push(...t.games.val_game_ids);
-      if (t.games?.cval_game_ids) ids.push(...t.games.cval_game_ids);
-    }
-    return ids;
-  }, [tours]);
+  const { data: myGamesData, isPending: gamesPending } = $tabletennis.useQuery(
+    "get",
+    "/my-games",
+    undefined,
+    { refetchInterval: BACKGROUND_REFETCH_MS },
+  );
 
-  const { data: gamesByIdData, isPending: gamesPending } =
-    $tabletennis.useQuery(
-      "get",
-      "/get-games-by-id",
-      { params: { query: { ids: allGameIds } } },
-      { enabled: allGameIds.length > 0 },
-    );
-
+  const unknownName = t`Unknown`;
   // grouped by tournament id (two tournaments may share a name), newest first
   const matchesByTournament = useMemo(() => {
-    if (!gamesByIdData) return [];
-    const games = (gamesByIdData as GetGamesByIdResponse).games ?? [];
-    const mine = games.filter(
-      (g) =>
-        g.player1.innohassle_id === playerId ||
-        g.player2.innohassle_id === playerId,
-    );
+    if (!myGamesData) return [];
+    const games = (myGamesData as { games?: GameData[] }).games ?? [];
     const byTour = new Map<string, GameData[]>();
-    for (const g of mine) {
+    for (const g of games) {
       if (!byTour.has(g.tour_id)) byTour.set(g.tour_id, []);
       byTour.get(g.tour_id)!.push(g);
     }
@@ -146,7 +132,7 @@ function MatchesList({ playerId }: { playerId: string }) {
         const tour = tourById.get(tourId);
         return {
           tourId,
-          name: tour?.name ?? list[0]?.tournament_name ?? "Unknown",
+          name: tour?.name ?? list[0]?.tournament_name ?? unknownName,
           date: tour?.date ?? null,
           games: [...list].sort((a, b) =>
             (gameTime(a) ?? "").localeCompare(gameTime(b) ?? ""),
@@ -154,16 +140,16 @@ function MatchesList({ playerId }: { playerId: string }) {
         };
       })
       .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
-  }, [gamesByIdData, playerId, tours]);
+  }, [myGamesData, tours, unknownName]);
 
-  if (toursPending || (allGameIds.length > 0 && gamesPending)) {
+  if (toursPending || gamesPending) {
     return <div className="skeleton h-48 w-full" />;
   }
 
   if (matchesByTournament.length === 0) {
     return (
       <p className="text-base-content/50 px-7 py-5 text-center text-sm">
-        No matches yet.
+        <Trans>No matches yet.</Trans>
       </p>
     );
   }
@@ -184,7 +170,7 @@ function MatchesList({ playerId }: { playerId: string }) {
             </h3>
             {tour.date && (
               <span className="text-base-content/40 shrink-0 text-[11px] tabular-nums">
-                {formatDay(tour.date)}
+                {formatDay(tour.date, i18n.locale)}
               </span>
             )}
           </div>
@@ -200,12 +186,13 @@ function MatchesList({ playerId }: { playerId: string }) {
 }
 
 function MatchRow({ game, playerId }: { game: GameData; playerId: string }) {
+  const { i18n } = useLingui();
   const isP1 = game.player1.innohassle_id === playerId;
   const me = isP1 ? game.player1 : game.player2;
   const opp = isP1 ? game.player2 : game.player1;
   const won = me.score > opp.score;
   const isFinished = game.finished;
-  const when = formatDayTime(gameTime(game));
+  const when = formatDayTime(gameTime(game), i18n.locale);
 
   return (
     <div className="bg-base-200 rounded-box flex items-center gap-2 px-3 py-2">
@@ -239,7 +226,9 @@ function MatchRow({ game, playerId }: { game: GameData; playerId: string }) {
           {won ? "W" : "L"}
         </span>
       ) : (
-        <span className="text-base-content/30 shrink-0 text-[10px]">live</span>
+        <span className="text-base-content/30 shrink-0 text-[10px]">
+          <Trans>live</Trans>
+        </span>
       )}
     </div>
   );

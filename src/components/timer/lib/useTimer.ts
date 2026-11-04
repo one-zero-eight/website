@@ -1,3 +1,4 @@
+import { msg, plural } from "@lingui/core/macro";
 import { useToast } from "@/components/toast";
 import { Dispatch, SetStateAction, useCallback, useRef, useState } from "react";
 import { useSaveState, useWakeLock } from "./utils";
@@ -64,7 +65,7 @@ export const useTimer = ({
       parseInt(seconds, 10);
 
     if (totalSeconds === 0) {
-      showError("Cannot set the timer to 0 seconds");
+      showError(msg`Cannot set the timer to 0 seconds`);
       return;
     }
 
@@ -80,7 +81,7 @@ export const useTimer = ({
 
     await wakeLock.request();
 
-    showSuccess("The timer started");
+    showSuccess(msg`The timer started`);
   };
 
   const handleStartUntilTime = async (targetDate: Date) => {
@@ -91,13 +92,13 @@ export const useTimer = ({
     );
 
     if (totalSeconds === 0) {
-      showError("The selected time must be in the future");
+      showError(msg`The selected time must be in the future`);
       return;
     }
 
     const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99;
     if (totalSeconds > MAX_SECONDS) {
-      showError("The maximum countdown duration is 99:99:99");
+      showError(msg`The maximum countdown duration is 99:99:99`);
       return;
     }
 
@@ -116,7 +117,7 @@ export const useTimer = ({
 
     await wakeLock.request();
 
-    showSuccess("The timer started");
+    showSuccess(msg`The timer started`);
   };
   const setPresetTime = (hours: number, minutes: number) => {
     if (isRunning) return; // Don't allow changing time while timer is running
@@ -138,13 +139,13 @@ export const useTimer = ({
       setTargetEndTime(newEndTime);
       setIsPaused(false);
 
-      showInfo("The timer resumed");
+      showInfo(msg`The timer resumed`);
     } else {
       // Pausing the timer
       setTargetEndTime(null);
       setIsPaused(true);
       saveState(secondsLeft);
-      showInfo("The timer paused");
+      showInfo(msg`The timer paused`);
     }
   };
 
@@ -164,7 +165,7 @@ export const useTimer = ({
 
     wakeLock.release();
 
-    showInfo("The timer stopped");
+    showInfo(msg`The timer stopped`);
   };
 
   const handleKeyDown = (
@@ -365,7 +366,7 @@ export const useTimer = ({
       const actualSecondsAdded = newSecondsLeft - secondsLeft;
 
       if (actualSecondsAdded === 0) {
-        showWarning("Timer is already at maximum (99:59:59)");
+        showWarning(msg`Timer is already at maximum (99:59:59)`);
         return;
       }
 
@@ -385,10 +386,13 @@ export const useTimer = ({
       localStorage.setItem("timerState", JSON.stringify(stateToSave));
 
       if (newSecondsLeft >= MAX_SECONDS) {
-        showWarning("Timer set to maximum (99:59:59)");
+        showWarning(msg`Timer set to maximum (99:59:59)`);
       } else {
         showSuccess(
-          `Added ${Math.round(actualSecondsAdded / 60)} minute${Math.round(actualSecondsAdded / 60) > 1 ? "s" : ""} to timer`,
+          msg`${plural(Math.round(actualSecondsAdded / 60), {
+            one: "Added # minute to timer",
+            other: "Added # minutes to timer",
+          })}`,
         );
       }
     } else if (targetEndTime) {
@@ -406,7 +410,7 @@ export const useTimer = ({
       const actualSecondsAdded = newSecondsLeft - currentRemainingSeconds;
 
       if (actualSecondsAdded === 0) {
-        showWarning("Timer is already at maximum (99:59:59)");
+        showWarning(msg`Timer is already at maximum (99:59:59)`);
         return;
       }
 
@@ -436,10 +440,13 @@ export const useTimer = ({
       localStorage.setItem("timerState", JSON.stringify(stateToSave));
 
       if (newSecondsLeft >= MAX_SECONDS) {
-        showWarning("Timer set to maximum (99:59:59)");
+        showWarning(msg`Timer set to maximum (99:59:59)`);
       } else {
         showSuccess(
-          `Added ${Math.round(actualSecondsAdded / 60)} minute${Math.round(actualSecondsAdded / 60) > 1 ? "s" : ""} to timer`,
+          msg`${plural(Math.round(actualSecondsAdded / 60), {
+            one: "Added # minute to timer",
+            other: "Added # minutes to timer",
+          })}`,
         );
       }
     }
@@ -474,7 +481,7 @@ export const useTimer = ({
       }, 10000);
     }
 
-    showSuccess("Time is up!");
+    showSuccess(msg`Time is up!`);
   }, [wakeLock, setShowTimeUpMessage, showSuccess]);
 
   const formatTime = useCallback(

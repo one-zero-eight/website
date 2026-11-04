@@ -1,4 +1,5 @@
 import { cn } from "@/lib/ui/cn";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useMemo, useState } from "react";
 
 import type { ComponentScheduleStatus } from "./createMeetingUtils.ts";
@@ -27,6 +28,7 @@ export function UnarrangedLessonsPanel({
   onCancel: () => void;
   placing?: boolean;
 }) {
+  const { t } = useLingui();
   const [query, setQuery] = useState("");
   const sessionCount = countUnarrangedSessions(groups);
 
@@ -51,7 +53,9 @@ export function UnarrangedLessonsPanel({
     <div className="flex min-h-0 flex-1 flex-col gap-2">
       <div className="flex flex-col gap-1">
         <div className="text-base-content flex items-baseline gap-2 text-lg leading-snug font-semibold">
-          <span>Неразмещённые</span>
+          <span>
+            <Trans>Unscheduled</Trans>
+          </span>
           {sessionCount ? (
             <span className="text-base-content/50 text-sm font-medium">
               {sessionCount}
@@ -66,12 +70,12 @@ export function UnarrangedLessonsPanel({
               onClick={onCancel}
               disabled={placing}
             >
-              Отмена
+              <Trans>Cancel</Trans>
             </button>
           </div>
         ) : (
           <p className="text-base-content/60 text-xs leading-relaxed">
-            Выберите серию, затем кликните по пустому слоту.
+            <Trans>Select a series, then click an empty slot.</Trans>
           </p>
         )}
       </div>
@@ -81,7 +85,7 @@ export function UnarrangedLessonsPanel({
         <input
           type="search"
           className="grow"
-          placeholder="Поиск…"
+          placeholder={t`Search…`}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
@@ -91,15 +95,17 @@ export function UnarrangedLessonsPanel({
         <div className="border-base-300 bg-base-200/40 rounded-box flex flex-col items-center gap-2 border border-dashed px-4 py-8 text-center">
           <span className="icon-[material-symbols--check-circle-outline-rounded] text-success/70 text-3xl" />
           <div className="text-base-content text-sm font-medium">
-            Всё размещено
+            <Trans>Everything is scheduled</Trans>
           </div>
           <p className="text-base-content/60 max-w-56 text-xs leading-relaxed">
-            В текущем разделе нет компонентов без слотов.
+            <Trans>
+              There are no components without slots in this section.
+            </Trans>
           </p>
         </div>
       ) : !filtered.length ? (
         <p className="text-base-content/60 px-1 py-4 text-center text-sm">
-          Ничего не найдено
+          <Trans>Nothing found</Trans>
         </p>
       ) : (
         <ul className="flex min-h-0 flex-1 [scrollbar-width:thin] flex-col gap-3 overflow-y-auto">
@@ -128,7 +134,7 @@ export function UnarrangedLessonsPanel({
               </div>
               {!group.sessions.length ? (
                 <p className="text-base-content/55 px-0.5 text-xs">
-                  Нет аудитории для размещения
+                  <Trans>No audience to schedule</Trans>
                 </p>
               ) : (
                 <ul className="flex flex-col gap-1">

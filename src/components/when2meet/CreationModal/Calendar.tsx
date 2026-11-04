@@ -2,13 +2,13 @@ import {
   HTMLAttributes,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { cn } from "@/lib/ui/cn";
 import { CalendarItem, generateCalendarMonth } from "../utils/dates.ts";
 
-const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const TOUCH_TAP_MOVE_THRESHOLD = 8;
 const TOUCH_LONG_PRESS_DELAY = 250;
 
@@ -39,15 +39,26 @@ function getInitialMonth(selectedDates: Set<string>) {
   return new Date(year, month - 1, 1);
 }
 
+function getWeekDayLabels(locale: string) {
+  const formatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
+  // 2024-01-01 is a Monday — keep Mon-first grid order.
+  return Array.from({ length: 7 }, (_, index) =>
+    formatter.format(new Date(2024, 0, 1 + index)),
+  );
+}
+
 export function Calendar({
   className,
   onDatesChange,
   defaultSelectedDates,
+  locale = "en",
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
   onDatesChange: (calendar: Set<string>) => void;
   defaultSelectedDates?: Iterable<string>;
+  locale?: string;
 }) {
+  const weekDays = useMemo(() => getWeekDayLabels(locale), [locale]);
   const initialSelectedDates = useRef(new Set(defaultSelectedDates ?? []));
   const initialMonth = useRef(getInitialMonth(initialSelectedDates.current));
   const currentMonthRef = useRef(initialMonth.current);
@@ -370,7 +381,7 @@ export function Calendar({
               currentMonthRef.current.getFullYear(),
               currentMonthRef.current.getMonth(),
               1,
-            ).toLocaleString("en", { month: "long" })}
+            ).toLocaleString(locale, { month: "long" })}
           </span>
         </div>
 
@@ -387,7 +398,7 @@ export function Calendar({
         ref={gridRef}
         className="grid w-full max-w-md min-w-0 touch-pan-y grid-cols-7"
       >
-        {WEEK_DAYS.map((day) => (
+        {weekDays.map((day) => (
           <div key={day} className="mb-2 text-center text-sm font-semibold">
             {day}
           </div>

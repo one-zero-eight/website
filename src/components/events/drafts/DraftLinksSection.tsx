@@ -1,4 +1,6 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { $events } from "@/api/events";
 import { SchemaDraftOut, SchemaEventLink } from "@/api/events/types";
 import { Modal } from "@/components/common/Modal.tsx";
@@ -16,6 +18,7 @@ export function DraftLinksSection({
   draft: SchemaDraftOut;
   canEdit: boolean;
 }) {
+  const { t } = useLingui();
   const { showError } = useToast();
   const queryClient = useQueryClient();
   const links = useMemo(() => draft.data.links ?? [], [draft.data.links]);
@@ -48,7 +51,7 @@ export function DraftLinksSection({
   }
 
   const onError = (error: unknown) => {
-    showError("Error", formatApiErrorMessage(error));
+    showError(msg`Error`, formatApiErrorDescriptor(error));
   };
 
   const { mutate: addLink, isPending: isAdding } = $events.useMutation(
@@ -134,7 +137,7 @@ export function DraftLinksSection({
   function handleSave() {
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
-      showError("Invalid link", "URL is required.");
+      showError(msg`Invalid link`, msg`URL is required.`);
       return;
     }
 
@@ -166,7 +169,9 @@ export function DraftLinksSection({
               !expanded && "-rotate-90",
             )}
           />
-          <h3 className="font-medium">Links</h3>
+          <h3 className="font-medium">
+            <Trans>Links</Trans>
+          </h3>
           {!expanded && (
             <span className="text-base-content/50 text-sm">{links.length}</span>
           )}
@@ -178,14 +183,16 @@ export function DraftLinksSection({
             disabled={busy}
             onClick={handleOpenAdd}
           >
-            Add link
+            <Trans>Add link</Trans>
           </button>
         )}
       </div>
 
       {expanded &&
         (links.length === 0 ? (
-          <p className="text-base-content/70 mt-3 text-sm">No links yet.</p>
+          <p className="text-base-content/70 mt-3 text-sm">
+            <Trans>No links yet.</Trans>
+          </p>
         ) : (
           <ul className="mt-3 flex flex-col gap-2">
             {links.map((link, index) => (
@@ -293,11 +300,13 @@ export function DraftLinksSection({
             setEditLink(null);
           }
         }}
-        title={editLink ? "Edit link" : "Add link"}
+        title={editLink ? t`Edit link` : t`Add link`}
       >
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm">
-            <span>URL</span>
+            <span>
+              <Trans>URL</Trans>
+            </span>
             <input
               type="url"
               className={eventFieldClass()}
@@ -308,7 +317,9 @@ export function DraftLinksSection({
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
-            <span>Name (optional)</span>
+            <span>
+              <Trans>Name (optional)</Trans>
+            </span>
             <input
               type="text"
               className={eventFieldClass()}
@@ -326,7 +337,7 @@ export function DraftLinksSection({
                 setEditLink(null);
               }}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
             <button
               type="button"
@@ -337,7 +348,7 @@ export function DraftLinksSection({
               {(isAdding || isPatching) && (
                 <span className="loading loading-spinner loading-sm" />
               )}
-              Save
+              <Trans>Save</Trans>
             </button>
           </div>
         </div>

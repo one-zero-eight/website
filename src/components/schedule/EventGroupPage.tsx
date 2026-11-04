@@ -10,8 +10,10 @@ import { useState } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { useWindowSize } from "usehooks-ts";
 import { Link } from "@tanstack/react-router";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export function EventGroupPage({ alias }: { alias: string }) {
+  const { t } = useLingui();
   const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
   const {
     data: group,
@@ -25,17 +27,20 @@ export function EventGroupPage({ alias }: { alias: string }) {
   const [exportModalOpen, setExportModalOpen] = useState(false);
 
   if (isLoading) {
-    return <Topbar title="Group" />;
+    return <Topbar title={<Trans>Group</Trans>} />;
   }
 
   if (isError || !group) {
     return (
       <>
-        <Topbar title="Group" />
+        <Topbar title={<Trans>Group</Trans>} />
         <div className="flex flex-col items-center justify-center gap-4 p-16 text-center">
           <h1 className="text-4xl font-bold">404</h1>
           <p className="text-base-content/75 text-lg">
-            Event group <code className="font-mono">"{alias}"</code> not found.
+            <Trans>
+              Event group <code className="font-mono">"{alias}"</code> not
+              found.
+            </Trans>
           </p>
           {isError && error && (
             <p className="text-base-content/60 text-base">
@@ -43,21 +48,23 @@ export function EventGroupPage({ alias }: { alias: string }) {
             </p>
           )}
           <Link to="/schedule" className="btn btn-primary">
-            Back to Schedule
+            <Trans>Back to Schedule</Trans>
           </Link>
         </div>
       </>
     );
   }
 
+  const groupName = group.name;
+
   return (
     <>
       <Helmet>
-        <title>{group.name} group — Schedule</title>
+        <title>{t`${groupName} group — Schedule`}</title>
         <meta name="description" content={group.description ?? undefined} />
       </Helmet>
 
-      <Topbar title="Group" />
+      <Topbar title={<Trans>Group</Trans>} />
       <div
         style={{ backgroundImage: "url(/background-pattern.svg)" }}
         className="bg-base-200 min-h-64 bg-repeat p-4"
@@ -67,13 +74,14 @@ export function EventGroupPage({ alias }: { alias: string }) {
           <div className="flex min-h-full grow flex-col gap-2">
             <h1 className="text-3xl font-semibold">{group.name}</h1>
             <p className="text-base-content/75 text-base whitespace-pre-wrap">
-              {group.description ||
-                "Hello world, this is a long description about my life and this elective."}
+              {group.description}
             </p>
           </div>
           <FavoriteButton groupAlias={group.alias} />
         </div>
-        <h2 className="my-4 flex text-3xl font-medium">Tags</h2>
+        <h2 className="my-4 flex text-3xl font-medium">
+          <Trans>Tags</Trans>
+        </h2>
         <div className="flex flex-wrap gap-2">
           {group.tags?.map((tag) => (
             <div
@@ -85,7 +93,9 @@ export function EventGroupPage({ alias }: { alias: string }) {
           ))}
         </div>
         <div className="mt-4 flex flex-row flex-wrap items-center">
-          <h2 className="flex grow text-3xl font-medium">Calendar</h2>
+          <h2 className="flex grow text-3xl font-medium">
+            <Trans>Calendar</Trans>
+          </h2>
           <ExportButton onClick={() => setExportModalOpen(true)} />
         </div>
       </div>

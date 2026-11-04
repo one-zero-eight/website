@@ -1,4 +1,6 @@
+import Tooltip from "@/components/common/Tooltip.tsx";
 import { cn } from "@/lib/ui/cn";
+import { useLingui } from "@lingui/react/macro";
 import { useCallback, useEffect, useState } from "react";
 import { Toast, ToastType } from "./types.ts";
 
@@ -30,6 +32,7 @@ export function ToastItem({
   toast: Toast;
   onClose: (id: string) => void;
 }) {
+  const { i18n, t } = useLingui();
   const [isLeaving, setIsLeaving] = useState(false);
   const [isEntering, setIsEntering] = useState(true);
 
@@ -94,16 +97,26 @@ export function ToastItem({
         )}
       />
       <div className="">
-        <h4 className="font-bold">{toast.title}</h4>
-        {toast.message && <p className="text-xs">{toast.message}</p>}
+        <h4 className="font-bold">
+          {typeof toast.title === "string" ? toast.title : i18n._(toast.title)}
+        </h4>
+        {toast.message && (
+          <p className="text-xs">
+            {typeof toast.message === "string"
+              ? toast.message
+              : i18n._(toast.message)}
+          </p>
+        )}
       </div>
-      <button
-        onClick={handleClose}
-        className="btn btn-square btn-sm"
-        aria-label="Close notification"
-      >
-        <span className="icon-[material-symbols--close] text-lg" />
-      </button>
+      <Tooltip content={t`Close notification`}>
+        <button
+          type="button"
+          onClick={handleClose}
+          className="btn btn-square btn-sm"
+        >
+          <span className="icon-[material-symbols--close] text-lg" />
+        </button>
+      </Tooltip>
     </div>
   );
 }

@@ -1,8 +1,11 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { $events } from "@/api/events";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
+import { getLocaleLabel } from "@/locales/lib";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
@@ -26,6 +29,7 @@ export function CreateDraftModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useLingui();
   const navigate = useNavigate();
   const { showError } = useToast();
   const { data: allowedLocales = [] } = $events.useQuery("get", "/locales");
@@ -58,7 +62,7 @@ export function CreateDraftModal({
       navigate({ to: "/events/drafts/$id", params: { id: draft.id } });
     },
     onError: (error) => {
-      showError("Error", formatApiErrorMessage(error));
+      showError(msg`Error`, formatApiErrorDescriptor(error));
     },
   });
 
@@ -70,10 +74,10 @@ export function CreateDraftModal({
     const apiEnrollment = enrollmentFormToApi(enrollment);
     if (!apiEnrollment) {
       showError(
-        "Invalid enrollment",
+        msg`Invalid enrollment`,
         enrollment.type === "external"
-          ? "Enrollment URL is required for external enrollment."
-          : "Capacity must be empty or at least 1.",
+          ? msg`Enrollment URL is required for external enrollment.`
+          : msg`Capacity must be empty or at least 1.`,
       );
       return;
     }
@@ -90,7 +94,7 @@ export function CreateDraftModal({
   }
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Create draft">
+    <Modal open={open} onOpenChange={onOpenChange} title={t`Create draft`}>
       <form
         className="@container/modal flex flex-col gap-4"
         onSubmit={(e) => {
@@ -100,7 +104,9 @@ export function CreateDraftModal({
       >
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-1 text-sm">
-            <span>Starts at</span>
+            <span>
+              <Trans>Starts at</Trans>
+            </span>
             <input
               type="datetime-local"
               className={eventFieldClass()}
@@ -111,7 +117,9 @@ export function CreateDraftModal({
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
-            <span>Ends at</span>
+            <span>
+              <Trans>Ends at</Trans>
+            </span>
             <input
               type="datetime-local"
               className={eventFieldClass()}
@@ -139,7 +147,9 @@ export function CreateDraftModal({
         />
 
         <div className="flex flex-col gap-2">
-          <span className="text-sm">Locales</span>
+          <span className="text-sm">
+            <Trans>Locales</Trans>
+          </span>
           <div className="flex flex-wrap gap-2">
             {allowedLocales.map((locale) => {
               const selected = selectedLocales.includes(locale);
@@ -149,7 +159,7 @@ export function CreateDraftModal({
                   type="button"
                   disabled={isPending}
                   className={cn(
-                    "btn btn-sm uppercase",
+                    "btn btn-sm",
                     selected ? "btn-primary" : "btn-ghost border",
                   )}
                   onClick={() =>
@@ -160,7 +170,7 @@ export function CreateDraftModal({
                     )
                   }
                 >
-                  {locale}
+                  {getLocaleLabel(locale)}
                 </button>
               );
             })}
@@ -174,7 +184,7 @@ export function CreateDraftModal({
             disabled={isPending}
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="submit"
@@ -184,7 +194,7 @@ export function CreateDraftModal({
             {isPending && (
               <span className="loading loading-spinner loading-sm" />
             )}
-            Create
+            <Trans>Create</Trans>
           </button>
         </div>
       </form>

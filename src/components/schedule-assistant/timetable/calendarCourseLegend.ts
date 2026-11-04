@@ -1,4 +1,9 @@
 import type { TimetableViewConfig as SchemaScheduleConfig } from "./timetableViewTypes.ts";
+import { i18n } from "@lingui/core";
+import {
+  localizedCourseName,
+  localizedCourseShortName,
+} from "./localizedNames.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
@@ -130,13 +135,16 @@ export function buildCalendarCourseLegend({
     ).join(", ");
 
     rows.push({
-      shortName: String(course.short_name || "").trim() || courseName,
-      courseName,
+      shortName:
+        localizedCourseShortName(course) || localizedCourseName(course),
+      courseName: localizedCourseName(course),
       instructor: instructor || "—",
     });
   }
 
   return rows.sort((a, b) =>
-    a.shortName.localeCompare(b.shortName, "en", { sensitivity: "base" }),
+    a.shortName.localeCompare(b.shortName, i18n.locale, {
+      sensitivity: "base",
+    }),
   );
 }

@@ -1,4 +1,10 @@
+import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { useMemo } from "react";
+import {
+  alternateInstructorName,
+  localizedInstructorName,
+  meetingCourseTitle,
+} from "./localizedNames.ts";
 import {
   DetailField,
   DetailSection,
@@ -26,10 +32,12 @@ export function InstructorDetailPanel({
   allMeetings: Meeting[];
   onNavigateToMeeting: (meeting: Meeting) => void;
 }) {
+  const { t, i18n } = useLingui();
   const instructor = resolveTimetableInstructor(
     config.instructors ?? [],
     instructorId,
   );
+  const alternateName = instructor ? alternateInstructorName(instructor) : null;
   const series = useMemo(() => {
     const meetings = instructorAssignedMeetings(
       config.instructors ?? [],
@@ -53,69 +61,75 @@ export function InstructorDetailPanel({
       else grouped.set(key, [entry]);
     }
     return [...grouped.entries()];
-  }, [config, allMeetings, instructorId]);
+  }, [config, allMeetings, instructorId, i18n.locale]);
 
   return (
     <div className="flex min-w-0 flex-col gap-1 text-sm">
-      <DetailSection title="Преподаватель" />
+      <DetailSection title={t`Instructor`} />
       <h2 className="text-lg font-semibold [overflow-wrap:anywhere]">
-        {instructor?.name_en || instructor?.name_ru || instructorId}
+        {instructor ? localizedInstructorName(instructor) : instructorId}
       </h2>
-      {instructor?.name_ru && instructor.name_ru !== instructor.name_en ? (
-        <DetailField label="Имя">{instructor.name_ru}</DetailField>
+      {alternateName ? (
+        <DetailField label={t`Name`}>{alternateName}</DetailField>
       ) : null}
       {instructor?.position ? (
-        <DetailField label="Должность">{instructor.position}</DetailField>
+        <DetailField label={t`Position`}>{instructor.position}</DetailField>
       ) : null}
       {instructor?.email ? (
-        <DetailField label="Почта">
+        <DetailField label={t`Email`}>
           <a className="link link-primary" href={`mailto:${instructor.email}`}>
             {instructor.email}
           </a>
         </DetailField>
       ) : null}
       {instructor?.alias ? (
-        <DetailField label="Alias">{instructor.alias}</DetailField>
+        <DetailField label={t`Alias`}>{instructor.alias}</DetailField>
       ) : null}
-      <DetailSection title="Занятия за семестр" />
+      <DetailSection title={t`Classes this semester`} />
       {!series.length ? (
-        <p className="text-base-content/60">Назначенных занятий нет.</p>
+        <p className="text-base-content/60">
+          <Trans>No assigned classes.</Trans>
+        </p>
       ) : null}
-      {series.map(([key, entries]) => (
-        <details
-          key={key}
-          className="border-base-300 rounded-box border"
-          open={entries.length === 1}
-        >
-          <summary className="hover:bg-base-200 rounded-box cursor-pointer p-3">
-            <span className="font-medium">
-              {entries[0].meeting.course} · {entries[0].meeting.tag}
-            </span>
-            <span className="text-base-content/60 ml-2 text-xs">
-              {entries.length} занятий
-            </span>
-          </summary>
-          <div className="flex flex-col gap-1 px-2 pb-2">
-            {entries.map((entry) => (
-              <button
-                type="button"
-                key={entry.meeting.instance_id}
-                className="hover:bg-base-200 flex flex-col gap-1 rounded-lg p-2 text-left"
-                onClick={() => onNavigateToMeeting(entry.meeting)}
-              >
-                <span className="font-medium">
-                  {entry.dateLabel} · {entry.weekdayLabel} ·{" "}
-                  {entry.meeting.start}–{entry.meeting.end}
-                </span>
-                <span className="text-base-content/70">
-                  {entry.audienceLabel || "Без групп"} ·{" "}
-                  {entry.meeting.room || "Без аудитории"}
-                </span>
-              </button>
-            ))}
-          </div>
-        </details>
-      ))}
+      {series.map(([key, entries]) => {
+        const classCount = entries.length;
+        return (
+          <details
+            key={key}
+            className="border-base-300 rounded-box border"
+            open={entries.length === 1}
+          >
+            <summary className="hover:bg-base-200 rounded-box cursor-pointer p-3">
+              <span className="font-medium">
+                {meetingCourseTitle(entries[0].meeting)} ·{" "}
+                {entries[0].meeting.tag}
+              </span>
+              <span className="text-base-content/60 ml-2 text-xs">
+                <Plural value={classCount} one="# class" other="# classes" />
+              </span>
+            </summary>
+            <div className="flex flex-col gap-1 px-2 pb-2">
+              {entries.map((entry) => (
+                <button
+                  type="button"
+                  key={entry.meeting.instance_id}
+                  className="hover:bg-base-200 flex flex-col gap-1 rounded-lg p-2 text-left"
+                  onClick={() => onNavigateToMeeting(entry.meeting)}
+                >
+                  <span className="font-medium">
+                    {entry.dateLabel} · {entry.weekdayLabel} ·{" "}
+                    {entry.meeting.start}–{entry.meeting.end}
+                  </span>
+                  <span className="text-base-content/70">
+                    {entry.audienceLabel || t`No groups`} ·{" "}
+                    {entry.meeting.room || t`No location`}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </details>
+        );
+      })}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { navigateToSignIn } from "@/api/accounts/sign-in.tsx";
 import { cn } from "@/lib/ui/cn";
+import { Trans } from "@lingui/react/macro";
 import { forwardRef } from "react";
 
 export type SignInButtonProps = {
@@ -21,7 +22,7 @@ export const SignInButton = forwardRef(function SignInButton_(
         onClick?.(e);
       }}
     >
-      Sign in
+      <Trans>Sign in</Trans>
     </button>
   );
 });

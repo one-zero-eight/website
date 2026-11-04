@@ -857,6 +857,17 @@ export interface components {
       /** Results */
       results: components["schemas"]["BatchBookItemResult"][];
     };
+    /**
+     * BlockRef
+     * @description Teaching window equal to the current dates of a term block.
+     */
+    BlockRef: {
+      /**
+       * Block
+       * @description Term block id
+       */
+      block: string;
+    };
     /** Body_distributions_apply_distribution */
     Body_distributions_apply_distribution: {
       /**
@@ -939,11 +950,8 @@ export interface components {
       uid: string | null;
       /** Organizer Mailbox */
       organizer_mailbox: string | null;
-      /**
-       * Room Id
-       * @description ID of the room
-       */
-      room_id: string;
+      /** Room Id */
+      room_id: string | null;
       /**
        * Room Response
        * @default Unknown
@@ -1371,7 +1379,7 @@ export interface components {
       tag: components["schemas"]["CommonCourseClassTags"] | string;
       /**
        * Per Week
-       * @description Number of weekly meetings
+       * @description Expected configured weekly slots in concurrent teaching weeks; alternation and one-off cancellations do not change this target
        */
       per_week?: number | null;
       /**
@@ -1435,6 +1443,8 @@ export interface components {
        * @default []
        */
       audience: string[];
+      /** @description Explicit inclusive dates or a term block; null uses the audience semester */
+      active?: components["schemas"]["SessionActiveWindow"] | null;
       /**
        * Weekly Pattern
        * @description Fixed weekly slots for core courses
@@ -1445,12 +1455,6 @@ export interface components {
        * @description Concrete placed meetings (for electives and other calendar-date series)
        */
       dates_pattern?: components["schemas"]["SessionOccurrence"][] | null;
-      /**
-       * Notes
-       * @description Public notes inherited by occurrences without their own override
-       * @default
-       */
-      notes: string;
     };
     /** ConflictHit */
     ConflictHit: {
@@ -1514,6 +1518,17 @@ export interface components {
        * @description Short Russian display name
        */
       short_name_ru?: string | null;
+      /**
+       * Notes
+       * @description Public notes shown on every meeting of the course
+       * @default
+       */
+      notes: string;
+      /**
+       * Moodle Url
+       * @description Optional Moodle course URL
+       */
+      moodle_url?: string | null;
       /**
        * Instructors
        * @description Subject-level staff with roles; preferred in event instructor pickers
@@ -1783,11 +1798,8 @@ export interface components {
       uid: string | null;
       /** Organizer Mailbox */
       organizer_mailbox: string | null;
-      /**
-       * Room Id
-       * @description Booked room
-       */
-      room_id: string;
+      /** Room Id */
+      room_id: string | null;
       /**
        * Room Response
        * @default Unknown
@@ -2354,6 +2366,11 @@ export interface components {
        */
       groups: string[];
     };
+    /** PublicBlockRef */
+    PublicBlockRef: {
+      /** Block */
+      block: string;
+    };
     /** PublicComponent */
     PublicComponent: {
       /** Tag */
@@ -2367,18 +2384,20 @@ export interface components {
     PublicComponentSessionSeries: {
       /** Audience */
       audience?: string[];
+      /**
+       * Active
+       * @description Explicit dates or a term block; null uses the audience semester.
+       */
+      active?:
+        | components["schemas"]["PublicDateRange"]
+        | components["schemas"]["PublicBlockRef"]
+        | null;
       /** Weekly Pattern */
       weekly_pattern?:
         | components["schemas"]["PublicWeeklyPatternSlot"][]
         | null;
       /** Dates Pattern */
       dates_pattern?: components["schemas"]["PublicSessionOccurrence"][] | null;
-      /**
-       * Notes
-       * @description Public notes inherited by occurrences without their own override.
-       * @default
-       */
-      notes: string;
     };
     /** PublicCourse */
     PublicCourse: {
@@ -2388,12 +2407,28 @@ export interface components {
       color?: string | null;
       /** Section Code */
       section_code: string;
+      /**
+       * Blocks
+       * @description Distinct block ids referenced by session active windows; null if none.
+       */
+      blocks?: string[] | null;
       /** Short Name */
       short_name?: string | null;
       /** Name Ru */
       name_ru?: string | null;
       /** Short Name Ru */
       short_name_ru?: string | null;
+      /**
+       * Notes
+       * @description Public notes shown on every meeting of the course.
+       * @default
+       */
+      notes: string;
+      /**
+       * Moodle Url
+       * @description Optional Moodle course URL.
+       */
+      moodle_url?: string | null;
       /** Instructors */
       instructors?: components["schemas"]["PublicCourseInstructor"][];
       /** Components */
@@ -2463,6 +2498,8 @@ export interface components {
       code: string;
       /** Name */
       name: string;
+      /** Name Ru */
+      name_ru?: string | null;
       /** Default Layout */
       default_layout?: PublicSectionDefault_layoutAnyOf0 | null;
       /** Programs */
@@ -2489,11 +2526,6 @@ export interface components {
       room?: string | null;
       /** Instructor */
       instructor?: string | string[] | null;
-      /**
-       * Notes
-       * @description Null inherits series notes; an empty string suppresses them.
-       */
-      notes?: string | null;
     };
     /** PublicStudentGroup */
     PublicStudentGroup: {
@@ -2507,6 +2539,8 @@ export interface components {
       /** Name */
       name: string;
       semester: components["schemas"]["PublicDateRange"];
+      /** Blocks */
+      blocks?: components["schemas"]["PublicTermBlock"][];
       /** Days */
       days: components["schemas"]["Weekday"][];
       starting_day: components["schemas"]["Weekday"];
@@ -2514,6 +2548,25 @@ export interface components {
       time_slots: components["schemas"]["PublicTimeSlot"][];
       /** Sections */
       sections?: components["schemas"]["PublicSection"][];
+    };
+    /** PublicTermBlock */
+    PublicTermBlock: {
+      /**
+       * Start Date
+       * Format: date
+       */
+      start_date: string;
+      /**
+       * End Date
+       * Format: date
+       */
+      end_date: string;
+      /** Id */
+      id: string;
+      /** Name */
+      name: string;
+      /** Name Ru */
+      name_ru?: string | null;
     };
     /** PublicTimeSlot */
     PublicTimeSlot: {
@@ -2600,11 +2653,6 @@ export interface components {
       room?: string | null;
       /** Instructor */
       instructor?: string | string[] | null;
-      /**
-       * Notes
-       * @description Null inherits series notes; an empty string suppresses them.
-       */
-      notes?: string | null;
     };
     /** ReviewComponent */
     ReviewComponent: {
@@ -2908,7 +2956,7 @@ export interface components {
       students_number: number | null;
       /**
        * Notes
-       * @description Resolved public meeting notes, including series inheritance.
+       * @description Public course notes shown on this meeting.
        * @default
        */
       notes: string;
@@ -2922,9 +2970,14 @@ export interface components {
       code: string;
       /**
        * Name
-       * @description Section display name
+       * @description English section display name
        */
       name: string;
+      /**
+       * Name Ru
+       * @description Russian section display name
+       */
+      name_ru?: string | null;
       /**
        * Default Layout
        * @description Default timetable layout when opening this section (groups, compact groups, or calendar)
@@ -2969,6 +3022,9 @@ export interface components {
       /** @description Optional teaching window for this program; when set, replaces term.semester for this program */
       semester?: components["schemas"]["DateRange"] | null;
     };
+    SessionActiveWindow:
+      | components["schemas"]["DateRange"]
+      | components["schemas"]["BlockRef"];
     /**
      * SessionOccurrence
      * @description One concrete placed meeting (date, time, room, instructor).
@@ -3002,11 +3058,6 @@ export interface components {
        * @description Instructor id(s) for this meeting
        */
       instructor?: string | string[] | null;
-      /**
-       * Notes
-       * @description Public notes: None inherits series notes; an empty string suppresses them
-       */
-      notes?: string | null;
     };
     /**
      * StudentEmailIssue
@@ -3097,6 +3148,36 @@ export interface components {
       /** Studying Meetings */
       studying_meetings: components["schemas"]["ScheduledMeeting"][];
     };
+    /** TermBlock */
+    TermBlock: {
+      /**
+       * Id
+       * @description Stable block identifier referenced by session series
+       */
+      id: string;
+      /**
+       * Name
+       * @description English teaching block display name
+       */
+      name: string;
+      /**
+       * Name Ru
+       * @description Russian teaching block display name
+       */
+      name_ru?: string | null;
+      /**
+       * Start Date
+       * Format: date
+       * @description Inclusive block start date
+       */
+      start_date: string;
+      /**
+       * End Date
+       * Format: date
+       * @description Inclusive block end date
+       */
+      end_date: string;
+    };
     /** TermConfig */
     TermConfig: {
       /**
@@ -3106,6 +3187,11 @@ export interface components {
       name: string;
       /** @description Single teaching period (start and end dates inclusive) */
       semester: components["schemas"]["DateRange"];
+      /**
+       * Blocks
+       * @description Named inclusive teaching windows; session active may reference one as {block: <id>}
+       */
+      blocks?: components["schemas"]["TermBlock"][];
       /**
        * Days
        * @description Working days used by the scheduler (for example, MONDAY..SATURDAY)
@@ -3190,6 +3276,8 @@ export interface components {
       /** Name */
       name?: string | null;
       semester?: components["schemas"]["DateRange"] | null;
+      /** Blocks */
+      blocks?: components["schemas"]["TermBlock"][] | null;
       /** Days */
       days?: components["schemas"]["Weekday"][] | null;
       starting_day?: components["schemas"]["Weekday"] | null;
@@ -3405,11 +3493,6 @@ export interface components {
        * @description Optional instructor id(s); defaults to the pattern instructor
        */
       instructor?: string | string[] | null;
-      /**
-       * Notes
-       * @description Public notes: None inherits series notes; an empty string suppresses them
-       */
-      notes?: string | null;
     };
   };
   responses: never;
@@ -3425,6 +3508,7 @@ export type SchemaBatchBookItemResult =
 export type SchemaBatchBookRequest = components["schemas"]["BatchBookRequest"];
 export type SchemaBatchBookResponse =
   components["schemas"]["BatchBookResponse"];
+export type SchemaBlockRef = components["schemas"]["BlockRef"];
 export type SchemaBodyDistributionsApplyDistribution =
   components["schemas"]["Body_distributions_apply_distribution"];
 export type SchemaBodyDistributionsPreviewDistribution =
@@ -3508,6 +3592,7 @@ export type SchemaPredefinedAliasesResponse =
 export type SchemaPreferenceShareLinkResponse =
   components["schemas"]["PreferenceShareLinkResponse"];
 export type SchemaProgramTrack = components["schemas"]["ProgramTrack"];
+export type SchemaPublicBlockRef = components["schemas"]["PublicBlockRef"];
 export type SchemaPublicComponent = components["schemas"]["PublicComponent"];
 export type SchemaPublicComponentSessionSeries =
   components["schemas"]["PublicComponentSessionSeries"];
@@ -3524,6 +3609,7 @@ export type SchemaPublicSessionOccurrence =
 export type SchemaPublicStudentGroup =
   components["schemas"]["PublicStudentGroup"];
 export type SchemaPublicTerm = components["schemas"]["PublicTerm"];
+export type SchemaPublicTermBlock = components["schemas"]["PublicTermBlock"];
 export type SchemaPublicTimeSlot = components["schemas"]["PublicTimeSlot"];
 export type SchemaPublicTimetable = components["schemas"]["PublicTimetable"];
 export type SchemaPublicTrack = components["schemas"]["PublicTrack"];
@@ -3546,6 +3632,8 @@ export type SchemaScheduleConfigUpdate =
 export type SchemaScheduledMeeting = components["schemas"]["ScheduledMeeting"];
 export type SchemaSectionConfig = components["schemas"]["SectionConfig"];
 export type SchemaSectionProgram = components["schemas"]["SectionProgram"];
+export type SchemaSessionActiveWindow =
+  components["schemas"]["SessionActiveWindow"];
 export type SchemaSessionOccurrence =
   components["schemas"]["SessionOccurrence"];
 export type SchemaStudentEmailIssue =
@@ -3553,6 +3641,7 @@ export type SchemaStudentEmailIssue =
 export type SchemaStudentIssue = components["schemas"]["StudentIssue"];
 export type SchemaStudentsGroups = components["schemas"]["StudentsGroups"];
 export type SchemaTeacherIssue = components["schemas"]["TeacherIssue"];
+export type SchemaTermBlock = components["schemas"]["TermBlock"];
 export type SchemaTermConfig = components["schemas"]["TermConfig"];
 export type SchemaTermPartialUpdate =
   components["schemas"]["TermPartialUpdate"];
@@ -4424,7 +4513,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "text/calendar": string;
         };
       };
       /** @description Validation Error */
@@ -4455,7 +4544,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "text/calendar": string;
         };
       };
       /** @description Validation Error */

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { useLingui } from "@lingui/react/macro";
 import {
   useCarouselImages,
   type AboutCarouselId,
@@ -36,6 +37,7 @@ function normalizeOffset(offset: number, setWidth: number) {
 }
 
 export function CarouselImage({ id }: { id: AboutCarouselId }) {
+  const { t } = useLingui();
   const carouselImages = useCarouselImages(id);
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -287,18 +289,22 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
             ref={trackRef}
             className="flex w-max gap-3 will-change-transform sm:gap-4"
           >
-            {marqueeImages.map((image, index) => (
-              <img
-                key={`${id}-${index}`}
-                data-carousel-item
-                src={image}
-                alt={`Community photo ${(index % setSize) + 1}`}
-                className={imageClass}
-                loading="lazy"
-                draggable={false}
-                onError={(e) => (e.currentTarget.style.display = "none")}
-              />
-            ))}
+            {marqueeImages.map((image, index) => {
+              const photoNumber = (index % setSize) + 1;
+
+              return (
+                <img
+                  key={`${id}-${index}`}
+                  data-carousel-item
+                  src={image}
+                  alt={t`Community photo ${photoNumber}`}
+                  className={imageClass}
+                  loading="lazy"
+                  draggable={false}
+                  onError={(e) => (e.currentTarget.style.display = "none")}
+                />
+              );
+            })}
           </div>
         </div>
         <div className="dark:from-base-100 pointer-events-none absolute inset-y-0 left-0 w-10 bg-linear-to-r from-black to-transparent sm:w-16" />

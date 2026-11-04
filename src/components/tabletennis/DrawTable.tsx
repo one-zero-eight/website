@@ -1,4 +1,6 @@
 import { cn } from "@/lib/ui/cn";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { t } from "@lingui/core/macro";
 import { useMemo, useState } from "react";
 import {
   bucketSeries,
@@ -11,22 +13,19 @@ import {
 
 export { parseDate, type RatingPoint };
 
-function padDate(n: number): string {
-  return String(n).padStart(2, "0");
+function formatLabel(time: number, bucket: Bucket, locale: string): string {
+  return new Date(time).toLocaleDateString(
+    locale,
+    bucket === "month"
+      ? { month: "2-digit", year: "numeric" }
+      : { day: "2-digit", month: "2-digit" },
+  );
 }
 
-function formatLabel(time: number, bucket: Bucket): string {
-  const d = new Date(time);
-  if (bucket === "month")
-    return `${padDate(d.getMonth() + 1)}.${d.getFullYear()}`;
-  return `${padDate(d.getDate())}.${padDate(d.getMonth() + 1)}`;
-}
-
-function formatTooltip(point: SeriesPoint): string {
-  const d = new Date(point.time);
-  const day = `${padDate(d.getDate())}.${padDate(d.getMonth() + 1)}.${d.getFullYear()}`;
-  if (point.bucket === "week") return `Week of ${day}`;
-  if (point.bucket === "month") return formatLabel(point.time, "month");
+function formatTooltip(point: SeriesPoint, locale: string): string {
+  const day = new Date(point.time).toLocaleDateString(locale);
+  if (point.bucket === "week") return t`Week of ${day}`;
+  if (point.bucket === "month") return formatLabel(point.time, "month", locale);
   return day;
 }
 
@@ -40,9 +39,9 @@ function ChoosePeriod({
   return (
     <div className="tabs tabs-box bg-base-200 w-fit text-sm md:text-base">
       {[
-        { key: "month" as const, label: "Month" },
-        { key: "year" as const, label: "Year" },
-        { key: "all" as const, label: "All time" },
+        { key: "month" as const, label: <Trans>Month</Trans> },
+        { key: "year" as const, label: <Trans>Year</Trans> },
+        { key: "all" as const, label: <Trans>All time</Trans> },
       ].map((tab) => (
         <button
           key={tab.key}
@@ -61,6 +60,7 @@ function ChoosePeriod({
 }
 
 function RatingChart({ series }: { series: SeriesPoint[] }) {
+  const { i18n } = useLingui();
   const [hovered, setHovered] = useState<number | null>(null);
 
   const pad = { top: 20, right: 20, bottom: 30, left: 50 };
@@ -165,7 +165,7 @@ function RatingChart({ series }: { series: SeriesPoint[] }) {
             fontSize={10}
             textAnchor="middle"
           >
-            {formatLabel(series[idx]!.time, series[idx]!.bucket)}
+            {formatLabel(series[idx]!.time, series[idx]!.bucket, i18n.locale)}
           </text>
         ))}
         {area && <path d={area} fill="url(#rating-area)" />}
@@ -211,9 +211,11 @@ function RatingChart({ series }: { series: SeriesPoint[] }) {
           }}
         >
           <p className="text-base-content font-semibold">
-            {formatTooltip(hoveredData)}
+            {formatTooltip(hoveredData, i18n.locale)}
           </p>
-          <p className="text-base-content/70">Rating: {hoveredData.score}</p>
+          <p className="text-base-content/70">
+            <Trans>Rating: {hoveredData.score}</Trans>
+          </p>
         </div>
       )}
     </div>
@@ -243,9 +245,11 @@ export function ScoreTable({ data = [] }: { data?: RatingPoint[] }) {
     return (
       <div className="bg-base-200 rounded-lg px-10 py-7">
         <h3 className="text-base-content text-xl font-light md:text-2xl">
-          Score Timeline
+          <Trans>Score Timeline</Trans>
         </h3>
-        <p className="text-base-content/50 mt-4 text-center text-sm">No data</p>
+        <p className="text-base-content/50 mt-4 text-center text-sm">
+          <Trans>No data</Trans>
+        </p>
       </div>
     );
   }
@@ -254,13 +258,13 @@ export function ScoreTable({ data = [] }: { data?: RatingPoint[] }) {
     <div className="bg-base-200 rounded-lg px-6 py-7 md:px-10">
       <div className="flex flex-col gap-4 pb-7 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-base-content text-xl font-light md:text-2xl">
-          Score Timeline
+          <Trans>Score Timeline</Trans>
         </h3>
         <ChoosePeriod period={period} onChange={setPeriod} />
       </div>
       {series.length === 0 ? (
         <p className="text-base-content/50 mt-4 text-center text-sm">
-          No data for the selected period
+          <Trans>No data for the selected period</Trans>
         </p>
       ) : (
         <RatingChart series={series} />

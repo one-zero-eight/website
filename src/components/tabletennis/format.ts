@@ -1,19 +1,31 @@
-function pad(n: number) {
-  return String(n).padStart(2, "0");
-}
-
-/** "13.09.2026" in the viewer's time zone; empty string for a missing date */
-export function formatDay(iso: string | null | undefined): string {
+/** Formats a date in the viewer's time zone; empty string for a missing date. */
+export function formatDay(
+  iso: string | null | undefined,
+  locale: string,
+): string {
   if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 }
 
-/** "13.09.2026, 18:40" in the viewer's time zone */
-export function formatDayTime(iso: string | null | undefined): string {
-  const day = formatDay(iso);
-  if (!day) return "";
-  const d = new Date(iso!);
-  return `${day}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+/** Formats a date and time in the viewer's time zone. */
+export function formatDayTime(
+  iso: string | null | undefined,
+  locale: string,
+): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }

@@ -1,10 +1,12 @@
+import { msg } from "@lingui/core/macro";
+
 // Preset time configurations
 export const PRESET_TIME_OPTIONS = [
-  { hours: 0, minutes: 30, label: "30 mins" },
-  { hours: 0, minutes: 45, label: "45 mins" },
-  { hours: 1, minutes: 0, label: "1 hour" },
-  { hours: 1, minutes: 30, label: "1.5 hours" },
-  { hours: 2, minutes: 0, label: "2 hours" },
+  { hours: 0, minutes: 30, label: msg`30 mins` },
+  { hours: 0, minutes: 45, label: msg`45 mins` },
+  { hours: 1, minutes: 0, label: msg`1 hour` },
+  { hours: 1, minutes: 30, label: msg`1.5 hours` },
+  { hours: 2, minutes: 0, label: msg`2 hours` },
 ];
 
 // Add time button configurations

@@ -1,4 +1,6 @@
 import type { CSSProperties } from "react";
+import { i18n } from "@lingui/core";
+import { t } from "@lingui/core/macro";
 import { formatHour, parseHour } from "./dates.ts";
 import type { MeetingDate } from "../types.ts";
 
@@ -109,7 +111,10 @@ export function generateTimeSlots(
   return slots;
 }
 
-export function formatMeetingDates(dateIds: string[]): MeetingDate[] {
+export function formatMeetingDates(
+  dateIds: string[],
+  locale: string = i18n.locale,
+): MeetingDate[] {
   return [...dateIds]
     .sort((a, b) => a.localeCompare(b))
     .map((dateId) => {
@@ -117,18 +122,18 @@ export function formatMeetingDates(dateIds: string[]): MeetingDate[] {
 
       return {
         id: dateId,
-        monthDay: date.toLocaleDateString("en", {
+        monthDay: date.toLocaleDateString(locale, {
           month: "short",
           day: "numeric",
         }),
-        weekDay: date.toLocaleDateString("en", { weekday: "short" }),
+        weekDay: date.toLocaleDateString(locale, { weekday: "short" }),
       };
     });
 }
 
 export function formatDateRangeLabel(dates: MeetingDate[]) {
   if (dates.length === 0) {
-    return "No dates";
+    return t`No dates`;
   }
 
   if (dates.length === 1) {

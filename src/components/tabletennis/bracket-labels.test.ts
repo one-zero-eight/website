@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { i18n } from "@lingui/core";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   buildStructure,
   ordinal,
@@ -6,6 +7,10 @@ import {
   standingsToTop,
   topsEqual,
 } from "./bracket-utils";
+
+beforeEach(() => {
+  i18n.loadAndActivate({ locale: "en", messages: {} });
+});
 
 describe("roundLabel", () => {
   const main = buildStructure(12).sections.find((s) => s.placeFrom === 1)!;

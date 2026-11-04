@@ -1,4 +1,6 @@
 import { $clubs } from "@/api/clubs";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { useLingui as useLinguiRuntime } from "@lingui/react";
 import { HostType, SchemaHost, SchemaPublicHost } from "@/api/events/types";
 import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
@@ -34,6 +36,7 @@ export function StoredHostLink({
   host: SchemaHost | null | undefined;
   clubs: { club_id: string; title: string }[];
 }) {
+  useLinguiRuntime();
   const ownedDisplay = displayStoredHost(host, clubs);
   const needsClubFetch =
     host?.type === HostType.club &&
@@ -48,7 +51,11 @@ export function StoredHostLink({
   );
 
   if (!host || !ownedDisplay) {
-    return <span>TBA</span>;
+    return (
+      <span>
+        <Trans>TBA</Trans>
+      </span>
+    );
   }
 
   if (host.type === HostType.club) {
@@ -111,7 +118,11 @@ export function PublicHostsList({
   linked?: boolean;
 }) {
   if (hosts.length === 0) {
-    return <span>TBA</span>;
+    return (
+      <span>
+        <Trans>TBA</Trans>
+      </span>
+    );
   }
 
   if (!linked) {
@@ -148,8 +159,13 @@ export function StoredHostsList({
   clubs: { club_id: string; title: string }[];
   linked?: boolean;
 }) {
+  const { t } = useLingui();
   if (hosts.length === 0) {
-    return <span>TBA</span>;
+    return (
+      <span>
+        <Trans>TBA</Trans>
+      </span>
+    );
   }
 
   if (!linked) {
@@ -159,7 +175,7 @@ export function StoredHostsList({
           <Fragment key={host.id ?? index}>
             {index > 0 && <span>, </span>}
             <span>
-              {displayStoredHost(host, clubs)?.displayName ?? "Unknown host"}
+              {displayStoredHost(host, clubs)?.displayName ?? t`Unknown host`}
             </span>
           </Fragment>
         ))}

@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { ActPage } from "@/components/search/act/ActPage";
 import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
@@ -19,14 +20,15 @@ export const Route = createFileRoute("/_with_menu/search/act")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { q } = Route.useSearch();
   return (
     <Suspense>
       <Helmet>
-        <title>Act</title>
+        <title>{t`Act`}</title>
         <meta
           name="description"
-          content="Take actions based on search results or suggestions."
+          content={t`Take actions based on search results or suggestions.`}
         />
       </Helmet>
 

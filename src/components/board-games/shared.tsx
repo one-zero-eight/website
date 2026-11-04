@@ -1,6 +1,19 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { ReservationStatus } from "@/api/board-games/types.ts";
 import { cn } from "@/lib/ui/cn";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react/macro";
+import { useLingui as useLinguiRuntime } from "@lingui/react";
+
+const reservationStatusLabels = {
+  [ReservationStatus.reserved]: msg`Reserved`,
+  [ReservationStatus.taken]: msg`Taken`,
+  [ReservationStatus.returned]: msg`Returned`,
+};
+
+export function getReservationStatusLabel(status: ReservationStatus) {
+  return reservationStatusLabels[status];
+}
 import type { ReactNode } from "react";
 
 export function withId<T extends { id: string | null }>(
@@ -29,6 +42,7 @@ export function ReservationStatusBadge({
 }: {
   status: ReservationStatus;
 }) {
+  const { i18n } = useLingui();
   return (
     <span
       className={cn(
@@ -38,7 +52,7 @@ export function ReservationStatusBadge({
         status === ReservationStatus.returned && "badge-success",
       )}
     >
-      {status}
+      {i18n._(getReservationStatusLabel(status))}
     </span>
   );
 }
@@ -119,15 +133,18 @@ export function GameInfoBody({
 export function GameDescription({
   description,
   className,
-  emptyLabel = "No description provided.",
+  emptyLabel,
 }: {
   description: string | null;
   className?: string;
   emptyLabel?: string;
 }) {
+  const { t } = useLingui();
   return (
     <p className={cn("wrap-anywhere whitespace-pre-wrap", className)}>
-      {description?.trim() ? description : emptyLabel}
+      {description?.trim()
+        ? description
+        : (emptyLabel ?? t`No description provided.`)}
     </p>
   );
 }
@@ -218,6 +235,7 @@ export function QueryError({
   title: string;
   error: unknown;
 }) {
+  useLinguiRuntime();
   return (
     <div className="alert alert-error">
       <span className="icon-[material-symbols--error-outline] shrink-0 text-xl" />

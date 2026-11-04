@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -6,43 +7,41 @@ type SearchExampleProps = {
 };
 
 export function SearchExample({ searchQueries }: SearchExampleProps) {
-  const [example, setExample] = useState(
-    searchQueries[Math.floor(Math.random() * searchQueries.length)],
+  const [exampleIndex, setExampleIndex] = useState(() =>
+    Math.floor(Math.random() * searchQueries.length),
   );
   const navigate = useNavigate();
 
   if (searchQueries.length === 0) return null;
 
-  const runSearch = (query: string) => {
-    navigate({ to: "/search", search: { q: query } });
-  };
+  const example = searchQueries[exampleIndex];
 
-  const setNewExample = () => {
+  const handleSearch = () => {
+    navigate({ to: "/search", search: { q: example } });
     if (searchQueries.length <= 1) return;
-    let newExample = example;
-
-    while (newExample === example) {
-      newExample =
-        searchQueries[Math.floor(Math.random() * searchQueries.length)];
-    }
-
-    setExample(newExample);
+    setExampleIndex(
+      (exampleIndex +
+        1 +
+        Math.floor(Math.random() * (searchQueries.length - 1))) %
+        searchQueries.length,
+    );
   };
 
   return (
     <p className="text-base-content/50 flex gap-2 text-sm">
-      Example:{" "}
-      <a
-        href="#"
-        className="text-primary hover:underline"
-        onClick={(e) => {
-          e.preventDefault();
-          runSearch(example);
-          setNewExample();
-        }}
-      >
-        {example}
-      </a>
+      <Trans>
+        Example:{" "}
+        <a
+          href="#"
+          className="text-primary hover:underline"
+          onClick={(event) => {
+            event.preventDefault();
+            handleSearch();
+          }}
+        >
+          {example}
+        </a>
+      </Trans>
     </p>
   );
 }

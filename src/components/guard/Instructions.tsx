@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Trans } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 
 export function ServiceAccountEmail({ email }: { email: string }) {
@@ -25,7 +26,7 @@ export function ServiceAccountEmail({ email }: { email: string }) {
         copied ? "badge-success" : "badge-ghost hover:badge-soft",
       )}
     >
-      {copied ? "Copied!" : email || "…"}
+      {copied ? <Trans>Copied!</Trans> : email || "…"}
     </button>
   );
 }
@@ -34,9 +35,11 @@ export function CopyInstructions({ serviceEmail }: { serviceEmail: string }) {
   return (
     <div className="alert alert-info alert-soft">
       <span className="text-sm">
-        Give Editor access to the service account{" "}
-        <ServiceAccountEmail email={serviceEmail} />, then paste the spreadsheet
-        URL below.
+        <Trans>
+          Give Editor access to the service account{" "}
+          <ServiceAccountEmail email={serviceEmail} />, then paste the
+          spreadsheet URL below.
+        </Trans>
       </span>
     </div>
   );

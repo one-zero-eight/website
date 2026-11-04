@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import { $search, searchTypes } from "@/api/search";
 import { cn } from "@/lib/ui/cn";
 import { useState } from "react";
@@ -12,7 +13,9 @@ function DynamicPageComponent({ url }: { url: string }) {
   if (!result) {
     return (
       <div className="border-border text-muted flex h-[25vh] w-full items-center justify-center rounded-xl border p-4 text-center md:h-[50vh]">
-        Sorry, this site does not support preview. Please, open it directly.
+        <Trans>
+          Sorry, this site does not support preview. Please, open it directly.
+        </Trans>
       </div>
     );
   }
@@ -87,6 +90,7 @@ export default function IframePreviewCard({
   source: searchTypes.SchemaSearchResponse["source"];
   onClose: () => void;
 }) {
+  const { t } = useLingui();
   const [hasError, setHasError] = useState(false);
 
   const url = "url" in source ? source.url : "";
@@ -143,7 +147,9 @@ export default function IframePreviewCard({
       </div>
       {isDownloadableFile ? (
         <div className="border-border text-muted flex h-[25vh] w-full flex-col items-center justify-center gap-3 rounded-xl border p-4 text-center md:h-[50vh]">
-          <p>This file cannot be previewed in the browser.</p>
+          <p>
+            <Trans>This file cannot be previewed in the browser.</Trans>
+          </p>
           <a
             href={url}
             download
@@ -152,7 +158,7 @@ export default function IframePreviewCard({
             className="btn btn-primary"
           >
             <span className="icon-[material-symbols--download]" />
-            Download
+            <Trans>Download</Trans>
           </a>
         </div>
       ) : isExternalPage && isWikiPagePending ? (
@@ -184,7 +190,7 @@ export default function IframePreviewCard({
               <iframe
                 src={url}
                 onError={() => setHasError(true)}
-                title="Preview"
+                title={t`Preview`}
                 className="border-border h-[50vh] w-full rounded-xl border"
                 loading="lazy"
               />
@@ -193,7 +199,9 @@ export default function IframePreviewCard({
         </>
       ) : (
         <div className="border-border text-muted flex h-[25vh] w-full items-center justify-center rounded-xl border p-4 text-center md:h-[50vh]">
-          Sorry, this site does not support preview. Please, open it directly.
+          <Trans>
+            Sorry, this site does not support preview. Please, open it directly.
+          </Trans>
         </div>
       )}
 
@@ -204,7 +212,7 @@ export default function IframePreviewCard({
           rel="noopener noreferrer"
           className="hover:underline"
         >
-          {"Go to website ->"}
+          <Trans>Go to website -&gt;</Trans>
         </a>
       </div>
     </div>

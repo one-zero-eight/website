@@ -1,14 +1,16 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { SwitchLocaleButton } from "@/components/layout/SwitchLocaleButton";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
 import { cn } from "@/lib/ui/cn";
+import type { ReactNode } from "react";
 
 export function Topbar({
   title,
   hideOnMobile = false,
   hideBorder = false,
 }: {
-  title: string;
+  title: ReactNode;
   hideOnMobile?: boolean;
   hideBorder?: boolean;
 }) {
@@ -28,6 +30,7 @@ export function Topbar({
       </div>
       <div className="hidden items-center py-2 pr-4 lg:flex">
         {/* <ToggleSnowButton /> // Disable snow */}
+        <SwitchLocaleButton />
         <SwitchThemeButton />
         <UserMenu isMobile={false} isSidebar={false} />
       </div>

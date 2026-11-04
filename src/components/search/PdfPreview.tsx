@@ -1,4 +1,7 @@
 import { searchTypes } from "@/api/search";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { usePreviewFile } from "@/api/search/use-preview-file.ts";
 import { useElementHeight, useElementWidth } from "@/lib/ui/use-element-size";
 import type { PDFDocumentProxy } from "pdfjs-dist";
@@ -26,8 +29,9 @@ export declare type PdfPreviewProps = {
 };
 
 export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
+  const { i18n, t } = useLingui();
   const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<MessageDescriptor | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data: file } = usePreviewFile(
@@ -49,11 +53,11 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
 
   function onDocumentLoadError(error: any) {
     if (error.name === "MissingPDFException") {
-      setError("PDF file is missing");
+      setError(msg`PDF file is missing`);
     } else if (error.name === "InvalidPDFException") {
-      setError("Preview available for PDF only");
+      setError(msg`Preview available for PDF only`);
     } else {
-      setError("Error while loading PDF file");
+      setError(msg`Error while loading PDF file`);
     }
   }
 
@@ -81,13 +85,13 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
         onLoadError={onDocumentLoadError}
         noData={
           <div className="flex h-[400px] items-center justify-center text-sm dark:text-[#eeff41]">
-            File has not yet been uploaded
+            <Trans>File has not yet been uploaded</Trans>
           </div>
         }
         loading={<div className="skeleton flex h-[400px]" />}
         error={
           <div className="flex h-[400px] items-center justify-center text-sm dark:text-[#eeff41]">
-            {error}
+            {error && i18n._(error)}
           </div>
         }
       >
@@ -125,7 +129,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           <div className="flex flex-row items-stretch gap-4">
             <PreviewBottomButton
               icon={<span className="icon-[material-symbols--download]"></span>}
-              text="Download"
+              text={t`Download`}
               href={source.resource_download_url ?? undefined}
               target="_blank"
               download
@@ -157,14 +161,14 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
         <div className="flex flex-row items-stretch gap-4">
           <PreviewBottomButton
             icon={<span className="icon-[material-symbols--open-in-new]" />}
-            text="To source"
+            text={t`To source`}
             href={source.link}
             target="_blank"
           />
           {file !== undefined && (
             <PreviewBottomButton
               icon={<span className="icon-[material-symbols--open-in-new]" />}
-              text="New tab"
+              text={t`New tab`}
               href={source.resource_download_url ?? undefined}
               target="_blank"
             />

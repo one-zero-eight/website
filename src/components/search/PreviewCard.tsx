@@ -1,4 +1,5 @@
 import { searchTypes } from "@/api/search";
+import { Trans } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 import React, { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -43,7 +44,13 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
         </p>
       </a>
 
-      <ErrorBoundary fallback={<div>Some error occurred</div>}>
+      <ErrorBoundary
+        fallback={
+          <div>
+            <Trans>Some error occurred</Trans>
+          </div>
+        }
+      >
         {source.type === "moodle-file" ? (
           <Suspense>
             <PdfPreview source={source} searchText="" />

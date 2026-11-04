@@ -3,3 +3,6 @@ allowBuilds:
 
 overrides:
   "@codemirror/view": "6.43.0"
+
+patchedDependencies:
+  vite-plugin-mkcert@2.0.0: patches/vite-plugin-mkcert@2.0.0.patch

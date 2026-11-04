@@ -1,4 +1,5 @@
 import { mergeAttributes, ResizableNodeView } from "@tiptap/core";
+import { t } from "@lingui/core/macro";
 import { Image as BaseImage } from "@tiptap/extension-image";
 import type { Editor } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
@@ -413,7 +414,7 @@ export const Image = BaseImage.extend({
                           }),
                         );
                       }
-                      alert("Failed to upload image");
+                      alert(t`Failed to upload image`);
                     },
                   );
 

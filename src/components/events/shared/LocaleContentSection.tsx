@@ -1,7 +1,9 @@
+import { useLingui } from "@lingui/react/macro";
 import { DescriptionEditor } from "@/components/editor/DescriptionEditor.tsx";
 import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { cn } from "@/lib/ui/cn";
+import { getLocaleLabel } from "@/locales/lib";
 import { RefObject } from "react";
 import {
   parseDescriptionContent,
@@ -34,6 +36,7 @@ export function LocaleContentSection({
   editorRef?: RefObject<TiptapEditorRef | null>;
   editorInitialContent?: DescriptionDoc | null;
 }) {
+  const { t } = useLingui();
   return (
     <div className="border-base-300 rounded-2xl border p-4">
       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -42,7 +45,7 @@ export function LocaleContentSection({
             key={locale}
             type="button"
             className={cn(
-              "btn btn-sm uppercase",
+              "btn btn-sm",
               selectedLocale === locale
                 ? "btn-primary"
                 : "btn-ghost border border-dashed",
@@ -50,7 +53,7 @@ export function LocaleContentSection({
             onClick={() => onSelectLocale(locale)}
             disabled={editing && selectedLocale !== locale}
           >
-            {locale}
+            {getLocaleLabel(locale)}
           </button>
         ))}
         {toolbar}
@@ -61,7 +64,7 @@ export function LocaleContentSection({
           <input
             type="text"
             className={eventFieldClass()}
-            placeholder="Event name"
+            placeholder={t`Event name`}
             value={editName ?? ""}
             onChange={(e) => onEditNameChange?.(e.target.value)}
           />
@@ -76,7 +79,7 @@ export function LocaleContentSection({
       ) : (
         <div className="flex flex-col gap-2">
           <h2 className="text-xl font-medium wrap-anywhere @min-[700px]/content:text-2xl">
-            {name?.trim() || "Untitled event"}
+            {name?.trim() || t`Untitled event`}
           </h2>
           <DescriptionViewer
             content={parseDescriptionContent(description)}

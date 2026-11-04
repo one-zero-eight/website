@@ -1,3 +1,5 @@
+import { i18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -29,6 +31,20 @@ const config: TimetableViewConfig = {
   rooms: [],
   students_groups: [],
 };
+function renderPanel(instructorId: string) {
+  return renderToStaticMarkup(
+    createElement(
+      I18nProvider,
+      { i18n },
+      createElement(InstructorDetailPanel, {
+        instructorId,
+        config,
+        allMeetings: [meeting],
+        onNavigateToMeeting: () => {},
+      }),
+    ),
+  );
+}
 const meeting: Meeting = {
   instance_id: "0:0:0:occ:0",
   course: "Math",
@@ -44,14 +60,7 @@ const meeting: Meeting = {
 
 describe("public instructor details", () => {
   it("shows public profile and scheduled classes without private queries", () => {
-    const html = renderToStaticMarkup(
-      createElement(InstructorDetailPanel, {
-        instructorId: "teacher",
-        config,
-        allMeetings: [meeting],
-        onNavigateToMeeting: () => {},
-      }),
-    );
+    const html = renderPanel("teacher");
     for (const value of [
       "Alice",
       "Алиса",
@@ -60,20 +69,14 @@ describe("public instructor details", () => {
       "Math",
       "G1",
       "101",
+      "1 class",
     ])
       expect(html).toContain(value);
-    expect(html).not.toContain("Редактировать");
+    expect(html).not.toContain("Edit");
   });
   it("shows an empty state rather than another teacher's classes", () => {
-    const html = renderToStaticMarkup(
-      createElement(InstructorDetailPanel, {
-        instructorId: "other",
-        config,
-        allMeetings: [meeting],
-        onNavigateToMeeting: () => {},
-      }),
-    );
-    expect(html).toContain("Назначенных занятий нет");
+    const html = renderPanel("other");
+    expect(html).toContain("No assigned classes.");
     expect(html).not.toContain("Math");
   });
 });

@@ -1,4 +1,5 @@
 import { $schedule, scheduleTypes } from "@/api/schedule";
+import { Plural, Trans } from "@lingui/react/macro";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { CategoryContainer } from "@/components/schedule/CategoryContainer.tsx";
 import { GroupCard } from "@/components/schedule/group-card/GroupCard";
@@ -7,9 +8,11 @@ import { GroupCardTagSkeleton } from "@/components/schedule/skeletons/GroupCardT
 import { getFirstTagByType } from "@/api/schedule/event-group.ts";
 import {
   getCategoryInfoBySlug,
+  getCategoryTitle,
   viewConfig,
 } from "@/components/schedule/view-config.ts";
 import { preprocessText } from "@/lib/utils/searchUtils";
+import { useAppLocale } from "@/locales/lib";
 import { Link } from "@tanstack/react-router";
 import Fuse from "fuse.js";
 import React, { useEffect, useMemo, useState } from "react";
@@ -23,6 +26,7 @@ export default function SchedulePage({
 }: {
   category: string | null;
 }) {
+  const [locale] = useAppLocale();
   const categoryInfo = getCategoryInfoBySlug(category ?? "");
   const { data, isPending, error, refetch } = $schedule.useQuery(
     "get",
@@ -109,13 +113,15 @@ export default function SchedulePage({
   if (error) {
     return (
       <div className="flex flex-col justify-center gap-2 p-4">
-        <h2 className="text-xl font-bold">Error Loading Schedule</h2>
+        <h2 className="text-xl font-bold">
+          <Trans>Error Loading Schedule</Trans>
+        </h2>
         <p className="text-base-content/30">{formatApiErrorMessage(error)}</p>
         <button
           onClick={() => refetch()}
           className="text-primary w-fit rounded-md"
         >
-          Retry
+          <Trans>Retry</Trans>
         </button>
       </div>
     );
@@ -138,7 +144,7 @@ export default function SchedulePage({
                 className: "border-b border-base-300",
               }}
             >
-              {v.title}
+              {getCategoryTitle(v, locale)}
             </Link>
           ))}
           <div className="border-b-base-300 min-w-2 grow border-b" />
@@ -162,7 +168,11 @@ export default function SchedulePage({
                 <div className="my-4 flex w-full flex-wrap justify-between">
                   <div className="text-3xl font-medium">{tagName}</div>
                   <div className="text-base-content/30 flex items-center">
-                    {groups[tagName].length} groups
+                    <Plural
+                      value={groups[tagName].length}
+                      one="# group"
+                      other="# groups"
+                    />
                   </div>
                 </div>
 
@@ -190,7 +200,9 @@ export default function SchedulePage({
           />
         </div>
       ) : (
-        <div className="flex flex-col gap-2 px-4">No groups found</div>
+        <div className="flex flex-col gap-2 px-4">
+          <Trans>No groups found</Trans>
+        </div>
       )}
     </>
   );

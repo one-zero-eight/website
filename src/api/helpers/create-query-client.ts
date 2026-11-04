@@ -3,6 +3,8 @@
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 
+import { i18n, type MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
 import {
   type DataTag,
   type InfiniteData,
@@ -71,8 +73,16 @@ function createApiQueryError(body: unknown, response: Response) {
 export function formatApiErrorMessage(
   error: unknown | TypeError | { body?: unknown; httpCode: number },
 ): string {
+  const descriptor = formatApiErrorDescriptor(error);
+  return typeof descriptor === "string" ? descriptor : i18n._(descriptor);
+}
+
+export function formatApiErrorDescriptor(
+  error: unknown | TypeError | { body?: unknown; httpCode: number },
+): string | MessageDescriptor {
   if (error instanceof TypeError) {
-    return `Network Error: ${error.message}`;
+    const message = error.message;
+    return msg`Network error: ${message}`;
   }
   if (
     typeof error === "object" &&
@@ -85,7 +95,7 @@ export function formatApiErrorMessage(
     const code = apiError.httpCode.toString();
     if (detail) {
       if (typeof detail === "string") {
-        return `Error ${code}: ${detail}`;
+        return msg`Error ${code}: ${detail}`;
       }
       if (Array.isArray(detail)) {
         const messages = detail
@@ -107,16 +117,18 @@ export function formatApiErrorMessage(
         detail !== null &&
         "message" in detail
       ) {
-        return `Error ${code}: ${detail.message as string}`;
+        const message = detail.message as string;
+        return msg`Error ${code}: ${message}`;
       }
-      return `Error ${code}: ${JSON.stringify(detail)}`;
+      const message = JSON.stringify(detail);
+      return msg`Error ${code}: ${message}`;
     }
-    return `Error ${code}`;
+    return msg`Error ${code}`;
   }
   if (error instanceof Error) {
     return error.message;
   }
-  return String(error ?? "Unknown error");
+  return error == null ? msg`Unknown error` : String(error);
 }
 
 // Helper type to dynamically infer the type from the `select` property

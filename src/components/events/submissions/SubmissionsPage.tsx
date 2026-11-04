@@ -1,4 +1,5 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { $events } from "@/api/events";
 import { ModerationStatus, SchemaSubmissionListItem } from "@/api/events/types";
 import { useNavigate } from "@tanstack/react-router";
@@ -7,32 +8,27 @@ import { useEventsAuth } from "../hooks";
 import { EventsByDate } from "../shared/EventsByDate";
 import { EventSummaryCard } from "../shared/EventSummaryCard";
 import { getSubmissionImageUrl } from "../utils/links";
-
-const sections: {
-  status: ModerationStatus;
-  title: string;
-  empty: string;
-}[] = [
-  {
-    status: ModerationStatus.pending,
-    title: "Pending",
-    empty: "No pending submissions.",
-  },
-  {
-    status: ModerationStatus.declined,
-    title: "Declined",
-    empty: "No declined submissions.",
-  },
-  {
-    status: ModerationStatus.approved,
-    title: "Approved",
-    empty: "No approved submissions.",
-  },
-];
-
 export function SubmissionsPage() {
   const navigate = useNavigate();
+  const { t } = useLingui();
   const { isModerator, clubs, isPending: isAuthPending } = useEventsAuth();
+  const sections = [
+    {
+      status: ModerationStatus.pending,
+      title: t`Pending`,
+      empty: t`No pending submissions.`,
+    },
+    {
+      status: ModerationStatus.declined,
+      title: t`Declined`,
+      empty: t`No declined submissions.`,
+    },
+    {
+      status: ModerationStatus.approved,
+      title: t`Approved`,
+      empty: t`No approved submissions.`,
+    },
+  ] as const;
 
   const { data, isPending, isError, error, refetch } = $events.useQuery(
     "get",
@@ -84,7 +80,7 @@ export function SubmissionsPage() {
           className="btn btn-ghost"
           onClick={() => refetch()}
         >
-          Retry
+          <Trans>Retry</Trans>
         </button>
       </div>
     );
@@ -92,7 +88,9 @@ export function SubmissionsPage() {
 
   return (
     <div className="@container/content flex flex-col gap-3 px-4 py-4">
-      <h2 className="text-2xl font-medium">Submissions</h2>
+      <h2 className="text-2xl font-medium">
+        <Trans>Submissions</Trans>
+      </h2>
 
       {sections.map((section) => {
         const items = byStatus[section.status];

@@ -1,4 +1,6 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
 import { $events } from "@/api/events";
 import moment from "moment";
 import { EventsByDate } from "../shared/EventsByDate";
@@ -10,6 +12,7 @@ import { getEventImageUrl } from "../utils/links";
  * drafts/submissions), fetched from the events API instead of the .ics feed.
  */
 export function EventsCardsView({ date }: { date: Date }) {
+  useLingui();
   const from = moment(date).startOf("month").toISOString();
   const to = moment(date).add(1, "month").startOf("month").toISOString();
 
@@ -39,7 +42,7 @@ export function EventsCardsView({ date }: { date: Date }) {
           className="btn btn-ghost"
           onClick={() => refetch()}
         >
-          Retry
+          <Trans>Retry</Trans>
         </button>
       </div>
     );
@@ -48,7 +51,9 @@ export function EventsCardsView({ date }: { date: Date }) {
   return (
     <div className="@container/content px-4 py-4">
       {data && data.length === 0 ? (
-        <p className="text-base-content/70">No events this month.</p>
+        <p className="text-base-content/70">
+          <Trans>No events this month.</Trans>
+        </p>
       ) : (
         <EventsByDate
           events={data ?? []}

@@ -1,3 +1,5 @@
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
 import {
   AcademicCalendar,
   useMyAcademicCalendar,
@@ -10,8 +12,13 @@ export function AcademicCalendarCard({
 }: {
   academicCalendar: AcademicCalendar;
 }) {
+  const { i18n } = useLingui();
+
   return (
-    <div className="group bg-base-200 rounded-box flex flex-row gap-4 px-4 py-4">
+    <div
+      key={i18n.locale}
+      className="group bg-base-200 rounded-box flex flex-row gap-4 px-4 py-4"
+    >
       <span className="icon-[ph--books] text-primary hidden w-12 shrink-0 text-5xl sm:block" />
       <div className="flex flex-col">
         <div className="text-base-content flex text-lg font-semibold">
@@ -25,7 +32,9 @@ export function AcademicCalendarCard({
           href="https://eduwiki.innopolis.university/index.php/AcademicCalendar"
           className="text-base-content/75 w-fit text-sm hover:underline"
         >
-          *based on <span className="text-primary">Eduwiki</span>
+          <Trans>
+            *based on <span className="text-primary">Eduwiki</span>
+          </Trans>
           <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-xs" />
         </a>
       </div>

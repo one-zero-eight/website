@@ -1,9 +1,11 @@
 import { accountsTypes } from "@/api/accounts";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { UserSearch } from "@/components/admin/UserSearch.tsx";
 import { useImpersonation } from "@/components/admin/useImpersonation.ts";
 import { useState } from "react";
 
 export function ImpersonateCard() {
+  const { t } = useLingui();
   const [selectedUser, setSelectedUser] =
     useState<accountsTypes.SchemaViewUser | null>(null);
   const {
@@ -17,11 +19,13 @@ export function ImpersonateCard() {
 
   return (
     <section className="bg-base-200 rounded-box flex min-w-0 flex-col gap-4 p-4">
-      <h2 className="text-xl font-medium">Impersonate</h2>
+      <h2 className="text-xl font-medium">
+        <Trans>Impersonate</Trans>
+      </h2>
       {impersonatingUser ? (
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
           <p className="text-warning min-w-0 truncate text-sm">
-            Currently impersonating {impersonatingUser.name}
+            <Trans>Currently impersonating {impersonatingUser.name}</Trans>
           </p>
           <button
             type="button"
@@ -32,14 +36,14 @@ export function ImpersonateCard() {
             {isDepersonating ? (
               <span className="loading loading-spinner loading-sm" />
             ) : (
-              "Depersonate"
+              <Trans>Depersonate</Trans>
             )}
           </button>
         </div>
       ) : (
         <>
           <UserSearch
-            placeholder="Name or email..."
+            placeholder={t`Name or email...`}
             onSelect={setSelectedUser}
             selectedUserId={selectedUser?.id}
           />
@@ -53,7 +57,7 @@ export function ImpersonateCard() {
               {isImpersonating ? (
                 <span className="loading loading-spinner loading-sm" />
               ) : (
-                "Impersonate"
+                <Trans>Impersonate</Trans>
               )}
             </button>
           </div>

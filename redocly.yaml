@@ -10,16 +10,16 @@ apis:
       output: ./src/api/schedule/types.ts
       #  --root-types --enum
   maps:
-    root: http://api.innohassle.ru/maps/staging-v0/openapi.json
+    root: https://api.innohassle.ru/maps/staging-v0/openapi.json
     x-openapi-ts:
       output: ./src/api/maps/types.ts
       #  --root-types --enum
-  music:
+  music-room:
     root: https://api.innohassle.ru/music-room/staging-v0/openapi.json
     x-openapi-ts:
       output: ./src/api/music-room/types.ts
       #  --root-types --enum
-  room:
+  room-booking:
     root: https://api.innohassle.ru/room-booking/staging-v0/openapi.json
     x-openapi-ts:
       output: ./src/api/room-booking/types.ts

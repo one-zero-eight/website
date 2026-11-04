@@ -1,9 +1,10 @@
 import moment from "moment";
+import { t } from "@lingui/core/macro";
 
 /** Format for UI display, e.g. 13.08.2026 18:00 */
 export function formatEventDateTime(value: string | null | undefined) {
   if (!value) {
-    return "TBA";
+    return t`TBA`;
   }
 
   return moment(value).format("DD.MM.YYYY HH:mm");
@@ -27,7 +28,7 @@ export function formatEventDateRange(
   endsAt: string | null | undefined,
 ) {
   if (!startsAt) {
-    return "TBA";
+    return t`TBA`;
   }
 
   const start = moment(startsAt);
@@ -94,18 +95,18 @@ export function getScheduleLocalWarning(
   endsAtLocal: string,
 ): string | null {
   if (startsAtLocal && isDatetimeLocalInPast(startsAtLocal)) {
-    return "Start time cannot be in the past.";
+    return t`Start time cannot be in the past.`;
   }
 
   if (endsAtLocal.trim() && !startsAtLocal.trim()) {
-    return "Set a start time before the end time.";
+    return t`Set a start time before the end time.`;
   }
 
   if (
     endsAtLocal.trim() &&
     durationHoursFromLocalRange(startsAtLocal, endsAtLocal) === null
   ) {
-    return "End time must be after the start time.";
+    return t`End time must be after the start time.`;
   }
 
   return null;

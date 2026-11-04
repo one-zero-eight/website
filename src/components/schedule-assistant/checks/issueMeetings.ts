@@ -6,10 +6,10 @@ import type {
 import type { Meeting } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import {
   dayKey,
-  everyWeekdayPhraseRu,
+  everyWeekdayPhrase,
   formatDisplayDate,
   todayIsoDate,
-  weekdayLabelRu,
+  weekdayLabel,
   weeklyPatternDayKey,
 } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 
@@ -220,13 +220,13 @@ export function formatScheduledMeetingWhen(scheduled: SchemaScheduledMeeting) {
   const roomSuffix = scheduled.room ? ` (${scheduled.room})` : "";
 
   if (scheduled.placement.kind === "occurrence") {
-    const weekday = weekdayLabelRu(dayKey(scheduled.placement.date));
+    const weekday = weekdayLabel(dayKey(scheduled.placement.date));
     return `${weekday} ${formatRuDate(scheduled.placement.date)} ${timeRange}${roomSuffix}`;
   }
 
   const weekdayKey =
     weeklyPatternDayKey(String(scheduled.placement.weekday)) ?? "";
-  return `${everyWeekdayPhraseRu(weekdayKey)} ${timeRange}${roomSuffix}`;
+  return `${everyWeekdayPhrase(weekdayKey)} ${timeRange}${roomSuffix}`;
 }
 
 export function formatInstructorLabel(

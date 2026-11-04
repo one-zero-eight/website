@@ -15,15 +15,17 @@ export function NewSectionButton({
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
+  const [nameRu, setNameRu] = useState("");
 
   function handleCreate() {
     const nextCode = code.trim();
     const nextName = name.trim();
     if (!nextCode || !nextName) return;
-    addSection({ code: nextCode, name: nextName }, () => {
+    addSection({ code: nextCode, name: nextName, name_ru: nameRu }, () => {
       setOpen(false);
       setCode("");
       setName("");
+      setNameRu("");
       onCreated(nextCode);
     });
   }
@@ -37,6 +39,7 @@ export function NewSectionButton({
         onClick={() => {
           setCode("");
           setName("");
+          setNameRu("");
           setOpen(true);
         }}
       >
@@ -59,13 +62,21 @@ export function NewSectionButton({
             onChange={(e) => setCode(e.target.value)}
           />
         </SettingsCreateField>
-        <SettingsCreateField label="Название" required>
+        <SettingsCreateField label="Название (EN)" required>
           <input
             className="input input-bordered input-sm w-full"
             value={name}
             required
-            placeholder="Английский"
+            placeholder="English"
             onChange={(e) => setName(e.target.value)}
+          />
+        </SettingsCreateField>
+        <SettingsCreateField label="Название (RU)">
+          <input
+            className="input input-bordered input-sm w-full"
+            value={nameRu}
+            placeholder="Английский"
+            onChange={(e) => setNameRu(e.target.value)}
           />
         </SettingsCreateField>
       </SettingsCreateModal>

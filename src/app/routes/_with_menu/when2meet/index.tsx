@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import {
   createFileRoute,
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/_with_menu/when2meet/")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { status } = Route.useSearch();
 
   return (
@@ -29,7 +31,7 @@ function RouteComponent() {
         <title>When2Meet</title>
         <meta
           name="description"
-          content="Create meetings and find free time easily."
+          content={t`Create meetings and find free time easily.`}
         />
       </Helmet>
 

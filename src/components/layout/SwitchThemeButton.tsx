@@ -1,11 +1,13 @@
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { useTheme } from "@/lib/ui/use-theme.ts";
+import { useLingui } from "@lingui/react/macro";
 
 export default function SwitchThemeButton() {
   const { setTernaryDarkMode } = useTheme();
+  const { t } = useLingui();
 
   return (
-    <Tooltip content="Switch theme">
+    <Tooltip content={t`Switch theme`}>
       <button
         type="button"
         className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2"

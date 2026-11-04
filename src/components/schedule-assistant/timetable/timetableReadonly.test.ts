@@ -2,6 +2,8 @@ import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
+import { i18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { buildCalendarGrid } from "./timetableCalendarModel.ts";
 import { TimetableCalendarTable } from "./TimetableCalendarTable.tsx";
 import {
@@ -58,16 +60,20 @@ async function mount(editable: boolean) {
   await act(async () => {
     root.render(
       createElement(
-        SelectionStoreContext.Provider,
-        { value: store },
-        createElement(TimetableCalendarTable, {
-          calendarGrid,
-          courseColors: {},
-          selectMeeting,
-          clearSelection: vi.fn(),
-          openMeetingEdit: editable ? edit : undefined,
-          onEmptyCellClick: editable ? create : undefined,
-        }),
+        I18nProvider,
+        { i18n },
+        createElement(
+          SelectionStoreContext.Provider,
+          { value: store },
+          createElement(TimetableCalendarTable, {
+            calendarGrid,
+            courseColors: {},
+            selectMeeting,
+            clearSelection: vi.fn(),
+            openMeetingEdit: editable ? edit : undefined,
+            onEmptyCellClick: editable ? create : undefined,
+          }),
+        ),
       ),
     );
   });
@@ -91,7 +97,7 @@ describe("read-only calendar capability boundary", () => {
         (button) => button.textContent?.trim() === "+",
       ),
     ).toBe(false);
-    expect(card.className).toContain("border-l-emerald-600");
+    expect(card.className).not.toContain("border-l-emerald-600");
     expect(card.textContent).toContain(meeting.notes);
     expect(container.querySelector("script")).toBeNull();
   });

@@ -1,3 +1,5 @@
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react/macro";
 import {
   deleteImageBlock,
   downloadImageOriginal,
@@ -23,6 +25,7 @@ export function ImageMenuItems({
   editor: Editor;
   editorState: EditorMenuState;
 }) {
+  const { t } = useLingui();
   const { showError } = useToast();
   const [isReplacing, setIsReplacing] = useState(false);
 
@@ -37,7 +40,7 @@ export function ImageMenuItems({
     }
 
     if (!file.type.startsWith("image/")) {
-      showError("Error", "Please select an image file");
+      showError(msg`Error`, msg`Please select an image file`);
       return;
     }
 
@@ -45,10 +48,10 @@ export function ImageMenuItems({
     try {
       const replaced = await replaceImageInBlock(editor, file);
       if (!replaced) {
-        showError("Error", "Could not replace image");
+        showError(msg`Error`, msg`Could not replace image`);
       }
     } catch {
-      showError("Error", "Failed to upload image");
+      showError(msg`Error`, msg`Failed to upload image`);
     } finally {
       setIsReplacing(false);
     }
@@ -62,7 +65,7 @@ export function ImageMenuItems({
     try {
       await downloadImageOriginal(editorState.imageSrc);
     } catch {
-      showError("Error", "Failed to download image");
+      showError(msg`Error`, msg`Failed to download image`);
     }
   }
 
@@ -78,7 +81,7 @@ export function ImageMenuItems({
         isDisabled={isReplacing}
         onMouseDown={(event) => event.preventDefault()}
         onClick={handleReplace}
-        title="Replace image"
+        title={t`Replace image`}
         iconClassName={
           isReplacing
             ? "loading loading-spinner loading-sm"
@@ -89,13 +92,13 @@ export function ImageMenuItems({
         isDisabled={!editorState.imageSrc}
         onMouseDown={(event) => event.preventDefault()}
         onClick={handleDownload}
-        title="Download original"
+        title={t`Download original`}
         iconClassName="icon-[material-symbols--download]"
       />
       <BubbleMenuButton
         onMouseDown={(event) => event.preventDefault()}
         onClick={handleDelete}
-        title="Delete image"
+        title={t`Delete image`}
         iconClassName="icon-[material-symbols--delete-outline]"
       />
     </>

@@ -1,6 +1,11 @@
+import { t } from "@lingui/core/macro";
 import { createElement } from "react";
+import { meetingCourseShortTitle } from "./localizedNames.ts";
 
-import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import type {
+  SchemaDateRange,
+  SchemaScheduleConfig,
+} from "@/api/schedule-assistant/types.ts";
 import type { SelectDropdownOption } from "@/components/common/SelectDropdown.tsx";
 import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { RoomAttributesHoverBadge } from "@/components/schedule-assistant/settings/rooms/RoomAttributesHoverBadge.tsx";
@@ -32,7 +37,7 @@ import {
   type MeetingPickerSlot,
 } from "./meetingPickerSchedule.ts";
 import { formatPickerLoadHint } from "./pickerLabels.ts";
-import { resolveAudienceSemester } from "./programTimeSlots.ts";
+import { resolveSessionWindow } from "./sessionWindows.ts";
 
 export type RoomAvailabilityStatus = "green" | "orange" | "red";
 
@@ -188,8 +193,7 @@ export function timesOverlap(
 }
 
 function conflictMeetingLabel(meeting: Meeting): string {
-  const title =
-    String(meeting.course_short_name || meeting.course || "").trim() || "—";
+  const title = meetingCourseShortTitle(meeting) || "—";
   const tag = String(meeting.tag || "").trim();
   return tag ? `${title} (${tag})` : title;
 }
@@ -239,6 +243,7 @@ export function roomAvailabilityForSlot({
   index?: MeetingPickerIndex | null;
   slots?: MeetingPickerSlot[];
 }): RoomAvailabilityInfo {
+  // Weekly callers supply windowed slots; never range-filter concrete or moved dates.
   const checkedSlots = slots ?? dates.map((date) => ({ date, start, end }));
   const dateSet = new Set(
     checkedSlots.map((slot) => slot.date.trim()).filter(Boolean),
@@ -405,12 +410,14 @@ export function roomPickerDatesForEdit({
   config,
   weekday,
   audienceTokens = [],
+  active,
 }: {
   config: SchemaScheduleConfig;
   weekday: TermWeekdayKey;
   audienceTokens?: string[];
+  active?: SchemaDateRange | null;
 }): string[] {
-  const range = resolveAudienceSemester(config, audienceTokens);
+  const range = resolveSessionWindow(config, audienceTokens, active);
   return range ? semesterDatesForWeekday(config, weekday, range) : [];
 }
 
@@ -555,10 +562,8 @@ export function buildRoomPickerOptions({
               weekly,
             )
           : null;
-      const hint = [
-        room?.capacity != null ? `Вместимость ${room.capacity}` : null,
-        loadHint,
-      ]
+      const capacity = room?.capacity;
+      const hint = [capacity != null ? t`Capacity ${capacity}` : null, loadHint]
         .filter(Boolean)
         .join(" · ");
 

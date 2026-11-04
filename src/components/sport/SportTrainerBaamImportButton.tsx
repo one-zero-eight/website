@@ -1,11 +1,14 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
+import { i18n } from "@lingui/core";
+import { msg, plural } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { $sport } from "@/api/sport";
 import { queryClient } from "@/app/query-client.ts";
 import {
   invalidateAttendance,
   sportTrainerMenuBtn,
 } from "@/components/sport/sport-trainer-utils.ts";
-import { useToast } from "@/components/toast";
+import { useToast, type ToastText } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useRef, useState } from "react";
 
@@ -40,13 +43,13 @@ export function SportTrainerBaamImportButton({
 
   async function importEmails(emails: string[]) {
     const notFound: string[] = [];
-    const failed: string[] = [];
+    const failed: { email: string; error: ToastText }[] = [];
     let marked = 0;
     const hours = maxHours;
     if (hours == null || hours <= 0) {
       showError(
-        "Could not import attendance",
-        "Training duration is unavailable.",
+        msg`Could not import attendance`,
+        msg`Training duration is unavailable.`,
       );
       return;
     }
@@ -92,10 +95,10 @@ export function SportTrainerBaamImportButton({
         if (Array.isArray(result)) {
           marked += 1;
         } else {
-          failed.push(`${email} (${result.description})`);
+          failed.push({ email, error: result.description });
         }
       } catch (error) {
-        failed.push(`${email} (${formatApiErrorMessage(error)})`);
+        failed.push({ email, error: formatApiErrorDescriptor(error) });
       } finally {
         setImportProgress((progress) =>
           progress ? { ...progress, done: progress.done + 1 } : progress,
@@ -109,15 +112,28 @@ export function SportTrainerBaamImportButton({
 
     if (marked > 0) {
       showSuccess(
-        "Attendance imported",
-        `Marked ${hours}h for ${marked} student${marked === 1 ? "" : "s"}.`,
+        msg`Attendance imported`,
+        msg`Marked ${hours}h for ${plural(marked, { one: "# student", other: "# students" })}.`,
       );
     }
     if (notFound.length > 0) {
-      showWarning("Students not found", notFound.join(", "));
+      showWarning(msg`Students not found`, notFound.join(", "));
     }
     if (failed.length > 0) {
-      showError("Could not mark attendance", failed.join(", "));
+      showError(msg`Could not mark attendance`, {
+        ...msg`Failed: ${{ failed: "" }}`,
+        values: {
+          // Resolve stored descriptors each time the toast renders after a locale change.
+          get failed() {
+            return failed
+              .map(
+                ({ email, error }) =>
+                  `${email} (${typeof error === "string" ? error : i18n._(error)})`,
+              )
+              .join(", ");
+          },
+        },
+      });
     }
   }
 
@@ -126,7 +142,10 @@ export function SportTrainerBaamImportButton({
     const emails = parseEmails(text);
 
     if (!emails.length) {
-      showWarning("Nothing to import", "The file contains no student emails.");
+      showWarning(
+        msg`Nothing to import`,
+        msg`The file contains no student emails.`,
+      );
       return;
     }
 
@@ -157,10 +176,12 @@ export function SportTrainerBaamImportButton({
         {importing ? (
           <>
             <span className="loading loading-spinner loading-sm" />
-            Importing {importProgress.done} / {importProgress.total}
+            <Trans>
+              Importing {importProgress.done} / {importProgress.total}
+            </Trans>
           </>
         ) : (
-          "Load from baam"
+          <Trans>Load from Baam</Trans>
         )}
       </button>
     </>

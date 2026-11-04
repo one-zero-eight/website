@@ -1,4 +1,6 @@
 import { Node, mergeAttributes } from "@tiptap/core";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { CalloutNodeView } from "./CalloutNodeView.tsx";
 
@@ -6,8 +8,8 @@ export type CalloutId = "note" | "tip" | "important" | "caution" | "warning";
 
 export type CalloutType = {
   id: CalloutId;
-  label: string;
-  menuLabel: string;
+  label: MessageDescriptor;
+  menuLabel: MessageDescriptor;
   icon: string;
   color: string;
 };
@@ -15,36 +17,36 @@ export type CalloutType = {
 export const calloutTypes: CalloutType[] = [
   {
     id: "note",
-    label: "NOTE",
-    menuLabel: "Note",
+    label: msg`NOTE`,
+    menuLabel: msg`Note`,
     icon: "icon-[material-symbols--info-outline-rounded]",
     color: "border-blue-500 bg-blue-500/10",
   },
   {
     id: "tip",
-    label: "TIP",
-    menuLabel: "Tip",
+    label: msg`TIP`,
+    menuLabel: msg`Tip`,
     icon: "icon-[material-symbols--lightbulb-outline-rounded]",
     color: "border-green-500 bg-green-500/10",
   },
   {
     id: "important",
-    label: "IMPORTANT",
-    menuLabel: "Important",
+    label: msg`IMPORTANT`,
+    menuLabel: msg`Important`,
     icon: "icon-[material-symbols--feedback-outline-rounded]",
     color: "border-purple-500 bg-purple-500/10",
   },
   {
     id: "caution",
-    label: "CAUTION",
-    menuLabel: "Caution",
+    label: msg`CAUTION`,
+    menuLabel: msg`Caution`,
     icon: "icon-[material-symbols--report-outline-rounded]",
     color: "border-red-500 bg-red-500/10",
   },
   {
     id: "warning",
-    label: "WARNING",
-    menuLabel: "Warning",
+    label: msg({ message: "WARNING", context: "callout" }),
+    menuLabel: msg({ message: "Warning", context: "callout" }),
     icon: "icon-[material-symbols--warning-outline-rounded]",
     color: "border-yellow-500 bg-yellow-500/10",
   },

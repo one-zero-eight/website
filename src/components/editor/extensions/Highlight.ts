@@ -1,4 +1,6 @@
 import { Highlight as BaseHighlight } from "@tiptap/extension-highlight";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
 
 export type HighlightColor =
   | "none"
@@ -12,52 +14,57 @@ export type HighlightColor =
 
 export type HighlightColorType = {
   id: HighlightColor;
-  label: string;
+  label: MessageDescriptor;
   color: string | undefined;
   darkColor: string | undefined;
 };
 
 export const highlightColors: Record<HighlightColor, HighlightColorType> = {
-  none: { id: "none", label: "Remove", color: undefined, darkColor: undefined },
+  none: {
+    id: "none",
+    label: msg`Remove highlight`,
+    color: undefined,
+    darkColor: undefined,
+  },
   yellow: {
     id: "yellow",
-    label: "Yellow",
+    label: msg`Yellow`,
     color: "#ffd66c",
     darkColor: "#bb9634",
   },
   green: {
     id: "green",
-    label: "Green",
+    label: msg`Green`,
     color: "#6bf5a3",
     darkColor: "#42b772",
   },
   blue: {
     id: "blue",
-    label: "Blue",
+    label: msg`Blue`,
     color: "#bfdbfe",
     darkColor: "#002451",
   },
   pink: {
     id: "pink",
-    label: "Pink",
+    label: msg`Pink`,
     color: "#fbcfe8",
     darkColor: "#590e3d",
   },
   orange: {
     id: "orange",
-    label: "Orange",
+    label: msg`Orange`,
     color: "#f4c48e",
     darkColor: "#582e02",
   },
   purple: {
     id: "purple",
-    label: "Purple",
+    label: msg`Purple`,
     color: "#e9d5ff",
     darkColor: "#381e56",
   },
   red: {
     id: "red",
-    label: "Red",
+    label: msg`Red`,
     color: "#fecaca",
     darkColor: "#521919",
   },

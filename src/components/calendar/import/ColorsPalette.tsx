@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import {
   autoUpdate,
   flip,
@@ -75,7 +76,7 @@ export function ImportColorsPalette({
           className="h-3 w-3 rounded-full"
           style={{ backgroundColor: calendarColor }}
         />
-        Choose color
+        <Trans>Choose color</Trans>
       </button>
       {showColors && (
         <FloatingPortal>

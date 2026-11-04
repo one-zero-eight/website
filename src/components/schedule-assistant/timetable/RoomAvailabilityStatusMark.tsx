@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import type { ReactNode } from "react";
 
 import Tooltip from "@/components/common/Tooltip.tsx";
@@ -14,10 +15,6 @@ const STATUS_DOT_CLASS: Record<RoomAvailabilityStatus, string> = {
   orange: "bg-warning",
   red: "bg-error",
 };
-
-const CAPACITY_HEADER = "Недостаточная вместимость";
-const OK_HEADER = "Нет проблем";
-const NO_DATES_HEADER = "Нет дат проведения";
 
 function formatConflictMeeting(item: {
   label: string;
@@ -56,6 +53,8 @@ export function RoomAvailabilityStatusMark({
 }: {
   info: RoomAvailabilityInfo | null;
 }) {
+  const { t } = useLingui();
+
   if (!info) {
     return (
       <span
@@ -70,26 +69,25 @@ export function RoomAvailabilityStatusMark({
   const hasCapacity = !!info.capacityIssue;
   const hasConflicts = conflictDateCount > 0;
   const isOk = checkedDateCount > 0 && !hasCapacity && !hasConflicts;
+  const capacity = info.capacityIssue?.capacity;
+  const needed = info.capacityIssue?.needed;
 
   return (
     <Tooltip
       content={
         <div className="flex max-w-xs flex-col gap-2 py-0.5 wrap-break-word whitespace-normal">
           {!checkedDateCount ? (
-            <TooltipSection title={NO_DATES_HEADER} />
+            <TooltipSection title={t`No class dates`} />
           ) : null}
-          {isOk ? <TooltipSection title={OK_HEADER} /> : null}
+          {isOk ? <TooltipSection title={t`No issues`} /> : null}
           {info.capacityIssue ? (
-            <TooltipSection title={CAPACITY_HEADER}>
-              <div className="text-sm">
-                {info.capacityIssue.capacity} &lt; нужно{" "}
-                {info.capacityIssue.needed}
-              </div>
+            <TooltipSection title={t`Insufficient capacity`}>
+              <div className="text-sm">{t`${capacity} < ${needed} needed`}</div>
             </TooltipSection>
           ) : null}
           {hasConflicts ? (
             <TooltipSection
-              title={`В выбранное время занято в ${conflictDateCount} из ${checkedDateCount} дат`}
+              title={t`Busy at the selected time on ${conflictDateCount} of ${checkedDateCount} dates`}
             >
               <div className="text-base-content/80 text-sm">
                 {formatPickerConflictDates(info.conflictDates)}

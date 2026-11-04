@@ -1,4 +1,5 @@
 import { $sport } from "@/api/sport";
+import { Trans, useLingui } from "@lingui/react/macro";
 import type {
   SchemaTrainerInfoSchema,
   SchemaTrainingInfoPersonalSchema,
@@ -31,7 +32,7 @@ export function SportTrainerPage() {
   if (!sport.isTrainer || sport.studentId == null) {
     return (
       <div className="text-base-content/70 rounded-box border-base-300 border p-6 text-center text-sm">
-        You are not registered as a sport trainer.
+        <Trans>You are not registered as a sport trainer.</Trans>
       </div>
     );
   }
@@ -54,6 +55,7 @@ function SportTrainerContent({
   trainerGroupIds: ReadonlySet<number>;
   trainerGroups: SchemaTrainerInfoSchema["groups"];
 }) {
+  const { t } = useLingui();
   const [rulesOpen, setRulesOpen] = useState(false);
   const [selectedCurrent, setSelectedCurrent] =
     useState<SchemaTrainingInfoPersonalSchema | null>(null);
@@ -142,7 +144,7 @@ function SportTrainerContent({
   if (semesterError || scheduleError) {
     return (
       <div className="alert alert-error">
-        Trainer schedule could not be loaded.
+        <Trans>Trainer schedule could not be loaded.</Trans>
       </div>
     );
   }
@@ -152,7 +154,7 @@ function SportTrainerContent({
       {trainerGroups.length > 0 ? (
         <div className="flex flex-col gap-2">
           <p className="text-base-content/55 text-xs font-bold tracking-widest uppercase">
-            Teaching groups
+            <Trans>Teaching groups</Trans>
           </p>
           <div className="flex flex-wrap gap-2">
             {trainerGroups.map((group) => (
@@ -168,10 +170,14 @@ function SportTrainerContent({
       ) : null}
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-3xl font-medium">Current Trainings</h2>
+        <h2 className="text-3xl font-medium">
+          <Trans>Current Trainings</Trans>
+        </h2>
         <p className="text-base-content/60 text-sm">
-          Trainings in progress or finished less than 3 days ago. Click a
-          training to manage student attendance.
+          <Trans>
+            Trainings in progress or finished less than 3 days ago. Click a
+            training to manage student attendance.
+          </Trans>
         </p>
         {isPending ? (
           <div className="skeleton h-40 w-full" />
@@ -179,7 +185,7 @@ function SportTrainerContent({
           <Suspense fallback={<div className="skeleton h-40 w-full" />}>
             <SportTrainingsCalendarList
               rows={currentTrainings}
-              emptyText="No current trainings"
+              emptyText={t`No current trainings`}
               compactEmpty
               studentId={studentId}
               trainerGroupIds={trainerGroupIds}
@@ -191,14 +197,16 @@ function SportTrainerContent({
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-3xl font-medium">Upcoming Trainings</h2>
+        <h2 className="text-3xl font-medium">
+          <Trans>Upcoming Trainings</Trans>
+        </h2>
         {isPending ? (
           <div className="skeleton h-40 w-full" />
         ) : (
           <Suspense fallback={<div className="skeleton h-40 w-full" />}>
             <SportTrainingsCalendarList
               rows={upcomingTrainings}
-              emptyText="No upcoming trainings"
+              emptyText={t`No upcoming trainings`}
               compactEmpty
               studentId={studentId}
               trainerGroupIds={trainerGroupIds}
@@ -210,10 +218,14 @@ function SportTrainerContent({
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-3xl font-medium">Past Trainings</h2>
+        <h2 className="text-3xl font-medium">
+          <Trans>Past Trainings</Trans>
+        </h2>
         <p className="text-base-content/60 text-sm">
-          Finished trainings from the last 8 weeks. Click a training to view or
-          update attendance.
+          <Trans>
+            Finished trainings from the last 8 weeks. Click a training to view
+            or update attendance.
+          </Trans>
         </p>
         {isPending ? (
           <div className="skeleton h-40 w-full" />
@@ -221,7 +233,7 @@ function SportTrainerContent({
           <Suspense fallback={<div className="skeleton h-40 w-full" />}>
             <SportTrainingsCalendarList
               rows={pastTrainings}
-              emptyText="No past trainings"
+              emptyText={t`No past trainings`}
               compactEmpty
               studentId={studentId}
               trainerGroupIds={trainerGroupIds}

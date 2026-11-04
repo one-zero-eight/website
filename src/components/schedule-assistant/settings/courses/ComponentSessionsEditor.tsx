@@ -25,7 +25,6 @@ import {
   type SessionPlacement,
 } from "@/components/schedule-assistant/timetable/SessionSeriesEditor.tsx";
 import {
-  emptyOccurrence,
   emptyWeeklySlot,
   toUiTime,
   weekdayToKey,
@@ -35,13 +34,15 @@ import {
   type Meeting,
 } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { cn } from "@/lib/ui/cn";
+import { resolveSessionWindow } from "@/components/schedule-assistant/timetable/sessionWindows.ts";
+import { dateToDay } from "@/components/schedule-assistant/settings/semester/semesterBlocks.ts";
 import {
   expandWeeklySlotsToEvents,
   expandOccurrencesToEvents,
   eventsToOccurrences,
   eventsToWeeklySlots,
   eventSchedulesEqual,
-  WEEKLY_CONVERSION_WARNING,
+  weeklyConversionWarning,
 } from "@/components/schedule-assistant/timetable/editableSessionEvents.ts";
 import {
   useEffect,
@@ -54,11 +55,37 @@ import {
 
 function emptySeries(): SchemaComponentSessionSeries {
   return {
-    notes: "",
     audience: [],
+    active: null,
     weekly_pattern: [],
     dates_pattern: null,
   };
+}
+
+function seriesAudience(
+  series: SchemaComponentSessionSeries,
+  componentGroups?: string[],
+) {
+  return series.audience?.length ? series.audience : (componentGroups ?? []);
+}
+
+function outsideWindowDates(
+  config: SchemaScheduleConfig,
+  series: SchemaComponentSessionSeries,
+  audience: string[],
+  deleted?: Set<number>,
+): string[] {
+  const range = resolveSessionWindow(config, audience, series.active);
+  return (series.dates_pattern ?? [])
+    .filter(
+      (occurrence, index) =>
+        !deleted?.has(index) &&
+        (!Number.isFinite(dateToDay(occurrence.date)) ||
+          !range ||
+          occurrence.date < range.start_date ||
+          occurrence.date > range.end_date),
+    )
+    .map((occurrence) => occurrence.date || "дата не указана");
 }
 
 function seriesMode(series: SchemaComponentSessionSeries): SessionPlacement {
@@ -259,6 +286,7 @@ export function ComponentSessionsEditor({
   perGroup = false,
   onChange,
   onDeletedDirtyChange,
+  onValidityChange,
   sessionsForSaveRef,
   resetKey = 0,
 }: {
@@ -273,6 +301,7 @@ export function ComponentSessionsEditor({
   perGroup?: boolean;
   onChange: (sessions: SchemaComponentSessionSeries[] | null) => void;
   onDeletedDirtyChange?: (dirty: boolean) => void;
+  onValidityChange?: (valid: boolean) => void;
   sessionsForSaveRef?: MutableRefObject<
     (() => SchemaComponentSessionSeries[] | null) | null
   >;
@@ -307,6 +336,47 @@ export function ComponentSessionsEditor({
     setDeletedOccBySeries(emptyIndexMap());
     setDeletedSeriesIndexes(new Set());
   }, [baselineSessions, resetKey]);
+
+  const valid = list.every(
+    (series, index) =>
+      deletedSeriesIndexes.has(index) ||
+      (resolveSessionWindow(
+        config,
+        seriesAudience(series, componentGroups),
+        series.active,
+      ) != null &&
+        outsideWindowDates(
+          config,
+          series,
+          seriesAudience(series, componentGroups),
+          deletedOccBySeries.get(index),
+        ).length === 0),
+  );
+
+  useEffect(() => {
+    onValidityChange?.(valid);
+  }, [onValidityChange, valid]);
+
+  const draftConfig = useMemo(() => {
+    if (courseIndex == null || componentIndex == null) return config;
+    const courses = (config.courses ?? []).map((course, index) =>
+      index !== courseIndex
+        ? course
+        : {
+            ...course,
+            components: course.components.map((component, index) =>
+              index !== componentIndex
+                ? component
+                : {
+                    ...component,
+                    audience: componentGroups ?? component.audience,
+                    sessions: list,
+                  },
+            ),
+          },
+    );
+    return { ...config, courses };
+  }, [componentGroups, componentIndex, config, courseIndex, list]);
 
   useEffect(() => {
     onDeletedDirtyChange?.(
@@ -347,7 +417,7 @@ export function ComponentSessionsEditor({
   useEffect(() => {
     let cancelled = false;
     startTransition(() => {
-      const nextMeetings = buildMeetings(config);
+      const nextMeetings = buildMeetings(draftConfig);
       const nextIndex = buildMeetingPickerIndex(nextMeetings);
       if (cancelled) return;
       setMeetings(nextMeetings);
@@ -356,7 +426,7 @@ export function ComponentSessionsEditor({
     return () => {
       cancelled = true;
     };
-  }, [config]);
+  }, [draftConfig]);
 
   function slotExcludeRef(
     seriesIndex: number,
@@ -392,6 +462,8 @@ export function ComponentSessionsEditor({
     index: number,
     patch: Partial<SchemaComponentSessionSeries>,
   ) {
+    if ("active" in patch || "audience" in patch)
+      modeStashRef.current.delete(index);
     onChange(
       list.map((series, i) => (i === index ? { ...series, ...patch } : series)),
     );
@@ -410,6 +482,14 @@ export function ComponentSessionsEditor({
       return;
     }
     onChange(list.filter((_, i) => i !== seriesIndex));
+    modeStashRef.current = new Map(
+      [...modeStashRef.current]
+        .filter(([index]) => index !== seriesIndex)
+        .map(([index, value]) => [
+          index > seriesIndex ? index - 1 : index,
+          value,
+        ]),
+    );
     setDeletedWeeklyBySeries((prev) =>
       reindexMapAfterSeriesRemove(prev, seriesIndex),
     );
@@ -441,10 +521,17 @@ export function ComponentSessionsEditor({
     const series = list[index];
     if (!series || seriesMode(series) === mode) return;
     const stash = { ...modeStashRef.current.get(index) };
-    const audienceTokens = series.audience?.length
-      ? series.audience
-      : (componentGroups ?? []);
-
+    const audienceTokens = seriesAudience(series, componentGroups);
+    if (!resolveSessionWindow(config, audienceTokens, series.active)) return;
+    if (
+      outsideWindowDates(
+        config,
+        series,
+        audienceTokens,
+        deletedOccBySeries.get(index),
+      ).length
+    )
+      return;
     if (mode === "weekly") {
       if ((series.dates_pattern ?? []).length > 0) {
         stash.dates_pattern = series.dates_pattern ?? null;
@@ -461,13 +548,14 @@ export function ComponentSessionsEditor({
           : [emptyWeeklySlot(config, audienceTokens)]);
       const expanded = expandWeeklySlotsToEvents({
         config,
+        active: series.active,
         weeklySlots: weekly,
         audienceTokens,
       });
       if (
         series.dates_pattern != null &&
         !eventSchedulesEqual(sourceEvents, expanded) &&
-        !window.confirm(WEEKLY_CONVERSION_WARNING)
+        !window.confirm(weeklyConversionWarning())
       )
         return;
       modeStashRef.current.set(index, stash);
@@ -491,11 +579,12 @@ export function ComponentSessionsEditor({
       ? eventsToOccurrences(
           expandWeeklySlotsToEvents({
             config,
+            active: series.active,
             weeklySlots: weekly,
             audienceTokens,
           }),
         )
-      : [emptyOccurrence(config, audienceTokens)];
+      : [];
     modeStashRef.current.set(index, stash);
     setDeletedWeeklyBySeries((prev) => {
       const next = cloneIndexMap(prev);
@@ -520,26 +609,44 @@ export function ComponentSessionsEditor({
         const mode = seriesMode(series);
         const baselineSeries = baselineSessions?.[seriesIndex];
         const seriesDeleted = deletedSeriesIndexes.has(seriesIndex);
-        const audienceTokens = series.audience?.length
-          ? series.audience
-          : (componentGroups ?? []);
+        const audienceTokens = seriesAudience(series, componentGroups);
+        const invalidDates = outsideWindowDates(
+          config,
+          series,
+          audienceTokens,
+          deletedOccBySeries.get(seriesIndex),
+        );
         return (
           <div
-            key={seriesIndex}
+            key={`${resetKey}:${seriesIndex}`}
             className={cn(
               "border-base-300 rounded-box flex flex-col gap-2 border p-3",
               seriesDeleted && "border-error/40",
             )}
           >
+            {!seriesDeleted && invalidDates.length ? (
+              <p className="text-error text-xs">
+                Даты вне периода серии: {invalidDates.join(", ")}. Исправьте
+                даты; преобразование недоступно.
+              </p>
+            ) : null}
             <SessionSeriesEditor
-              notes={series.notes}
-              onNotesChange={(notes) => updateSeries(seriesIndex, { notes })}
               config={config}
+              active={series.active}
+              originalActive={baselineSeries?.active}
+              onSessionWindowChange={
+                seriesDeleted
+                  ? undefined
+                  : (window) =>
+                      updateSeries(seriesIndex, {
+                        active: window.active,
+                      })
+              }
               meetings={meetings}
               meetingIndex={meetingIndex}
               placement={mode}
               onPlacementChange={(next) => setMode(seriesIndex, next)}
-              placementDisabled={seriesDeleted}
+              placementDisabled={seriesDeleted || invalidDates.length > 0}
               disabled={seriesDeleted}
               beforePlacement={
                 <div className="flex items-center gap-1">
@@ -592,6 +699,7 @@ export function ComponentSessionsEditor({
                 updateSeries(seriesIndex, { weekly_pattern })
               }
               occurrences={series.dates_pattern ?? []}
+              newOccurrenceDefaults={{ date: "" }}
               onOccurrencesChange={(occurrences) =>
                 updateSeries(seriesIndex, { dates_pattern: occurrences })
               }

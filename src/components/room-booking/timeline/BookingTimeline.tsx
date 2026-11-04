@@ -1,6 +1,11 @@
 import type { roomBookingTypes } from "@/api/room-booking";
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
 import { accessLevelColors } from "@/components/room-booking/AccessLevelIcon.tsx";
-import { sanitizeBookingTitle } from "@/components/room-booking/utils.ts";
+import {
+  getRoomTitle,
+  sanitizeBookingTitle,
+} from "@/components/room-booking/utils.ts";
 import { cn } from "@/lib/ui/cn";
 import {
   clockTime,
@@ -83,6 +88,7 @@ export const BookingTimeline = forwardRef<
   },
   ref,
 ) {
+  const { i18n } = useLingui();
   const compactModeEnabled = useMediaQuery(
     `(max-width: ${COMPACT_VERSION_WIDTH_THRESHOLD}px)`,
   );
@@ -302,7 +308,7 @@ export const BookingTimeline = forwardRef<
   const newBookingData = useMemo(() => {
     if (!newBookingSlot) return null;
     return buildNewBookingData(interactionCtx, newBookingSlot);
-  }, [interactionCtx, newBookingSlot]);
+  }, [interactionCtx, newBookingSlot, i18n.locale]);
 
   const nowRulerCssVars = useMemo(
     () =>
@@ -480,7 +486,11 @@ export const BookingTimeline = forwardRef<
         data-new-touched={newBookingTouched ? "" : undefined}
       >
         <div className={cn(styles.corner, "text-base")}>
-          {!compactModeEnabled && <h2>Timeline</h2>}
+          {!compactModeEnabled && (
+            <h2>
+              <Trans>Timeline</Trans>
+            </h2>
+          )}
         </div>
 
         <div ref={scrollerEl} className={styles.scroller} style={scrollerStyle}>
@@ -583,7 +593,9 @@ export const BookingTimeline = forwardRef<
                     } as CSSProperties
                   }
                 >
-                  <span className={styles.headerItemDay}>{dayTitle(day)}</span>
+                  <span className={styles.headerItemDay}>
+                    {dayTitle(day, i18n.locale)}
+                  </span>
                   <div className={styles.headerItemHours}>
                     {HOURS_TIMES.map((h) => (
                       <span key={h}>
@@ -701,7 +713,9 @@ export const BookingTimeline = forwardRef<
                       to="/room-booking/rooms/$room"
                       params={{ room: room.id }}
                     >
-                      {compactModeEnabled ? room.short_name : room.title}
+                      {compactModeEnabled
+                        ? room.short_name
+                        : getRoomTitle(room, i18n.locale)}
                     </Link>
                   )}
                 </div>
@@ -721,7 +735,7 @@ export const BookingTimeline = forwardRef<
               className="btn btn-outline grow"
               onClick={() => setInteractionState({ type: "idle" })}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
             <button
               type="button"
@@ -736,7 +750,7 @@ export const BookingTimeline = forwardRef<
                 }
               }}
             >
-              Book
+              <Trans>Book</Trans>
             </button>
           </div>
         </div>

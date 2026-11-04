@@ -1,4 +1,5 @@
 import { $maps } from "@/api/maps";
+import { Trans } from "@lingui/react/macro";
 import { MapView } from "@/components/maps/viewer/MapView.tsx";
 import { Link } from "@tanstack/react-router";
 import { useMemo } from "react";
@@ -57,7 +58,7 @@ export function RoomMapPreview({ roomId }: { roomId: string }) {
         <div className="text-center">
           <span className="text-muted-foreground icon-[material-symbols--map-outline] text-2xl" />
           <p className="text-muted-foreground mt-2 text-sm">
-            Room location not found on map
+            <Trans>Room location not found on map</Trans>
           </p>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { Details } from "@/components/editor/extensions/Details.ts";
 import { Highlight } from "@/components/editor/extensions/Highlight.ts";
 import { Link } from "@/components/editor/extensions/Link.ts";
@@ -71,24 +72,6 @@ const baseExtensions = [
   TableKit.configure({
     table: { resizable: true, cellMinWidth: 100 },
   }),
-  // https://tiptap.dev/docs/editor/extensions/functionality/placeholder
-  Placeholder.configure({
-    emptyEditorClass: "is-editor-empty",
-    emptyNodeClass: "is-empty",
-    includeChildren: true,
-    showOnlyCurrent: false,
-    showOnlyWhenEditable: true,
-    placeholder: ({ node }) => {
-      if (node.type.name === "heading") {
-        return `Heading ${node.attrs.level}…`;
-      } else if (node.type.name === "caption") {
-        return "Write caption…";
-      } else if (node.type.name === "detailsSummary") {
-        return "Toggle…";
-      }
-      return "Write something…";
-    },
-  }),
   Highlight,
   Callout,
   Details,
@@ -122,12 +105,33 @@ function TiptapDescriptionEditor(
   },
   ref: React.Ref<TiptapEditorRef>,
 ) {
+  const { t, i18n } = useLingui();
   const extensions = useMemo(
     () => [
       ...baseExtensions,
+      Placeholder.configure({
+        emptyEditorClass: "is-editor-empty",
+        emptyNodeClass: "is-empty",
+        includeChildren: true,
+        showOnlyCurrent: false,
+        showOnlyWhenEditable: true,
+        placeholder: ({ node }) => {
+          if (node.type.name === "heading") {
+            const level = node.attrs.level;
+            return t`Heading ${level}…`;
+          }
+          if (node.type.name === "caption") {
+            return t`Write caption…`;
+          }
+          if (node.type.name === "detailsSummary") {
+            return t`Toggle…`;
+          }
+          return t`Write something…`;
+        },
+      }),
       EditorImageHandlersExtension.configure(imageHandlers ?? {}),
     ],
-    [imageHandlers],
+    [imageHandlers, t],
   );
 
   const editor = useEditor({
@@ -172,6 +176,12 @@ function TiptapDescriptionEditor(
     content: initialContent || "",
     onUpdate: () => onUpdate?.(),
   });
+
+  useEffect(() => {
+    if (editor && !editor.isDestroyed) {
+      editor.view.dispatch(editor.state.tr);
+    }
+  }, [editor, i18n.locale]);
 
   // Expose editor ref
   useImperativeHandle(ref, () => ({

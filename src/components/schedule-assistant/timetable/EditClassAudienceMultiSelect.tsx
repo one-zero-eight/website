@@ -1,4 +1,5 @@
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import { Trans, useLingui } from "@lingui/react/macro";
 import clsx from "clsx";
 import {
   forwardRef,
@@ -74,6 +75,7 @@ export function EditClassAudienceMultiSelect({
   patternLabel?: string;
   sectionCode: string;
 }) {
+  const { t } = useLingui();
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -245,7 +247,9 @@ export function EditClassAudienceMultiSelect({
     >
       {!editorOnly ? (
         <>
-          <span className="text-sm font-medium">Группы</span>
+          <span className="text-sm font-medium">
+            <Trans>Groups</Trans>
+          </span>
 
           {tokens.length ? (
             <div className="text-base-content/70 min-w-0 leading-snug wrap-break-word">
@@ -257,7 +261,7 @@ export function EditClassAudienceMultiSelect({
 
           {changed && originalLabel ? (
             <div className="text-base-content/55 text-xs">
-              Было:{" "}
+              <Trans>Was:</Trans>{" "}
               <button
                 type="button"
                 className="hover:text-base-content cursor-pointer underline decoration-dotted underline-offset-2"
@@ -270,8 +274,8 @@ export function EditClassAudienceMultiSelect({
           {!changed && overridden ? (
             <div className="text-info/80 text-xs">
               {patternLabel
-                ? `В шаблоне: ${patternLabel}`
-                : "переопределено в шаблоне"}
+                ? t`In template: ${patternLabel}`
+                : t`overridden in template`}
             </div>
           ) : null}
         </>
@@ -282,7 +286,7 @@ export function EditClassAudienceMultiSelect({
         type="text"
         className="input input-bordered input-xs h-8 min-h-8 w-full px-2 text-sm"
         value={searchQuery}
-        placeholder="Поиск группы, программы, секции или @селектора…"
+        placeholder={t`Search for a group, program, section or @selector…`}
         disabled={disabled}
         onChange={(event) => setSearchQuery(event.target.value)}
         onKeyDown={handleListNavigationKeyDown}
@@ -374,7 +378,7 @@ export function EditClassAudienceMultiSelect({
           ))
         ) : (
           <div className="text-base-content/50 px-2 py-2 text-sm">
-            Ничего не найдено
+            <Trans>Nothing found</Trans>
           </div>
         )}
       </div>

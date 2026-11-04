@@ -4,6 +4,7 @@ import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
 import { RoomBookingPage } from "@/components/room-booking/timeline/RoomBookingPage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 type RoomBookingSearch = {
   d?: number;
@@ -27,17 +28,18 @@ export const Route = createFileRoute("/_with_menu/room-booking/")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   return (
     <>
       <Helmet>
-        <title>Room booking</title>
+        <title>{t`Room booking`}</title>
         <meta
           name="description"
-          content="Book auditoriums and meeting rooms in Innopolis University."
+          content={t`Book auditoriums and meeting rooms in Innopolis University.`}
         />
       </Helmet>
 
-      <Topbar title="Room booking" hideOnMobile />
+      <Topbar title={<Trans>Room booking</Trans>} hideOnMobile />
       <BookingPageTabs />
       <RequireAuth>
         <RoomBookingPage />

@@ -1,4 +1,6 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
 import {
   createFuseInstance,
   searchClubs,
@@ -8,14 +10,16 @@ import { useMemo, useState } from "react";
 import { ClubCard } from "./ClubCard";
 import { ClubsSidebar } from "./ClubsSidebar";
 import {
-  clubTypeDescription,
   clubTypeIcon,
   clubTypesOrder,
+  clubsCountLabel,
+  getClubTypeDescription,
   getClubTypeLabel,
 } from "./constants.ts";
 import { isClubLeader } from "./permissions.ts";
 
 export function ClubsListPage() {
+  useLingui();
   const { data: clubs, isPending } = $clubs.useQuery(
     "get",
     "/clubs/",
@@ -84,7 +88,9 @@ export function ClubsListPage() {
   if (isPending) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-base-content/30 text-lg">Loading clubs...</div>
+        <div className="text-base-content/30 text-lg">
+          <Trans>Loading clubs...</Trans>
+        </div>
       </div>
     );
   }
@@ -92,7 +98,9 @@ export function ClubsListPage() {
   if (!clubs || clubs.length === 0) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-base-content/30 text-lg">No clubs found</div>
+        <div className="text-base-content/30 text-lg">
+          <Trans>No clubs found</Trans>
+        </div>
       </div>
     );
   }
@@ -122,14 +130,16 @@ export function ClubsListPage() {
 
       {filteredClubs.length === 0 ? (
         <div className="flex min-h-[400px] grow items-center justify-center">
-          <div className="text-base-content/30 text-lg">No clubs found</div>
+          <div className="text-base-content/30 text-lg">
+            <Trans>No clubs found</Trans>
+          </div>
         </div>
       ) : (
         <div className="flex grow flex-col gap-6">
           {yourClubs.length > 0 && (
             <section>
               <h2 className="text-base-content text-xl font-semibold">
-                Your club
+                <Trans>Your club</Trans>
               </h2>
               <div className="mt-4 flex flex-col gap-6">
                 {yourClubs.map((club) => (
@@ -153,11 +163,11 @@ export function ClubsListPage() {
                   </h2>
                   <div className="grow" />
                   <span className="text-base-content/50 text-sm">
-                    {clubsOfType.length} clubs
+                    {clubsCountLabel(clubsOfType.length)}
                   </span>
                 </div>
                 <span className="text-base-content/50">
-                  {clubTypeDescription[type as clubsTypes.ClubType]}
+                  {getClubTypeDescription(type as clubsTypes.ClubType)}
                 </span>
                 <div className="mt-4 flex flex-col gap-6">
                   {clubsOfType.map((club) => (

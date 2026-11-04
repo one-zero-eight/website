@@ -1,4 +1,5 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
@@ -11,6 +12,7 @@ import {
 } from "./constants.ts";
 
 export function ClubAdminCard({ club }: { club: clubsTypes.SchemaClub }) {
+  const { t } = useLingui();
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
   const clubLeader = useMemo(
     () =>
@@ -47,7 +49,9 @@ export function ClubAdminCard({ club }: { club: clubsTypes.SchemaClub }) {
               {getClubTypeLabel(club.type)}
             </span>
             {!club.is_active && (
-              <span className="badge badge-sm badge-error">Inactive</span>
+              <span className="badge badge-sm badge-error">
+                <Trans>Inactive</Trans>
+              </span>
             )}
           </div>
         </div>
@@ -63,7 +67,9 @@ export function ClubAdminCard({ club }: { club: clubsTypes.SchemaClub }) {
             className="btn btn-primary btn-soft btn-sm"
           >
             <span className="icon-[mdi--pencil] size-4" />
-            <span>Edit</span>
+            <span>
+              <Trans>Edit</Trans>
+            </span>
           </Link>
           <Link
             to="/clubs/$slug"
@@ -71,7 +77,9 @@ export function ClubAdminCard({ club }: { club: clubsTypes.SchemaClub }) {
             className="btn btn-soft btn-sm"
           >
             <span className="icon-[mdi--arrow-right] size-4" />
-            <span>View</span>
+            <span>
+              <Trans>View</Trans>
+            </span>
           </Link>
           {clubLeader && (
             <a
@@ -88,7 +96,7 @@ export function ClubAdminCard({ club }: { club: clubsTypes.SchemaClub }) {
               {clubLeader.telegram_alias && (
                 <span className="icon-[mdi--telegram] size-4" />
               )}
-              <span>{clubLeader?.name || "Leader"}</span>
+              <span>{clubLeader?.name || t`Leader`}</span>
             </a>
           )}
           {club.links.map((link, index) => (

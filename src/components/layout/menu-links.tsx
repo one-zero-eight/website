@@ -83,13 +83,20 @@ export function isMenuItemVisible(
 
 export const items: ItemType[] = [
   // Our flagman services:
-  {
-    type: "local",
-    title: "Search",
-    to: "/search",
-    icon: <span className="icon-[material-symbols--search]" />,
-  },
-  { type: "separator" },
+  ...((import.meta.env.VITE_PRODUCTION && []) || [
+    {
+      type: "local",
+      title: "Search",
+      to: "/search",
+      badge: (
+        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
+          DEV
+        </span>
+      ),
+      icon: <span className="icon-[material-symbols--search]" />,
+    },
+    { type: "separator" },
+  ]),
   {
     type: "local",
     title: "Dashboard",
@@ -279,6 +286,12 @@ export const items: ItemType[] = [
     title: "Baam",
     href: "https://baam.tatar/s",
     icon: <span className="icon-[material-symbols--qr-code-rounded]" />,
+  },
+  {
+    type: "external",
+    title: "Innopa",
+    href: "https://innopa.ru/about",
+    icon: <span className="icon-[bxl--linkedin]" />,
   },
   {
     type: "external",

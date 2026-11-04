@@ -1,8 +1,10 @@
 import { useAccountsApiAvailability } from "@/api/accounts/api-availability.ts";
 import { cn } from "@/lib/ui/cn";
+import { useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo, useState } from "react";
 
 export function ConnectivityNotification() {
+  const { t } = useLingui();
   const { isUnavailable: isAccountsApiUnavailable } =
     useAccountsApiAvailability();
   const [isOffline, setIsOffline] = useState(
@@ -43,26 +45,25 @@ export function ConnectivityNotification() {
   const issue = useMemo(() => {
     if (isOffline) {
       return {
-        title: "You are offline",
-        description: "Connect to the internet to keep using InNoHassle.",
+        title: t`You are offline`,
+        description: t`Connect to the internet to keep using InNoHassle.`,
         suggestions: [
-          "Connect to WiFi or mobile internet.",
-          "Check that airplane mode is disabled.",
-          "Reload the page after the connection is restored.",
+          t`Connect to WiFi or mobile internet.`,
+          t`Check that airplane mode is disabled.`,
+          t`Reload the page after the connection is restored.`,
         ],
       };
     }
 
     if (isAccountsApiUnavailable) {
       return {
-        title: "Couldn't connect to InNoHassle servers",
-        description:
-          "Try to disable VPN and connect to University WiFi, then reload the page.",
+        title: t`Couldn't connect to InNoHassle servers`,
+        description: t`Try to disable VPN and connect to University WiFi, then reload the page.`,
       };
     }
 
     return null;
-  }, [isAccountsApiUnavailable, isOffline]);
+  }, [isAccountsApiUnavailable, isOffline, t]);
 
   if (!issue || isClosed) {
     return null;

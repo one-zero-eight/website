@@ -1,4 +1,5 @@
 import { Modal } from "@/components/common/Modal.tsx";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useMemo, useState } from "react";
 import { eventFieldClass } from "../shared/formStyles";
 
@@ -11,6 +12,7 @@ export function EnrolledListModal({
   onOpenChange: (open: boolean) => void;
   enrolledEmails: string[];
 }) {
+  const { t } = useLingui();
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -37,20 +39,24 @@ export function EnrolledListModal({
   }
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Participants">
+    <Modal open={open} onOpenChange={onOpenChange} title={t`Participants`}>
       <div className="@container/modal flex flex-col gap-3">
         <input
           type="search"
           className={eventFieldClass()}
-          placeholder="Search..."
+          placeholder={t`Search...`}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
         <div className="max-h-80 min-h-0 overflow-y-auto">
           {enrolledEmails.length === 0 ? (
-            <p className="text-base-content/70 text-sm">No participants.</p>
+            <p className="text-base-content/70 text-sm">
+              <Trans>No participants.</Trans>
+            </p>
           ) : filtered.length === 0 ? (
-            <p className="text-base-content/70 text-sm">No matches.</p>
+            <p className="text-base-content/70 text-sm">
+              <Trans>No matches.</Trans>
+            </p>
           ) : (
             <ul className="divide-base-300 divide-y">
               {filtered.map((email) => (
@@ -68,7 +74,7 @@ export function EnrolledListModal({
             disabled={enrolledEmails.length === 0}
             onClick={handleExport}
           >
-            Export
+            <Trans>Export</Trans>
           </button>
         </div>
       </div>

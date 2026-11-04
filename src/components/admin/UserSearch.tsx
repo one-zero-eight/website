@@ -1,11 +1,12 @@
 import { $accounts, accountsTypes } from "@/api/accounts";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { AdminUserListItem } from "@/components/admin/AdminUserListItem.tsx";
 import { useEffect, useRef, useState } from "react";
 
 export function UserSearch({
   title,
-  placeholder = "Name or email...",
+  placeholder,
   initialQuery = "",
   onSelect,
   selectedUserId,
@@ -16,6 +17,7 @@ export function UserSearch({
   onSelect?: (user: accountsTypes.SchemaViewUser) => void;
   selectedUserId?: string;
 }) {
+  const { t } = useLingui();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState(initialQuery);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery.trim());
@@ -60,7 +62,7 @@ export function UserSearch({
           autoComplete="off"
           spellCheck={false}
           className="input input-bordered w-full"
-          placeholder={placeholder}
+          placeholder={placeholder ?? t`Name or email...`}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
@@ -80,7 +82,9 @@ export function UserSearch({
       )}
 
       {showResults && !isLoadingResults && !isError && data?.length === 0 && (
-        <p className="text-base-content/75">No users found.</p>
+        <p className="text-base-content/75">
+          <Trans>No users found.</Trans>
+        </p>
       )}
 
       {showResults && !isLoadingResults && !isError && !!data?.length && (

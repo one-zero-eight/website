@@ -1,6 +1,7 @@
 import { useMe } from "@/api/accounts/user.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
+import { SwitchLocaleButton } from "@/components/layout/SwitchLocaleButton.tsx";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton.tsx";
 import UserMenu from "@/components/layout/UserMenu.tsx";
 import { useImpersonatingUser } from "@/components/admin/useImpersonation.ts";
@@ -9,18 +10,20 @@ import {
   isMenuItemVisible,
   LinkItemType,
 } from "@/components/layout/menu-links.tsx";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 
 export function MorePage() {
   const { me } = useMe();
   const [impersonatingUser] = useImpersonatingUser();
+  const { t } = useLingui();
 
   return (
     <div className="flex min-h-full flex-col items-start justify-start">
       {/* Social links */}
       <div className="flex w-full gap-2 px-2">
-        <Tooltip content="GitHub">
+        <Tooltip content={t`GitHub`}>
           <a
             href="https://github.com/one-zero-eight"
             target="_blank"
@@ -30,7 +33,7 @@ export function MorePage() {
             <span className="icon-[mdi--github] text-base-content/70 text-3xl" />
           </a>
         </Tooltip>
-        <Tooltip content="Telegram">
+        <Tooltip content={t`Telegram`}>
           <a
             href="https://telegram.me/one_zero_eight"
             target="_blank"
@@ -42,6 +45,7 @@ export function MorePage() {
         </Tooltip>
         <div className="flex grow"></div>
         {/* <ToggleSnowButton /> // Disable snow */}
+        <SwitchLocaleButton />
         <SwitchThemeButton />
         <div className="py-2 pr-2">
           <UserMenu isMobile={false} isSidebar={false} />
@@ -69,7 +73,7 @@ export function MorePage() {
           className="hover:bg-base-300 flex rounded-xl px-4 py-2 transition-colors"
         >
           <span className="in-[.is-active]:selected in-[.is-active]:text-primary text-base-content/50 flex w-fit items-center text-base font-normal whitespace-nowrap in-[.is-active]:font-medium">
-            About us
+            <Trans>About us</Trans>
           </span>
         </Link>
       </div>

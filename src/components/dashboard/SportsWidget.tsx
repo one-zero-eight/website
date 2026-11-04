@@ -1,9 +1,11 @@
 import { $sport } from "@/api/sport";
+import { Trans, Plural, useLingui } from "@lingui/react/macro";
 import { useNowMS } from "@/lib/utils/use-now.ts";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 export function SportsWidget() {
+  const { i18n } = useLingui();
   const [widgetShown, setWidgetShown] = useLocalStorage("widget-sports", false);
   const { data: profile, isPending: profileIsPending } = $sport.useQuery(
     "get",
@@ -45,6 +47,12 @@ export function SportsWidget() {
     0,
     Math.ceil((deadline.getTime() - nowMs) / (1000 * 60 * 60 * 24)),
   );
+  const localeTag = i18n.locale === "ru" ? "ru-RU" : "en-US";
+  const deadlineDate = deadline.toLocaleDateString(localeTag, {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 
   return (
     <div className="group bg-base-200 rounded-box flex flex-row gap-4 px-4 py-4">
@@ -53,28 +61,37 @@ export function SportsWidget() {
         <p className="text-base-content flex items-center text-lg font-semibold">
           <span className="icon-[material-symbols--exercise-outline] text-primary mr-2 shrink-0 text-3xl sm:hidden" />
           <span>
-            Sports:{" "}
-            <span className="font-normal">
-              {earnedHours} / {semesterHours}
-              {debtHours ? `+${debtHours} (debt)` : null} hours
-            </span>
+            {debtHours ? (
+              <Trans>
+                Sports:{" "}
+                <span className="font-normal">
+                  {earnedHours} / {semesterHours}+{debtHours} (debt) hours
+                </span>
+              </Trans>
+            ) : (
+              <Trans>
+                Sports:{" "}
+                <span className="font-normal">
+                  {earnedHours} / {semesterHours} hours
+                </span>
+              </Trans>
+            )}
           </span>
         </p>
         <p className="text-base-content/75">
-          <span className="font-semibold">Deadline:</span>{" "}
-          {deadline.toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-          })}{" "}
-          ({daysLeft} days left)
+          <Trans>
+            <span className="font-semibold">Deadline:</span> {deadlineDate} (
+            <Plural value={daysLeft} one="# day left" other="# days left" />)
+          </Trans>
         </p>
         <a
           href="https://telegram.me/IUSportBot"
           className="text-base-content/75 w-fit hover:underline"
         >
-          Check in for sports in the{" "}
-          <span className="text-primary">Sports bot</span>
+          <Trans>
+            Check in for sports in the{" "}
+            <span className="text-primary">Sport bot</span>
+          </Trans>
           <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-xs" />
         </a>
       </div>

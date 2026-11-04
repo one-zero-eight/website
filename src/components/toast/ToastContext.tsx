@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import { ConfirmDialog } from "./ConfirmDialog.tsx";
-import { ConfirmOptions, Toast, ToastContextType } from "./types.ts";
+import { ConfirmOptions, Toast, ToastContextType, ToastText } from "./types.ts";
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
@@ -32,8 +32,6 @@ export function ToastProvider({ children }: PropsWithChildren) {
     const id = generateId();
     const newToast: Toast = {
       ...toast,
-      title: toast.title.toString(),
-      message: toast.message ? toast.message.toString() : undefined,
       id,
       duration: toast.duration ?? 5000, // по умолчанию 5 секунд
       isVisible: true,
@@ -57,28 +55,28 @@ export function ToastProvider({ children }: PropsWithChildren) {
   }, []);
 
   const showSuccess = useCallback(
-    (title: string, message?: string) => {
+    (title: ToastText, message?: ToastText) => {
       showToast({ type: "success", title, message });
     },
     [showToast],
   );
 
   const showError = useCallback(
-    (title: string, message?: string) => {
+    (title: ToastText, message?: ToastText) => {
       showToast({ type: "error", title, message });
     },
     [showToast],
   );
 
   const showWarning = useCallback(
-    (title: string, message?: string) => {
+    (title: ToastText, message?: ToastText) => {
       showToast({ type: "warning", title, message });
     },
     [showToast],
   );
 
   const showInfo = useCallback(
-    (title: string, message?: string) => {
+    (title: ToastText, message?: ToastText) => {
       showToast({ type: "info", title, message });
     },
     [showToast],

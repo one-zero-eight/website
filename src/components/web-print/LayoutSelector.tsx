@@ -1,47 +1,49 @@
 import { PrintingOptionsNumberUpAnyOf0 } from "@/api/printers/types.ts";
 import { cn } from "@/lib/ui/cn";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 import { useEffect, useRef, useState } from "react";
 
 const LAYOUT_OPTIONS = [
   {
     value: PrintingOptionsNumberUpAnyOf0.Value1,
     label: "1×1",
-    subtitle: "1 page",
+    subtitle: msg`1 page`,
     cols: 1,
     rows: 1,
   },
   {
     value: PrintingOptionsNumberUpAnyOf0.Value2,
     label: "1×2",
-    subtitle: "2 pages",
+    subtitle: msg`2 pages`,
     cols: 1,
     rows: 2,
   },
   {
     value: PrintingOptionsNumberUpAnyOf0.Value4,
     label: "2×2",
-    subtitle: "4 pages",
+    subtitle: msg`4 pages`,
     cols: 2,
     rows: 2,
   },
   {
     value: PrintingOptionsNumberUpAnyOf0.Value6,
     label: "2×3",
-    subtitle: "6 pages",
+    subtitle: msg`6 pages`,
     cols: 2,
     rows: 3,
   },
   {
     value: PrintingOptionsNumberUpAnyOf0.Value9,
     label: "3×3",
-    subtitle: "9 pages",
+    subtitle: msg`9 pages`,
     cols: 3,
     rows: 3,
   },
   {
     value: PrintingOptionsNumberUpAnyOf0.Value16,
     label: "4×4",
-    subtitle: "16 pages",
+    subtitle: msg`16 pages`,
     cols: 4,
     rows: 4,
   },
@@ -54,6 +56,7 @@ export function LayoutSelector({
   value: PrintingOptionsNumberUpAnyOf0;
   onChange: (value: PrintingOptionsNumberUpAnyOf0) => void;
 }) {
+  const { i18n } = useLingui();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const selected =
@@ -86,7 +89,9 @@ export function LayoutSelector({
         <LayoutSheetPreview cols={selected.cols} rows={selected.rows} />
         <div className="min-w-0 flex-1">
           <p className="text-sm">{selected.label}</p>
-          <p className="text-base-content/50 text-sm">{selected.subtitle}</p>
+          <p className="text-base-content/50 text-sm">
+            {i18n._(selected.subtitle)}
+          </p>
         </div>
         <span
           className={cn(
@@ -120,7 +125,7 @@ export function LayoutSelector({
                 <div className="text-center">
                   <p className="text-sm">{option.label}</p>
                   <p className="text-base-content/50 text-xs">
-                    {option.subtitle}
+                    {i18n._(option.subtitle)}
                   </p>
                 </div>
               </button>

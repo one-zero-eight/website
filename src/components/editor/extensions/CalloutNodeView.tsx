@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import {
   CalloutId,
   CalloutType,
@@ -68,10 +69,11 @@ export const CalloutNodeView = memo(
 );
 
 function StaticCalloutHeader({ calloutType }: { calloutType: CalloutType }) {
+  const { i18n } = useLingui();
   return (
     <div className="flex shrink-0 items-center gap-2 text-xl select-none">
       <span className={cn("text-xl", calloutType.icon)} />
-      <span className="text-sm font-medium">{calloutType.label}</span>
+      <span className="text-sm font-medium">{i18n._(calloutType.label)}</span>
     </div>
   );
 }
@@ -83,6 +85,7 @@ function CalloutTypeHeader({
   calloutType: CalloutType;
   setType: (type: CalloutId) => void;
 }) {
+  const { t, i18n } = useLingui();
   const [isOpen, setIsOpen] = useState(false);
   const activeIndexRef = useRef<number | null>(null);
 
@@ -128,10 +131,10 @@ function CalloutTypeHeader({
           "flex cursor-pointer items-center justify-center gap-2 text-xl select-none hover:opacity-70",
           isOpen && "opacity-70",
         )}
-        title="Change callout type"
+        title={t`Change callout type`}
       >
         <span className={cn("text-xl", calloutType.icon)} />
-        <span className="text-sm font-medium">{calloutType.label}</span>
+        <span className="text-sm font-medium">{i18n._(calloutType.label)}</span>
         <span
           className={cn(
             "shrink-0 text-lg transition-transform",
@@ -185,7 +188,7 @@ function CalloutTypeHeader({
                   })}
                 >
                   <span className={type.icon} />
-                  <span>{type.menuLabel}</span>
+                  <span>{i18n._(type.menuLabel)}</span>
                 </div>
               );
             })}

@@ -1,3 +1,4 @@
+import { msg } from "@lingui/core/macro";
 import { $sport } from "@/api/sport";
 import type { SchemaBadGradeReportSchema } from "@/api/sport/types.ts";
 import type { useToast } from "@/components/toast";
@@ -33,9 +34,9 @@ export function handleAttendanceResponse(
   showWarning: ReturnType<typeof useToast>["showWarning"],
 ) {
   if (Array.isArray(data)) {
-    showSuccess("Attendance updated", "Hours have been saved.");
+    showSuccess(msg`Attendance updated`, msg`Hours have been saved.`);
     return;
   }
 
-  showWarning("Attendance issue", data.description);
+  showWarning(msg`Attendance issue`, data.description);
 }

@@ -14,9 +14,11 @@ import {
 } from "@floating-ui/react";
 import { cn } from "@/lib/ui/cn";
 import React, { useRef, useState } from "react";
+import { useLingui } from "@lingui/react/macro";
 
 interface Option {
   value: string;
+  label?: string;
 }
 
 interface CustomSelectProps {
@@ -32,6 +34,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   onChange,
   className,
 }) => {
+  const { t } = useLingui();
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -78,8 +81,10 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         })}
       >
         <span>
-          {options.find((opt) => opt.value === selectedValue)?.value ||
-            "Select..."}
+          {(() => {
+            const selected = options.find((opt) => opt.value === selectedValue);
+            return selected?.label ?? selected?.value ?? t`Select...`;
+          })()}
         </span>
         <svg
           className={`text-primary h-5 w-5 transition-transform ${
@@ -136,7 +141,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                       },
                     })}
                   >
-                    {option.value}
+                    {option.label ?? option.value}
                   </div>
                 );
               })}

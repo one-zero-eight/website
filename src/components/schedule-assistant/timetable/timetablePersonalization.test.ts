@@ -4,9 +4,12 @@ import {
   type SchemaPublicTimetable,
 } from "@/api/schedule-assistant/types.ts";
 import { publicTimetableConfig } from "./publicTimetableConfig.ts";
+import { personalColumnRailStyle } from "./timetableGroupsGridLayout.ts";
 import {
+  listPersonalMeetingsByDay,
   nearestPersonalMeeting,
   personalTimetableGroups,
+  resolvePersonalInstructorId,
   shouldAutoNavigatePersonalGroups,
 } from "./timetablePersonalization.ts";
 import {
@@ -31,10 +34,18 @@ const publicData: SchemaPublicTimetable = {
     ],
   },
   students_groups: [{ code: "A", name: "Group A" }],
+  instructors: [
+    {
+      id: "teacher",
+      name_en: "Teacher",
+      email: "teacher@innopolis.ru",
+    },
+  ],
   courses: [
     {
       name: "Math",
       section_code: "core",
+      notes: "Bring a laptop",
       components: [
         {
           tag: "lec",
@@ -42,7 +53,6 @@ const publicData: SchemaPublicTimetable = {
           sessions: [
             {
               audience: ["B"],
-              notes: "Bring a laptop",
               dates_pattern: [
                 {
                   date: "2026-09-07",
@@ -122,6 +132,91 @@ describe("personal timetable navigation", () => {
       ),
     ).toBe(next);
   });
+  it("groups personal meetings by day within the selected week", () => {
+    const monEarly = {
+      ...meeting,
+      date: "2026-09-07",
+      start: "09:00",
+      instance_id: "mon-early",
+    };
+    const monLate = {
+      ...meeting,
+      date: "2026-09-07",
+      start: "11:00",
+      instance_id: "mon-late",
+    };
+    const wed = { ...meeting, date: "2026-09-09", instance_id: "wed" };
+    const nextWeek = {
+      ...meeting,
+      date: "2026-09-14",
+      instance_id: "next-week",
+    };
+    const otherGroup = {
+      ...meeting,
+      date: "2026-09-08",
+      groups: ["A"],
+      instance_id: "other",
+    };
+    expect(
+      listPersonalMeetingsByDay(
+        [wed, monLate, nextWeek, otherGroup, monEarly],
+        ["B"],
+        "2026-09-07",
+      ).map((day) => [
+        day.date,
+        day.meetings.map((item) => item.meeting.instance_id),
+      ]),
+    ).toEqual([
+      ["2026-09-07", ["mon-early", "mon-late"]],
+      ["2026-09-09", ["wed"]],
+    ]);
+  });
+  it("labels studying groups and merges teaching meetings by email", () => {
+    const studying = {
+      ...meeting,
+      instance_id: "study",
+      instructors: "other",
+    };
+    const teaching = {
+      ...meeting,
+      instance_id: "teach",
+      groups: ["A"],
+      instructors: "teacher",
+    };
+    const both = {
+      ...meeting,
+      instance_id: "both",
+      start: "12:00",
+      instructors: "teacher",
+    };
+    expect(resolvePersonalInstructorId(config, "teacher@innopolis.ru")).toBe(
+      "teacher",
+    );
+    expect(
+      listPersonalMeetingsByDay(
+        [teaching, studying, both],
+        ["B"],
+        "2026-09-07",
+        {
+          groupLabelsById: new Map([["B", "Group B"]]),
+          instructors: config.instructors,
+          instructorId: "teacher",
+        },
+      ).map((day) =>
+        day.meetings.map((item) => [
+          item.meeting.instance_id,
+          item.roles,
+          item.ownGroupLabels,
+        ]),
+      ),
+    ).toEqual([
+      [
+        ["study", ["studying"], ["Group B"]],
+        ["teach", ["teaching"], []],
+        ["both", ["studying", "teaching"], ["Group B"]],
+      ],
+    ]);
+  });
   it("auto-navigates once, after readiness, without overriding users or deep links", () => {
     const options = {
       ready: true,
@@ -142,6 +237,34 @@ describe("personal timetable navigation", () => {
       ).toBe(false);
     }
   });
+});
+
+describe("personal column rail alignment", () => {
+  it("uses compact column widths for merged cells and headers", () => {
+    expect(personalColumnRailStyle(11, [5], 2, 100)?.backgroundPosition).toBe(
+      "500px 0, 598px 0",
+    );
+    expect(personalColumnRailStyle(1, [0], 4, 100)?.backgroundPosition).toBe(
+      "0px 0, 96px 0",
+    );
+  });
+  it.each([
+    { groupCount: 1, index: 0, railPx: 4 },
+    { groupCount: 2, index: 0, railPx: 2 },
+    { groupCount: 11, index: 0, railPx: 2 },
+    { groupCount: 11, index: 5, railPx: 2 },
+    { groupCount: 11, index: 10, railPx: 2 },
+  ])(
+    "aligns $railPx px rails for group $index of $groupCount",
+    ({ groupCount, index, railPx }) => {
+      const style = personalColumnRailStyle(groupCount, [index], railPx)!;
+      expect(style.backgroundPosition).toBe(
+        `${index * 135}px 0, ${(index + 1) * 135 - railPx}px 0`,
+      );
+      expect(style.backgroundOrigin).toBe("border-box");
+      expect(style.backgroundClip).toBe("border-box");
+    },
+  );
 });
 
 describe("independent personal highlighting", () => {

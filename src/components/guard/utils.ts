@@ -38,9 +38,9 @@ export function buildDocsUrl(fileId: string): string {
 /**
  * Formats ISO date string to readable format
  */
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string, locale: string): string {
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",

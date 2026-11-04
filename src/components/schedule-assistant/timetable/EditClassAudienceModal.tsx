@@ -7,6 +7,7 @@ import {
 import { AudienceTokensInfoIcon } from "@/components/schedule-assistant/settings/courses/audienceTreeTooltip.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
+import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo, useState } from "react";
 
 import { EditClassAudienceMultiSelect } from "./EditClassAudienceMultiSelect.tsx";
@@ -31,8 +32,8 @@ export function EditClassAudienceSummaryRow({
   onRestoreOriginal,
   overridden,
   patternLabel,
-  patternLabelPrefix = "в шаблоне",
-  labelPrefix = "Группы",
+  patternLabelPrefix,
+  labelPrefix,
   emptyLabel = "—",
   onEdit,
 }: {
@@ -50,6 +51,9 @@ export function EditClassAudienceSummaryRow({
   emptyLabel?: string;
   onEdit: () => void;
 }) {
+  const { t } = useLingui();
+  const prefix = labelPrefix ?? t`Groups`;
+  const patternPrefix = patternLabelPrefix ?? t`in template`;
   const audienceSize = useMemo(
     () => audienceSizeForTokens(config, tokens),
     [config, tokens],
@@ -69,14 +73,15 @@ export function EditClassAudienceSummaryRow({
         className="btn btn-ghost btn-xs h-auto min-h-0 justify-start gap-1 px-2"
         disabled={disabled}
         onClick={onEdit}
-        title={`Изменить: ${labelPrefix}`}
+        title={t`Edit: ${prefix}`}
       >
         <span className="inline-flex min-w-0 items-center gap-1">
-          <span className="text-base-content/50 shrink-0">{labelPrefix}:</span>
+          <span className="text-base-content/50 shrink-0">{prefix}:</span>
           <span className="max-w-56 truncate font-medium">{label}</span>
           {audienceSize != null ? (
             <span className="text-base-content/45 shrink-0">
-              · {audienceSize} студ.
+              ·{" "}
+              <Plural value={audienceSize} one="# student" other="# students" />
             </span>
           ) : null}
           <AudienceTokensInfoIcon
@@ -89,7 +94,7 @@ export function EditClassAudienceSummaryRow({
       </button>
       {changed && originalLabel != null ? (
         <div className="text-base-content/55 px-2.5 text-xs">
-          Было:{" "}
+          <Trans>Was:</Trans>{" "}
           <button
             type="button"
             className="hover:text-base-content cursor-pointer underline decoration-dotted underline-offset-2"
@@ -102,8 +107,8 @@ export function EditClassAudienceSummaryRow({
       {!changed && overridden ? (
         <div className="text-base-content/55 px-2.5 text-xs">
           {patternLabel
-            ? `${patternLabelPrefix} · ${patternLabel}`
-            : "переопределено в шаблоне"}
+            ? `${patternPrefix} · ${patternLabel}`
+            : t`overridden in template`}
         </div>
       ) : null}
     </div>
@@ -129,6 +134,7 @@ export function EditClassAudienceModal({
   onSave: (tokens: string[]) => void;
   sectionCode: string;
 }) {
+  const { t } = useLingui();
   const { showError } = useToast();
   const tree = useMemo(
     () => buildAudienceSelectorTree(config, { sectionCode }),
@@ -162,7 +168,7 @@ export function EditClassAudienceModal({
   function handleSave() {
     const next = minimizeAudienceTokens(draft, tree);
     if (!next.length) {
-      showError("Ошибка", "Укажите хотя бы одну группу.");
+      showError(t`Error`, t`Specify at least one group.`);
       return;
     }
     onSave(next);
@@ -176,12 +182,14 @@ export function EditClassAudienceModal({
         if (!next) handleClose();
         else onOpenChange(next);
       }}
-      title="Группы"
+      title={t`Groups`}
       containerClassName="max-w-xl"
     >
       <div className="flex flex-col gap-3">
         <div className="rounded-box border-base-300 bg-base-100 border px-3 py-2 text-sm">
-          <div className="text-base-content/50 text-xs">Выбрано</div>
+          <div className="text-base-content/50 text-xs">
+            <Trans>Selected</Trans>
+          </div>
           <div className="text-base-content/80 mt-0.5 inline-flex min-w-0 items-center gap-1 leading-snug">
             <span className="min-w-0 wrap-break-word">
               {draft.length ? draftLabel : "—"}
@@ -192,7 +200,7 @@ export function EditClassAudienceModal({
           </div>
           {changedFromOriginal ? (
             <div className="text-base-content/60 mt-1.5 text-xs">
-              Было:{" "}
+              <Trans>Was:</Trans>{" "}
               <button
                 type="button"
                 className="text-base-content/80 hover:text-base-content cursor-pointer underline decoration-dotted underline-offset-2"
@@ -204,7 +212,7 @@ export function EditClassAudienceModal({
           ) : null}
           {changedFromOpening && !changedFromOriginal ? (
             <div className="text-base-content/60 mt-1.5 text-xs">
-              При открытии:{" "}
+              <Trans>When opened:</Trans>{" "}
               <button
                 type="button"
                 className="text-base-content/80 hover:text-base-content cursor-pointer underline decoration-dotted underline-offset-2"
@@ -225,14 +233,14 @@ export function EditClassAudienceModal({
         />
         <div className="flex justify-end gap-2">
           <button type="button" className="btn btn-ghost" onClick={handleClose}>
-            Отмена
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="button"
             className="btn btn-primary"
             onClick={handleSave}
           >
-            Сохранить
+            <Trans>Save</Trans>
           </button>
         </div>
       </div>
@@ -253,6 +261,7 @@ export function EditClassPerGroupModal({
   options: SelectDropdownOption[];
   onSave: (group: string) => void;
 }) {
+  const { t } = useLingui();
   const { showError } = useToast();
   const [draft, setDraft] = useState(value);
 
@@ -265,7 +274,7 @@ export function EditClassPerGroupModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Группа"
+      title={t`Group`}
       containerClassName="max-w-md"
     >
       <div className="flex flex-col gap-3">
@@ -273,7 +282,7 @@ export function EditClassPerGroupModal({
           value={draft}
           onChange={setDraft}
           options={options}
-          placeholder="Выберите группу"
+          placeholder={t`Select a group`}
           searchable
           className="w-full"
           triggerClassName="w-full"
@@ -284,21 +293,21 @@ export function EditClassPerGroupModal({
             className="btn btn-ghost"
             onClick={() => onOpenChange(false)}
           >
-            Отмена
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="button"
             className="btn btn-primary"
             onClick={() => {
               if (!draft.trim()) {
-                showError("Ошибка", "Выберите группу.");
+                showError(t`Error`, t`Select a group.`);
                 return;
               }
               onSave(draft);
               onOpenChange(false);
             }}
           >
-            Сохранить
+            <Trans>Save</Trans>
           </button>
         </div>
       </div>

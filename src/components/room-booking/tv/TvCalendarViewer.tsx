@@ -1,3 +1,6 @@
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
+import ruLocale from "@fullcalendar/core/locales/ru";
 import {
   DayHeaderContentArg,
   EventContentArg,
@@ -11,14 +14,14 @@ import { cn } from "@/lib/ui/cn";
 import moment from "moment/moment";
 import { type RefObject } from "react";
 
-function renderTvDayHeader({ date }: DayHeaderContentArg) {
+function renderTvDayHeader({ date }: DayHeaderContentArg, locale: string) {
   return (
     <>
       <span className="text-xl font-semibold">
-        {moment(date).format("dddd")}
+        {moment(date).locale(locale).format("dddd")}
       </span>{" "}
       <div className="inline-flex w-fit items-center justify-center rounded-md text-xl font-semibold in-[.fc-day-today]:bg-red-500 in-[.fc-day-today]:px-2 in-[.fc-day-today]:text-white">
-        {moment(date).format("D")}
+        {moment(date).locale(locale).format("D")}
       </div>
     </>
   );
@@ -41,15 +44,16 @@ export default function TvCalendarViewer({
   scrollTime: string;
   calendarRef: RefObject<FullCalendar | null>;
 }) {
+  const { i18n } = useLingui();
   if (isError) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="rounded-box border-base-300 bg-base-200 w-full max-w-xl border p-8 text-center">
           <p className="text-error text-2xl font-semibold">
-            Failed to load TV page
+            <Trans>Failed to load TV page</Trans>
           </p>
           <p className="text-base-content/70 mt-2 text-lg">
-            Room not found or calendar is unavailable.
+            <Trans>Room not found or calendar is unavailable.</Trans>
           </p>
         </div>
       </div>
@@ -69,6 +73,8 @@ export default function TvCalendarViewer({
     <div className="h-full [&_.fc-col-header-cell-cushion]:px-2 [&_.fc-col-header-cell-cushion]:py-1 [&_.fc-col-header-cell-cushion]:text-black! [&_.fc-timegrid-now-indicator-arrow]:text-red-500! [&_.fc-timegrid-now-indicator-line]:border-red-500! [&_.fc-timegrid-slot-label]:text-lg! [&_.fc-timegrid-slot-label]:text-black! [&_.fc-timegrid-slot-label-cushion]:text-lg! [&_.fc-timegrid-slot-label-cushion]:text-black!">
       <FullCalendar
         ref={calendarRef}
+        locale={i18n.locale}
+        locales={[ruLocale]}
         plugins={[momentPlugin, dayGridPlugin, timeGridPlugin]}
         initialView="timeGrid7"
         timeZone="Europe/Moscow"
@@ -89,7 +95,7 @@ export default function TvCalendarViewer({
             type: "timeGrid",
             duration: { days: 7 },
             slotMinHeight: 36,
-            dayHeaderContent: renderTvDayHeader,
+            dayHeaderContent: (arg) => renderTvDayHeader(arg, i18n.locale),
             eventContent: renderEventTimeGrid,
           },
         }}

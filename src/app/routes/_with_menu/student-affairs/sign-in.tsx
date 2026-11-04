@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useMe } from "@/api/accounts/user.ts";
 import { $studentAffairs } from "@/api/student-affairs";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/_with_menu/student-affairs/sign-in")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { return_to } = Route.useSearch();
   const { me } = useMe();
   const { data } = $studentAffairs.useQuery("post", "/sso/generate-link", {
@@ -50,15 +52,17 @@ function RouteComponent() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
       <Helmet>
-        <title>Redirecting to the Student Affairs Helpdesk</title>
+        <title>{t`Redirecting to the Student Affairs Helpdesk`}</title>
       </Helmet>
 
       <div className="mb-6">
         <span className="text-primary loading loading-spinner loading-6xl" />
       </div>
-      <h2 className="mb-2 text-2xl font-bold">Redirecting...</h2>
+      <h2 className="mb-2 text-2xl font-bold">
+        <Trans>Redirecting...</Trans>
+      </h2>
       <p className="text-base-content/70 mb-4 text-lg">
-        Just a moment, we're redirecting you to the helpdesk...
+        <Trans>Just a moment, we're redirecting you to the helpdesk...</Trans>
       </p>
     </div>
   );

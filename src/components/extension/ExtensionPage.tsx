@@ -1,6 +1,9 @@
 import ExtensionScreenshotPNG from "/extension-screenshot.png";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export function ExtensionPage() {
+  const { t } = useLingui();
+
   return (
     <div className="grid grid-cols-1 gap-4 p-4 @xl/content:grid-cols-2">
       <div className="flex flex-col gap-4">
@@ -10,32 +13,36 @@ export function ExtensionPage() {
           </div>
           <div className="flex flex-col gap-2">
             <p className="text-base-content flex items-center text-2xl font-semibold">
-              What is it?
+              <Trans>What is it?</Trans>
             </p>
             <p className="text-base-content/75 text-lg">
-              InNoHassle Tools is a browser extension that provides convenient
-              tools for Moodle, InNoHassle and other services at Innopolis
-              University.
+              <Trans>
+                InNoHassle Tools is a browser extension that provides convenient
+                tools for Moodle, InNoHassle and other services at Innopolis
+                University.
+              </Trans>
             </p>
             <p className="text-base-content flex items-center text-2xl font-semibold">
-              Features:
+              <Trans>Features:</Trans>
             </p>
             <p className="text-base-content text-lg">
               🔄{" "}
               <span className="text-base-content/75">
-                Autologin to Moodle without entering credentials
+                <Trans>Autologin to Moodle without entering credentials</Trans>
               </span>
             </p>
             <p className="text-base-content text-lg">
               🔗{" "}
               <span className="text-base-content/75">
-                Quick links to your courses and IU resources
+                <Trans>Quick links to your courses and IU resources</Trans>
               </span>
             </p>
             <p className="text-base-content text-lg">
               🔍{" "}
               <span className="text-base-content/75">
-                Integrated AI search engine for all Moodle materials
+                <Trans>
+                  Integrated AI search engine for all Moodle materials
+                </Trans>
               </span>
             </p>
           </div>
@@ -50,12 +57,14 @@ export function ExtensionPage() {
           </div>
           <div className="flex flex-col gap-2">
             <p className="text-base-content flex items-center text-2xl font-semibold">
-              Chrome extension
+              <Trans>Chrome extension</Trans>
               <span className="icon-[material-symbols--open-in-new-rounded] ml-1" />
             </p>
             <p className="text-base-content/75 text-lg">
-              Install the extension for Chromium-based browsers (Chrome, Edge,
-              Yandex Browser, Arc) from the Chrome Web Store.
+              <Trans>
+                Install the extension for Chromium-based browsers (Chrome, Edge,
+                Yandex Browser, Arc) from the Chrome Web Store.
+              </Trans>
             </p>
           </div>
         </a>
@@ -69,12 +78,14 @@ export function ExtensionPage() {
           </div>
           <div className="flex flex-col gap-2">
             <p className="text-base-content flex items-center text-2xl font-semibold">
-              Firefox extension
+              <Trans>Firefox extension</Trans>
               <span className="icon-[material-symbols--open-in-new-rounded] ml-1" />
             </p>
             <p className="text-base-content/75 text-lg">
-              Install the extension for Firefox-based browsers from our servers
-              (supports automatic updates).
+              <Trans>
+                Install the extension for Firefox-based browsers from our
+                servers (supports automatic updates).
+              </Trans>
             </p>
           </div>
         </a>
@@ -92,8 +103,10 @@ export function ExtensionPage() {
               <span className="icon-[material-symbols--open-in-new-rounded] ml-1" />
             </p>
             <p className="text-base-content/75 text-lg">
-              Check out the source code, report issues and contribute to the
-              project on GitHub.
+              <Trans>
+                Check out the source code, report issues and contribute to the
+                project on GitHub.
+              </Trans>
             </p>
           </div>
         </a>
@@ -101,7 +114,7 @@ export function ExtensionPage() {
       <div className="bg-base-200 rounded-box flex w-full flex-row items-center justify-center p-4">
         <img
           src={ExtensionScreenshotPNG}
-          alt="extension screenshot"
+          alt={t`Extension screenshot`}
           className="rounded-box w-full"
         />
       </div>

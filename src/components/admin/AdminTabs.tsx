@@ -1,22 +1,23 @@
+import { Trans } from "@lingui/react/macro";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 
 export function AdminTabs() {
   return (
     <div className="border-base-300 flex shrink-0 flex-row gap-2 overflow-x-auto border-b px-1 whitespace-nowrap">
       <TabLink to="/admin" exact>
-        Home
+        <Trans>Home</Trans>
       </TabLink>
       <TabLink to="/admin/users" exact={false}>
-        Users
+        <Trans>Users</Trans>
       </TabLink>
       <TabLink to="/admin/predefined" exact>
-        Predefined
+        <Trans>Predefined</Trans>
       </TabLink>
       <TabLink to="/admin/rooms" exact>
-        Rooms
+        <Trans>Rooms</Trans>
       </TabLink>
       <TabLink to="/admin/academic-calendars" exact>
-        Academic calendars
+        <Trans>Academic calendars</Trans>
       </TabLink>
     </div>
   );

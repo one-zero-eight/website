@@ -1,4 +1,5 @@
 import { EnrollmentType, SchemaEnrollment } from "@/api/events/types";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 import { eventFieldClass } from "./formStyles";
 
@@ -74,9 +75,12 @@ export function EnrollmentFields({
   onChange: (value: EnrollmentFormValue) => void;
   disabled?: boolean;
 }) {
+  const { t } = useLingui();
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-sm">Enrollment</span>
+      <span className="text-sm">
+        <Trans>Enrollment</Trans>
+      </span>
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
@@ -91,7 +95,7 @@ export function EnrollmentFields({
             onChange({ ...value, type: EnrollmentType.internal, url: "" })
           }
         >
-          On InNoHassle
+          <Trans>On InNoHassle</Trans>
         </button>
         <button
           type="button"
@@ -106,19 +110,21 @@ export function EnrollmentFields({
             onChange({ ...value, type: EnrollmentType.external, capacity: "" })
           }
         >
-          External
+          <Trans>External</Trans>
         </button>
       </div>
 
       {value.type === EnrollmentType.internal ? (
         <label className="flex flex-col gap-1 text-sm">
-          <span>Max participants</span>
+          <span>
+            <Trans>Max participants</Trans>
+          </span>
           <input
             type="number"
             min={1}
             step={1}
             className={eventFieldClass()}
-            placeholder="Unlimited"
+            placeholder={t`Unlimited`}
             disabled={disabled}
             value={value.capacity}
             onChange={(e) => onChange({ ...value, capacity: e.target.value })}
@@ -126,7 +132,9 @@ export function EnrollmentFields({
         </label>
       ) : (
         <label className="flex flex-col gap-1 text-sm">
-          <span>Enrollment URL</span>
+          <span>
+            <Trans>Enrollment URL</Trans>
+          </span>
           <input
             type="url"
             className={eventFieldClass()}

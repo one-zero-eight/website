@@ -1,5 +1,6 @@
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { useState } from "react";
+import { useLingui } from "@lingui/react/macro";
 import { ImportModal } from "@/components/calendar/import/ImportModal.tsx";
 import type { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 
@@ -8,6 +9,7 @@ export default function EditButtonLinked({
 }: {
   linkedCalendar: SchemaLinkedCalendarView;
 }) {
+  const { t } = useLingui();
   const [importModalOpen, setImportModalOpen] = useState(false);
 
   const { alias, name } = linkedCalendar;
@@ -15,8 +17,9 @@ export default function EditButtonLinked({
 
   return (
     <>
-      <Tooltip content={"Edit this calendar"}>
+      <Tooltip content={t`Edit this calendar`}>
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();

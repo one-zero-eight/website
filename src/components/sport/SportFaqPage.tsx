@@ -1,4 +1,5 @@
 import { $sport } from "@/api/sport";
+import { Trans } from "@lingui/react/macro";
 
 export function SportFaqPage() {
   const { data, isPending, isError } = $sport.useQuery("get", "/faq");
@@ -14,14 +15,20 @@ export function SportFaqPage() {
 
   if (isError) {
     return (
-      <p className="text-base-content/60 text-base">FAQ could not be loaded.</p>
+      <p className="text-base-content/60 text-base">
+        <Trans>FAQ could not be loaded.</Trans>
+      </p>
     );
   }
 
   const categories = data ? Object.entries(data) : [];
 
   if (categories.length === 0) {
-    return <p className="text-base-content/60 text-base">No FAQ entries.</p>;
+    return (
+      <p className="text-base-content/60 text-base">
+        <Trans>No FAQ entries.</Trans>
+      </p>
+    );
   }
 
   // Two fully independent columns (left = first half, right = second half) so

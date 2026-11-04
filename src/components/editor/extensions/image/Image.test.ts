@@ -1,3 +1,5 @@
+import { messages as enMessages } from "@/locales/en.po";
+import { i18n } from "@lingui/core";
 import type { Editor } from "@tiptap/core";
 import { Slice } from "@tiptap/pm/model";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -125,6 +127,7 @@ describe("image clipboard uploads", () => {
   const file = new File(["image"], "pasted.png", { type: "image/png" });
 
   beforeEach(() => {
+    i18n.loadAndActivate({ locale: "en", messages: enMessages });
     vi.stubGlobal(
       "Image",
       class {

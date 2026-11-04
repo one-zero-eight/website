@@ -1,4 +1,6 @@
+import { msg, plural, select } from "@lingui/core/macro";
 import { useToast } from "@/components/toast";
+import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 import { useState } from "react";
 import { BannedList } from "./BannedList";
@@ -57,6 +59,7 @@ export function FileDetails({
   onUpdateDefaultRole: (role: string) => Promise<void>;
   onUpdateUserRole: (userId: string, role: string) => Promise<void>;
 }) {
+  const { i18n, t } = useLingui();
   const { showConfirm } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
@@ -66,14 +69,17 @@ export function FileDetails({
   const bannedCount = file?.sso_banned?.length ?? 0;
   const currentRole =
     file?.default_role === FileRole.reader ? FileRole.reader : FileRole.writer;
-  const sheetTitle = file?.title || "Untitled";
+  const sheetTitle = file?.title || t`Untitled`;
 
   const handleDelete = async () => {
+    const sheetTitle = file?.title;
     const confirmed = await showConfirm({
-      title: "Delete sheet",
-      message: `Delete "${sheetTitle}"? The join link will stop working, and access managed by Guard will be removed. This cannot be undone.`,
-      confirmText: "Delete",
-      cancelText: "Cancel",
+      title: msg`Delete sheet`,
+      message: sheetTitle
+        ? msg`Delete "${sheetTitle}"? The join link will stop working, and access managed by Guard will be removed. This cannot be undone.`
+        : msg`Delete this untitled sheet? The join link will stop working, and access managed by Guard will be removed. This cannot be undone.`,
+      confirmText: msg`Delete`,
+      cancelText: msg`Cancel`,
       type: "error",
     });
     if (!confirmed) return;
@@ -90,17 +96,23 @@ export function FileDetails({
     if (!file || newRole === currentRole) return;
 
     const affectedCount = file.sso_joins?.length || 0;
-    const roleLabel = newRole === FileRole.writer ? "Writer" : "Reader";
     const message =
       affectedCount > 0
-        ? `New guests will get ${roleLabel} access. Permissions for ${affectedCount} already joined user${affectedCount === 1 ? "" : "s"} will be updated too.`
-        : `New guests will get ${roleLabel} access when they join via the link.`;
+        ? msg`New guests will get ${select(newRole, { writer: "Writer", other: "Reader" })} access. ${plural(
+            affectedCount,
+            {
+              one: "Permissions for # already joined user will be updated too.",
+              other:
+                "Permissions for # already joined users will be updated too.",
+            },
+          )}`
+        : msg`New guests will get ${select(newRole, { writer: "Writer", other: "Reader" })} access when they join via the link.`;
 
     const confirmed = await showConfirm({
-      title: `Set guests role to ${roleLabel}`,
+      title: msg`Set guests role to ${select(newRole, { writer: "Writer", other: "Reader" })}`,
       message,
-      confirmText: `Set to ${roleLabel}`,
-      cancelText: "Cancel",
+      confirmText: msg`Set to ${select(newRole, { writer: "Writer", other: "Reader" })}`,
+      cancelText: msg`Cancel`,
       type: "warning",
     });
     if (!confirmed) return;
@@ -122,27 +134,30 @@ export function FileDetails({
           className="btn btn-ghost btn-sm w-fit gap-1 px-2"
         >
           <span className="icon-[material-symbols--arrow-back-rounded] text-lg" />
-          Sheets
+          <Trans>Sheets</Trans>
         </button>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1">
-            <EditTitleButton
-              currentTitle={file?.title || "Untitled"}
-              onSave={onUpdateTitle}
-            />
+            <EditTitleButton currentTitle={sheetTitle} onSave={onUpdateTitle} />
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <span className="badge badge-ghost badge-sm">
-                {file?.created_at ? formatDate(file.created_at) : "—"}
+                {file?.created_at
+                  ? formatDate(file.created_at, i18n.locale)
+                  : "—"}
               </span>
               {!isLoading && (
                 <>
                   <span className="badge badge-ghost badge-sm">
-                    {joinsCount} {joinsCount === 1 ? "join" : "joins"}
+                    <Plural value={joinsCount} one="# join" other="# joins" />
                   </span>
                   {bannedCount > 0 && (
                     <span className="badge badge-error badge-soft badge-sm">
-                      {bannedCount} banned
+                      <Plural
+                        value={bannedCount}
+                        one="# banned user"
+                        other="# banned users"
+                      />
                     </span>
                   )}
                 </>
@@ -165,7 +180,7 @@ export function FileDetails({
               }}
             >
               <span className="icon-[material-symbols--open-in-new-rounded] text-lg" />
-              Open
+              <Trans>Open</Trans>
             </a>
             <button
               type="button"
@@ -178,7 +193,7 @@ export function FileDetails({
               ) : (
                 <span className="icon-[material-symbols--delete-outline-rounded] text-lg" />
               )}
-              Delete
+              <Trans>Delete</Trans>
             </button>
           </div>
         </div>
@@ -187,9 +202,11 @@ export function FileDetails({
       <section className="bg-base-200 rounded-box flex flex-col gap-3 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="font-medium">Guests Role</p>
+            <p className="font-medium">
+              <Trans>Guests Role</Trans>
+            </p>
             <p className="text-base-content/60 text-sm">
-              Role granted when someone joins via the link
+              <Trans>Role granted when someone joins via the link</Trans>
             </p>
           </div>
           {isUpdatingRole ? (
@@ -214,7 +231,7 @@ export function FileDetails({
               className={cn("tab gap-2", peopleTab === "joins" && "tab-active")}
               onClick={() => setPeopleTab("joins")}
             >
-              Joins
+              <Trans>Joins</Trans>
               <span className="badge badge-sm badge-ghost">{joinsCount}</span>
             </button>
             <button
@@ -226,7 +243,7 @@ export function FileDetails({
               )}
               onClick={() => setPeopleTab("banned")}
             >
-              Banned
+              <Trans>Banned</Trans>
               <span className="badge badge-sm badge-ghost">{bannedCount}</span>
             </button>
           </div>
@@ -237,7 +254,7 @@ export function FileDetails({
               type="text"
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search email"
+              placeholder={t`Search email`}
               className="grow"
             />
           </label>

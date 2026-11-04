@@ -1,3 +1,7 @@
+import { localizedSectionName } from "./localizedNames.ts";
+import { i18n } from "@lingui/core";
+import { t } from "@lingui/core/macro";
+
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
@@ -40,6 +44,7 @@ function groupTitleByCode(config: SchemaScheduleConfig) {
 type AudienceTreeCache = {
   studentsGroups: SchemaScheduleConfig["students_groups"];
   sections: NonNullable<SchemaScheduleConfig["term"]>["sections"];
+  locale: string;
   tree: AudienceSelectorSection[];
 };
 
@@ -55,7 +60,8 @@ export function buildAudienceSelectorTree(
   if (
     audienceTreeCache &&
     audienceTreeCache.studentsGroups === studentsGroups &&
-    audienceTreeCache.sections === termSections
+    audienceTreeCache.sections === termSections &&
+    audienceTreeCache.locale === i18n.locale
   ) {
     tree = audienceTreeCache.tree;
   } else {
@@ -64,7 +70,7 @@ export function buildAudienceSelectorTree(
 
     for (const section of getScheduleSections(config)) {
       const sectionCode = String(section.code || "").trim();
-      const sectionTitle = String(section.name || sectionCode).trim();
+      const sectionTitle = localizedSectionName(section);
       if (!sectionCode || !sectionTitle) continue;
 
       const programs: AudienceSelectorProgram[] = [];
@@ -77,7 +83,7 @@ export function buildAudienceSelectorTree(
         for (const [trackIndex, track] of normalizeTracksFromSectionProgram(
           program,
         ).entries()) {
-          const trackName = String(track.name || "Трек").trim();
+          const trackName = String(track.name || t`Track`).trim();
           const trackRef = String(track.code || track.name || "").trim();
           const groups = (track.groups || []).map((groupId) => {
             const gid = String(groupId).trim();
@@ -112,6 +118,7 @@ export function buildAudienceSelectorTree(
     audienceTreeCache = {
       studentsGroups,
       sections: termSections,
+      locale: i18n.locale,
       tree: sections,
     };
     tree = sections;

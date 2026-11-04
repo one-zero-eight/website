@@ -159,7 +159,7 @@ async function fetchEventsFromIcsUrl(
   for (const event of expanded.events) {
     events.push(
       createPersonalCalendarEvent(
-        event.summary || "Busy",
+        event.summary || "",
         event.startDate,
         event.endDate,
       ),
@@ -169,7 +169,7 @@ async function fetchEventsFromIcsUrl(
   for (const occurrence of expanded.occurrences) {
     events.push(
       createPersonalCalendarEvent(
-        occurrence.item.summary || "Busy",
+        occurrence.item.summary || "",
         occurrence.startDate,
         occurrence.endDate,
       ),

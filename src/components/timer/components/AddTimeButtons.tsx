@@ -1,4 +1,5 @@
 import { ADD_TIME_OPTIONS } from "../lib/constants";
+import { Trans } from "@lingui/react/macro";
 
 interface AddTimeButtonsProps {
   isRunning: boolean;
@@ -14,7 +15,7 @@ export const AddTimeButtons = ({
   return (
     <div className="mb-6 flex flex-col items-center gap-2 px-4 sm:gap-3 md:mb-8">
       <span className="text-base-content mr-1 w-full self-center text-center text-sm font-semibold sm:mr-2 sm:w-auto sm:text-base md:text-lg">
-        More time:
+        <Trans>More time:</Trans>
       </span>
       <div className="flex flex-wrap justify-center gap-2">
         {ADD_TIME_OPTIONS.map((minutes) => (
@@ -24,7 +25,7 @@ export const AddTimeButtons = ({
             onClick={() => onAddTime(minutes)}
             className="btn sm:btn-md btn-sm"
           >
-            +{minutes} min
+            <Trans>+{minutes} min</Trans>
           </button>
         ))}
       </div>

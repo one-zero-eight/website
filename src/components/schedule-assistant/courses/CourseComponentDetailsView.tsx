@@ -44,6 +44,7 @@ import {
   useInteractions,
   useTransitionStyles,
 } from "@floating-ui/react";
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   type ReactNode,
   useEffect,
@@ -54,7 +55,7 @@ import {
 
 export function DetailSection({ title }: { title: string }) {
   return (
-    <div className="text-base-content/55 mt-3 mb-1.5 text-xs font-semibold tracking-wide uppercase first:mt-0">
+    <div className="text-base-content/55 mt-6 mb-1.5 text-xs font-semibold tracking-wide uppercase first:mt-0">
       {title}
     </div>
   );
@@ -176,6 +177,7 @@ export function SeriesScheduleItemsList({
   sharedColumns?: boolean;
   showNavigationTitle?: boolean;
 }) {
+  const { t } = useLingui();
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentRef = useRef<HTMLElement | null>(null);
   const [currentOffscreen, setCurrentOffscreen] = useState<
@@ -285,6 +287,9 @@ export function SeriesScheduleItemsList({
           };
 
           if (canNavigate) {
+            const navigationTarget = item.meeting!.date
+              ? formatDisplayDate(item.meeting!.date)
+              : item.primary;
             return (
               <button
                 key={`${index}-${item.primary}-${item.meeting!.instance_id}`}
@@ -292,9 +297,7 @@ export function SeriesScheduleItemsList({
                 type="button"
                 className={rowClass}
                 title={
-                  showNavigationTitle
-                    ? `Перейти к ${item.meeting!.date ? formatDisplayDate(item.meeting!.date) : item.primary}`
-                    : undefined
+                  showNavigationTitle ? t`Go to ${navigationTarget}` : undefined
                 }
                 onClick={(event) => {
                   event.preventDefault();
@@ -324,28 +327,32 @@ export function SeriesScheduleItemsList({
       {currentOffscreen === "above" ? (
         <button
           type="button"
-          className="bg-primary/45 pointer-events-auto absolute top-0 right-3 z-10 size-5 cursor-pointer rounded-bl-full border-0 p-0"
+          className="text-primary pointer-events-auto absolute top-0.5 right-2 z-10 inline-flex size-7 cursor-pointer items-center justify-center border-0 bg-transparent p-0"
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
             scrollToCurrent();
           }}
           onMouseDown={(event) => event.stopPropagation()}
-          title="К выбранному выше"
-        />
+          title={t`Go to selected above`}
+        >
+          <span className="icon-[material-symbols--arrow-upward-rounded] text-2xl" />
+        </button>
       ) : null}
       {currentOffscreen === "below" ? (
         <button
           type="button"
-          className="bg-primary/45 pointer-events-auto absolute right-3 bottom-0 z-10 size-5 cursor-pointer rounded-tl-full border-0 p-0"
+          className="text-primary pointer-events-auto absolute right-2 bottom-0.5 z-10 inline-flex size-7 cursor-pointer items-center justify-center border-0 bg-transparent p-0"
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
             scrollToCurrent();
           }}
           onMouseDown={(event) => event.stopPropagation()}
-          title="К выбранному ниже"
-        />
+          title={t`Go to selected below`}
+        >
+          <span className="icon-[material-symbols--arrow-downward-rounded] text-2xl" />
+        </button>
       ) : null}
     </div>
   );
@@ -375,7 +382,7 @@ export function ComponentSeriesList({
           compact ? "mb-1" : "mb-1.5",
         )}
       >
-        Серии
+        <Trans>Series</Trans>
       </div>
       <div
         className={cn(
@@ -615,6 +622,7 @@ export function CourseComponentDetailsFields({
   onNavigateToMeeting?: (meeting: Meeting) => void;
   compact?: boolean;
 }) {
+  const { t } = useLingui();
   const placement = countComponentPlacement(config, component);
   const targetLabel = formatComponentTarget(component);
   const placedLabel = formatComponentPlaced(placement);
@@ -643,22 +651,24 @@ export function CourseComponentDetailsFields({
   return (
     <>
       {showPlanningDetails && goalParts.length ? (
-        <DetailField label="Цель" compact={compact}>
+        <DetailField label={t`Goal`} compact={compact}>
           {goalParts.join(" · ")}
         </DetailField>
       ) : null}
       {showPlanningDetails && component.per_group ? (
-        <DetailField label="Режим" compact={compact}>
-          <span className="badge badge-ghost badge-sm">по группам</span>
+        <DetailField label={t`Mode`} compact={compact}>
+          <span className="badge badge-ghost badge-sm">
+            <Trans>by groups</Trans>
+          </span>
         </DetailField>
       ) : null}
       {showPlanningDetails && component.expected_enrollment != null ? (
-        <DetailField label="Набор" compact={compact}>
+        <DetailField label={t`Enrollment`} compact={compact}>
           {component.expected_enrollment}
         </DetailField>
       ) : null}
       {showPlanningDetails && poolEntries.length ? (
-        <DetailField label="Кто может вести" compact={compact}>
+        <DetailField label={t`Who can teach`} compact={compact}>
           <span className="inline-flex flex-col gap-0.5">
             {poolEntries.map((entry) => (
               <span key={entry}>{entry}</span>
@@ -667,7 +677,7 @@ export function CourseComponentDetailsFields({
         </DetailField>
       ) : null}
       {showGroups && groupIds.length ? (
-        <DetailField label="Группы" compact={compact}>
+        <DetailField label={t`Groups`} compact={compact}>
           <MeetingAudienceInline config={config} groupIds={groupIds} />
         </DetailField>
       ) : null}

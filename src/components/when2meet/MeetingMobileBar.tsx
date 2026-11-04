@@ -1,7 +1,9 @@
 import { cn } from "@/lib/ui/cn";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { formatParticipantShortName } from "./utils/participants.ts";
+import { plural } from "@lingui/core/macro";
 
 export function MeetingMobileBar({
   onDelete,
@@ -32,9 +34,15 @@ export function MeetingMobileBar({
     participantNames: string[];
   };
 }) {
+  const { t } = useLingui();
   const [expandedSlotLabel, setExpandedSlotLabel] = useState<string | null>(
     null,
   );
+  const availableCount = selectedSlotDetails?.participantNames.length ?? 0;
+  const availablePrefix = t`${plural(availableCount, {
+    one: "# available:",
+    other: "# available:",
+  })}`;
   const [overflowMeasurement, setOverflowMeasurement] = useState<{
     key: string;
     isOverflowing: boolean;
@@ -53,6 +61,7 @@ export function MeetingMobileBar({
     selectedSlotDetails?.participantNames.length ?? 0,
     participantNames,
     selectedSlotDetails?.unavailableMessage ?? "",
+    availablePrefix,
   ].join("\0");
   const areParticipantsOverflowing =
     overflowMeasurement?.key === participantMeasurementKey &&
@@ -66,7 +75,7 @@ export function MeetingMobileBar({
       return;
     }
 
-    function updateOverflowMeasurement() {
+    const updateOverflowMeasurement = () => {
       const isOverflowing =
         participantMeasure.scrollWidth > participantRow.clientWidth;
 
@@ -80,7 +89,7 @@ export function MeetingMobileBar({
 
         return { key: participantMeasurementKey, isOverflowing };
       });
-    }
+    };
 
     updateOverflowMeasurement();
 
@@ -100,7 +109,7 @@ export function MeetingMobileBar({
             disabled={!canClearSetup || isSavingSetup}
             onClick={onClearSetup}
           >
-            Clear all
+            <Trans>Clear all</Trans>
           </button>
         )}
         <button
@@ -112,7 +121,7 @@ export function MeetingMobileBar({
           {isSavingSetup ? (
             <span className="loading loading-spinner loading-sm" />
           ) : (
-            "Save timeslots"
+            t`Save timeslots`
           )}
         </button>
       </div>,
@@ -154,9 +163,7 @@ export function MeetingMobileBar({
                 data-slot-participants-measure
                 className="invisible absolute whitespace-nowrap"
               >
-                <span>
-                  {selectedSlotDetails.participantNames.length} available:{" "}
-                </span>
+                <span>{availablePrefix} </span>
                 {participantNames}
               </span>
               <div
@@ -168,9 +175,7 @@ export function MeetingMobileBar({
                     : "truncate",
                 )}
               >
-                <span className="text-base-content/60">
-                  {selectedSlotDetails.participantNames.length} available:{" "}
-                </span>
+                <span className="text-base-content/60">{availablePrefix} </span>
                 {participantNames}
               </div>
               {(areParticipantsOverflowing || areParticipantsExpanded) && (
@@ -185,7 +190,7 @@ export function MeetingMobileBar({
                     )
                   }
                 >
-                  {areParticipantsExpanded ? "Hide all" : "Show all"}
+                  {areParticipantsExpanded ? t`Hide all` : t`Show all`}
                 </button>
               )}
             </div>
@@ -201,7 +206,7 @@ export function MeetingMobileBar({
               disabled={isSavingAvailability}
               onClick={onToggleAvailability}
             >
-              Change my availability
+              <Trans>Change my availability</Trans>
             </button>
           )}
           {onDelete && (
@@ -229,7 +234,7 @@ export function MeetingMobileBar({
               disabled={isSavingAvailability}
               onClick={onCancelAvailability}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </button>
           )}
           <button
@@ -241,7 +246,7 @@ export function MeetingMobileBar({
             {isSavingAvailability ? (
               <span className="loading loading-spinner loading-sm" />
             ) : (
-              "Save timeslots"
+              t`Save timeslots`
             )}
           </button>
         </div>

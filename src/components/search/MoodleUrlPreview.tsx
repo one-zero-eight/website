@@ -1,4 +1,5 @@
 import { searchTypes } from "@/api/search";
+import { Trans, useLingui } from "@lingui/react/macro";
 import PreviewBottomButton from "./PreviewBottomButton";
 
 export declare type MoodleUrlPreviewProps = {
@@ -6,6 +7,7 @@ export declare type MoodleUrlPreviewProps = {
 };
 
 export default function MoodleUrlPreview({ source }: MoodleUrlPreviewProps) {
+  const { t } = useLingui();
   return (
     <>
       <div className="rounded-box flex h-[400px] w-full items-center justify-center overflow-hidden shadow-lg">
@@ -13,7 +15,9 @@ export default function MoodleUrlPreview({ source }: MoodleUrlPreviewProps) {
           href={source.url}
           className="hover:text-base-300 flex flex-row items-center justify-center gap-2"
         >
-          <p>Go To</p>
+          <p>
+            <Trans>Go To</Trans>
+          </p>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -34,7 +38,7 @@ export default function MoodleUrlPreview({ source }: MoodleUrlPreviewProps) {
       <div className="mt-2 mb-4 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
         <PreviewBottomButton
           icon={<span className="icon-[material-symbols--open-in-new]" />}
-          text="To source"
+          text={t`To source`}
           href={source.link}
           target="_blank"
         />

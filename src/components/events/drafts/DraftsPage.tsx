@@ -1,4 +1,10 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  formatApiErrorDescriptor,
+  formatApiErrorMessage,
+} from "@/api/helpers/create-query-client";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import { $events } from "@/api/events";
 import { useToast } from "@/components/toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,6 +17,7 @@ import { getDraftImageUrl } from "../utils/links";
 import { CreateDraftModal } from "./CreateDraftModal";
 
 export function DraftsPage() {
+  useLingui();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { showError } = useToast();
@@ -47,7 +54,7 @@ export function DraftsPage() {
       },
       onError: (mutationError) => {
         setPendingId(null);
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -62,7 +69,7 @@ export function DraftsPage() {
       },
       onError: (mutationError) => {
         setPendingId(null);
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -89,7 +96,7 @@ export function DraftsPage() {
           className="btn btn-ghost"
           onClick={() => refetch()}
         >
-          Retry
+          <Trans>Retry</Trans>
         </button>
       </div>
     );
@@ -98,18 +105,22 @@ export function DraftsPage() {
   return (
     <div className="@container/content px-4 py-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-2xl font-medium">Your drafts</h2>
+        <h2 className="text-2xl font-medium">
+          <Trans>Your drafts</Trans>
+        </h2>
         <button
           type="button"
           className="btn btn-primary"
           onClick={() => setCreateOpen(true)}
         >
-          Create draft
+          <Trans>Create draft</Trans>
         </button>
       </div>
 
       {data && data.length === 0 ? (
-        <p className="text-base-content/70">No drafts yet.</p>
+        <p className="text-base-content/70">
+          <Trans>No drafts yet.</Trans>
+        </p>
       ) : (
         <EventsByDate
           events={data ?? []}
@@ -150,7 +161,7 @@ export function DraftsPage() {
                         {inviteBusy && isDeclining && (
                           <span className="loading loading-spinner loading-sm" />
                         )}
-                        Decline
+                        <Trans>Decline</Trans>
                       </button>
                       <button
                         type="button"
@@ -168,7 +179,7 @@ export function DraftsPage() {
                         {inviteBusy && isAccepting && (
                           <span className="loading loading-spinner loading-sm" />
                         )}
-                        Accept
+                        <Trans>Accept</Trans>
                       </button>
                     </div>
                   ) : undefined

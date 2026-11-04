@@ -1,5 +1,6 @@
 import type { AcademicCalendar } from "@/components/dashboard/academic-calendar.tsx";
 import type { EventContentArg } from "@fullcalendar/core";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * Shared with CalendarViewer's listMonth view so any calendar rendered as a
@@ -22,7 +23,7 @@ export function renderCalendarListEventContent({ event }: EventContentArg) {
   // never runs (events.ics includes URL; schedule feeds often don't).
   return event.id === "today" ? (
     <div id="today" className="flex">
-      Chill day🥳
+      <Trans>Chill day</Trans> 🥳
     </div>
   ) : (
     <div className="flex flex-wrap gap-x-1 text-left">

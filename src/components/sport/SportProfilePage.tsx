@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   MedicalGroupUploadModal,
   MedicalReferenceUploadModal,
@@ -7,14 +8,15 @@ import { useSportProfile } from "@/components/sport/sport-profile.ts";
 import { useState } from "react";
 
 export function SportProfilePage() {
+  const { t } = useLingui();
   const { profile, isCollege, isTrainer, studentStatus } = useSportProfile();
   const [medicalGroupModalOpen, setMedicalGroupModalOpen] = useState(false);
   const [medicalReferenceModalOpen, setMedicalReferenceModalOpen] =
     useState(false);
 
   const roleLabels = [
-    profile?.student_info ? (isCollege ? "College" : "Student") : null,
-    isTrainer ? "Trainer" : null,
+    profile?.student_info ? (isCollege ? t`College` : t`Student`) : null,
+    isTrainer ? t`Trainer` : null,
   ].filter((label): label is string => !!label);
   const normalizedStatus = studentStatus?.trim().toLowerCase() ?? "";
   const enrollmentStatus =
@@ -39,7 +41,7 @@ export function SportProfilePage() {
           className="btn btn-outline btn-sm border-base-content text-base-content hover:bg-base-content hover:text-base-100"
           onClick={() => setMedicalReferenceModalOpen(true)}
         >
-          Submit medical leave reference
+          <Trans>Submit medical leave reference</Trans>
         </button>
       </div>
       <MedicalGroupUploadModal

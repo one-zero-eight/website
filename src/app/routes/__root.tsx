@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { AutoSignIn } from "@/api/accounts/sign-in.tsx";
 import { BottomNavigation } from "@/components/layout/BottomNavigation.tsx";
 import { ConnectivityNotification } from "@/components/layout/Offline.tsx";
@@ -30,9 +31,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         <Sidebar />
 
         <div className="@container/content flex min-h-full grow flex-col items-center justify-center overflow-y-auto">
-          <h1 className="mb-4 text-4xl font-bold">404 / not found</h1>
+          <h1 className="mb-4 text-4xl font-bold">
+            <Trans>404 / not found</Trans>
+          </h1>
           <Link to="/dashboard" className="selected">
-            Go to dashboard
+            <Trans>Go to dashboard</Trans>
           </Link>
         </div>
       </div>
@@ -55,12 +58,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
             <Sidebar />
 
             <div className="@container/content flex min-h-full grow flex-col items-center justify-center overflow-y-auto">
-              <h1 className="mb-2 text-4xl font-bold">403 / forbidden</h1>
+              <h1 className="mb-2 text-4xl font-bold">
+                <Trans>403 / forbidden</Trans>
+              </h1>
               <p className="text-base-content/70 mb-4">
-                You don't have permission to access this page.
+                <Trans>You don't have permission to access this page.</Trans>
               </p>
               <Link to="/dashboard" className="selected">
-                Go to dashboard
+                <Trans>Go to dashboard</Trans>
               </Link>
             </div>
           </div>

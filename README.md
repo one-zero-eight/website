@@ -55,6 +55,7 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
 - Formatting and linting: [Husky](https://typicode.github.io/husky/), [lint-staged](https://github.com/lint-staged/lint-staged), [Prettier](https://prettier.io/), [ESLint](https://eslint.org/)
 - Data fetching: [OpenAPI Typescript](https://openapi-ts.dev/), [TanStack Query](https://tanstack.com/query/latest)
 - Calendar: [FullCalendar](https://fullcalendar.io/), [ical.js](https://github.com/kewisch/ical.js)
+- i18n: [Lingui](https://lingui.dev/)
 
 ## Development
 
@@ -71,6 +72,9 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
 
 > [!TIP]
 > When the API types change, you can run `pnpm run gen:api` to generate new client types and functions.
+
+> [!TIP]
+> After adding UI strings wrapped in Lingui macros (`Trans` / `msg` / `t`), run `pnpm lingui:extract` and fill Russian `msgstr` in `src/locales/ru.po`.
 
 ### Development preview on Android via ADB (USB or Wi‑Fi)
 

@@ -1,5 +1,6 @@
 import { searchTypes } from "@/api/search";
 import { cn } from "@/lib/ui/cn";
+import { Trans } from "@lingui/react/macro";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -38,7 +39,7 @@ export function AskResult({
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
-                {"link"}
+                <Trans>link</Trans>
               </a>
             ),
             p: ({ children }) => (
@@ -52,12 +53,16 @@ export function AskResult({
           {answer}
         </Markdown>
       ) : (
-        <span>- Sorry, I can't help you with this question.</span>
+        <span>
+          <Trans>- Sorry, I can't help you with this question.</Trans>
+        </span>
       )}
 
       {uniqueSources.length > 0 && (
         <div>
-          <span>Sources: </span>
+          <span>
+            <Trans>Sources:</Trans>{" "}
+          </span>
           {uniqueSources.map((s, i) => {
             const link = getSourceLink(s);
             return (

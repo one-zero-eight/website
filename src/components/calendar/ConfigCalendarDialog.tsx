@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import { $schedule } from "@/api/schedule";
 import { Modal } from "@/components/common/Modal.tsx";
 import { GroupCardByAlias } from "@/components/schedule/group-card/GroupCardByAlias.tsx";
@@ -20,6 +21,7 @@ export function ConfigCalendarDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useLingui();
   const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
   const { data: predefined } = $schedule.useQuery(
     "get",
@@ -38,7 +40,7 @@ export function ConfigCalendarDialog({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Config & Export"
+      title={t`Config & Export`}
       containerClassName="xl:max-w-[75%] bg-base-100"
     >
       <div className="grid grid-cols-1 justify-stretch gap-4 @2xl/modal:grid-cols-2">
@@ -67,8 +69,8 @@ export function ConfigCalendarDialog({
         ))}
 
         <PersonalCard
-          name="Sport"
-          description="Your sport checkins"
+          name={t`Sport`}
+          description={t`Your sport checkins`}
           pageUrl="/sport"
           targetType={TargetForExport.sport}
           exportButtonOnClick={() => {
@@ -81,8 +83,8 @@ export function ConfigCalendarDialog({
         />
         {musicRoomIsSuccess && (
           <PersonalCard
-            name="Music room"
-            description="Your music room bookings"
+            name={t`Music room`}
+            description={t`Your music room bookings`}
             pageUrl="/music-room"
             targetType={TargetForExport.music_room}
             exportButtonOnClick={() => {
@@ -95,8 +97,8 @@ export function ConfigCalendarDialog({
           />
         )}
         <PersonalCard
-          name="Moodle"
-          description="Your Moodle deadlines"
+          name={t`Moodle`}
+          description={t`Your Moodle deadlines`}
           targetType={TargetForExport.moodle}
           exportButtonOnClick={() => {
             setTargetForExport({
@@ -107,8 +109,8 @@ export function ConfigCalendarDialog({
           }}
         />
         <PersonalCard
-          name="Room booking"
-          description="Your room bookings"
+          name={t`Room booking`}
+          description={t`Your room bookings`}
           targetType={TargetForExport.room_bookings}
           exportButtonOnClick={() => {
             setTargetForExport({
@@ -132,18 +134,20 @@ export function ConfigCalendarDialog({
       </div>
 
       <p className="text-base-content/75 mb-4 text-lg">
-        Add favorite calendars using star button or{" "}
-        <button
-          type="button"
-          onClick={() => setImportModalOpen(true)}
-          className="underline underline-offset-4"
-        >
-          import your own calendars
-        </button>{" "}
-        to InNoHassle.
+        <Trans>
+          Add favorite calendars using star button or{" "}
+          <button
+            type="button"
+            onClick={() => setImportModalOpen(true)}
+            className="underline underline-offset-4"
+          >
+            import your own calendars
+          </button>{" "}
+          to InNoHassle.
+        </Trans>
         <br />
         <Link to="/schedule" className="underline underline-offset-4">
-          Explore schedules
+          <Trans>Explore schedules</Trans>
         </Link>
       </p>
 

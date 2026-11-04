@@ -1,4 +1,5 @@
 import { usePwaPrompt } from "@/app/pwa-prompt.tsx";
+import { Trans } from "@lingui/react/macro";
 import { useLocalStorage } from "usehooks-ts";
 
 export function PwaWidget() {
@@ -16,10 +17,12 @@ export function PwaWidget() {
       <div className="flex grow flex-col">
         <div className="text-base-content flex text-lg font-semibold">
           <span className="icon-[material-symbols--install-mobile-outline-rounded] text-primary mr-2 shrink-0 text-3xl sm:hidden" />
-          <span>Install as PWA</span>
+          <span>
+            <Trans>Install as PWA</Trans>
+          </span>
         </div>
         <div className="text-base-content/75">
-          Add to home screen and use it like a native app.
+          <Trans>Add to home screen and use it like a native app.</Trans>
         </div>
         <button
           type="button"
@@ -27,7 +30,9 @@ export function PwaWidget() {
           className="text-base-content/75 flex w-fit items-center hover:underline"
         >
           <span className="icon-[material-symbols--arrow-forward] text-primary mr-1" />
-          <span className="text-primary">Install</span>
+          <span className="text-primary">
+            <Trans>Install</Trans>
+          </span>
         </button>
       </div>
       <button

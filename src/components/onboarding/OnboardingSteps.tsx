@@ -8,6 +8,8 @@ import { getDormScheduleAliases } from "@/components/onboarding/dorm-schedule.ts
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { useLingui } from "@lingui/react";
+import { Trans, useLingui as useLinguiMacro } from "@lingui/react/macro";
 import { useRef, useState } from "react";
 
 export function SignInStep({
@@ -22,7 +24,7 @@ export function SignInStep({
   const isSignedIn = !!email;
 
   return (
-    <StepContent title="Sign in via Innopolis SSO">
+    <StepContent title={<Trans>Sign in via Innopolis SSO</Trans>}>
       {isSignedIn ? (
         <>
           <StepBody>
@@ -35,17 +37,21 @@ export function SignInStep({
               className="link text-base-content/60 hover:text-base-content self-center text-sm"
               onClick={() => navigateToSignOut("/start?step=1")}
             >
-              Not you? Sign out
+              <Trans>Not you? Sign out</Trans>
             </button>
           </StepBody>
-          <PrimaryButton onClick={onContinue}>Confirm</PrimaryButton>
+          <PrimaryButton onClick={onContinue}>
+            <Trans>Confirm</Trans>
+          </PrimaryButton>
         </>
       ) : (
         <StepBody>
           <p className="text-base-content/75 text-center">
-            Use your Innopolis account
-            <br />
-            to access InNoHassle services.
+            <Trans>
+              Use your Innopolis account
+              <br />
+              to access InNoHassle services.
+            </Trans>
           </p>
           <div className="flex justify-center">
             <SignInButton />
@@ -67,6 +73,7 @@ export function TelegramStep({
   requiresReconnect: boolean;
   onContinue: () => void;
 }) {
+  const { t } = useLinguiMacro();
   const queryClient = useQueryClient();
   const [forceReconnect, setForceReconnect] = useState(false);
   const {
@@ -85,7 +92,7 @@ export function TelegramStep({
 
   if (telegramUsername && !requiresReconnect && !forceReconnect) {
     return (
-      <StepContent title="Connect Telegram">
+      <StepContent title={<Trans>Connect Telegram</Trans>}>
         <StepBody>
           <div className="text-center">
             {telegramName && <p className="text-xl">{telegramName}</p>}
@@ -96,10 +103,12 @@ export function TelegramStep({
             className="link text-base-content/60 hover:text-base-content self-center text-sm"
             onClick={() => setForceReconnect(true)}
           >
-            Wrong? Reconnect
+            <Trans>Wrong? Reconnect</Trans>
           </button>
         </StepBody>
-        <PrimaryButton onClick={onContinue}>Confirm</PrimaryButton>
+        <PrimaryButton onClick={onContinue}>
+          <Trans>Confirm</Trans>
+        </PrimaryButton>
       </StepContent>
     );
   }
@@ -108,19 +117,19 @@ export function TelegramStep({
     <StepContent
       title={
         requiresReconnect || forceReconnect
-          ? "Reconnect Telegram"
-          : "Connect Telegram"
+          ? t`Reconnect Telegram`
+          : t`Connect Telegram`
       }
     >
       <StepBody>
         <div className="text-base-content/60 flex flex-col font-light">
           <div className="flex px-3 py-2">
             <span className="icon-[mdi--tick-outline] mr-2 shrink-0 text-xl text-green-500" />
-            Allow InNoHassle to message you on Telegram.
+            <Trans>Allow InNoHassle to message you on Telegram.</Trans>
           </div>
           <div className="flex px-3 py-2">
             <span className="icon-[mdi--close-outline] mr-2 shrink-0 text-xl text-red-500" />
-            Do not block the bot.
+            <Trans>Do not block the bot.</Trans>
           </div>
         </div>
 
@@ -181,6 +190,7 @@ export function DormScheduleStep({
   }) => void;
   onSkip: () => void;
 }) {
+  useLingui();
   const matchedAliases = getDormScheduleAliases({ building, floor });
   const isSelectionComplete = matchedAliases.length > 0;
   const matchedGroups = matchedAliases.flatMap((alias) => {
@@ -191,7 +201,7 @@ export function DormScheduleStep({
   });
 
   return (
-    <StepContent title="Find your dorm schedule">
+    <StepContent title={<Trans>Find your dorm schedule</Trans>}>
       <StepBody>
         <DormBuildingFloorInput
           building={building}
@@ -229,8 +239,10 @@ export function DormScheduleStep({
                 ))}
               </div>
               <p className="text-base-content/70 text-center text-sm">
-                You will see room cleaning and linen change schedules in your
-                personal calendar.
+                <Trans>
+                  You will see room cleaning and linen change schedules in your
+                  personal calendar.
+                </Trans>
               </p>
             </>
           )}
@@ -247,7 +259,7 @@ export function DormScheduleStep({
         className="link text-base-content/60 hover:text-base-content mb-3 self-center text-sm"
         onClick={onSkip}
       >
-        Skip
+        <Trans>Skip</Trans>
       </button>
       <PrimaryButton
         onClick={() =>
@@ -268,7 +280,7 @@ export function DormScheduleStep({
         {isSaving ? (
           <span className="loading loading-spinner loading-sm" />
         ) : (
-          "Confirm"
+          <Trans>Confirm</Trans>
         )}
       </PrimaryButton>
     </StepContent>
@@ -292,8 +304,9 @@ export function VerifyGroupsStep({
   error: unknown;
   onContinue: () => void;
 }) {
+  useLingui();
   return (
-    <StepContent title="Verify your groups">
+    <StepContent title={<Trans>Verify your groups</Trans>}>
       <StepBody>
         {isPending && (
           <div className="flex flex-col gap-2">
@@ -322,28 +335,40 @@ export function VerifyGroupsStep({
               ))
             ) : (
               <p className="text-base-content/60 text-center text-sm">
-                No groups found.
+                <Trans>No groups found.</Trans>
               </p>
             )}
           </div>
         )}
 
         <p className="text-base-content/60 text-center text-sm">
-          {groups.length > 0 ? "Not your groups? " : null}
-          <Link
-            to="/schedule"
-            className="link text-base-content/60 hover:text-base-content"
-          >
-            {groups.length > 0
-              ? "Change them in schedule"
-              : "Choose groups in schedule"}
-          </Link>
-          .
+          {groups.length > 0 ? (
+            <Trans>
+              Not your groups?{" "}
+              <Link
+                to="/schedule"
+                className="link text-base-content/60 hover:text-base-content"
+              >
+                Change them in schedule
+              </Link>
+              .
+            </Trans>
+          ) : (
+            <Trans>
+              <Link
+                to="/schedule"
+                className="link text-base-content/60 hover:text-base-content"
+              >
+                Choose groups in schedule
+              </Link>
+              .
+            </Trans>
+          )}
         </p>
       </StepBody>
 
       <PrimaryButton onClick={onContinue} disabled={isPending || isError}>
-        Confirm
+        <Trans>Confirm</Trans>
       </PrimaryButton>
     </StepContent>
   );
@@ -351,18 +376,18 @@ export function VerifyGroupsStep({
 
 export function CompleteStep() {
   return (
-    <StepContent title="You are all set">
+    <StepContent title={<Trans>You are all set</Trans>}>
       <StepBody>
         <Link to="/calendar" className="btn btn-primary w-full">
-          Go to personal calendar
+          <Trans>Go to personal calendar</Trans>
           <span className="icon-[material-symbols--arrow-forward]" />
         </Link>
         <Link to="/dashboard" className="btn btn-ghost w-full">
-          Go to your dashboard
+          <Trans>Go to your dashboard</Trans>
           <span className="icon-[material-symbols--arrow-forward]" />
         </Link>
         <Link to="/about" className="btn btn-ghost w-full">
-          More about InNoHassle
+          <Trans>More about InNoHassle</Trans>
           <span className="icon-[material-symbols--arrow-forward]" />
         </Link>
       </StepBody>
@@ -407,7 +432,9 @@ function DormBuildingFloorInput({
           onChange={(event) => handleBuildingChange(event.target.value)}
           className="input input-bordered border-primary h-14 w-11 p-0 text-center text-2xl font-medium"
         />
-        <span className="text-base-content/50 text-xs">Building</span>
+        <span className="text-base-content/50 text-xs">
+          <Trans>Building</Trans>
+        </span>
       </div>
 
       <span className="text-base-content/50 flex h-14 items-center text-2xl">
@@ -426,7 +453,9 @@ function DormBuildingFloorInput({
             isHighRiseBuilding ? "w-16" : "w-11",
           )}
         />
-        <span className="text-base-content/50 text-xs">Floor</span>
+        <span className="text-base-content/50 text-xs">
+          <Trans>Floor</Trans>
+        </span>
       </div>
     </div>
   );
@@ -436,7 +465,7 @@ function StepContent({
   title,
   children,
 }: {
-  title: string;
+  title: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (

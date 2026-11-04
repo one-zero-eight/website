@@ -73,7 +73,7 @@ describe("timetable series search", () => {
       {},
       config,
     );
-    expect(entries[0].dateLabel).toBe("24 авг.");
+    expect(entries[0].dateLabel).toBe("Aug 24");
     expect(entries[1].dateLabel).toContain(String(year + 1));
   });
   it("shows weekly defaults instead of the nearest occurrence's overrides", () => {
@@ -128,7 +128,7 @@ describe("timetable series search", () => {
     const base = buildTimetableSeriesEntry(result.entry, seriesConfig, labels);
     expect(base.meeting.room).toBe("ONLINE");
     expect(base.meeting.start).toBe("09:00");
-    expect(base.weekdayLabel).toBe("Пн");
+    expect(base.weekdayLabel).toBe("Mon");
     expect(base.instructorLabel).toBe("Alex Smith");
     expect(result.entry.meeting.date).toBe("2026-09-08");
     expect(result.entry.meeting.room).toBe("102");
@@ -146,18 +146,18 @@ describe("timetable series search", () => {
     });
   });
   it.each([
-    [1, ["январь", "января", "янв"]],
-    [2, ["февраль", "февраля", "фев", "февр"]],
-    [3, ["март", "марта", "мар"]],
-    [4, ["апрель", "апреля", "апр"]],
-    [5, ["май", "мая"]],
-    [6, ["июнь", "июня", "июн"]],
-    [7, ["июль", "июля", "июл"]],
-    [8, ["август", "августа", "авг"]],
-    [9, ["сентябрь", "сентября", "сен", "сент"]],
-    [10, ["октябрь", "октября", "окт"]],
-    [11, ["ноябрь", "ноября", "ноя", "нояб"]],
-    [12, ["декабрь", "декабря", "дек"]],
+    [1, ["январь", "января", "янв", "january", "jan"]],
+    [2, ["февраль", "февраля", "фев", "февр", "february", "feb"]],
+    [3, ["март", "марта", "мар", "march", "mar"]],
+    [4, ["апрель", "апреля", "апр", "april", "apr"]],
+    [5, ["май", "мая", "may"]],
+    [6, ["июнь", "июня", "июн", "june", "jun"]],
+    [7, ["июль", "июля", "июл", "july", "jul"]],
+    [8, ["август", "августа", "авг", "august", "aug"]],
+    [9, ["сентябрь", "сентября", "сен", "сент", "september", "sep", "sept"]],
+    [10, ["октябрь", "октября", "окт", "october", "oct"]],
+    [11, ["ноябрь", "ноября", "ноя", "нояб", "november", "nov"]],
+    [12, ["декабрь", "декабря", "дек", "december", "dec"]],
   ] as const)(
     "recognizes names and abbreviations for month %i",
     (month, aliases) => {
@@ -245,18 +245,24 @@ describe("timetable series search", () => {
         .meeting.tag,
     ).toBe("lab");
   });
-  it.each(["07.09", "7.9.2026", "2026-09-07", "7 сентября", "7 сентября 2026"])(
-    "finds concrete dates with %s",
-    (date) => {
-      const result = search(
-        [meeting("2026-09-07"), meeting("2026-09-14")],
-        `Mathematical ${date}`,
-      );
-      expect(result).toHaveLength(1);
-      expect(result[0].isSeries).toBe(false);
-      expect(result[0].entry.meeting.date).toBe("2026-09-07");
-    },
-  );
+  it.each([
+    "07.09",
+    "7.9.2026",
+    "2026-09-07",
+    "7 сентября",
+    "7 сентября 2026",
+    "7 september",
+    "Sep 7",
+    "September 7, 2026",
+  ])("finds concrete dates with %s", (date) => {
+    const result = search(
+      [meeting("2026-09-07"), meeting("2026-09-14")],
+      `Mathematical ${date}`,
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0].isSeries).toBe(false);
+    expect(result[0].entry.meeting.date).toBe("2026-09-07");
+  });
   it("matches yearless dates across the loaded semester, respecting explicit years", () => {
     expect(search([meeting("2027-01-04")], "04.01")).toHaveLength(1);
     expect(search([meeting("2027-01-04")], "04.01.2026")).toHaveLength(0);
@@ -272,6 +278,13 @@ describe("timetable series search", () => {
       )[0].occurrences,
     ).toHaveLength(2);
     expect(search([meeting("2026-09-07")], "вторник")).toHaveLength(0);
+    expect(
+      search(
+        [meeting("2026-09-07"), meeting("2026-09-14")],
+        "Mathematical Monday",
+      )[0].occurrences,
+    ).toHaveLength(2);
+    expect(search([meeting("2026-09-07")], "tuesday")).toHaveLength(0);
   });
   it("keeps moved events in their original series and searches actual dates", () => {
     const moved = meeting("2026-09-08", {

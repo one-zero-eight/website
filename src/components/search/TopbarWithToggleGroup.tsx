@@ -1,3 +1,4 @@
+import { SwitchLocaleButton } from "@/components/layout/SwitchLocaleButton";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
 import { cn } from "@/lib/ui/cn";
@@ -22,6 +23,7 @@ export function TopbarWithToggleGroup({
       </div>
       <div className="hidden items-center py-2 pr-4 lg:flex">
         {/* <ToggleSnowButton /> // Disable snow */}
+        <SwitchLocaleButton />
         <SwitchThemeButton />
         <UserMenu isMobile={false} isSidebar={false} />
       </div>

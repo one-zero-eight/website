@@ -666,6 +666,11 @@ export interface components {
        */
       title: string;
       /**
+       * Ru Title
+       * @description Room title in Russian
+       */
+      ru_title: string;
+      /**
        * Short Name
        * @description Shorter version of room title
        */

@@ -1,4 +1,5 @@
 import type { when2meetTypes } from "@/api/when2meet";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
 import { formatMeetingTimeRange } from "./utils/meeting-time.ts";
 
@@ -7,7 +8,11 @@ export function MeetingItem({
 }: {
   meeting: when2meetTypes.SchemaEventSummary;
 }) {
-  const selectedTimeLabel = formatMeetingTimeRange(meeting.selected_time);
+  const { t, i18n } = useLingui();
+  const selectedTimeLabel = formatMeetingTimeRange(
+    meeting.selected_time,
+    i18n.locale,
+  );
 
   return (
     <Link
@@ -22,7 +27,7 @@ export function MeetingItem({
             {meeting.is_archived && (
               <span
                 className="icon-[mdi--archive-outline] text-base-content/60 shrink-0 text-lg"
-                title="Archived"
+                title={t`Archived`}
               />
             )}
           </div>
@@ -52,7 +57,9 @@ export function MeetingItem({
           ) : (
             <div className="flex items-center gap-2">
               <span className="icon-[material-symbols--schedule-outline] text-base-content/50 shrink-0 text-lg" />
-              <span>Not selected</span>
+              <span>
+                <Trans>Not selected</Trans>
+              </span>
             </div>
           )}
         </div>

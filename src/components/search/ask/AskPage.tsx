@@ -1,4 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
 import SearchField from "@/components/search/SearchField.tsx";
 import { AskResult } from "./AskResult";
 import { searchTypes } from "@/api/search";
@@ -12,6 +14,7 @@ type Message =
   | { role: "assistant"; response: searchTypes.SchemaAskResponses };
 
 export function AskPage({ askQuery }: { askQuery: string }) {
+  useLingui();
   const { me } = useMe();
 
   const [inputQuery, setInputQuery] = useState(askQuery);
@@ -42,8 +45,12 @@ export function AskPage({ askQuery }: { askQuery: string }) {
 
       {messages.length === 0 && !isPending && !error && (
         <div className="flex flex-col gap-4">
-          <span>AI Assistant:</span>
-          <span>- Ask me anything!</span>
+          <span>
+            <Trans>AI Assistant:</Trans>
+          </span>
+          <span>
+            <Trans>- Ask me anything!</Trans>
+          </span>
         </div>
       )}
 
@@ -67,12 +74,14 @@ export function AskPage({ askQuery }: { askQuery: string }) {
             onClick={cancel}
           >
             <span className="icon-[material-symbols--close]" />
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
         </div>
       ) : error ? (
         <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">
-          <span>- Sorry, I can't help you with this question.</span>
+          <span>
+            <Trans>- Sorry, I can't help you with this question.</Trans>
+          </span>
           <span className="text-base-content/60 text-sm">
             {formatApiErrorMessage(error)}
           </span>

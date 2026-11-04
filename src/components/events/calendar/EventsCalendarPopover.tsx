@@ -1,4 +1,6 @@
 import { $events } from "@/api/events";
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
 import {
   autoUpdate,
   flip,
@@ -32,6 +34,7 @@ export function EventsCalendarPopover({
   setIsOpen: (open: boolean, event?: Event) => void;
   eventElement: HTMLElement;
 }) {
+  const { i18n } = useLingui();
   const eventId = extractEventIdFromUrl(event.url);
 
   const { data: eventData } = $events.useQuery(
@@ -115,7 +118,9 @@ export function EventsCalendarPopover({
                   <span className="icon-[material-symbols--today-outline] text-2xl" />
                 </div>
                 <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
-                  {moment(event.startStr).format("dddd, D MMMM; HH:mm")}
+                  {moment(event.startStr)
+                    .locale(i18n.locale)
+                    .format("dddd, D MMMM; HH:mm")}
                 </p>
               </div>
 
@@ -174,7 +179,7 @@ export function EventsCalendarPopover({
                     className="flex w-full py-1 underline underline-offset-2"
                     onClick={() => setIsOpen(false)}
                   >
-                    Open event page
+                    <Trans>Open event page</Trans>
                   </Link>
                 </div>
               )}

@@ -1,41 +1,45 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 export function ClubLeaguePage() {
+  const { t } = useLingui();
   return (
     <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-4 py-8 lg:px-8">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-base-content mb-4 text-3xl font-bold md:text-4xl">
-          Club League
+          <Trans>Club League</Trans>
         </h1>
         <p className="text-base-content/50 mx-auto max-w-2xl text-lg">
-          Compete, grow, and earn rewards for your club's achievements
+          <Trans>
+            Compete, grow, and earn rewards for your club's achievements
+          </Trans>
         </p>
       </div>
 
       {/* Aims Section */}
       <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
-          Club League Aims
+          <Trans>Club League Aims</Trans>
         </h2>
         <div className="flex flex-col gap-4">
           <AimItem
             number={1}
-            text="To determine the most active, initiative and successful student societies at Innopolis University, as well as to reward them"
+            text={t`To determine the most active, initiative and successful student societies at Innopolis University, as well as to reward them`}
           />
           <AimItem
             number={2}
-            text="To promote the IU by contributing to the development of the educational institution and the formation of a strong student community"
+            text={t`To promote the IU by contributing to the development of the educational institution and the formation of a strong student community`}
           />
           <AimItem
             number={3}
-            text="To integrate competition element into student clubs' life in order to stimulate such clubs to grow and set targets"
+            text={t`To integrate competition element into student clubs' life in order to stimulate such clubs to grow and set targets`}
           />
           <AimItem
             number={4}
-            text="To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
+            text={t`To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University`}
           />
           <AimItem
             number={5}
-            text="To teach student club leaders to run reports"
+            text={t`To teach student club leaders to run reports`}
           />
         </div>
       </div>
@@ -43,39 +47,49 @@ export function ClubLeaguePage() {
       {/* Competition Principles */}
       <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
-          Competition Principles
+          <Trans>Competition Principles</Trans>
         </h2>
         <div className="text-base-content/90 space-y-4">
           <p>
-            The main competition principle lies in sportsmanship, where each
-            competitor fairly assesses its correspondence to each criteria,
-            respects opponents and crediting decision-making.
+            <Trans>
+              The main competition principle lies in sportsmanship, where each
+              competitor fairly assesses its correspondence to each criteria,
+              respects opponents and crediting decision-making.
+            </Trans>
           </p>
           <p>
-            Report form will be published to Club Leaders telegram group every
-            month, according to which points will be credited.
+            <Trans>
+              Report form will be published to Club Leaders telegram group every
+              month, according to which points will be credited.
+            </Trans>
           </p>
 
           <div className="mt-6">
             <h3 className="text-base-content mb-3 font-semibold">
-              Priority Order in Crediting Decision Making
+              <Trans>Priority Order in Crediting Decision Making</Trans>
             </h3>
             <ul className="ml-6 list-disc space-y-2">
-              <li>Criteria from the official table</li>
               <li>
-                In controversial situations decision is made by{" "}
-                <a
-                  href="https://telegram.me/T_Konovalov"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  @T_Konovalov
-                </a>
+                <Trans>Criteria from the official table</Trans>
               </li>
               <li>
-                In difficult situations decision is made by group vote in Club
-                Leaders telegram group
+                <Trans>
+                  In controversial situations decision is made by{" "}
+                  <a
+                    href="https://telegram.me/T_Konovalov"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    @T_Konovalov
+                  </a>
+                </Trans>
+              </li>
+              <li>
+                <Trans>
+                  In difficult situations decision is made by group vote in Club
+                  Leaders telegram group
+                </Trans>
               </li>
             </ul>
           </div>
@@ -88,21 +102,25 @@ export function ClubLeaguePage() {
           <div className="mb-4 flex items-center gap-3">
             <span className="icon-[material-symbols--calendar-month-outline] text-primary text-3xl" />
             <h2 className="text-base-content text-xl font-semibold">
-              League Calendar
+              <Trans>League Calendar</Trans>
             </h2>
           </div>
           <div className="space-y-3">
             <div className="bg-base-300 rounded-field p-4">
               <div className="text-primary mb-1 font-semibold">
-                1st Semester
+                <Trans>1st Semester</Trans>
               </div>
-              <div className="text-base-content/80">August - December</div>
+              <div className="text-base-content/80">
+                <Trans>August - December</Trans>
+              </div>
             </div>
             <div className="bg-base-300 rounded-field p-4">
               <div className="text-primary mb-1 font-semibold">
-                2nd Semester
+                <Trans>2nd Semester</Trans>
               </div>
-              <div className="text-base-content/80">January - July</div>
+              <div className="text-base-content/80">
+                <Trans>January - July</Trans>
+              </div>
             </div>
           </div>
         </div>
@@ -111,28 +129,38 @@ export function ClubLeaguePage() {
           <div className="mb-4 flex items-center gap-3">
             <span className="icon-[material-symbols--info-outline] text-primary text-3xl" />
             <h2 className="text-base-content text-xl font-semibold">
-              Important Rules
+              <Trans>Important Rules</Trans>
             </h2>
           </div>
           <ul className="text-base-content/90 space-y-2 text-sm">
             <li className="flex gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>Budget must be spent before the end of the semester</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-primary mt-0.5">•</span>
               <span>
-                Clubs get points only for activities related to their field
-                (except criterion 16)
+                <Trans>
+                  Budget must be spent before the end of the semester
+                </Trans>
               </span>
             </li>
             <li className="flex gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>Every criterion requires proof</span>
+              <span>
+                <Trans>
+                  Clubs get points only for activities related to their field
+                  (except criterion 16)
+                </Trans>
+              </span>
             </li>
             <li className="flex gap-2">
               <span className="text-primary mt-0.5">•</span>
-              <span>Unspent points from last semester expire</span>
+              <span>
+                <Trans>Every criterion requires proof</Trans>
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-primary mt-0.5">•</span>
+              <span>
+                <Trans>Unspent points from last semester expire</Trans>
+              </span>
             </li>
           </ul>
         </div>
@@ -141,28 +169,40 @@ export function ClubLeaguePage() {
       {/* Purchases */}
       <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
-          Club Purchases
+          <Trans>Club Purchases</Trans>
         </h2>
 
         <div className="space-y-6">
           <div>
             <h3 className="text-base-content mb-3 flex items-center gap-2 font-semibold">
               <span className="icon-[material-symbols--shopping-cart-outline] text-primary text-xl" />
-              What Clubs Can Purchase
+              <Trans>What Clubs Can Purchase</Trans>
             </h3>
             <ul className="text-base-content/90 ml-6 list-disc space-y-2">
-              <li>Equipment</li>
-              <li>Workshops, lectures and other related services</li>
-              <li>Merch of the club</li>
-              <li>Other materials related to the activities of the club</li>
+              <li>
+                <Trans>Equipment</Trans>
+              </li>
+              <li>
+                <Trans>Workshops, lectures and other related services</Trans>
+              </li>
+              <li>
+                <Trans>Merch of the club</Trans>
+              </li>
+              <li>
+                <Trans>
+                  Other materials related to the activities of the club
+                </Trans>
+              </li>
             </ul>
             <div className="bg-base-300 rounded-field mt-4 p-4">
               <p className="text-base-content/90 text-sm">
-                <span className="font-semibold">Example:</span> Badminton club
-                can buy shuttlecocks, but cannot buy a flower pot.
+                <Trans>
+                  <span className="font-semibold">Example:</span> Badminton club
+                  can buy shuttlecocks, but cannot buy a flower pot.
+                </Trans>
               </p>
               <p className="mt-2 text-sm">
-                Buying food for events is prohibited now.
+                <Trans>Buying food for events is prohibited now.</Trans>
               </p>
             </div>
           </div>
@@ -170,7 +210,7 @@ export function ClubLeaguePage() {
           <div>
             <h3 className="text-base-content mb-3 flex items-center gap-2 font-semibold">
               <span className="icon-[material-symbols--receipt-long-outline] text-primary text-xl" />
-              Purchase Process
+              <Trans>Purchase Process</Trans>
             </h3>
             <div className="space-y-3">
               <div className="flex gap-3">
@@ -178,7 +218,10 @@ export function ClubLeaguePage() {
                   1
                 </span>
                 <p className="text-base-content/90">
-                  Purchases are made only <strong>2 times per semester</strong>
+                  <Trans>
+                    Purchases are made only{" "}
+                    <strong>2 times per semester</strong>
+                  </Trans>
                 </p>
               </div>
               <div className="flex gap-3">
@@ -186,9 +229,11 @@ export function ClubLeaguePage() {
                   2
                 </span>
                 <p className="text-base-content/90">
-                  The club manager collects orders from the club leaders in
-                  advance, and later makes a purchase in the form of an official
-                  order
+                  <Trans>
+                    The club manager collects orders from the club leaders in
+                    advance, and later makes a purchase in the form of an
+                    official order
+                  </Trans>
                 </p>
               </div>
               <div className="flex gap-3">
@@ -196,17 +241,19 @@ export function ClubLeaguePage() {
                   3
                 </span>
                 <p className="text-base-content/90">
-                  If the purchase is non-standard and doesn't correspond to the
-                  activities of the club, you have to write a justification for
-                  the purchase and send it to{" "}
-                  <a
-                    href="https://telegram.me/T_Konovalov"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    @T_Konovalov
-                  </a>
+                  <Trans>
+                    If the purchase is non-standard and doesn't correspond to
+                    the activities of the club, you have to write a
+                    justification for the purchase and send it to{" "}
+                    <a
+                      href="https://telegram.me/T_Konovalov"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      @T_Konovalov
+                    </a>
+                  </Trans>
                 </p>
               </div>
             </div>
@@ -217,7 +264,7 @@ export function ClubLeaguePage() {
       {/* Resources Links */}
       <div className="from-primary/10 to-primary/5 rounded-field bg-linear-to-br p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
-          League Resources
+          <Trans>League Resources</Trans>
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
           <a
@@ -229,15 +276,17 @@ export function ClubLeaguePage() {
             <div className="flex items-center gap-3">
               <span className="icon-[material-symbols--table-chart-outline] text-primary text-3xl" />
               <h3 className="text-base-content font-semibold">
-                Club League Criteria
+                <Trans>Club League Criteria</Trans>
               </h3>
             </div>
             <p className="text-base-content/50 text-sm">
-              Detailed criteria for earning points in the league, categorized by
-              club type (Technical, Sport, Special Interest, Art/Culture)
+              <Trans>
+                Detailed criteria for earning points in the league, categorized
+                by club type (Technical, Sport, Special Interest, Art/Culture)
+              </Trans>
             </p>
             <div className="text-primary mt-auto flex items-center gap-1 text-sm font-medium">
-              Open Spreadsheet
+              <Trans>Open Spreadsheet</Trans>
               <span className="icon-[material-symbols--arrow-outward]" />
             </div>
           </a>
@@ -251,15 +300,17 @@ export function ClubLeaguePage() {
             <div className="flex items-center gap-3">
               <span className="icon-[material-symbols--leaderboard-outline] text-primary text-3xl" />
               <h3 className="text-base-content font-semibold">
-                Current League Points
+                <Trans>Current League Points</Trans>
               </h3>
             </div>
             <p className="text-base-content/50 text-sm">
-              Live standings showing points earned by clubs throughout the
-              semester
+              <Trans>
+                Live standings showing points earned by clubs throughout the
+                semester
+              </Trans>
             </p>
             <div className="text-primary mt-auto flex items-center gap-1 text-sm font-medium">
-              View Standings
+              <Trans>View Standings</Trans>
               <span className="icon-[material-symbols--arrow-outward]" />
             </div>
           </a>
@@ -269,11 +320,13 @@ export function ClubLeaguePage() {
       {/* Contact Section */}
       <div className="bg-base-200 rounded-field p-6 text-center md:p-8">
         <h2 className="text-base-content mb-4 text-2xl font-semibold">
-          Need Help?
+          <Trans>Need Help?</Trans>
         </h2>
         <p className="text-base-content/50 mb-4">
-          If you need any assistance, advice, or resources to maintain and
-          develop your club, contact our Student Clubs Manager:
+          <Trans>
+            If you need any assistance, advice, or resources to maintain and
+            develop your club, contact our Student Clubs Manager:
+          </Trans>
         </p>
         <div className="text-base-content">
           <p className="text-lg font-semibold">Timofey Konovalov</p>

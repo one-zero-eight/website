@@ -1,4 +1,6 @@
 import { $schedule, scheduleTypes } from "@/api/schedule";
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
 import { accountsTypes } from "@/api/accounts";
 import {
   buildEventGroupsByAlias,
@@ -27,6 +29,7 @@ export function AdminUserListItem({
   onSelect?: (user: accountsTypes.SchemaViewUser) => void;
   selected?: boolean;
 }) {
+  useLingui();
   const { data: predefined } = $schedule.useQuery(
     "get",
     "/get-predefined-data",
@@ -87,7 +90,9 @@ export function AdminUserListItem({
         <UserAvatar />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="truncate font-medium">{notFoundEmail}</span>
-          <span className="text-error text-sm">User not found</span>
+          <span className="text-error text-sm">
+            <Trans>User not found</Trans>
+          </span>
           <PredefinedGroupLabels
             groups={groups}
             eventGroupsByAlias={eventGroupsByAlias}

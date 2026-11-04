@@ -20,7 +20,7 @@ export function getAccountDisplayName(me?: accountsTypes.SchemaViewUser) {
     return me.id;
   }
 
-  return "You";
+  return undefined;
 }
 
 export function getParticipantDisplayName(

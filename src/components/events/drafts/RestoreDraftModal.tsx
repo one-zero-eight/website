@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   RestoreBodyFrom,
   RestoreSource,
@@ -5,16 +6,6 @@ import {
 } from "@/api/events/types";
 import { Modal } from "@/components/common/Modal.tsx";
 import moment from "moment";
-
-function entityLabel(entity: RestoreSource) {
-  if (entity === RestoreSource.submission) {
-    return "Submission";
-  }
-  if (entity === RestoreSource.public) {
-    return "Public";
-  }
-  return entity;
-}
 
 export function RestoreDraftModal({
   open,
@@ -29,11 +20,12 @@ export function RestoreDraftModal({
   isPending: boolean;
   onRestore: (from: RestoreBodyFrom) => void;
 }) {
+  const { t } = useLingui();
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Restore draft">
+    <Modal open={open} onOpenChange={onOpenChange} title={t`Restore draft`}>
       <div className="@container/modal flex flex-col gap-3">
         <p className="text-base-content/70 text-sm">
-          Choose a source to restore the draft from.
+          <Trans>Choose a source to restore the draft from.</Trans>
         </p>
         <ul className="flex flex-col gap-2">
           {sources.map((source) => (
@@ -51,7 +43,11 @@ export function RestoreDraftModal({
                 }
               >
                 <span className="font-medium">
-                  {entityLabel(source.entity)}
+                  {source.entity === RestoreSource.submission
+                    ? t`Submission`
+                    : source.entity === RestoreSource.public
+                      ? t`Public`
+                      : source.entity}
                 </span>
                 <span className="text-base-content/70 text-sm">
                   {moment(source.revision).format("D MMM YYYY, HH:mm")} ·{" "}
@@ -68,7 +64,7 @@ export function RestoreDraftModal({
             disabled={isPending}
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
         </div>
       </div>

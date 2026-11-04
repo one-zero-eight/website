@@ -1,6 +1,9 @@
 import { $forms } from "@/api/forms";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { msg } from "@lingui/core/macro";
+import type { MessageDescriptor } from "@lingui/core";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useState } from "react";
 import {
   FormUrlInput,
@@ -10,9 +13,10 @@ import {
 } from "./index.ts";
 
 export function FormsPage() {
+  const { i18n } = useLingui();
   const { showError } = useToast();
   const [formUrl, setFormUrl] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<MessageDescriptor | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [copied, setCopied] = useState(false);
@@ -29,12 +33,12 @@ export function FormsPage() {
         );
       },
       onError: (error) => {
-        showError("Error", formatApiErrorMessage(error));
+        showError(msg`Error`, formatApiErrorDescriptor(error));
       },
     });
 
-  const validateUrl = (rawUrl: string): string => {
-    if (!rawUrl.trim()) return "";
+  const validateUrl = (rawUrl: string): MessageDescriptor | null => {
+    if (!rawUrl.trim()) return null;
 
     const normalized = rawUrl.trim().match(/^https?:\/\//)
       ? rawUrl.trim()
@@ -58,12 +62,12 @@ export function FormsPage() {
       );
 
       if (!isAllowedHost) {
-        return "Only Yandex Forms URLs are supported";
+        return msg`Only Yandex Forms URLs are supported`;
       }
 
-      return "";
+      return null;
     } catch {
-      return "Please enter a valid URL";
+      return msg`Please enter a valid URL`;
     }
   };
 
@@ -72,7 +76,7 @@ export function FormsPage() {
     setFormUrl(value);
 
     if (error) {
-      setError("");
+      setError(null);
     }
 
     if (value.trim()) {
@@ -113,7 +117,7 @@ export function FormsPage() {
       if (clipboardText) {
         setFormUrl(clipboardText);
         if (error) {
-          setError("");
+          setError(null);
         }
         if (clipboardText.trim()) {
           setIsValidating(true);
@@ -163,7 +167,7 @@ export function FormsPage() {
 
   const handleClear = () => {
     setFormUrl("");
-    setError("");
+    setError(null);
   };
 
   return (
@@ -171,8 +175,10 @@ export function FormsPage() {
       <div className="max-w-2xl self-center">
         <div className="mb-6 text-center">
           <p className="text-base-content/70 text-lg">
-            Enter a form URL to generate a link with the respondent's email
-            pre-filled
+            <Trans>
+              Enter a form URL to generate a link with the respondent's email
+              pre-filled
+            </Trans>
           </p>
         </div>
 
@@ -185,7 +191,7 @@ export function FormsPage() {
         >
           <FormUrlInput
             formUrl={formUrl}
-            error={error}
+            error={error ? i18n._(error) : ""}
             isValidating={isValidating}
             onChange={handleUrlChange}
             onBlur={handleBlur}

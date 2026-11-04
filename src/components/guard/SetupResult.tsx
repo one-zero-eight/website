@@ -1,4 +1,5 @@
 import { buildDocsUrl, buildSheetsUrl } from "./utils";
+import { Trans } from "@lingui/react/macro";
 import { CopyLinkButton } from "./CopyLinkButton";
 import { useServiceAccountEmail } from "./hooks";
 import { ServiceAccountEmail } from "./Instructions";
@@ -27,14 +28,20 @@ export function SetupResult({
   return (
     <div className="alert alert-success alert-soft flex-col items-stretch gap-3">
       <div>
-        <h3 className="text-lg font-semibold">Setup complete</h3>
+        <h3 className="text-lg font-semibold">
+          <Trans>Setup complete</Trans>
+        </h3>
         <p className="mt-1 text-sm">
-          New file was created under{" "}
-          <ServiceAccountEmail email={serviceEmail} /> ownership. You were added
-          with editor role.
+          <Trans>
+            New file was created under{" "}
+            <ServiceAccountEmail email={serviceEmail} /> ownership. You were
+            added with editor role.
+          </Trans>
         </p>
         <p className="text-base-content/70 mt-2 text-sm">
-          Edit the spreadsheet or share the join link with students.
+          <Trans>
+            Edit the spreadsheet or share the join link with students.
+          </Trans>
         </p>
       </div>
 
@@ -46,7 +53,7 @@ export function SetupResult({
           rel="noopener noreferrer"
           className="btn btn-outline btn-sm"
         >
-          Open spreadsheet
+          <Trans>Open spreadsheet</Trans>
         </a>
         {onDismiss ? (
           <button
@@ -54,7 +61,7 @@ export function SetupResult({
             onClick={onDismiss}
             className="btn btn-ghost btn-sm ml-auto"
           >
-            Dismiss
+            <Trans>Dismiss</Trans>
           </button>
         ) : null}
       </div>

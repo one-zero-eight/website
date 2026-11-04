@@ -181,6 +181,7 @@ export function ComponentEditModal({
   const [baseline, setBaseline] = useState<SchemaComponent | null>(null);
   const [tab, setTab] = useState<EditTab>("basics");
   const [sessionDeletesDirty, setSessionDeletesDirty] = useState(false);
+  const [sessionsValid, setSessionsValid] = useState(true);
   const [sessionsResetKey, setSessionsResetKey] = useState(0);
   const sessionsForSaveRef = useRef<
     (() => SchemaComponentSessionSeries[] | null) | null
@@ -198,6 +199,7 @@ export function ComponentEditModal({
     setDraft(next);
     setBaseline(cloneComponent(next));
     setSessionDeletesDirty(false);
+    setSessionsValid(true);
     setSessionsResetKey((key) => key + 1);
     setTab("basics");
   }, [open, component, tree]);
@@ -218,7 +220,7 @@ export function ComponentEditModal({
       normalizeComponentForCompare(draft, tree) !==
         normalizeComponentForCompare(baseline, tree)) ||
     sessionDeletesDirty;
-  const canSave = hasTag && (isNew || isDirty);
+  const canSave = hasTag && sessionsValid && (isNew || isDirty);
 
   function handleClose() {
     onOpenChange(false);
@@ -228,6 +230,7 @@ export function ComponentEditModal({
     if (!baseline) return;
     setDraft(cloneComponent(baseline));
     setSessionDeletesDirty(false);
+    setSessionsValid(true);
     setSessionsResetKey((key) => key + 1);
   }
 
@@ -235,9 +238,11 @@ export function ComponentEditModal({
     if (!draft || !canSave) return;
     const tag = String(draft.tag || "").trim();
     if (!tag) return;
-    const sessions =
-      sessionsForSaveRef.current?.() ??
-      (draft.sessions && draft.sessions.length ? draft.sessions : null);
+    const sessions = sessionsForSaveRef.current
+      ? sessionsForSaveRef.current()
+      : draft.sessions?.length
+        ? draft.sessions
+        : null;
     onSave({
       ...draft,
       tag,
@@ -416,7 +421,7 @@ export function ComponentEditModal({
           />
         ) : null}
 
-        {tab === "sessions" ? (
+        <div className={cn(tab !== "sessions" && "hidden")}>
           <ComponentSessionsEditor
             config={config}
             courseIndex={courseIndex}
@@ -429,13 +434,20 @@ export function ComponentEditModal({
             onChange={(sessions) => setDraft({ ...draft, sessions })}
             baselineSessions={baseline?.sessions}
             onDeletedDirtyChange={setSessionDeletesDirty}
+            onValidityChange={setSessionsValid}
             sessionsForSaveRef={sessionsForSaveRef}
             resetKey={sessionsResetKey}
           />
+        </div>
+        {!sessionsValid ? (
+          <p className="text-error text-sm">
+            Исправьте периоды или даты серий на вкладке «Занятия» перед
+            сохранением.
+          </p>
         ) : null}
 
         <div className="flex items-center justify-end gap-3 border-t pt-3">
-          {isDirty ? (
+          {isDirty || !sessionsValid ? (
             <button
               type="button"
               className="text-base-content/50 hover:text-base-content/80 text-sm"

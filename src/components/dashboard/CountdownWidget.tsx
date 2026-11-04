@@ -1,4 +1,7 @@
 import { useNowMS } from "@/lib/utils/use-now.ts";
+import { t, plural } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
 import Logo108 from "@/components/icons/Logo108.tsx";
 import type { ReactNode } from "react";
 
@@ -20,32 +23,36 @@ type CountdownEvent = CountdownEventTemplate & {
  *
  * E.g. *-01-01T00:00:00+03:00 is a convenient declaration for a New Year in Moscow timezone.
  */
-const countdownEventTemplates: CountdownEventTemplate[] = [
-  {
-    dateTemplate: "*-01-01T00:00:00+03:00",
-    name: "New Year countdown",
-    iconClass: "icon-[twemoji--christmas-tree]",
-  },
-  {
-    dateTemplate: "*-06-01T00:00:00+03:00",
-    name: "Summer countdown",
-    iconClass: "icon-[twemoji--sun]",
-  },
-  {
-    dateTemplate: "2026-02-06T19:00+03:00",
-    name: (
-      <>
-        <span className="block sm:hidden">Introduction to 108 countdown</span>
-        <span className="hidden flex-row items-center gap-2 sm:flex">
-          <span>Introduction to</span>
-          <Logo108 className="size-8" />
-          <span>countdown</span>
-        </span>
-      </>
-    ),
-    iconClass: "icon-[twemoji--purple-heart]",
-  },
-];
+function getCountdownEventTemplates(): CountdownEventTemplate[] {
+  return [
+    {
+      dateTemplate: "*-01-01T00:00:00+03:00",
+      name: t`New Year countdown`,
+      iconClass: "icon-[twemoji--christmas-tree]",
+    },
+    {
+      dateTemplate: "*-06-01T00:00:00+03:00",
+      name: t`Summer countdown`,
+      iconClass: "icon-[twemoji--sun]",
+    },
+    {
+      dateTemplate: "2026-02-06T19:00+03:00",
+      name: (
+        <>
+          <span className="block sm:hidden">
+            <Trans>Introduction to 108 countdown</Trans>
+          </span>
+          <span className="hidden flex-row items-center gap-2 sm:flex">
+            <Trans>
+              Introduction to <Logo108 className="size-8" /> countdown
+            </Trans>
+          </span>
+        </>
+      ),
+      iconClass: "icon-[twemoji--purple-heart]",
+    },
+  ];
+}
 
 /**
  * Expands the list of events to include annual events, sorts them by date and returns the next event
@@ -56,7 +63,7 @@ const countdownEventTemplates: CountdownEventTemplate[] = [
 function getNextCountdownEvent(dateNow: Date): CountdownEvent | null {
   const expandedEvents: CountdownEvent[] = [];
 
-  for (const template of countdownEventTemplates) {
+  for (const template of getCountdownEventTemplates()) {
     const [y, _] = template.dateTemplate.split("-", 2);
 
     if (y === "*") {
@@ -102,15 +109,11 @@ const formatCountdownTimeLeft = (deltaTimeSeconds: number): string => {
   const hours = Math.floor((deltaTimeSeconds / 60 / 60) % 24);
   const days = Math.floor(deltaTimeSeconds / 60 / 60 / 24);
 
-  return (
-    `${days} day${days > 1 ? "s" : ""}, ` +
-    `${hours} hour${hours > 1 ? "s" : ""}, ` +
-    `${minutes} minute${minutes > 1 ? "s" : ""}, ` +
-    `${seconds} second${seconds > 1 ? "s" : ""}`
-  );
+  return t`${plural(days, { one: "# day", other: "# days" })}, ${plural(hours, { one: "# hour", other: "# hours" })}, ${plural(minutes, { one: "# minute", other: "# minutes" })}, ${plural(seconds, { one: "# second", other: "# seconds" })}`;
 };
 
 export function CountdownWidget() {
+  useLingui();
   const nowMs = useNowMS(true, 1000);
 
   const nextEvent = getNextCountdownEvent(new Date(nowMs));

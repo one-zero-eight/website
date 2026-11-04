@@ -1,3 +1,7 @@
+import { messages as enMessages } from "@/locales/en.po";
+import { messages as ruMessages } from "@/locales/ru.po";
+import { i18n as singletonI18n, setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, expect, it, vi } from "vitest";
@@ -37,10 +41,18 @@ describe("native color selection", () => {
     document.body.append(container);
     const root = createRoot(container);
     const onChange = vi.fn();
+    const messages = { en: enMessages, ru: ruMessages };
+    const i18n = setupI18n({ locale: "en", messages });
+    singletonI18n.load(messages);
+    singletonI18n.activate("en");
     try {
       await act(async () => {
         root.render(
-          createElement(CompactColorPicker, { value: "#804242", onChange }),
+          createElement(
+            I18nProvider,
+            { i18n },
+            createElement(CompactColorPicker, { value: "#804242", onChange }),
+          ),
         );
       });
       await act(async () => container.querySelector("button")!.click());

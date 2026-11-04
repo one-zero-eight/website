@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import {
   BoardGamesTabs,
   RequireBoardGamesAdmin,
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/_with_menu/board-games/admin")({
 function RouteComponent() {
   return (
     <>
-      <Topbar title="Board Games" />
+      <Topbar title={<Trans>Board Games</Trans>} />
       <BoardGamesTabs />
       <RequireAuth>
         <RequireBoardGamesAdmin>

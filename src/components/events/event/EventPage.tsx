@@ -1,5 +1,8 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { Plural, Trans, useLingui } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 import {
+  formatApiErrorDescriptor,
   formatApiErrorMessage,
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
@@ -9,6 +12,7 @@ import { SignInButton } from "@/components/common/SignInButton.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
+import { getLocaleLabel, useAppLocale } from "@/locales/lib";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -18,6 +22,7 @@ import { PublicHostsList } from "../shared/HostLink";
 import { LocationLink } from "../shared/LocationLink";
 import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
 import { parseDescriptionContent } from "../utils/description";
+import { pickPreferredEventLocale } from "../utils/locale";
 import { getEventImageUrl, getLinkDisplayLabel } from "../utils/links";
 import { EnrolledListModal } from "./EnrolledListModal";
 
@@ -25,8 +30,10 @@ export function EventPage({ id }: { id: string }) {
   const navigate = useNavigate();
   const { me } = useMe();
   const { isModerator } = useEventsAuth();
+  const { t } = useLingui();
   const { showError, showConfirm } = useToast();
   const queryClient = useQueryClient();
+  const [appLocale] = useAppLocale();
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
   const [enrolledOpen, setEnrolledOpen] = useState(false);
 
@@ -48,9 +55,9 @@ export function EventPage({ id }: { id: string }) {
     }
 
     if (!selectedLocale || !locales.includes(selectedLocale)) {
-      setSelectedLocale(locales[0] ?? null);
+      setSelectedLocale(pickPreferredEventLocale(locales, appLocale));
     }
-  }, [locales, selectedLocale]);
+  }, [locales, selectedLocale, appLocale]);
 
   const invalidateEvent = () => {
     queryClient.invalidateQueries({
@@ -68,7 +75,7 @@ export function EventPage({ id }: { id: string }) {
         invalidateEvent();
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -81,7 +88,7 @@ export function EventPage({ id }: { id: string }) {
         invalidateEvent();
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
@@ -97,18 +104,17 @@ export function EventPage({ id }: { id: string }) {
         navigate({ to: "/events" });
       },
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     },
   );
 
   async function handleUnpublish() {
     const confirmed = await showConfirm({
-      title: "Unpublish event",
-      message:
-        "Remove this event from the public calendar? This cannot be undone from here.",
-      confirmText: "Unpublish",
-      cancelText: "Cancel",
+      title: msg`Unpublish event`,
+      message: msg`Remove this event from the public calendar? This cannot be undone from here.`,
+      confirmText: msg`Unpublish`,
+      cancelText: msg`Cancel`,
       type: "error",
     });
     if (!confirmed) {
@@ -141,14 +147,14 @@ export function EventPage({ id }: { id: string }) {
     return (
       <div className="px-4 py-4">
         <p className="text-error mb-2">
-          {formatApiErrorMessage(error) || "Failed to load event."}
+          {formatApiErrorMessage(error) || t`Failed to load event.`}
         </p>
         <button
           type="button"
           className="btn btn-ghost"
           onClick={() => refetch()}
         >
-          Retry
+          <Trans>Retry</Trans>
         </button>
       </div>
     );
@@ -160,6 +166,7 @@ export function EventPage({ id }: { id: string }) {
   const enrollment = data.data.enrollment;
   const isExternal = enrollment.type === EnrollmentType.external;
   const capacity = enrollment.capacity;
+  const enrolledCount = data.enrolled_count;
   const atCapacity =
     !isExternal &&
     capacity !== null &&
@@ -171,7 +178,7 @@ export function EventPage({ id }: { id: string }) {
   const visibleLinks = (data.data.links ?? []).filter((link) =>
     link.url.trim(),
   );
-  const title = localeContent?.name?.trim() || "Untitled event";
+  const title = localeContent?.name?.trim() || t`Untitled event`;
   const enrollmentHost = (() => {
     if (!enrollment.url?.trim()) {
       return null;
@@ -199,14 +206,14 @@ export function EventPage({ id }: { id: string }) {
                   key={locale}
                   type="button"
                   className={cn(
-                    "btn btn-sm uppercase",
+                    "btn btn-sm",
                     selectedLocale === locale
                       ? "btn-primary"
                       : "btn-ghost border border-dashed",
                   )}
                   onClick={() => setSelectedLocale(locale)}
                 >
-                  {locale}
+                  {getLocaleLabel(locale)}
                 </button>
               ))}
               <h1 className="min-w-0 flex-1 text-xl font-medium wrap-anywhere @min-[700px]/content:text-2xl">
@@ -243,31 +250,39 @@ export function EventPage({ id }: { id: string }) {
                 {isExternal ? (
                   enrollment.url && enrollmentHost ? (
                     <p className="flex flex-wrap items-center gap-1">
-                      <span>Enrollment on</span>
-                      <a
-                        href={enrollment.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 underline underline-offset-2"
-                      >
-                        {enrollmentHost}
-                        <span className="icon-[material-symbols--open-in-new] text-base" />
-                      </a>
+                      <Trans>
+                        Enrollment on{" "}
+                        <a
+                          href={enrollment.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 underline underline-offset-2"
+                        >
+                          {enrollmentHost}
+                          <span className="icon-[material-symbols--open-in-new] text-base" />
+                        </a>
+                      </Trans>
                     </p>
                   ) : (
-                    <p>External enrollment</p>
+                    <p>
+                      <Trans>External enrollment</Trans>
+                    </p>
                   )
                 ) : (
                   <p>
-                    {data.enrolled_count}
-                    {capacity !== null && capacity !== undefined
-                      ? ` / ${capacity}`
-                      : ""}{" "}
-                    {capacity !== null && capacity !== undefined
-                      ? "students"
-                      : data.enrolled_count === 1
-                        ? "student"
-                        : "students"}
+                    {capacity !== null && capacity !== undefined ? (
+                      <Plural
+                        value={capacity}
+                        one={`${enrolledCount} / # student`}
+                        other={`${enrolledCount} / # students`}
+                      />
+                    ) : (
+                      <Plural
+                        value={enrolledCount}
+                        one="# student"
+                        other="# students"
+                      />
+                    )}
                   </p>
                 )}
               </div>
@@ -278,7 +293,7 @@ export function EventPage({ id }: { id: string }) {
                     className="btn btn-ghost btn-sm"
                     onClick={() => setEnrolledOpen(true)}
                   >
-                    Participants
+                    <Trans>Participants</Trans>
                   </button>
                 )}
                 {!me ? (
@@ -294,7 +309,7 @@ export function EventPage({ id }: { id: string }) {
                       {isUnenrolling && (
                         <span className="loading loading-spinner loading-sm" />
                       )}
-                      Remove from calendar
+                      <Trans>Remove from calendar</Trans>
                     </button>
                   ) : (
                     <button
@@ -306,7 +321,7 @@ export function EventPage({ id }: { id: string }) {
                       {isEnrolling && (
                         <span className="loading loading-spinner loading-sm" />
                       )}
-                      Add to calendar
+                      <Trans>Add to calendar</Trans>
                     </button>
                   )
                 ) : data.enrolled ? (
@@ -319,7 +334,7 @@ export function EventPage({ id }: { id: string }) {
                     {isUnenrolling && (
                       <span className="loading loading-spinner loading-sm" />
                     )}
-                    Unenroll
+                    <Trans>Unenroll</Trans>
                   </button>
                 ) : (
                   <button
@@ -331,16 +346,20 @@ export function EventPage({ id }: { id: string }) {
                     {isEnrolling && (
                       <span className="loading loading-spinner loading-sm" />
                     )}
-                    {atCapacity ? "Full" : "Enroll"}
+                    {atCapacity ? t`Full` : t`Enroll`}
                   </button>
                 )}
               </div>
             </div>
 
             <div className="border-base-300 rounded-2xl border p-4">
-              <h2 className="mb-3 font-medium">Links</h2>
+              <h2 className="mb-3 font-medium">
+                <Trans>Links</Trans>
+              </h2>
               {visibleLinks.length === 0 ? (
-                <p className="text-base-content/70 text-sm">No links.</p>
+                <p className="text-base-content/70 text-sm">
+                  <Trans>No links.</Trans>
+                </p>
               ) : (
                 <ul className="flex flex-col gap-2 text-sm">
                   {visibleLinks.map((link) => (
@@ -362,7 +381,9 @@ export function EventPage({ id }: { id: string }) {
 
             {(data.can_edit_draft || isModerator) && (
               <div className="border-base-300 flex flex-wrap items-center justify-between gap-2 rounded-2xl border p-4">
-                <p className="text-sm font-medium">Manage</p>
+                <p className="text-sm font-medium">
+                  <Trans>Manage</Trans>
+                </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   {data.can_edit_draft && (
                     <Link
@@ -370,7 +391,7 @@ export function EventPage({ id }: { id: string }) {
                       params={{ id }}
                       className="btn btn-sm btn-ghost border"
                     >
-                      Edit draft
+                      <Trans>Edit draft</Trans>
                     </Link>
                   )}
                   {isModerator && (
@@ -383,7 +404,7 @@ export function EventPage({ id }: { id: string }) {
                       {isUnpublishing && (
                         <span className="loading loading-spinner loading-sm" />
                       )}
-                      Unpublish
+                      <Trans>Unpublish</Trans>
                     </button>
                   )}
                 </div>

@@ -1,4 +1,5 @@
 import { useSportProfile } from "@/components/sport/sport-profile.ts";
+import { Trans } from "@lingui/react/macro";
 import type { ReactNode } from "react";
 
 /**
@@ -22,15 +23,21 @@ export function SportPageShell({ children }: { children: ReactNode }) {
       <div className="px-4 py-4">
         <div className="card card-border border-error bg-base-100">
           <div className="card-body">
-            <h2 className="card-title text-error">Sport profile unavailable</h2>
+            <h2 className="card-title text-error">
+              <Trans>Sport profile unavailable</Trans>
+            </h2>
             <p className="text-base-content/80 text-sm">
               {sport.profileErr != null &&
               typeof sport.profileErr === "object" &&
               "message" in sport.profileErr &&
               typeof (sport.profileErr as { message?: unknown }).message ===
-                "string"
-                ? (sport.profileErr as { message: string }).message
-                : "You may not be registered in the sport system yet."}
+                "string" ? (
+                (sport.profileErr as { message: string }).message
+              ) : (
+                <Trans>
+                  You may not be registered in the sport system yet.
+                </Trans>
+              )}
             </p>
           </div>
         </div>

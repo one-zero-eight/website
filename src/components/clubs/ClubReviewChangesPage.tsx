@@ -1,4 +1,5 @@
 import { $clubs } from "@/api/clubs";
+import { Plural, Trans } from "@lingui/react/macro";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Link } from "@tanstack/react-router";
 import moment from "moment";
@@ -18,7 +19,7 @@ export function ClubReviewChangesPage() {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-base-content/50 text-lg">
-          Loading changes for review...
+          <Trans>Loading changes for review...</Trans>
         </div>
       </div>
     );
@@ -28,17 +29,21 @@ export function ClubReviewChangesPage() {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-2">
         <span className="icon-[mdi--check-circle-outline] text-base-content/20 size-12" />
-        <div className="text-base-content/50 text-lg">No changes to review</div>
+        <div className="text-base-content/50 text-lg">
+          <Trans>No changes to review</Trans>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 py-8 lg:px-8">
-      <div className="text-base-content/70 text-sm">
-        <span className="font-semibold">{clubs.length}</span>{" "}
-        {clubs.length === 1 ? "club has" : "clubs have"} changes waiting for
-        review
+      <div className="text-base-content/70 text-sm font-semibold">
+        <Plural
+          value={clubs.length}
+          one="# club has changes waiting for review"
+          other="# clubs have changes waiting for review"
+        />
       </div>
 
       <div className="flex flex-col gap-4">
@@ -62,19 +67,21 @@ export function ClubReviewChangesPage() {
                   {club.title}
                 </span>
                 <span className="badge badge-warning badge-sm">
-                  Waiting for review
+                  <Trans>Waiting for review</Trans>
                 </span>
               </div>
               <p className="text-base-content/50 line-clamp-1 text-sm">
                 {club.short_description}
               </p>
               <p className="text-base-content/70 text-sm">
-                Submitted:{" "}
-                <time dateTime={club.pending_update!.submitted_at}>
-                  {moment(club.pending_update!.submitted_at).format(
-                    "D MMM YYYY, HH:mm",
-                  )}
-                </time>
+                <Trans>
+                  Submitted:{" "}
+                  <time dateTime={club.pending_update!.submitted_at}>
+                    {moment(club.pending_update!.submitted_at).format(
+                      "D MMM YYYY, HH:mm",
+                    )}
+                  </time>
+                </Trans>
               </p>
             </div>
           </Link>

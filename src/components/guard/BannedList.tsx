@@ -1,4 +1,6 @@
 import { useToast } from "@/components/toast";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useMemo, useState } from "react";
 import { filterByFields, formatDate } from "./utils";
 
@@ -27,7 +29,9 @@ export function BannedList({
     return (
       <div className="bg-base-200/50 text-base-content/60 rounded-box flex flex-col items-center gap-2 px-4 py-10 text-center">
         <span className="icon-[material-symbols--person-off-outline-rounded] text-3xl" />
-        <p>No banned users</p>
+        <p>
+          <Trans>No banned users</Trans>
+        </p>
       </div>
     );
   }
@@ -35,7 +39,7 @@ export function BannedList({
   if (filtered.length === 0) {
     return (
       <p className="text-base-content/60 py-6 text-center text-sm">
-        No banned users match your search
+        <Trans>No banned users match your search</Trans>
       </p>
     );
   }
@@ -60,6 +64,9 @@ function BannedItemCard({
   banned: BannedItem;
   onUnban: (userId: string) => Promise<void>;
 }) {
+  const { i18n } = useLingui();
+  const bannedAt = formatDate(banned.banned_at, i18n.locale);
+
   return (
     <div className="bg-base-200 rounded-box flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
@@ -68,7 +75,7 @@ function BannedItemCard({
           <Email email={banned.innomail} />
         </div>
         <div className="text-base-content/50 text-xs">
-          banned {formatDate(banned.banned_at)}
+          <Trans>banned {bannedAt}</Trans>
         </div>
       </div>
       <UnbanButton
@@ -101,10 +108,10 @@ function UnbanButton({
 
   const handleClick = async () => {
     const confirmed = await showConfirm({
-      title: "Unban user",
-      message: `Unban ${email}? They will be able to join this sheet again via the join link.`,
-      confirmText: "Unban",
-      cancelText: "Cancel",
+      title: msg`Unban user`,
+      message: msg`Unban ${email}? They will be able to join this sheet again via the join link.`,
+      confirmText: msg`Unban`,
+      cancelText: msg`Cancel`,
       type: "info",
     });
     if (!confirmed) return;
@@ -129,7 +136,7 @@ function UnbanButton({
       ) : (
         <span className="icon-[material-symbols--undo-rounded] text-lg" />
       )}
-      Unban
+      <Trans>Unban</Trans>
     </button>
   );
 }

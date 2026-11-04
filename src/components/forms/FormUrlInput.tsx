@@ -1,4 +1,5 @@
 import { cn } from "@/lib/ui/cn";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 interface FormUrlInputProps {
   formUrl: string;
@@ -23,13 +24,15 @@ export function FormUrlInput({
   onKeyDown,
   onClear,
 }: FormUrlInputProps) {
+  const { t } = useLingui();
+
   return (
     <div>
       <label
         htmlFor="formUrl"
         className="text-base-content mb-2 block text-lg font-semibold"
       >
-        Form URL
+        <Trans>Form URL</Trans>
       </label>
       <div className="relative">
         <input
@@ -52,7 +55,7 @@ export function FormUrlInput({
           type="button"
           onClick={formUrl.trim() ? onClear : onPasteClick}
           className="text-base-content/50 hover:bg-base-content/10 hover:text-base-content absolute top-1/2 right-2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-sm transition-colors"
-          title={formUrl.trim() ? "Clear input" : "Paste from clipboard"}
+          title={formUrl.trim() ? t`Clear input` : t`Paste from clipboard`}
         >
           <span
             className={cn(
@@ -66,7 +69,9 @@ export function FormUrlInput({
       </div>
       {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
       {isValidating && (
-        <p className="text-base-content/50 mt-1 text-sm">Validating URL...</p>
+        <p className="text-base-content/50 mt-1 text-sm">
+          <Trans>Validating URL...</Trans>
+        </p>
       )}
     </div>
   );

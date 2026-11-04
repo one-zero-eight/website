@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { calloutTypes } from "@/components/editor/extensions/Callout.ts";
 import {
   autoUpdate,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/ui/cn";
 import { useRef, useState } from "react";
 
 export function CalloutTypePicker({ editor }: { editor: Editor }) {
+  const { t, i18n } = useLingui();
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -72,10 +74,10 @@ export function CalloutTypePicker({ editor }: { editor: Editor }) {
             "btn btn-sm btn-ghost flex items-center gap-1",
             isOpen && "btn-active",
           )}
-          title="Callout"
+          title={t`Callout`}
         >
           <span className={cn("shrink-0 text-sm", currentType.icon)} />
-          <span>{currentType.menuLabel}</span>
+          <span>{i18n._(currentType.menuLabel)}</span>
           <span
             className={cn(
               "shrink-0 text-lg transition-transform",
@@ -123,7 +125,7 @@ export function CalloutTypePicker({ editor }: { editor: Editor }) {
                   })}
                 >
                   <span className={cn("shrink-0", type.icon)} />
-                  <span>{type.menuLabel}</span>
+                  <span>{i18n._(type.menuLabel)}</span>
                 </div>
               ))}
             </div>

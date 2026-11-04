@@ -1,5 +1,6 @@
 import { $schedule, scheduleTypes } from "@/api/schedule";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { msg } from "@lingui/core/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -29,10 +30,10 @@ export function usePredefinedDataEditor(
           queryKey: $schedule.queryOptions("get", "/get-predefined-data")
             .queryKey,
         });
-        showSuccess("Success", "Predefined data updated");
+        showSuccess(msg`Success`, msg`Predefined data updated`);
       },
       onError: (error) => {
-        showError("Error", formatApiErrorMessage(error));
+        showError(msg`Error`, formatApiErrorDescriptor(error));
       },
     },
   );
@@ -61,13 +62,13 @@ export function usePredefinedDataEditor(
 
     const normalizedEmail = normalizeEmail(email);
     if (!normalizedEmail.includes("@")) {
-      showError("Error", "Enter a valid email.");
+      showError(msg`Error`, msg`Enter a valid email.`);
       return false;
     }
 
     const group = predefined.academic_groups?.[groupIndex];
     if (!group) {
-      showError("Error", "Academic group not found.");
+      showError(msg`Error`, msg`Academic group not found.`);
       return false;
     }
 
@@ -76,7 +77,7 @@ export function usePredefinedDataEditor(
         (groupEmail) => groupEmail.toLowerCase() === normalizedEmail,
       )
     ) {
-      showError("Error", "This email is already in the group.");
+      showError(msg`Error`, msg`This email is already in the group.`);
       return false;
     }
 

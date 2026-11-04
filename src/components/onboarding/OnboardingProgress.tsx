@@ -1,14 +1,24 @@
 import { cn } from "@/lib/ui/cn";
 import { Link } from "@tanstack/react-router";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react";
 
-const steps = ["Sign in", "Telegram", "Dorm", "Groups", "Complete"] as const;
+const steps = [
+  msg`Sign in`,
+  msg`Telegram`,
+  msg`Dorm`,
+  msg`Groups`,
+  msg`Complete`,
+];
 
 export function OnboardingProgress({ step }: { step: number }) {
+  const { i18n } = useLingui();
+
   return (
     <>
       <div className="min-[480px]:hidden">
         <ol className="flex w-full items-center">
-          {steps.map((label, index) => {
+          {steps.map((_, index) => {
             const stepNumber = index + 1;
             const isComplete = stepNumber < step;
             const marker = (
@@ -30,7 +40,7 @@ export function OnboardingProgress({ step }: { step: number }) {
 
             return (
               <li
-                key={label}
+                key={index}
                 className="flex min-w-0 flex-1 items-center last:flex-none"
               >
                 {isComplete ? (
@@ -81,13 +91,13 @@ export function OnboardingProgress({ step }: { step: number }) {
                       : "text-base-content/40",
                 )}
               >
-                {label}
+                {i18n._(label)}
               </p>
             </>
           );
 
           return (
-            <li key={label} className="min-w-0">
+            <li key={index} className="min-w-0">
               {isComplete ? (
                 <Link
                   to="/start"

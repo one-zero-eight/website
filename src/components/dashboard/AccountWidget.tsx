@@ -1,15 +1,17 @@
 import { getMyAvatarUrl, useMe } from "@/api/accounts/user.ts";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
 
 export function AccountWidget() {
+  const { t } = useLingui();
   const { me } = useMe();
 
   if (!me) return null;
 
   const roles = [
-    me.innopolis_info?.is_staff && "Staff",
-    me.innopolis_info?.is_student && "Student",
-    me.innopolis_info?.is_college && "College",
+    me.innopolis_info?.is_staff && t`Staff`,
+    me.innopolis_info?.is_student && t`Student`,
+    me.innopolis_info?.is_college && t`College`,
   ]
     .filter(Boolean)
     .join(", ");
@@ -20,7 +22,7 @@ export function AccountWidget() {
         {me.telegram_info?.photo_url ? (
           <img
             src={getMyAvatarUrl()}
-            alt="Your avatar"
+            alt={t`Your avatar`}
             className="border-base-content/50 rounded-full border-2"
           />
         ) : (
@@ -36,7 +38,7 @@ export function AccountWidget() {
         <p className="text-base-content/75 overflow-hidden text-sm text-ellipsis">
           {me.telegram_info ? (
             <>
-              @{me.telegram_info?.username || "no Telegram alias"}
+              @{me.telegram_info?.username || t`no Telegram alias`}
               {me?.telegram_update_data &&
                 !me?.telegram_update_data.success && (
                   <Link
@@ -44,7 +46,7 @@ export function AccountWidget() {
                     search={{ reconnect: true }}
                     className="link text-primary ml-1 text-sm"
                   >
-                    Reconnect Telegram
+                    <Trans>Reconnect Telegram</Trans>
                   </Link>
                 )}
             </>
@@ -53,7 +55,7 @@ export function AccountWidget() {
               to="/account/connect-telegram"
               className="link text-primary text-sm"
             >
-              Connect Telegram
+              <Trans>Connect Telegram</Trans>
             </Link>
           )}
         </p>

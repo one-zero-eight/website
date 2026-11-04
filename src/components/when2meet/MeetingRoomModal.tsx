@@ -1,20 +1,16 @@
 import { $when2meet, type when2meetTypes } from "@/api/when2meet";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { msg, plural } from "@lingui/core/macro";
+import {
+  formatApiErrorDescriptor,
+  formatApiErrorMessage,
+} from "@/api/helpers/create-query-client";
 import { Modal } from "@/components/common/Modal.tsx";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
-import { useToast } from "@/components/toast";
+import { useToast, type ToastText } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-
-function formatRoomDetails(room: when2meetTypes.SchemaAvailableRoom) {
-  const details = [
-    room.location,
-    room.capacity ? `${room.capacity} seats` : null,
-  ].filter(Boolean);
-
-  return details.join(" · ");
-}
 
 export function MeetingRoomModal({
   meetingRef,
@@ -43,7 +39,20 @@ export function MeetingRoomModal({
   selectedTimeLabel?: string | null;
   onMeetingUpdated: (meeting: when2meetTypes.SchemaEventView) => void;
 }) {
+  const { t } = useLingui();
   const queryClient = useQueryClient();
+
+  function formatRoomDetails(room: when2meetTypes.SchemaAvailableRoom) {
+    const capacity = room.capacity;
+    const details = [
+      room.location,
+      capacity
+        ? t`${plural(capacity, { one: "# seat", other: "# seats" })}`
+        : null,
+    ].filter(Boolean);
+
+    return details.join(" · ");
+  }
   const { showSuccess, showError, showConfirm } = useToast();
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -130,8 +139,8 @@ export function MeetingRoomModal({
 
   function handleRoomMutationSuccess(
     updatedMeeting: when2meetTypes.SchemaEventView,
-    title: string,
-    message: string,
+    title: ToastText,
+    message: ToastText,
   ) {
     onMeetingUpdated(updatedMeeting);
     showSuccess(title, message);
@@ -149,8 +158,8 @@ export function MeetingRoomModal({
     onSuccess: (updatedMeeting) =>
       handleRoomMutationSuccess(
         updatedMeeting,
-        "Room booked",
-        "Room was booked for the meeting.",
+        msg`Room booked`,
+        msg`Room was booked for the meeting.`,
       ),
   });
 
@@ -163,8 +172,8 @@ export function MeetingRoomModal({
     onSuccess: (updatedMeeting) =>
       handleRoomMutationSuccess(
         updatedMeeting,
-        "Room changed",
-        "Meeting room was changed.",
+        msg`Room changed`,
+        msg`Meeting room was changed.`,
       ),
   });
 
@@ -173,11 +182,11 @@ export function MeetingRoomModal({
       onSuccess: (updatedMeeting) =>
         handleRoomMutationSuccess(
           updatedMeeting,
-          "Room canceled",
-          "Meeting room booking was canceled.",
+          msg`Room canceled`,
+          msg`Meeting room booking was canceled.`,
         ),
       onError: (mutationError) => {
-        showError("Error", formatApiErrorMessage(mutationError));
+        showError(msg`Error`, formatApiErrorDescriptor(mutationError));
       },
     });
 
@@ -221,10 +230,10 @@ export function MeetingRoomModal({
     }
 
     const confirmed = await showConfirm({
-      title: "Cancel room booking",
-      message: "Cancel the room booking for this meeting?",
-      confirmText: "Cancel booking",
-      cancelText: "Keep room",
+      title: msg`Cancel room booking`,
+      message: msg`Cancel the room booking for this meeting?`,
+      confirmText: msg`Cancel booking`,
+      cancelText: msg`Keep room`,
       type: "warning",
     });
 
@@ -254,7 +263,7 @@ export function MeetingRoomModal({
       <Modal
         open={open}
         onOpenChange={onOpenChange}
-        title={bookedRoom ? "Change room" : "Book room"}
+        title={bookedRoom ? t`Change room` : t`Book room`}
       >
         {selectedTimeLabel && (
           <p className="text-base-content/70 text-sm">{selectedTimeLabel}</p>
@@ -263,21 +272,21 @@ export function MeetingRoomModal({
         {bookedRoom && isBookingDetailsPending ? (
           <div className="flex items-center gap-2 text-sm">
             <span className="loading loading-spinner loading-sm text-primary" />
-            Loading current booking details...
+            <Trans>Loading current booking details...</Trans>
           </div>
         ) : bookedRoom && (bookingDetailsError || !bookingTitle) ? (
           <div className="alert alert-error">
             <span>
               {bookingDetailsError
                 ? formatApiErrorMessage(bookingDetailsError)
-                : "Unable to load current booking details."}
+                : t`Unable to load current booking details.`}
             </span>
             <button
               type="button"
               className="btn btn-sm"
               onClick={onRetryBookingDetails}
             >
-              Retry
+              <Trans>Retry</Trans>
             </button>
           </div>
         ) : null}
@@ -294,12 +303,12 @@ export function MeetingRoomModal({
               className="btn btn-sm"
               onClick={() => refetch()}
             >
-              Retry
+              <Trans>Retry</Trans>
             </button>
           </div>
         ) : sortedRooms.length === 0 ? (
           <div className="text-base-content/60 py-6 text-center text-sm">
-            No rooms are available for this meeting time.
+            <Trans>No rooms are available for this meeting time.</Trans>
           </div>
         ) : (
           <div className="grid max-h-[min(55vh,420px)] gap-2 overflow-y-auto py-2 pr-1">
@@ -337,7 +346,7 @@ export function MeetingRoomModal({
               {isCancelingRoom ? (
                 <span className="loading loading-spinner loading-sm" />
               ) : (
-                "Cancel room"
+                <Trans>Cancel room</Trans>
               )}
             </button>
           )}
@@ -347,7 +356,7 @@ export function MeetingRoomModal({
             disabled={isMutatingRoom}
             onClick={() => onOpenChange(false)}
           >
-            Close
+            <Trans>Close</Trans>
           </button>
           <button
             type="button"
@@ -362,7 +371,7 @@ export function MeetingRoomModal({
             }
             onClick={handleNext}
           >
-            Next
+            <Trans>Next</Trans>
           </button>
         </div>
       </Modal>

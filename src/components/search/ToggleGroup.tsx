@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Trans } from "@lingui/react/macro";
 
 const ToggleGroup = ({
   currentTabText,
@@ -14,7 +15,9 @@ const ToggleGroup = ({
         activeOptions={{ exact: true, includeSearch: false }}
         activeProps={{ className: "border-b-2 border-primary" }}
       >
-        <span className="pt-4 pb-2 lg:pt-6">Search</span>
+        <span className="pt-4 pb-2 lg:pt-6">
+          <Trans>Search</Trans>
+        </span>
       </Link>
       <Link
         to="/search/ask"
@@ -23,7 +26,9 @@ const ToggleGroup = ({
         activeOptions={{ exact: true, includeSearch: false }}
         activeProps={{ className: "border-b-2 border-primary" }}
       >
-        <span className="pt-4 pb-2 lg:pt-6">Ask</span>
+        <span className="pt-4 pb-2 lg:pt-6">
+          <Trans>Ask</Trans>
+        </span>
       </Link>
     </div>
   );

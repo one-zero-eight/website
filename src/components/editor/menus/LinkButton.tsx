@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import {
   autoUpdate,
   flip,
@@ -16,6 +17,7 @@ import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { BubbleMenuButton } from "./BubbleMenuContent";
 
 export function LinkButton({ editor }: { editor: Editor }) {
+  const { t } = useLingui();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const editorState = useEditorState({
     editor,
@@ -29,7 +31,7 @@ export function LinkButton({ editor }: { editor: Editor }) {
     <BubbleMenuButton
       isActive={editorState.isLink}
       isDisabled={!editorState.canLink}
-      title="Link"
+      title={t`Link`}
       iconClassName="icon-[material-symbols--link]"
       ref={buttonRef}
       onClick={() =>
@@ -43,6 +45,7 @@ export function LinkButton({ editor }: { editor: Editor }) {
 }
 
 export function LinkDialog({ editor }: { editor: Editor }) {
+  const { t } = useLingui();
   const [isOpen, setIsOpen] = useState(false);
   const textInputRef = useRef<HTMLInputElement>(null);
   const urlInputRef = useRef<HTMLInputElement>(null);
@@ -178,13 +181,15 @@ export function LinkDialog({ editor }: { editor: Editor }) {
             >
               <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-1">
-                  <label className="text-sm font-medium">Text</label>
+                  <label className="text-sm font-medium">
+                    <Trans>Text</Trans>
+                  </label>
                   <input
                     ref={textInputRef}
                     type="text"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Link text"
+                    placeholder={t`Link text`}
                     className="input input-sm border-base-300 bg-base-100"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -195,7 +200,9 @@ export function LinkDialog({ editor }: { editor: Editor }) {
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-sm font-medium">URL</label>
+                  <label className="text-sm font-medium">
+                    <Trans>URL</Trans>
+                  </label>
                   <input
                     ref={urlInputRef}
                     type="url"
@@ -221,7 +228,11 @@ export function LinkDialog({ editor }: { editor: Editor }) {
                     onClick={handleSetLink}
                     className="btn btn-sm btn-primary flex-1"
                   >
-                    {editorState.isLink ? "Update" : "Add"} Link
+                    {editorState.isLink ? (
+                      <Trans>Update Link</Trans>
+                    ) : (
+                      <Trans>Add Link</Trans>
+                    )}
                   </button>
                   {editorState.isLink && (
                     <button
@@ -229,7 +240,7 @@ export function LinkDialog({ editor }: { editor: Editor }) {
                       onClick={handleRemoveLink}
                       className="btn btn-sm btn-ghost"
                     >
-                      Remove
+                      <Trans>Remove</Trans>
                     </button>
                   )}
                 </div>

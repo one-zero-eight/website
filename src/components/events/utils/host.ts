@@ -1,4 +1,5 @@
 import { HostType, SchemaHost, SchemaPublicHost } from "@/api/events/types";
+import { t } from "@lingui/core/macro";
 
 export type HostDisplay = {
   displayName: string;
@@ -22,7 +23,7 @@ export function displayStoredHost(
 
   if (host.type === HostType.external) {
     return {
-      displayName: host.name || "Unknown host",
+      displayName: host.name || t`Unknown host`,
       link: host.url,
     };
   }
@@ -30,13 +31,13 @@ export function displayStoredHost(
   if (host.type === HostType.club && host.club_id) {
     const owned = clubs.find((club) => club.club_id === host.club_id);
     return {
-      displayName: owned?.title ?? "Club",
+      displayName: owned?.title ?? t`Club`,
       link: null,
     };
   }
 
   return {
-    displayName: "Unknown host",
+    displayName: t`Unknown host`,
     link: null,
   };
 }
@@ -60,7 +61,8 @@ export function parseIcsHostDescription(description: string | undefined) {
       continue;
     }
 
-    const displayName = line.replace(/^host:\s*/i, "").trim() || "Unknown host";
+    const displayName =
+      line.replace(/^host:\s*/i, "").trim() || t`Unknown host`;
     const next = lines[i + 1];
     const link =
       next && /^https?:\/\//i.test(next) && !/^host:\s*/i.test(next)

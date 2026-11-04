@@ -1,5 +1,8 @@
+import { useLingui } from "@lingui/react/macro";
+
 import type {
   SchemaCourseConfig,
+  SchemaDateRange,
   SchemaScheduleConfig,
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
@@ -33,6 +36,7 @@ export function InstructorPicker({
   weekday,
   date,
   weeklySlot,
+  active,
   audienceTokens,
   start,
   end,
@@ -41,7 +45,7 @@ export function InstructorPicker({
   excludeRef,
   excludeInstanceId,
   onChange,
-  placeholder = "Преподаватель",
+  placeholder,
   allowEmpty = true,
   className,
   triggerClassName,
@@ -58,6 +62,7 @@ export function InstructorPicker({
   weekday: TermWeekdayKey;
   date?: string;
   weeklySlot?: SchemaWeeklyPatternSlot;
+  active?: SchemaDateRange | null;
   audienceTokens?: string[];
   start: string;
   end: string;
@@ -74,6 +79,7 @@ export function InstructorPicker({
   matchTriggerWidth?: boolean;
   showHintOnTrigger?: boolean;
 }) {
+  const { t, i18n } = useLingui();
   const [statusReady, setStatusReady] = useState(false);
 
   useEffect(() => {
@@ -120,6 +126,7 @@ export function InstructorPicker({
               weeklySlot,
               audienceTokens ?? [],
               "instructor",
+              active,
             )
           : [];
       const dates = slots.map((slot) => slot.date);
@@ -153,7 +160,9 @@ export function InstructorPicker({
         }),
       ];
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
+      active,
       allowEmpty,
       config,
       courseInstructors,
@@ -171,6 +180,7 @@ export function InstructorPicker({
       weekday,
       weeklySlot,
       audienceTokens,
+      i18n.locale,
     ],
   );
 
@@ -188,7 +198,7 @@ export function InstructorPicker({
       options={menuOptions}
       triggerOption={options.find((option) => option.value === value)}
       onOpenChange={setPickerOpen}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t`Instructor`}
       searchable
       matchTriggerWidth={matchTriggerWidth}
       showHintOnTrigger={showHintOnTrigger}

@@ -1,5 +1,7 @@
 import { $boardGames } from "@/api/board-games";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import {
   ReservationStatus,
   type SchemaReservation,
@@ -7,6 +9,7 @@ import {
 import {
   boardGamesModalClassName,
   InformationField,
+  getReservationStatusLabel,
   ReservationStatusBadge,
   telegramHandle,
 } from "@/components/board-games/shared.tsx";
@@ -30,6 +33,7 @@ export function ReservationDetailsModal({
   gameTitle?: string;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t, i18n } = useLingui();
   const queryClient = useQueryClient();
   const { showConfirm, showError, showSuccess } = useToast();
   const [selectedStatus, setSelectedStatus] = useState(reservation.status);
@@ -51,12 +55,18 @@ export function ReservationDetailsModal({
     {
       onSuccess: () => {
         invalidateAdminQueries();
-        showSuccess("Reservation updated", "The new status has been saved.");
+        showSuccess(
+          msg`Reservation updated`,
+          msg`The new status has been saved.`,
+        );
         setIsBorrowerModalOpen(false);
         onOpenChange(false);
       },
       onError: (error) => {
-        showError("Could not update reservation", formatApiErrorMessage(error));
+        showError(
+          msg`Could not update reservation`,
+          formatApiErrorDescriptor(error),
+        );
       },
     },
   );
@@ -66,11 +76,17 @@ export function ReservationDetailsModal({
     {
       onSuccess: () => {
         invalidateAdminQueries();
-        showSuccess("Reservation deleted", "The reservation was removed.");
+        showSuccess(
+          msg`Reservation deleted`,
+          msg`The reservation was removed.`,
+        );
         onOpenChange(false);
       },
       onError: (error) => {
-        showError("Could not delete reservation", formatApiErrorMessage(error));
+        showError(
+          msg`Could not delete reservation`,
+          formatApiErrorDescriptor(error),
+        );
       },
     },
   );
@@ -99,9 +115,11 @@ export function ReservationDetailsModal({
 
   async function handleDelete() {
     const confirmed = await showConfirm({
-      title: "Delete reservation",
-      message: `Delete the reservation for ${gameTitle ?? "this game"}? This action cannot be undone.`,
-      confirmText: "Delete reservation",
+      title: msg`Delete reservation`,
+      message: gameTitle
+        ? msg`Delete the reservation for ${gameTitle}? This action cannot be undone.`
+        : msg`Delete this reservation? This action cannot be undone.`,
+      confirmText: msg`Delete reservation`,
       type: "error",
     });
     if (!confirmed) return;
@@ -114,23 +132,23 @@ export function ReservationDetailsModal({
       <Modal
         open
         onOpenChange={onOpenChange}
-        title="Reservation information"
+        title={t`Reservation information`}
         containerClassName={boardGamesModalClassName}
         closeOnOutsidePress={!isMutationPending}
       >
         <div className="grid grid-cols-1 gap-x-6 gap-y-4 @sm/modal:grid-cols-2">
           {gameTitle && (
-            <InformationField label="Game" className="@sm/modal:col-span-2">
+            <InformationField label={t`Game`} className="@sm/modal:col-span-2">
               {gameTitle}
             </InformationField>
           )}
-          <InformationField label="User email">
+          <InformationField label={t`User email`}>
             {reservation.user_email}
           </InformationField>
-          <InformationField label="Status">
+          <InformationField label={t`Status`}>
             <ReservationStatusBadge status={reservation.status} />
           </InformationField>
-          <InformationField label="Telegram alias">
+          <InformationField label={t`Telegram alias`}>
             {telegram ? (
               <a
                 href={`https://t.me/${telegram}`}
@@ -141,32 +159,37 @@ export function ReservationDetailsModal({
                 @{telegram}
               </a>
             ) : (
-              "Not provided"
+              t`Not provided`
             )}
           </InformationField>
-          <InformationField label="Return date">
-            {reservation.return_date || "Not provided"}
+          <InformationField label={t`Return date`}>
+            {reservation.return_date || t`Not provided`}
           </InformationField>
           <InformationField
-            label="When available"
+            label={t`When available`}
             className="@sm/modal:col-span-2"
           >
-            {reservation.when_available || "Not provided"}
+            {reservation.when_available || t`Not provided`}
           </InformationField>
-          <InformationField label="Comments" className="@sm/modal:col-span-2">
-            {reservation.comments || "Not provided"}
+          <InformationField
+            label={t`Comments`}
+            className="@sm/modal:col-span-2"
+          >
+            {reservation.comments || t`Not provided`}
           </InformationField>
-          <InformationField label="Borrower name">
-            {reservation.borrower_name || "Not provided"}
+          <InformationField label={t`Borrower name`}>
+            {reservation.borrower_name || t`Not provided`}
           </InformationField>
-          <InformationField label="Created at">
-            {new Date(reservation.created_at).toLocaleString()}
+          <InformationField label={t`Created at`}>
+            {new Date(reservation.created_at).toLocaleString(i18n.locale)}
           </InformationField>
         </div>
 
         <div className="border-base-300 mt-2 flex flex-col gap-3 border-t pt-4">
           <label className="fieldset">
-            <span className="fieldset-legend">Update status</span>
+            <span className="fieldset-legend">
+              <Trans>Update status</Trans>
+            </span>
             <select
               className="select w-full"
               value={selectedStatus}
@@ -177,7 +200,7 @@ export function ReservationDetailsModal({
             >
               {reservationStatuses.map((status) => (
                 <option key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {i18n._(getReservationStatusLabel(status))}
                 </option>
               ))}
             </select>
@@ -195,7 +218,7 @@ export function ReservationDetailsModal({
               ) : (
                 <span className="icon-[material-symbols--delete-outline] text-xl" />
               )}
-              Delete
+              <Trans>Delete</Trans>
             </button>
             <button
               type="button"
@@ -208,7 +231,7 @@ export function ReservationDetailsModal({
               {statusMutation.isPending && (
                 <span className="loading loading-spinner loading-sm" />
               )}
-              Update status
+              <Trans>Update status</Trans>
             </button>
           </div>
         </div>
@@ -229,13 +252,14 @@ export function BorrowerNameModal({
   onOpenChange,
   onSubmit,
   isPending,
-  confirmLabel = "Update status",
+  confirmLabel,
 }: {
   onOpenChange: (open: boolean) => void;
   onSubmit: (borrowerName: string) => void;
   isPending: boolean;
   confirmLabel?: string;
 }) {
+  const { t } = useLingui();
   const [borrowerName, setBorrowerName] = useState("");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -248,19 +272,21 @@ export function BorrowerNameModal({
     <Modal
       open
       onOpenChange={onOpenChange}
-      title="Confirm borrower"
+      title={t`Confirm borrower`}
       containerClassName={boardGamesModalClassName}
       closeOnOutsidePress={!isPending}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <label className="fieldset">
-          <span className="fieldset-legend">Borrower name</span>
+          <span className="fieldset-legend">
+            <Trans>Borrower name</Trans>
+          </span>
           <input
             type="text"
             className="input w-full"
             value={borrowerName}
             onChange={(event) => setBorrowerName(event.target.value)}
-            placeholder="Full name"
+            placeholder={t`Full name`}
             disabled={isPending}
             autoFocus
             required
@@ -273,7 +299,7 @@ export function BorrowerNameModal({
             onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </button>
           <button
             type="submit"
@@ -283,7 +309,7 @@ export function BorrowerNameModal({
             {isPending && (
               <span className="loading loading-spinner loading-sm" />
             )}
-            {confirmLabel}
+            {confirmLabel ?? t`Update status`}
           </button>
         </div>
       </form>

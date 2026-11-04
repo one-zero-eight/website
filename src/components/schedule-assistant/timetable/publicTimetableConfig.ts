@@ -12,6 +12,7 @@ export function publicTimetableConfig(
     ...data,
     term: {
       ...data.term,
+      blocks: data.term.blocks ?? [],
       sections: (data.term.sections ?? []).map((section) => ({
         ...section,
         default_layout: section.default_layout

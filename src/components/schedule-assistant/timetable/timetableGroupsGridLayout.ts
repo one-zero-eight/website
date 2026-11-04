@@ -32,6 +32,42 @@ export const GROUPS_TABLE_CLASS =
 /** Stronger right border between adjacent programs in «По группам». */
 export const GROUPS_PROGRAM_SEPARATOR = "border-r-2 border-r-[#1d3f70]";
 
+/** Personal column rails — same 2px weight as program separators, distinct color. */
+export const PERSONAL_COLUMN_RAIL_COLOR = "#ec4899";
+
+/** Paint rails on a separate fixed-width layer aligned with group columns. */
+export function personalColumnRailStyle(
+  groupCount: number,
+  personalIndexes: readonly number[],
+  railPx = 2,
+  columnPx = GROUPS_COL_PX,
+): CSSProperties | undefined {
+  if (!personalIndexes.length || groupCount <= 0) return undefined;
+  const images: string[] = [];
+  const sizes: string[] = [];
+  const positions: string[] = [];
+  const swatch = `linear-gradient(${PERSONAL_COLUMN_RAIL_COLOR},${PERSONAL_COLUMN_RAIL_COLOR})`;
+  const size = `${railPx}px 100%`;
+  for (const index of personalIndexes) {
+    images.push(swatch, swatch);
+    sizes.push(size, size);
+    // Use the colgroup's fixed column width, not the merged cell's background
+    // positioning area, which can exclude its program separator border.
+    positions.push(
+      `${index * columnPx}px 0`,
+      `${(index + 1) * columnPx - railPx}px 0`,
+    );
+  }
+  return {
+    backgroundImage: images.join(", "),
+    backgroundSize: sizes.join(", "),
+    backgroundPosition: positions.join(", "),
+    backgroundOrigin: "border-box",
+    backgroundClip: "border-box",
+    backgroundRepeat: "no-repeat",
+  };
+}
+
 /** Program title stays visible while scrolling through its group columns. */
 export const GROUPS_PROGRAM_TITLE_STICKY_CLASS =
   "sticky z-[24] mx-auto block w-max max-w-full bg-[#1f5fae] px-2";
@@ -46,7 +82,7 @@ export const GROUPS_SLOT_ROW_CLASS =
   "slot-row [&_.empty]:h-full [&_.empty]:min-h-[64px] [&_.meeting]:min-h-0 [&_td]:h-[100px]";
 
 export const COMPACT_GROUPS_SLOT_ROW_CLASS =
-  "[contain-intrinsic-size:auto_52px] [&_.empty]:min-h-7! [&_.meeting]:min-h-0! [&_.meeting]:p-1 [&_.meeting-body]:grid-rows-[auto_auto] [&_.meeting-body]:gap-0 [&_.meeting-footer]:gap-0 [&_.meeting-title]:line-clamp-1 [&_.meeting-title]:max-h-[1.25em] [&_td]:h-13!";
+  "[contain-intrinsic-size:auto_64px] [&_.empty]:min-h-7! [&_.meeting]:min-h-0! [&_.meeting]:p-1 [&_.meeting-body]:gap-0 [&_.meeting-footer]:gap-0 [&_.meeting-title]:line-clamp-1 [&_.meeting-title]:max-h-[1.25em] [&_td]:h-16!";
 
 export const GROUPS_HEAD_PAD = "px-2 py-1.5 text-[0.6875rem] leading-tight";
 
@@ -69,13 +105,14 @@ export const GROUPS_TABLE_HEAD_CLASS =
 export const GROUPS_GRID_HEADER_HEIGHT_DEFAULT = "57px";
 
 export const GROUPS_MEETING_CLASS =
-  "mb-0 flex h-full min-h-0 w-full cursor-pointer flex-col gap-0.5 rounded border p-[7px] pb-1.5 last:mb-0";
+  "mb-0 flex h-full min-h-0 w-full min-w-0 cursor-pointer flex-col gap-0.5 rounded border p-[7px] pb-1.5 last:mb-0";
 
+/** Constrain sticky, intrinsic-width titles without sacrificing footer space. */
 export const GROUPS_MEETING_BODY_CLASS =
-  "meeting-body grid h-full min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-0.5 overflow-hidden";
+  "meeting-body grid h-full min-h-0 min-w-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)_auto] gap-0.5 overflow-hidden";
 
 export const GROUPS_MEETING_TITLE_CLASS =
-  "meeting-title line-clamp-3 max-h-[calc(1.25em*3)] min-h-0 min-w-0 overflow-hidden text-[0.6875rem] leading-tight font-bold break-words text-[#1a2332]";
+  "meeting-title line-clamp-3 max-h-[calc(1.25em*3)] min-h-0 max-w-full min-w-0 overflow-hidden text-[0.6875rem] leading-tight font-bold wrap-anywhere whitespace-normal text-[#1a2332]";
 
 export const GROUPS_MEETING_FOOTER_CLASS =
   "meeting-footer flex min-w-0 shrink-0 flex-col gap-0.5";

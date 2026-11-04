@@ -1,3 +1,6 @@
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react/macro";
 import type { ReactNode } from "react";
 
 import { InstructorSlotPreferenceLevel } from "@/api/schedule-assistant/types.ts";
@@ -16,14 +19,14 @@ const STATUS_DOT_CLASS: Record<InstructorAvailabilityStatus, string> = {
   red: "bg-error",
 };
 
-const OK_HEADER = "Нет проблем";
-const NO_DATES_HEADER = "Нет дат проведения";
-
-const PREFERENCE_HEADER: Record<InstructorSlotPreferenceLevel, string> = {
-  [InstructorSlotPreferenceLevel.preferred]: "Предпочтительное время",
-  [InstructorSlotPreferenceLevel.neutral]: "Нейтральное время",
-  [InstructorSlotPreferenceLevel.discouraged]: "Нежелательное время",
-  [InstructorSlotPreferenceLevel.banned]: "Запрещённое время",
+const PREFERENCE_HEADER: Record<
+  InstructorSlotPreferenceLevel,
+  MessageDescriptor
+> = {
+  [InstructorSlotPreferenceLevel.preferred]: msg`Preferred time`,
+  [InstructorSlotPreferenceLevel.neutral]: msg`Neutral time`,
+  [InstructorSlotPreferenceLevel.discouraged]: msg`Undesirable time`,
+  [InstructorSlotPreferenceLevel.banned]: msg`Forbidden time`,
 };
 
 function formatConflictMeeting(item: {
@@ -63,6 +66,8 @@ export function InstructorAvailabilityStatusMark({
 }: {
   info: InstructorAvailabilityInfo | null;
 }) {
+  const { t } = useLingui();
+
   if (!info) {
     return (
       <span
@@ -83,15 +88,17 @@ export function InstructorAvailabilityStatusMark({
       content={
         <div className="flex max-w-xs flex-col gap-2 py-0.5 wrap-break-word whitespace-normal">
           {!checkedDateCount ? (
-            <TooltipSection title={NO_DATES_HEADER} />
+            <TooltipSection title={t`No class dates`} />
           ) : null}
-          {isOk ? <TooltipSection title={OK_HEADER} /> : null}
+          {isOk ? <TooltipSection title={t`No issues`} /> : null}
           {info.preference ? (
-            <TooltipSection title={PREFERENCE_HEADER[info.preference.level]} />
+            <TooltipSection
+              title={t(PREFERENCE_HEADER[info.preference.level])}
+            />
           ) : null}
           {hasConflicts ? (
             <TooltipSection
-              title={`В выбранное время занято в ${conflictDateCount} из ${checkedDateCount} дат`}
+              title={t`Busy at the selected time on ${conflictDateCount} of ${checkedDateCount} dates`}
             >
               <div className="text-base-content/80 text-sm">
                 {formatPickerConflictDates(info.conflictDates)}

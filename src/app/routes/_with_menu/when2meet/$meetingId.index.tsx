@@ -1,8 +1,8 @@
+import { useLingui } from "@lingui/react/macro";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { MeetingPage } from "@/components/when2meet/MeetingPage";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
-
 export const Route = createFileRoute("/_with_menu/when2meet/$meetingId/")({
   component: RouteComponent,
   validateSearch: (
@@ -19,16 +19,17 @@ export const Route = createFileRoute("/_with_menu/when2meet/$meetingId/")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { meetingId } = Route.useParams();
   const { name, setupSlots } = Route.useSearch();
 
   return (
     <>
       <Helmet>
-        <title>{name ?? "Meeting"} | When2Meet</title>
+        <title>{name ? `${name} | When2Meet` : "When2Meet"}</title>
         <meta
           name="description"
-          content="View meeting responses and choose the best time."
+          content={t`View meeting responses and choose the best time.`}
         />
       </Helmet>
 

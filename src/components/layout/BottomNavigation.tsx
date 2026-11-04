@@ -1,5 +1,6 @@
 import { Link, LinkOptions } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
+import { Trans } from "@lingui/react/macro";
 import React, { PropsWithChildren, ReactElement } from "react";
 
 export function BottomNavigation() {
@@ -32,35 +33,35 @@ export function BottomNavigation() {
     >
       <BottomNavigationLink
         to="/dashboard"
-        title="Dashboard"
+        title={<Trans>Dashboard</Trans>}
         icon={
           <span className="icon-[material-symbols--space-dashboard-outline] in-[.is-active]:icon-[material-symbols--space-dashboard]" />
         }
       />
       <BottomNavigationLink
         to="/calendar"
-        title="Calendar"
+        title={<Trans>Calendar</Trans>}
         icon={
           <span className="icon-[material-symbols--calendar-month-outline-rounded] in-[.is-active]:icon-[material-symbols--calendar-month-rounded]" />
         }
       />
       <BottomNavigationLink
         to="/maps"
-        title="Maps"
+        title={<Trans>Maps</Trans>}
         icon={
           <span className="icon-[material-symbols--map-outline-rounded] in-[.is-active]:icon-[material-symbols--map-rounded]" />
         }
       />
       <BottomNavigationLink
         to="/room-booking"
-        title="Booking"
+        title={<Trans>Booking</Trans>}
         icon={
           <span className="icon-[material-symbols--door-open-outline-rounded] in-[.is-active]:icon-[material-symbols--door-open-rounded]" />
         }
       />
       <BottomNavigationLink
         to="/menu"
-        title="More"
+        title={<Trans>More</Trans>}
         icon={
           <span className="icon-[material-symbols--menu-rounded] in-[.is-active]:icon-[material-symbols--menu-rounded]" />
         }
@@ -73,7 +74,9 @@ function BottomNavigationLink({
   title,
   icon,
   ...props
-}: PropsWithChildren<LinkOptions & { title: string; icon: ReactElement }>) {
+}: PropsWithChildren<
+  LinkOptions & { title: React.ReactNode; icon: ReactElement }
+>) {
   return (
     <Link
       {...props}

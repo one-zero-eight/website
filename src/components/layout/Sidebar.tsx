@@ -6,6 +6,7 @@ import {
   isMenuItemVisible,
   LinkItemType,
 } from "@/components/layout/menu-links.tsx";
+import { Trans } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 import { useLocalStorage } from "usehooks-ts";
@@ -100,7 +101,7 @@ export default function Sidebar() {
               <span className="icon-[material-symbols--info-outline-rounded] in-[.is-active]:text-primary text-base-content/70 text-2xl" />
             ) : (
               <span className="in-[.is-active]:selected in-[.is-active]:text-primary text-base-content/50 flex w-fit items-center text-base font-normal whitespace-nowrap in-[.is-active]:font-medium">
-                About us
+                <Trans>About us</Trans>
               </span>
             )}
           </Link>

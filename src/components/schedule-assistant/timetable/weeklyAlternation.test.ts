@@ -19,6 +19,7 @@ import {
   expandWeeklySlotsToEvents,
   serializeWeeklyEventsToSlots,
 } from "./editableSessionEvents.ts";
+import { activeForBlock } from "./sessionWindows.ts";
 import {
   applyMeetingEditsToCourse,
   applySeriesScheduleToCourse,
@@ -28,6 +29,7 @@ import { applyCreateMeetingToCourse } from "./createMeetingUtils.ts";
 import { weeklyPickerSlots } from "./meetingPickerSchedule.ts";
 import { draftMeetingsFromWeeklySlots } from "./sessionSeriesRows.tsx";
 import { normalizeWeeklySlot, weeklyRowMarks } from "./sessionRowMarks.ts";
+import type { SessionWindowValue } from "./sessionSeriesRows.tsx";
 import { roomAvailabilityForSlot } from "./roomPickerOptions.ts";
 import { instructorAvailabilityForSlot } from "./instructorPickerOptions.ts";
 import { countCourseLessonsByInstructor } from "@/components/schedule-assistant/settings/courses/courseInstructorLessonCounts.ts";
@@ -313,6 +315,49 @@ describe("weekly alternation", () => {
     expect(restored.alternation).toEqual(original.alternation);
     expect(restored.room).toBe("999");
     expect(restored.edits).toEqual(current.edits);
+  });
+
+  it("highlights and restores a block window change on the frequency control", () => {
+    const slot = alternating();
+    const config = {
+      ...configFor(),
+      term: {
+        ...configFor().term,
+        blocks: [
+          {
+            id: "first",
+            name: "Блок 1",
+            start_date: "2026-09-01",
+            end_date: "2026-09-15",
+          },
+          {
+            id: "second",
+            name: "Блок 2",
+            start_date: "2026-09-16",
+            end_date: "2026-09-30",
+          },
+        ],
+      },
+    };
+    let restoredWindow: SessionWindowValue = {
+      active: activeForBlock("second"),
+    };
+    const marks = weeklyRowMarks({
+      current: slot,
+      original: slot,
+      weekdayLabel: "Вт",
+      config,
+      window: { active: activeForBlock("second") },
+      originalWindow: { active: activeForBlock("first") },
+      onRestore: () => undefined,
+      onRestoreWindow: (window) => {
+        restoredWindow = window;
+      },
+    });
+    expect(marks.alternation?.mark).toBe("changed");
+    expect(marks.alternation?.originalLabel).toContain("Блок 1");
+    marks.alternation?.onRestore?.();
+    expect(restoredWindow).toEqual({ active: activeForBlock("first") });
   });
 
   it("materializes only active dates and detects lossy reverse conversion", () => {

@@ -1,5 +1,8 @@
+import { msg } from "@lingui/core/macro";
+import type { MessageDescriptor } from "@lingui/core";
 import { guardTypes } from "@/api/guard";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useEffect, useState } from "react";
 import { RolesSwitch } from "./JoinsList";
 import { SetupResult } from "./SetupResult";
@@ -7,12 +10,13 @@ import { FileRole, useGuardMutations } from "./hooks";
 import { loadGmail, saveGmail } from "./utils";
 
 export function CreateSheetPage() {
+  const { i18n, t } = useLingui();
   const [title, setTitle] = useState("");
   const [gmail, setGmail] = useState("");
   const [respondentRole, setRespondentRole] = useState<FileRole>(
     FileRole.writer,
   );
-  const [error, setError] = useState("");
+  const [error, setError] = useState<MessageDescriptor | string>("");
   const [setupResult, setSetupResult] = useState<{
     title: string;
     fileId: string;
@@ -35,18 +39,18 @@ export function CreateSheetPage() {
     setError("");
 
     if (!gmail.trim()) {
-      setError("Gmail is required");
+      setError(msg`Gmail is required`);
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(gmail.trim())) {
-      setError("Please enter a valid Gmail address");
+      setError(msg`Please enter a valid Gmail address`);
       return;
     }
 
     if (!title.trim()) {
-      setError("Title is required");
+      setError(msg`Title is required`);
       return;
     }
 
@@ -75,7 +79,7 @@ export function CreateSheetPage() {
           mutations.invalidateFiles();
         },
         onError: (err) => {
-          setError(formatApiErrorMessage(err));
+          setError(formatApiErrorDescriptor(err));
         },
       },
     );
@@ -93,7 +97,9 @@ export function CreateSheetPage() {
         }}
       >
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Title</legend>
+          <legend className="fieldset-legend">
+            <Trans>Title</Trans>
+          </legend>
           <input
             type="text"
             id="title"
@@ -102,13 +108,15 @@ export function CreateSheetPage() {
               setTitle(e.target.value);
               if (error) setError("");
             }}
-            placeholder="e.g., CSE electives"
+            placeholder={t`e.g., CSE electives`}
             className="input input-bordered w-full"
           />
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Owner Gmail</legend>
+          <legend className="fieldset-legend">
+            <Trans>Owner Gmail</Trans>
+          </legend>
           <input
             type="email"
             id="gmail"
@@ -123,7 +131,9 @@ export function CreateSheetPage() {
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Guests Role</legend>
+          <legend className="fieldset-legend">
+            <Trans>Guests Role</Trans>
+          </legend>
           <RolesSwitch
             currentRole={respondentRole}
             onSwitch={setRespondentRole}
@@ -132,7 +142,7 @@ export function CreateSheetPage() {
 
         {error && (
           <div className="alert alert-error alert-soft">
-            <span>{error}</span>
+            <span>{typeof error === "string" ? error : i18n._(error)}</span>
           </div>
         )}
 
@@ -144,10 +154,10 @@ export function CreateSheetPage() {
           {isSubmitting ? (
             <>
               <span className="loading loading-spinner loading-sm" />
-              Creating...
+              <Trans>Creating...</Trans>
             </>
           ) : (
-            "Create sheet"
+            <Trans>Create sheet</Trans>
           )}
         </button>
       </form>

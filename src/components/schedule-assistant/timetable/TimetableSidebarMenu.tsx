@@ -1,4 +1,5 @@
 import type { TimetableViewConfig as SchemaScheduleConfig } from "./timetableViewTypes.ts";
+import { meetingCourseTitle } from "./localizedNames.ts";
 import { cn } from "@/lib/ui/cn";
 import {
   autoUpdate,
@@ -11,6 +12,8 @@ import {
   useFloating,
   useInteractions,
 } from "@floating-ui/react";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { Link } from "@tanstack/react-router";
 import {
   useDeferredValue,
   useMemo,
@@ -29,17 +32,31 @@ import {
   meetingMetadataSubgridClass,
   meetingMetadataTextClass,
 } from "./MeetingMetadata.tsx";
-import { UnarrangedLessonsPanel } from "./UnarrangedLessonsPanel.tsx";
+import { meetingColorStyle } from "./timetableGroupsGridLayout.ts";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
+import { UnarrangedLessonsPanel } from "./UnarrangedLessonsPanel.tsx";
 import {
   countUnarrangedSessions,
   type UnarrangedComponentGroup,
   type UnarrangedLessonItem,
 } from "./unarrangedLessons.ts";
 import {
+  listPersonalMeetingsByDay,
+  resolvePersonalInstructorId,
+  type PersonalMeetingEntry,
+  type PersonalTimetableGroup,
+} from "./timetablePersonalization.ts";
+import { useSelectionStore } from "./timetableSelectionStore.ts";
+import {
   buildInstructorLabelById,
+  colorBySubject,
+  resolveInstructorLabel,
+  todayIsoDate,
   type Meeting,
 } from "./timetableViewerModel.ts";
+
+const personalLinkClass =
+  "cursor-pointer text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid";
 
 import {
   buildTimetableSearchEntries,
@@ -47,6 +64,13 @@ import {
   timetableOccurrenceDifferences,
   searchTimetableEntries,
 } from "./timetableSearch.ts";
+
+export type PersonalLessonsState =
+  | { kind: "guest"; onSignIn: () => void }
+  | { kind: "pending" }
+  | { kind: "error"; message: string; onRetry: () => void }
+  | { kind: "empty" }
+  | { kind: "ready" };
 
 function TimetableEventSearch({
   meetings,
@@ -59,6 +83,7 @@ function TimetableEventSearch({
   onSelect: (meeting: Meeting) => void;
   activeDate: string;
 }) {
+  const { t, i18n } = useLingui();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -66,18 +91,20 @@ function TimetableEventSearch({
   const resultRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const instructorLabels = useMemo(
     () => buildInstructorLabelById(config),
-    [config],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [config, i18n.locale],
   );
   const [expandedSeries, setExpandedSeries] = useState<string | null>(null);
   const entries = useMemo(
     () => buildTimetableSearchEntries(meetings, instructorLabels, config),
-    [meetings, instructorLabels, config],
+    [meetings, instructorLabels, config, i18n.locale],
   );
   const deferredQuery = useDeferredValue(query);
   const results = useMemo(
     () => searchTimetableEntries(entries, deferredQuery, activeDate),
     [entries, deferredQuery, activeDate],
   );
+  const resultCount = results.length;
   const visibleSeries = useMemo(() => results.slice(0, 50), [results]);
   const resolveSeriesEntry = useMemo(() => {
     const cache = new Map<(typeof entries)[number], (typeof entries)[number]>();
@@ -88,7 +115,7 @@ function TimetableEventSearch({
       cache.set(entry, base);
       return base;
     };
-  }, [config, instructorLabels]);
+  }, [config, instructorLabels, i18n.locale]);
   const visibleResults = useMemo(
     () =>
       visibleSeries.flatMap((result) => {
@@ -228,7 +255,7 @@ function TimetableEventSearch({
           ref={inputRef}
           type="search"
           className="min-w-0 grow"
-          placeholder="Поиск событий…"
+          placeholder={t`Search events…`}
           value={query}
           onFocus={() => setOpen(true)}
           onClick={() => setOpen(true)}
@@ -263,7 +290,7 @@ function TimetableEventSearch({
           >
             {!results.length ? (
               <p className="text-base-content/60 col-span-2 px-3 py-4 text-sm">
-                Ничего не найдено
+                <Trans>Nothing found</Trans>
               </p>
             ) : (
               visibleResults.map(
@@ -331,7 +358,7 @@ function TimetableEventSearch({
                         >
                           {nested
                             ? `${weekdayLabel}, ${dateLabel}`
-                            : `${meeting.course}${meeting.tag ? ` (${meeting.tag})` : ""}`}
+                            : `${meetingCourseTitle(meeting)}${meeting.tag ? ` (${meeting.tag})` : ""}`}
                         </span>
                         {showTime ||
                         (showRoom &&
@@ -370,7 +397,7 @@ function TimetableEventSearch({
                                   kind="room"
                                   overridden={!series && overrides.has("room")}
                                 >
-                                  {meeting.room || "Без локации"}
+                                  {meeting.room || t`No location`}
                                 </MeetingMetadataField>
                               ) : null
                             }
@@ -405,7 +432,7 @@ function TimetableEventSearch({
                                     !series && overrides.has("instructor")
                                   }
                                 >
-                                  {instructorLabel || "Без преподавателя"}
+                                  {instructorLabel || t`No instructor`}
                                 </MeetingMetadataField>
                               ) : null
                             }
@@ -416,13 +443,13 @@ function TimetableEventSearch({
                         <button
                           type="button"
                           className="text-base-content/60 hover:text-primary col-span-2 flex items-center gap-1.5 justify-self-start rounded-md px-2 pb-1.5 text-xs transition-colors"
-                          title="Показать даты (→), свернуть (←)"
+                          title={t`Show dates (→), collapse (←)`}
                           onClick={() => handleToggleDates(key)}
                         >
                           <span className="icon-[material-symbols--calendar-month-outline-rounded] text-sm" />
                           {expandedSeries === key
-                            ? "Скрыть даты"
-                            : "Показать даты"}
+                            ? t`Hide dates`
+                            : t`Show dates`}
                           <span>{series.occurrences.length}</span>
                           <span
                             className={cn(
@@ -439,15 +466,421 @@ function TimetableEventSearch({
                 },
               )
             )}
-            {results.length > visibleSeries.length ? (
+            {resultCount > visibleSeries.length ? (
               <p className="text-base-content/60 col-span-2 px-3 py-2 text-xs">
-                Показаны первые 50 из {results.length}. Уточните запрос.
+                <Trans>
+                  Showing the first 50 of {resultCount}. Refine your search.
+                </Trans>
               </p>
             ) : null}
           </div>
         </FloatingPortal>
       ) : null}
     </>
+  );
+}
+
+function personalDayHeading(date: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+  })
+    .format(new Date(`${date}T12:00:00`))
+    .replace(/^./u, (letter) => letter.toUpperCase());
+}
+
+function addDaysIso(date: string, days: number) {
+  const value = new Date(`${date}T00:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + days);
+  return value.toISOString().slice(0, 10);
+}
+
+function localNowTimeHm() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}
+
+function isPersonalMeetingPast(meeting: Meeting, today: string, nowHm: string) {
+  if (meeting.date < today) return true;
+  if (meeting.date > today) return false;
+  const end = meeting.end || meeting.start;
+  return Boolean(end && end <= nowHm);
+}
+
+function PersonalMeetingCard({
+  entry,
+  courseColors,
+  instructorLabels,
+  muted = false,
+  onSelect,
+}: {
+  entry: PersonalMeetingEntry;
+  courseColors: Record<string, { bg: string; border: string }>;
+  instructorLabels: Record<string, string>;
+  muted?: boolean;
+  onSelect: (meeting: Meeting) => void;
+}) {
+  const { meeting, roles } = entry;
+  const selectionStore = useSelectionStore();
+  const colors = colorBySubject(meeting.course, courseColors);
+  const timeRange = meeting.end
+    ? `${meeting.start}–${meeting.end}`
+    : meeting.start;
+  const isTeaching = roles.includes("teaching");
+  const instructorIds = (
+    typeof meeting.instructors === "string"
+      ? meeting.instructors
+        ? [meeting.instructors]
+        : []
+      : (meeting.instructors ?? [])
+  ).filter(Boolean);
+  const room = String(meeting.room || "").trim();
+  const title = `${meetingCourseTitle(meeting)}${meeting.tag ? ` (${meeting.tag})` : ""}`;
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={cn(
+        "border-base-300/80 w-full cursor-pointer rounded-lg border px-2 py-1.5 text-left transition-[filter] hover:brightness-[0.98]",
+        muted && "opacity-50 grayscale-[0.45]",
+      )}
+      style={meetingColorStyle(colors)}
+      title={title}
+      onClick={() => onSelect(meeting)}
+      onKeyDown={(event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        onSelect(meeting);
+      }}
+    >
+      <div className="text-base-content truncate text-xs leading-snug font-medium">
+        {title}
+      </div>
+      <div className="text-base-content/70 mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 text-[0.6875rem] leading-tight">
+        <span className="font-semibold tabular-nums">{timeRange}</span>
+        {room ? (
+          <>
+            <span className="text-base-content/35">·</span>
+            <span
+              className={personalLinkClass}
+              title={room}
+              onClick={(event) => {
+                event.stopPropagation();
+                selectionStore.setSelection({ type: "room", value: room });
+              }}
+            >
+              {room}
+            </span>
+          </>
+        ) : null}
+        {!isTeaching
+          ? instructorIds.map((id) => {
+              const label = resolveInstructorLabel(id, instructorLabels);
+              return (
+                <span
+                  key={id}
+                  className="inline-flex min-w-0 items-center gap-x-1.5"
+                >
+                  <span className="text-base-content/35">·</span>
+                  <span
+                    className={cn(personalLinkClass, "truncate")}
+                    title={label}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      selectionStore.setSelection({
+                        type: "instructor",
+                        value: id,
+                      });
+                    }}
+                  >
+                    {label}
+                  </span>
+                </span>
+              );
+            })
+          : null}
+      </div>
+    </div>
+  );
+}
+
+function PersonalWeekDays({
+  days,
+  courseColors,
+  instructorLabels,
+  today,
+  nowHm,
+  onNavigateToMeeting,
+}: {
+  days: ReturnType<typeof listPersonalMeetingsByDay>;
+  courseColors: Record<string, { bg: string; border: string }>;
+  instructorLabels: Record<string, string>;
+  today: string;
+  nowHm: string;
+  onNavigateToMeeting: (meeting: Meeting) => void;
+}) {
+  const { i18n } = useLingui();
+  return (
+    <>
+      {days.map((day) => {
+        const isToday = day.date === today;
+        const isPastDay = day.date < today;
+        return (
+          <div
+            key={day.date}
+            className={cn("flex flex-col gap-1.5", isPastDay && "opacity-70")}
+          >
+            <div
+              className={cn(
+                "text-[0.6875rem] leading-tight font-semibold tracking-wide uppercase",
+                isToday
+                  ? "text-[#f5a623]"
+                  : isPastDay
+                    ? "text-base-content/40"
+                    : "text-base-content/70",
+              )}
+            >
+              {isToday ? (
+                <>
+                  <Trans>Today</Trans> ·{" "}
+                </>
+              ) : null}
+              {personalDayHeading(day.date, i18n.locale)}
+            </div>
+            <ul className="flex flex-col gap-1.5">
+              {day.meetings.map((entry) => (
+                <li key={entry.meeting.instance_id}>
+                  <PersonalMeetingCard
+                    entry={entry}
+                    courseColors={courseColors}
+                    instructorLabels={instructorLabels}
+                    muted={isPersonalMeetingPast(entry.meeting, today, nowHm)}
+                    onSelect={onNavigateToMeeting}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+function PersonalLessonsSection({
+  state,
+  ownGroups,
+  meetings,
+  weekStart,
+  courseColors,
+  config,
+  userEmail,
+  onNavigateToMeeting,
+}: {
+  state: PersonalLessonsState;
+  ownGroups: PersonalTimetableGroup[];
+  meetings: Meeting[];
+  weekStart: string;
+  courseColors: Record<string, { bg: string; border: string }>;
+  config: SchemaScheduleConfig;
+  userEmail?: string | null;
+  onNavigateToMeeting: (meeting: Meeting) => void;
+}) {
+  const { i18n } = useLingui();
+  const instructorLabels = useMemo(
+    () => buildInstructorLabelById(config),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [config, i18n.locale],
+  );
+  const groupIds = useMemo(
+    () => ownGroups.map((group) => group.groupId),
+    [ownGroups],
+  );
+  const groupLabelsById = useMemo(
+    () => new Map(ownGroups.map((group) => [group.groupId, group.label])),
+    [ownGroups],
+  );
+  const instructorId = useMemo(
+    () => resolvePersonalInstructorId(config, userEmail),
+    [config, userEmail],
+  );
+  const listOptions = useMemo(
+    () => ({
+      groupLabelsById,
+      instructors: config.instructors,
+      instructorId,
+    }),
+    [groupLabelsById, config.instructors, instructorId],
+  );
+  const today = todayIsoDate();
+  const nowHm = localNowTimeHm();
+  const nextWeekStart = useMemo(
+    () => (weekStart ? addDaysIso(weekStart, 7) : ""),
+    [weekStart],
+  );
+  const days = useMemo(
+    () =>
+      state.kind === "ready"
+        ? listPersonalMeetingsByDay(meetings, groupIds, weekStart, listOptions)
+        : [],
+    [state.kind, meetings, groupIds, weekStart, listOptions],
+  );
+  const nextWeekDays = useMemo(
+    () =>
+      state.kind === "ready"
+        ? listPersonalMeetingsByDay(
+            meetings,
+            groupIds,
+            nextWeekStart,
+            listOptions,
+          )
+        : [],
+    [state.kind, meetings, groupIds, nextWeekStart, listOptions],
+  );
+  const [nextWeekOpen, setNextWeekOpen] = useState(false);
+  const weekCount = days.reduce((count, day) => count + day.meetings.length, 0);
+  const nextWeekCount = nextWeekDays.reduce(
+    (count, day) => count + day.meetings.length,
+    0,
+  );
+  const errorMessage = state.kind === "error" ? state.message : "";
+
+  return (
+    <section className="flex min-h-0 flex-1 flex-col gap-2">
+      <h3 className="flex shrink-0 items-baseline justify-between gap-2 text-sm font-semibold">
+        <span>
+          <Trans>Your classes</Trans>
+        </span>
+        {state.kind === "ready" ? (
+          <span className="text-base-content/45 text-xs font-medium tabular-nums">
+            {weekCount}
+          </span>
+        ) : null}
+      </h3>
+      {state.kind === "guest" ? (
+        <div className="flex flex-col gap-2">
+          <p className="text-base-content/65 text-sm leading-relaxed">
+            <Trans>Sign in to highlight your groups.</Trans>
+          </p>
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost self-start"
+            onClick={state.onSignIn}
+          >
+            <Trans>Sign in</Trans>
+          </button>
+        </div>
+      ) : state.kind === "pending" ? (
+        <div className="flex flex-col gap-1.5">
+          <span className="skeleton h-10 w-full" />
+          <span className="skeleton h-10 w-full" />
+        </div>
+      ) : state.kind === "error" ? (
+        <div className="flex flex-col gap-2">
+          <p className="text-error text-sm leading-relaxed">
+            <Trans>Failed to load your groups: {errorMessage}</Trans>
+          </p>
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost self-start"
+            onClick={state.onRetry}
+          >
+            <Trans>Retry</Trans>
+          </button>
+        </div>
+      ) : state.kind === "empty" ? (
+        <p className="text-base-content/65 text-sm leading-relaxed">
+          <Trans>
+            Your groups and teaching classes were not found yet. You can still
+            browse the whole timetable.
+          </Trans>
+        </p>
+      ) : (
+        <div className="flex min-h-0 flex-1 [scrollbar-width:thin] flex-col gap-3 overflow-y-auto">
+          {ownGroups.length || instructorId ? (
+            <div className="flex flex-col gap-1">
+              {ownGroups.length ? (
+                <div className="flex min-w-0 flex-wrap items-center gap-1">
+                  <span className="text-base-content/45 text-[0.625rem] font-semibold tracking-wide uppercase">
+                    <Trans>Groups</Trans>
+                  </span>
+                  {ownGroups.map((group) => (
+                    <span
+                      key={group.groupId}
+                      className="bg-base-200 text-base-content/80 rounded px-1.5 py-0.5 text-[0.625rem] leading-tight font-medium"
+                      title={`${group.sectionCode} · ${group.programCode}`}
+                    >
+                      {group.label}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              {instructorId ? (
+                <div className="text-base-content/55 text-[0.625rem] leading-tight">
+                  <Trans>
+                    <span className="font-semibold text-[#7c3aed]">
+                      Teaching
+                    </span>
+                    <span className="text-base-content/35"> · </span>
+                    classes where you are the instructor
+                  </Trans>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          {!days.length ? (
+            <p className="text-base-content/65 text-sm leading-relaxed">
+              <Trans>No classes this week.</Trans>
+            </p>
+          ) : (
+            <PersonalWeekDays
+              days={days}
+              courseColors={courseColors}
+              instructorLabels={instructorLabels}
+              today={today}
+              nowHm={nowHm}
+              onNavigateToMeeting={onNavigateToMeeting}
+            />
+          )}
+          <button
+            type="button"
+            className="text-base-content/75 hover:text-base-content inline-flex items-center gap-1 self-start text-xs font-medium"
+            onClick={() => setNextWeekOpen((open) => !open)}
+          >
+            <span
+              className={cn(
+                "icon-[material-symbols--expand-more-rounded] text-base transition-transform",
+                nextWeekOpen && "rotate-180",
+              )}
+            />
+            <Trans>Next week</Trans>
+            {nextWeekCount ? (
+              <span className="text-base-content/45 tabular-nums">
+                {nextWeekCount}
+              </span>
+            ) : null}
+          </button>
+          {nextWeekOpen ? (
+            !nextWeekDays.length ? (
+              <p className="text-base-content/55 text-sm leading-relaxed">
+                <Trans>No classes next week.</Trans>
+              </p>
+            ) : (
+              <PersonalWeekDays
+                days={nextWeekDays}
+                courseColors={courseColors}
+                instructorLabels={instructorLabels}
+                today={today}
+                nowHm={nowHm}
+                onNavigateToMeeting={onNavigateToMeeting}
+              />
+            )
+          ) : null}
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -462,6 +895,11 @@ export function TimetableSidebarMenu({
   onCancelPlace,
   placing = false,
   showUnarranged,
+  personalLessons,
+  ownGroups = [],
+  courseColors = {},
+  userEmail,
+  sidebarAction,
 }: {
   meetings: Meeting[];
   config: SchemaScheduleConfig;
@@ -473,6 +911,11 @@ export function TimetableSidebarMenu({
   onCancelPlace?: () => void;
   placing?: boolean;
   showUnarranged: boolean;
+  personalLessons?: PersonalLessonsState;
+  ownGroups?: PersonalTimetableGroup[];
+  courseColors?: Record<string, { bg: string; border: string }>;
+  userEmail?: string | null;
+  sidebarAction?: "composer" | "student";
 }) {
   const [page, setPage] = useState<"menu" | "unarranged">("menu");
   const canShowUnarranged =
@@ -491,7 +934,7 @@ export function TimetableSidebarMenu({
           }}
         >
           <span className="icon-[material-symbols--arrow-back-rounded] text-lg" />
-          Меню
+          <Trans>Menu</Trans>
         </button>
         <UnarrangedLessonsPanel
           groups={groups}
@@ -506,13 +949,27 @@ export function TimetableSidebarMenu({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <h2 className="text-lg font-semibold">Меню</h2>
+      <h2 className="text-lg font-semibold">
+        <Trans>Menu</Trans>
+      </h2>
       <TimetableEventSearch
         meetings={meetings}
         config={config}
         onSelect={onNavigateToMeeting}
         activeDate={activeDate}
       />
+      {personalLessons ? (
+        <PersonalLessonsSection
+          state={personalLessons}
+          ownGroups={ownGroups}
+          meetings={meetings}
+          weekStart={activeDate}
+          courseColors={courseColors}
+          config={config}
+          userEmail={userEmail}
+          onNavigateToMeeting={onNavigateToMeeting}
+        />
+      ) : null}
       {canShowUnarranged ? (
         <button
           type="button"
@@ -523,12 +980,38 @@ export function TimetableSidebarMenu({
           onClick={() => setPage("unarranged")}
         >
           <span className="icon-[material-symbols--playlist-add-check-rounded] shrink-0 text-xl" />
-          <span className="flex-1">Неразмещённые</span>
+          <span className="flex-1">
+            <Trans>Unscheduled</Trans>
+          </span>
           <span className="text-base-content/60 tabular-nums">
             {countUnarrangedSessions(groups)}
           </span>
           <span className="icon-[material-symbols--chevron-right-rounded] shrink-0 text-xl" />
         </button>
+      ) : null}
+      {sidebarAction === "composer" ? (
+        <Link
+          to="/schedule-assistant"
+          className="btn btn-ghost mt-auto h-auto min-h-12 w-full shrink-0 justify-start gap-2 px-3 py-3 text-left normal-case"
+        >
+          <span className="icon-[mdi--calendar-edit-outline] shrink-0 text-xl" />
+          <span className="flex-1">
+            <Trans>Timetable composer</Trans>
+          </span>
+          <span className="icon-[material-symbols--chevron-right-rounded] shrink-0 text-xl" />
+        </Link>
+      ) : null}
+      {sidebarAction === "student" ? (
+        <Link
+          to="/timetable"
+          className="btn btn-ghost mt-auto h-auto min-h-12 w-full shrink-0 justify-start gap-2 px-3 py-3 text-left normal-case"
+        >
+          <span className="icon-[mdi--account-school-outline] shrink-0 text-xl" />
+          <span className="flex-1">
+            <Trans>View as student</Trans>
+          </span>
+          <span className="icon-[material-symbols--chevron-right-rounded] shrink-0 text-xl" />
+        </Link>
       ) : null}
     </div>
   );

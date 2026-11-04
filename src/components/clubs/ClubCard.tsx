@@ -1,4 +1,6 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
@@ -12,6 +14,7 @@ import {
 } from "./constants.ts";
 
 function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
+  useLingui();
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
   const isLeader = isClubLeader(clubsUser, club.id);
@@ -44,7 +47,7 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
           <div className="flex shrink-0 items-center gap-2">
             {isLeader && (
               <span className="badge badge-primary badge-soft shrink-0">
-                Leader
+                <Trans>Leader</Trans>
               </span>
             )}
             <span className={cn("badge shrink-0", getClubTypeColor(club.type))}>
@@ -59,20 +62,22 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
 
         {clubLeader && (
           <p className="text-base-content/50 text-sm md:text-base">
-            Leader:{" "}
-            <a
-              href={
-                clubLeader.telegram_alias
-                  ? `https://telegram.me/${clubLeader.telegram_alias}`
-                  : undefined
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="link link-hover"
-            >
-              {clubLeader.name}
-            </a>
+            <Trans>
+              Leader:{" "}
+              <a
+                href={
+                  clubLeader.telegram_alias
+                    ? `https://telegram.me/${clubLeader.telegram_alias}`
+                    : undefined
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="link link-hover"
+              >
+                {clubLeader.name}
+              </a>
+            </Trans>
           </p>
         )}
 
@@ -86,7 +91,9 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
             onClick={(e) => e.stopPropagation()}
           >
             <span className="icon-[mdi--arrow-right] size-4" />
-            <span>Details</span>
+            <span>
+              <Trans>Details</Trans>
+            </span>
           </Link>
           {club.links.map((link, index) => (
             <a

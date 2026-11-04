@@ -1,9 +1,13 @@
 /** Port of schedule-assistant-viewer.html script (same behavior). */
+import { t } from "@lingui/core/macro";
+import { resolveSessionWindow } from "./sessionWindows.ts";
+import { localizedInstructorName } from "./localizedNames.ts";
 import type {
   TimetableViewConfig as SchemaScheduleConfig,
   TimetableViewCourse as SchemaCourseConfig,
 } from "./timetableViewTypes.ts";
 import type {
+  SchemaSessionActiveWindow,
   SchemaWeeklyPatternSlot,
   SchemaWeeklyPatternSlotEdit,
 } from "@/api/schedule-assistant/types.ts";
@@ -18,7 +22,6 @@ import {
   nearestSlotStart,
   normalizeHhmm,
   programResolvedTimeSlots,
-  resolveAudienceSemester,
   resolveProgramTimeColumns,
   termResolvedTimeSlots,
   toMinutes as slotToMinutes,
@@ -37,59 +40,95 @@ export const DAY_NAMES = [
   "Sun",
 ] as const;
 
-/** Полные подписи дней для строк таблицы. */
-export const WEEKDAY_LABEL_RU: Record<(typeof DAY_NAMES)[number], string> = {
-  Mon: "Понедельник",
-  Tue: "Вторник",
-  Wed: "Среда",
-  Thu: "Четверг",
-  Fri: "Пятница",
-  Sat: "Суббота",
-  Sun: "Воскресенье",
-};
-
-export function weekdayLabelRu(day: string) {
-  return WEEKDAY_LABEL_RU[day as (typeof DAY_NAMES)[number]] ?? day;
+/** Full weekday label for table rows. */
+export function weekdayLabel(day: string) {
+  switch (day) {
+    case "Mon":
+      return t`Monday`;
+    case "Tue":
+      return t`Tuesday`;
+    case "Wed":
+      return t`Wednesday`;
+    case "Thu":
+      return t`Thursday`;
+    case "Fri":
+      return t`Friday`;
+    case "Sat":
+      return t`Saturday`;
+    case "Sun":
+      return t`Sunday`;
+    default:
+      return day;
+  }
 }
 
-/** «Каждый понедельник» / «Каждую субботу» / «Каждое воскресенье». */
-const EVERY_WEEKDAY_PHRASE_RU: Record<(typeof DAY_NAMES)[number], string> = {
-  Mon: "Каждый понедельник",
-  Tue: "Каждый вторник",
-  Wed: "Каждую среду",
-  Thu: "Каждый четверг",
-  Fri: "Каждую пятницу",
-  Sat: "Каждую субботу",
-  Sun: "Каждое воскресенье",
-};
-
-export function everyWeekdayPhraseRu(day: string) {
-  return (
-    EVERY_WEEKDAY_PHRASE_RU[day as (typeof DAY_NAMES)[number]] ??
-    `Каждый ${weekdayLabelRu(day).toLowerCase()}`
-  );
+/** Sentence-start recurrence phrase: "Every Monday". */
+export function everyWeekdayPhrase(day: string) {
+  switch (day) {
+    case "Mon":
+      return t`Every Monday`;
+    case "Tue":
+      return t`Every Tuesday`;
+    case "Wed":
+      return t`Every Wednesday`;
+    case "Thu":
+      return t`Every Thursday`;
+    case "Fri":
+      return t`Every Friday`;
+    case "Sat":
+      return t`Every Saturday`;
+    case "Sun":
+      return t`Every Sunday`;
+    default:
+      return day;
+  }
 }
 
+/** Mid-sentence recurrence phrase for weekly conflicts: "every Monday". */
 export function weeklyConflictWhenLabel(dates: string[]): string {
   const date = dates[0]?.trim();
-  if (!date) return "каждую неделю";
-  return everyWeekdayPhraseRu(dayKey(date)).toLowerCase();
+  if (!date) return t`every week`;
+  switch (dayKey(date)) {
+    case "Mon":
+      return t`every Monday`;
+    case "Tue":
+      return t`every Tuesday`;
+    case "Wed":
+      return t`every Wednesday`;
+    case "Thu":
+      return t`every Thursday`;
+    case "Fri":
+      return t`every Friday`;
+    case "Sat":
+      return t`every Saturday`;
+    default:
+      return t`every Sunday`;
+  }
 }
 
 /** Один источник текстов `title` для таблицы и для HTML панели деталей. */
-export const scheduleAssistantDetailTooltips = {
-  room: "Показать локацию в панели деталей",
-  instructor: "Показать преподавателя в панели деталей",
-  group: "Показать группу в панели деталей",
-  program: "Показать программу в панели деталей",
-  resource: "Показать в панели деталей",
-} as const;
-
-export function instructorDetailTooltip(name: string) {
-  return `Показать преподавателя «${name}» в панели деталей`;
+export function scheduleAssistantDetailTooltip(
+  kind: "room" | "instructor" | "group" | "program" | "resource",
+): string {
+  switch (kind) {
+    case "room":
+      return t`Show location in the details panel`;
+    case "instructor":
+      return t`Show instructor in the details panel`;
+    case "group":
+      return t`Show group in the details panel`;
+    case "program":
+      return t`Show program in the details panel`;
+    default:
+      return t`Show in the details panel`;
+  }
 }
 
-/** Table UI: English name, else Russian, else alias/email/id. */
+export function instructorDetailTooltip(name: string) {
+  return t`Show instructor “${name}” in the details panel`;
+}
+
+/** Table UI: name in the active locale, else the other locale, alias/email/id. */
 export function buildInstructorLabelById(
   config: SchemaScheduleConfig,
 ): Record<string, string> {
@@ -97,12 +136,7 @@ export function buildInstructorLabelById(
   for (const instructor of config.instructors ?? []) {
     const id = String(instructor.id || "").trim();
     if (!id) continue;
-    const label =
-      instructor.name_en?.trim() ||
-      instructor.name_ru?.trim() ||
-      instructor.alias?.trim() ||
-      instructor.email?.trim() ||
-      id;
+    const label = localizedInstructorName({ ...instructor, id });
     out[id] = label;
     const email = instructor.email?.trim();
     if (email && !(email in out)) out[email] = label;
@@ -121,10 +155,13 @@ export type MeetingOverrideField = "room" | "time" | "weekday" | "instructor";
 
 export type Meeting = {
   instance_id: string;
+  /** Canonical English course name; also the course identity in the config. */
   course: string;
+  course_name_ru?: string;
   /** Short English display name from course config. */
   course_short_name?: string;
-  /** Effective series note after the date-specific override. */
+  course_short_name_ru?: string;
+  /** Public course notes. */
   notes?: string;
   tag: string;
   groups: string[];
@@ -371,7 +408,7 @@ export function resolveWeeklyMeetingFields(
   slot: SchemaWeeklyPatternSlot,
   date: string,
   config: SchemaScheduleConfig,
-  seriesNotes = "",
+  courseNotes = "",
 ) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
   const edit = findEditForMeetingDate(date, slot.edits, startingDay);
@@ -382,7 +419,7 @@ export function resolveWeeklyMeetingFields(
       end: String(slot.end_time).slice(0, 5),
       room: slot.room ?? "",
       instructors: slot.instructor ?? "",
-      notes: edit.notes ?? seriesNotes,
+      notes: courseNotes,
       cancelled: true,
     };
   }
@@ -409,7 +446,7 @@ export function resolveWeeklyMeetingFields(
     end: resolvedEnd,
     room: resolvedRoom || "",
     instructors: resolvedInstructor,
-    notes: edit?.notes ?? seriesNotes,
+    notes: courseNotes,
     cancelled: false,
   };
 }
@@ -466,9 +503,10 @@ export function activeWeeklySlotDates(
   config: SchemaScheduleConfig,
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[],
+  active?: SchemaSessionActiveWindow | null,
 ): string[] {
   const weekday = weeklyPatternDayKey(String(slot.weekday));
-  const range = resolveAudienceSemester(config, audienceTokens);
+  const range = resolveSessionWindow(config, audienceTokens, active);
   if (!weekday || !range) return [];
   return semesterDatesForWeekday(config, weekday, range).filter((date) =>
     isWeeklySlotActiveOnDate(
@@ -497,8 +535,9 @@ export function countWeeklyPatternSlotOccurrences(
   config: SchemaScheduleConfig,
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[],
+  active?: SchemaSessionActiveWindow | null,
 ): number {
-  return activeWeeklySlotDates(config, slot, audienceTokens).filter(
+  return activeWeeklySlotDates(config, slot, audienceTokens, active).filter(
     (date) => !resolveWeeklyMeetingFields(slot, date, config).cancelled,
   ).length;
 }
@@ -794,7 +833,7 @@ export function buildColumns(config: SchemaScheduleConfig) {
   for (const gid of Array.from(usedGroups).sort()) {
     if (known.has(gid)) continue;
     columns.push({
-      yearLabel: "Other",
+      yearLabel: t`Other`,
       groupId: gid,
       groupLabel: meta.groupNames[gid] || gid,
     });
@@ -804,12 +843,16 @@ export function buildColumns(config: SchemaScheduleConfig) {
 
 function meetingCourseFields(course: {
   name: string;
+  name_ru?: string | null;
   short_name?: string | null;
+  short_name_ru?: string | null;
 }) {
-  const shortName = String(course.short_name ?? "").trim();
   return {
     course: course.name,
-    course_short_name: shortName || undefined,
+    course_name_ru: String(course.name_ru ?? "").trim() || undefined,
+    course_short_name: String(course.short_name ?? "").trim() || undefined,
+    course_short_name_ru:
+      String(course.short_name_ru ?? "").trim() || undefined,
   };
 }
 
@@ -836,7 +879,6 @@ export function buildMeetingsForCourse(
   const course = config.courses?.[courseIdx];
   if (!course) return [] as Meeting[];
   const section = course.section_code;
-  const groupToProgram = buildGroupToProgramMap(config);
 
   const flat: Meeting[] = [];
   for (const [componentIdx, component] of (course.components || []).entries()) {
@@ -846,12 +888,6 @@ export function buildMeetingsForCourse(
         config,
         audienceTokens,
       );
-      const audienceWindow = resolveAudienceSemester(
-        config,
-        audienceTokens,
-        groupToProgram,
-      );
-
       for (const [occIdx, occurrence] of (
         series.dates_pattern || []
       ).entries()) {
@@ -868,7 +904,7 @@ export function buildMeetingsForCourse(
             : undefined,
           room: occurrence.room ?? "",
           instructors: occurrence.instructor ?? "",
-          notes: occurrence.notes ?? series.notes ?? "",
+          notes: course.notes ?? "",
           ...("instructor_pool" in component
             ? { instructor_pool: component.instructor_pool as unknown[] }
             : {}),
@@ -878,15 +914,19 @@ export function buildMeetingsForCourse(
 
       const pattern = series.weekly_pattern || [];
       if (pattern.length === 0) continue;
-      if (audienceWindow == null) continue;
       for (const [slotIdx, slot] of pattern.entries()) {
-        const dates = activeWeeklySlotDates(config, slot, audienceTokens);
+        const dates = activeWeeklySlotDates(
+          config,
+          slot,
+          audienceTokens,
+          series.active,
+        );
         for (const date of dates) {
           const resolved = resolveWeeklyMeetingFields(
             slot,
             date,
             config,
-            series.notes ?? "",
+            course.notes ?? "",
           );
           if (resolved.cancelled) {
             flat.push({
@@ -1018,11 +1058,16 @@ export function weekIndexForDate(weeks: WeekRange[], dateStr: string) {
 
 export type WeekRelativePosition = "current" | "past" | "future";
 
-export const WEEK_RELATIVE_LABELS: Record<WeekRelativePosition, string> = {
-  current: "Текущая",
-  past: "Прошлая",
-  future: "Будущая",
-};
+export function weekRelativeLabel(position: WeekRelativePosition): string {
+  switch (position) {
+    case "current":
+      return t`Current week`;
+    case "past":
+      return t`Past week`;
+    default:
+      return t`Future week`;
+  }
+}
 
 export const WEEK_RELATIVE_DOT_CLASS: Record<WeekRelativePosition, string> = {
   current: "bg-success",

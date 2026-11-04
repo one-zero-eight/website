@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+
 import type { TimetableViewConfig as SchemaScheduleConfig } from "./timetableViewTypes.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import {
@@ -98,7 +100,7 @@ export function summarizeMeetingAudience(
               ? [
                   {
                     title: String(
-                      tracks[0]?.name || tracks[0]?.code || "Трек",
+                      tracks[0]?.name || tracks[0]?.code || t`Track`,
                     ).trim(),
                     full: false,
                     selector: (() => {
@@ -151,7 +153,7 @@ export function summarizeMeetingAudience(
         if (!selectedInTrack.length) continue;
 
         const trackRef = String(track.code || track.name || "").trim();
-        const trackTitle = String(track.name || trackRef || "Трек").trim();
+        const trackTitle = String(track.name || trackRef || t`Track`).trim();
         const trackSelector = trackRef
           ? `@${programCode}/${trackRef}`
           : programSelector;
@@ -190,7 +192,7 @@ export function summarizeMeetingAudience(
   const leftovers = [...selected].filter((id) => !covered.has(id));
   if (leftovers.length) {
     programs.push({
-      title: "Другие группы",
+      title: t`Other groups`,
       programCode: "",
       full: false,
       selector: "",

@@ -1,24 +1,18 @@
+import { i18n } from "@lingui/core";
+
 export type MeetingTimeRange = {
   start: string;
   end: string;
 };
 
-const dateFormatter = new Intl.DateTimeFormat("en", {
-  month: "short",
-  day: "numeric",
-});
-
-const timeFormatter = new Intl.DateTimeFormat("en-GB", {
-  hour: "2-digit",
-  minute: "2-digit",
-  hourCycle: "h23",
-});
-
 function getDateId(date: Date) {
   return date.toLocaleDateString("en-CA");
 }
 
-export function formatMeetingTimeRange(meetingTime?: MeetingTimeRange | null) {
+export function formatMeetingTimeRange(
+  meetingTime?: MeetingTimeRange | null,
+  locale: string = i18n.locale,
+) {
   if (!meetingTime) {
     return null;
   }
@@ -29,6 +23,16 @@ export function formatMeetingTimeRange(meetingTime?: MeetingTimeRange | null) {
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     return null;
   }
+
+  const dateFormatter = new Intl.DateTimeFormat(locale, {
+    month: "short",
+    day: "numeric",
+  });
+  const timeFormatter = new Intl.DateTimeFormat(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
 
   const startDate = dateFormatter.format(start);
   const startTime = timeFormatter.format(start);

@@ -1,9 +1,10 @@
 import type {
   SchemaCourseConfig,
+  SchemaDateRange,
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { InstructorPicker } from "@/components/schedule-assistant/timetable/InstructorPicker.tsx";
-import { DateInput } from "@/components/schedule-assistant/timetable/DateInput.tsx";
+import { DateInput } from "@/components/schedule-assistant/DateInput.tsx";
 import {
   occurrenceExcludeRef,
   weeklySlotExcludeRef,
@@ -31,7 +32,8 @@ import {
 } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { SessionEventCard } from "@/components/schedule-assistant/timetable/SessionEventCard.tsx";
 import { cn } from "@/lib/ui/cn";
-import { SessionNotesOverrideField } from "./SessionSeriesEditor.tsx";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { resolveSessionWindow } from "./sessionWindows.ts";
 import {
   memo,
   startTransition,
@@ -54,8 +56,7 @@ function isBulkFieldPatch(patch: EditableSessionEventPatch) {
     patch.start_time !== undefined ||
     patch.end_time !== undefined ||
     patch.room !== undefined ||
-    patch.instructor !== undefined ||
-    patch.notes !== undefined
+    patch.instructor !== undefined
   );
 }
 
@@ -76,7 +77,11 @@ function SelectionBar({
           className="text-base-content/70 hover:text-base-content cursor-pointer text-sm hover:underline"
           onClick={onToggleAll}
         >
-          {selectedCount > 0 ? "Снять выбор" : "Выбрать все"}
+          {selectedCount > 0 ? (
+            <Trans>Clear selection</Trans>
+          ) : (
+            <Trans>Select all</Trans>
+          )}
         </button>
         {onSelectFollowing ? (
           <button
@@ -84,13 +89,13 @@ function SelectionBar({
             className="text-base-content/70 hover:text-base-content cursor-pointer text-sm hover:underline"
             onClick={onSelectFollowing}
           >
-            Выбрать это и все последующие
+            <Trans>Select this and all following</Trans>
           </button>
         ) : null}
       </div>
       {selectedCount > 0 ? (
         <span className="text-base-content/70 ml-auto shrink-0 text-sm">
-          Выбрано: {selectedCount}
+          <Trans>Selected: {selectedCount}</Trans>
         </span>
       ) : null}
     </div>
@@ -154,7 +159,6 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
   meetings,
   meetingIndex,
   audienceTokens,
-  seriesNotes,
   courseInstructors,
   instructorPool,
   meetingRef,
@@ -174,7 +178,6 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
   meetings: Meeting[];
   meetingIndex: MeetingPickerIndex | null;
   audienceTokens: string[];
-  seriesNotes?: string;
   courseInstructors?: SchemaCourseConfig["instructors"];
   instructorPool?: unknown[] | null;
   meetingRef: MeetingRef | null;
@@ -184,6 +187,7 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
   excludeInstanceId: string | null;
   pickerSelection?: Meeting[];
 }) {
+  const { t } = useLingui();
   const cancelled = event.cancelled;
   const weekday = eventWeekdayKey(event.date, config);
   const start = toUiTime(event.start_time);
@@ -274,10 +278,10 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
           className="btn btn-ghost btn-sm btn-square shrink-0"
           title={
             cancelled
-              ? "Восстановить"
+              ? t`Restore`
               : event.source.kind === "weekly"
-                ? "Отменить занятие"
-                : "Удалить дату"
+                ? t`Cancel class`
+                : t`Delete date`
           }
           onClick={(clickEvent) => {
             clickEvent.preventDefault();
@@ -353,17 +357,13 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
           />
         </FieldMark>
       </div>
-      <div className="sm:col-span-2">
-        <SessionNotesOverrideField
-          notes={event.notes}
-          seriesNotes={seriesNotes ?? ""}
-          disabled={cancelled}
-          onChange={(notes) => onChange(event.key, { notes })}
-        />
-      </div>
       {cancelled ? (
         <div className="text-error/80 text-xs sm:col-span-2">
-          {event.source.kind === "weekly" ? "Отменено" : "Удалено"}
+          {event.source.kind === "weekly" ? (
+            <Trans>Cancelled</Trans>
+          ) : (
+            <Trans>Deleted</Trans>
+          )}
         </div>
       ) : null}
     </div>
@@ -377,7 +377,6 @@ function ConcreteEventRow({
   meetings,
   meetingIndex,
   audienceTokens,
-  seriesNotes,
   courseInstructors,
   instructorPool,
   meetingRef,
@@ -396,7 +395,6 @@ function ConcreteEventRow({
   meetings: Meeting[];
   meetingIndex: MeetingPickerIndex | null;
   audienceTokens: string[];
-  seriesNotes?: string;
   courseInstructors?: SchemaCourseConfig["instructors"];
   instructorPool?: unknown[] | null;
   meetingRef: MeetingRef | null;
@@ -426,7 +424,6 @@ function ConcreteEventRow({
             meetings={meetings}
             meetingIndex={meetingIndex}
             audienceTokens={audienceTokens}
-            seriesNotes={seriesNotes}
             courseInstructors={courseInstructors}
             instructorPool={instructorPool}
             meetingRef={meetingRef}
@@ -450,12 +447,12 @@ export function EditableSessionEventsEditor({
   onEventsChange,
   originalEvents,
   audienceTokens,
-  seriesNotes,
   courseInstructors,
   instructorPool,
   meetingRef,
   focusKey,
   afterHeader,
+  active,
   allowAddOccurrence = false,
 }: {
   config: SchemaScheduleConfig;
@@ -465,12 +462,12 @@ export function EditableSessionEventsEditor({
   onEventsChange: (next: EditableSessionEvent[]) => void;
   originalEvents: EditableSessionEvent[];
   audienceTokens: string[];
-  seriesNotes?: string;
   courseInstructors?: SchemaCourseConfig["instructors"];
   instructorPool?: unknown[] | null;
   meetingRef: MeetingRef | null;
   focusKey: string | null;
   afterHeader?: ReactNode;
+  active?: SchemaDateRange | null;
   allowAddOccurrence?: boolean;
 }) {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(
@@ -646,7 +643,6 @@ export function EditableSessionEventsEditor({
             meetings={meetings}
             meetingIndex={meetingIndex}
             audienceTokens={audienceTokens}
-            seriesNotes={seriesNotes}
             courseInstructors={courseInstructors}
             instructorPool={instructorPool}
             meetingRef={meetingRef}
@@ -674,10 +670,15 @@ export function EditableSessionEventsEditor({
           onClick={() => {
             const template =
               events.find((item) => !item.cancelled) ?? events[0];
+            const sessionWindow = resolveSessionWindow(
+              config,
+              audienceTokens,
+              active,
+            );
             onEventsChange([
               ...events,
               createOccurrenceEvent({
-                date: template?.date,
+                date: template?.date ?? sessionWindow?.start_date,
                 start_time: template?.start_time,
                 end_time: template?.end_time,
                 room: template?.room ?? null,
@@ -687,7 +688,7 @@ export function EditableSessionEventsEditor({
           }}
         >
           <span className="icon-[material-symbols--add-rounded] text-base" />
-          Добавить дату
+          <Trans>Add date</Trans>
         </button>
       ) : null}
     </div>

@@ -1,9 +1,11 @@
 import { Calendar } from "@/components/calendar/Calendar.tsx";
+import { useLingui } from "@lingui/react/macro";
 import { getEventsIcsUrl } from "../utils/links";
 import { EventsCalendarPopover } from "./EventsCalendarPopover";
 import { EventsCardsView } from "./EventsCardsView";
 
 export function EventsCalendarPage() {
+  const { t } = useLingui();
   return (
     <Calendar
       urls={[
@@ -17,7 +19,7 @@ export function EventsCalendarPage() {
       customViews={[
         {
           id: "eventsCards",
-          displayName: "Cards",
+          displayName: t`Cards`,
           component: EventsCardsView,
         },
       ]}

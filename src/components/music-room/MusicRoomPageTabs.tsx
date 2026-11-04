@@ -1,10 +1,15 @@
+import { Trans } from "@lingui/react/macro";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 
 export function MusicRoomPageTabs() {
   return (
     <div className="border-base-300 flex shrink-0 flex-row gap-2 overflow-x-auto border-b px-1 whitespace-nowrap">
-      <TabLink to="/music-room">Calendar</TabLink>
-      <TabLink to="/music-room/instructions">Instructions</TabLink>
+      <TabLink to="/music-room">
+        <Trans>Calendar</Trans>
+      </TabLink>
+      <TabLink to="/music-room/instructions">
+        <Trans>Instructions</Trans>
+      </TabLink>
     </div>
   );
 }

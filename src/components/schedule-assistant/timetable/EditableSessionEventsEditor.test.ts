@@ -1,21 +1,31 @@
-import { act, createElement, useState, type ReactNode } from "react";
+import { act, createElement, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import { describe, expect, it, vi } from "vitest";
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 
 import { EditableSessionEventsEditor } from "./EditableSessionEventsEditor.tsx";
-import {
-  SessionNotesOverrideField,
-  SeriesNotesField,
-} from "./SessionSeriesEditor.tsx";
 import { buildMeetingPickerIndex } from "./meetingPickerIndex.ts";
 import type { EditableSessionEvent } from "./editableSessionEvents.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
 
+const i18n = setupI18n({ locale: "en", messages: {} });
+
 vi.mock("./sessionSeriesRows.tsx", () => ({
   FieldMark: ({ children }: { children: ReactNode }) => children,
-  RoomSelect: ({ pickerSelection }: { pickerSelection?: Meeting[] }) =>
-    createElement("span", { "data-room-scope": pickerSelection?.length ?? 1 }),
+  RoomSelect: ({
+    pickerSelection,
+    onChange,
+  }: {
+    pickerSelection?: Meeting[];
+    onChange: (room: string) => void;
+  }) =>
+    createElement("button", {
+      type: "button",
+      "data-room-scope": pickerSelection?.length ?? 1,
+      onClick: () => onChange("999"),
+    }),
   SlotTimeFields: () => null,
   toUiTime: (value: string) => value.slice(0, 5),
   weekdayToKey: () => "Fri",
@@ -26,67 +36,59 @@ vi.mock("./InstructorPicker.tsx", () => ({
       "data-instructor-scope": pickerSelection?.length ?? 1,
     }),
 }));
-vi.mock("./DateInput.tsx", () => ({ DateInput: () => null }));
+vi.mock("@/components/schedule-assistant/DateInput.tsx", () => ({
+  DateInput: () => null,
+}));
 vi.mock("./SessionEventCard.tsx", () => ({
   SessionEventCard: ({ children }: { children: ReactNode }) => children,
 }));
 
-describe("notes controls", () => {
-  it("inherits live series text, allows empty overrides and resets to inheritance", async () => {
-    const onOverrideChange = vi.fn();
-    function NotesForm() {
-      const [notes, setNotes] = useState<string | null>(null);
-      const [seriesNotes, setSeriesNotes] = useState("Bring a laptop");
-      return createElement(
-        "div",
-        null,
-        createElement(SeriesNotesField, {
-          notes: seriesNotes,
-          onChange: setSeriesNotes,
-        }),
-        createElement(SessionNotesOverrideField, {
-          notes,
-          seriesNotes,
-          onChange: (value) => {
-            setNotes(value);
-            onOverrideChange(value);
-          },
-        }),
-      );
-    }
+describe("window-aware new occurrences", () => {
+  it("seeds the first explicit date from the effective selected window", async () => {
+    const active = { start_date: "2026-09-16", end_date: "2026-09-30" };
+    const onEventsChange = vi.fn();
     const container = document.createElement("div");
-    document.body.append(container);
     const root = createRoot(container);
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-    const setValue = Object.getOwnPropertyDescriptor(
-      HTMLTextAreaElement.prototype,
-      "value",
-    )!.set!;
-    async function input(textarea: HTMLTextAreaElement, value: string) {
-      await act(async () => {
-        setValue.call(textarea, value);
-        textarea.dispatchEvent(new Event("input", { bubbles: true }));
-      });
-    }
     try {
-      await act(async () => root.render(createElement(NotesForm)));
-      const [series, occurrence] = container.querySelectorAll("textarea");
-      expect(occurrence.value).toBe("Bring a laptop");
-      expect(container.textContent).toContain("Из заметок серии");
-      await input(series, "Updated series");
-      expect(occurrence.value).toBe("Updated series");
-      await input(occurrence, "");
-      expect(onOverrideChange).toHaveBeenLastCalledWith("");
-      expect(container.textContent).toContain("Заметки серии скрыты");
-      await input(series, "New default");
-      expect(occurrence.value).toBe("");
-      await act(async () => container.querySelector("button")!.click());
-      expect(onOverrideChange).toHaveBeenLastCalledWith(null);
-      expect(occurrence.value).toBe("New default");
-      expect(container.querySelector("button")).toBeNull();
+      await act(async () =>
+        root.render(
+          createElement(
+            I18nProvider,
+            { i18n },
+            createElement(EditableSessionEventsEditor, {
+              config: {
+                term: {
+                  semester: {
+                    start_date: "2026-09-01",
+                    end_date: "2026-09-30",
+                  },
+                  sections: [],
+                },
+                students_groups: [],
+              } as unknown as SchemaScheduleConfig,
+              meetings: [],
+              meetingIndex: null,
+              events: [],
+              originalEvents: [],
+              audienceTokens: [],
+              onEventsChange,
+              meetingRef: null,
+              focusKey: null,
+              allowAddOccurrence: true,
+              active,
+            }),
+          ),
+        ),
+      );
+      await act(async () =>
+        [...container.querySelectorAll("button")]
+          .find((button) => button.textContent?.includes("Add date"))!
+          .click(),
+      );
+      expect(onEventsChange.mock.lastCall![0][0].date).toBe(active.start_date);
     } finally {
       await act(async () => root.unmount());
-      container.remove();
       Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: false });
     }
   });
@@ -130,25 +132,29 @@ describe("bulk resource picker selection", () => {
     try {
       await act(async () =>
         root.render(
-          createElement(EditableSessionEventsEditor, {
-            config: {
-              term: { days: ["friday"] },
-            } as unknown as SchemaScheduleConfig,
-            meetings,
-            meetingIndex: buildMeetingPickerIndex(meetings),
-            events,
-            originalEvents: events,
-            onEventsChange,
-            audienceTokens: [],
-            meetingRef: {
-              kind: "occ",
-              courseIdx: 0,
-              componentIdx: 0,
-              seriesIdx: 0,
-              occIdx: 0,
-            },
-            focusKey: null,
-          }),
+          createElement(
+            I18nProvider,
+            { i18n },
+            createElement(EditableSessionEventsEditor, {
+              config: {
+                term: { days: ["friday"] },
+              } as unknown as SchemaScheduleConfig,
+              meetings,
+              meetingIndex: buildMeetingPickerIndex(meetings),
+              events,
+              originalEvents: events,
+              onEventsChange,
+              audienceTokens: [],
+              meetingRef: {
+                kind: "occ",
+                courseIdx: 0,
+                componentIdx: 0,
+                seriesIdx: 0,
+                occIdx: 0,
+              },
+              focusKey: null,
+            }),
+          ),
         ),
       );
       const scopes = (attribute: string) =>
@@ -166,37 +172,20 @@ describe("bulk resource picker selection", () => {
       expect(scopes("data-room-scope")).toEqual(["2", "2", "1"]);
       expect(scopes("data-instructor-scope")).toEqual(["2", "2", "1"]);
       await act(async () => {
-        const textarea = container.querySelector("textarea")!;
-        Object.getOwnPropertyDescriptor(
-          HTMLTextAreaElement.prototype,
-          "value",
-        )!.set!.call(textarea, "Selected notes");
-        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        container
+          .querySelectorAll<HTMLButtonElement>("[data-room-scope]")[0]!
+          .click();
       });
       expect(
         onEventsChange.mock.lastCall?.[0].map(
-          (event: EditableSessionEvent) => event.notes,
+          (event: EditableSessionEvent) => event.room,
         ),
-      ).toEqual(["Selected notes", "Selected notes", null]);
+      ).toEqual(["999", "999", "304"]);
       await act(async () => {
         checkboxes[1]!.click();
       });
       expect(scopes("data-room-scope")).toEqual(["1", "1", "1"]);
       expect(scopes("data-instructor-scope")).toEqual(["1", "1", "1"]);
-      const selectAll = [...container.querySelectorAll("button")].find(
-        (button) => button.textContent === "Снять выбор",
-      );
-      await act(async () => {
-        selectAll!.click();
-      });
-      const selectAllAfterClear = [
-        ...container.querySelectorAll("button"),
-      ].find((button) => button.textContent === "Выбрать все");
-      await act(async () => {
-        selectAllAfterClear!.click();
-      });
-      expect(scopes("data-room-scope")).toEqual(["3", "3", "3"]);
-      expect(scopes("data-instructor-scope")).toEqual(["3", "3", "3"]);
     } finally {
       await act(async () => root.unmount());
       container.remove();

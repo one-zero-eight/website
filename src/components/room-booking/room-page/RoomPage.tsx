@@ -1,14 +1,20 @@
 import { $maps } from "@/api/maps";
 import { $roomBooking } from "@/api/room-booking";
-import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types";
-import { Topbar } from "@/components/layout/Topbar.tsx";
+import { getRoomTitle } from "@/components/room-booking/utils.ts";
+import {
+  accessLevelLabel,
+  capacityPeopleLabel,
+} from "@/components/room-booking/access-level-label.ts";
 import { AccessLevelIcon } from "@/components/room-booking/AccessLevelIcon.tsx";
 import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
 import { RoomCalendar } from "@/components/room-booking/room-page/RoomCalendar.tsx";
 import { RoomMapPreview } from "@/components/room-booking/room-page/RoomMapPreview.tsx";
+import { Topbar } from "@/components/layout/Topbar.tsx";
 import { Link } from "@tanstack/react-router";
-import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { useLingui as useLinguiRuntime } from "@lingui/react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 
 const ViewOnMapButton = memo(function ViewOnMapButton({
@@ -34,7 +40,7 @@ const ViewOnMapButton = memo(function ViewOnMapButton({
           className="border-border bg-background hover:bg-muted text-foreground inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors"
         >
           <span className="icon-[material-symbols--map-outline] text-base" />
-          View on Map
+          <Trans>View on Map</Trans>
         </Link>
       </div>
     </div>
@@ -54,13 +60,17 @@ const RoomDetails = memo(function RoomDetails({
   handleShare: () => void;
   copied: boolean;
 }) {
+  const { i18n } = useLinguiRuntime();
+
   return (
     <div className="p-4">
       {/* Two-column layout on large screens */}
       <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
         {/* Room details column */}
         <div className="flex min-h-full grow flex-col gap-3 lg:flex-1">
-          <h1 className="text-3xl font-semibold">{room.title}</h1>
+          <h1 className="text-3xl font-semibold">
+            {getRoomTitle(room, i18n.locale)}
+          </h1>
 
           {room.access_level && (
             <div className="flex flex-row items-center gap-3">
@@ -70,14 +80,10 @@ const RoomDetails = memo(function RoomDetails({
               />
               <div className="flex-1">
                 <p className="text-foreground text-sm font-medium">
-                  Access Level
+                  <Trans>Access Level</Trans>
                 </p>
                 <p className="text-muted-foreground text-sm">
-                  {room.access_level === RoomAccess_levelAnyOf0.yellow
-                    ? "Yellow (for students)"
-                    : room.access_level === RoomAccess_levelAnyOf0.red
-                      ? "Red (for employees)"
-                      : "Special rules apply"}
+                  {accessLevelLabel(room.access_level)}
                 </p>
               </div>
             </div>
@@ -87,9 +93,11 @@ const RoomDetails = memo(function RoomDetails({
             <div className="flex flex-row items-center gap-3">
               <span className="text-foreground icon-[material-symbols--event-seat-outline-rounded] text-3xl" />
               <div className="flex-1">
-                <p className="text-foreground text-sm font-medium">Capacity</p>
+                <p className="text-foreground text-sm font-medium">
+                  <Trans>Capacity</Trans>
+                </p>
                 <p className="text-muted-foreground text-sm">
-                  {room.capacity} people
+                  {capacityPeopleLabel(room.capacity)}
                 </p>
               </div>
             </div>
@@ -100,10 +108,12 @@ const RoomDetails = memo(function RoomDetails({
               <span className="text-foreground icon-[material-symbols--schedule-outline] text-3xl" />
               <div className="flex-1">
                 <p className="text-foreground text-sm font-medium">
-                  Time Restrictions
+                  <Trans>Time Restrictions</Trans>
                 </p>
                 <p className="text-muted-foreground text-sm">
-                  Students can book only at night (19:00-8:00) and weekends
+                  <Trans>
+                    Students can book only at night (19:00-8:00) and weekends
+                  </Trans>
                 </p>
               </div>
             </div>
@@ -122,7 +132,11 @@ const RoomDetails = memo(function RoomDetails({
                 }`}
               >
                 <span className="icon-[material-symbols--share-outline] text-base" />
-                {copied ? "Link copied!" : "Share this room"}
+                {copied ? (
+                  <Trans>Link copied!</Trans>
+                ) : (
+                  <Trans>Share this room</Trans>
+                )}
               </button>
             </div>
           </div>
@@ -144,10 +158,12 @@ const RoomDetails = memo(function RoomDetails({
 });
 
 export function RoomPage({ id }: { id: string }) {
+  const { t, i18n } = useLingui();
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
     params: { query: { include_red: true } },
   });
   const room = rooms?.find((r) => r.id === id);
+  const roomTitle = room ? getRoomTitle(room, i18n.locale) : "";
   const [_, _copy] = useCopyToClipboard();
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<any>(null);
@@ -212,8 +228,8 @@ export function RoomPage({ id }: { id: string }) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: room?.title || "Room Details",
-          text: `Check out this room: ${room?.title}`,
+          title: roomTitle || t`Room details`,
+          text: t`Check out this room: ${roomTitle}`,
           url: url,
         });
       } catch {
@@ -223,20 +239,20 @@ export function RoomPage({ id }: { id: string }) {
     } else {
       copyToClipboard(url);
     }
-  }, [room, copyToClipboard]);
+  }, [roomTitle, copyToClipboard, t]);
 
   if (!room) {
-    return <Topbar title="Room" />;
+    return <Topbar title={<Trans>Room</Trans>} />;
   }
 
   return (
     <>
       <Helmet>
-        <title>{room.title}</title>
-        <meta name="description" content={room.title ?? undefined} />
+        <title>{roomTitle}</title>
+        <meta name="description" content={roomTitle} />
       </Helmet>
 
-      <Topbar title="Room details" />
+      <Topbar title={<Trans>Room details</Trans>} />
       <BookingPageTabs />
 
       <RoomDetails

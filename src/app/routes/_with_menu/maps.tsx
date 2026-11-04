@@ -3,6 +3,7 @@ import { MapsPage } from "@/components/maps/MapsPage.tsx";
 import { MapsPageTabs } from "@/components/maps/MapsPageTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/maps")({
   validateSearch: (
@@ -23,18 +24,19 @@ export const Route = createFileRoute("/_with_menu/maps")({
 });
 
 function RouteComponent() {
+  const { t } = useLingui();
   const { scene, area, q } = Route.useSearch();
   return (
     <>
       <Helmet>
-        <title>Maps</title>
+        <title>{t`Maps`}</title>
         <meta
           name="description"
-          content="View plans of Innopolis University."
+          content={t`View plans of Innopolis University.`}
         />
       </Helmet>
 
-      <Topbar title="Maps" hideOnMobile />
+      <Topbar title={<Trans>Maps</Trans>} hideOnMobile />
       <MapsPageTabs />
       <MapsPage sceneId={scene} areaId={area} q={q} />
     </>

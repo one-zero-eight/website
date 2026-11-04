@@ -1,4 +1,5 @@
 import { cn } from "@/lib/ui/cn";
+import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { useMemo, useState, useEffect } from "react";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
 import {
@@ -6,8 +7,12 @@ import {
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
 import { PlayerActionMenu } from "./PlayerActionMenu.tsx";
+import { GuestBadge } from "./PlayersField";
+import { BACKGROUND_REFETCH_MS } from "./useTabletennisRefresh";
 import { Pager } from "./Pager";
 import { pageSlice, rankByRating } from "./ranking";
+
+const PLAYERS_PAGE_SIZE = 25;
 
 type PlayerEntry = {
   place: number;
@@ -15,8 +20,10 @@ type PlayerEntry = {
   rating: number;
   status: string;
   visible: boolean;
+  isAdmin: boolean;
+  guest: boolean;
   innohassle_id: string;
-  raw: SchemaPlayer & { is_active: boolean };
+  raw: ListedPlayer;
 };
 
 type SortKey = "name" | "rating";
@@ -28,11 +35,14 @@ type Filters = {
   ratingMax: number;
   nameSearch: string;
   showHidden: boolean;
+  adminsOnly: boolean;
+  guestsOnly: boolean;
   sortKey: SortKey;
   sortDir: SortDir;
 };
 
 type SchemaPlayer = tabletennisTypes.SchemaPlayer;
+type ListedPlayer = SchemaPlayer & { is_active: boolean; is_admin?: boolean };
 
 function SortArrow({
   sortKey,
@@ -54,29 +64,33 @@ const INITIAL_FILTERS: Filters = {
   ratingMax: 9999,
   nameSearch: "",
   showHidden: false,
+  adminsOnly: false,
+  guestsOnly: false,
   sortKey: "rating",
   sortDir: "desc",
 };
 
-function toPlayerEntry(
-  p: SchemaPlayer & { is_active: boolean },
-  place: number,
-): PlayerEntry {
+function toPlayerEntry(p: ListedPlayer, place: number): PlayerEntry {
   return {
     place,
     name: p.nickname,
     rating: p.rating,
     status: p.status ?? "",
     visible: p.is_active,
+    isAdmin: p.is_admin ?? false,
+    guest: p.placeholder,
     innohassle_id: p.innohassle_id,
     raw: p,
   };
 }
 
 export function TabletennisPlayersTop() {
+  const { t } = useLingui();
   const { data, isPending, isError, error } = $tabletennis.useQuery(
     "get",
     "/players",
+    undefined,
+    { refetchInterval: BACKGROUND_REFETCH_MS },
   );
 
   const { data: isAdminData } = $tabletennis.useQuery("get", "/isadmin");
@@ -104,7 +118,7 @@ export function TabletennisPlayersTop() {
     if (!data) return [];
     const raw = data as unknown as {
       total: number;
-      players: (SchemaPlayer & { is_active: boolean })[];
+      players: ListedPlayer[];
     };
     const pool = raw.players
       .filter((p) => debounced.showHidden || p.is_active)
@@ -113,10 +127,16 @@ export function TabletennisPlayersTop() {
           debounced.status === "all" ||
           (p.status ?? "").toLowerCase() === debounced.status,
       );
-    return rankByRating(pool).map(({ player, place }) =>
-      toPlayerEntry(player, place),
+    // guests have no place in the top; only admins see them, to link them to accounts
+    const ranked = rankByRating(pool.filter((p) => !p.placeholder)).map(
+      ({ player, place }) => toPlayerEntry(player, place),
     );
-  }, [data, debounced.showHidden, debounced.status]);
+    if (!isAdmin) return ranked;
+    const guests = pool
+      .filter((p) => p.placeholder)
+      .map((p) => toPlayerEntry(p, 0));
+    return [...ranked, ...guests];
+  }, [data, debounced.showHidden, debounced.status, isAdmin]);
 
   const results = useMemo(() => {
     const filtered = entries
@@ -126,7 +146,9 @@ export function TabletennisPlayersTop() {
       )
       .filter((p) =>
         p.name.toLowerCase().includes(debounced.nameSearch.toLowerCase()),
-      );
+      )
+      .filter((p) => !debounced.adminsOnly || p.isAdmin)
+      .filter((p) => !debounced.guestsOnly || p.guest);
 
     const sorted = [...filtered].sort((a, b) => {
       const mul = debounced.sortDir === "asc" ? 1 : -1;
@@ -138,7 +160,7 @@ export function TabletennisPlayersTop() {
     return sorted;
   }, [entries, debounced]);
 
-  const visibleResults = pageSlice(results, page);
+  const visibleResults = pageSlice(results, page, PLAYERS_PAGE_SIZE);
 
   function toggleSort(key: SortKey) {
     setFilters((prev) => ({
@@ -154,13 +176,13 @@ export function TabletennisPlayersTop() {
     return (
       <div className="py-10 text-center">
         <p className="text-base-content/70 mb-2">
-          Register to see the players list.
+          <Trans>Register to see the players list.</Trans>
         </p>
         <a
           href="/tabletennis"
           className="rounded-xl border-2 border-[#712BB2] bg-[#712BB2] px-6 py-2 text-xs font-medium text-white transition-all duration-150 hover:bg-[#712BB2]/90 md:px-8 md:py-3 md:text-sm"
         >
-          Go to profile
+          <Trans>Go to profile</Trans>
         </a>
       </div>
     );
@@ -188,7 +210,13 @@ export function TabletennisPlayersTop() {
             )}
             onClick={() => setFilters((prev) => ({ ...prev, status: s }))}
           >
-            {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+            {s === "all" ? (
+              <Trans>All</Trans>
+            ) : s === "beginner" ? (
+              <Trans>Beginner</Trans>
+            ) : (
+              <Trans>Advanced</Trans>
+            )}
           </button>
         ))}
       </div>
@@ -196,10 +224,12 @@ export function TabletennisPlayersTop() {
       {/* Filters row */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex items-center gap-2">
-          <label className="text-base-content/70 text-sm">Rating:</label>
+          <label className="text-base-content/70 text-sm">
+            <Trans>Rating:</Trans>
+          </label>
           <input
             type="number"
-            placeholder="Min"
+            placeholder={t`Min`}
             value={filters.ratingMin || ""}
             onChange={(e) =>
               setFilters((prev) => ({
@@ -212,7 +242,7 @@ export function TabletennisPlayersTop() {
           <span className="text-base-content/50">—</span>
           <input
             type="number"
-            placeholder="Max"
+            placeholder={t`Max`}
             value={filters.ratingMax === 9999 ? "" : filters.ratingMax}
             onChange={(e) =>
               setFilters((prev) => ({
@@ -224,10 +254,12 @@ export function TabletennisPlayersTop() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-base-content/70 text-sm">Name:</label>
+          <label className="text-base-content/70 text-sm">
+            <Trans>Name:</Trans>
+          </label>
           <input
             type="text"
-            placeholder="Search..."
+            placeholder={t`Search...`}
             value={filters.nameSearch}
             onChange={(e) =>
               setFilters((prev) => ({ ...prev, nameSearch: e.target.value }))
@@ -244,16 +276,54 @@ export function TabletennisPlayersTop() {
               setFilters((prev) => ({ ...prev, showHidden: e.target.checked }))
             }
           />
-          <span className="text-base-content/70">Show hidden</span>
+          <span className="text-base-content/70">
+            <Trans>Show hidden</Trans>
+          </span>
         </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="toggle toggle-sm"
+            checked={filters.adminsOnly}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, adminsOnly: e.target.checked }))
+            }
+          />
+          <span className="text-base-content/70">
+            <Trans>Admins only</Trans>
+          </span>
+        </label>
+        {isAdmin && (
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="toggle toggle-sm"
+              checked={filters.guestsOnly}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  guestsOnly: e.target.checked,
+                }))
+              }
+            />
+            <span className="text-base-content/70">
+              <Trans>Guests only</Trans>
+            </span>
+          </label>
+        )}
       </div>
 
       {/* Results count */}
       <p className="text-base-content/50 text-xs">
-        {results.length} player{results.length === 1 ? "" : "s"}
+        <Plural value={results.length} one="# player" other="# players" />
       </p>
 
-      <Pager page={page} total={results.length} onChange={setPage} />
+      <Pager
+        page={page}
+        total={results.length}
+        onChange={setPage}
+        pageSize={PLAYERS_PAGE_SIZE}
+      />
 
       {/* Table */}
       <div className="bg-base-200 rounded-box overflow-x-auto">
@@ -265,7 +335,7 @@ export function TabletennisPlayersTop() {
                 className="cursor-pointer px-4 py-4 select-none"
                 onClick={() => toggleSort("name")}
               >
-                Name{" "}
+                <Trans>Name</Trans>{" "}
                 <SortArrow
                   sortKey="name"
                   activeSortKey={debounced.sortKey}
@@ -276,15 +346,19 @@ export function TabletennisPlayersTop() {
                 className="w-24 cursor-pointer px-4 py-4 select-none"
                 onClick={() => toggleSort("rating")}
               >
-                Rating{" "}
+                <Trans>Rating</Trans>{" "}
                 <SortArrow
                   sortKey="rating"
                   activeSortKey={debounced.sortKey}
                   sortDir={debounced.sortDir}
                 />
               </th>
-              <th className="w-24 px-4 py-4">Status</th>
-              <th className="w-24 px-4 py-4">Visible</th>
+              <th className="w-24 px-4 py-4">
+                <Trans>Status</Trans>
+              </th>
+              <th className="w-24 px-4 py-4">
+                <Trans>Visible</Trans>
+              </th>
               {isAdmin && <th className="w-12 px-4 py-4" />}
             </tr>
           </thead>
@@ -294,20 +368,36 @@ export function TabletennisPlayersTop() {
                 key={p.innohassle_id}
                 className="border-base-300 border-b last:border-0"
               >
-                <td className="text-base-content/70 px-4 py-3">{p.place}</td>
+                <td className="text-base-content/70 px-4 py-3">
+                  {p.guest ? "—" : p.place}
+                </td>
                 <td className="px-4 py-3 font-medium">{p.name}</td>
                 <td className="px-4 py-3">{p.rating}</td>
                 <td className="px-4 py-3">
-                  <span
-                    className={cn(
-                      "badge badge-sm",
-                      p.status.toLowerCase() === "active"
-                        ? "badge-primary"
-                        : "badge-ghost",
+                  <div className="flex flex-wrap items-center gap-1">
+                    <span
+                      className={cn(
+                        "badge badge-sm",
+                        p.status.toLowerCase() === "active"
+                          ? "badge-primary"
+                          : "badge-ghost",
+                      )}
+                    >
+                      {p.status.toLowerCase() === "beginner" ? (
+                        <Trans>Beginner</Trans>
+                      ) : p.status.toLowerCase() === "advanced" ? (
+                        <Trans>Advanced</Trans>
+                      ) : (
+                        p.status
+                      )}
+                    </span>
+                    {p.isAdmin && (
+                      <span className="badge badge-sm border-[#712BB2] bg-transparent text-[#712BB2]">
+                        <Trans>admin</Trans>
+                      </span>
                     )}
-                  >
-                    {p.status}
-                  </span>
+                    {p.guest && <GuestBadge />}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <span
@@ -315,7 +405,7 @@ export function TabletennisPlayersTop() {
                       p.visible ? "text-green-500" : "text-base-content/30"
                     }
                   >
-                    {p.visible ? "visible" : "hidden"}
+                    {p.visible ? <Trans>visible</Trans> : <Trans>hidden</Trans>}
                   </span>
                 </td>
                 {isAdmin && (
@@ -329,7 +419,7 @@ export function TabletennisPlayersTop() {
         </table>
         {visibleResults.length === 0 && (
           <p className="text-base-content/50 py-6 text-center">
-            No players match the current filters
+            <Trans>No players match the current filters</Trans>
           </p>
         )}
       </div>

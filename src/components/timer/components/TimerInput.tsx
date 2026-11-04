@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { useLingui } from "@lingui/react/macro";
 
 interface TimerInputProps {
   value: string;
@@ -12,6 +13,7 @@ interface TimerInputProps {
 
 export const TimerInput = forwardRef<HTMLInputElement, TimerInputProps>(
   ({ value, onChange, onKeyDown, onFocus, onBlur, disabled, type }, ref) => {
+    const { t } = useLingui();
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       onChange(e.target.value);
     };
@@ -28,7 +30,9 @@ export const TimerInput = forwardRef<HTMLInputElement, TimerInputProps>(
         onBlur={onBlur}
         disabled={disabled}
         className="w-auto min-w-0 bg-transparent p-0 text-center text-5xl outline-none sm:text-6xl md:text-7xl lg:text-[160px]"
-        aria-label={`${type === "H" ? "Hours" : type === "M" ? "Minutes" : "Seconds"}`}
+        aria-label={
+          type === "H" ? t`Hours` : type === "M" ? t`Minutes` : t`Seconds`
+        }
       />
     );
   },

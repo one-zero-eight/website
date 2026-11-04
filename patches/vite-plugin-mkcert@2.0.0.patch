@@ -1,0 +1,44 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -740,12 +740,7 @@
+ 	}).filter(Boolean);
+ };
+ const getDefaultHosts = () => {
+-	return [
+-		"localhost",
+-		"::1",
+-		...getLocalV4Ips(),
+-		...getLocalV6Ips()
+-	];
++	return [];
+ };
+ 
+ //#endregion
+diff --git a/dist/index.mjs b/dist/index.mjs
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -704,12 +704,7 @@
+ 	}).filter(Boolean);
+ };
+ const getDefaultHosts = () => {
+-	return [
+-		"localhost",
+-		"::1",
+-		...getLocalV4Ips(),
+-		...getLocalV6Ips()
+-	];
++	return [];
+ };
+ 
+ //#endregion
+diff --git a/plugin/src/utils/network.ts b/plugin/src/utils/network.ts
+--- a/plugin/src/utils/network.ts
++++ b/plugin/src/utils/network.ts
+@@ -43,5 +43,5 @@
+ }
+ 
+ export const getDefaultHosts = () => {
+-  return ['localhost', '::1', ...getLocalV4Ips(), ...getLocalV6Ips()]
++  return []
+ }

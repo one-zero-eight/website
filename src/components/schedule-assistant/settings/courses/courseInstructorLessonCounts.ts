@@ -66,6 +66,7 @@ export function countCourseLessonsByInstructor(
           config,
           slot,
           audienceTokens,
+          session.active,
         )) {
           const resolved = resolveWeeklyMeetingFields(slot, date, config);
           if (resolved.cancelled) continue;
