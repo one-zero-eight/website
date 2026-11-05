@@ -32,7 +32,7 @@ msgstr ""
 msgid " (capacity: {capacity} people)"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:40
+#: src/components/search/ask/AskPage.tsx:106
 msgid "- Ask me anything!"
 msgstr ""
 
@@ -41,7 +41,7 @@ msgid "- Executing"
 msgstr ""
 
 #: src/components/search/act/ActPage.tsx:82
-#: src/components/search/ask/AskPage.tsx:71
+#: src/components/search/ask/AskPage.tsx:149
 #: src/components/search/ask/AskResult.tsx:59
 msgid "- Sorry, I can't help you with this question."
 msgstr ""
@@ -853,7 +853,7 @@ msgid "Advanced"
 msgstr ""
 
 #: src/components/search/act/ActPage.tsx:64
-#: src/components/search/ask/AskPage.tsx:37
+#: src/components/search/ask/AskPage.tsx:103
 msgid "AI Assistant:"
 msgstr ""
 
@@ -1030,6 +1030,10 @@ msgstr ""
 #: src/app/routes/_with_menu/search/ask.tsx:30
 #: src/components/search/SearchField.tsx:52
 msgid "Ask"
+msgstr ""
+
+#: src/components/search/ask/AskInput.tsx:30
+msgid "Ask a question..."
 msgstr ""
 
 #: src/app/routes/_with_menu/search/ask.tsx:33
@@ -1407,7 +1411,6 @@ msgstr ""
 #: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:296
 #: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:73
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:86
-#: src/components/search/ask/AskPage.tsx:65
 #: src/components/tabletennis/ArchivedTournament.tsx:65
 #: src/components/tabletennis/CreateTournamentForm.tsx:120
 #: src/components/tabletennis/LiveTournament.tsx:262
@@ -1577,6 +1580,10 @@ msgstr ""
 
 #: src/components/clubs/constants.ts:85
 msgid "Chat"
+msgstr ""
+
+#: src/components/search/ask/AskPage.tsx:78
+msgid "Chats"
 msgstr ""
 
 #: src/components/sport/SportStudentTrainingModal.tsx:467
@@ -2168,6 +2175,10 @@ msgstr ""
 msgid "Could not mark attendance"
 msgstr ""
 
+#: src/components/search/ask/AskPage.tsx:119
+msgid "Could not open the chat"
+msgstr ""
+
 #: src/components/editor/menus/ImageMenuItems.tsx:51
 msgid "Could not replace image"
 msgstr ""
@@ -2176,11 +2187,11 @@ msgstr ""
 msgid "Could not reserve game"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:37
+#: src/components/search/ask/AskFeedback.tsx:50
 msgid "Could not save the rating"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:53
+#: src/components/search/ask/AskFeedback.tsx:71
 msgid "Could not send the comment"
 msgstr ""
 
@@ -5215,6 +5226,10 @@ msgstr ""
 msgid "No changes to save."
 msgstr ""
 
+#: src/components/search/ask/AskChatList.tsx:35
+msgid "No chats yet"
+msgstr ""
+
 #: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:91
 #: src/components/schedule-assistant/timetable/pickerLabels.ts:30
 #: src/components/schedule-assistant/timetable/pickerLabels.ts:52
@@ -6428,7 +6443,7 @@ msgstr ""
 msgid "Rating: {0}"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:65
+#: src/components/search/ask/AskFeedback.tsx:83
 msgid "Rating: {chosenEmoji}"
 msgstr ""
 
@@ -7345,7 +7360,8 @@ msgstr ""
 msgid "Semestral Budget"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:98
+#: src/components/search/ask/AskFeedback.tsx:116
+#: src/components/search/ask/AskInput.tsx:54
 msgid "Send"
 msgstr ""
 
@@ -7921,6 +7937,7 @@ msgstr ""
 msgid "Step 5: Fill Registration Form"
 msgstr ""
 
+#: src/components/search/ask/AskInput.tsx:45
 #: src/components/timer/TimerPage.tsx:302
 msgid "Stop"
 msgstr ""
@@ -8264,15 +8281,15 @@ msgstr ""
 msgid "Text"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:49
+#: src/components/search/ask/AskFeedback.tsx:67
 msgid "Thank you for the comment!"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:32
+#: src/components/search/ask/AskFeedback.tsx:45
 msgid "Thank you, we will look into it"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:31
+#: src/components/search/ask/AskFeedback.tsx:44
 msgid "Thank you!"
 msgstr ""
 
@@ -9340,7 +9357,7 @@ msgstr ""
 msgid "What Clubs Can Purchase"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:76
+#: src/components/search/ask/AskFeedback.tsx:94
 msgid "What did you like?"
 msgstr ""
 
@@ -9349,7 +9366,7 @@ msgstr ""
 msgid "What is it?"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:77
+#: src/components/search/ask/AskFeedback.tsx:95
 msgid "What was wrong?"
 msgstr ""
 

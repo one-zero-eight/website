@@ -89,7 +89,11 @@ export function AskResult({
       )}
 
       {!hasError && response.ask_query_id && (
-        <AskFeedback askQueryId={response.ask_query_id} />
+        <AskFeedback
+          askQueryId={response.ask_query_id}
+          feedback={response.feedback}
+          feedbackComment={response.feedback_comment}
+        />
       )}
     </div>
   );

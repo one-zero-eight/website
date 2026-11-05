@@ -5,6 +5,7 @@ import { useToast } from "@/components/toast";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useState } from "react";
+import { rememberFeedback } from "./ask-session";
 
 const feedbackEmoji: Record<AskFeedbackValue, string> = {
   [AskFeedbackValue.like]: "👍",
@@ -15,17 +16,29 @@ const feedbackEmoji: Record<AskFeedbackValue, string> = {
 const COMMENT_MAX_LENGTH = 2000;
 
 // 👍/👎 under an answer, as in the Telegram bot: the vote goes to the answer's trace in Phoenix, after it only the chosen one is
-// shown, with a box to say what was liked or not; the comment is sent with the same vote and becomes its explanation in Phoenix
-export function AskFeedback({ askQueryId }: { askQueryId: string }) {
+// shown, with a box to say what was liked or not; the comment is sent with the same vote and becomes its explanation in Phoenix.
+// In a chat opened again, the vote and the comment given before are shown as they were.
+export function AskFeedback({
+  askQueryId,
+  feedback,
+  feedbackComment,
+}: {
+  askQueryId: string;
+  feedback?: `${AskFeedbackValue}` | null;
+  feedbackComment?: string | null;
+}) {
   const { t } = useLingui();
   const { showSuccess, showError } = useToast();
-  const [chosen, setChosen] = useState<AskFeedbackValue>();
+  const [chosen, setChosen] = useState<AskFeedbackValue | undefined>(
+    feedback ? AskFeedbackValue[feedback] : undefined,
+  );
   const [comment, setComment] = useState("");
-  const [isCommentSent, setIsCommentSent] = useState(false);
+  const [isCommentSent, setIsCommentSent] = useState(!!feedbackComment);
 
   const vote = $search.useMutation("post", "/ask/{ask_query_id}/feedback", {
     onSuccess: (_data, { params }) => {
       setChosen(params.query.feedback);
+      rememberFeedback(askQueryId, params.query.feedback, null);
       showSuccess(
         params.query.feedback === AskFeedbackValue.like
           ? msg`Thank you!`
@@ -44,8 +57,13 @@ export function AskFeedback({ askQueryId }: { askQueryId: string }) {
     "post",
     "/ask/{ask_query_id}/feedback",
     {
-      onSuccess: () => {
+      onSuccess: (_data, { params, body }) => {
         setIsCommentSent(true);
+        rememberFeedback(
+          askQueryId,
+          params.query.feedback,
+          body?.comment ?? null,
+        );
         showSuccess(msg`Thank you for the comment!`);
       },
       onError: (error) => {

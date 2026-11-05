@@ -142,6 +142,48 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/ask/chats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Chats
+     * @description The user's chats with the assistant, the last answered first (at most 100). GET /ask/chats/{chat_id} gives the
+     *     questions and answers of one, and a question with its `chat_id` goes on with it.
+     */
+    get: operations["ask_list_chats"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/chats/{chat_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Chat History
+     * @description A chat of the user: its questions and answers, the oldest first, as POST /ask/ gave them, with the user's votes. A
+     *     question that was cancelled or failed is not in it: the agent does not remember it either.
+     */
+    get: operations["ask_chat_history"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/act/": {
     parameters: {
       query?: never;
@@ -424,6 +466,42 @@ export interface components {
       /** Title */
       title: string;
     };
+    /** AskChat */
+    AskChat: {
+      /** Chat Id */
+      chat_id: string;
+      /** Title */
+      title: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
+    /** AskChatHistory */
+    AskChatHistory: {
+      /** Chat Id */
+      chat_id: string;
+      /** Title */
+      title: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+      /** Answers */
+      answers: components["schemas"]["AskResponses"][];
+    };
     /** AskResponses */
     AskResponses: {
       /** Query */
@@ -443,6 +521,10 @@ export interface components {
       calendar_events: components["schemas"]["CalendarEventOffer"][];
       /** Messages */
       messages: unknown[];
+      /** Feedback */
+      feedback?: AskResponsesFeedbackAnyOf0 | null;
+      /** Feedback Comment */
+      feedback_comment?: string | null;
     };
     /** Body_ask_act_by_query */
     Body_ask_act_by_query: {
@@ -818,6 +900,8 @@ export interface components {
 export type SchemaActResponses = components["schemas"]["ActResponses"];
 export type SchemaAddedCalendarEvent =
   components["schemas"]["AddedCalendarEvent"];
+export type SchemaAskChat = components["schemas"]["AskChat"];
+export type SchemaAskChatHistory = components["schemas"]["AskChatHistory"];
 export type SchemaAskResponses = components["schemas"]["AskResponses"];
 export type SchemaBodyAskActByQuery =
   components["schemas"]["Body_ask_act_by_query"];
@@ -1127,6 +1211,64 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  ask_list_chats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskChat"][];
+        };
+      };
+    };
+  };
+  ask_chat_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskChatHistory"];
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
       };
     };
   };
@@ -1624,6 +1766,10 @@ export enum PathsSearchSearchSearch_query_idFeedbackPostParametersQueryFeedback 
   dislike = "dislike",
 }
 export enum PathsAskAsk_query_idFeedbackPostParametersQueryFeedback {
+  like = "like",
+  dislike = "dislike",
+}
+export enum AskResponsesFeedbackAnyOf0 {
   like = "like",
   dislike = "dislike",
 }
