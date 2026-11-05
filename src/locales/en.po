@@ -114,8 +114,8 @@ msgid "{0, plural, one {# training} other {# trainings}}"
 msgstr "{0, plural, one {# training} other {# trainings}}"
 
 #. placeholder {0}: Math.round(actualSecondsAdded / 60)
-#: src/components/timer/lib/useTimer.ts:392
-#: src/components/timer/lib/useTimer.ts:446
+#: src/components/timer/lib/useTimer.ts:394
+#: src/components/timer/lib/useTimer.ts:448
 msgid "{0, plural, one {Added # minute to timer} other {Added # minutes to timer}}"
 msgstr "{0, plural, one {Added # minute to timer} other {Added # minutes to timer}}"
 
@@ -502,7 +502,7 @@ msgstr "<0>To remove</0> the DEBTOR status you should clear the debt bar, attend
 msgid "<0>Winter break:</0> {breakDates}"
 msgstr "<0>Winter break:</0> {breakDates}"
 
-#: src/components/timer/lib/constants.ts:7
+#: src/components/timer/lib/constants.ts:9
 msgid "1 hour"
 msgstr "1 hour"
 
@@ -510,7 +510,7 @@ msgstr "1 hour"
 msgid "1 page"
 msgstr "1 page"
 
-#: src/components/timer/lib/constants.ts:8
+#: src/components/timer/lib/constants.ts:10
 msgid "1.5 hours"
 msgstr "1.5 hours"
 
@@ -526,7 +526,7 @@ msgstr "16 pages"
 msgid "1st Semester"
 msgstr "1st Semester"
 
-#: src/components/timer/lib/constants.ts:9
+#: src/components/timer/lib/constants.ts:11
 msgid "2 hours"
 msgstr "2 hours"
 
@@ -543,7 +543,7 @@ msgstr "2nd Semester"
 msgid "3 days"
 msgstr "3 days"
 
-#: src/components/timer/lib/constants.ts:5
+#: src/components/timer/lib/constants.ts:7
 msgid "30 mins"
 msgstr "30 mins"
 
@@ -563,7 +563,7 @@ msgstr "403 / forbidden"
 msgid "404 / not found"
 msgstr "404 / not found"
 
-#: src/components/timer/lib/constants.ts:6
+#: src/components/timer/lib/constants.ts:8
 msgid "45 mins"
 msgstr "45 mins"
 
@@ -1395,7 +1395,7 @@ msgstr "Can be played now"
 #: src/components/tabletennis/PlayerActionMenu.tsx:229
 #: src/components/tabletennis/PlayerActionMenu.tsx:298
 #: src/components/tabletennis/QualificationMatches.tsx:339
-#: src/components/timer/components/CustomTimeModal.tsx:156
+#: src/components/timer/components/CustomTimeModal.tsx:155
 #: src/components/timer/components/StopDialog.tsx:27
 #: src/components/toast/ConfirmDialog.tsx:23
 #: src/components/toast/ToastProvider.test.ts:130
@@ -1484,7 +1484,7 @@ msgstr "Cannot decline without feedback"
 msgid "Cannot select a past time"
 msgstr "Cannot select a past time"
 
-#: src/components/timer/lib/useTimer.ts:68
+#: src/components/timer/lib/useTimer.ts:69
 msgid "Cannot set the timer to 0 seconds"
 msgstr "Cannot set the timer to 0 seconds"
 
@@ -7207,7 +7207,7 @@ msgstr "Select a room."
 msgid "Select a series, then click an empty slot."
 msgstr "Select a series, then click an empty slot."
 
-#: src/components/timer/components/CustomTimeModal.tsx:107
+#: src/components/timer/components/CustomTimeModal.tsx:106
 msgid "Select a specific date and time in the future. The timer will count down until that moment."
 msgstr "Select a specific date and time in the future. The timer will count down until that moment."
 
@@ -7219,7 +7219,7 @@ msgstr "Select a user to impersonate."
 msgid "Select all"
 msgstr "Select all"
 
-#: src/components/timer/components/CustomTimeModal.tsx:102
+#: src/components/timer/components/CustomTimeModal.tsx:101
 msgid "Select Target Time"
 msgstr "Select Target Time"
 
@@ -7796,7 +7796,7 @@ msgstr "Start qualification"
 msgid "Start time cannot be in the past."
 msgstr "Start time cannot be in the past."
 
-#: src/components/timer/components/CustomTimeModal.tsx:167
+#: src/components/timer/components/CustomTimeModal.tsx:166
 msgid "Start Timer"
 msgstr "Start Timer"
 
@@ -8102,7 +8102,7 @@ msgstr "Tap another player to swap them"
 msgid "Tap two players to swap them, or hold one and drag it onto another."
 msgstr "Tap two players to swap them, or hold one and drag it onto another."
 
-#: src/components/timer/components/CustomTimeModal.tsx:116
+#: src/components/timer/components/CustomTimeModal.tsx:115
 msgid "Target Date & Time"
 msgstr "Target Date & Time"
 
@@ -8258,10 +8258,10 @@ msgstr "The main competition principle lies in sportsmanship, where each competi
 msgid "The main goal of <0/> members is improving their skills and having fun. We pass knowledge from older generations to younger ones and stay friends within the team."
 msgstr "The main goal of <0/> members is improving their skills and having fun. We pass knowledge from older generations to younger ones and stay friends within the team."
 
-#: src/components/timer/components/CustomTimeModal.tsx:89
+#: src/components/timer/components/CustomTimeModal.tsx:88
 #: src/components/timer/lib/useTimer.ts:101
-msgid "The maximum countdown duration is 99:99:99"
-msgstr "The maximum countdown duration is 99:99:99"
+msgid "The maximum countdown duration is 99:59:59"
+msgstr "The maximum countdown duration is 99:59:59"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:304
 #: src/components/board-games/ReservationDetailsModal.tsx:60
@@ -8313,8 +8313,8 @@ msgstr "The scanner returned nothing. Please try to scan again."
 msgid "The selected start time has passed. Choose another time."
 msgstr "The selected start time has passed. Choose another time."
 
-#: src/components/timer/components/CustomTimeModal.tsx:84
-#: src/components/timer/lib/useTimer.ts:95
+#: src/components/timer/components/CustomTimeModal.tsx:83
+#: src/components/timer/lib/useTimer.ts:96
 msgid "The selected time must be in the future"
 msgstr "The selected time must be in the future"
 
@@ -8342,7 +8342,7 @@ msgstr "The timer paused"
 msgid "The timer resumed"
 msgstr "The timer resumed"
 
-#: src/components/timer/lib/useTimer.ts:84
+#: src/components/timer/lib/useTimer.ts:85
 #: src/components/timer/lib/useTimer.ts:120
 msgid "The timer started"
 msgstr "The timer started"
@@ -8486,7 +8486,7 @@ msgstr "Time"
 msgid "Time & date"
 msgstr "Time & date"
 
-#: src/components/timer/lib/useTimer.ts:484
+#: src/components/timer/lib/useTimer.ts:486
 msgid "Time is up!"
 msgstr "Time is up!"
 
@@ -8495,7 +8495,7 @@ msgstr "Time is up!"
 msgid "Time Restrictions"
 msgstr "Time Restrictions"
 
-#: src/components/timer/components/CustomTimeModal.tsx:140
+#: src/components/timer/components/CustomTimeModal.tsx:139
 msgid "Time you will have"
 msgstr "Time you will have"
 
@@ -8512,13 +8512,13 @@ msgstr "Timeline"
 msgid "Timer"
 msgstr "Timer"
 
-#: src/components/timer/lib/useTimer.ts:369
-#: src/components/timer/lib/useTimer.ts:413
+#: src/components/timer/lib/useTimer.ts:371
+#: src/components/timer/lib/useTimer.ts:415
 msgid "Timer is already at maximum (99:59:59)"
 msgstr "Timer is already at maximum (99:59:59)"
 
-#: src/components/timer/lib/useTimer.ts:389
-#: src/components/timer/lib/useTimer.ts:443
+#: src/components/timer/lib/useTimer.ts:391
+#: src/components/timer/lib/useTimer.ts:445
 msgid "Timer set to maximum (99:59:59)"
 msgstr "Timer set to maximum (99:59:59)"
 
