@@ -2152,8 +2152,12 @@ msgstr ""
 msgid "Could not reserve game"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:33
+#: src/components/search/ask/AskFeedback.tsx:37
 msgid "Could not save the rating"
+msgstr ""
+
+#: src/components/search/ask/AskFeedback.tsx:53
+msgid "Could not send the comment"
 msgstr ""
 
 #: src/components/sport/SportTrainerAttendanceModal.tsx:69
@@ -6388,7 +6392,7 @@ msgstr ""
 msgid "Rating: {0}"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:44
+#: src/components/search/ask/AskFeedback.tsx:65
 msgid "Rating: {chosenEmoji}"
 msgstr ""
 
@@ -7303,6 +7307,10 @@ msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:96
 msgid "Semestral Budget"
+msgstr ""
+
+#: src/components/search/ask/AskFeedback.tsx:98
+msgid "Send"
 msgstr ""
 
 #: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:385
@@ -8220,11 +8228,15 @@ msgstr ""
 msgid "Text"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:28
+#: src/components/search/ask/AskFeedback.tsx:49
+msgid "Thank you for the comment!"
+msgstr ""
+
+#: src/components/search/ask/AskFeedback.tsx:32
 msgid "Thank you, we will look into it"
 msgstr ""
 
-#: src/components/search/ask/AskFeedback.tsx:27
+#: src/components/search/ask/AskFeedback.tsx:31
 msgid "Thank you!"
 msgstr ""
 
@@ -9292,9 +9304,17 @@ msgstr ""
 msgid "What Clubs Can Purchase"
 msgstr ""
 
+#: src/components/search/ask/AskFeedback.tsx:76
+msgid "What did you like?"
+msgstr ""
+
 #: src/components/dorms/DormsPage.tsx:15
 #: src/components/extension/ExtensionPage.tsx:16
 msgid "What is it?"
+msgstr ""
+
+#: src/components/search/ask/AskFeedback.tsx:77
+msgid "What was wrong?"
 msgstr ""
 
 #: src/components/board-games/ReservationDetailsModal.tsx:169

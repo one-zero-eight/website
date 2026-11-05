@@ -2152,9 +2152,13 @@ msgstr "Не удалось заменить изображение"
 msgid "Could not reserve game"
 msgstr "Не удалось забронировать игру"
 
-#: src/components/search/ask/AskFeedback.tsx:33
+#: src/components/search/ask/AskFeedback.tsx:37
 msgid "Could not save the rating"
 msgstr "Не удалось сохранить оценку"
+
+#: src/components/search/ask/AskFeedback.tsx:53
+msgid "Could not send the comment"
+msgstr "Не удалось отправить комментарий"
 
 #: src/components/sport/SportTrainerAttendanceModal.tsx:69
 #: src/components/sport/SportTrainerTrainingModal.tsx:204
@@ -6388,7 +6392,7 @@ msgstr "Рейтинг:"
 msgid "Rating: {0}"
 msgstr "Рейтинг: {0}"
 
-#: src/components/search/ask/AskFeedback.tsx:44
+#: src/components/search/ask/AskFeedback.tsx:65
 msgid "Rating: {chosenEmoji}"
 msgstr "Оценка: {chosenEmoji}"
 
@@ -7305,6 +7309,10 @@ msgstr "Селф-спорт: {0}ч"
 msgid "Semestral Budget"
 msgstr "Бюджет на семестр"
 
+#: src/components/search/ask/AskFeedback.tsx:98
+msgid "Send"
+msgstr "Отправить"
+
 #: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:385
 msgid "Series"
 msgstr "Серии"
@@ -8220,11 +8228,15 @@ msgstr "Предварительно"
 msgid "Text"
 msgstr "Текст"
 
-#: src/components/search/ask/AskFeedback.tsx:28
+#: src/components/search/ask/AskFeedback.tsx:49
+msgid "Thank you for the comment!"
+msgstr "Спасибо за комментарий!"
+
+#: src/components/search/ask/AskFeedback.tsx:32
 msgid "Thank you, we will look into it"
 msgstr "Спасибо, разберём"
 
-#: src/components/search/ask/AskFeedback.tsx:27
+#: src/components/search/ask/AskFeedback.tsx:31
 msgid "Thank you!"
 msgstr "Спасибо!"
 
@@ -9292,10 +9304,18 @@ msgstr "Добро пожаловать в InNoHassle"
 msgid "What Clubs Can Purchase"
 msgstr "Что могут покупать клубы"
 
+#: src/components/search/ask/AskFeedback.tsx:76
+msgid "What did you like?"
+msgstr "Что понравилось?"
+
 #: src/components/dorms/DormsPage.tsx:15
 #: src/components/extension/ExtensionPage.tsx:16
 msgid "What is it?"
 msgstr "Что это?"
+
+#: src/components/search/ask/AskFeedback.tsx:77
+msgid "What was wrong?"
+msgstr "Что было не так?"
 
 #: src/components/board-games/ReservationDetailsModal.tsx:169
 #: src/components/board-games/UserReservationDetailsModal.tsx:110

@@ -132,8 +132,8 @@ export interface paths {
     /**
      * Add User Feedback
      * @description A 👍 (`like`) or 👎 (`dislike`) on an answer, as under the answers of the Telegram bot: the annotation `user-feedback` on
-     *     the answer's trace in Phoenix. A second vote of the user replaces the first. An answer has an `ask_query_id` only when
-     *     tracing is on.
+     *     the answer's trace in Phoenix, and the user's `comment` on what they liked or not is its explanation. A second vote of the
+     *     user (the same one with a comment, or another) replaces the first. An answer has an `ask_query_id` only when tracing is on.
      */
     post: operations["ask_add_user_feedback"];
     delete?: never;
@@ -394,6 +394,11 @@ export interface components {
     Body_ask_act_by_query: {
       /** Query */
       query: string;
+    };
+    /** Body_ask_add_user_feedback */
+    Body_ask_add_user_feedback: {
+      /** Comment */
+      comment?: string | null;
     };
     /** Body_ask_ask_by_query */
     Body_ask_ask_by_query: {
@@ -737,6 +742,8 @@ export type SchemaActResponses = components["schemas"]["ActResponses"];
 export type SchemaAskResponses = components["schemas"]["AskResponses"];
 export type SchemaBodyAskActByQuery =
   components["schemas"]["Body_ask_act_by_query"];
+export type SchemaBodyAskAddUserFeedback =
+  components["schemas"]["Body_ask_add_user_feedback"];
 export type SchemaBodyAskAskByQuery =
   components["schemas"]["Body_ask_ask_by_query"];
 export type SchemaBodyAskAskByQueryStream =
@@ -1002,7 +1009,11 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["Body_ask_add_user_feedback"];
+      };
+    };
     responses: {
       /** @description Success */
       200: {

@@ -2152,9 +2152,13 @@ msgstr "Could not replace image"
 msgid "Could not reserve game"
 msgstr "Could not reserve game"
 
-#: src/components/search/ask/AskFeedback.tsx:33
+#: src/components/search/ask/AskFeedback.tsx:37
 msgid "Could not save the rating"
 msgstr "Could not save the rating"
+
+#: src/components/search/ask/AskFeedback.tsx:53
+msgid "Could not send the comment"
+msgstr "Could not send the comment"
 
 #: src/components/sport/SportTrainerAttendanceModal.tsx:69
 #: src/components/sport/SportTrainerTrainingModal.tsx:204
@@ -6388,7 +6392,7 @@ msgstr "Rating:"
 msgid "Rating: {0}"
 msgstr "Rating: {0}"
 
-#: src/components/search/ask/AskFeedback.tsx:44
+#: src/components/search/ask/AskFeedback.tsx:65
 msgid "Rating: {chosenEmoji}"
 msgstr "Rating: {chosenEmoji}"
 
@@ -7305,6 +7309,10 @@ msgstr "Self-sport: {0}h"
 msgid "Semestral Budget"
 msgstr "Semestral Budget"
 
+#: src/components/search/ask/AskFeedback.tsx:98
+msgid "Send"
+msgstr "Send"
+
 #: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:385
 msgid "Series"
 msgstr "Series"
@@ -8220,11 +8228,15 @@ msgstr "Tentative"
 msgid "Text"
 msgstr "Text"
 
-#: src/components/search/ask/AskFeedback.tsx:28
+#: src/components/search/ask/AskFeedback.tsx:49
+msgid "Thank you for the comment!"
+msgstr "Thank you for the comment!"
+
+#: src/components/search/ask/AskFeedback.tsx:32
 msgid "Thank you, we will look into it"
 msgstr "Thank you, we will look into it"
 
-#: src/components/search/ask/AskFeedback.tsx:27
+#: src/components/search/ask/AskFeedback.tsx:31
 msgid "Thank you!"
 msgstr "Thank you!"
 
@@ -9292,10 +9304,18 @@ msgstr "Welcome to InNoHassle"
 msgid "What Clubs Can Purchase"
 msgstr "What Clubs Can Purchase"
 
+#: src/components/search/ask/AskFeedback.tsx:76
+msgid "What did you like?"
+msgstr "What did you like?"
+
 #: src/components/dorms/DormsPage.tsx:15
 #: src/components/extension/ExtensionPage.tsx:16
 msgid "What is it?"
 msgstr "What is it?"
+
+#: src/components/search/ask/AskFeedback.tsx:77
+msgid "What was wrong?"
+msgstr "What was wrong?"
 
 #: src/components/board-games/ReservationDetailsModal.tsx:169
 #: src/components/board-games/UserReservationDetailsModal.tsx:110
