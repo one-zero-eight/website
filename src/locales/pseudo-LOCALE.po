@@ -32,7 +32,7 @@ msgstr ""
 msgid " (capacity: {capacity} people)"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:52
+#: src/components/search/ask/AskPage.tsx:40
 msgid "- Ask me anything!"
 msgstr ""
 
@@ -41,7 +41,7 @@ msgid "- Executing"
 msgstr ""
 
 #: src/components/search/act/ActPage.tsx:82
-#: src/components/search/ask/AskPage.tsx:83
+#: src/components/search/ask/AskPage.tsx:71
 #: src/components/search/ask/AskResult.tsx:59
 msgid "- Sorry, I can't help you with this question."
 msgstr ""
@@ -649,6 +649,7 @@ msgid "Access token"
 msgstr ""
 
 #: src/app/routes/_with_menu/search/act.tsx:28
+#: src/app/routes/_with_menu/search/act.tsx:35
 #: src/components/search/SearchField.tsx:52
 msgid "Act"
 msgstr ""
@@ -852,7 +853,7 @@ msgid "Advanced"
 msgstr ""
 
 #: src/components/search/act/ActPage.tsx:64
-#: src/components/search/ask/AskPage.tsx:49
+#: src/components/search/ask/AskPage.tsx:37
 msgid "AI Assistant:"
 msgstr ""
 
@@ -1026,13 +1027,12 @@ msgstr ""
 msgid "Art & Culture"
 msgstr ""
 
-#: src/app/routes/_with_menu/search/ask.tsx:28
+#: src/app/routes/_with_menu/search/ask.tsx:30
 #: src/components/search/SearchField.tsx:52
-#: src/components/search/ToggleGroup.tsx:30
 msgid "Ask"
 msgstr ""
 
-#: src/app/routes/_with_menu/search/ask.tsx:31
+#: src/app/routes/_with_menu/search/ask.tsx:33
 msgid "Ask questions or find answers at Innopolis University."
 msgstr ""
 
@@ -1407,7 +1407,7 @@ msgstr ""
 #: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:296
 #: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:73
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:86
-#: src/components/search/ask/AskPage.tsx:77
+#: src/components/search/ask/AskPage.tsx:65
 #: src/components/tabletennis/ArchivedTournament.tsx:65
 #: src/components/tabletennis/CreateTournamentForm.tsx:120
 #: src/components/tabletennis/LiveTournament.tsx:262
@@ -4616,7 +4616,7 @@ msgstr ""
 msgid "Loading current booking details..."
 msgstr ""
 
-#: src/components/search/SearchPage.tsx:191
+#: src/components/search/SearchPage.tsx:210
 msgid "Loading search results..."
 msgstr ""
 
@@ -5082,6 +5082,10 @@ msgstr ""
 msgid "New booking"
 msgstr ""
 
+#: src/components/search/ask/NewChatButton.tsx:16
+msgid "New chat"
+msgstr ""
+
 #: src/components/guard/SetupResult.tsx:35
 msgid "New file was created under <0/> ownership. You were added with editor role."
 msgstr ""
@@ -5413,7 +5417,7 @@ msgstr ""
 msgid "No logo"
 msgstr ""
 
-#: src/components/search/SearchPage.tsx:184
+#: src/components/search/SearchPage.tsx:203
 msgid "No matched results for: {searchedFor}"
 msgstr ""
 
@@ -6750,7 +6754,7 @@ msgstr ""
 msgid "Result"
 msgstr ""
 
-#: src/components/search/SearchPage.tsx:182
+#: src/components/search/SearchPage.tsx:201
 msgid "Results for: {searchedFor}"
 msgstr ""
 
@@ -7102,9 +7106,9 @@ msgid "Scores are entered by the organiser."
 msgstr ""
 
 #: src/app/routes/_with_menu/search/index.tsx:29
+#: src/app/routes/_with_menu/search/index.tsx:36
 #: src/components/clubs/ClubsSidebar.tsx:38
 #: src/components/search/SearchField.tsx:52
-#: src/components/search/ToggleGroup.tsx:19
 msgid "Search"
 msgstr ""
 
@@ -7649,7 +7653,7 @@ msgstr ""
 msgid "Some players were not found, see the list below"
 msgstr ""
 
-#: src/components/search/SearchPage.tsx:250
+#: src/components/search/SearchPage.tsx:269
 msgid "Sorry, something gone wrong."
 msgstr ""
 

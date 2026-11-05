@@ -7,10 +7,13 @@ import type { ReactNode } from "react";
 
 export function Topbar({
   title,
+  titleAction,
   hideOnMobile = false,
   hideBorder = false,
 }: {
   title: ReactNode;
+  // A button of the page next to its title
+  titleAction?: ReactNode;
   hideOnMobile?: boolean;
   hideBorder?: boolean;
 }) {
@@ -25,8 +28,14 @@ export function Topbar({
         hideBorder && !!me ? "" : "border-b-base-300 border-b",
       )}
     >
-      <div className="grow px-4 py-2">
+      <div
+        className={cn(
+          "grow px-4 py-2",
+          !!titleAction && "flex flex-wrap items-center gap-2",
+        )}
+      >
         <h1 className="mr-2 text-3xl font-medium">{title}</h1>
+        {titleAction}
       </div>
       <div className="hidden items-center py-2 pr-4 lg:flex">
         {/* <ToggleSnowButton /> // Disable snow */}

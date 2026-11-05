@@ -3,15 +3,10 @@ import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import SearchField from "@/components/search/SearchField.tsx";
 import { AskResult } from "./AskResult";
-import { searchTypes } from "@/api/search";
-import { useAskStream } from "./use-ask-stream";
+import { askQuestion, cancelQuestion, useAskSession } from "./ask-session";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useState } from "react";
 import AnimatedDots from "../AnimatedDots";
-
-type Message =
-  | { role: "user"; content: string }
-  | { role: "assistant"; response: searchTypes.SchemaAskResponses };
 
 export function AskPage({ askQuery }: { askQuery: string }) {
   useLingui();
@@ -19,19 +14,12 @@ export function AskPage({ askQuery }: { askQuery: string }) {
 
   const [inputQuery, setInputQuery] = useState(askQuery);
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  // The conversation stays when the user goes to another page and comes back
+  const { messages, answerText, status, isPending, error } = useAskSession();
 
-  const [chatId, setChatId] = useState<string | null>(null);
-
-  const { ask, cancel, answerText, status, isPending, error } = useAskStream();
-
-  const runSearch = async (query: string) => {
-    setMessages((prev) => [...prev, { role: "user", content: query }]);
+  const runSearch = (query: string) => {
     setInputQuery("");
-    const response = await ask(query, chatId);
-    if (!response) return;
-    setMessages((prev) => [...prev, { role: "assistant", response }]);
-    setChatId(response.chat_id ?? null);
+    askQuestion(query);
   };
 
   return (
@@ -71,7 +59,7 @@ export function AskPage({ askQuery }: { askQuery: string }) {
           <button
             type="button"
             className="btn btn-ghost btn-sm self-start"
-            onClick={cancel}
+            onClick={cancelQuestion}
           >
             <span className="icon-[material-symbols--close]" />
             <Trans>Cancel</Trans>
