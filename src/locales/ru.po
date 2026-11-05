@@ -853,7 +853,6 @@ msgid "Advanced"
 msgstr "Продвинутые"
 
 #: src/components/search/act/ActPage.tsx:64
-#: src/components/search/ask/AskPage.tsx:103
 msgid "AI Assistant:"
 msgstr "ИИ-ассистент:"
 
@@ -1582,6 +1581,10 @@ msgstr "Канал"
 msgid "Chat"
 msgstr "Чат"
 
+#: src/components/search/ask/AskChatList.tsx:147
+msgid "Chat name"
+msgstr "Название чата"
+
 #: src/components/search/ask/AskPage.tsx:78
 msgid "Chats"
 msgstr "Чаты"
@@ -2135,6 +2138,10 @@ msgstr "Не удалось удалить игру"
 msgid "Could not delete reservation"
 msgstr "Не удалось удалить бронирование"
 
+#: src/components/search/ask/AskChatList.tsx:111
+msgid "Could not delete the chat"
+msgstr "Не удалось удалить чат"
+
 #: src/components/maps/viewer/MapView.tsx:158
 #: src/components/maps/viewer/MapView.tsx:169
 msgid "Could not download maps PDF."
@@ -2178,6 +2185,10 @@ msgstr "Не удалось отметить посещаемость"
 #: src/components/search/ask/AskPage.tsx:119
 msgid "Could not open the chat"
 msgstr "Не удалось открыть чат"
+
+#: src/components/search/ask/AskChatList.tsx:90
+msgid "Could not rename the chat"
+msgstr "Не удалось переименовать чат"
 
 #: src/components/editor/menus/ImageMenuItems.tsx:51
 msgid "Could not replace image"
@@ -2521,6 +2532,7 @@ msgstr "Задайте правила для своей комнаты"
 #: src/components/guard/FileDetails.tsx:81
 #: src/components/guard/FileDetails.tsx:196
 #: src/components/room-booking/timeline/BookingModal.tsx:777
+#: src/components/search/ask/AskChatList.tsx:197
 #: src/components/tabletennis/LiveTournament.tsx:395
 #: src/components/tabletennis/ValidationMatches.tsx:709
 #: src/components/toast/ToastProvider.test.ts:73
@@ -2616,6 +2628,10 @@ msgstr "Удалить таблицу"
 #: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1038
 msgid "Delete slot"
 msgstr "Удалить слот"
+
+#: src/components/search/ask/AskChatList.tsx:122
+msgid "Delete the chat \"{title}\"? Its questions and answers cannot be restored."
+msgstr "Удалить чат «{title}»? Его вопросы и ответы нельзя будет вернуть."
 
 #. placeholder {0}: getName(scoring.p1)
 #. placeholder {1}: getName(scoring.p2)
@@ -2772,7 +2788,7 @@ msgstr "Точка: не расставлено / частично / всё ра
 msgid "Downgrade to Beginner"
 msgstr "Перевести в новички"
 
-#: src/components/search/IframePreviewCard.tsx:161
+#: src/components/search/IframePreviewCard.tsx:199
 #: src/components/search/PdfPreview.tsx:132
 msgid "Download"
 msgstr "Скачать"
@@ -3884,7 +3900,7 @@ msgstr "К выбранному ниже"
 msgid "Go to source"
 msgstr "Перейти к источнику"
 
-#: src/components/search/IframePreviewCard.tsx:215
+#: src/components/search/IframePreviewCard.tsx:261
 msgid "Go to website ->"
 msgstr "Перейти на сайт →"
 
@@ -5226,7 +5242,7 @@ msgstr "Нет изменений для проверки у этого клуб
 msgid "No changes to save."
 msgstr "Нет изменений для сохранения."
 
-#: src/components/search/ask/AskChatList.tsx:35
+#: src/components/search/ask/AskChatList.tsx:45
 msgid "No chats yet"
 msgstr "Чатов пока нет"
 
@@ -6209,7 +6225,8 @@ msgid "Preferred time"
 msgstr "Предпочтительное время"
 
 #: src/components/clubs/EditClubPage.tsx:914
-#: src/components/search/IframePreviewCard.tsx:193
+#: src/components/search/IframePreviewCard.tsx:207
+#: src/components/search/IframePreviewCard.tsx:239
 #: src/components/web-print/PrintPage.tsx:445
 #: src/components/web-print/ScanPage.tsx:400
 msgid "Preview"
@@ -6640,6 +6657,10 @@ msgstr "Убрать это мероприятие из публичного к�
 #: src/components/when2meet/MeetingPage.tsx:960
 msgid "Remove this participant from the meeting?"
 msgstr "Удалить этого участника из встречи?"
+
+#: src/components/search/ask/AskChatList.tsx:186
+msgid "Rename"
+msgstr "Переименовать"
 
 #: src/components/tabletennis/ArchivedTournament.tsx:64
 #: src/components/tabletennis/ArchivedTournament.tsx:149
@@ -7673,8 +7694,8 @@ msgstr "Некоторые игроки не найдены, см. список 
 msgid "Sorry, something gone wrong."
 msgstr "Извините, что-то пошло не так."
 
-#: src/components/search/IframePreviewCard.tsx:16
-#: src/components/search/IframePreviewCard.tsx:202
+#: src/components/search/IframePreviewCard.tsx:18
+#: src/components/search/IframePreviewCard.tsx:248
 msgid "Sorry, this site does not support preview. Please, open it directly."
 msgstr "Извините, этот сайт не поддерживает предпросмотр. Откройте его напрямую."
 
@@ -8482,7 +8503,7 @@ msgstr "У этого клуба есть изменения, ожидающие
 msgid "This email is already in the group."
 msgstr "Этот email уже есть в группе."
 
-#: src/components/search/IframePreviewCard.tsx:151
+#: src/components/search/IframePreviewCard.tsx:189
 msgid "This file cannot be previewed in the browser."
 msgstr "Этот файл нельзя просмотреть в браузере."
 

@@ -178,10 +178,22 @@ export interface paths {
     get: operations["ask_chat_history"];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * Delete Chat
+     * @description Delete a chat of the user: its questions and answers with the user's votes, and the agent's memory of it. A question
+     *     of the chat being answered or waiting for its turn is cancelled first (its request ends as by POST /ask/{chat_id}/cancel).
+     *     A question sent with this `chat_id` afterwards starts a new chat. The answers' traces stay in Phoenix, and the events
+     *     the user added to their calendar stay there.
+     */
+    delete: operations["ask_delete_chat"];
     options?: never;
     head?: never;
-    patch?: never;
+    /**
+     * Rename Chat
+     * @description The user's name of their chat, in place of the one the model gave it (or its first question). The model does not
+     *     name the chat again after that.
+     */
+    patch: operations["ask_rename_chat"];
     trace?: never;
   };
   "/act/": {
@@ -550,6 +562,11 @@ export interface components {
       /** Chat Id */
       chat_id?: string | null;
     };
+    /** Body_ask_rename_chat */
+    Body_ask_rename_chat: {
+      /** Title */
+      title: string;
+    };
     /** CalendarEventOffer */
     CalendarEventOffer: {
       /** Id */
@@ -911,6 +928,8 @@ export type SchemaBodyAskAskByQuery =
   components["schemas"]["Body_ask_ask_by_query"];
 export type SchemaBodyAskAskByQueryStream =
   components["schemas"]["Body_ask_ask_by_query_stream"];
+export type SchemaBodyAskRenameChat =
+  components["schemas"]["Body_ask_rename_chat"];
 export type SchemaCalendarEventOffer =
   components["schemas"]["CalendarEventOffer"];
 export type SchemaCampusLifeSource = components["schemas"]["CampusLifeSource"];
@@ -1252,6 +1271,86 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AskChatHistory"];
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_delete_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_rename_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Body_ask_rename_chat"];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskChat"];
         };
       };
       /** @description Chat not found or user has no access to it */

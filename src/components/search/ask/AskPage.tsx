@@ -99,9 +99,7 @@ export function AskPage({ askQuery }: { askQuery: string }) {
           <div className="mx-auto flex w-full max-w-4xl grow flex-col gap-4 p-4">
             {isEmpty && (
               <div className="flex grow flex-col items-center justify-center gap-2 text-center">
-                <span className="text-lg font-medium">
-                  <Trans>AI Assistant:</Trans>
-                </span>
+                <span className="text-lg font-medium">cAtIx</span>
                 <span className="text-base-content/70">
                   <Trans>- Ask me anything!</Trans>
                 </span>

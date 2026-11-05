@@ -196,6 +196,11 @@ export function startNewChat() {
   });
 }
 
+// A chat the user deleted: when it is the open one, a new conversation starts in its place
+export function forgetChat(chatId: string) {
+  if (session.chatId === chatId) startNewChat();
+}
+
 // One of the user's chats with its questions and answers, as the server keeps them, to go on with it
 export async function openChat(chatId: string) {
   if (chatId === session.chatId && !session.isPending && !session.isOpening) {

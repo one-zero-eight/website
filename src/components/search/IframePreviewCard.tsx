@@ -1,7 +1,9 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import { $search, searchTypes } from "@/api/search";
+import { SEARCH_API_URL } from "@/api/search/links.ts";
+import { usePreviewFile } from "@/api/search/use-preview-file.ts";
 import { cn } from "@/lib/ui/cn";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { componentByPath, resolvePageByUrl } from "./innohassleRoutes";
 import { MapsPage } from "../maps/MapsPage";
 import Markdown from "react-markdown";
@@ -25,6 +27,36 @@ function DynamicPageComponent({ url }: { url: string }) {
 }
 
 const downloadableFileRegex = /\.(docx?|xlsx?|pptx?|odt|ods|odp|rtf|zip|rar)$/i;
+const pdfFileRegex = /\.pdf$/i;
+
+// The university's sites forbid showing their files in a frame of another site (X-Frame-Options: SAMEORIGIN):
+// the search API gives the PDF of a document of the knowledge base, and the frame shows it from a blob URL of this site
+function usePdfObjectUrl(url: string | undefined) {
+  const { data: file, isPending } = usePreviewFile(
+    url
+      ? `${SEARCH_API_URL}/search/pdf?url=${encodeURIComponent(url)}`
+      : undefined,
+  );
+  const pdf: Blob | undefined = file?.response.ok ? file.data : undefined;
+  const [objectUrl, setObjectUrl] = useState<string>();
+
+  useEffect(() => {
+    if (!pdf) {
+      setObjectUrl(undefined);
+      return;
+    }
+    const created = URL.createObjectURL(
+      new Blob([pdf], { type: "application/pdf" }),
+    );
+    setObjectUrl(created);
+    return () => URL.revokeObjectURL(created);
+  }, [pdf]);
+
+  return {
+    objectUrl,
+    isPending: !!url && (isPending || (!!pdf && !objectUrl)),
+  };
+}
 
 function WikiPageText({ text }: { text: string }) {
   return (
@@ -107,9 +139,14 @@ export default function IframePreviewCard({
     url.startsWith("https://my.innopolis.university/");
 
   const isDownloadableFile = downloadableFileRegex.test(parsedUrl.pathname);
+  const isPdf = pdfFileRegex.test(parsedUrl.pathname);
 
   const isExternalPage =
     !!url && !hasError && !component && !isDownloadableFile;
+
+  const { objectUrl: pdfObjectUrl, isPending: isPdfPending } = usePdfObjectUrl(
+    isExternalPage && isPdf ? url : undefined,
+  );
 
   // Many sites forbid showing them in a frame: the knowledge base holds the text of the page, if it has the page
   const { data: wikiPage, isPending: isWikiPagePending } = $search.useQuery(
@@ -117,7 +154,8 @@ export default function IframePreviewCard({
     "/search/page",
     { params: { query: { url } } },
     {
-      enabled: isExternalPage,
+      // A PDF the API could not give: its text in the knowledge base
+      enabled: isExternalPage && !isPdfPending && !pdfObjectUrl,
       retry: false,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
@@ -161,6 +199,14 @@ export default function IframePreviewCard({
             <Trans>Download</Trans>
           </a>
         </div>
+      ) : isPdfPending ? (
+        <div className="skeleton h-[50vh] w-full rounded-xl" />
+      ) : pdfObjectUrl ? (
+        <iframe
+          src={pdfObjectUrl}
+          title={t`Preview`}
+          className="border-border h-[50vh] w-full rounded-xl border"
+        />
       ) : isExternalPage && isWikiPagePending ? (
         <div className="skeleton h-[50vh] w-full rounded-xl" />
       ) : wikiPage ? (
