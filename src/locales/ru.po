@@ -42,7 +42,7 @@ msgstr "- Выполняю"
 
 #: src/components/search/act/ActPage.tsx:82
 #: src/components/search/ask/AskPage.tsx:83
-#: src/components/search/ask/AskResult.tsx:58
+#: src/components/search/ask/AskResult.tsx:59
 msgid "- Sorry, I can't help you with this question."
 msgstr "- Извините, я не могу помочь с этим вопросом."
 
@@ -502,6 +502,14 @@ msgstr "<0>Чтобы снять</0> статус DEBTOR, нужно закры�
 msgid "<0>Winter break:</0> {breakDates}"
 msgstr "<0>Зимние каникулы:</0> {breakDates}"
 
+#: src/components/search/ask/AskCalendarEvents.tsx:67
+msgid "✅ Added: {title} · {start}"
+msgstr "✅ Добавлено: {title} · {start}"
+
+#: src/components/search/ask/AskCalendarEvents.tsx:71
+msgid "➕ Add to my calendar: {title} · {start}"
+msgstr "➕ В мой календарь: {title} · {start}"
+
 #: src/components/timer/lib/constants.ts:7
 msgid "1 hour"
 msgstr "1 час"
@@ -729,7 +737,7 @@ msgstr "Добавить email в эту группу..."
 msgid "Add external host"
 msgstr "Добавить внешнего организатора"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:137
+#: src/components/calendar/ConfigCalendarDialog.tsx:139
 msgid "Add favorite calendars using star button or <0>import your own calendars</0> to InNoHassle."
 msgstr "Добавляйте избранные календари, нажимая на звездочку, или <0>импортируйте свои календари</0> в InNoHassle."
 
@@ -781,6 +789,10 @@ msgstr "Добавьте на домашний экран и пользуйте�
 #: src/components/events/drafts/DraftHostsSection.tsx:420
 msgid "Add your club"
 msgstr "Добавить свой клуб"
+
+#: src/components/search/ask/AskCalendarEvents.tsx:26
+msgid "Added to your calendar"
+msgstr "Добавлено в ваш календарь"
 
 #: src/app/routes/guard.google.files.$slug.join.tsx:126
 msgid "Adding you to the file..."
@@ -843,6 +855,10 @@ msgstr "Продвинутые"
 #: src/components/search/ask/AskPage.tsx:49
 msgid "AI Assistant:"
 msgstr "ИИ-ассистент:"
+
+#: src/components/calendar/AiCalendarCard.tsx:20
+msgid "AI Calendar"
+msgstr "AI Calendar"
 
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:86
 msgid "Alias"
@@ -1019,6 +1035,10 @@ msgstr "Спросить"
 #: src/app/routes/_with_menu/search/ask.tsx:31
 msgid "Ask questions or find answers at Innopolis University."
 msgstr "Задавайте вопросы или ищите ответы в Университете Иннополис."
+
+#: src/components/calendar/AiCalendarCard.tsx:40
+msgid "Ask the assistant"
+msgstr "Спросить ИИ-ассистента"
 
 #: src/components/web-print/FileDropzone.tsx:329
 msgid "Attach file"
@@ -1932,7 +1952,7 @@ msgstr "Компонент {componentNumber}"
 
 #: src/components/calendar/CalendarViewer.tsx:723
 #: src/components/calendar/CalendarViewer.tsx:866
-#: src/components/calendar/ConfigCalendarDialog.tsx:43
+#: src/components/calendar/ConfigCalendarDialog.tsx:44
 #: src/components/layout/UserMenu.tsx:138
 msgid "Config & Export"
 msgstr "Настройки и экспорт"
@@ -2086,6 +2106,10 @@ msgstr "Исправить этот счёт"
 #: src/components/board-games/BoardGamesAdminPage.tsx:664
 msgid "Could not add game"
 msgstr "Не удалось добавить игру"
+
+#: src/components/search/ask/AskCalendarEvents.tsx:30
+msgid "Could not add the event to the calendar"
+msgstr "Не удалось добавить событие в календарь"
 
 #: src/components/board-games/BoardGamesTabs.tsx:51
 msgid "Could not check access"
@@ -3213,6 +3237,10 @@ msgctxt "about-us"
 msgid "Events"
 msgstr "Мероприятия"
 
+#: src/components/calendar/AiCalendarCard.tsx:23
+msgid "Events you added under the assistant's answers"
+msgstr "События, которые вы добавили под ответами ИИ-ассистента"
+
 #: src/components/clubs/ClubLeaguePage.tsx:156
 msgid "Every criterion requires proof"
 msgstr "Каждый критерий требует подтверждения"
@@ -3333,7 +3361,7 @@ msgstr "Расширьте своё резюме"
 msgid "Expires at: {0}"
 msgstr "Действует до: {0}"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:150
+#: src/components/calendar/ConfigCalendarDialog.tsx:152
 msgid "Explore schedules"
 msgstr "Смотреть расписания"
 
@@ -4497,7 +4525,7 @@ msgstr "Оставьте отзыв и оцените"
 msgid "Let us know if you have ideas for our projects or run into any issues."
 msgstr "Напишите нам, если у вас есть идеи проектов или вы столкнулись с проблемой."
 
-#: src/components/search/ask/AskResult.tsx:43
+#: src/components/search/ask/AskResult.tsx:44
 msgid "link"
 msgstr "ссылка"
 
@@ -4905,7 +4933,7 @@ msgstr "Понедельник"
 msgid "Month"
 msgstr "Месяц"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:100
+#: src/components/calendar/ConfigCalendarDialog.tsx:101
 msgid "Moodle"
 msgstr "Moodle"
 
@@ -4948,7 +4976,7 @@ msgstr "Переместить вверх"
 #: src/app/routes/_with_menu/music-room.index.tsx:24
 #: src/app/routes/_with_menu/music-room.instructions.tsx:17
 #: src/app/routes/_with_menu/music-room.instructions.tsx:24
-#: src/components/calendar/ConfigCalendarDialog.tsx:86
+#: src/components/calendar/ConfigCalendarDialog.tsx:87
 msgid "Music room"
 msgstr "Музкомната"
 
@@ -5794,6 +5822,10 @@ msgstr "Открыть таблицу"
 #: src/components/schedule/personal-card/PersonalCard.tsx:84
 msgid "Open Telegram bot"
 msgstr "Открыть Telegram-бота"
+
+#: src/components/search/ask/AskCalendarEvents.tsx:80
+msgid "Open the calendar"
+msgstr "Открыть календарь"
 
 #: src/components/calendar/ExportModal.tsx:99
 msgid "Open your calendar settings to add a calendar by URL."
@@ -6838,7 +6870,7 @@ msgstr "Комната забронирована"
 #: src/app/routes/_with_menu/room-booking/list.tsx:25
 #: src/app/routes/_with_menu/room-booking/rooms.index.tsx:25
 #: src/app/routes/_with_menu/room-booking/rules.tsx:24
-#: src/components/calendar/ConfigCalendarDialog.tsx:112
+#: src/components/calendar/ConfigCalendarDialog.tsx:113
 msgid "Room booking"
 msgstr "Бронирование"
 
@@ -7630,7 +7662,7 @@ msgstr "Извините, этот сайт не поддерживает пре
 msgid "Sources"
 msgstr "Источники"
 
-#: src/components/search/ask/AskResult.tsx:65
+#: src/components/search/ask/AskResult.tsx:66
 msgid "Sources:"
 msgstr "Источники:"
 
@@ -7676,7 +7708,7 @@ msgstr "Разделить игроков на группы"
 #: src/app/routes/_with_menu/sport/index.tsx:26
 #: src/app/routes/_with_menu/sport/profile.tsx:26
 #: src/app/routes/_with_menu/sport/trainer.tsx:26
-#: src/components/calendar/ConfigCalendarDialog.tsx:72
+#: src/components/calendar/ConfigCalendarDialog.tsx:73
 msgid "Sport"
 msgstr "Спорт"
 
@@ -9599,11 +9631,11 @@ msgstr "Ваши группы и занятия преподавателя по�
 msgid "Your medical group ({medicalGroup}) is not eligible for this training."
 msgstr "Ваша медицинская группа ({medicalGroup}) не допускается к этой тренировке."
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:101
+#: src/components/calendar/ConfigCalendarDialog.tsx:102
 msgid "Your Moodle deadlines"
 msgstr "Ваши дедлайны из Moodle"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:87
+#: src/components/calendar/ConfigCalendarDialog.tsx:88
 msgid "Your music room bookings"
 msgstr "Ваши бронирования музкомнаты"
 
@@ -9615,7 +9647,7 @@ msgstr "Ваше бронирование удалено."
 msgid "Your reservations"
 msgstr "Ваши бронирования"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:113
+#: src/components/calendar/ConfigCalendarDialog.tsx:114
 msgid "Your room bookings"
 msgstr "Ваши бронирования аудиторий"
 
@@ -9632,7 +9664,7 @@ msgstr "Ваши таблицы"
 msgid "Your sheets — Guard"
 msgstr "Ваши листы — Guard"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:73
+#: src/components/calendar/ConfigCalendarDialog.tsx:74
 msgid "Your sport checkins"
 msgstr "Ваши записи на спорт"
 

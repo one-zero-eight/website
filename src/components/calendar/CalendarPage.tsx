@@ -18,6 +18,8 @@ import {
   getMyEventsLink,
 } from "@/api/schedule/links.ts";
 import { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
+import { getMyAssistantCalendarLink } from "@/api/search/links.ts";
+import { useAiCalendarHidden } from "@/components/calendar/ai-calendar.ts";
 import type { EventInput } from "@fullcalendar/core";
 import { useMemo, useRef, useState } from "react";
 
@@ -29,6 +31,7 @@ export function CalendarPage() {
     "/users/me/predefined",
   );
   const when2MeetEvents = useWhen2MeetCalendarEvents();
+  const [aiCalendarHidden] = useAiCalendarHidden();
   const [visibleRange, setVisibleRange] = useState<{
     start: Date;
     end: Date;
@@ -94,6 +97,7 @@ export function CalendarPage() {
                 scheduleUser.id,
                 scheduleUser.music_room_hidden,
                 scheduleUser.moodle_hidden,
+                aiCalendarHidden,
                 Object.values(scheduleUser.linked_calendars || {}),
               )
         }
@@ -123,6 +127,7 @@ function getCalendarsToShow(
   userId: number | undefined,
   music_room_hidden: boolean,
   moodle_hidden: boolean,
+  ai_calendar_hidden: boolean,
   imported: SchemaLinkedCalendarView[],
 ): URLType[] {
   const visibleAliases = new Set(
@@ -183,6 +188,16 @@ function getCalendarsToShow(
     sourceLink: "https://innohassle.ru/room-booking",
     updatedAt: new Date().toISOString(),
   });
+
+  // AI Calendar: the events added under the assistant's answers
+  if (!ai_calendar_hidden) {
+    toShow.push({
+      url: getMyAssistantCalendarLink(),
+      color: "seagreen",
+      sourceLink: "/search/ask",
+      updatedAt: new Date().toISOString(),
+    });
+  }
 
   // Add imported calendars
   imported.forEach((v) => {

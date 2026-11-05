@@ -3,6 +3,7 @@ import { cn } from "@/lib/ui/cn";
 import { Trans } from "@lingui/react/macro";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { AskCalendarEvents } from "./AskCalendarEvents";
 import { AskFeedback } from "./AskFeedback";
 
 export function AskResult({
@@ -81,6 +82,10 @@ export function AskResult({
             );
           })}
         </div>
+      )}
+
+      {!hasError && response.calendar_events.length > 0 && (
+        <AskCalendarEvents events={response.calendar_events} />
       )}
 
       {!hasError && response.ask_query_id && (

@@ -2,6 +2,7 @@
 // @ts-nocheck
 import { getMyAccessToken } from "@/api/helpers/access-token.ts";
 import { SCHEDULE_API_URL } from "@/api/schedule/links.ts";
+import { SEARCH_API_URL } from "@/api/search/links.ts";
 import { EventInput } from "@fullcalendar/core";
 import {
   addDays,
@@ -55,6 +56,7 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
     if (!internalState || arg.isRefetch) {
       const url =
         meta.url.startsWith(SCHEDULE_API_URL) ||
+        meta.url.startsWith(SEARCH_API_URL) ||
         meta.url.startsWith("https://api.innohassle.ru")
           ? meta.url
           : `${SCHEDULE_API_URL}/me/check-calendar-url-to-link?${new URLSearchParams(

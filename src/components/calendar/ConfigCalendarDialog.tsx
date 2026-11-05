@@ -13,6 +13,7 @@ import {
 } from "@/components/calendar/ExportModal.tsx";
 import { LinkedCard } from "@/components/schedule/linked-card/LinkedCard.tsx";
 import { ImportModal } from "@/components/calendar/import/ImportModal";
+import { AiCalendarCard } from "@/components/calendar/AiCalendarCard.tsx";
 
 export function ConfigCalendarDialog({
   open,
@@ -120,6 +121,7 @@ export function ConfigCalendarDialog({
             setExportModalOpen(true);
           }}
         />
+        <AiCalendarCard />
         {Object.keys(scheduleUser?.linked_calendars || {}).map((key, index) => {
           const linkedCalendar = scheduleUser?.linked_calendars
             ? scheduleUser?.linked_calendars[key]
