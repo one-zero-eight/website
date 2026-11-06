@@ -32,7 +32,7 @@ msgstr ""
 msgid " (capacity: {capacity} people)"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:106
+#: src/components/search/ask/AskPage.tsx:104
 msgid "- Ask me anything!"
 msgstr ""
 
@@ -41,8 +41,8 @@ msgid "- Executing"
 msgstr ""
 
 #: src/components/search/act/ActPage.tsx:82
-#: src/components/search/ask/AskPage.tsx:149
-#: src/components/search/ask/AskResult.tsx:59
+#: src/components/search/ask/AskPage.tsx:152
+#: src/components/search/ask/AskResult.tsx:70
 msgid "- Sorry, I can't help you with this question."
 msgstr ""
 
@@ -1981,6 +1981,7 @@ msgstr ""
 #: src/components/onboarding/OnboardingSteps.tsx:371
 #: src/components/room-booking/timeline/BookingModal.tsx:712
 #: src/components/room-booking/timeline/BookingModal.tsx:742
+#: src/components/search/ask/AskApproval.tsx:41
 #: src/components/tabletennis/LiveTournament.tsx:366
 #: src/components/tabletennis/PlayerActionMenu.tsx:240
 #: src/components/toast/ConfirmDialog.tsx:22
@@ -2182,7 +2183,7 @@ msgstr ""
 msgid "Could not mark attendance"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:119
+#: src/components/search/ask/AskPage.tsx:117
 msgid "Could not open the chat"
 msgstr ""
 
@@ -2494,6 +2495,7 @@ msgstr ""
 #: src/components/events/submissions/SubmissionPage.tsx:207
 #: src/components/events/submissions/SubmissionPage.tsx:368
 #: src/components/events/submissions/SubmissionPage.tsx:382
+#: src/components/search/ask/AskApproval.tsx:48
 msgid "Decline"
 msgstr ""
 
@@ -4552,7 +4554,7 @@ msgstr ""
 msgid "Let us know if you have ideas for our projects or run into any issues."
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:44
+#: src/components/search/ask/AskResult.tsx:55
 msgid "link"
 msgstr ""
 
@@ -5623,6 +5625,10 @@ msgstr ""
 
 #: src/components/when2meet/MeetingPage.tsx:1228
 msgid "Not available for this meeting"
+msgstr ""
+
+#: src/components/search/ask/AskApproval.tsx:30
+msgid "Not done: a newer question was asked."
 msgstr ""
 
 #: src/components/tabletennis/ValidationMatches.tsx:452
@@ -7703,7 +7709,7 @@ msgstr ""
 msgid "Sources"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:66
+#: src/components/search/ask/AskResult.tsx:77
 msgid "Sources:"
 msgstr ""
 
@@ -8316,6 +8322,10 @@ msgstr ""
 
 #: src/components/sport/SportOverviewSection.tsx:611
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
+msgstr ""
+
+#: src/components/search/ask/AskApproval.tsx:19
+msgid "The assistant needs your approval to do this:"
 msgstr ""
 
 #: src/components/when2meet/MeetingPage.tsx:465

@@ -32,7 +32,7 @@ msgstr " · Тонер {0}%"
 msgid " (capacity: {capacity} people)"
 msgstr " (вместимость: {capacity} чел.)"
 
-#: src/components/search/ask/AskPage.tsx:106
+#: src/components/search/ask/AskPage.tsx:104
 msgid "- Ask me anything!"
 msgstr "- Спрашивайте о чём угодно!"
 
@@ -41,8 +41,8 @@ msgid "- Executing"
 msgstr "- Выполняю"
 
 #: src/components/search/act/ActPage.tsx:82
-#: src/components/search/ask/AskPage.tsx:149
-#: src/components/search/ask/AskResult.tsx:59
+#: src/components/search/ask/AskPage.tsx:152
+#: src/components/search/ask/AskResult.tsx:70
 msgid "- Sorry, I can't help you with this question."
 msgstr "- Извините, я не могу помочь с этим вопросом."
 
@@ -1981,6 +1981,7 @@ msgstr "Настройте параметры и запустите сканир
 #: src/components/onboarding/OnboardingSteps.tsx:371
 #: src/components/room-booking/timeline/BookingModal.tsx:712
 #: src/components/room-booking/timeline/BookingModal.tsx:742
+#: src/components/search/ask/AskApproval.tsx:41
 #: src/components/tabletennis/LiveTournament.tsx:366
 #: src/components/tabletennis/PlayerActionMenu.tsx:240
 #: src/components/toast/ConfirmDialog.tsx:22
@@ -2182,7 +2183,7 @@ msgstr "Не удалось загрузить бронирования"
 msgid "Could not mark attendance"
 msgstr "Не удалось отметить посещаемость"
 
-#: src/components/search/ask/AskPage.tsx:119
+#: src/components/search/ask/AskPage.tsx:117
 msgid "Could not open the chat"
 msgstr "Не удалось открыть чат"
 
@@ -2494,6 +2495,7 @@ msgstr "Долг: {debt}ч"
 #: src/components/events/submissions/SubmissionPage.tsx:207
 #: src/components/events/submissions/SubmissionPage.tsx:368
 #: src/components/events/submissions/SubmissionPage.tsx:382
+#: src/components/search/ask/AskApproval.tsx:48
 msgid "Decline"
 msgstr "Отклонить"
 
@@ -4552,7 +4554,7 @@ msgstr "Оставьте отзыв и оцените"
 msgid "Let us know if you have ideas for our projects or run into any issues."
 msgstr "Напишите нам, если у вас есть идеи проектов или вы столкнулись с проблемой."
 
-#: src/components/search/ask/AskResult.tsx:44
+#: src/components/search/ask/AskResult.tsx:55
 msgid "link"
 msgstr "ссылка"
 
@@ -5624,6 +5626,10 @@ msgstr "недоступно для этой встречи"
 #: src/components/when2meet/MeetingPage.tsx:1228
 msgid "Not available for this meeting"
 msgstr "Недоступно для этой встречи"
+
+#: src/components/search/ask/AskApproval.tsx:30
+msgid "Not done: a newer question was asked."
+msgstr "Не выполнено: после этого был задан новый вопрос."
 
 #: src/components/tabletennis/ValidationMatches.tsx:452
 msgid "Not in a group"
@@ -7703,7 +7709,7 @@ msgstr "Извините, этот сайт не поддерживает пре
 msgid "Sources"
 msgstr "Источники"
 
-#: src/components/search/ask/AskResult.tsx:66
+#: src/components/search/ask/AskResult.tsx:77
 msgid "Sources:"
 msgstr "Источники:"
 
@@ -8317,6 +8323,10 @@ msgstr "Спасибо!"
 #: src/components/sport/SportOverviewSection.tsx:611
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "<0>Пропущенная из‑за болезни неделя</0> <1>компенсируется двумя спортивными часами.</1>"
+
+#: src/components/search/ask/AskApproval.tsx:19
+msgid "The assistant needs your approval to do this:"
+msgstr "Ассистенту нужно ваше подтверждение, чтобы сделать это:"
 
 #: src/components/when2meet/MeetingPage.tsx:465
 msgid "The booking no longer exists in Room Booking, so it was removed from the meeting."

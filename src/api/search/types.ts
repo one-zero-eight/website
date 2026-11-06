@@ -98,6 +98,49 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/ask/{chat_id}/decision": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decide
+     * @description Approve or reject what the assistant is about to do for the user (the `approval` of the chat's last response): booking
+     *     the music room or a room, enrolling in an event, cancelling a booking. The agent goes on from where it paused, does it
+     *     with this request's token (approve) or not (reject), and its answer is the answer to the question that waited. Each
+     *     action is done only after this; one not decided is never done.
+     */
+    post: operations["ask_decide"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/{chat_id}/decision/stream": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decide Stream
+     * @description The same as POST /ask/{chat_id}/decision, with the work shown while it goes on: the events of POST /ask/stream.
+     */
+    post: operations["ask_decide_stream"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/ask/{chat_id}/cancel": {
     parameters: {
       query?: never;
@@ -478,6 +521,20 @@ export interface components {
       /** Title */
       title: string;
     };
+    /** AskAction */
+    AskAction: {
+      /** Name */
+      name: string;
+      /** Description */
+      description: string;
+    };
+    /** AskApproval */
+    AskApproval: {
+      /** Id */
+      id: string;
+      /** Actions */
+      actions: components["schemas"]["AskAction"][];
+    };
     /** AskChat */
     AskChat: {
       /** Chat Id */
@@ -513,6 +570,17 @@ export interface components {
       updated_at: string;
       /** Answers */
       answers: components["schemas"]["AskResponses"][];
+      waiting?: components["schemas"]["AskResponses"] | null;
+    };
+    /** AskDecision */
+    AskDecision: {
+      /**
+       * Decision
+       * @enum {string}
+       */
+      decision: AskDecisionDecision;
+      /** Approval Id */
+      approval_id?: string | null;
     };
     /** AskResponses */
     AskResponses: {
@@ -537,6 +605,7 @@ export interface components {
       feedback?: AskResponsesFeedbackAnyOf0 | null;
       /** Feedback Comment */
       feedback_comment?: string | null;
+      approval?: components["schemas"]["AskApproval"] | null;
     };
     /** Body_ask_act_by_query */
     Body_ask_act_by_query: {
@@ -917,8 +986,11 @@ export interface components {
 export type SchemaActResponses = components["schemas"]["ActResponses"];
 export type SchemaAddedCalendarEvent =
   components["schemas"]["AddedCalendarEvent"];
+export type SchemaAskAction = components["schemas"]["AskAction"];
+export type SchemaAskApproval = components["schemas"]["AskApproval"];
 export type SchemaAskChat = components["schemas"]["AskChat"];
 export type SchemaAskChatHistory = components["schemas"]["AskChatHistory"];
+export type SchemaAskDecision = components["schemas"]["AskDecision"];
 export type SchemaAskResponses = components["schemas"]["AskResponses"];
 export type SchemaBodyAskActByQuery =
   components["schemas"]["Body_ask_act_by_query"];
@@ -1128,6 +1200,116 @@ export interface operations {
     responses: {
       /** @description Server-sent events: `status`, `answer`, then `done` (AskResponses) or `error` */
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_decide: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AskDecision"];
+      };
+    };
+    responses: {
+      /** @description The answer to the question that waited, or another approval */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskResponses"];
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Nothing waits for a decision in the chat, or the question was cancelled */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description ML service error */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The language model cannot be reached; the detail says the assistant is not working now */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ask_decide_stream: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AskDecision"];
+      };
+    };
+    responses: {
+      /** @description Server-sent events, as of POST /ask/stream */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Nothing waits for a decision in the chat */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -1867,6 +2049,10 @@ export enum PathsSearchSearchSearch_query_idFeedbackPostParametersQueryFeedback 
 export enum PathsAskAsk_query_idFeedbackPostParametersQueryFeedback {
   like = "like",
   dislike = "dislike",
+}
+export enum AskDecisionDecision {
+  approve = "approve",
+  reject = "reject",
 }
 export enum AskResponsesFeedbackAnyOf0 {
   like = "like",

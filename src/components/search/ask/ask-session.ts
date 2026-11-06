@@ -1,5 +1,8 @@
 import { $search, searchFetch, searchTypes } from "@/api/search";
-import { AskResponsesFeedbackAnyOf0 as AskResponseFeedback } from "@/api/search/types";
+import {
+  AskDecisionDecision,
+  AskResponsesFeedbackAnyOf0 as AskResponseFeedback,
+} from "@/api/search/types";
 import { queryClient } from "@/app/query-client";
 import { useSyncExternalStore } from "react";
 
@@ -94,7 +97,36 @@ async function streamAnswer(
   if (requestError || !stream) {
     throw new Error("Failed to start the answer");
   }
+  return readAnswer(stream);
+}
 
+// The answer to the question that waited for the user's decision on what the assistant was about to do for them
+async function streamDecision(
+  chatId: string,
+  decision: searchTypes.SchemaAskDecision,
+  signal: AbortSignal,
+): Promise<searchTypes.SchemaAskResponses | undefined> {
+  const { data: stream, error: requestError } = await searchFetch.POST(
+    "/ask/{chat_id}/decision/stream",
+    {
+      params: { path: { chat_id: chatId } },
+      body: decision,
+      parseAs: "stream",
+      signal,
+    },
+  );
+  if (requestError || !stream) {
+    const detail = (requestError as { detail?: unknown } | undefined)?.detail;
+    throw new Error(
+      typeof detail === "string" ? detail : "Failed to send the decision",
+    );
+  }
+  return readAnswer(stream);
+}
+
+async function readAnswer(
+  stream: ReadableStream<BufferSource>,
+): Promise<searchTypes.SchemaAskResponses | undefined> {
   const reader = stream.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";
   while (true) {
@@ -150,6 +182,49 @@ export async function askQuestion(query: string) {
       update({
         messages: [...session.messages, { role: "assistant", response }],
         chatId: response.chat_id ?? null,
+      });
+      queryClient.invalidateQueries({
+        queryKey: $search.queryOptions("get", "/ask/chats").queryKey,
+      });
+    }
+  } catch (e) {
+    if (!controller.signal.aborted) {
+      update({ error: e instanceof Error ? e : new Error(String(e)) });
+    }
+  } finally {
+    if (abortController === controller) {
+      abortController = null;
+      update({ isPending: false });
+    }
+  }
+}
+
+// The user's decision on what the assistant is about to do for them (the `approval` of the last answer): it is done only
+// when approved. The answer that waited for the decision takes the place of the approval
+export async function decideApproval(decision: "approve" | "reject") {
+  const last = session.messages.at(-1);
+  const chatId = session.chatId;
+  if (!chatId || last?.role !== "assistant" || !last.response.approval) return;
+  abortController?.abort();
+  const controller = new AbortController();
+  abortController = controller;
+  update({ answerText: "", status: "", error: null, isPending: true });
+
+  try {
+    const response = await streamDecision(
+      chatId,
+      {
+        decision: AskDecisionDecision[decision],
+        approval_id: last.response.approval.id,
+      },
+      controller.signal,
+    );
+    if (response && session.chatId === chatId) {
+      update({
+        messages: [
+          ...session.messages.slice(0, -1),
+          { role: "assistant", response },
+        ],
       });
       queryClient.invalidateQueries({
         queryKey: $search.queryOptions("get", "/ask/chats").queryKey,
@@ -226,7 +301,11 @@ export async function openChat(chatId: string) {
     if (session.chatId !== chatId) return; // Another chat was opened meanwhile
     update({
       isOpening: false,
-      messages: history.answers.flatMap((response): AskMessage[] => [
+      // The question that waits for the user's decision comes last, with what it waits for
+      messages: [
+        ...history.answers,
+        ...(history.waiting ? [history.waiting] : []),
+      ].flatMap((response): AskMessage[] => [
         { role: "user", content: response.query },
         { role: "assistant", response },
       ]),

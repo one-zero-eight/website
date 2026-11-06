@@ -125,7 +125,12 @@ export function AskPage({ askQuery }: { askQuery: string }) {
               message.role === "user" ? (
                 <UserMessage key={`${chatId}:${i}`} text={message.content} />
               ) : (
-                <AskResult key={`${chatId}:${i}`} response={message.response} />
+                <AskResult
+                  key={`${chatId}:${i}`}
+                  response={message.response}
+                  isLast={i === messages.length - 1}
+                  isPending={isPending}
+                />
               ),
             )}
 
