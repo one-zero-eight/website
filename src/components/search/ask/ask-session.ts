@@ -1,3 +1,9 @@
+import { accountsFetch } from "@/api/accounts";
+import { checkIsTokenExpired } from "@/api/helpers/access-token.ts";
+import {
+  getMySportAccessToken,
+  setMySportAccessToken,
+} from "@/api/helpers/sport-access-token.ts";
 import { $search, searchFetch, searchTypes } from "@/api/search";
 import {
   AskDecisionDecision,
@@ -80,6 +86,21 @@ function parseEvent(block: string): AskStreamEvent | undefined {
   return { name, data: JSON.parse(data) } as AskStreamEvent;
 }
 
+// The user's InNoHassle Sport token goes with a question: with it the assistant reads their sport hours and trainings and
+// checks them in to a training once they confirm it. It lives a day, so an expired one is fetched again. Without it the
+// assistant answers without their sport.
+async function sportHeaders(): Promise<Record<string, string>> {
+  let token = getMySportAccessToken();
+  if (token && checkIsTokenExpired(token, new Date()) === true) {
+    const { data } = await accountsFetch
+      .GET("/tokens/generate-my-sport-token")
+      .catch(() => ({ data: undefined }));
+    token = data?.access_token ?? null;
+    if (token) setMySportAccessToken(token);
+  }
+  return token ? { "X-Sport-Token": token } : {};
+}
+
 // The final answer, or undefined when the question was cancelled
 async function streamAnswer(
   query: string,
@@ -90,6 +111,7 @@ async function streamAnswer(
     "/ask/stream",
     {
       body: { query, chat_id: chatId },
+      headers: await sportHeaders(),
       parseAs: "stream",
       signal,
     },
@@ -111,6 +133,7 @@ async function streamDecision(
     {
       params: { path: { chat_id: chatId } },
       body: decision,
+      headers: await sportHeaders(),
       parseAs: "stream",
       signal,
     },
