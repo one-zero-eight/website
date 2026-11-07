@@ -189,12 +189,12 @@ function getCalendarsToShow(
     updatedAt: new Date().toISOString(),
   });
 
-  // AI Calendar: the events added under the assistant's answers
+  // AI Calendar: the events added under the assistant's answers and from the schedule changes in chats.
+  // No link of the whole feed: "Go to source" of an event is its own message (X-WR-LINK) or nothing, never the assistant.
   if (!ai_calendar_hidden) {
     toShow.push({
       url: getMyAssistantCalendarLink(),
       color: "seagreen",
-      sourceLink: "/search/ask",
       updatedAt: new Date().toISOString(),
     });
   }
