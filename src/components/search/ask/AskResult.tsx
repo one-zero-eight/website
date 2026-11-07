@@ -3,15 +3,22 @@ import { cn } from "@/lib/ui/cn";
 import { Trans } from "@lingui/react/macro";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { AskApproval } from "./AskApproval";
+import { AskCalendarEvents } from "./AskCalendarEvents";
+import { AskFeedback } from "./AskFeedback";
 
 export function AskResult({
   response,
   hasError,
+  isLast = false,
+  isPending = false,
 }: {
   response: searchTypes.SchemaAskResponses;
   hasError?: boolean;
+  isLast?: boolean;
+  isPending?: boolean;
 }) {
-  const { answer, search_responses } = response;
+  const { answer, search_responses, approval } = response;
 
   const uniqueSources = search_responses.filter(
     (item, index, self) =>
@@ -28,7 +35,13 @@ export function AskResult({
         "border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2",
       )}
     >
-      {!hasError ? (
+      {!hasError && approval ? (
+        <AskApproval
+          approval={approval}
+          isLast={isLast}
+          isPending={isPending}
+        />
+      ) : !hasError ? (
         <Markdown
           remarkPlugins={[remarkGfm]}
           components={{
@@ -80,6 +93,18 @@ export function AskResult({
             );
           })}
         </div>
+      )}
+
+      {!hasError && response.calendar_events.length > 0 && (
+        <AskCalendarEvents events={response.calendar_events} />
+      )}
+
+      {!hasError && response.ask_query_id && (
+        <AskFeedback
+          askQueryId={response.ask_query_id}
+          feedback={response.feedback}
+          feedbackComment={response.feedback_comment}
+        />
       )}
     </div>
   );

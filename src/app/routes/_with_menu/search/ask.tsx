@@ -1,7 +1,9 @@
 import { useLingui } from "@lingui/react/macro";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { AskPage } from "@/components/search/ask/AskPage";
-import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
+import { NewChatButton } from "@/components/search/ask/NewChatButton";
+import { CatixTitle } from "@/components/search/ask/CatixTitle";
+import { Topbar } from "@/components/layout/Topbar";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
@@ -32,7 +34,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <TopbarWithToggleGroup currentTabText={q} />
+      <Topbar title={<CatixTitle />} titleAction={<NewChatButton />} />
       <RequireAuth>
         <AskPage askQuery={q ?? ""} />
       </RequireAuth>

@@ -86,8 +86,22 @@ export const items: ItemType[] = [
   ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
+      title: "Ask the assistant",
+      to: "/search/ask",
+      activeOptions: { exact: true, includeSearch: false },
+      badge: (
+        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
+          DEV
+        </span>
+      ),
+      icon: <span className="icon-[material-symbols--auto-awesome-outline]" />,
+    },
+    {
+      type: "local",
       title: "Search",
       to: "/search",
+      // Not active on /search/ask, which has its own item above
+      activeOptions: { exact: true, includeSearch: false },
       badge: (
         <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
           DEV

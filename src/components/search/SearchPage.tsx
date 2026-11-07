@@ -12,13 +12,22 @@ import SearchField from "@/components/search/SearchField.tsx";
 import SearchResult from "@/components/search/SearchResult.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSessionStorage } from "usehooks-ts";
 import IframePreviewCard from "./IframePreviewCard";
 
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
   useLingui();
   const navigate = useNavigate();
 
-  const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
+  // The last search and its filters stay when the user goes to another page and comes back (in this tab); the results come
+  // from the query cache then
+  const [savedQuery, setSavedQuery] = useSessionStorage(
+    "search-last-query",
+    "",
+  );
+  const [submittedQuery, setSubmittedQuery] = useState<string | null>(
+    searchQuery || savedQuery || null,
+  );
   const didInit = useRef<boolean>(false);
 
   const [previewSource, setPreviewSource] =
@@ -44,10 +53,11 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     },
   };
 
-  const [appliedFilters, setAppliedFilters] =
-    useState<Record<string, Record<string, boolean>>>(initialFiltersState);
+  const [appliedFilters, setAppliedFilters] = useSessionStorage<
+    Record<string, Record<string, boolean>>
+  >("search-filters", initialFiltersState);
   const [selectedFilters, setSelectedFilters] =
-    useState<Record<string, Record<string, boolean>>>(initialFiltersState);
+    useState<Record<string, Record<string, boolean>>>(appliedFilters);
 
   const checks = (group: string, value: string) => {
     setSelectedFilters((prev) => ({
@@ -155,7 +165,16 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     }
   }, [searchQuery]);
 
+  useEffect(() => {
+    // Opened from the menu (no query in the address): the last search
+    if (!searchQuery && savedQuery) {
+      navigate({ to: "/search", search: { q: savedQuery }, replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const runSearch = (query: string) => {
+    setSavedQuery(query);
     navigate({ to: "/search", search: { q: query } });
     if (query === submittedQuery) {
       refetch();
@@ -233,7 +252,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
             ) : (
               previewSource &&
               !isMobile &&
-              "url" in previewSource && (
+              "url" in previewSource &&
+              !!previewSource.url && (
                 <IframePreviewCard
                   source={previewSource}
                   onClose={() => setPreviewSource(undefined)}
