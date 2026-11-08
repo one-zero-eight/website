@@ -35,13 +35,7 @@ export function AskResult({
         "border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2",
       )}
     >
-      {!hasError && approval ? (
-        <AskApproval
-          approval={approval}
-          isLast={isLast}
-          isPending={isPending}
-        />
-      ) : !hasError ? (
+      {!hasError ? (
         <Markdown
           remarkPlugins={[remarkGfm]}
           components={{
@@ -69,6 +63,14 @@ export function AskResult({
         <span>
           <Trans>- Sorry, I can't help you with this question.</Trans>
         </span>
+      )}
+
+      {!hasError && approval && (
+        <AskApproval
+          approval={approval}
+          isLast={isLast}
+          isPending={isPending}
+        />
       )}
 
       {uniqueSources.length > 0 && (
