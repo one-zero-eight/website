@@ -927,6 +927,34 @@ export interface components {
       /** Url */
       url: string;
     };
+    /** MusicBookingWindow */
+    MusicBookingWindow: {
+      /**
+       * Starts At
+       * Format: date-time
+       */
+      starts_at: string;
+      /**
+       * Ends At
+       * Format: date-time
+       */
+      ends_at: string;
+      /**
+       * Latest Start At
+       * Format: date-time
+       */
+      latest_start_at: string;
+      /** Max Duration Minutes */
+      max_duration_minutes: number;
+      /** Duration Minutes */
+      duration_minutes?: number | null;
+      /**
+       * Step Minutes
+       * @default 30
+       * @constant
+       */
+      step_minutes: 30;
+    };
     /** PageText */
     PageText: {
       /** Title */
@@ -1088,6 +1116,9 @@ export interface components {
       service: SignupOfferService;
       /** Title */
       title: string;
+      /** Booking Title */
+      booking_title?: string | null;
+      music_window?: components["schemas"]["MusicBookingWindow"] | null;
       /**
        * Starts At
        * Format: date-time
@@ -1119,6 +1150,18 @@ export interface components {
        * Format: date-time
        */
       expires_at: string;
+    };
+    /**
+     * SignupSelection
+     * @description Only explicit user choices; target IDs and dates remain server-owned.
+     */
+    SignupSelection: {
+      /** Booking Title */
+      booking_title?: string | null;
+      /** Time From */
+      time_from?: string | null;
+      /** Time To */
+      time_to?: string | null;
     };
     /** SiteChoice */
     SiteChoice: {
@@ -1269,6 +1312,8 @@ export type SchemaMoodleFileSource = components["schemas"]["MoodleFileSource"];
 export type SchemaMoodleUnknownSource =
   components["schemas"]["MoodleUnknownSource"];
 export type SchemaMoodleUrlSource = components["schemas"]["MoodleUrlSource"];
+export type SchemaMusicBookingWindow =
+  components["schemas"]["MusicBookingWindow"];
 export type SchemaPageText = components["schemas"]["PageText"];
 export type SchemaParseRequest = components["schemas"]["ParseRequest"];
 export type SchemaPdfLocation = components["schemas"]["PdfLocation"];
@@ -1277,6 +1322,7 @@ export type SchemaResourcesSource = components["schemas"]["ResourcesSource"];
 export type SchemaSearchResponse = components["schemas"]["SearchResponse"];
 export type SchemaSearchResponses = components["schemas"]["SearchResponses"];
 export type SchemaSignupOffer = components["schemas"]["SignupOffer"];
+export type SchemaSignupSelection = components["schemas"]["SignupSelection"];
 export type SchemaSiteChoice = components["schemas"]["SiteChoice"];
 export type SchemaSourceRequestCreate =
   components["schemas"]["SourceRequestCreate"];
@@ -1715,7 +1761,11 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SignupSelection"] | null;
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {
@@ -2508,6 +2558,8 @@ export enum ResourcesSourceType {
 export enum SignupOfferService {
   events = "events",
   sport = "sport",
+  rooms = "rooms",
+  music = "music",
 }
 export enum SignupOfferStatus {
   available = "available",

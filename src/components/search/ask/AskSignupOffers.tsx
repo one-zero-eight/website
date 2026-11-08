@@ -1,8 +1,15 @@
 import { $search, searchTypes } from "@/api/search";
 import { SignupOfferStatus } from "@/api/search/types";
+import { cn } from "@/lib/ui/cn";
 import { queryClient } from "@/app/query-client";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useRef, useState } from "react";
+import {
+  musicStep,
+  validBookingInterval,
+  validBookingReceipt,
+} from "./ask-booking";
+import { AskBookingChoices } from "./AskBookingChoices";
 import { rememberSignup, sportHeaders } from "./ask-session";
 
 // These are exact server offers, not commands parsed from the assistant's Markdown.
@@ -30,7 +37,10 @@ export function AskSignupOffers({
     },
   );
 
-  async function handleSignup(offer: searchTypes.SchemaSignupOffer) {
+  async function handleSignup(
+    offer: searchTypes.SchemaSignupOffer,
+    selection?: searchTypes.SchemaSignupSelection,
+  ) {
     if (
       busy.current ||
       disabled ||
@@ -50,15 +60,31 @@ export function AskSignupOffers({
     const unknown: searchTypes.SchemaSignupOffer = {
       ...offer,
       status: SignupOfferStatus.unknown,
-      message: t`Check the service before trying again. Do not repeat an uncertain registration.`,
+      message:
+        offer.service === "rooms" || offer.service === "music"
+          ? t`Check the service before trying again. Do not repeat an uncertain booking.`
+          : t`Check the service before trying again. Do not repeat an uncertain registration.`,
     };
     // A reload or navigation must not turn an in-flight write into a fresh signup button.
     rememberSignup(chatId, unknown);
+    setResults((previous) => ({ ...previous, [offer.id]: unknown }));
     try {
       const result = await signup.mutateAsync({
         params: { path: { chat_id: chatId, offer_id: offer.id } },
         headers: offer.service === "sport" ? await sportHeaders() : {},
+        ...(selection ? { body: selection } : {}),
       });
+      if (
+        result?.id !== offer.id ||
+        result.service !== offer.service ||
+        !["confirmed", "refused", "unknown"].includes(result.status) ||
+        ((offer.service === "rooms" || offer.service === "music") &&
+          !validBookingReceipt(result))
+      ) {
+        throw new Error("Invalid action receipt");
+      }
+      // A duplicate click can return another tab's durable selection. The
+      // server receipt is authoritative, not the choice attempted in this tab.
       setResults((previous) => ({ ...previous, [offer.id]: result }));
       rememberSignup(chatId, result);
     } catch {
@@ -159,14 +185,26 @@ export function AskSignupOffers({
           </h3>
           <ul className="divide-base-300 divide-y">
             {group.map((offer) => {
+              const booking =
+                offer.service === "rooms" || offer.service === "music";
               const start = Date.parse(offer.starts_at);
               const invalid =
+                (booking && !validBookingInterval(offer)) ||
                 !Number.isFinite(start) ||
                 (offer.ends_at != null && !(Date.parse(offer.ends_at) > start));
               const expired =
                 expiredIds.includes(offer.id) ||
                 !(Date.parse(offer.expires_at) > Date.now()) ||
-                start <= Date.now();
+                (offer.service === "music"
+                  ? !(
+                      Math.floor(
+                        Date.parse(offer.music_window?.latest_start_at ?? "") /
+                          musicStep,
+                      ) *
+                        musicStep >
+                      Date.now()
+                    )
+                  : start <= Date.now());
               const overnight =
                 !invalid &&
                 offer.ends_at != null &&
@@ -181,6 +219,13 @@ export function AskSignupOffers({
                       {offer.title}
                     </h4>
                     <p className="text-base-content/60 mt-1 text-xs leading-relaxed wrap-anywhere tabular-nums">
+                      {offer.service === "music" &&
+                        offer.status === "available" && (
+                          <>
+                            <Trans>Available window</Trans>
+                            {": "}
+                          </>
+                        )}
                       {invalid ? (
                         t`Invalid event interval`
                       ) : offer.all_day ? (
@@ -200,35 +245,76 @@ export function AskSignupOffers({
                       )}
                       {offer.location && ` · ${offer.location}`}
                     </p>
+                    {offer.service === "rooms" &&
+                      offer.status !== "available" &&
+                      offer.booking_title && (
+                        <p className="text-base-content/70 mt-1 text-xs wrap-anywhere">
+                          {offer.booking_title}
+                        </p>
+                      )}
                   </div>
-                  <div className="flex min-h-9 items-center text-sm @min-[28rem]/signup:max-w-48 @min-[28rem]/signup:justify-self-end">
+                  <div
+                    className={cn(
+                      "flex min-h-9 min-w-0 items-center text-sm",
+                      booking && offer.status === "available"
+                        ? "w-full @min-[28rem]/signup:col-span-2"
+                        : "@min-[28rem]/signup:max-w-48 @min-[28rem]/signup:justify-self-end",
+                    )}
+                  >
                     {pendingId === offer.id ? (
                       <span className="text-base-content/60 flex items-center gap-2">
                         <span className="loading loading-spinner loading-sm" />
-                        <Trans>Signing up…</Trans>
+                        {booking ? (
+                          <Trans>Booking…</Trans>
+                        ) : (
+                          <Trans>Signing up…</Trans>
+                        )}
                       </span>
                     ) : offer.status === "confirmed" ? (
                       <span className="text-success flex items-center gap-1.5 font-medium">
                         <span className="icon-[material-symbols--check-circle-outline] shrink-0 text-lg" />
-                        <Trans>You are signed up</Trans>
+                        {booking ? (
+                          <Trans>Booked</Trans>
+                        ) : (
+                          <Trans>You are signed up</Trans>
+                        )}
                       </span>
                     ) : offer.status === "refused" ? (
                       <span className="text-error">
-                        <Trans>Could not sign up</Trans>
+                        {booking ? (
+                          <Trans>Could not book</Trans>
+                        ) : (
+                          <Trans>Could not sign up</Trans>
+                        )}
                       </span>
                     ) : offer.status === "unknown" ? (
                       <span className="text-warning">
-                        <Trans>Registration outcome is unknown</Trans>
+                        {booking ? (
+                          <Trans>Booking outcome is unknown</Trans>
+                        ) : (
+                          <Trans>Registration outcome is unknown</Trans>
+                        )}
                       </span>
                     ) : invalid ? (
                       <span className="text-error">
-                        <Trans>Signup unavailable</Trans>
+                        {booking ? (
+                          <Trans>Booking unavailable</Trans>
+                        ) : (
+                          <Trans>Signup unavailable</Trans>
+                        )}
                       </span>
                     ) : expired ? (
                       <span className="text-base-content/60">
-                        <Trans>
-                          This offer has expired. Ask for current events.
-                        </Trans>
+                        {booking ? (
+                          <Trans>
+                            This offer has expired. Ask for current
+                            availability.
+                          </Trans>
+                        ) : (
+                          <Trans>
+                            This offer has expired. Ask for current events.
+                          </Trans>
+                        )}
                       </span>
                     ) : offer.external_url ? (
                       <a
@@ -240,6 +326,12 @@ export function AskSignupOffers({
                         <Trans>Open registration</Trans>
                         <span className="icon-[material-symbols--open-in-new] shrink-0" />
                       </a>
+                    ) : booking ? (
+                      <AskBookingChoices
+                        offer={offer}
+                        disabled={disabled || pendingId !== null}
+                        onBook={handleSignup}
+                      />
                     ) : (
                       <button
                         type="button"
@@ -265,7 +357,11 @@ export function AskSignupOffers({
                       rel="noopener noreferrer"
                       className="text-primary justify-self-start text-xs underline underline-offset-2 @min-[28rem]/signup:col-span-2"
                     >
-                      <Trans>Check registration in the service</Trans>
+                      {booking ? (
+                        <Trans>Check booking in the service</Trans>
+                      ) : (
+                        <Trans>Check registration in the service</Trans>
+                      )}
                     </a>
                   )}
                 </li>

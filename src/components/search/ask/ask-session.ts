@@ -8,8 +8,10 @@ import { $search, searchFetch, searchTypes } from "@/api/search";
 import {
   AskDecisionDecision,
   AskResponsesFeedbackAnyOf0 as AskResponseFeedback,
+  SignupOfferStatus,
 } from "@/api/search/types";
 import { queryClient } from "@/app/query-client";
+import { validBookingReceipt } from "./ask-booking";
 import { useSyncExternalStore } from "react";
 
 export type DraftAttachment = {
@@ -70,7 +72,10 @@ type AskStreamEvent =
 // every chat of the user as well: one of them opens again from the list of chats (`openChat`)
 const STORAGE_KEY = "search-ask-session";
 
-type SignupReceipt = {
+type SignupReceipt = Pick<
+  searchTypes.SchemaSignupOffer,
+  "starts_at" | "ends_at" | "booking_title"
+> & {
   chatId: string;
   offerId: string;
   status: searchTypes.SchemaSignupOffer["status"];
@@ -482,16 +487,26 @@ function restoreSignupReceipts(
   return {
     ...response,
     signup_offers: response.signup_offers.map((offer) => {
-      if (offer.status !== "available") {
-        storeSignupReceipt(chatId, offer);
-        return offer;
-      }
       const receipt = signupReceipts.find(
         (item) => item.chatId === chatId && item.offerId === offer.id,
       );
-      return receipt
-        ? { ...offer, status: receipt.status, message: receipt.message }
-        : offer;
+      if (offer.status !== "available") {
+        const booking = offer.service === "rooms" || offer.service === "music";
+        const result =
+          booking && !validBookingReceipt(offer)
+            ? { ...offer, status: SignupOfferStatus.unknown }
+            : offer;
+        storeSignupReceipt(chatId, result);
+        return result;
+      }
+      if (!receipt) return offer;
+      const {
+        chatId: _chatId,
+        offerId: _offerId,
+        expiresAt: _expiresAt,
+        ...snapshot
+      } = receipt;
+      return { ...offer, ...snapshot };
     }),
   };
 }
@@ -508,9 +523,17 @@ function storeSignupReceipt(
     offerId: offer.id,
     status: offer.status,
     message: offer.message,
+    starts_at: offer.starts_at,
+    ends_at: offer.ends_at,
+    booking_title: offer.booking_title,
     expiresAt: Math.min(
       Date.parse(offer.expires_at),
-      Date.parse(offer.starts_at),
+      // A chosen music start is not the original window's actionable deadline.
+      Date.parse(
+        offer.service === "music"
+          ? (offer.music_window?.latest_start_at ?? offer.expires_at)
+          : offer.starts_at,
+      ),
     ),
   });
 }

@@ -86,6 +86,686 @@ function render(props: Partial<Parameters<typeof AskResult>[0]> = {}) {
   });
 }
 
+const roomOffer = {
+  ...offer,
+  service: "rooms",
+  title: "Meeting room 301",
+  location: "University, floor 3",
+  booking_title: null,
+} as unknown as searchTypes.SchemaSignupOffer;
+
+const musicWindow = {
+  starts_at: "2099-11-12T06:00:00Z",
+  ends_at: "2099-11-12T09:00:00Z",
+  latest_start_at: "2099-11-12T08:00:00Z",
+  max_duration_minutes: 90,
+  duration_minutes: null as number | null,
+  step_minutes: 30,
+};
+const musicOffer = {
+  ...offer,
+  service: "music",
+  title: "Music Room",
+  starts_at: "2099-11-12T06:00:00Z",
+  ends_at: "2099-11-12T09:00:00Z",
+  location: "Dormitory 1",
+  music_window: {
+    starts_at: "2099-11-12T06:00:00Z",
+    ends_at: "2099-11-12T09:00:00Z",
+    latest_start_at: "2099-11-12T08:00:00Z",
+    max_duration_minutes: 90,
+    duration_minutes: null,
+    step_minutes: 30,
+  },
+} as unknown as searchTypes.SchemaSignupOffer;
+
+it("constrains music choices to grid, quota, latest start and the window end without selecting a default", () => {
+  render({ response: { ...response, signup_offers: [musicOffer] } });
+  act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+  const [start, duration] = container.querySelectorAll("select");
+  const values = (select: HTMLSelectElement) =>
+    Array.from(select.options, (option) => option.value);
+  expect(values(start)).toEqual([
+    "",
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+  ]);
+  expect(values(duration)).toEqual(["", "30", "60", "90"]);
+  changeInput(start, "11:00");
+  expect(values(duration)).toEqual(["", "30", "60"]);
+  expect(duration.value).toBe("");
+  changeInput(duration, "60");
+  changeInput(start, "09:00");
+  changeInput(duration, "90");
+  expect(values(start)).toEqual(["", "09:00", "09:30", "10:00", "10:30"]);
+  expect(api.signup).not.toHaveBeenCalled();
+});
+
+it("prefills only an explicitly requested music duration and still asks for a start", () => {
+  const fixed = {
+    ...musicOffer,
+    music_window: { ...musicWindow, duration_minutes: 60 },
+  } as unknown as searchTypes.SchemaSignupOffer;
+  render({ response: { ...response, signup_offers: [fixed] } });
+  act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+  const [start, duration] = container.querySelectorAll("select");
+  expect(start.value).toBe("");
+  expect(duration.value).toBe("60");
+  expect(Array.from(duration.options, (option) => option.value)).toEqual([
+    "",
+    "60",
+  ]);
+  act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+  expect(api.signup).not.toHaveBeenCalled();
+  expect(api.remember).not.toHaveBeenCalled();
+});
+
+it("keeps a music window actionable after its beginning but offers only future grid starts", () => {
+  const now = vi
+    .spyOn(Date, "now")
+    .mockReturnValue(Date.parse("2099-11-12T09:45:00+03:00"));
+  try {
+    render({ response: { ...response, signup_offers: [musicOffer] } });
+    expect(container.querySelector("li button")?.textContent).toBe(
+      "Choose time",
+    );
+    act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+    const [start] = container.querySelectorAll("select");
+    expect(Array.from(start.options, (option) => option.value)).toEqual([
+      "",
+      "10:00",
+      "10:30",
+      "11:00",
+    ]);
+  } finally {
+    now.mockRestore();
+  }
+});
+
+it.each([
+  null,
+  { ...musicWindow, starts_at: "bad" },
+  { ...musicWindow, starts_at: "2099-11-12T09:00:00" },
+  { ...musicWindow, starts_at: "2099-11-12T06:15:00Z" },
+  { ...musicWindow, ends_at: "2099-11-12T09:00:01Z" },
+  { ...musicWindow, ends_at: "2099-11-13T09:00:00Z" },
+  { ...musicWindow, latest_start_at: "2099-11-12T05:00:00Z" },
+  { ...musicWindow, latest_start_at: "2099-11-12T09:00:00Z" },
+  { ...musicWindow, max_duration_minutes: 0 },
+  { ...musicWindow, max_duration_minutes: 29 },
+  { ...musicWindow, max_duration_minutes: -1 },
+  { ...musicWindow, duration_minutes: 120 },
+  { ...musicWindow, step_minutes: 15 },
+])(
+  "does not expose booking controls for malformed music metadata: %j",
+  (music_window) => {
+    render({
+      response: {
+        ...response,
+        signup_offers: [
+          {
+            ...musicOffer,
+            music_window,
+          } as unknown as searchTypes.SchemaSignupOffer,
+        ],
+      },
+    });
+    expect(container.textContent).toContain("Booking unavailable");
+    expect(container.querySelector("li button")).toBeNull();
+    expect(api.remember).not.toHaveBeenCalled();
+    expect(api.signup).not.toHaveBeenCalled();
+  },
+);
+
+it.each([null, "2099-11-12T18:00:00", "bad"])(
+  "blocks malformed fixed room intervals: %s",
+  (ends_at) => {
+    render({
+      response: { ...response, signup_offers: [{ ...roomOffer, ends_at }] },
+    });
+    expect(container.querySelector("li button")).toBeNull();
+    expect(api.signup).not.toHaveBeenCalled();
+  },
+);
+
+it("refuses a music start that passes after selection without marking a write attempted", async () => {
+  const now = vi
+    .spyOn(Date, "now")
+    .mockReturnValue(Date.parse("2099-11-12T09:45:00+03:00"));
+  try {
+    render({ response: { ...response, signup_offers: [musicOffer] } });
+    act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+    const [start, duration] = container.querySelectorAll("select");
+    changeInput(start, "10:00");
+    changeInput(duration, "60");
+    now.mockReturnValue(Date.parse("2099-11-12T10:00:00+03:00"));
+    await act(async () =>
+      container.querySelector<HTMLButtonElement>("li button")!.click(),
+    );
+    expect(api.signup).not.toHaveBeenCalled();
+    expect(api.remember).not.toHaveBeenCalled();
+    expect(container.textContent).toContain(
+      "Choose a future time within the available window.",
+    );
+    expect(container.querySelector<HTMLSelectElement>("select")!.value).toBe(
+      "",
+    );
+  } finally {
+    now.mockRestore();
+  }
+});
+
+it.each(["expires_at", "latest_start_at"])(
+  "expires music by %s rather than window start",
+  (field) => {
+    const expired = "2000-01-01T00:00:00Z";
+    const item =
+      field === "expires_at"
+        ? { ...musicOffer, expires_at: expired }
+        : {
+            ...musicOffer,
+            starts_at: "2000-01-01T00:00:00Z",
+            ends_at: "2000-01-01T03:00:00Z",
+            music_window: {
+              ...musicWindow,
+              starts_at: "2000-01-01T00:00:00Z",
+              ends_at: "2000-01-01T03:00:00Z",
+              latest_start_at: "2000-01-01T02:00:00Z",
+            },
+          };
+    render({
+      response: {
+        ...response,
+        signup_offers: [item as unknown as searchTypes.SchemaSignupOffer],
+      },
+    });
+    expect(container.querySelector("li button")).toBeNull();
+    expect(container.textContent).toContain(
+      "This offer has expired. Ask for current availability.",
+    );
+  },
+);
+
+it.each([roomOffer, musicOffer])(
+  "uses booking status labels for $service and keeps the chosen interval",
+  async (item) => {
+    const selected = {
+      ...item,
+      starts_at: "2099-11-12T10:00:00+03:00",
+      ends_at: "2099-11-12T11:00:00+03:00",
+      booking_title: item.service === "rooms" ? "Thesis rehearsal" : null,
+    } as unknown as searchTypes.SchemaSignupOffer;
+    for (const [status, label] of [
+      ["confirmed", "Booked"],
+      ["refused", "Could not book"],
+      ["unknown", "Booking outcome is unknown"],
+    ]) {
+      render({
+        response: {
+          ...response,
+          signup_offers: [
+            { ...selected, status } as searchTypes.SchemaSignupOffer,
+          ],
+        },
+      });
+      expect(container.textContent).toContain(label);
+      expect(container.textContent).toContain("10:00–11:00");
+      expect(container.textContent).not.toContain("Available window");
+      if (item.service === "rooms")
+        expect(container.textContent).toContain("Thesis rehearsal");
+      expect(container.querySelector("li button")).toBeNull();
+    }
+  },
+);
+
+it("keeps pending booking controls disabled and shows Booking without a second confirmation", async () => {
+  let release!: (result: searchTypes.SchemaSignupOffer) => void;
+  api.signup.mockReturnValue(
+    new Promise((resolve) => {
+      release = resolve;
+    }),
+  );
+  const item = {
+    ...roomOffer,
+    booking_title: "Seminar",
+  } as unknown as searchTypes.SchemaSignupOffer;
+  render({
+    response: {
+      ...response,
+      signup_offers: [item, { ...musicOffer, id: "music-2" }],
+    },
+  });
+  expect(container.querySelector<HTMLInputElement>("input")!.value).toBe(
+    "Seminar",
+  );
+  act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+  expect(container.textContent).toContain("Booking…");
+  expect(
+    container.querySelector<HTMLButtonElement>("li button")!.disabled,
+  ).toBe(true);
+  expect(api.signup).toHaveBeenCalledTimes(1);
+  await act(async () =>
+    release({ ...item, status: "confirmed" } as searchTypes.SchemaSignupOffer),
+  );
+  expect(container.textContent).toContain("Booked");
+});
+
+it("contains expanded booking controls within full-width responsive chat rows", () => {
+  render({
+    response: { ...response, answer: "Options:", signup_offers: [musicOffer] },
+  });
+  act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+  const row = container.querySelector("li")!;
+  const controls = row.querySelector("select")!.closest("div")!;
+  expect(container.firstElementChild?.classList.contains("w-full")).toBe(true);
+  expect(row.classList.contains("grid-cols-1")).toBe(true);
+  expect(controls.classList.contains("min-w-0")).toBe(true);
+  expect(controls.className).toContain("@min-[28rem]/signup:grid-cols-2");
+  const actionCell = row.children[1];
+  expect(actionCell.className).toContain("@min-[28rem]/signup:col-span-2");
+  expect(actionCell.className).not.toContain("max-w-48");
+  expect(actionCell.contains(row.querySelector("button"))).toBe(true);
+});
+
+it.each([roomOffer, musicOffer])(
+  "disables $service choices while generating or awaiting approval",
+  (item) => {
+    for (const props of [
+      { isPending: true },
+      {
+        response: {
+          ...response,
+          approval: { id: "approval-1", actions: [] },
+          signup_offers: [item],
+        },
+      },
+    ]) {
+      render({ response: { ...response, signup_offers: [item] }, ...props });
+      const button = container.querySelector<HTMLButtonElement>("li button")!;
+      expect(button.disabled).toBe(true);
+      act(() => button.click());
+      expect(api.signup).not.toHaveBeenCalled();
+    }
+  },
+);
+
+it.each([false, true])(
+  "shows the authoritative music receipt, including a competing selection: %s",
+  async (competing) => {
+    const receipt = {
+      ...musicOffer,
+      status: "confirmed",
+      starts_at: competing
+        ? "2099-11-12T09:00:00+03:00"
+        : "2099-11-12T10:00:00+03:00",
+      ends_at: competing
+        ? "2099-11-12T09:30:00+03:00"
+        : "2099-11-12T11:00:00+03:00",
+      music_window: { ...musicWindow, max_duration_minutes: 60 },
+    };
+    api.signup.mockResolvedValue(receipt);
+    render({ response: { ...response, signup_offers: [musicOffer] } });
+    act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+    const [start, duration] = container.querySelectorAll("select");
+    changeInput(start, "10:00");
+    changeInput(duration, "60");
+    await act(async () =>
+      container.querySelector<HTMLButtonElement>("li button")!.click(),
+    );
+    expect(container.textContent).toContain("Booked");
+    expect(container.textContent).toContain(
+      competing ? "09:00–09:30" : "10:00–11:00",
+    );
+    if (competing) expect(container.textContent).not.toContain("10:00–11:00");
+    expect(api.remember).toHaveBeenLastCalledWith("chat-1", receipt);
+    expect(api.signup).toHaveBeenCalledTimes(1);
+    expect(container.querySelector("li button")).toBeNull();
+  },
+);
+
+it.each([false, true])(
+  "shows the authoritative room subject, including a competing selection: %s",
+  async (competing) => {
+    const receipt = {
+      ...roomOffer,
+      status: "confirmed",
+      booking_title: competing ? "Already booked subject" : "Attempted subject",
+    };
+    api.signup.mockResolvedValue(receipt);
+    render({ response: { ...response, signup_offers: [roomOffer] } });
+    changeInput(
+      container.querySelector<HTMLInputElement>("li input")!,
+      "Attempted subject",
+    );
+    await act(async () =>
+      container.querySelector<HTMLButtonElement>("li button")!.click(),
+    );
+    expect(container.textContent).toContain("Booked");
+    expect(container.textContent).toContain(receipt.booking_title);
+    if (competing)
+      expect(container.textContent).not.toContain("Attempted subject");
+    expect(api.remember).toHaveBeenLastCalledWith("chat-1", receipt);
+    expect(api.signup).toHaveBeenCalledTimes(1);
+  },
+);
+
+it.each([
+  ["rooms", { booking_title: null }],
+  ["rooms", { booking_title: "   " }],
+  ["rooms", { booking_title: "a".repeat(101) }],
+  ["rooms", { starts_at: undefined }],
+  ["rooms", { ends_at: null }],
+  ["rooms", { ends_at: "2099-11-12T19:30:00" }],
+  ["rooms", { service: "events" }],
+  ["music", { starts_at: undefined }],
+  ["music", { ends_at: null }],
+  ["music", { music_window: null }],
+  ["music", { starts_at: "2099-11-12T10:15:00+03:00" }],
+  ["music", { starts_at: musicOffer.starts_at, ends_at: musicOffer.ends_at }],
+  ["music", { ends_at: "2099-11-12T13:00:00+03:00" }],
+] as const)(
+  "keeps a malformed %s booking receipt unknown: %j",
+  async (service, malformed) => {
+    const item = service === "rooms" ? roomOffer : musicOffer;
+    const selected =
+      service === "rooms"
+        ? { booking_title: "Attempted subject" }
+        : {
+            starts_at: "2099-11-12T10:00:00+03:00",
+            ends_at: "2099-11-12T11:00:00+03:00",
+          };
+    api.signup.mockResolvedValue({
+      ...item,
+      ...selected,
+      status: "confirmed",
+      ...malformed,
+    });
+    render({ response: { ...response, signup_offers: [item] } });
+    if (service === "music") {
+      act(() =>
+        container.querySelector<HTMLButtonElement>("li button")!.click(),
+      );
+      const [start, duration] = container.querySelectorAll("select");
+      changeInput(start, "10:00");
+      changeInput(duration, "60");
+    } else {
+      changeInput(
+        container.querySelector<HTMLInputElement>("li input")!,
+        "Attempted subject",
+      );
+    }
+    await act(async () =>
+      container.querySelector<HTMLButtonElement>("li button")!.click(),
+    );
+    expect(container.textContent).toContain("Booking outcome is unknown");
+    expect(container.textContent).not.toContain("Booked");
+    expect(api.remember).toHaveBeenLastCalledWith(
+      "chat-1",
+      expect.objectContaining({
+        ...item,
+        ...selected,
+        status: "unknown",
+        message: expect.stringContaining("Do not repeat an uncertain booking"),
+      }),
+    );
+    expect(api.signup).toHaveBeenCalledTimes(1);
+    expect(container.querySelector("li button")).toBeNull();
+  },
+);
+
+it("shows the exact selected interval from a refusal receipt", async () => {
+  api.signup.mockResolvedValue({
+    ...musicOffer,
+    starts_at: "2099-11-12T10:00:00+03:00",
+    ends_at: "2099-11-12T11:00:00+03:00",
+    status: "refused",
+    message: "Window is no longer available",
+  });
+  render({ response: { ...response, signup_offers: [musicOffer] } });
+  act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+  const [start, duration] = container.querySelectorAll("select");
+  changeInput(start, "10:00");
+  changeInput(duration, "60");
+  await act(async () =>
+    container.querySelector<HTMLButtonElement>("li button")!.click(),
+  );
+  expect(container.textContent).toContain("Could not book");
+  expect(container.textContent).toContain("10:00–11:00");
+  expect(container.textContent).not.toContain("09:00–12:00");
+  expect(api.remember).toHaveBeenLastCalledWith(
+    "chat-1",
+    expect.objectContaining({
+      starts_at: "2099-11-12T10:00:00+03:00",
+      ends_at: "2099-11-12T11:00:00+03:00",
+      status: "refused",
+    }),
+  );
+});
+
+it.each([
+  [45, ["", "30"]],
+  [240, ["", "30", "60", "90", "120", "150", "180"]],
+] as const)(
+  "caps grid durations by both quota %s and window length",
+  (max_duration_minutes, expected) => {
+    render({
+      response: {
+        ...response,
+        signup_offers: [
+          {
+            ...musicOffer,
+            music_window: { ...musicWindow, max_duration_minutes },
+          } as unknown as searchTypes.SchemaSignupOffer,
+        ],
+      },
+    });
+    expect(container.querySelector("li button")?.textContent).toBe(
+      "Choose time",
+    );
+    act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+    const [, duration] = container.querySelectorAll("select");
+    expect(Array.from(duration.options, (option) => option.value)).toEqual(
+      expected,
+    );
+    expect(duration.value).toBe("");
+  },
+);
+
+it("expires music when no future grid start remains before the latest-start cap", () => {
+  const now = vi
+    .spyOn(Date, "now")
+    .mockReturnValue(Date.parse("2099-11-12T10:05:00+03:00"));
+  try {
+    render({
+      response: {
+        ...response,
+        signup_offers: [
+          {
+            ...musicOffer,
+            music_window: {
+              ...musicWindow,
+              latest_start_at: "2099-11-12T10:15:00+03:00",
+            },
+          } as unknown as searchTypes.SchemaSignupOffer,
+        ],
+      },
+    });
+    expect(container.querySelector("li button")).toBeNull();
+    expect(container.textContent).toContain(
+      "This offer has expired. Ask for current availability.",
+    );
+  } finally {
+    now.mockRestore();
+  }
+});
+
+it("validates music duration against the offered choices before recording any attempt", async () => {
+  render({ response: { ...response, signup_offers: [musicOffer] } });
+  act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+  const [start, duration] = container.querySelectorAll("select");
+  changeInput(start, "10:00");
+  const invalid = document.createElement("option");
+  invalid.value = "45";
+  duration.append(invalid);
+  changeInput(duration, "45");
+  await act(async () =>
+    container.querySelector<HTMLButtonElement>("li button")!.click(),
+  );
+  expect(api.signup).not.toHaveBeenCalled();
+  expect(api.remember).not.toHaveBeenCalled();
+  expect(container.textContent).toContain("Choose a start time and duration.");
+});
+
+it("requires explicit Music Room time and duration, then persists the selected Moscow interval before transport", async () => {
+  api.signup.mockImplementation(() => {
+    expect(api.remember).toHaveBeenCalledWith(
+      "chat-1",
+      expect.objectContaining({
+        status: "unknown",
+        starts_at: "2099-11-12T10:00:00+03:00",
+        ends_at: "2099-11-12T11:00:00+03:00",
+      }),
+    );
+    return Promise.reject(new TypeError("Lost reply"));
+  });
+  render({ response: { ...response, signup_offers: [musicOffer] } });
+  expect(container.textContent).toContain("Available window");
+  expect(container.textContent).toContain("09:00–12:00");
+  expect(container.querySelector("li button")?.textContent).toBe("Choose time");
+  act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
+  expect(api.signup).not.toHaveBeenCalled();
+  expect(api.remember).not.toHaveBeenCalled();
+  const [start, duration] = container.querySelectorAll("select");
+  expect(start.value).toBe("");
+  expect(duration.value).toBe("");
+  const book = container.querySelector<HTMLButtonElement>("li button")!;
+  expect(book.textContent).toBe("Book");
+  await act(async () => book.click());
+  expect(api.signup).not.toHaveBeenCalled();
+  expect(api.remember).not.toHaveBeenCalled();
+  expect(container.textContent).toContain("Choose a start time and duration.");
+  changeInput(start, "10:00");
+  expect(container.textContent).not.toContain(
+    "Choose a start time and duration.",
+  );
+  expect(duration.value).toBe("");
+  changeInput(duration, "60");
+  expect(book.parentElement?.textContent).toContain(
+    "Nov 12, 2099, 10:00–11:00 · MSK",
+  );
+  await act(async () => {
+    book.click();
+    book.click();
+  });
+  expect(api.signup).toHaveBeenCalledExactlyOnceWith({
+    params: { path: { chat_id: "chat-1", offer_id: "offer-1" } },
+    headers: {},
+    body: { time_from: "10:00", time_to: "11:00" },
+  });
+  expect(container.textContent).toContain("Booking outcome is unknown");
+  expect(container.textContent).toContain("10:00–11:00");
+  expect(container.textContent).not.toContain("09:00–12:00");
+  expect(container.textContent).not.toContain("Available window");
+  expect(container.textContent).toContain("Check booking in the service");
+  expect(container.querySelector("button")).toBeNull();
+});
+
+function changeInput(
+  element: HTMLInputElement | HTMLSelectElement,
+  value: string,
+) {
+  act(() => {
+    const prototype =
+      element instanceof HTMLSelectElement
+        ? HTMLSelectElement.prototype
+        : HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(prototype, "value")!.set!.call(
+      element,
+      value,
+    );
+    element.dispatchEvent(
+      new Event(element instanceof HTMLSelectElement ? "change" : "input", {
+        bubbles: true,
+      }),
+    );
+  });
+}
+
+it.each(["a".repeat(101), "🎵".repeat(101)])(
+  "rejects an oversized room subject before consuming the attempt: %s",
+  async (title) => {
+    render({ response: { ...response, signup_offers: [roomOffer] } });
+    const input = container.querySelector<HTMLInputElement>("li input")!;
+    const button = container.querySelector<HTMLButtonElement>("li button")!;
+    changeInput(input, title);
+    await act(async () => button.click());
+    expect(api.remember).not.toHaveBeenCalled();
+    expect(api.signup).not.toHaveBeenCalled();
+    expect(input.value).toBe(title);
+    expect(button.disabled).toBe(false);
+    expect(container.textContent).toContain(
+      "Booking subject must be 100 characters or fewer.",
+    );
+
+    const validTitle =
+      title === "a".repeat(101) ? "a".repeat(100) : "🎵".repeat(100);
+    changeInput(input, validTitle);
+    api.signup.mockResolvedValue({
+      ...roomOffer,
+      booking_title: validTitle,
+      status: "confirmed",
+    });
+    await act(async () => button.click());
+    expect(api.signup).toHaveBeenCalledExactlyOnceWith({
+      params: { path: { chat_id: "chat-1", offer_id: "offer-1" } },
+      headers: {},
+      body: { booking_title: validTitle },
+    });
+    expect(container.textContent).toContain("Booked");
+  },
+);
+
+it("requires a room subject inline and books only the exact supplied title", async () => {
+  render({ response: { ...response, signup_offers: [roomOffer] } });
+  expect(container.textContent).toContain("Meeting room 301");
+  expect(container.textContent).toContain("University, floor 3");
+  const button = container.querySelector<HTMLButtonElement>("li button")!;
+  expect(button.textContent).toBe("Book");
+  await act(async () => button.click());
+  expect(api.signup).not.toHaveBeenCalled();
+  expect(api.remember).not.toHaveBeenCalled();
+  expect(container.textContent).toContain("Enter a booking subject.");
+  const input = container.querySelector("li input")! as HTMLInputElement;
+  expect(input.value).toBe("");
+  expect(input.required).toBe(true);
+  changeInput(input, "Thesis rehearsal");
+  expect(container.textContent).not.toContain("Enter a booking subject.");
+  api.signup.mockResolvedValue({
+    ...roomOffer,
+    booking_title: "Thesis rehearsal",
+    status: "confirmed",
+  });
+  await act(async () => button.click());
+  expect(api.signup).toHaveBeenCalledExactlyOnceWith({
+    params: { path: { chat_id: "chat-1", offer_id: "offer-1" } },
+    headers: {},
+    body: { booking_title: "Thesis rehearsal" },
+  });
+  expect(api.remember).toHaveBeenNthCalledWith(
+    1,
+    "chat-1",
+    expect.objectContaining({
+      booking_title: "Thesis rehearsal",
+      status: "unknown",
+    }),
+  );
+  expect(container.textContent).toContain("Booked");
+  expect(api.headers).not.toHaveBeenCalled();
+});
+
 it("groups offers by Moscow date with compact intervals and separate titles and actions", () => {
   render({
     response: {

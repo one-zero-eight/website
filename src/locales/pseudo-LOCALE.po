@@ -415,6 +415,10 @@ msgstr ""
 msgid "{trainingTitle} (Trainer)"
 msgstr ""
 
+#: src/components/search/ask/AskBookingChoices.tsx:158
+msgid "{value} min"
+msgstr ""
+
 #: src/components/dashboard/AcademicCalendarWidget.tsx:35
 msgid "*based on <0>Eduwiki</0>"
 msgstr ""
@@ -1120,6 +1124,10 @@ msgstr ""
 msgid "Available medical groups"
 msgstr ""
 
+#: src/components/search/ask/AskSignupOffers.tsx:225
+msgid "Available window"
+msgstr ""
+
 #: src/components/search/ask/AskSources.tsx:105
 msgid "Available sources"
 msgstr ""
@@ -1251,6 +1259,10 @@ msgstr ""
 msgid "Book this room"
 msgstr ""
 
+#: src/components/search/ask/AskSignupOffers.tsx:277
+msgid "Booked"
+msgstr ""
+
 #: src/components/when2meet/MeetingPage.tsx:1559
 msgid "Booked room"
 msgstr ""
@@ -1267,8 +1279,28 @@ msgstr ""
 msgid "Booking details"
 msgstr ""
 
+#: src/components/search/ask/AskSignupOffers.tsx:293
+msgid "Booking outcome is unknown"
+msgstr ""
+
+#: src/components/search/ask/AskBookingChoices.tsx:165
+msgid "Booking subject"
+msgstr ""
+
+#: src/components/search/ask/AskBookingChoices.tsx:98
+msgid "Booking subject must be 100 characters or fewer."
+msgstr ""
+
 #: src/components/when2meet/MeetingPage.tsx:1594
 msgid "Booking time differs from the selected meeting time."
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:301
+msgid "Booking unavailable"
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:268
+msgid "Booking…"
 msgstr ""
 
 #: src/components/board-games/ReservationDetailsModal.tsx:180
@@ -1631,6 +1663,10 @@ msgstr ""
 msgid "Chats"
 msgstr ""
 
+#: src/components/search/ask/AskSignupOffers.tsx:361
+msgid "Check booking in the service"
+msgstr ""
+
 #: src/components/sport/SportStudentTrainingModal.tsx:467
 #: src/components/sport/SportTrainingsCalendarList.tsx:270
 msgid "Check in"
@@ -1667,6 +1703,10 @@ msgstr ""
 #. placeholder {0}: field.unresolved.length
 #: src/components/tabletennis/PlayersField.tsx:364
 msgid "Check the players ({0}): pick the right one, fix the email, add as a guest, or remove."
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:65
+msgid "Check the service before trying again. Do not repeat an uncertain booking."
 msgstr ""
 
 #: src/components/search/ask/AskSignupOffers.tsx:53
@@ -1715,6 +1755,10 @@ msgstr ""
 msgid "Chill day"
 msgstr ""
 
+#: src/components/search/ask/AskBookingChoices.tsx:79
+msgid "Choose a future time within the available window."
+msgstr ""
+
 #: src/components/when2meet/MeetingPage.tsx:1057
 msgid "Choose a meeting start time in the future."
 msgstr ""
@@ -1729,6 +1773,10 @@ msgstr ""
 
 #: src/components/search/SourceRequests.tsx:135
 msgid "Choose a specific study group, not \"all\"."
+msgstr ""
+
+#: src/components/search/ask/AskBookingChoices.tsx:74
+msgid "Choose a start time and duration."
 msgstr ""
 
 #: src/components/when2meet/CreationPage.tsx:261
@@ -1748,6 +1796,10 @@ msgstr ""
 msgid "Choose color"
 msgstr ""
 
+#: src/components/search/ask/AskBookingChoices.tsx:155
+msgid "Choose duration"
+msgstr ""
+
 #: src/components/clubs/EditClubPage.tsx:729
 #: src/components/web-print/FileDropzone.tsx:267
 msgid "Choose file"
@@ -1759,6 +1811,14 @@ msgstr ""
 
 #: src/components/search/ask/AskInput.tsx:71
 msgid "Choose PDF, TXT, PNG, JPEG or WebP files."
+msgstr ""
+
+#: src/components/search/ask/AskBookingChoices.tsx:133
+msgid "Choose start time"
+msgstr ""
+
+#: src/components/search/ask/AskBookingChoices.tsx:112
+msgid "Choose time"
 msgstr ""
 
 #: src/components/extension/ExtensionPage.tsx:60
@@ -2190,6 +2250,10 @@ msgstr ""
 
 #: src/components/search/ask/AskCalendarEvents.tsx:30
 msgid "Could not add the event to the calendar"
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:285
+msgid "Could not book"
 msgstr ""
 
 #: src/components/board-games/BoardGamesTabs.tsx:51
@@ -2953,6 +3017,10 @@ msgstr ""
 msgid "Drop your file here"
 msgstr ""
 
+#: src/components/search/ask/AskBookingChoices.tsx:143
+msgid "Duration"
+msgstr ""
+
 #: src/components/web-print/PrintPage.tsx:632
 msgid "e.g. 1-5,8,16-20 (empty = all)"
 msgstr ""
@@ -3134,6 +3202,10 @@ msgstr ""
 #: src/components/events/drafts/CreateDraftModal.tsx:79
 #: src/components/events/drafts/EditDraftInfoModal.tsx:93
 msgid "Enrollment URL is required for external enrollment."
+msgstr ""
+
+#: src/components/search/ask/AskBookingChoices.tsx:93
+msgid "Enter a booking subject."
 msgstr ""
 
 #: src/components/schedule-assistant/DateInput.tsx:203
@@ -8100,6 +8172,10 @@ msgstr ""
 msgid "Start qualification"
 msgstr ""
 
+#: src/components/search/ask/AskBookingChoices.tsx:121
+msgid "Start time (MSK)"
+msgstr ""
+
 #: src/components/events/utils/datetime.ts:98
 msgid "Start time cannot be in the past."
 msgstr ""
@@ -8782,6 +8858,10 @@ msgstr ""
 
 #: src/components/clubs/EditClubPage.tsx:684
 msgid "This logo change will be cancelled when you save."
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:309
+msgid "This offer has expired. Ask for current availability."
 msgstr ""
 
 #: src/components/search/ask/AskSignupOffers.tsx:171

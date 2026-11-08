@@ -351,6 +351,168 @@ describe("ask session attachments", () => {
     );
   });
 
+  it.each(["rooms", "music"])(
+    "restores the exact %s booking selection across stale history and reload",
+    async (service) => {
+      const now = vi
+        .spyOn(Date, "now")
+        .mockReturnValue(Date.parse("2099-11-12T09:00:00+03:00"));
+      try {
+        const window = {
+          starts_at: "2099-11-12T09:00:00+03:00",
+          ends_at: "2099-11-12T12:00:00+03:00",
+          latest_start_at: "2099-11-12T11:30:00+03:00",
+          duration_minutes: null,
+          max_duration_minutes: 90,
+          step_minutes: 30,
+        };
+        const offer = {
+          ...signupOffer,
+          service,
+          starts_at:
+            service === "music" ? window.starts_at : signupOffer.starts_at,
+          ends_at: service === "music" ? window.ends_at : signupOffer.ends_at,
+          booking_title: null,
+          music_window: service === "music" ? window : null,
+        } as unknown as searchTypes.SchemaSignupOffer;
+        api.history.mockResolvedValue({
+          answers: [{ ...answer, signup_offers: [offer] }],
+        });
+        await act(async () => session.openChat("chat-1"));
+        const selected = {
+          ...offer,
+          status: "unknown",
+          starts_at:
+            service === "music"
+              ? "2099-11-12T10:00:00+03:00"
+              : "2099-11-12T18:30:00+03:00",
+          ends_at:
+            service === "music"
+              ? "2099-11-12T10:30:00+03:00"
+              : "2099-11-12T19:00:00+03:00",
+          booking_title: service === "rooms" ? "Thesis rehearsal" : null,
+        } as unknown as searchTypes.SchemaSignupOffer;
+        act(() => session.rememberSignup("chat-1", selected));
+        await act(async () => session.openChat("chat-2"));
+        const otherMessages = snapshot.messages;
+        // The selected time has passed, but the original music window still offers later starts.
+        now.mockReturnValue(Date.parse("2099-11-12T10:45:00+03:00"));
+        act(() => session.setDraftQuery("Still in the other chat"));
+        expect(snapshot.messages).toBe(otherMessages);
+        act(() => root.unmount());
+        vi.resetModules();
+        session = await import("./ask-session");
+        root = createRoot(container);
+        function ReloadedProbe() {
+          snapshot = session.useAskSession();
+          return null;
+        }
+        act(() => root.render(createElement(ReloadedProbe)));
+        await act(async () => session.openChat("chat-1"));
+        expect(snapshot.messages[1]).toMatchObject({
+          response: { signup_offers: [selected] },
+        });
+        const saved = JSON.parse(sessionStorage.getItem("search-ask-session")!);
+        expect(saved.signupReceipts).toContainEqual(
+          expect.objectContaining({
+            chatId: "chat-1",
+            offerId: offer.id,
+            status: "unknown",
+            starts_at: selected.starts_at,
+            ends_at: selected.ends_at,
+            booking_title: service === "rooms" ? "Thesis rehearsal" : null,
+            expiresAt: Date.parse(
+              service === "music" ? window.latest_start_at : offer.expires_at,
+            ),
+          }),
+        );
+        const serverReceipt = {
+          ...offer,
+          starts_at:
+            service === "music"
+              ? "2099-11-12T10:30:00+03:00"
+              : "2099-11-12T19:00:00+03:00",
+          ends_at:
+            service === "music"
+              ? "2099-11-12T11:30:00+03:00"
+              : "2099-11-12T19:30:00+03:00",
+          booking_title: service === "rooms" ? "Server selected title" : null,
+        } as unknown as searchTypes.SchemaSignupOffer;
+        for (const status of ["confirmed", "unknown", "refused"] as const) {
+          act(() => session.startNewChat());
+          api.history.mockResolvedValueOnce({
+            answers: [
+              {
+                ...answer,
+                signup_offers: [
+                  { ...serverReceipt, status, message: "Server receipt" },
+                ],
+              },
+            ],
+          });
+          await act(async () => session.openChat("chat-1"));
+          expect(snapshot.messages[1]).toMatchObject({
+            response: {
+              signup_offers: [
+                { ...serverReceipt, status, message: "Server receipt" },
+              ],
+            },
+          });
+        }
+        expect(api.post).not.toHaveBeenCalled();
+      } finally {
+        now.mockRestore();
+      }
+    },
+  );
+
+  it("downgrades an invalid durable booking receipt without borrowing local selection", async () => {
+    const offer = {
+      ...signupOffer,
+      service: "rooms",
+      booking_title: null,
+    } as unknown as searchTypes.SchemaSignupOffer;
+    const local = {
+      ...offer,
+      status: "unknown",
+      starts_at: "2099-11-12T18:30:00+03:00",
+      ends_at: "2099-11-12T19:00:00+03:00",
+      booking_title: "Local attempted title",
+    } as unknown as searchTypes.SchemaSignupOffer;
+    act(() => session.rememberSignup("chat-1", local));
+    api.history.mockResolvedValue({
+      answers: [
+        {
+          ...answer,
+          signup_offers: [
+            {
+              ...offer,
+              status: "confirmed",
+              starts_at: "2099-11-12T19:00:00+03:00",
+              ends_at: "2099-11-12T19:30:00+03:00",
+              booking_title: "   ",
+            },
+          ],
+        },
+      ],
+    });
+
+    await act(async () => session.openChat("chat-1"));
+
+    expect(snapshot.messages[1]).toMatchObject({
+      response: {
+        signup_offers: [
+          {
+            status: "unknown",
+            starts_at: "2099-11-12T19:00:00+03:00",
+            ends_at: "2099-11-12T19:30:00+03:00",
+            booking_title: "   ",
+          },
+        ],
+      },
+    });
+  });
+
   it("keeps an attempted signup unavailable across chat navigation and reload", async () => {
     const offer = signupOffer;
     api.history.mockResolvedValue({
