@@ -3140,6 +3140,10 @@ msgstr ""
 msgid "Enter a valid email."
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:205
+msgid "Enter a valid Telegram chat, channel or invite link."
+msgstr ""
+
 #: src/components/clubs/AddClubDialog.tsx:97
 msgid "Enter club title"
 msgstr ""
@@ -8430,6 +8434,10 @@ msgstr ""
 msgid "Telegram Chat"
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:188
+msgid "Telegram chat or channel link"
+msgstr ""
+
 #: src/components/clubs/HowToCreateClubPage.tsx:261
 msgid "Telegram group link"
 msgstr ""
@@ -9237,6 +9245,10 @@ msgstr ""
 
 #: src/components/account/MyTokenPage.tsx:72
 msgid "Use only for development. Do not send it to untrusted people or applications!"
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:197
+msgid "Use t.me/username for a public chat or channel, or t.me/+HASH or t.me/joinchat/HASH for a private invitation. Links with https:// are also supported."
 msgstr ""
 
 #: src/components/account/SignInModal.tsx:23

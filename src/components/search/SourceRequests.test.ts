@@ -123,19 +123,83 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 it.each([
-  "https://t.me/publicchat",
+  ["t.me/universityinnopolis", "https://t.me/universityinnopolis"],
+  ["https://t.me/universityinnopolis", "https://t.me/universityinnopolis"],
+  ["  t.me/UniversityInnopolis  ", "https://t.me/universityinnopolis"],
+  ["https://t.me/publicchat", "https://t.me/publicchat"],
+  ["t.me/ab_cd", "https://t.me/ab_cd"],
+  [`t.me/${"a".repeat(32)}`, `https://t.me/${"a".repeat(32)}`],
+  ["t.me/+valid_Invite-1234", "https://t.me/+valid_Invite-1234"],
+  [
+    "t.me/joinchat/valid_Invite-1234",
+    "https://t.me/joinchat/valid_Invite-1234",
+  ],
+])("submits a Telegram source link %s", async (link, normalized) => {
+  await open();
+  input("invite_link", link);
+  expect(button("Submit request").disabled).toBe(true);
+  act(() =>
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
+  );
+  expect(button("Submit request").disabled).toBe(false);
+  await act(async () => button("Submit request").click());
+  await settle();
+  const posts = api.fetch.mock.calls.filter(([req]) => req.method === "POST");
+  expect(posts).toHaveLength(1);
+  expect(await posts[0][0].json()).toEqual({
+    invite_link: normalized,
+    group_code: "B24-DS-01",
+    comment: "",
+    consent: true,
+  });
+});
+it.each([
   "https://evil.test/+invite",
   "",
   "https://t.me/+invite?leak=yes",
-  "t.me/+valid_Invite-1234",
-  "t.me/joinchat/valid_Invite-1234",
   "http://t.me/+valid_Invite-1234",
   "https://t.me/+short",
   `https://t.me/+${"a".repeat(15)}`,
   `https://t.me/+${"a".repeat(129)}`,
   "https://t.me/+valid_Invite-1234/",
   "https://t.me/+valid_Invite-1234?key=value",
-])("rejects non-private or malformed invite %s", async (invite) => {
+  "http://t.me/universityinnopolis",
+  "https://t.me/universityinnopolis/123",
+  "t.me/universityinnopolis?start=123",
+  "https://t.me/universityinnopolis#fragment",
+  "https://t.me/universityinnopolis/",
+  "https://t.me@evil.test/universityinnopolis",
+  "https://evil.test@t.me/universityinnopolis",
+  "https://t.me.evil.test/universityinnopolis",
+  "https://t.me:443/universityinnopolis",
+  "https://t.me/%75niversityinnopolis",
+  "https://t.me/university-innopolis",
+  "https://t.me/universityиннополис",
+  "https://t.me/12345",
+  "https://t.me/abcd",
+  `https://t.me/${"a".repeat(33)}`,
+  "https://t.me/_publicchat",
+  "https://t.me/publicchat_",
+  ...[
+    "joinchat",
+    "share",
+    "proxy",
+    "socks",
+    "login",
+    "confirmphone",
+    "setlanguage",
+    "addstickers",
+    "addemoji",
+    "addtheme",
+    "bg",
+    "invoice",
+    "giftcode",
+    "addlist",
+    "boost",
+    "contact",
+    "Login",
+  ].map((path) => `t.me/${path}`),
+])("rejects malformed Telegram links %s", async (invite) => {
   await open();
   input("invite_link", invite);
   act(() =>

@@ -6,6 +6,25 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
+function normalizeTelegramLink(value: string): string | undefined {
+  const link = value.trim().replace(/^t\.me\//, "https://t.me/");
+  if (/^https:\/\/t\.me\/(\+|joinchat\/)[A-Za-z0-9_-]{16,128}$/.test(link)) {
+    return link;
+  }
+  const username = /^https:\/\/t\.me\/([A-Za-z][A-Za-z0-9_]{3,30}[A-Za-z0-9])$/
+    .exec(link)?.[1]
+    .toLowerCase();
+  if (
+    !username ||
+    /^(joinchat|share|proxy|socks|login|confirmphone|setlanguage|addstickers|addemoji|addtheme|bg|invoice|giftcode|addlist|boost|contact)$/.test(
+      username,
+    )
+  ) {
+    return undefined;
+  }
+  return `https://t.me/${username}`;
+}
+
 export function SourceRequests() {
   const [open, setOpen] = useState(false);
   return (
@@ -61,10 +80,8 @@ function SourceRequestsContent() {
       });
     },
   });
-  const validInvite =
-    /^https:\/\/t\.me\/(\+|joinchat\/)[A-Za-z0-9_-]{16,128}$/.test(
-      inviteLink.trim(),
-    );
+  const normalizedInvite = normalizeTelegramLink(inviteLink);
+  const validInvite = normalizedInvite !== undefined;
   const validGroup =
     /^[A-Za-z0-9][A-Za-z0-9._-]{0,39}$/.test(groupCode.trim()) &&
     groupCode.trim().toLowerCase() !== "all";
@@ -76,10 +93,10 @@ function SourceRequestsContent() {
     !mutation.isPending;
 
   function handleSubmit() {
-    if (!canSubmit) return;
+    if (!canSubmit || !normalizedInvite) return;
     mutation.mutate({
       body: {
-        invite_link: inviteLink.trim(),
+        invite_link: normalizedInvite,
         group_code: groupCode.trim(),
         comment,
         consent: true,
@@ -110,7 +127,7 @@ function SourceRequestsContent() {
         </Trans>
       </p>
       <label className="flex flex-col gap-1">
-        <Trans>Private Telegram invite link</Trans>
+        <Trans>Telegram chat or channel link</Trans>
         <input
           className="input w-full"
           name="invite_link"
@@ -120,10 +137,16 @@ function SourceRequestsContent() {
         />
         <span className="text-base-content/70 text-xs">
           <Trans>
-            Use https://t.me/+HASH or https://t.me/joinchat/HASH. Public chat
-            links are not supported.
+            Use t.me/username for a public chat or channel, or t.me/+HASH or
+            t.me/joinchat/HASH for a private invitation. Links with https:// are
+            also supported.
           </Trans>
         </span>
+        {!validInvite && (
+          <span className="text-error text-sm">
+            <Trans>Enter a valid Telegram chat, channel or invite link.</Trans>
+          </span>
+        )}
       </label>
       <label className="flex flex-col gap-1">
         <Trans>Study group</Trans>

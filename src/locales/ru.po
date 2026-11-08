@@ -3144,6 +3144,10 @@ msgstr "Укажите время для строки {row}."
 msgid "Enter a valid email."
 msgstr "Введите корректный email."
 
+#: src/components/search/SourceRequests.tsx:205
+msgid "Enter a valid Telegram chat, channel or invite link."
+msgstr "Введите корректную ссылку на Telegram-чат, канал или приглашение."
+
 #: src/components/clubs/AddClubDialog.tsx:97
 msgid "Enter club title"
 msgstr "Введите название клуба"
@@ -8442,6 +8446,10 @@ msgstr "Чат Telegram"
 msgid "Telegram Chat"
 msgstr "Telegram-чат"
 
+#: src/components/search/SourceRequests.tsx:188
+msgid "Telegram chat or channel link"
+msgstr "Ссылка на Telegram-чат или канал"
+
 #: src/components/clubs/HowToCreateClubPage.tsx:261
 msgid "Telegram group link"
 msgstr "Ссылка на группу Telegram"
@@ -9250,6 +9258,10 @@ msgstr "Используйте https://t.me/+HASH или https://t.me/joinchat/H
 #: src/components/account/MyTokenPage.tsx:72
 msgid "Use only for development. Do not send it to untrusted people or applications!"
 msgstr "Используйте только для разработки. Не передавайте его людям и приложениям, которым не доверяете!"
+
+#: src/components/search/SourceRequests.tsx:197
+msgid "Use t.me/username for a public chat or channel, or t.me/+HASH or t.me/joinchat/HASH for a private invitation. Links with https:// are also supported."
+msgstr "Для публичного чата или канала используйте t.me/username, для приватного приглашения — t.me/+HASH или t.me/joinchat/HASH. Ссылки с https:// тоже поддерживаются."
 
 #: src/components/account/SignInModal.tsx:23
 msgid "Use your Innopolis account to access all features of this service."
