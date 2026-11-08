@@ -85,6 +85,28 @@ describe("ask session attachments", () => {
     act(() => root.unmount());
     vi.unstubAllGlobals();
   });
+  it("announces a completed answer after saving it, without private content", async () => {
+    const completed = vi.fn((event: Event) => {
+      const saved = JSON.parse(sessionStorage.getItem("search-ask-session")!);
+      expect(saved.messages.at(-1)).toEqual({
+        role: "assistant",
+        response: answer,
+      });
+      expect((event as CustomEvent).detail).toEqual({
+        chatId: "chat-1",
+        needsApproval: false,
+      });
+    });
+    window.addEventListener("catix-answer-ready", completed);
+    try {
+      api.post.mockResolvedValueOnce({ data: stream([["done", answer]]) });
+      await act(async () => session.askQuestion("Read it"));
+      expect(completed).toHaveBeenCalledOnce();
+      expect(snapshot.error).toBeNull();
+    } finally {
+      window.removeEventListener("catix-answer-ready", completed);
+    }
+  });
   it("does not bind an unsent draft when an approval stream identifies its chat", async () => {
     const waiting = { ...answer, approval: { id: "approval-1", actions: [] } };
     api.history.mockResolvedValueOnce({ answers: [], waiting });
@@ -99,6 +121,73 @@ describe("ask session attachments", () => {
     await act(async () => session.decideApproval("approve"));
     expect(snapshot.draftAttachments).toEqual([{ info, bound: false }]);
   });
+  it("announces approval requests and the answer after a decision, but not history", async () => {
+    const completed = vi.fn();
+    window.addEventListener("catix-answer-ready", completed);
+    try {
+      const waiting = {
+        ...answer,
+        approval: { id: "approval-1", actions: [] },
+      };
+      api.history.mockResolvedValueOnce({ answers: [], waiting });
+      await act(async () => session.openChat("chat-1"));
+      expect(completed).not.toHaveBeenCalled();
+      api.post.mockResolvedValueOnce({ data: stream([["done", answer]]) });
+      await act(async () => session.decideApproval("approve"));
+      expect(completed).toHaveBeenCalledOnce();
+      expect(completed.mock.calls[0][0].detail).toEqual({
+        chatId: "chat-1",
+        needsApproval: false,
+      });
+      api.post.mockResolvedValueOnce({ data: stream([["done", waiting]]) });
+      await act(async () => session.askQuestion("Please do it"));
+      expect(completed).toHaveBeenCalledTimes(2);
+      expect(completed.mock.calls[1][0].detail).toEqual({
+        chatId: "chat-1",
+        needsApproval: true,
+      });
+    } finally {
+      window.removeEventListener("catix-answer-ready", completed);
+    }
+  });
+  it.each(["error", "cancelled", "disconnected", "aborted"])(
+    "does not announce a %s stream",
+    async (outcome) => {
+      const completed = vi.fn();
+      window.addEventListener("catix-answer-ready", completed);
+      try {
+        if (outcome === "aborted") {
+          let finish!: (value: { data: ReadableStream<Uint8Array> }) => void;
+          api.post.mockReturnValueOnce(
+            new Promise((resolve) => {
+              finish = resolve;
+            }),
+          );
+          let pending!: Promise<void>;
+          await act(async () => {
+            pending = session.askQuestion("Read it");
+          });
+          act(() => session.startNewChat());
+          await act(async () => {
+            finish({ data: stream([["done", answer]]) });
+            await pending;
+          });
+        } else {
+          api.post.mockResolvedValueOnce({
+            data: stream(
+              outcome === "disconnected"
+                ? []
+                : [[outcome, { detail: "Stopped" }]],
+            ),
+          });
+          await act(async () => session.askQuestion("Read it"));
+        }
+        expect(completed).not.toHaveBeenCalled();
+      } finally {
+        window.removeEventListener("catix-answer-ready", completed);
+      }
+    },
+  );
   it("restores attachments from answered and waiting history and keeps them after approval", async () => {
     const waiting = {
       ...answer,

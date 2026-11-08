@@ -5,7 +5,7 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AskPage } from "./AskPage";
-import { openChat, startNewChat } from "./ask-session";
+import { askQuestion, openChat, startNewChat } from "./ask-session";
 
 const api = vi.hoisted(() => ({
   history: vi.fn(),
@@ -93,6 +93,70 @@ describe("AskPage attachment history", () => {
     container.remove();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
+  });
+  it("opens a notification deep link and consumes it so later chat choices stay put", async () => {
+    const handled = vi.fn();
+    await act(async () =>
+      root.render(
+        createElement(
+          I18nProvider,
+          {
+            i18n: setupI18n({ locale: "en", messages: { en: {} } }),
+          },
+          createElement(AskPage, {
+            askQuery: "",
+            askChat: "notified-chat",
+            onChatLinkHandled: handled,
+          }),
+        ),
+      ),
+    );
+    expect(api.history).toHaveBeenCalledWith({
+      queryKey: [
+        "get",
+        "/ask/chats/{chat_id}",
+        { params: { path: { chat_id: "notified-chat" } } },
+      ],
+    });
+    expect(handled).toHaveBeenCalled();
+  });
+  it("does not interrupt an ongoing answer when its own chat notification opens", async () => {
+    await act(async () => openChat("chat-1"));
+    let finish!: () => void;
+    api.post.mockResolvedValueOnce({
+      data: new ReadableStream<Uint8Array>({
+        start(controller) {
+          finish = () => controller.close();
+        },
+      }),
+    });
+    let pending!: Promise<void>;
+    await act(async () => {
+      pending = askQuestion("Continue");
+    });
+    const signal = api.post.mock.calls[0][1].signal;
+    api.history.mockClear();
+    await act(async () =>
+      root.render(
+        createElement(
+          I18nProvider,
+          {
+            i18n: setupI18n({ locale: "en", messages: { en: {} } }),
+          },
+          createElement(AskPage, {
+            askQuery: "",
+            askChat: "chat-1",
+            onChatLinkHandled: vi.fn(),
+          }),
+        ),
+      ),
+    );
+    expect(signal.aborted).toBe(false);
+    expect(api.history).not.toHaveBeenCalled();
+    await act(async () => {
+      finish();
+      await pending;
+    });
   });
   it("does not create a private blob URL after the attachment leaves the page", async () => {
     await act(async () => openChat("chat-1"));

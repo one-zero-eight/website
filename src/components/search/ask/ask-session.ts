@@ -26,6 +26,20 @@ export type AskMessage =
     }
   | { role: "assistant"; response: searchTypes.SchemaAskResponses };
 
+export const askAnswerReadyEvent = "catix-answer-ready";
+export type AskAnswerReady = { chatId: string | null; needsApproval: boolean };
+
+function announceAnswer(response: searchTypes.SchemaAskResponses) {
+  window.dispatchEvent(
+    new CustomEvent<AskAnswerReady>(askAnswerReadyEvent, {
+      detail: {
+        chatId: session.chatId,
+        needsApproval: !!response.approval,
+      },
+    }),
+  );
+}
+
 type AskSession = {
   messages: AskMessage[];
   chatId: string | null;
@@ -302,6 +316,7 @@ export async function askQuestion(
         chatId: response.chat_id ?? null,
         draftAttachments: [],
       });
+      announceAnswer(response);
       queryClient.invalidateQueries({
         queryKey: $search.queryOptions("get", "/ask/chats").queryKey,
       });
@@ -343,13 +358,14 @@ export async function decideApproval(decision: "approve" | "reject") {
       },
       controller.signal,
     );
-    if (response && session.chatId === chatId) {
+    if (response && !controller.signal.aborted && session.chatId === chatId) {
       update({
         messages: [
           ...session.messages.slice(0, -1),
           { role: "assistant", response },
         ],
       });
+      announceAnswer(response);
       queryClient.invalidateQueries({
         queryKey: $search.queryOptions("get", "/ask/chats").queryKey,
       });

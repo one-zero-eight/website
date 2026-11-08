@@ -1565,6 +1565,14 @@ msgstr "Cards"
 msgid "Catan"
 msgstr "Catan"
 
+#: src/components/search/ask/AskNotifications.tsx:65
+msgid "cAtIx is waiting for confirmation"
+msgstr "cAtIx is waiting for confirmation"
+
+#: src/components/search/ask/AskNotifications.tsx:66
+msgid "cAtIx replied"
+msgstr "cAtIx replied"
+
 #: src/components/editor/extensions/Callout.ts:42
 msgid "Caution"
 msgstr "Caution"
@@ -2286,6 +2294,10 @@ msgstr "Could not update attendance"
 #: src/components/board-games/BoardGamesAdminPage.tsx:664
 msgid "Could not update game"
 msgstr "Could not update game"
+
+#: src/components/search/ask/AskNotificationButton.tsx:80
+msgid "Could not update notification settings. Please try again."
+msgstr "Could not update notification settings. Please try again."
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:310
 #: src/components/board-games/ReservationDetailsModal.tsx:67
@@ -5798,6 +5810,19 @@ msgstr "Nothing selected"
 msgid "Nothing to import"
 msgstr "Nothing to import"
 
+#: src/components/search/ask/AskNotificationButton.tsx:49
+msgid "Notifications are blocked. Allow them in your browser settings."
+msgstr "Notifications are blocked. Allow them in your browser settings."
+
+#: src/components/search/ask/AskNotificationButton.tsx:103
+msgid "Notifications on"
+msgstr "Notifications on"
+
+#: src/components/search/ask/AskNotificationButton.tsx:97
+#: src/components/search/ask/AskNotificationButton.tsx:105
+msgid "Notify me when cAtIx replies"
+msgstr "Notify me when cAtIx replies"
+
 #. placeholder {0}: getViewUserName(targetUser)
 #: src/components/admin/useImpersonation.ts:103
 msgid "Now impersonating {0}"
@@ -5934,6 +5959,10 @@ msgstr "Open <0>/tv</0> on the display, enter the startup password below, and ap
 msgid "Open bracket"
 msgstr "Open bracket"
 
+#: src/components/search/ask/AskNotifications.tsx:77
+msgid "Open chat"
+msgstr "Open chat"
+
 #: src/components/room-booking/bookings-list/BookingsListPage.tsx:113
 #: src/components/when2meet/MeetingPage.tsx:1580
 msgid "Open details"
@@ -5973,6 +6002,10 @@ msgstr "Open Telegram bot"
 #: src/components/search/ask/AskCalendarEvents.tsx:80
 msgid "Open the calendar"
 msgstr "Open the calendar"
+
+#: src/components/search/ask/AskNotifications.tsx:37
+msgid "Open the chat to read the reply."
+msgstr "Open the chat to read the reply."
 
 #: src/components/calendar/ExportModal.tsx:99
 msgid "Open your calendar settings to add a calendar by URL."
@@ -9017,6 +9050,10 @@ msgstr "Tue"
 #: src/components/schedule-assistant/timetable/timetableViewerModel.ts:49
 msgid "Tuesday"
 msgstr "Tuesday"
+
+#: src/components/search/ask/AskNotificationButton.tsx:96
+msgid "Turn off reply notifications"
+msgstr "Turn off reply notifications"
 
 #. placeholder {0}: lastApproval.roomId
 #. placeholder {1}: new Date(lastApproval.at).toLocaleString(i18n.locale, { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", })

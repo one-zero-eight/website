@@ -8,9 +8,11 @@ import { SourceRequests } from "@/components/search/SourceRequests";
 import { AskChatList } from "./AskChatList";
 import { AskAttachment } from "./AskAttachment";
 import { AskInput } from "./AskInput";
+import { AskNotificationButton } from "./AskNotificationButton";
 import { AskResult } from "./AskResult";
 import {
   askQuestion,
+  openChat,
   cancelQuestion,
   setDraftQuery,
   setDraftAttachments,
@@ -21,7 +23,15 @@ import {
 const FOLLOW_DISTANCE_PX = 80;
 
 // A chat as in messengers: the earlier messages above, the newest at the bottom over the message box
-export function AskPage({ askQuery }: { askQuery: string }) {
+export function AskPage({
+  askQuery,
+  askChat,
+  onChatLinkHandled,
+}: {
+  askQuery: string;
+  askChat?: string;
+  onChatLinkHandled?: () => void;
+}) {
   useLingui();
 
   const [isChatListOpen, setIsChatListOpen] = useState(false);
@@ -46,6 +56,14 @@ export function AskPage({ askQuery }: { askQuery: string }) {
   useEffect(() => {
     if (askQuery) setDraftQuery(askQuery);
   }, [askQuery]);
+
+  useEffect(() => {
+    if (!askChat) return;
+    // A notification for this chat must not cancel a newer answer in progress.
+    if (askChat !== chatId) void openChat(askChat);
+    // Consume the link so choosing another chat does not reopen this one.
+    onChatLinkHandled?.();
+  }, [askChat, chatId, onChatLinkHandled]);
 
   // Follow the chat to its end while the user has not scrolled up to read
   useEffect(() => {
@@ -191,7 +209,10 @@ export function AskPage({ askQuery }: { askQuery: string }) {
             onStop={handleStop}
             isPending={isPending}
           />
-          <SourceRequests />
+          <div className="flex flex-wrap items-center justify-between gap-1">
+            <SourceRequests />
+            <AskNotificationButton />
+          </div>
         </div>
       </div>
     </div>

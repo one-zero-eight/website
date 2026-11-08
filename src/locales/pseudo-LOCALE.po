@@ -1565,6 +1565,14 @@ msgstr ""
 msgid "Catan"
 msgstr ""
 
+#: src/components/search/ask/AskNotifications.tsx:65
+msgid "cAtIx is waiting for confirmation"
+msgstr ""
+
+#: src/components/search/ask/AskNotifications.tsx:66
+msgid "cAtIx replied"
+msgstr ""
+
 #: src/components/editor/extensions/Callout.ts:42
 msgid "Caution"
 msgstr ""
@@ -2281,6 +2289,10 @@ msgstr ""
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:664
 msgid "Could not update game"
+msgstr ""
+
+#: src/components/search/ask/AskNotificationButton.tsx:80
+msgid "Could not update notification settings. Please try again."
 msgstr ""
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:310
@@ -5794,6 +5806,19 @@ msgstr ""
 msgid "Nothing to import"
 msgstr ""
 
+#: src/components/search/ask/AskNotificationButton.tsx:49
+msgid "Notifications are blocked. Allow them in your browser settings."
+msgstr ""
+
+#: src/components/search/ask/AskNotificationButton.tsx:103
+msgid "Notifications on"
+msgstr ""
+
+#: src/components/search/ask/AskNotificationButton.tsx:97
+#: src/components/search/ask/AskNotificationButton.tsx:105
+msgid "Notify me when cAtIx replies"
+msgstr ""
+
 #. placeholder {0}: getViewUserName(targetUser)
 #: src/components/admin/useImpersonation.ts:103
 msgid "Now impersonating {0}"
@@ -5930,6 +5955,10 @@ msgstr ""
 msgid "Open bracket"
 msgstr ""
 
+#: src/components/search/ask/AskNotifications.tsx:77
+msgid "Open chat"
+msgstr ""
+
 #: src/components/room-booking/bookings-list/BookingsListPage.tsx:113
 #: src/components/when2meet/MeetingPage.tsx:1580
 msgid "Open details"
@@ -5960,6 +5989,10 @@ msgstr ""
 
 #: src/components/search/ask/AskCalendarEvents.tsx:80
 msgid "Open the calendar"
+msgstr ""
+
+#: src/components/search/ask/AskNotifications.tsx:37
+msgid "Open the chat to read the reply."
 msgstr ""
 
 #: src/components/calendar/ExportModal.tsx:99
@@ -9004,6 +9037,10 @@ msgstr ""
 
 #: src/components/schedule-assistant/timetable/timetableViewerModel.ts:49
 msgid "Tuesday"
+msgstr ""
+
+#: src/components/search/ask/AskNotificationButton.tsx:96
+msgid "Turn off reply notifications"
 msgstr ""
 
 #. placeholder {0}: lastApproval.roomId
