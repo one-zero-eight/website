@@ -54,6 +54,9 @@ function AskSourcesContent() {
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="border-base-300 border-b pb-2">
+        <SourceRequests />
+      </div>
       {isLoading ? (
         <div className="flex flex-col gap-2">
           <p className="text-base-content/70 text-sm">
@@ -165,9 +168,6 @@ function AskSourcesContent() {
           </p>
         </>
       ) : null}
-      <div className="border-base-300 border-t pt-2">
-        <SourceRequests />
-      </div>
     </div>
   );
 }

@@ -105,6 +105,9 @@ describe("AskSources", () => {
       "Saved message history remains searchable",
     );
     expect(document.body.textContent).toContain("Propose a Telegram chat");
+    expect(
+      document.body.textContent!.indexOf("Propose a Telegram chat"),
+    ).toBeLessThan(document.body.textContent!.indexOf("Verified study groups"));
     expect(query).toHaveBeenCalledWith(
       "get",
       "/sources",
