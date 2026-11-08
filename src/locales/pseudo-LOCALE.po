@@ -1120,6 +1120,10 @@ msgstr ""
 msgid "Available medical groups"
 msgstr ""
 
+#: src/components/search/ask/AskSources.tsx:105
+msgid "Available sources"
+msgstr ""
+
 #: src/components/search/SourceRequests.tsx:282
 msgid "Awaiting cAtIx administrator approval"
 msgstr ""
@@ -1982,6 +1986,10 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
+#: src/components/search/ask/AskSources.tsx:117
+msgid "Common source"
+msgstr ""
+
 #: src/components/about/CarouselImage.tsx:300
 msgid "Community photo {photoNumber}"
 msgstr ""
@@ -2239,6 +2247,10 @@ msgstr ""
 #: src/components/board-games/BoardGamesPage.tsx:126
 #: src/components/board-games/ReservationsAdminPage.tsx:207
 msgid "Could not load reservations"
+msgstr ""
+
+#: src/components/search/ask/AskSources.tsx:70
+msgid "Could not load sources."
 msgstr ""
 
 #: src/components/search/SourceRequests.tsx:195
@@ -2816,6 +2828,10 @@ msgstr ""
 
 #: src/components/tabletennis/PlayersField.tsx:431
 msgid "Did you mean"
+msgstr ""
+
+#: src/components/search/ask/AskSources.tsx:15
+msgid "Disabled"
 msgstr ""
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:242
@@ -4747,6 +4763,10 @@ msgstr ""
 msgid "Loading search results..."
 msgstr ""
 
+#: src/components/search/ask/AskSources.tsx:62
+msgid "Loading sources"
+msgstr ""
+
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2094
 msgid "Loading table…"
 msgstr ""
@@ -5320,6 +5340,10 @@ msgstr ""
 
 #: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:137
 msgid "No audience to schedule"
+msgstr ""
+
+#: src/components/search/ask/AskSources.tsx:158
+msgid "No available sources."
 msgstr ""
 
 #: src/components/guard/BannedList.tsx:33
@@ -6022,6 +6046,10 @@ msgstr ""
 #: src/components/common/CompactColorPicker.tsx:179
 #: src/components/schedule-assistant/timetable/timetableViewerModel.ts:836
 msgid "Other"
+msgstr ""
+
+#: src/components/search/ask/AskSources.tsx:125
+msgid "Other and new topics"
 msgstr ""
 
 #: src/components/calendar/ExportModal.tsx:110
@@ -7199,8 +7227,16 @@ msgstr ""
 msgid "Save timeslots"
 msgstr ""
 
+#: src/components/search/ask/AskSources.tsx:148
+msgid "Saved message history remains searchable even when collection is disabled."
+msgstr ""
+
 #: src/components/tabletennis/ValidationMatches.tsx:563
 msgid "Saved, other admins see these groups"
+msgstr ""
+
+#: src/components/search/ask/AskSources.tsx:13
+msgid "Saving messages"
 msgstr ""
 
 #: src/components/clubs/EditClubPage.tsx:1278
@@ -7391,6 +7427,10 @@ msgstr ""
 
 #: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:88
 msgid "Search…"
+msgstr ""
+
+#: src/components/search/ask/AskSources.tsx:14
+msgid "Searching on request"
 msgstr ""
 
 #: src/components/timer/components/TimerInput.tsx:34
@@ -8197,6 +8237,10 @@ msgstr ""
 msgid "Study group verification is not proof of Telegram chat membership. Indexed messages will be available to verified students of the target study group, including those who are not in the Telegram chat."
 msgstr ""
 
+#: src/components/search/ask/AskSources.tsx:96
+msgid "Study group verification is unavailable. Common sources are still available."
+msgstr ""
+
 #: src/components/events/drafts/RestoreDraftModal.tsx:47
 msgid "Submission"
 msgstr ""
@@ -8690,6 +8734,10 @@ msgstr ""
 
 #: src/components/web-print/PrintPage.tsx:204
 msgid "There is no file to be printed!"
+msgstr ""
+
+#: src/components/search/ask/AskSources.tsx:163
+msgid "These are configured capabilities, not a guarantee that a source is currently online."
 msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:205
@@ -9347,6 +9395,10 @@ msgstr ""
 msgid "Validation"
 msgstr ""
 
+#: src/components/search/ask/AskSources.tsx:84
+msgid "Verified study groups"
+msgstr ""
+
 #: src/components/onboarding/OnboardingSteps.tsx:309
 msgid "Verify your groups"
 msgstr ""
@@ -9656,6 +9708,10 @@ msgstr ""
 
 #: src/components/about/AboutPage.tsx:32
 msgid "Who we are"
+msgstr ""
+
+#: src/components/search/ask/AskSources.tsx:127
+msgid "Whole chat"
 msgstr ""
 
 #: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:103

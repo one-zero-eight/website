@@ -1120,6 +1120,10 @@ msgstr "Available"
 msgid "Available medical groups"
 msgstr "Available medical groups"
 
+#: src/components/search/ask/AskSources.tsx:105
+msgid "Available sources"
+msgstr "Available sources"
+
 #: src/components/search/SourceRequests.tsx:282
 msgid "Awaiting cAtIx administrator approval"
 msgstr "Awaiting cAtIx administrator approval"
@@ -1982,6 +1986,10 @@ msgstr "Comment (optional)"
 msgid "Comments"
 msgstr "Comments"
 
+#: src/components/search/ask/AskSources.tsx:117
+msgid "Common source"
+msgstr "Common source"
+
 #: src/components/about/CarouselImage.tsx:300
 msgid "Community photo {photoNumber}"
 msgstr "Community photo {photoNumber}"
@@ -2240,6 +2248,10 @@ msgstr "Could not load preview"
 #: src/components/board-games/ReservationsAdminPage.tsx:207
 msgid "Could not load reservations"
 msgstr "Could not load reservations"
+
+#: src/components/search/ask/AskSources.tsx:70
+msgid "Could not load sources."
+msgstr "Could not load sources."
 
 #: src/components/search/SourceRequests.tsx:195
 msgid "Could not load your requests. Refresh to try again."
@@ -2821,6 +2833,10 @@ msgstr "Device flow was approved without a room id."
 #: src/components/tabletennis/PlayersField.tsx:431
 msgid "Did you mean"
 msgstr "Did you mean"
+
+#: src/components/search/ask/AskSources.tsx:15
+msgid "Disabled"
+msgstr "Disabled"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:242
 msgid "Discard the proposed changes to \"{clubTitle}\"? The leader will need to resubmit."
@@ -4751,6 +4767,10 @@ msgstr "Loading requests…"
 msgid "Loading search results..."
 msgstr "Loading search results..."
 
+#: src/components/search/ask/AskSources.tsx:62
+msgid "Loading sources"
+msgstr "Loading sources"
+
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2094
 msgid "Loading table…"
 msgstr "Loading table…"
@@ -5325,6 +5345,10 @@ msgstr "No attendees yet."
 #: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:137
 msgid "No audience to schedule"
 msgstr "No audience to schedule"
+
+#: src/components/search/ask/AskSources.tsx:158
+msgid "No available sources."
+msgstr "No available sources."
 
 #: src/components/guard/BannedList.tsx:33
 msgid "No banned users"
@@ -6035,6 +6059,10 @@ msgstr "Organizer"
 #: src/components/schedule-assistant/timetable/timetableViewerModel.ts:836
 msgid "Other"
 msgstr "Other"
+
+#: src/components/search/ask/AskSources.tsx:125
+msgid "Other and new topics"
+msgstr "Other and new topics"
 
 #: src/components/calendar/ExportModal.tsx:110
 msgid "Other applications: find in settings"
@@ -7211,9 +7239,17 @@ msgstr "Save meeting time"
 msgid "Save timeslots"
 msgstr "Save timeslots"
 
+#: src/components/search/ask/AskSources.tsx:148
+msgid "Saved message history remains searchable even when collection is disabled."
+msgstr "Saved message history remains searchable even when collection is disabled."
+
 #: src/components/tabletennis/ValidationMatches.tsx:563
 msgid "Saved, other admins see these groups"
 msgstr "Saved, other admins see these groups"
+
+#: src/components/search/ask/AskSources.tsx:13
+msgid "Saving messages"
+msgstr "Saving messages"
 
 #: src/components/clubs/EditClubPage.tsx:1278
 msgid "Saving..."
@@ -7404,6 +7440,10 @@ msgstr "Search..."
 #: src/components/schedule-assistant/timetable/UnarrangedLessonsPanel.tsx:88
 msgid "Search…"
 msgstr "Search…"
+
+#: src/components/search/ask/AskSources.tsx:14
+msgid "Searching on request"
+msgstr "Searching on request"
 
 #: src/components/timer/components/TimerInput.tsx:34
 msgid "Seconds"
@@ -8209,6 +8249,10 @@ msgstr "Study group"
 msgid "Study group verification is not proof of Telegram chat membership. Indexed messages will be available to verified students of the target study group, including those who are not in the Telegram chat."
 msgstr "Study group verification is not proof of Telegram chat membership. Indexed messages will be available to verified students of the target study group, including those who are not in the Telegram chat."
 
+#: src/components/search/ask/AskSources.tsx:96
+msgid "Study group verification is unavailable. Common sources are still available."
+msgstr "Study group verification is unavailable. Common sources are still available."
+
 #: src/components/events/drafts/RestoreDraftModal.tsx:47
 msgid "Submission"
 msgstr "Submission"
@@ -8703,6 +8747,10 @@ msgstr "There are no reservations yet."
 #: src/components/web-print/PrintPage.tsx:204
 msgid "There is no file to be printed!"
 msgstr "There is no file to be printed!"
+
+#: src/components/search/ask/AskSources.tsx:163
+msgid "These are configured capabilities, not a guarantee that a source is currently online."
+msgstr "These are configured capabilities, not a guarantee that a source is currently online."
 
 #: src/components/clubs/HowToCreateClubPage.tsx:205
 msgid "Think about your <0>aims and goals</0> to keep your club going purposefully. Consider writing mission and vision statements to clarify your club's purpose."
@@ -9359,6 +9407,10 @@ msgstr "Validating URL..."
 msgid "Validation"
 msgstr "Validation"
 
+#: src/components/search/ask/AskSources.tsx:84
+msgid "Verified study groups"
+msgstr "Verified study groups"
+
 #: src/components/onboarding/OnboardingSteps.tsx:309
 msgid "Verify your groups"
 msgstr "Verify your groups"
@@ -9669,6 +9721,10 @@ msgstr "Who is it?"
 #: src/components/about/AboutPage.tsx:32
 msgid "Who we are"
 msgstr "Who we are"
+
+#: src/components/search/ask/AskSources.tsx:127
+msgid "Whole chat"
+msgstr "Whole chat"
 
 #: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:103
 msgid "whole semester"

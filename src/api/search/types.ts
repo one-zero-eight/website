@@ -497,6 +497,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/sources": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Sources */
+    get: operations["sources_list_sources"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1159,6 +1176,45 @@ export interface components {
       /** Verified Groups */
       verified_groups: string[];
     };
+    /** SourceTopicView */
+    SourceTopicView: {
+      /** Topic Id */
+      topic_id: string;
+      /** Title */
+      title: string;
+      /**
+       * Mode
+       * @enum {string}
+       */
+      mode: SourceTopicViewMode;
+    };
+    /** SourceView */
+    SourceView: {
+      /** Chat Id */
+      chat_id: string;
+      /** Title */
+      title: string;
+      /** Group Code */
+      group_code: string;
+      /** Forum */
+      forum: boolean;
+      /**
+       * Default Mode
+       * @enum {string}
+       */
+      default_mode: SourceViewDefault_mode;
+      /** Topics */
+      topics: components["schemas"]["SourceTopicView"][];
+      /** Has Stored Messages */
+      has_stored_messages: boolean;
+    };
+    /** SourcesView */
+    SourcesView: {
+      /** Verified Groups */
+      verified_groups: string[];
+      /** Sources */
+      sources: components["schemas"]["SourceView"][];
+    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -1228,6 +1284,9 @@ export type SchemaSourceRequestView =
   components["schemas"]["SourceRequestView"];
 export type SchemaSourceRequestsView =
   components["schemas"]["SourceRequestsView"];
+export type SchemaSourceTopicView = components["schemas"]["SourceTopicView"];
+export type SchemaSourceView = components["schemas"]["SourceView"];
+export type SchemaSourcesView = components["schemas"]["SourcesView"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
@@ -2335,6 +2394,26 @@ export interface operations {
       };
     };
   };
+  sources_list_sources: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SourcesView"];
+        };
+      };
+    };
+  };
 }
 export enum PathsSearchSearchGetParametersQueryResponse_types {
   pdf = "pdf",
@@ -2444,4 +2523,14 @@ export enum SourceRequestViewStatus {
   connected = "connected",
   failed = "failed",
   rejected = "rejected",
+}
+export enum SourceTopicViewMode {
+  store = "store",
+  search = "search",
+  off = "off",
+}
+export enum SourceViewDefault_mode {
+  store = "store",
+  search = "search",
+  off = "off",
 }

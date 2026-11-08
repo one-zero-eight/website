@@ -4,7 +4,7 @@ import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useRef, useState } from "react";
 import AnimatedDots from "@/components/search/AnimatedDots";
-import { SourceRequests } from "@/components/search/SourceRequests";
+import { AskSources } from "./AskSources";
 import { AskChatList } from "./AskChatList";
 import { AskAttachment } from "./AskAttachment";
 import { AskInput } from "./AskInput";
@@ -101,22 +101,28 @@ export function AskPage({
       </aside>
 
       <div className="flex min-h-0 min-w-0 grow flex-col">
-        <div className="border-base-300 flex flex-col border-b px-4 py-2 @4xl/content:hidden">
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm self-start"
-            onClick={() => setIsChatListOpen((open) => !open)}
-          >
-            <span className="icon-[material-symbols--chat-outline] text-lg" />
-            <Trans>Chats</Trans>
-            <span
-              className={
-                isChatListOpen
-                  ? "icon-[material-symbols--expand-less-rounded]"
-                  : "icon-[material-symbols--expand-more-rounded]"
-              }
-            />
-          </button>
+        <div className="border-base-300 hidden justify-end border-b px-4 py-2 @4xl/content:flex">
+          <AskSources />
+        </div>
+        <div className="border-base-300 flex flex-col gap-2 border-b px-4 py-2 @4xl/content:hidden">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm self-start"
+              onClick={() => setIsChatListOpen((open) => !open)}
+            >
+              <span className="icon-[material-symbols--chat-outline] text-lg" />
+              <Trans>Chats</Trans>
+              <span
+                className={
+                  isChatListOpen
+                    ? "icon-[material-symbols--expand-less-rounded]"
+                    : "icon-[material-symbols--expand-more-rounded]"
+                }
+              />
+            </button>
+            <AskSources />
+          </div>
           {isChatListOpen && (
             <div className="max-h-64 overflow-y-auto pt-2">
               <AskChatList onSelect={() => setIsChatListOpen(false)} />
@@ -209,8 +215,7 @@ export function AskPage({
             onStop={handleStop}
             isPending={isPending}
           />
-          <div className="flex flex-wrap items-center justify-between gap-1">
-            <SourceRequests />
+          <div className="flex flex-wrap items-center justify-end gap-1">
             <AskNotificationButton />
           </div>
         </div>
