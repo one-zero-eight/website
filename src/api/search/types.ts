@@ -63,6 +63,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/search/archive-document": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Archive Document
+     * @description Download and safely unpack the source archive on demand; cache the exact verified PDF.
+     */
+    get: operations["search_archive_document"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/search/search/{search_query_id}/feedback": {
     parameters: {
       query?: never;
@@ -463,6 +483,15 @@ export interface components {
       /** Title */
       title: string;
     };
+    /** ArchiveDocument */
+    ArchiveDocument: {
+      /** Page */
+      page: string;
+      /** Revision */
+      revision: string;
+      /** Member */
+      member: string;
+    };
     /** AskAction */
     AskAction: {
       /** Name */
@@ -700,6 +729,7 @@ export interface components {
        *     ]
        */
       breadcrumbs: string[];
+      archive_document?: components["schemas"]["ArchiveDocument"] | null;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -1011,6 +1041,7 @@ export interface components {
 export type SchemaActResponses = components["schemas"]["ActResponses"];
 export type SchemaAddedCalendarEvent =
   components["schemas"]["AddedCalendarEvent"];
+export type SchemaArchiveDocument = components["schemas"]["ArchiveDocument"];
 export type SchemaAskAction = components["schemas"]["AskAction"];
 export type SchemaAskApproval = components["schemas"]["AskApproval"];
 export type SchemaAskChat = components["schemas"]["AskChat"];
@@ -1175,6 +1206,66 @@ export interface operations {
         content?: never;
       };
       /** @description The site did not answer in time */
+      504: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  search_archive_document: {
+    parameters: {
+      query: {
+        page: string;
+        revision: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The cited archive member */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": unknown;
+        };
+      };
+      /** @description This document revision is unavailable */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description The archive could not be downloaded or opened */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The preview cache is unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The archive download timed out */
       504: {
         headers: {
           [name: string]: unknown;
@@ -2071,7 +2162,7 @@ export enum ParseRequestStatus {
   failed = "failed",
 }
 export enum ParseRequestOutcome {
-  unspecified = "",
+  pending = "",
   committed = "committed",
   review = "review",
   unchanged = "unchanged",

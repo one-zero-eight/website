@@ -23,7 +23,9 @@ export default function SearchResult({
     "preview_text" in response.source ? response.source.preview_text : "";
 
   const handleClick = () => {
-    if (isMobile && link) {
+    const isArchiveDocument =
+      response.source.type === "eduwiki" && !!response.source.archive_document;
+    if (isMobile && link && !isArchiveDocument) {
       window.open(link, "_blank");
     }
     select();

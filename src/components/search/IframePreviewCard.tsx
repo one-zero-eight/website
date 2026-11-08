@@ -122,6 +122,103 @@ export default function IframePreviewCard({
   source: searchTypes.SchemaSearchResponse["source"];
   onClose: () => void;
 }) {
+  if (source.type === "eduwiki" && source.archive_document) {
+    return (
+      <ArchiveDocumentPreview
+        key={JSON.stringify(source.archive_document)}
+        source={source}
+        document={source.archive_document}
+        onClose={onClose}
+      />
+    );
+  }
+  return <OrdinaryPreviewCard source={source} onClose={onClose} />;
+}
+
+function ArchiveDocumentPreview({
+  source,
+  document,
+  onClose,
+}: {
+  source: searchTypes.SchemaEduwikiSource;
+  document: NonNullable<searchTypes.SchemaEduwikiSource["archive_document"]>;
+  onClose: () => void;
+}) {
+  const { t } = useLingui();
+  const query = new URLSearchParams({
+    page: document.page,
+    revision: document.revision,
+  });
+  const {
+    data: file,
+    isPending,
+    isError,
+  } = usePreviewFile(`${SEARCH_API_URL}/search/archive-document?${query}`);
+  const pdf = !isError && file?.response.ok ? file.data : undefined;
+  const [preview, setPreview] = useState<{ pdf: Blob; url: string }>();
+  const objectUrl = preview?.pdf === pdf ? preview?.url : undefined;
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    if (!pdf) return;
+    const created = URL.createObjectURL(
+      new Blob([pdf], { type: "application/pdf" }),
+    );
+    setPreview({ pdf, url: created });
+    return () => URL.revokeObjectURL(created);
+  }, [pdf]);
+
+  return (
+    <div className="border-base-300 bg-base-200 rounded-field flex w-full min-w-0 flex-col gap-2 border p-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="min-w-0 text-lg font-semibold wrap-break-word">
+          {source.display_name}
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          title={t`Close`}
+          className="btn btn-circle btn-ghost btn-sm"
+        >
+          ✕
+        </button>
+      </div>
+      <p className="text-sm wrap-anywhere">{document.member}</p>
+      {isPending || (pdf && !objectUrl) ? (
+        <div className="skeleton h-[50vh] w-full rounded-xl" />
+      ) : objectUrl && !hasError ? (
+        <iframe
+          src={objectUrl}
+          onErrorCapture={() => setHasError(true)}
+          title={t`Preview`}
+          className="border-border h-[50vh] w-full rounded-xl border"
+        />
+      ) : (
+        <p className="text-error p-4">
+          <Trans>
+            Could not open this archive document. It may be missing or changed.
+          </Trans>
+        </p>
+      )}
+      <a
+        href={source.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary self-center hover:underline"
+      >
+        <Trans>Open original archive</Trans>
+      </a>
+    </div>
+  );
+}
+
+function OrdinaryPreviewCard({
+  source,
+  onClose,
+}: {
+  source: searchTypes.SchemaSearchResponse["source"];
+  onClose: () => void;
+}) {
   const { t } = useLingui();
   const [hasError, setHasError] = useState(false);
 

@@ -14,6 +14,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import IframePreviewCard from "./IframePreviewCard";
+import { ArchiveDocumentModal } from "./ArchiveDocumentModal";
 
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
   useLingui();
@@ -114,16 +115,19 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
         }
 
         const url = "url" in e.source ? e.source.url : "";
+        const isPdfDocument =
+          (e.source.type === "eduwiki" && !!e.source.archive_document) ||
+          url.endsWith(".pdf");
 
         const isPdf =
           filters.response_types.includes(
             PathsSearchSearchGetParametersQueryResponse_types.pdf,
-          ) && url.endsWith(".pdf");
+          ) && isPdfDocument;
 
         const isLink =
           filters.response_types.includes(
             PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
-          ) && !url.endsWith(".pdf");
+          ) && !isPdfDocument;
 
         return isPdf || isLink;
       })
@@ -142,8 +146,13 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
 
   useEffect(() => {
     const first = filteredResponses[0];
-    if (first && previewSource === undefined && !isMobile) {
-      // Reset preview source when search result changes and it has an appropriate type for preview
+    if (
+      first &&
+      previewSource === undefined &&
+      !isMobile &&
+      !(first.source.type === "eduwiki" && first.source.archive_document)
+    ) {
+      // Archive documents require explicit selection; other sources preview automatically.
       setPreviewSource(first.source);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -263,6 +272,14 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
           </div>
         </div>
       )}
+      {isMobile &&
+        previewSource?.type === "eduwiki" &&
+        previewSource.archive_document && (
+          <ArchiveDocumentModal
+            source={previewSource}
+            onClose={() => setPreviewSource(undefined)}
+          />
+        )}
       {error && (
         <div>
           <p className="text-base-content py-4 text-xl font-semibold">

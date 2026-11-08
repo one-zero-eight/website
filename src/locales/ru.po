@@ -2209,6 +2209,10 @@ msgstr "Не удалось отметить посещаемость"
 msgid "Could not open the chat"
 msgstr "Не удалось открыть чат"
 
+#: src/components/search/IframePreviewCard.tsx:198
+msgid "Could not open this archive document. It may be missing or changed."
+msgstr "Не удалось открыть этот документ из архива. Возможно, он удалён или изменён."
+
 #: src/components/search/ask/AskChatList.tsx:90
 msgid "Could not rename the chat"
 msgstr "Не удалось переименовать чат"
@@ -5875,10 +5879,18 @@ msgstr "Открыть турнирную сетку"
 msgid "Open details"
 msgstr "Открыть подробности"
 
+#: src/components/search/ask/AskResult.tsx:109
+msgid "Open document: {member}"
+msgstr "Открыть документ: {member}"
+
 #: src/components/calendar/CalendarEventPopover.tsx:251
 #: src/components/events/calendar/EventsCalendarPopover.tsx:182
 msgid "Open event page"
 msgstr "Открыть страницу мероприятия"
+
+#: src/components/search/IframePreviewCard.tsx:209
+msgid "Open original archive"
+msgstr "Открыть исходный архив"
 
 #: src/components/guard/SetupResult.tsx:56
 msgid "Open spreadsheet"

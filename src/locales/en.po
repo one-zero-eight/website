@@ -2209,6 +2209,10 @@ msgstr "Could not mark attendance"
 msgid "Could not open the chat"
 msgstr "Could not open the chat"
 
+#: src/components/search/IframePreviewCard.tsx:198
+msgid "Could not open this archive document. It may be missing or changed."
+msgstr "Could not open this archive document. It may be missing or changed."
+
 #: src/components/search/ask/AskChatList.tsx:90
 msgid "Could not rename the chat"
 msgstr "Could not rename the chat"
@@ -5875,10 +5879,18 @@ msgstr "Open bracket"
 msgid "Open details"
 msgstr "Open details"
 
+#: src/components/search/ask/AskResult.tsx:109
+msgid "Open document: {member}"
+msgstr "Open document: {member}"
+
 #: src/components/calendar/CalendarEventPopover.tsx:251
 #: src/components/events/calendar/EventsCalendarPopover.tsx:182
 msgid "Open event page"
 msgstr "Open event page"
+
+#: src/components/search/IframePreviewCard.tsx:209
+msgid "Open original archive"
+msgstr "Open original archive"
 
 #: src/components/guard/SetupResult.tsx:56
 msgid "Open spreadsheet"

@@ -6,6 +6,16 @@ import remarkGfm from "remark-gfm";
 import { AskApproval } from "./AskApproval";
 import { AskCalendarEvents } from "./AskCalendarEvents";
 import { AskFeedback } from "./AskFeedback";
+import { useState } from "react";
+import { ArchiveDocumentModal } from "@/components/search/ArchiveDocumentModal";
+
+function sourceKey(source: searchTypes.SchemaSearchResponse["source"]) {
+  if (source.type === "eduwiki" && source.archive_document) {
+    const { page, revision, member } = source.archive_document;
+    return JSON.stringify([source.type, page, revision, member]);
+  }
+  return source.type;
+}
 
 export function AskResult({
   response,
@@ -19,10 +29,13 @@ export function AskResult({
   isPending?: boolean;
 }) {
   const { answer, search_responses, approval } = response;
+  const [previewSource, setPreviewSource] =
+    useState<searchTypes.SchemaEduwikiSource>();
 
   const uniqueSources = search_responses.filter(
     (item, index, self) =>
-      index === self.findIndex((s) => s.source.type === item.source.type),
+      index ===
+      self.findIndex((s) => sourceKey(s.source) === sourceKey(item.source)),
   );
 
   const getSourceLink = (s: searchTypes.SchemaSearchResponse) =>
@@ -80,21 +93,43 @@ export function AskResult({
           </span>
           {uniqueSources.map((s, i) => {
             const link = getSourceLink(s);
+            const source = s.source;
+            const member =
+              source.type === "eduwiki"
+                ? source.archive_document?.member
+                : undefined;
             return (
-              <span key={link || i}>
-                <a
-                  className="text-primary hover:underline"
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {s.source.type}
-                </a>
+              <span key={sourceKey(source)}>
+                {source.type === "eduwiki" && source.archive_document ? (
+                  <button
+                    type="button"
+                    className="text-primary text-left wrap-anywhere hover:underline"
+                    onClick={() => setPreviewSource(source)}
+                  >
+                    <Trans>Open document: {member}</Trans>
+                  </button>
+                ) : (
+                  <a
+                    className="text-primary hover:underline"
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {s.source.type}
+                  </a>
+                )}
                 {i < uniqueSources.length - 1 && ", "}
               </span>
             );
           })}
         </div>
+      )}
+
+      {previewSource && (
+        <ArchiveDocumentModal
+          source={previewSource}
+          onClose={() => setPreviewSource(undefined)}
+        />
       )}
 
       {!hasError && response.calendar_events.length > 0 && (
