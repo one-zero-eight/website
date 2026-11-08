@@ -1,5 +1,6 @@
 import HideButtonUI from "@/components/schedule/HideButtonUI.tsx";
 import LinkIconButton from "@/components/schedule/group-card/LinkIconButton.tsx";
+import SimpleExportButton from "@/components/schedule/group-card/SimpleExportButton.tsx";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useNavigate } from "@tanstack/react-router";
 import { useAiCalendarHidden } from "./ai-calendar";
@@ -28,16 +29,7 @@ export function AiCalendarCard({
         </p>
       </div>
       <div className="flex flex-row place-items-center select-none">
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm"
-          onClick={(event) => {
-            event.stopPropagation();
-            exportButtonOnClick?.();
-          }}
-        >
-          <Trans>Export</Trans>
-        </button>
+        <SimpleExportButton onClick={exportButtonOnClick} />
         <HideButtonUI
           isHidden={isHidden}
           onClick={(e) => {

@@ -51,6 +51,16 @@ it("opens export without navigating to the assistant", async () => {
 
   const exportButton = container.querySelector("button");
   expect(exportButton).not.toBeNull();
+  expect(exportButton!.textContent).toBe("");
+  expect(
+    exportButton!.querySelector(
+      '[class*="icon-[material-symbols--cloud-download-outline]"]',
+    ),
+  ).not.toBeNull();
+  await act(async () => exportButton!.focus());
+  expect(document.querySelector('[role="tooltip"]')?.textContent).toBe(
+    "Export your schedule",
+  );
   await act(async () => exportButton!.click());
 
   expect(onExport).toHaveBeenCalledOnce();
