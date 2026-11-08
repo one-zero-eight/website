@@ -479,6 +479,42 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/my-calendar/export-key": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Calendar Export Key Status */
+    get: operations["users_calendar_export_key_status"];
+    put?: never;
+    /** Create Calendar Export Key */
+    post: operations["users_create_calendar_export_key"];
+    /** Revoke Calendar Export Key */
+    delete: operations["users_revoke_calendar_export_key"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/calendar-export.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Public Calendar Export */
+    get: operations["users_public_calendar_export"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/sources/requests": {
     parameters: {
       query?: never;
@@ -722,6 +758,16 @@ export interface components {
       room?: string | null;
       /** Source Url */
       source_url?: string | null;
+    };
+    /** CalendarExportKeyCreated */
+    CalendarExportKeyCreated: {
+      /** Access Key */
+      access_key: string;
+    };
+    /** CalendarExportKeyStatus */
+    CalendarExportKeyStatus: {
+      /** Access Key */
+      access_key: string | null;
     };
     /** CampusLifeSource */
     CampusLifeSource: {
@@ -1301,6 +1347,10 @@ export type SchemaBodyAskRenameChat =
   components["schemas"]["Body_ask_rename_chat"];
 export type SchemaCalendarEventOffer =
   components["schemas"]["CalendarEventOffer"];
+export type SchemaCalendarExportKeyCreated =
+  components["schemas"]["CalendarExportKeyCreated"];
+export type SchemaCalendarExportKeyStatus =
+  components["schemas"]["CalendarExportKeyStatus"];
 export type SchemaCampusLifeSource = components["schemas"]["CampusLifeSource"];
 export type SchemaClubsSource = components["schemas"]["ClubsSource"];
 export type SchemaEduwikiSource = components["schemas"]["EduwikiSource"];
@@ -2374,6 +2424,123 @@ export interface operations {
         content?: never;
       };
       /** @description The offer expired (it lives 48 hours) or there is no such offer */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  users_calendar_export_key_status: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalendarExportKeyStatus"];
+        };
+      };
+      /** @description No token or a bad one */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  users_create_calendar_export_key: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalendarExportKeyCreated"];
+        };
+      };
+      /** @description No token or a bad one */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  users_revoke_calendar_export_key: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No token or a bad one */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  users_public_calendar_export: {
+    parameters: {
+      query?: {
+        access_key?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description AI Calendar events without source-message provenance */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/calendar": unknown;
+        };
+      };
+      /** @description Missing, invalid or revoked subscription key */
       404: {
         headers: {
           [name: string]: unknown;

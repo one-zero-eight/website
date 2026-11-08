@@ -2228,6 +2228,10 @@ msgstr "Копировать лист — Guard"
 msgid "Copy the link."
 msgstr "Скопируйте ссылку."
 
+#: src/components/calendar/ExportModal.tsx:293
+msgid "Copy the private link."
+msgstr "Скопируйте приватную ссылку."
+
 #: src/components/guard/CopySheetPage.tsx:204
 msgid "Copying..."
 msgstr "Копирование..."
@@ -2434,6 +2438,10 @@ msgstr "Создайте новую защищённую Google-таблицу �
 msgid "Create a new protected spreadsheet from scratch"
 msgstr "Создать новую защищённую таблицу с нуля"
 
+#: src/components/calendar/ExportModal.tsx:257
+msgid "Create a private link to subscribe to AI Calendar events. Creating it does not add anything to your calendar."
+msgstr "Создайте приватную ссылку для подписки на события AI Calendar. Это не добавит их в ваш календарь."
+
 #: src/components/clubs/HowToCreateClubPage.tsx:226
 msgid "Create an <0>avatar or logo</0> for your club."
 msgstr "Создайте <0>логотип</0> для клуба."
@@ -2446,6 +2454,10 @@ msgstr "Создать занятие"
 #: src/components/events/drafts/DraftsPage.tsx:116
 msgid "Create draft"
 msgstr "Создать черновик"
+
+#: src/components/calendar/ExportModal.tsx:274
+msgid "Create link"
+msgstr "Создать ссылку"
 
 #: src/components/when2meet/CreateMeetingButton.tsx:20
 #: src/components/when2meet/MeetingsLandingPage.tsx:109
@@ -3581,6 +3593,10 @@ msgstr "Смотреть расписания"
 msgid "Export"
 msgstr "Экспорт"
 
+#: src/components/calendar/ExportModal.tsx:88
+msgid "Export AI Calendar"
+msgstr "Экспорт AI Calendar"
+
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1716
 msgid "Export all sections to XLSX"
 msgstr "Экспорт всех разделов в XLSX"
@@ -3842,6 +3858,10 @@ msgstr "Этаж"
 #: src/components/clubs/HowToCreateClubPage.tsx:130
 msgid "Football, Basketball, Volleyball, Badminton, Yoga"
 msgstr "Футбол, баскетбол, волейбол, бадминтон, йога"
+
+#: src/components/calendar/ExportModal.tsx:312
+msgid "For other apps, find the add-by-URL option in settings."
+msgstr "В других приложениях найдите в настройках добавление календаря по URL."
 
 #: src/components/scholarship/ScholarshipPage.tsx:26
 msgid "For the first semester — scholarship from the admissions department."
@@ -4404,6 +4424,10 @@ msgstr "в шаблоне"
 #: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:277
 msgid "In template: {patternLabel}"
 msgstr "В шаблоне: {patternLabel}"
+
+#: src/components/calendar/ExportModal.tsx:302
+msgid "In your calendar app, add a calendar by URL."
+msgstr "В календаре добавьте календарь по URL."
 
 #: src/components/clubs/ClubAdminCard.tsx:53
 #: src/components/clubs/ClubPage.tsx:133
@@ -6282,6 +6306,10 @@ msgstr "Прошлая неделя"
 msgid "Paste from clipboard"
 msgstr "Вставить из буфера обмена"
 
+#: src/components/calendar/ExportModal.tsx:318
+msgid "Paste the link and add it."
+msgstr "Вставьте ссылку и добавьте календарь."
+
 #: src/components/calendar/ExportModal.tsx:114
 msgid "Paste the link and click Add."
 msgstr "Вставьте ссылку и нажмите «Добавить»."
@@ -7164,6 +7192,10 @@ msgstr "Просмотрите заявки на мероприятия."
 #: src/components/events/EventsTabs.tsx:20
 msgid "Review Events"
 msgstr "Модерация"
+
+#: src/components/calendar/ExportModal.tsx:334
+msgid "Revoke link"
+msgstr "Отозвать ссылку"
 
 #: src/components/guard/FileDetails.tsx:209
 msgid "Role granted when someone joins via the link"
@@ -8883,6 +8915,10 @@ msgstr "Предложение устарело. Попросите подобр
 #: src/components/admin/RequireInnohassleAdmin.tsx:23
 msgid "This page is available only for InNoHassle admins."
 msgstr "Эта страница доступна только админам InNoHassle."
+
+#: src/components/calendar/ExportModal.tsx:284
+msgid "This private link grants read access to your AI Calendar. External calendar apps refresh on their own schedule; revoking the link cannot erase events already copied by an app. The feed includes only AI Calendar events and does not include their source-message provenance."
+msgstr "Эта приватная ссылка предоставляет доступ на чтение к вашему AI Calendar. Внешние календарные приложения обновляют данные по собственному расписанию; отзыв ссылки не удалит события, уже скопированные приложением. Лента содержит только события AI Calendar и не включает сведения об исходных сообщениях."
 
 #: src/components/when2meet/MeetingPage.tsx:1572
 msgid "This room booking no longer exists."

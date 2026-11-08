@@ -2228,6 +2228,10 @@ msgstr "Copy sheet — Guard"
 msgid "Copy the link."
 msgstr "Copy the link."
 
+#: src/components/calendar/ExportModal.tsx:293
+msgid "Copy the private link."
+msgstr "Copy the private link."
+
 #: src/components/guard/CopySheetPage.tsx:204
 msgid "Copying..."
 msgstr "Copying..."
@@ -2434,6 +2438,10 @@ msgstr "Create a new protected Google Spreadsheet with SSO join access."
 msgid "Create a new protected spreadsheet from scratch"
 msgstr "Create a new protected spreadsheet from scratch"
 
+#: src/components/calendar/ExportModal.tsx:257
+msgid "Create a private link to subscribe to AI Calendar events. Creating it does not add anything to your calendar."
+msgstr "Create a private link to subscribe to AI Calendar events. Creating it does not add anything to your calendar."
+
 #: src/components/clubs/HowToCreateClubPage.tsx:226
 msgid "Create an <0>avatar or logo</0> for your club."
 msgstr "Create an <0>avatar or logo</0> for your club."
@@ -2446,6 +2454,10 @@ msgstr "Create class"
 #: src/components/events/drafts/DraftsPage.tsx:116
 msgid "Create draft"
 msgstr "Create draft"
+
+#: src/components/calendar/ExportModal.tsx:274
+msgid "Create link"
+msgstr "Create link"
 
 #: src/components/when2meet/CreateMeetingButton.tsx:20
 #: src/components/when2meet/MeetingsLandingPage.tsx:109
@@ -3581,6 +3593,10 @@ msgstr "Explore schedules"
 msgid "Export"
 msgstr "Export"
 
+#: src/components/calendar/ExportModal.tsx:88
+msgid "Export AI Calendar"
+msgstr "Export AI Calendar"
+
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1716
 msgid "Export all sections to XLSX"
 msgstr "Export all sections to XLSX"
@@ -3842,6 +3858,10 @@ msgstr "Floor"
 #: src/components/clubs/HowToCreateClubPage.tsx:130
 msgid "Football, Basketball, Volleyball, Badminton, Yoga"
 msgstr "Football, Basketball, Volleyball, Badminton, Yoga"
+
+#: src/components/calendar/ExportModal.tsx:312
+msgid "For other apps, find the add-by-URL option in settings."
+msgstr "For other apps, find the add-by-URL option in settings."
 
 #: src/components/scholarship/ScholarshipPage.tsx:26
 msgid "For the first semester — scholarship from the admissions department."
@@ -4404,6 +4424,10 @@ msgstr "in template"
 #: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:277
 msgid "In template: {patternLabel}"
 msgstr "In template: {patternLabel}"
+
+#: src/components/calendar/ExportModal.tsx:302
+msgid "In your calendar app, add a calendar by URL."
+msgstr "In your calendar app, add a calendar by URL."
 
 #: src/components/clubs/ClubAdminCard.tsx:53
 #: src/components/clubs/ClubPage.tsx:133
@@ -6282,6 +6306,10 @@ msgstr "Past week"
 msgid "Paste from clipboard"
 msgstr "Paste from clipboard"
 
+#: src/components/calendar/ExportModal.tsx:318
+msgid "Paste the link and add it."
+msgstr "Paste the link and add it."
+
 #: src/components/calendar/ExportModal.tsx:114
 msgid "Paste the link and click Add."
 msgstr "Paste the link and click Add."
@@ -7164,6 +7192,10 @@ msgstr "Review event submissions."
 #: src/components/events/EventsTabs.tsx:20
 msgid "Review Events"
 msgstr "Review Events"
+
+#: src/components/calendar/ExportModal.tsx:334
+msgid "Revoke link"
+msgstr "Revoke link"
 
 #: src/components/guard/FileDetails.tsx:209
 msgid "Role granted when someone joins via the link"
@@ -8883,6 +8915,10 @@ msgstr "This offer has expired. Ask for current events."
 #: src/components/admin/RequireInnohassleAdmin.tsx:23
 msgid "This page is available only for InNoHassle admins."
 msgstr "This page is available only for InNoHassle admins."
+
+#: src/components/calendar/ExportModal.tsx:284
+msgid "This private link grants read access to your AI Calendar. External calendar apps refresh on their own schedule; revoking the link cannot erase events already copied by an app. The feed includes only AI Calendar events and does not include their source-message provenance."
+msgstr "This private link grants read access to your AI Calendar. External calendar apps refresh on their own schedule; revoking the link cannot erase events already copied by an app. The feed includes only AI Calendar events and does not include their source-message provenance."
 
 #: src/components/when2meet/MeetingPage.tsx:1572
 msgid "This room booking no longer exists."

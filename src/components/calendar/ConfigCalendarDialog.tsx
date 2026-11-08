@@ -121,7 +121,12 @@ export function ConfigCalendarDialog({
             setExportModalOpen(true);
           }}
         />
-        <AiCalendarCard />
+        <AiCalendarCard
+          exportButtonOnClick={() => {
+            setTargetForExport({ type: "ai-calendar" });
+            setExportModalOpen(true);
+          }}
+        />
         {Object.keys(scheduleUser?.linked_calendars || {}).map((key, index) => {
           const linkedCalendar = scheduleUser?.linked_calendars
             ? scheduleUser?.linked_calendars[key]

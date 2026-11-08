@@ -5,7 +5,11 @@ import { useNavigate } from "@tanstack/react-router";
 import { useAiCalendarHidden } from "./ai-calendar";
 
 // The card of AI Calendar among the personal calendars: show or hide it in the calendar, go to the assistant
-export function AiCalendarCard() {
+export function AiCalendarCard({
+  exportButtonOnClick,
+}: {
+  exportButtonOnClick?: () => void;
+}) {
   const { t } = useLingui();
   const navigate = useNavigate();
   const [isHidden, setIsHidden] = useAiCalendarHidden();
@@ -24,6 +28,16 @@ export function AiCalendarCard() {
         </p>
       </div>
       <div className="flex flex-row place-items-center select-none">
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={(event) => {
+            event.stopPropagation();
+            exportButtonOnClick?.();
+          }}
+        >
+          <Trans>Export</Trans>
+        </button>
         <HideButtonUI
           isHidden={isHidden}
           onClick={(e) => {

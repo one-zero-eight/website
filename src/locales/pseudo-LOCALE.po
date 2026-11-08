@@ -2228,6 +2228,10 @@ msgstr ""
 msgid "Copy the link."
 msgstr ""
 
+#: src/components/calendar/ExportModal.tsx:293
+msgid "Copy the private link."
+msgstr ""
+
 #: src/components/guard/CopySheetPage.tsx:204
 msgid "Copying..."
 msgstr ""
@@ -2430,6 +2434,10 @@ msgstr ""
 msgid "Create a new protected spreadsheet from scratch"
 msgstr ""
 
+#: src/components/calendar/ExportModal.tsx:257
+msgid "Create a private link to subscribe to AI Calendar events. Creating it does not add anything to your calendar."
+msgstr ""
+
 #: src/components/clubs/HowToCreateClubPage.tsx:226
 msgid "Create an <0>avatar or logo</0> for your club."
 msgstr ""
@@ -2441,6 +2449,10 @@ msgstr ""
 #: src/components/events/drafts/CreateDraftModal.tsx:97
 #: src/components/events/drafts/DraftsPage.tsx:116
 msgid "Create draft"
+msgstr ""
+
+#: src/components/calendar/ExportModal.tsx:274
+msgid "Create link"
 msgstr ""
 
 #: src/components/when2meet/CreateMeetingButton.tsx:20
@@ -3577,6 +3589,10 @@ msgstr ""
 msgid "Export"
 msgstr ""
 
+#: src/components/calendar/ExportModal.tsx:88
+msgid "Export AI Calendar"
+msgstr ""
+
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1716
 msgid "Export all sections to XLSX"
 msgstr ""
@@ -3837,6 +3853,10 @@ msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:130
 msgid "Football, Basketball, Volleyball, Badminton, Yoga"
+msgstr ""
+
+#: src/components/calendar/ExportModal.tsx:312
+msgid "For other apps, find the add-by-URL option in settings."
 msgstr ""
 
 #: src/components/scholarship/ScholarshipPage.tsx:26
@@ -4399,6 +4419,10 @@ msgstr ""
 
 #: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:277
 msgid "In template: {patternLabel}"
+msgstr ""
+
+#: src/components/calendar/ExportModal.tsx:302
+msgid "In your calendar app, add a calendar by URL."
 msgstr ""
 
 #: src/components/clubs/ClubAdminCard.tsx:53
@@ -6270,6 +6294,10 @@ msgstr ""
 msgid "Paste from clipboard"
 msgstr ""
 
+#: src/components/calendar/ExportModal.tsx:318
+msgid "Paste the link and add it."
+msgstr ""
+
 #: src/components/calendar/ExportModal.tsx:114
 msgid "Paste the link and click Add."
 msgstr ""
@@ -7151,6 +7179,10 @@ msgstr ""
 
 #: src/components/events/EventsTabs.tsx:20
 msgid "Review Events"
+msgstr ""
+
+#: src/components/calendar/ExportModal.tsx:334
+msgid "Revoke link"
 msgstr ""
 
 #: src/components/guard/FileDetails.tsx:209
@@ -8870,6 +8902,10 @@ msgstr ""
 
 #: src/components/admin/RequireInnohassleAdmin.tsx:23
 msgid "This page is available only for InNoHassle admins."
+msgstr ""
+
+#: src/components/calendar/ExportModal.tsx:284
+msgid "This private link grants read access to your AI Calendar. External calendar apps refresh on their own schedule; revoking the link cannot erase events already copied by an app. The feed includes only AI Calendar events and does not include their source-message provenance."
 msgstr ""
 
 #: src/components/when2meet/MeetingPage.tsx:1572
