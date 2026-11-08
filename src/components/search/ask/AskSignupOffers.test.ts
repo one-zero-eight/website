@@ -86,6 +86,92 @@ function render(props: Partial<Parameters<typeof AskResult>[0]> = {}) {
   });
 }
 
+it("groups offers by Moscow date with compact intervals and separate titles and actions", () => {
+  render({
+    response: {
+      ...response,
+      signup_offers: [
+        offer,
+        {
+          ...offer,
+          id: "offer-2",
+          title: "Football",
+          starts_at: "2099-11-12T17:00:00Z",
+          ends_at: "2099-11-12T18:30:00Z",
+        },
+        {
+          ...offer,
+          id: "offer-3",
+          title: "Basketball",
+          starts_at: "2099-11-12T21:00:00Z",
+          ends_at: "2099-11-12T22:30:00Z",
+        },
+      ],
+    },
+  });
+  expect(
+    Array.from(container.querySelectorAll("h3"), (el) => el.textContent),
+  ).toEqual(["Nov 12, 2099 · MSK", "Nov 13, 2099 · MSK"]);
+  const rows = container.querySelectorAll("li");
+  expect(rows).toHaveLength(3);
+  expect(rows[0].querySelector("h4")?.textContent).toBe("Volleyball");
+  expect(rows[0].textContent).toContain("18:00–19:30");
+  expect(rows[1].textContent).toContain("20:00–21:30");
+  expect(rows[2].textContent).toContain("00:00–01:30");
+  expect(rows[0].textContent).not.toContain("2099");
+  expect(rows[0].querySelector("button")?.classList.contains("btn")).toBe(true);
+  act(() => rows[0].querySelector("h4")!.click());
+  expect(api.signup).not.toHaveBeenCalled();
+});
+
+it("gives signup lists the chat width even when the answer is short", () => {
+  render({ response: { ...response, answer: "Options:" } });
+  expect(container.firstElementChild?.classList.contains("w-full")).toBe(true);
+  expect(container.firstElementChild?.classList.contains("min-w-0")).toBe(true);
+  render({ response: { ...response, answer: "Hello", signup_offers: [] } });
+  expect(container.firstElementChild?.classList.contains("w-full")).toBe(false);
+});
+
+it("replaces the action in place with one confirmation, without repeating the server receipt", async () => {
+  render();
+  const row = container.querySelector("li");
+  api.signup.mockResolvedValue({
+    ...offer,
+    status: "confirmed",
+    message: "Запись подтверждена в сервисе.",
+  });
+  await act(async () => container.querySelector("button")!.click());
+  expect(container.querySelector("li")).toBe(row);
+  expect(row?.textContent).toContain("You are signed up");
+  expect(row?.textContent).not.toContain("Запись подтверждена в сервисе.");
+  expect(row?.querySelector("button")).toBeNull();
+});
+
+it("keeps both full dates for overnight offers", () => {
+  render({
+    response: {
+      ...response,
+      signup_offers: [
+        {
+          ...offer,
+          starts_at: "2099-12-31T23:30:00+03:00",
+          ends_at: "2100-01-01T01:00:00+03:00",
+        },
+      ],
+    },
+  });
+  const row = container.querySelector("li")!;
+  expect(row.textContent).toContain("Dec 31, 2099, 23:30 – Jan 1, 2100, 01:00");
+});
+
+it("does not invent an end time when it is unknown", () => {
+  render({
+    response: { ...response, signup_offers: [{ ...offer, ends_at: null }] },
+  });
+  const details = container.querySelector("li p")!;
+  expect(details.textContent).toBe("18:00 · Sports complex");
+});
+
 it("shows the exact signup target and posts only its offer ID on explicit click", async () => {
   render();
   expect(container.textContent).toContain("Volleyball");

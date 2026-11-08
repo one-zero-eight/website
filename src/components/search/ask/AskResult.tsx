@@ -47,6 +47,10 @@ export function AskResult({
       tabIndex={0}
       className={cn(
         "border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2",
+        !hasError &&
+          response.chat_id &&
+          !!response.signup_offers?.length &&
+          "w-full min-w-0",
       )}
     >
       {!hasError ? (
