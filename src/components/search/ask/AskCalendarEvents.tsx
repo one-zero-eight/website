@@ -34,12 +34,21 @@ export function AskCalendarEvents({
     },
   );
 
-  const formatStart = (event: searchTypes.SchemaCalendarEventOffer) =>
-    new Date(event.starts_at).toLocaleString(i18n.locale, {
-      day: "numeric",
-      month: "short",
-      ...(event.all_day ? {} : { hour: "2-digit", minute: "2-digit" }),
-    });
+  const formatInterval = (event: searchTypes.SchemaCalendarEventOffer) => {
+    const format = (value: string) =>
+      new Date(
+        event.all_day ? `${value.slice(0, 10)}T12:00:00` : value,
+      ).toLocaleString(i18n.locale, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        ...(event.all_day ? {} : { hour: "2-digit", minute: "2-digit" }),
+      });
+    const start = format(event.starts_at);
+    return !event.all_day && event.ends_at
+      ? `${start} – ${format(event.ends_at)}`
+      : start;
+  };
 
   return (
     <div className="flex flex-col items-start gap-1">
@@ -49,13 +58,20 @@ export function AskCalendarEvents({
           addEvent.isPending &&
           addEvent.variables?.params.path.proposal_id === event.id;
         const title = event.title;
-        const start = formatStart(event);
+        const startsAt = Date.parse(event.starts_at);
+        const invalid =
+          !Number.isFinite(startsAt) ||
+          (event.ends_at != null && !(Date.parse(event.ends_at) > startsAt)) ||
+          (event.end_suggested && (!event.ends_at || event.all_day));
+        const start = invalid
+          ? i18n._(msg`Invalid event interval`)
+          : formatInterval(event);
         return (
           <button
             key={event.id}
             type="button"
             className="btn btn-outline btn-sm h-auto min-h-8 py-1 text-left"
-            disabled={isAdded || isAdding}
+            disabled={isAdded || isAdding || invalid}
             onClick={() =>
               addEvent.mutate({ params: { path: { proposal_id: event.id } } })
             }
@@ -72,6 +88,16 @@ export function AskCalendarEvents({
                 ➕ Add to my calendar: {title} · {start}
               </Trans>
             )}
+            {!invalid &&
+              event.end_suggested &&
+              !event.all_day &&
+              event.ends_at && (
+                <span className="block text-xs">
+                  <Trans>
+                    Proposed duration: 90 minutes (end time not specified).
+                  </Trans>
+                </span>
+              )}
           </button>
         );
       })}

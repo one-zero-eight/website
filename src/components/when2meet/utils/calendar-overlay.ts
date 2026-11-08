@@ -1,6 +1,7 @@
 import { addDays } from "@fullcalendar/core/internal";
 import { IcalExpander } from "@/components/calendar/iCalendarPlugin/ical-expander/IcalExpander";
 import ICAL from "ical.js";
+import { t } from "@lingui/core/macro";
 import { getTimeSlotDurationMinutes, slotKeyToDateRange } from "./api-slots.ts";
 import { getSlotKey } from "./slots.ts";
 
@@ -9,7 +10,7 @@ export type PersonalCalendarEvent =
       title: string;
       allDay: false;
       start: Date;
-      end: Date;
+      end: Date | null;
     }
   | {
       title: string;
@@ -75,7 +76,7 @@ function createPersonalCalendarEvent(
       title,
       allDay: false,
       start: startDate.toJSDate(),
-      end: endDate?.toJSDate() ?? startDate.toJSDate(),
+      end: endDate?.toJSDate() ?? null,
     };
   }
 
@@ -99,6 +100,7 @@ function eventOverlapsRange(
   rangeEnd: Date,
 ) {
   if (!event.allDay) {
+    if (!event.end) return event.start >= rangeStart && event.start < rangeEnd;
     return intervalsOverlap(event.start, event.end, rangeStart, rangeEnd);
   }
 
@@ -161,7 +163,10 @@ async function fetchEventsFromIcsUrl(
       createPersonalCalendarEvent(
         event.summary || "",
         event.startDate,
-        event.endDate,
+        event.component.hasProperty("dtend") ||
+          event.component.hasProperty("duration")
+          ? event.endDate
+          : null,
       ),
     );
   }
@@ -171,7 +176,10 @@ async function fetchEventsFromIcsUrl(
       createPersonalCalendarEvent(
         occurrence.item.summary || "",
         occurrence.startDate,
-        occurrence.endDate,
+        occurrence.item.component.hasProperty("dtend") ||
+          occurrence.item.component.hasProperty("duration")
+          ? occurrence.endDate
+          : null,
       ),
     );
   }
@@ -208,6 +216,7 @@ export function buildCalendarSlotOverlay(
   dateIds: string[],
   timeSlots: string[],
   allowedSlots?: Set<string>,
+  unknownEndLabel = t`end time not specified`,
 ) {
   const slotEvents = new Map<string, string[]>();
   const durationMinutes = getTimeSlotDurationMinutes(timeSlots);
@@ -228,7 +237,17 @@ export function buildCalendarSlotOverlay(
           continue;
         }
 
-        if (intervalsOverlap(start, end, event.start, event.end)) {
+        if (!event.end) {
+          // An unknown interval is not zero-length or all-day. Mark its start
+          // only, explicitly labelled; this is not evidence of later free time.
+          if (event.start >= start && event.start < end) {
+            const clock = event.start.toLocaleTimeString("en-GB", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            titles.push(`${event.title} · ${clock} · ${unknownEndLabel}`);
+          }
+        } else if (intervalsOverlap(start, end, event.start, event.end)) {
           titles.push(event.title);
         }
       }

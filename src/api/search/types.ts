@@ -649,6 +649,11 @@ export interface components {
       /** Ends At */
       ends_at?: string | null;
       /**
+       * End Suggested
+       * @default false
+       */
+      end_suggested: boolean;
+      /**
        * All Day
        * @default false
        */

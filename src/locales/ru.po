@@ -9777,3 +9777,33 @@ msgstr "Ваши записи на спорт"
 #: src/components/sport/SportCheckinRulesModal.tsx:33
 msgid "Your university pass grants access only to the sessions you have checked in for. In case of misuse of the university pass, you may be subject to sanctions, including a monetary fine from the sports complex and disciplinary action from the university."
 msgstr "Университетский пропуск даёт доступ только на те занятия, на которые вы записались. За неправомерное использование пропуска могут применяться санкции, в том числе денежный штраф от спортивного комплекса и дисциплинарные меры со стороны университета."
+
+#: src/components/calendar/CalendarEventPopover.tsx:162
+#: src/components/calendar/CalendarViewer.tsx:465
+msgid "All day"
+msgstr "Весь день"
+
+#: src/components/calendar/CalendarEventPopover.tsx:173
+msgid "Clarify end time with the assistant"
+msgstr "Уточнить окончание с ассистентом"
+
+#: src/components/calendar/CalendarEventPopover.tsx:109
+msgid "Help me specify the end time of my AI Calendar event \"{title}\" starting at {start}. Ask me for the end time; do not guess it."
+msgstr "Помоги уточнить время окончания моего события AI Calendar «{title}» с началом {start}. Спроси у меня время окончания, не придумывай его."
+
+#: src/components/search/ask/AskCalendarEvents.tsx:67
+#: src/components/search/ask/AskSignupOffers.tsx:98
+msgid "Invalid event interval"
+msgstr "Некорректное время события"
+
+#: src/components/search/ask/AskCalendarEvents.tsx:96
+msgid "Proposed duration: 90 minutes (end time not specified)."
+msgstr "Предлагаемая длительность: 90 минут (время окончания не указано)."
+
+#: src/components/calendar/calendar-list-view.tsx:33
+#: src/components/calendar/CalendarEventPopover.tsx:149
+#: src/components/calendar/CalendarEventTime.tsx:20
+#: src/components/when2meet/useWhen2MeetPersonalCalendarOverlay.ts:100
+#: src/components/when2meet/utils/calendar-overlay.ts:219
+msgid "end time not specified"
+msgstr "окончание не указано"

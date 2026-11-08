@@ -54,6 +54,7 @@ import { useLocalStorage, useMediaQuery } from "usehooks-ts";
 import iCalendarPlugin from "./iCalendarPlugin";
 import { WHEN2MEET_EVENT_ID_PREFIX } from "./when2meet-events.ts";
 import "./styles-calendar.css";
+import { CalendarEventTime, hasUnknownEnd } from "./CalendarEventTime";
 
 export type CalendarView = {
   id: string;
@@ -351,9 +352,8 @@ export function CalendarViewer({
         }}
         eventDataTransform={(input) => {
           if (
-            input.end === null &&
-            typeof input.start === "string" &&
-            input.start.length === 10
+            input.allDay === true ||
+            (typeof input.start === "string" && input.start.length === 10)
           ) {
             return input; // It is an all-day event, no need to transform
           }
@@ -461,7 +461,8 @@ export function CalendarViewer({
             eventContent: renderEventDayGridMonth,
           },
         }}
-        allDayText="" // Remove text in all day row
+        allDaySlot={true}
+        allDayText={t`All day`}
         // displayEventEnd={true} // Display end time
         nowIndicator={true} // Display current time as line
         nowIndicatorContent={(arg) => {
@@ -912,7 +913,7 @@ function renderEventTimeGridWeek({
       {timeText && (
         <span className="text-opacity-50 line-clamp-2 text-xs">
           {" "}
-          {timeText}
+          <CalendarEventTime event={event} timeText={timeText} />
         </span>
       )}
       <span
@@ -945,8 +946,13 @@ function renderEventDayGridMonth({
         {event.title || <>&nbsp;</>}
       </div>
       {timeText && (
-        <div className="text-base-content/30 ml-1 hidden w-fit text-right text-xs @5xl/content:block">
-          {timeText}
+        <div
+          className={cn(
+            "text-base-content/60 ml-1 w-fit text-right text-xs whitespace-normal",
+            !hasUnknownEnd(event) && "hidden @5xl/content:block",
+          )}
+        >
+          <CalendarEventTime event={event} timeText={timeText} />
         </div>
       )}
     </div>

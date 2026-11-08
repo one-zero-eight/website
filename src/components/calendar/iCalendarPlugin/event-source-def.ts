@@ -178,6 +178,8 @@ function buildNonDateProps(
     borderColor:
       iCalEvent.color || scheduleAssistantColors?.border || meta.color,
     extendedProps: {
+      // Read the VEVENT, not ical.js/FullCalendar's synthetic layout end.
+      endUnknown: !iCalEvent.startDate.isDate && !specifiesEnd(iCalEvent),
       location: iCalEvent.location,
       organizer: iCalEvent.organizer,
       description: iCalEvent.description,
