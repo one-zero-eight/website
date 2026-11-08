@@ -4,6 +4,7 @@ import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useRef, useState } from "react";
 import AnimatedDots from "@/components/search/AnimatedDots";
+import { SourceRequests } from "@/components/search/SourceRequests";
 import { AskChatList } from "./AskChatList";
 import { AskAttachment } from "./AskAttachment";
 import { AskInput } from "./AskInput";
@@ -190,6 +191,7 @@ export function AskPage({ askQuery }: { askQuery: string }) {
             onStop={handleStop}
             isPending={isPending}
           />
+          <SourceRequests />
         </div>
       </div>
     </div>

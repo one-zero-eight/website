@@ -17,6 +17,9 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock("./AskChatList", () => ({ AskChatList: () => null }));
 vi.mock("./AskResult", () => ({ AskResult: () => null }));
+vi.mock("@/components/search/SourceRequests", () => ({
+  SourceRequests: () => "Propose a Telegram chat",
+}));
 vi.mock("@/api/accounts", () => ({ accountsFetch: {} }));
 vi.mock("@/api/helpers/sport-access-token.ts", () => ({
   getMySportAccessToken: () => null,
@@ -110,6 +113,9 @@ describe("AskPage attachment history", () => {
     act(() => startNewChat());
     await act(async () => finish({ data: new Blob(["pdf"]), error: null }));
     expect(URL.createObjectURL).not.toHaveBeenCalled();
+  });
+  it("offers source requests beside the assistant composer", () => {
+    expect(container.textContent).toContain("Propose a Telegram chat");
   });
   it("shows a private download error without losing the filename", async () => {
     await act(async () => openChat("chat-1"));

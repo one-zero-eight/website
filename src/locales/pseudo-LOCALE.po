@@ -91,6 +91,10 @@ msgstr ""
 msgid "[{group}] Semester {semester}: <0>{range}</0>"
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:90
+msgid "[private invite hidden]"
+msgstr ""
+
 #. placeholder {0}: clubs.length
 #: src/components/clubs/ClubReviewChangesPage.tsx:42
 msgid "{0, plural, one {# club has changes waiting for review} other {# clubs have changes waiting for review}}"
@@ -979,6 +983,10 @@ msgstr ""
 msgid "approved at {date}"
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:284
+msgid "Approved; queued to join"
+msgstr ""
+
 #: src/components/when2meet/ArchiveMeetingButton.test.ts:43
 #: src/components/when2meet/ArchiveMeetingButton.tsx:39
 msgid "Archive"
@@ -1110,6 +1118,10 @@ msgstr ""
 
 #: src/components/sport/SportOverviewSection.tsx:501
 msgid "Available medical groups"
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:282
+msgid "Awaiting cAtIx administrator approval"
 msgstr ""
 
 #: src/components/scholarship/ScholarshipCalculator.tsx:262
@@ -1703,6 +1715,10 @@ msgstr ""
 msgid "Choose a source to restore the draft from."
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:135
+msgid "Choose a specific study group, not \"all\"."
+msgstr ""
+
 #: src/components/when2meet/CreationPage.tsx:261
 #: src/components/when2meet/CreationPage.tsx:312
 msgid "Choose allowed timeslots on the meeting page."
@@ -1948,6 +1964,10 @@ msgstr ""
 msgid "College only"
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:139
+msgid "Comment (optional)"
+msgstr ""
+
 #: src/components/board-games/ReservationDetailsModal.tsx:175
 #: src/components/board-games/UserReservationDetailsModal.tsx:116
 #: src/components/board-games/UserReservationDetailsModal.tsx:369
@@ -2055,6 +2075,10 @@ msgstr ""
 
 #: src/components/account/ConnectTelegramPage.tsx:77
 msgid "Connect your Telegram"
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:294
+msgid "Connection failed"
 msgstr ""
 
 #: src/components/clubs/constants.ts:87
@@ -2209,6 +2233,10 @@ msgstr ""
 msgid "Could not load reservations"
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:195
+msgid "Could not load your requests. Refresh to try again."
+msgstr ""
+
 #: src/components/sport/SportTrainerBaamImportButton.tsx:123
 msgid "Could not mark attendance"
 msgstr ""
@@ -2239,6 +2267,10 @@ msgstr ""
 
 #: src/components/search/ask/AskSignupOffers.tsx:159
 msgid "Could not sign up"
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:267
+msgid "Could not submit the request. Check the invite link, study group and consent, then retry. If the connection was interrupted, refresh your requests before trying again."
 msgstr ""
 
 #: src/components/sport/SportTrainerAttendanceModal.tsx:69
@@ -4498,6 +4530,10 @@ msgstr ""
 msgid "Joining a student organization contributes to your self-awareness and presents opportunities to learn more about yourself, your goals, and your strengths."
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:286
+msgid "Joining Telegram chat"
+msgstr ""
+
 #: src/components/guard/FileDetails.tsx:234
 msgid "Joins"
 msgstr ""
@@ -4685,6 +4721,10 @@ msgstr ""
 
 #: src/components/when2meet/MeetingRoomModal.tsx:275
 msgid "Loading current booking details..."
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:190
+msgid "Loading requests…"
 msgstr ""
 
 #: src/components/search/SearchPage.tsx:210
@@ -5570,6 +5610,10 @@ msgstr ""
 msgid "No qualification was played in this tournament."
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:200
+msgid "No requests yet."
+msgstr ""
+
 #: src/components/board-games/ReservationsAdminPage.tsx:212
 msgid "No reservations match these filters."
 msgstr ""
@@ -6378,6 +6422,10 @@ msgstr ""
 msgid "Priority Order in Crediting Decision Making"
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:110
+msgid "Private Telegram invite link"
+msgstr ""
+
 #: src/components/web-print/PrintPage.tsx:333
 msgid "Probably, the printer is busy — try to reboot it."
 msgstr ""
@@ -6402,6 +6450,10 @@ msgstr ""
 
 #: src/components/about/AboutPage.tsx:48
 msgid "Projects"
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:19
+msgid "Propose a Telegram chat"
 msgstr ""
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:51
@@ -6587,6 +6639,10 @@ msgstr ""
 msgid "Redo"
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:209
+msgid "Refresh requests"
+msgstr ""
+
 #: src/components/tabletennis/Registration.tsx:58
 msgid "Register"
 msgstr ""
@@ -6755,8 +6811,16 @@ msgstr ""
 msgid "Report form will be published to Club Leaders telegram group every month, according to which points will be credited."
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:296
+msgid "Request rejected"
+msgstr ""
+
 #: src/components/clubs/HowToCreateClubPage.tsx:82
 msgid "Request rooms, projectors, sports halls, and other resources for your club's meetings."
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:168
+msgid "Request saved. Current status: <0/>"
 msgstr ""
 
 #: src/components/web-print/PrintPage.tsx:452
@@ -7771,6 +7835,10 @@ msgstr ""
 msgid "Sorry, this site does not support preview. Please, open it directly."
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:291
+msgid "Source enabled; message history may still be loading"
+msgstr ""
+
 #: src/components/search/SelectSourcesFilterButton.tsx:21
 msgid "Sources"
 msgstr ""
@@ -8084,6 +8152,14 @@ msgstr ""
 msgid "Students not found"
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:126
+msgid "Study group"
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:103
+msgid "Study group verification is not proof of Telegram chat membership. Indexed messages will be available to verified students of the target study group, including those who are not in the Telegram chat."
+msgstr ""
+
 #: src/components/events/drafts/RestoreDraftModal.tsx:47
 msgid "Submission"
 msgstr ""
@@ -8105,6 +8181,10 @@ msgstr ""
 
 #: src/components/events/drafts/DraftPage.tsx:886
 msgid "Submit on review"
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:183
+msgid "Submit request"
 msgstr ""
 
 #: src/components/sport/SportOverviewSection.tsx:251
@@ -8130,6 +8210,10 @@ msgstr ""
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:396
 #: src/components/clubs/ClubReviewChangesPage.tsx:77
 msgid "Submitted: <0>{0}</0>"
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:97
+msgid "Submitting a request does not join the chat. A cAtIx administrator must review it first; Telegram may then require its own approval."
 msgstr ""
 
 #: src/components/admin/AdminRoomsPage.tsx:73
@@ -8361,6 +8445,10 @@ msgstr ""
 msgid "Telegram not provided"
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:24
+msgid "Telegram source requests"
+msgstr ""
+
 #: src/components/clubs/EditClubPage.tsx:1203
 msgid "Telegram User"
 msgstr ""
@@ -8514,6 +8602,10 @@ msgstr ""
 #~ msgid "The start date must not be after the end date."
 #~ msgstr ""
 
+#: src/components/search/SourceRequests.tsx:155
+msgid "The Telegram chat administrator agreed to indexing this chat and making its messages available to verified students of the target study group."
+msgstr ""
+
 #: src/components/timer/lib/useTimer.ts:148
 msgid "The timer paused"
 msgstr ""
@@ -8589,6 +8681,10 @@ msgstr ""
 
 #: src/components/board-games/BoardGamesPage.tsx:547
 msgid "This game is no longer available. Refresh the page and choose another game."
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:249
+msgid "This invitation already has a rejected or failed request. Refresh your requests and contact a cAtIx administrator for review, or use a new invitation."
 msgstr ""
 
 #: src/app/routes/forms.submit.tsx:177
@@ -9135,6 +9231,10 @@ msgstr ""
 msgid "URL-friendly identifier for the club"
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:119
+msgid "Use https://t.me/+HASH or https://t.me/joinchat/HASH. Public chat links are not supported."
+msgstr ""
+
 #: src/components/account/MyTokenPage.tsx:72
 msgid "Use only for development. Do not send it to untrusted people or applications!"
 msgstr ""
@@ -9302,6 +9402,10 @@ msgstr ""
 
 #: src/components/clubs/ClubReviewChangesPage.tsx:70
 msgid "Waiting for review"
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:288
+msgid "Waiting for Telegram membership confirmation"
 msgstr ""
 
 #: src/components/sport/SportOverviewSection.tsx:394
@@ -9700,6 +9804,10 @@ msgstr ""
 msgid "You have no reservations yet."
 msgstr ""
 
+#: src/components/search/SourceRequests.tsx:258
+msgid "You have reached the daily limit for new requests. Wait 24 hours before submitting a new invitation. You can still refresh your existing requests."
+msgstr ""
+
 #: src/components/clubs/EditClubPage.tsx:241
 msgid "You have unsaved changes. Are you sure you want to leave?"
 msgstr ""
@@ -9771,6 +9879,10 @@ msgstr ""
 
 #: src/components/calendar/ConfigCalendarDialog.tsx:88
 msgid "Your music room bookings"
+msgstr ""
+
+#: src/components/search/SourceRequests.tsx:186
+msgid "Your requests"
 msgstr ""
 
 #: src/components/board-games/UserReservationDetailsModal.tsx:55

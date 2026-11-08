@@ -479,6 +479,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/sources/requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Requests */
+    get: operations["sources_list_requests"];
+    put?: never;
+    /** Create Request */
+    post: operations["sources_create_request"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1094,6 +1112,53 @@ export interface components {
       /** About */
       about: string;
     };
+    /** SourceRequestCreate */
+    SourceRequestCreate: {
+      /** Invite Link */
+      invite_link: string;
+      /** Group Code */
+      group_code: string;
+      /**
+       * Comment
+       * @default
+       */
+      comment: string;
+      /**
+       * Consent
+       * @constant
+       */
+      consent: true;
+    };
+    /** SourceRequestView */
+    SourceRequestView: {
+      /** Id */
+      id: string;
+      /** Group Code */
+      group_code: string;
+      /** Comment */
+      comment: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: SourceRequestViewStatus;
+      /** Message */
+      message: string | null;
+      /** Title */
+      title: string | null;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+    };
+    /** SourceRequestsView */
+    SourceRequestsView: {
+      /** Requests */
+      requests: components["schemas"]["SourceRequestView"][];
+      /** Verified Group */
+      verified_group: string | null;
+    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -1157,6 +1222,12 @@ export type SchemaSearchResponse = components["schemas"]["SearchResponse"];
 export type SchemaSearchResponses = components["schemas"]["SearchResponses"];
 export type SchemaSignupOffer = components["schemas"]["SignupOffer"];
 export type SchemaSiteChoice = components["schemas"]["SiteChoice"];
+export type SchemaSourceRequestCreate =
+  components["schemas"]["SourceRequestCreate"];
+export type SchemaSourceRequestView =
+  components["schemas"]["SourceRequestView"];
+export type SchemaSourceRequestsView =
+  components["schemas"]["SourceRequestsView"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
@@ -2211,6 +2282,59 @@ export interface operations {
       };
     };
   };
+  sources_list_requests: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SourceRequestsView"];
+        };
+      };
+    };
+  };
+  sources_create_request: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SourceRequestCreate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SourceRequestView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
 }
 export enum PathsSearchSearchGetParametersQueryResponse_types {
   pdf = "pdf",
@@ -2311,4 +2435,13 @@ export enum SignupOfferStatus {
   confirmed = "confirmed",
   refused = "refused",
   unknown = "unknown",
+}
+export enum SourceRequestViewStatus {
+  pending = "pending",
+  approved = "approved",
+  joining = "joining",
+  waiting_join = "waiting_join",
+  connected = "connected",
+  failed = "failed",
+  rejected = "rejected",
 }
