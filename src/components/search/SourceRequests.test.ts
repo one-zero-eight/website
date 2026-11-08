@@ -62,18 +62,24 @@ async function open() {
 }
 function input(name: string, value: string) {
   const element = document.querySelector<
-    HTMLInputElement | HTMLTextAreaElement
+    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
   >(`[name="${name}"]`)!;
   const prototype =
     element instanceof HTMLTextAreaElement
       ? HTMLTextAreaElement.prototype
-      : HTMLInputElement.prototype;
+      : element instanceof HTMLSelectElement
+        ? HTMLSelectElement.prototype
+        : HTMLInputElement.prototype;
   act(() => {
     Object.getOwnPropertyDescriptor(prototype, "value")!.set!.call(
       element,
       value,
     );
-    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(
+      new Event(element instanceof HTMLSelectElement ? "change" : "input", {
+        bubbles: true,
+      }),
+    );
   });
 }
 beforeEach(() => {
@@ -238,24 +244,18 @@ it.each([
   expect(
     api.fetch.mock.calls.filter(([req]) => req.method === "POST"),
   ).toHaveLength(0);
-  input("group_code", "b24.ds_01-1");
+  input("group_code", "B24-DS-01");
+  act(() =>
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
+  );
   expect(button("Submit request").disabled).toBe(false);
 });
 it("enforces backend field limits while allowing inclusive boundaries", async () => {
   await open();
-  for (const [name, maxLength] of [
-    ["invite_link", 160],
-    ["group_code", 40],
-    ["comment", 2000],
-  ] as const) {
-    expect(
-      document.querySelector<HTMLInputElement | HTMLTextAreaElement>(
-        `[name="${name}"]`,
-      )!.maxLength,
-    ).toBe(maxLength);
-  }
+  expect(
+    document.querySelector<HTMLInputElement>('[name="invite_link"]')!.maxLength,
+  ).toBe(160);
   input("invite_link", `https://t.me/+${"a".repeat(128)}`);
-  input("group_code", "a".repeat(40));
   input("comment", "a".repeat(2000));
   act(() =>
     document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
@@ -263,6 +263,9 @@ it("enforces backend field limits while allowing inclusive boundaries", async ()
   expect(button("Submit request").disabled).toBe(false);
   input("comment", "a".repeat(2001));
   expect(button("Submit request").disabled).toBe(true);
+  expect(document.body.textContent).toContain(
+    "Comment must be 2000 characters or fewer",
+  );
   await act(async () => button("Submit request").click());
   expect(
     api.fetch.mock.calls.filter(([req]) => req.method === "POST"),
@@ -286,6 +289,7 @@ it("disables duplicate submissions while pending and keeps the form after a serv
   await act(async () => button("Submit request").click());
   await settle();
   expect(button("Submit request").disabled).toBe(true);
+  expect(document.body.textContent).toContain("Submitting your request");
   await act(async () => button("Submit request").click());
   expect(
     api.fetch.mock.calls.filter(([req]) => req.method === "POST"),
@@ -530,18 +534,21 @@ it("signed-out users see the auth wall without querying or submitting", async ()
   expect(document.querySelector('[name="invite_link"]')).toBeNull();
   expect(api.fetch).not.toHaveBeenCalled();
 });
-it("prefills the verified study group but lets the user propose another", async () => {
+it("prefills the only verified study group and preserves an explicit selection on refetch", async () => {
   expect(api.fetch).not.toHaveBeenCalled();
   await open();
   expect(
-    document.querySelector<HTMLInputElement>('[name="group_code"]')!.value,
+    document.querySelector<HTMLSelectElement>('[name="group_code"]')!.value,
   ).toBe("B24-DS-01");
-  input("group_code", "M26-SE-01");
+  api.fetch.mockImplementation(() =>
+    Promise.resolve(response({ requests: [], verified_groups: ["B24-DS-01"] })),
+  );
+  input("group_code", "B24-DS-01");
   await act(async () => client.invalidateQueries());
   await settle();
   expect(
-    document.querySelector<HTMLInputElement>('[name="group_code"]')!.value,
-  ).toBe("M26-SE-01");
+    document.querySelector<HTMLSelectElement>('[name="group_code"]')!.value,
+  ).toBe("B24-DS-01");
 });
 it("offers multiple verified groups without selecting one automatically", async () => {
   api.fetch.mockResolvedValue(
@@ -549,44 +556,44 @@ it("offers multiple verified groups without selecting one automatically", async 
   );
   await open();
 
-  const groupInput = document.querySelector<HTMLInputElement>(
+  const groupSelect = document.querySelector<HTMLSelectElement>(
     '[name="group_code"]',
   )!;
-  expect(groupInput.value).toBe("");
-  const listId = groupInput.getAttribute("list")!;
-  expect(listId).toBeTruthy();
-  const datalist = document.getElementById(listId)!;
-  expect(
-    [...datalist.querySelectorAll("option")].map((option) => option.value),
-  ).toEqual(["B24-DS-01", "M26-SE-01"]);
+  expect(groupSelect.value).toBe("");
+  expect([...groupSelect.options].map((option) => option.value)).toEqual([
+    "",
+    "B24-DS-01",
+    "M26-SE-01",
+  ]);
   expect(button("Submit request").disabled).toBe(true);
-
   input("group_code", "M26-SE-01");
   expect(button("Submit request").disabled).toBe(true);
 });
-it("allows a manual study-group proposal when no verified groups are returned", async () => {
+it("does not allow manual group proposals when no verified groups are returned", async () => {
   api.fetch.mockResolvedValue(response({ requests: [], verified_groups: [] }));
   await open();
 
   expect(
-    document.querySelector<HTMLInputElement>('[name="group_code"]')!.value,
-  ).toBe("");
-  input("group_code", "M26-SE-01");
-  input("invite_link", "https://t.me/+privateInvite1234");
-  act(() =>
-    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
+    document.querySelector<HTMLSelectElement>('[name="group_code"]')!.options,
+  ).toHaveLength(1);
+  expect(document.body.textContent).toContain(
+    "No verified study groups are available",
   );
-  expect(button("Submit request").disabled).toBe(false);
+  input("group_code", "M26-SE-01");
+  expect(button("Submit request").disabled).toBe(true);
 });
-it("allows a manual group proposal when group lookup fails", async () => {
+it("keeps own-group submission unavailable when group lookup fails but offers all users", async () => {
   api.fetch.mockImplementationOnce(() =>
     Promise.resolve(response({ detail: "unavailable" }, 503)),
   );
   await open();
   await settle();
   expect(document.body.textContent).toContain("Could not load your requests");
-
-  input("group_code", "M26-SE-01");
+  expect(document.body.textContent).toContain(
+    "Your study groups could not be verified",
+  );
+  expect(button("Submit request").disabled).toBe(true);
+  input("audience", "all");
   input("invite_link", "https://t.me/+privateInvite1234");
   act(() =>
     document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
@@ -596,7 +603,7 @@ it("allows a manual group proposal when group lookup fails", async () => {
 it("requires explicit admin consent and sends only the proposed source payload", async () => {
   await open();
   input("invite_link", "  https://t.me/joinchat/privateInvite1234  ");
-  input("group_code", " B24-DS-01 ");
+  input("group_code", "B24-DS-01");
   input("comment", "Please add our chat");
   expect(button("Submit request").disabled).toBe(true);
   await act(async () => button("Submit request").click());
@@ -617,4 +624,173 @@ it("requires explicit admin consent and sends only the proposed source payload",
     comment: "Please add our chat",
     consent: true,
   });
+});
+
+it("submits all-audience requests without verified groups after explicit selection", async () => {
+  api.fetch.mockResolvedValue(response({ requests: [], verified_groups: [] }));
+  await open();
+
+  const audience =
+    document.querySelector<HTMLSelectElement>('[name="audience"]')!;
+  expect(audience.value).toBe("own");
+  expect([...audience.options].map((option) => option.textContent)).toEqual([
+    "My verified study group",
+    "All cAtIx users",
+  ]);
+  act(() => {
+    audience.value = "all";
+    audience.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  input("invite_link", "t.me/universityinnopolis");
+  act(() =>
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
+  );
+  expect(document.body.textContent).toContain(
+    "visible to all cAtIx users, including people who are not members of your study group",
+  );
+  expect(button("Submit request").disabled).toBe(false);
+  await act(async () => button("Submit request").click());
+  await settle();
+  const post = api.fetch.mock.calls.find(([req]) => req.method === "POST")![0];
+  expect(await post.json()).toEqual({
+    invite_link: "https://t.me/universityinnopolis",
+    group_code: "all",
+    comment: "",
+    consent: true,
+  });
+});
+
+it("limits own-audience submissions to a selected verified group", async () => {
+  api.fetch.mockResolvedValue(
+    response({ requests: [], verified_groups: ["B24-DS-01", "M26-SE-01"] }),
+  );
+  await open();
+  const groupSelect = document.querySelector<HTMLSelectElement>(
+    '[name="group_code"]',
+  )!;
+  expect([...groupSelect.options].map((option) => option.value)).toEqual([
+    "",
+    "B24-DS-01",
+    "M26-SE-01",
+  ]);
+  expect(groupSelect.value).toBe("");
+  act(() => {
+    groupSelect.value = "M26-SE-01";
+    groupSelect.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  input("invite_link", "https://t.me/+privateInvite1234");
+  act(() =>
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
+  );
+  expect(button("Submit request").disabled).toBe(false);
+  await act(async () => button("Submit request").click());
+  const post = api.fetch.mock.calls.find(([req]) => req.method === "POST")![0];
+  expect((await post.json()).group_code).toBe("M26-SE-01");
+});
+
+it("explains the exact inactive submission reason and resets consent when audience changes", async () => {
+  api.fetch.mockResolvedValue(
+    response({ requests: [], verified_groups: ["B24-DS-01", "M26-SE-01"] }),
+  );
+  await open();
+  expect(document.body.textContent).toContain(
+    "Enter a valid Telegram chat, channel or invite link",
+  );
+  expect(document.body.textContent).toContain(
+    "Choose one of your verified study groups",
+  );
+  expect(document.body.textContent).toContain(
+    "Confirm the chat administrator's consent",
+  );
+  input("invite_link", "https://t.me/+privateInvite1234");
+  act(() =>
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
+  );
+  const audience =
+    document.querySelector<HTMLSelectElement>('[name="audience"]')!;
+  act(() => {
+    audience.value = "all";
+    audience.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  expect(
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked,
+  ).toBe(false);
+  expect(document.body.textContent).toContain("visible to all cAtIx users");
+  input("audience", "own");
+  expect(
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked,
+  ).toBe(false);
+  input("group_code", "B24-DS-01");
+  act(() =>
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
+  );
+  input("group_code", "M26-SE-01");
+  expect(
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked,
+  ).toBe(false);
+});
+
+it("labels all-audience requests instead of showing the raw all group code", async () => {
+  api.fetch.mockResolvedValue(
+    response({
+      requests: [{ ...request, group_code: "all", title: null }],
+      verified_groups: [],
+    }),
+  );
+  await open();
+  expect(
+    [...document.querySelectorAll("ul li p")]
+      .slice(0, 2)
+      .map((item) => item.textContent),
+  ).toEqual(["All cAtIx users", "All cAtIx users"]);
+});
+
+it("does not widen an own-group request when refetch removes its verified group", async () => {
+  api.fetch.mockResolvedValue(
+    response({ requests: [], verified_groups: ["B24-DS-01", "M26-SE-01"] }),
+  );
+  await open();
+  input("group_code", "B24-DS-01");
+  input("invite_link", "https://t.me/+privateInvite1234");
+  act(() =>
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
+  );
+  expect(button("Submit request").disabled).toBe(false);
+
+  api.fetch.mockImplementation((req: Request) =>
+    Promise.resolve(
+      req.method === "POST"
+        ? response(request, 201)
+        : response({ requests: [], verified_groups: ["M26-SE-01"] }),
+    ),
+  );
+  await act(async () => button("Refresh requests").click());
+  await settle();
+  expect(
+    document.querySelector<HTMLSelectElement>('[name="group_code"]')!.value,
+  ).toBe("");
+  expect(
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked,
+  ).toBe(false);
+  expect(button("Submit request").disabled).toBe(true);
+  expect(
+    api.fetch.mock.calls.filter(([req]) => req.method === "POST"),
+  ).toHaveLength(0);
+});
+
+it("explains a 403 as a verified-group mismatch and asks the user to reload groups", async () => {
+  await open();
+  input("invite_link", "https://t.me/+privateInvite1234");
+  act(() =>
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
+  );
+  api.fetch.mockImplementationOnce(() =>
+    Promise.resolve(response({ detail: "do not show this" }, 403)),
+  );
+  await act(async () => button("Submit request").click());
+  await settle();
+  expect(document.body.textContent).toContain(
+    "Your selected study group is no longer verified. Refresh your requests",
+  );
+  expect(document.body.textContent).not.toContain("do not show this");
 });

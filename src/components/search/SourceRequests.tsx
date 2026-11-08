@@ -4,7 +4,9 @@ import { RequireAuth } from "@/components/common/AuthWall";
 import { Modal } from "@/components/common/Modal";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+const EMPTY_VERIFIED_GROUPS: string[] = [];
 
 function normalizeTelegramLink(value: string): string | undefined {
   const link = value.trim().replace(/^t\.me\//, "https://t.me/");
@@ -56,9 +58,10 @@ export function SourceRequests() {
 function SourceRequestsContent() {
   const { i18n, t } = useLingui();
   const queryClient = useQueryClient();
-  const groupListId = useId();
+  const groupSelectionInitialized = useRef(false);
   const [inviteLink, setInviteLink] = useState("");
-  const [proposedGroup, setProposedGroup] = useState<string | undefined>();
+  const [audience, setAudience] = useState<"own" | "all">("own");
+  const [selectedGroup, setSelectedGroup] = useState<string | undefined>();
   const [comment, setComment] = useState("");
   const [consent, setConsent] = useState(false);
   const requests = $search.useQuery("get", "/sources/requests", undefined, {
@@ -66,9 +69,23 @@ function SourceRequestsContent() {
     refetchInterval: 15_000,
     refetchOnMount: "always",
   });
-  const verifiedGroups = requests.data?.verified_groups ?? [];
-  const groupCode =
-    proposedGroup ?? (verifiedGroups.length === 1 ? verifiedGroups[0] : "");
+  const verifiedGroups = requests.isSuccess
+    ? requests.data.verified_groups
+    : EMPTY_VERIFIED_GROUPS;
+  useEffect(() => {
+    if (!requests.isSuccess || groupSelectionInitialized.current) return;
+    groupSelectionInitialized.current = true;
+    if (verifiedGroups.length === 1) setSelectedGroup(verifiedGroups[0]);
+  }, [requests.isSuccess, verifiedGroups]);
+  useEffect(() => {
+    if (
+      audience === "own" &&
+      selectedGroup &&
+      !verifiedGroups.includes(selectedGroup)
+    ) {
+      setConsent(false);
+    }
+  }, [audience, selectedGroup, verifiedGroups]);
   const mutation = $search.useMutation("post", "/sources/requests", {
     retry: false,
     onSuccess: () => {
@@ -83,8 +100,11 @@ function SourceRequestsContent() {
   const normalizedInvite = normalizeTelegramLink(inviteLink);
   const validInvite = normalizedInvite !== undefined;
   const validGroup =
-    /^[A-Za-z0-9][A-Za-z0-9._-]{0,39}$/.test(groupCode.trim()) &&
-    groupCode.trim().toLowerCase() !== "all";
+    audience === "all" ||
+    (requests.isSuccess &&
+      selectedGroup !== undefined &&
+      verifiedGroups.includes(selectedGroup));
+  const groupCode = audience === "all" ? "all" : (selectedGroup ?? "");
   const canSubmit =
     consent &&
     validInvite &&
@@ -97,11 +117,17 @@ function SourceRequestsContent() {
     mutation.mutate({
       body: {
         invite_link: normalizedInvite,
-        group_code: groupCode.trim(),
+        group_code: groupCode,
         comment,
         consent: true,
       },
     });
+  }
+
+  function handleAudienceChange(value: "own" | "all") {
+    if (value === audience) return;
+    setAudience(value);
+    setConsent(false);
   }
 
   function hideInviteLinks(text: string) {
@@ -122,10 +148,42 @@ function SourceRequestsContent() {
       <p className="text-base-content/70 text-sm">
         <Trans>
           Study group verification is not proof of Telegram chat membership.
-          Indexed messages will be available to verified students of the target
-          study group, including those who are not in the Telegram chat.
         </Trans>
       </p>
+      <label className="flex flex-col gap-1">
+        <Trans>Who should be able to see indexed messages?</Trans>
+        <select
+          className="select w-full"
+          name="audience"
+          value={audience}
+          onChange={(event) =>
+            handleAudienceChange(event.target.value as "own" | "all")
+          }
+        >
+          <option value="own">
+            <Trans>My verified study group</Trans>
+          </option>
+          <option value="all">
+            <Trans>All cAtIx users</Trans>
+          </option>
+        </select>
+      </label>
+      {audience === "own" ? (
+        <p className="text-base-content/70 text-sm">
+          <Trans>
+            Indexed messages will be visible to students verified for the
+            selected study group, including students who are not Telegram chat
+            members.
+          </Trans>
+        </p>
+      ) : (
+        <p className="alert alert-warning text-sm">
+          <Trans>
+            Messages will be visible to all cAtIx users, including people who
+            are not members of your study group or Telegram chat.
+          </Trans>
+        </p>
+      )}
       <label className="flex flex-col gap-1">
         <Trans>Telegram chat or channel link</Trans>
         <input
@@ -148,34 +206,69 @@ function SourceRequestsContent() {
           </span>
         )}
       </label>
-      <label className="flex flex-col gap-1">
-        <Trans>Study group</Trans>
-        <input
-          className="input w-full"
-          name="group_code"
-          maxLength={40}
-          list={groupListId}
-          value={groupCode}
-          onChange={(event) => setProposedGroup(event.target.value)}
-        />
-        <datalist id={groupListId}>
-          {verifiedGroups.map((group) => (
-            <option key={group} value={group} />
-          ))}
-        </datalist>
-        <span className="text-base-content/70 text-xs">
-          <Trans>Choose a specific study group, not "all".</Trans>
-        </span>
-      </label>
+      {audience === "own" && (
+        <label className="flex flex-col gap-1">
+          <Trans>Study group</Trans>
+          <select
+            className="select w-full"
+            name="group_code"
+            value={selectedGroup ?? ""}
+            onChange={(event) => {
+              if (event.target.value !== selectedGroup) {
+                setSelectedGroup(event.target.value || undefined);
+                setConsent(false);
+              }
+            }}
+          >
+            <option value="">
+              <Trans>Select a verified study group</Trans>
+            </option>
+            {verifiedGroups.map((group) => (
+              <option key={group} value={group}>
+                {group}
+              </option>
+            ))}
+          </select>
+          <span className="text-base-content/70 text-xs">
+            {requests.isError ? (
+              <Trans>
+                Your study groups could not be verified. Refresh to try again,
+                or choose all cAtIx users.
+              </Trans>
+            ) : verifiedGroups.length === 0 && requests.isSuccess ? (
+              <Trans>
+                No verified study groups are available. Choose all cAtIx users
+                or refresh after verification is available.
+              </Trans>
+            ) : (
+              <Trans>
+                Only groups verified for your account can be selected.
+              </Trans>
+            )}
+          </span>
+          {!validGroup && !requests.isError && verifiedGroups.length > 0 && (
+            <span className="text-error text-sm">
+              <Trans>Choose one of your verified study groups.</Trans>
+            </span>
+          )}
+        </label>
+      )}
       <label className="flex flex-col gap-1">
         <Trans>Comment (optional)</Trans>
         <textarea
           className="textarea w-full"
           name="comment"
-          maxLength={2000}
           value={comment}
           onChange={(event) => setComment(event.target.value)}
         />
+        <span className="text-base-content/70 text-xs">
+          <Trans>Maximum 2000 characters.</Trans>
+        </span>
+        {comment.length > 2000 && (
+          <span className="text-error text-sm">
+            <Trans>Comment must be 2000 characters or fewer.</Trans>
+          </span>
+        )}
       </label>
       <label className="flex items-start gap-2 text-sm">
         <input
@@ -184,12 +277,26 @@ function SourceRequestsContent() {
           checked={consent}
           onChange={(event) => setConsent(event.target.checked)}
         />
-        <Trans>
-          The Telegram chat administrator agreed to indexing this chat and
-          making its messages available to verified students of the target study
-          group.
-        </Trans>
+        {audience === "all" ? (
+          <Trans>
+            The Telegram chat administrator agreed to indexing this chat and
+            making its messages visible to all cAtIx users.
+          </Trans>
+        ) : (
+          <Trans>
+            The Telegram chat administrator agreed to indexing this chat and
+            making its messages available to verified students of the selected
+            study group.
+          </Trans>
+        )}
       </label>
+      {!consent && (
+        <p className="text-error text-sm">
+          <Trans>
+            Confirm the chat administrator's consent for this audience.
+          </Trans>
+        </p>
+      )}
       {mutation.isError && (
         <p className="text-error text-sm">
           <SourceRequestError error={mutation.error} />
@@ -214,6 +321,11 @@ function SourceRequestsContent() {
         )}
         <Trans>Submit request</Trans>
       </button>
+      {mutation.isPending && (
+        <p className="text-base-content/70 text-sm">
+          <Trans>Submitting your request…</Trans>
+        </p>
+      )}
       <h3 className="mt-2 font-semibold">
         <Trans>Your requests</Trans>
       </h3>
@@ -247,9 +359,18 @@ function SourceRequestsContent() {
             className="border-base-300 rounded-box border p-3 text-sm"
           >
             <p className="font-medium break-words">
-              {hideInviteLinks(request.title ?? request.group_code)}
+              {hideInviteLinks(
+                request.title ??
+                  (request.group_code === "all"
+                    ? t`All cAtIx users`
+                    : request.group_code),
+              )}
             </p>
-            <p>{hideInviteLinks(request.group_code)}</p>
+            <p>
+              {request.group_code === "all"
+                ? t`All cAtIx users`
+                : hideInviteLinks(request.group_code)}
+            </p>
             <p>
               <SourceRequestStatus status={request.status} />
             </p>
@@ -276,6 +397,14 @@ function SourceRequestsContent() {
 
 function SourceRequestError({ error }: { error: unknown }) {
   if (isApiHttpError(error)) {
+    if (error.httpCode === 403) {
+      return (
+        <Trans>
+          Your selected study group is no longer verified. Refresh your requests
+          and select a currently verified group before submitting.
+        </Trans>
+      );
+    }
     if (error.httpCode === 409) {
       return (
         <Trans>
