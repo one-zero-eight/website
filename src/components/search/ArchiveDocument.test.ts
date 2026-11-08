@@ -171,7 +171,10 @@ describe("cited archive documents", () => {
     await render(
       createElement(IframePreviewCard, { source, onClose: vi.fn() }),
     );
-    expect(container.querySelector(".skeleton")).not.toBeNull();
+    expect(container.querySelector(".loading-spinner")).not.toBeNull();
+    expect(container.querySelector('[role="status"]')?.textContent).toContain(
+      "Loading...",
+    );
     expect(container.querySelector("iframe")).toBeNull();
     const firstSignal = vi.mocked(customFetch.GET).mock.calls[0][1]?.signal;
     vi.mocked(customFetch.GET).mockResolvedValue({
@@ -198,6 +201,7 @@ describe("cited archive documents", () => {
     });
     expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
     expect(container.textContent).toContain("second.pdf");
+    expect(container.querySelector(".loading-spinner")).toBeNull();
     await render(
       createElement(IframePreviewCard, {
         source: {
@@ -216,6 +220,24 @@ describe("cited archive documents", () => {
     });
     await render(null);
     expect(URL.revokeObjectURL).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows a circular loader while an ordinary PDF is downloading", async () => {
+    vi.mocked(customFetch.GET).mockImplementationOnce(
+      () => new Promise(() => {}),
+    );
+    await render(
+      createElement(IframePreviewCard, {
+        source: {
+          ...source,
+          archive_document: null,
+          url: "https://eduwiki.example/rules.pdf",
+        },
+        onClose: vi.fn(),
+      }),
+    );
+    expect(container.querySelector(".loading-spinner")).not.toBeNull();
+    expect(container.querySelector("iframe")).toBeNull();
   });
 
   it("reports an iframe failure instead of embedding the archive", async () => {

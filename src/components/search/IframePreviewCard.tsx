@@ -185,7 +185,15 @@ function ArchiveDocumentPreview({
       </div>
       <p className="text-sm wrap-anywhere">{document.member}</p>
       {isPending || (pdf && !objectUrl) ? (
-        <div className="skeleton h-[50vh] w-full rounded-xl" />
+        <div
+          role="status"
+          className="flex h-[50vh] w-full flex-col items-center justify-center gap-3 rounded-xl"
+        >
+          <span className="loading loading-spinner loading-lg text-primary" />
+          <span className="text-base-content/70 text-sm">
+            <Trans>Loading...</Trans>
+          </span>
+        </div>
       ) : objectUrl && !hasError ? (
         <iframe
           src={objectUrl}
@@ -297,7 +305,15 @@ function OrdinaryPreviewCard({
           </a>
         </div>
       ) : isPdfPending ? (
-        <div className="skeleton h-[50vh] w-full rounded-xl" />
+        <div
+          role="status"
+          className="flex h-[50vh] w-full flex-col items-center justify-center gap-3 rounded-xl"
+        >
+          <span className="loading loading-spinner loading-lg text-primary" />
+          <span className="text-base-content/70 text-sm">
+            <Trans>Loading...</Trans>
+          </span>
+        </div>
       ) : pdfObjectUrl ? (
         <iframe
           src={pdfObjectUrl}
