@@ -268,6 +268,46 @@ describe("AskPage attachment history", () => {
       attachment_ids: [info.id],
     });
   });
+  it("wraps long words in user messages and streaming answers without truncating them", async () => {
+    const text = "AAMkADAx".repeat(100);
+    let controller!: ReadableStreamDefaultController<Uint8Array>;
+    api.post.mockResolvedValueOnce({
+      data: new ReadableStream<Uint8Array>({
+        start(streamController) {
+          controller = streamController;
+        },
+      }),
+    });
+    let pending!: Promise<void>;
+    await act(async () => {
+      pending = askQuestion(text);
+    });
+    try {
+      await act(async () => {
+        controller.enqueue(
+          new TextEncoder().encode(
+            `event: answer\ndata: ${JSON.stringify({ text })}\n\n`,
+          ),
+        );
+      });
+      const userMessage = container.querySelector(".bg-primary")!;
+      const streamingAnswer = container.querySelector("p.whitespace-pre-wrap")!;
+      for (const element of [userMessage, streamingAnswer.parentElement!]) {
+        expect(element.textContent).toBe(text);
+        expect(element.classList.contains("min-w-0")).toBe(true);
+        expect(element.classList.contains("wrap-anywhere")).toBe(true);
+      }
+      expect(
+        streamingAnswer.parentElement!.classList.contains("max-w-full"),
+      ).toBe(true);
+    } finally {
+      await act(async () => {
+        controller.close();
+        await pending;
+      });
+    }
+  });
+
   it("shows private history files with size and pages, downloading only on request", async () => {
     await act(async () => openChat("chat-1"));
     expect(container.textContent).toContain("private.pdf");

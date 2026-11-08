@@ -46,11 +46,11 @@ export function AskResult({
     <div
       tabIndex={0}
       className={cn(
-        "border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2",
+        "border-base-300 bg-base-200 text-base-content rounded-field flex max-w-full min-w-0 flex-col gap-2 self-start border! px-4 py-2 wrap-anywhere",
         !hasError &&
           response.chat_id &&
           !!response.signup_offers?.length &&
-          "w-full min-w-0",
+          "w-full",
       )}
     >
       {!hasError ? (
@@ -69,6 +69,9 @@ export function AskResult({
             ),
             p: ({ children }) => (
               <p className="whitespace-pre-wrap">{children}</p>
+            ),
+            pre: ({ children }) => (
+              <pre className="max-w-full overflow-x-auto">{children}</pre>
             ),
             li: ({ children }) => (
               <li className="ml-5 list-disc">{children}</li>

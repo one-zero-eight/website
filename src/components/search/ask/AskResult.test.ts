@@ -132,6 +132,42 @@ describe("AskResult approval context", () => {
     );
   });
 
+  it.each(["plain", "inline code", "list"])(
+    "keeps a long ID intact and enables wrapping in %s answers",
+    (format) => {
+      const id = "AAMkADAx".repeat(100);
+      const answer =
+        format === "inline code"
+          ? `Booking: \`${id}\``
+          : format === "list"
+            ? `- Booking: \`${id}\``
+            : `Booking: ${id}`;
+      render({ response: { ...response, answer, approval: null } });
+
+      const bubble = container.firstElementChild!;
+      expect(bubble.textContent).toContain(id);
+      expect(bubble.classList.contains("max-w-full")).toBe(true);
+      expect(bubble.classList.contains("min-w-0")).toBe(true);
+      expect(bubble.classList.contains("wrap-anywhere")).toBe(true);
+    },
+  );
+
+  it("keeps preformatted code scrollable inside the answer", () => {
+    const code = "AAMkADAx".repeat(100);
+    render({
+      response: {
+        ...response,
+        answer: `\`\`\`\n${code}\n\`\`\``,
+        approval: null,
+      },
+    });
+
+    const pre = container.querySelector("pre")!;
+    expect(pre.textContent).toBe(`${code}\n`);
+    expect(pre.classList.contains("max-w-full")).toBe(true);
+    expect(pre.classList.contains("overflow-x-auto")).toBe(true);
+  });
+
   it("does not show the explanation or approval controls on an error", () => {
     render({ hasError: true });
 

@@ -178,7 +178,7 @@ export function AskPage({
             )}
 
             {isPending && (
-              <div className="border-base-300 bg-base-200 text-base-content rounded-field flex max-w-full flex-col gap-2 self-start border! px-4 py-2">
+              <div className="border-base-300 bg-base-200 text-base-content rounded-field flex max-w-full min-w-0 flex-col gap-2 self-start border! px-4 py-2 wrap-anywhere">
                 {answerText ? (
                   <p className="whitespace-pre-wrap">{answerText}</p>
                 ) : (
@@ -232,7 +232,7 @@ function UserMessage({
   attachments?: searchTypes.SchemaAttachmentInfo[];
 }) {
   return (
-    <div className="bg-primary text-primary-content rounded-field max-w-[80%] self-end rounded-br-none px-4 py-2 break-words whitespace-pre-wrap">
+    <div className="bg-primary text-primary-content rounded-field max-w-[80%] min-w-0 self-end rounded-br-none px-4 py-2 wrap-anywhere whitespace-pre-wrap">
       {text}
       {attachments && attachments.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
