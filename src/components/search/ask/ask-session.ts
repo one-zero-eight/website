@@ -56,11 +56,22 @@ type AskStreamEvent =
 // every chat of the user as well: one of them opens again from the list of chats (`openChat`)
 const STORAGE_KEY = "search-ask-session";
 
+type SignupReceipt = {
+  chatId: string;
+  offerId: string;
+  status: searchTypes.SchemaSignupOffer["status"];
+  message?: string | null;
+  expiresAt: number;
+};
+
 const saved: Pick<AskSession, "messages" | "chatId"> &
-  Partial<Pick<AskSession, "draftQuery" | "draftAttachments">> = JSON.parse(
+  Partial<Pick<AskSession, "draftQuery" | "draftAttachments">> & {
+    signupReceipts?: SignupReceipt[];
+  } = JSON.parse(
   sessionStorage.getItem(STORAGE_KEY) ??
     JSON.stringify({ messages: [], chatId: null }),
 );
+let signupReceipts = saved.signupReceipts ?? [];
 
 let session: AskSession = {
   ...saved,
@@ -79,6 +90,16 @@ const listeners = new Set<() => void>();
 
 function update(patch: Partial<AskSession>) {
   session = { ...session, ...patch };
+  persist();
+  listeners.forEach((listener) => listener());
+}
+
+function persist() {
+  // Bound receipt lifetime to the actionable interval and this tab. Evicting a still-live
+  // receipt just to cap the count could re-enable an uncertain write.
+  signupReceipts = signupReceipts.filter(
+    (receipt) => receipt.expiresAt > Date.now(),
+  );
   sessionStorage.setItem(
     STORAGE_KEY,
     JSON.stringify({
@@ -86,9 +107,9 @@ function update(patch: Partial<AskSession>) {
       chatId: session.chatId,
       draftQuery: session.draftQuery,
       draftAttachments: session.draftAttachments,
+      signupReceipts,
     }),
   );
-  listeners.forEach((listener) => listener());
 }
 
 function subscribe(listener: () => void) {
@@ -124,7 +145,7 @@ function parseEvent(block: string): AskStreamEvent | undefined {
 // The user's InNoHassle Sport token goes with a question: with it the assistant reads their sport hours and trainings and
 // checks them in to a training once they confirm it. It lives a day, so an expired one is fetched again. Without it the
 // assistant answers without their sport.
-async function sportHeaders(): Promise<Record<string, string>> {
+export async function sportHeaders(): Promise<Record<string, string>> {
   let token = getMySportAccessToken();
   if (token && checkIsTokenExpired(token, new Date()) === true) {
     const { data } = await accountsFetch
@@ -380,7 +401,11 @@ export function startNewChat() {
 
 // A chat the user deleted: when it is the open one, a new conversation starts in its place
 export function forgetChat(chatId: string) {
+  signupReceipts = signupReceipts.filter(
+    (receipt) => receipt.chatId !== chatId,
+  );
   if (session.chatId === chatId) startNewChat();
+  else persist();
 }
 
 // One of the user's chats with its questions and answers, as the server keeps them, to go on with it
@@ -421,13 +446,85 @@ export async function openChat(chatId: string) {
           content: response.query,
           attachments: response.attachments ?? [],
         },
-        { role: "assistant", response },
+        {
+          role: "assistant",
+          response: restoreSignupReceipts(chatId, response),
+        },
       ]),
     });
   } catch (e) {
     if (session.chatId !== chatId) return;
     update({ isOpening: false, openingError: e });
   }
+}
+
+function restoreSignupReceipts(
+  chatId: string,
+  response: searchTypes.SchemaAskResponses,
+): searchTypes.SchemaAskResponses {
+  if (!response.signup_offers?.length) return response;
+  return {
+    ...response,
+    signup_offers: response.signup_offers.map((offer) => {
+      if (offer.status !== "available") {
+        storeSignupReceipt(chatId, offer);
+        return offer;
+      }
+      const receipt = signupReceipts.find(
+        (item) => item.chatId === chatId && item.offerId === offer.id,
+      );
+      return receipt
+        ? { ...offer, status: receipt.status, message: receipt.message }
+        : offer;
+    }),
+  };
+}
+
+function storeSignupReceipt(
+  chatId: string,
+  offer: searchTypes.SchemaSignupOffer,
+) {
+  signupReceipts = signupReceipts.filter(
+    (item) => item.chatId !== chatId || item.offerId !== offer.id,
+  );
+  signupReceipts.push({
+    chatId,
+    offerId: offer.id,
+    status: offer.status,
+    message: offer.message,
+    expiresAt: Math.min(
+      Date.parse(offer.expires_at),
+      Date.parse(offer.starts_at),
+    ),
+  });
+}
+
+// Keep receipts even when the originating chat is no longer open.
+export function rememberSignup(
+  chatId: string,
+  offer: searchTypes.SchemaSignupOffer,
+) {
+  storeSignupReceipt(chatId, offer);
+  if (session.chatId !== chatId) {
+    persist();
+    return;
+  }
+  update({
+    messages: session.messages.map((message) =>
+      message.role === "assistant" &&
+      message.response.signup_offers?.some((item) => item.id === offer.id)
+        ? {
+            ...message,
+            response: {
+              ...message.response,
+              signup_offers: message.response.signup_offers.map((item) =>
+                item.id === offer.id ? offer : item,
+              ),
+            },
+          }
+        : message,
+    ),
+  });
 }
 
 // The user's vote on an answer: the answer shows it when the page opens again

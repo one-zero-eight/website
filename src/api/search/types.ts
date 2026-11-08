@@ -192,6 +192,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/ask/{chat_id}/signup/{offer_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Signup Offer
+     * @description An explicit button click, not an agent turn. Durable claim prevents retries.
+     */
+    post: operations["ask_signup_offer"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/ask/{chat_id}/decision": {
     parameters: {
       query?: never;
@@ -555,6 +575,11 @@ export interface components {
     };
     /** AskResponses */
     AskResponses: {
+      /**
+       * Signup Offers
+       * @default []
+       */
+      signup_offers: components["schemas"]["SignupOffer"][];
       /** Query */
       query: string;
       /** Answer */
@@ -1014,6 +1039,52 @@ export interface components {
       /** Search Query Id */
       search_query_id?: string | null;
     };
+    /**
+     * SignupOffer
+     * @description A verified service target; an external URL is a link, never consent to a write.
+     */
+    SignupOffer: {
+      /** Id */
+      id: string;
+      /**
+       * Service
+       * @enum {string}
+       */
+      service: SignupOfferService;
+      /** Title */
+      title: string;
+      /**
+       * Starts At
+       * Format: date-time
+       */
+      starts_at: string;
+      /** Ends At */
+      ends_at?: string | null;
+      /**
+       * All Day
+       * @default false
+       */
+      all_day: boolean;
+      /** Location */
+      location?: string | null;
+      /** Source Url */
+      source_url?: string | null;
+      /** External Url */
+      external_url?: string | null;
+      /**
+       * Status
+       * @default available
+       * @enum {string}
+       */
+      status: SignupOfferStatus;
+      /** Message */
+      message?: string | null;
+      /**
+       * Expires At
+       * Format: date-time
+       */
+      expires_at: string;
+    };
     /** SiteChoice */
     SiteChoice: {
       /** Name */
@@ -1084,6 +1155,7 @@ export type SchemaResidentsSource = components["schemas"]["ResidentsSource"];
 export type SchemaResourcesSource = components["schemas"]["ResourcesSource"];
 export type SchemaSearchResponse = components["schemas"]["SearchResponse"];
 export type SchemaSearchResponses = components["schemas"]["SearchResponses"];
+export type SchemaSignupOffer = components["schemas"]["SignupOffer"];
 export type SchemaSiteChoice = components["schemas"]["SiteChoice"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
@@ -1484,6 +1556,48 @@ export interface operations {
     responses: {
       /** @description Server-sent events: `status`, `answer`, then `done` (AskResponses) or `error` */
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_signup_offer: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description The user's InNoHassle Sport token ([InNoHassle Accounts](https://api.innohassle.ru/accounts/v0/tokens/generate-my-sport-token), as the site keeps it): the assistant reads their sport hours and trainings and checks them in to a training (after they approve it) with it. Without it, or with one of another user or expired, the assistant has no access to their sport. */
+        "X-Sport-Token"?: string | null;
+      };
+      path: {
+        chat_id: string;
+        offer_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignupOffer"];
+        };
+      };
+      /** @description Offer not found or chat is not owned by this user */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -2187,4 +2301,14 @@ export enum Resources {
 }
 export enum ResourcesSourceType {
   resources = "resources",
+}
+export enum SignupOfferService {
+  events = "events",
+  sport = "sport",
+}
+export enum SignupOfferStatus {
+  available = "available",
+  confirmed = "confirmed",
+  refused = "refused",
+  unknown = "unknown",
 }

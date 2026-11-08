@@ -50,6 +50,7 @@ const answer = {
   chat_id: "chat-1",
   search_responses: [],
   calendar_events: [],
+  signup_offers: [],
   messages: [],
   attachments: [info],
 } satisfies searchTypes.SchemaAskResponses;

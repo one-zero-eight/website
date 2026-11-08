@@ -1632,6 +1632,10 @@ msgstr ""
 msgid "Check out this room: {roomTitle}"
 msgstr ""
 
+#: src/components/search/ask/AskSignupOffers.tsx:202
+msgid "Check registration in the service"
+msgstr ""
+
 #: src/components/layout/Offline.tsx:52
 msgid "Check that airplane mode is disabled."
 msgstr ""
@@ -1639,6 +1643,10 @@ msgstr ""
 #. placeholder {0}: field.unresolved.length
 #: src/components/tabletennis/PlayersField.tsx:364
 msgid "Check the players ({0}): pick the right one, fix the email, add as a guest, or remove."
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:53
+msgid "Check the service before trying again. Do not repeat an uncertain registration."
 msgstr ""
 
 #: src/components/sport/SportStudentTrainingModal.tsx:79
@@ -2227,6 +2235,10 @@ msgstr ""
 
 #: src/components/search/ask/AskFeedback.tsx:71
 msgid "Could not send the comment"
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:159
+msgid "Could not sign up"
 msgstr ""
 
 #: src/components/sport/SportTrainerAttendanceModal.tsx:69
@@ -5880,6 +5892,10 @@ msgstr ""
 msgid "Open event page"
 msgstr ""
 
+#: src/components/search/ask/AskSignupOffers.tsx:180
+msgid "Open registration"
+msgstr ""
+
 #: src/components/guard/SetupResult.tsx:56
 msgid "Open spreadsheet"
 msgstr ""
@@ -6585,6 +6601,10 @@ msgstr ""
 
 #: src/components/tabletennis/Registration.tsx:30
 msgid "Register to start playing and tracking your rating. Your results will be visible on the leaderboard."
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:163
+msgid "Registration outcome is unknown"
 msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:81
@@ -7688,6 +7708,18 @@ msgstr ""
 msgid "Sign out"
 msgstr ""
 
+#: src/components/search/ask/AskSignupOffers.tsx:189
+msgid "Sign up"
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:151
+msgid "Signing up…"
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:167
+msgid "Signup unavailable"
+msgstr ""
+
 #: src/components/onboarding/OnboardingSteps.tsx:262
 msgid "Skip"
 msgstr ""
@@ -8565,6 +8597,10 @@ msgstr ""
 
 #: src/components/clubs/EditClubPage.tsx:684
 msgid "This logo change will be cancelled when you save."
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:171
+msgid "This offer has expired. Ask for current events."
 msgstr ""
 
 #: src/components/admin/RequireInnohassleAdmin.tsx:23
@@ -9571,6 +9607,10 @@ msgstr ""
 
 #: src/components/maps/viewer/MapView.tsx:126
 msgid "You are outside this map"
+msgstr ""
+
+#: src/components/search/ask/AskSignupOffers.tsx:155
+msgid "You are signed up"
 msgstr ""
 
 #: src/components/calendar/ExportModal.tsx:144

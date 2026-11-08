@@ -5,6 +5,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { AskApproval } from "./AskApproval";
 import { AskCalendarEvents } from "./AskCalendarEvents";
+import { AskSignupOffers } from "./AskSignupOffers";
 import { AskFeedback } from "./AskFeedback";
 import { useState } from "react";
 import { ArchiveDocumentModal } from "@/components/search/ArchiveDocumentModal";
@@ -83,6 +84,14 @@ export function AskResult({
           approval={approval}
           isLast={isLast}
           isPending={isPending}
+        />
+      )}
+
+      {!hasError && response.chat_id && !!response.signup_offers?.length && (
+        <AskSignupOffers
+          chatId={response.chat_id}
+          offers={response.signup_offers}
+          disabled={isPending || !!approval}
         />
       )}
 

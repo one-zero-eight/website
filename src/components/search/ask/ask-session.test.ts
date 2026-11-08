@@ -34,8 +34,18 @@ const answer = {
   search_responses: [],
   calendar_events: [],
   messages: [],
+  signup_offers: [],
   attachments: [info],
 } satisfies searchTypes.SchemaAskResponses;
+const signupOffer = {
+  id: "offer-1",
+  service: "sport",
+  title: "Volleyball",
+  starts_at: "2099-11-12T18:00:00+03:00",
+  ends_at: "2099-11-12T19:30:00+03:00",
+  expires_at: "2099-11-12T17:00:00+03:00",
+  status: "available",
+} as searchTypes.SchemaSignupOffer;
 function stream(events: [string, unknown][]) {
   return new ReadableStream<Uint8Array>({
     start(controller) {
@@ -250,5 +260,228 @@ describe("ask session attachments", () => {
     expect(sessionStorage.getItem("search-ask-session")).not.toMatch(
       /blob:|data:/,
     );
+  });
+
+  it("keeps an attempted signup unavailable across chat navigation and reload", async () => {
+    const offer = signupOffer;
+    api.history.mockResolvedValue({
+      answers: [{ ...answer, signup_offers: [offer] }],
+    });
+    await act(async () => session.openChat("chat-1"));
+    const unknown = {
+      ...offer,
+      status: "unknown",
+      message: "Check the service",
+    } as searchTypes.SchemaSignupOffer;
+    act(() => session.rememberSignup("chat-1", unknown));
+    await act(async () => session.openChat("chat-2"));
+    expect(snapshot.messages[1]).toMatchObject({
+      response: { signup_offers: [offer] },
+    });
+    await act(async () => session.openChat("chat-1"));
+    expect(snapshot.messages[1]).toMatchObject({
+      response: { signup_offers: [unknown] },
+    });
+    await act(async () => session.openChat("chat-2"));
+    act(() => root.unmount());
+    vi.resetModules();
+    session = await import("./ask-session");
+    root = createRoot(container);
+    function ReloadedProbe() {
+      snapshot = session.useAskSession();
+      return null;
+    }
+    act(() => root.render(createElement(ReloadedProbe)));
+    api.history.mockResolvedValueOnce({
+      answers: [
+        {
+          ...answer,
+          signup_offers: [
+            { ...offer, title: "Updated title" },
+            { ...offer, id: "offer-2" },
+          ],
+        },
+      ],
+    });
+    await act(async () => session.openChat("chat-1"));
+    expect(snapshot.messages[1]).toMatchObject({
+      response: {
+        signup_offers: [
+          { ...unknown, title: "Updated title" },
+          { ...offer, id: "offer-2" },
+        ],
+      },
+    });
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
+  it.each(["confirmed", "refused"] as const)(
+    "retains a late %s receipt without mutating another chat",
+    async (status) => {
+      const offer = signupOffer;
+      api.history.mockResolvedValue({
+        answers: [{ ...answer, signup_offers: [offer] }],
+      });
+      await act(async () => session.openChat("chat-1"));
+      act(() =>
+        session.rememberSignup("chat-1", {
+          ...offer,
+          status: "unknown",
+        } as searchTypes.SchemaSignupOffer),
+      );
+      await act(async () => session.openChat("chat-2"));
+      const otherMessages = snapshot.messages;
+      const result = {
+        ...offer,
+        status,
+        message: "Service receipt",
+      } as searchTypes.SchemaSignupOffer;
+      act(() => session.rememberSignup("chat-1", result));
+      expect(snapshot.messages).toBe(otherMessages);
+      expect(snapshot.chatId).toBe("chat-2");
+      const saved = JSON.parse(sessionStorage.getItem("search-ask-session")!);
+      expect(saved.signupReceipts).toContainEqual(
+        expect.objectContaining({
+          chatId: "chat-1",
+          offerId: offer.id,
+          status,
+        }),
+      );
+      await act(async () => session.openChat("chat-1"));
+      expect(snapshot.messages[1]).toMatchObject({
+        response: { signup_offers: [result] },
+      });
+    },
+  );
+
+  it.each(["confirmed", "refused", "unknown"] as const)(
+    "retains authoritative %s history instead of an older receipt",
+    async (status) => {
+      const offer = signupOffer;
+      api.history.mockResolvedValue({
+        answers: [{ ...answer, signup_offers: [offer] }],
+      });
+      await act(async () => session.openChat("chat-1"));
+      act(() =>
+        session.rememberSignup("chat-1", {
+          ...offer,
+          status: "unknown",
+          message: "Local uncertainty",
+        } as searchTypes.SchemaSignupOffer),
+      );
+      act(() => session.startNewChat());
+      const authoritative = {
+        ...offer,
+        status,
+        message: "Server receipt",
+      } as searchTypes.SchemaSignupOffer;
+      api.history.mockResolvedValueOnce({
+        answers: [{ ...answer, signup_offers: [authoritative] }],
+      });
+      await act(async () => session.openChat("chat-1"));
+      expect(snapshot.messages[1]).toMatchObject({
+        response: { signup_offers: [authoritative] },
+      });
+      act(() => session.startNewChat());
+      await act(async () => session.openChat("chat-1"));
+      expect(snapshot.messages[1]).toMatchObject({
+        response: { signup_offers: [authoritative] },
+      });
+    },
+  );
+
+  it("never evicts a still-actionable receipt to make room for newer attempts", async () => {
+    const offer = signupOffer;
+    api.history.mockResolvedValue({
+      answers: [{ ...answer, signup_offers: [offer] }],
+    });
+    await act(async () => session.openChat("chat-1"));
+    act(() =>
+      session.rememberSignup("chat-1", {
+        ...offer,
+        status: "unknown",
+      } as searchTypes.SchemaSignupOffer),
+    );
+    act(() => session.startNewChat());
+    for (let index = 0; index < 200; index++) {
+      session.rememberSignup("chat-2", {
+        ...offer,
+        id: `other-${index}`,
+        status: "confirmed",
+      } as searchTypes.SchemaSignupOffer);
+    }
+    await act(async () => session.openChat("chat-1"));
+    expect(snapshot.messages[1]).toMatchObject({
+      response: { signup_offers: [{ ...offer, status: "unknown" }] },
+    });
+  });
+
+  it("removes only the deleted chat's signup receipts", async () => {
+    const receipt = {
+      ...signupOffer,
+      status: "unknown",
+    } as searchTypes.SchemaSignupOffer;
+    session.rememberSignup("chat-1", receipt);
+    session.rememberSignup("chat-2", receipt);
+    api.history.mockResolvedValueOnce({ answers: [answer] });
+    await act(async () => session.openChat("chat-2"));
+    const messages = snapshot.messages;
+    act(() => session.forgetChat("chat-1"));
+    expect(snapshot.messages).toBe(messages);
+    const saved = JSON.parse(sessionStorage.getItem("search-ask-session")!);
+    expect(saved.signupReceipts).toEqual([
+      expect.objectContaining({ chatId: "chat-2", offerId: receipt.id }),
+    ]);
+  });
+
+  it("prunes receipts once their offers can no longer be attempted", () => {
+    const clock = vi
+      .spyOn(Date, "now")
+      .mockReturnValue(Date.parse(signupOffer.expires_at) - 1);
+    try {
+      session.rememberSignup("chat-1", {
+        ...signupOffer,
+        status: "unknown",
+      } as searchTypes.SchemaSignupOffer);
+      expect(
+        JSON.parse(sessionStorage.getItem("search-ask-session")!)
+          .signupReceipts,
+      ).toHaveLength(1);
+      clock.mockReturnValue(Date.parse(signupOffer.expires_at));
+      act(() => session.setDraftQuery("Next question"));
+      expect(
+        JSON.parse(sessionStorage.getItem("search-ask-session")!)
+          .signupReceipts,
+      ).toEqual([]);
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
+  it("persists a signup result on its original answer without adding a question", async () => {
+    const offer = signupOffer;
+    api.history.mockResolvedValueOnce({
+      answers: [{ ...answer, signup_offers: [offer] }, answer],
+    });
+    await act(async () => session.openChat("chat-1"));
+    const confirmed = {
+      ...offer,
+      status: "confirmed",
+    } as searchTypes.SchemaSignupOffer;
+    act(() => session.rememberSignup("chat-1", confirmed));
+    expect(snapshot.messages).toHaveLength(4);
+    expect(snapshot.messages[1]).toMatchObject({
+      response: { signup_offers: [confirmed] },
+    });
+    expect(snapshot.messages[3]).toEqual({
+      role: "assistant",
+      response: answer,
+    });
+    const saved = JSON.parse(sessionStorage.getItem("search-ask-session")!);
+    expect(saved.messages[1].response.signup_offers).toEqual([confirmed]);
+    expect(api.post).not.toHaveBeenCalled();
+    act(() => session.startNewChat());
+    act(() => session.rememberSignup("chat-1", confirmed));
+    expect(snapshot.messages).toEqual([]);
   });
 });

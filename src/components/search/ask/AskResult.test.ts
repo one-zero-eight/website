@@ -19,6 +19,7 @@ const response: searchTypes.SchemaAskResponses = {
   search_responses: [],
   attachments: [],
   calendar_events: [],
+  signup_offers: [],
   messages: [],
   approval: {
     id: "cp-paused",

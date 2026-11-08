@@ -351,6 +351,7 @@ describe("cited archive documents", () => {
       ],
       attachments: [],
       calendar_events: [],
+      signup_offers: [],
       messages: [],
     };
     await render(createElement(AskResult, { response }));
@@ -392,6 +393,7 @@ describe("cited archive documents", () => {
         ],
         attachments: [],
         calendar_events: [],
+        signup_offers: [],
         messages: [],
       };
       await render(createElement(AskResult, { response }));

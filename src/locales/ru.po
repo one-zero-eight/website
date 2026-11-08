@@ -1632,6 +1632,10 @@ msgstr "Исходный код, сообщения о багах и вклад 
 msgid "Check out this room: {roomTitle}"
 msgstr "Посмотрите эту комнату: {roomTitle}"
 
+#: src/components/search/ask/AskSignupOffers.tsx:202
+msgid "Check registration in the service"
+msgstr "Проверить запись в сервисе"
+
 #: src/components/layout/Offline.tsx:52
 msgid "Check that airplane mode is disabled."
 msgstr "Убедитесь, что режим полёта выключен."
@@ -1640,6 +1644,10 @@ msgstr "Убедитесь, что режим полёта выключен."
 #: src/components/tabletennis/PlayersField.tsx:364
 msgid "Check the players ({0}): pick the right one, fix the email, add as a guest, or remove."
 msgstr "Проверьте игроков ({0}): выберите нужного, исправьте email, добавьте как гостя или удалите."
+
+#: src/components/search/ask/AskSignupOffers.tsx:53
+msgid "Check the service before trying again. Do not repeat an uncertain registration."
+msgstr "Проверьте запись в сервисе. Не повторяйте её, пока результат неизвестен."
 
 #: src/components/sport/SportStudentTrainingModal.tsx:79
 #: src/components/sport/SportTrainingsCalendarList.tsx:129
@@ -2232,6 +2240,10 @@ msgstr "Не удалось сохранить оценку"
 #: src/components/search/ask/AskFeedback.tsx:71
 msgid "Could not send the comment"
 msgstr "Не удалось отправить комментарий"
+
+#: src/components/search/ask/AskSignupOffers.tsx:159
+msgid "Could not sign up"
+msgstr "Не удалось записаться"
 
 #: src/components/sport/SportTrainerAttendanceModal.tsx:69
 #: src/components/sport/SportTrainerTrainingModal.tsx:204
@@ -5892,6 +5904,10 @@ msgstr "Открыть страницу мероприятия"
 msgid "Open original archive"
 msgstr "Открыть исходный архив"
 
+#: src/components/search/ask/AskSignupOffers.tsx:180
+msgid "Open registration"
+msgstr "Открыть регистрацию"
+
 #: src/components/guard/SetupResult.tsx:56
 msgid "Open spreadsheet"
 msgstr "Открыть таблицу"
@@ -6598,6 +6614,10 @@ msgstr "Зарегистрируйтесь, чтобы увидеть списо
 #: src/components/tabletennis/Registration.tsx:30
 msgid "Register to start playing and tracking your rating. Your results will be visible on the leaderboard."
 msgstr "Зарегистрируйтесь, чтобы начать играть и отслеживать свой рейтинг. Ваши результаты появятся в таблице лидеров."
+
+#: src/components/search/ask/AskSignupOffers.tsx:163
+msgid "Registration outcome is unknown"
+msgstr "Результат записи неизвестен"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:81
 msgid "Regular Schedule & Resources"
@@ -7700,6 +7720,18 @@ msgstr "Войти через Innopolis SSO"
 msgid "Sign out"
 msgstr "Выйти"
 
+#: src/components/search/ask/AskSignupOffers.tsx:189
+msgid "Sign up"
+msgstr "Записаться"
+
+#: src/components/search/ask/AskSignupOffers.tsx:151
+msgid "Signing up…"
+msgstr "Записываем…"
+
+#: src/components/search/ask/AskSignupOffers.tsx:167
+msgid "Signup unavailable"
+msgstr "Запись недоступна"
+
 #: src/components/onboarding/OnboardingSteps.tsx:262
 msgid "Skip"
 msgstr "Пропустить"
@@ -8578,6 +8610,10 @@ msgstr "Ссылка может быть недействительной, ус�
 #: src/components/clubs/EditClubPage.tsx:684
 msgid "This logo change will be cancelled when you save."
 msgstr "Это изменение логотипа будет отменено при сохранении."
+
+#: src/components/search/ask/AskSignupOffers.tsx:171
+msgid "This offer has expired. Ask for current events."
+msgstr "Предложение устарело. Попросите подобрать актуальные события."
 
 #: src/components/admin/RequireInnohassleAdmin.tsx:23
 msgid "This page is available only for InNoHassle admins."
@@ -9584,6 +9620,10 @@ msgstr "Вы офлайн"
 #: src/components/maps/viewer/MapView.tsx:126
 msgid "You are outside this map"
 msgstr "Вы вне этой карты"
+
+#: src/components/search/ask/AskSignupOffers.tsx:155
+msgid "You are signed up"
+msgstr "Вы записаны"
 
 #: src/components/calendar/ExportModal.tsx:144
 msgid "You can add deadlines from your Moodle courses to your favorite calendar application and it will be updated on changes."
