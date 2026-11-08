@@ -86,7 +86,7 @@ beforeEach(() => {
         response(
           req.method === "POST"
             ? request
-            : { requests: [], verified_group: "B24-DS-01" },
+            : { requests: [], verified_groups: ["B24-DS-01"] },
           req.method === "POST" ? 201 : 200,
         ),
       ),
@@ -296,7 +296,7 @@ it("refreshes the request list after a confirmed submission without exposing the
       response(
         req.method === "POST"
           ? request
-          : { requests: [request], verified_group: "B24-DS-01" },
+          : { requests: [request], verified_groups: ["B24-DS-01"] },
         req.method === "POST" ? 201 : 200,
       ),
     ),
@@ -358,7 +358,7 @@ it.each([
       requests: [
         { ...request, status, title: "Group chat", message: "Review note" },
       ],
-      verified_group: null,
+      verified_groups: [],
     }),
   );
   await open();
@@ -369,7 +369,7 @@ it.each([
   api.fetch.mockResolvedValue(
     response({
       requests: [{ ...request, status: "connected" }],
-      verified_group: null,
+      verified_groups: [],
     }),
   );
   await act(async () => button("Refresh requests").click());
@@ -394,7 +394,7 @@ it("shows loading and a retryable list error instead of a false empty state", as
   expect(document.body.textContent).toContain("Could not load your requests");
   expect(document.body.textContent).not.toContain("No requests yet");
   api.fetch.mockImplementation(() =>
-    Promise.resolve(response({ requests: [], verified_group: null })),
+    Promise.resolve(response({ requests: [], verified_groups: [] })),
   );
   await act(async () => button("Refresh requests").click());
   await settle();
@@ -442,7 +442,7 @@ it("does not expose private invite links in request titles or messages", async (
           invite_link: "https://t.me/+hiddenField",
         },
       ],
-      verified_group: null,
+      verified_groups: [],
     }),
   );
   await open();
@@ -478,6 +478,56 @@ it("prefills the verified study group but lets the user propose another", async 
   expect(
     document.querySelector<HTMLInputElement>('[name="group_code"]')!.value,
   ).toBe("M26-SE-01");
+});
+it("offers multiple verified groups without selecting one automatically", async () => {
+  api.fetch.mockResolvedValue(
+    response({ requests: [], verified_groups: ["B24-DS-01", "M26-SE-01"] }),
+  );
+  await open();
+
+  const groupInput = document.querySelector<HTMLInputElement>(
+    '[name="group_code"]',
+  )!;
+  expect(groupInput.value).toBe("");
+  const listId = groupInput.getAttribute("list")!;
+  expect(listId).toBeTruthy();
+  const datalist = document.getElementById(listId)!;
+  expect(
+    [...datalist.querySelectorAll("option")].map((option) => option.value),
+  ).toEqual(["B24-DS-01", "M26-SE-01"]);
+  expect(button("Submit request").disabled).toBe(true);
+
+  input("group_code", "M26-SE-01");
+  expect(button("Submit request").disabled).toBe(true);
+});
+it("allows a manual study-group proposal when no verified groups are returned", async () => {
+  api.fetch.mockResolvedValue(response({ requests: [], verified_groups: [] }));
+  await open();
+
+  expect(
+    document.querySelector<HTMLInputElement>('[name="group_code"]')!.value,
+  ).toBe("");
+  input("group_code", "M26-SE-01");
+  input("invite_link", "https://t.me/+privateInvite1234");
+  act(() =>
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
+  );
+  expect(button("Submit request").disabled).toBe(false);
+});
+it("allows a manual group proposal when group lookup fails", async () => {
+  api.fetch.mockImplementationOnce(() =>
+    Promise.resolve(response({ detail: "unavailable" }, 503)),
+  );
+  await open();
+  await settle();
+  expect(document.body.textContent).toContain("Could not load your requests");
+
+  input("group_code", "M26-SE-01");
+  input("invite_link", "https://t.me/+privateInvite1234");
+  act(() =>
+    document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
+  );
+  expect(button("Submit request").disabled).toBe(false);
 });
 it("requires explicit admin consent and sends only the proposed source payload", async () => {
   await open();

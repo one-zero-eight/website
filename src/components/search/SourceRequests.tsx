@@ -4,7 +4,7 @@ import { RequireAuth } from "@/components/common/AuthWall";
 import { Modal } from "@/components/common/Modal";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 export function SourceRequests() {
   const [open, setOpen] = useState(false);
@@ -37,6 +37,7 @@ export function SourceRequests() {
 function SourceRequestsContent() {
   const { i18n, t } = useLingui();
   const queryClient = useQueryClient();
+  const groupListId = useId();
   const [inviteLink, setInviteLink] = useState("");
   const [proposedGroup, setProposedGroup] = useState<string | undefined>();
   const [comment, setComment] = useState("");
@@ -46,7 +47,9 @@ function SourceRequestsContent() {
     refetchInterval: 15_000,
     refetchOnMount: "always",
   });
-  const groupCode = proposedGroup ?? requests.data?.verified_group ?? "";
+  const verifiedGroups = requests.data?.verified_groups ?? [];
+  const groupCode =
+    proposedGroup ?? (verifiedGroups.length === 1 ? verifiedGroups[0] : "");
   const mutation = $search.useMutation("post", "/sources/requests", {
     retry: false,
     onSuccess: () => {
@@ -128,9 +131,15 @@ function SourceRequestsContent() {
           className="input w-full"
           name="group_code"
           maxLength={40}
+          list={groupListId}
           value={groupCode}
           onChange={(event) => setProposedGroup(event.target.value)}
         />
+        <datalist id={groupListId}>
+          {verifiedGroups.map((group) => (
+            <option key={group} value={group} />
+          ))}
+        </datalist>
         <span className="text-base-content/70 text-xs">
           <Trans>Choose a specific study group, not "all".</Trans>
         </span>

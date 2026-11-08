@@ -1156,8 +1156,8 @@ export interface components {
     SourceRequestsView: {
       /** Requests */
       requests: components["schemas"]["SourceRequestView"][];
-      /** Verified Group */
-      verified_group: string | null;
+      /** Verified Groups */
+      verified_groups: string[];
     };
     /** ValidationError */
     ValidationError: {
