@@ -41,6 +41,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/search/pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Pdf By Url
+     * @description The original PDF of a page of the knowledge base, for a preview in a frame: the university's sites forbid showing
+     *     their files in a frame of another site (X-Frame-Options: SAMEORIGIN), this answer does not. Only documents the
+     *     knowledge base has a page of: not a proxy to anywhere.
+     */
+    get: operations["search_pdf_by_url"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/search/search/{search_query_id}/feedback": {
     parameters: {
       query?: never;
@@ -53,6 +75,57 @@ export interface paths {
     /** Add User Feedback */
     post: operations["search_add_user_feedback"];
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/attachments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Upload */
+    post: operations["ask_upload"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/attachments/{attachment_id}/content": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Content */
+    get: operations["ask_content"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/attachments/{attachment_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete */
+    delete: operations["ask_delete"];
     options?: never;
     head?: never;
     patch?: never;
@@ -87,7 +160,8 @@ export interface paths {
     /**
      * Ask By Query Stream
      * @description The same as POST /ask/, but the work is shown while it goes on. Events: `status` ({text}: what the agent is doing: waiting in the queue, checking, asking a helper, writing, as in the Telegram bot),
-     *     `answer` ({text}: the whole answer so far), `done` (AskResponses: the final answer with its sources), `cancelled`
+     *     `answer` ({text}: the whole answer so far), `done` (AskResponses: the final answer with its sources and the events it
+     *     offers for the calendar), `cancelled`
      *     ({detail}: POST /ask/{chat_id}/cancel) or `error` ({detail}). A client's questions are answered one at a time, in the
      *     order they came: while an earlier one is not done, this one waits and sends no events.
      */
@@ -177,6 +251,7 @@ export interface paths {
      * @description A 👍 (`like`) or 👎 (`dislike`) on an answer, as under the answers of the Telegram bot: the annotation `user-feedback` on
      *     the answer's trace in Phoenix, and the user's `comment` on what they liked or not is its explanation. A second vote of the
      *     user (the same one with a comment, or another) replaces the first. An answer has an `ask_query_id` only when tracing is on.
+     *     The chat's history (GET /ask/chats/{chat_id}) shows the vote with its comment.
      */
     post: operations["ask_add_user_feedback"];
     delete?: never;
@@ -256,179 +331,20 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/moodle/courses/grouped-by-semester": {
+  "/sites": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get Courses Grouped By Semester */
-    get: operations["moodle_get_courses_grouped_by_semester"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/courses/by-course-fullname/content": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get Course Names Grouped */
-    get: operations["moodle_get_course_names_grouped"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/preview": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Preview Moodle */
-    get: operations["moodle_preview_moodle"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/files": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get Moodle Files */
-    get: operations["moodle_get_moodle_files"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/courses": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Courses */
-    get: operations["moodle_courses"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/batch-courses": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
     /**
-     * Batch Upsert Courses
-     * @description Accepted and dropped.
+     * List Sites
+     * @description Names accepted by the parser: trusted configured sites from sites.SITES.
      */
-    post: operations["moodle_batch_upsert_courses"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/courses-content": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Courses Content */
-    get: operations["moodle_courses_content"];
+    get: operations["parsers_list_sites"];
     put?: never;
     post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/set-course-content": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Course Content
-     * @description Accepted and dropped.
-     */
-    post: operations["moodle_course_content"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/need-to-upload-contents": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Need To Upload Contents */
-    post: operations["moodle_need_to_upload_contents"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/content-uploaded": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Content Uploaded
-     * @description Accepted and dropped.
-     */
-    post: operations["moodle_content_uploaded"];
     delete?: never;
     options?: never;
     head?: never;
@@ -446,9 +362,35 @@ export interface paths {
     put?: never;
     /**
      * Run Parse Route
-     * @description The wiki is built by `catix-wiki`, not by an endpoint.
+     * @description Queue an update of the source for the wiki's own run and answer at once (202) with the request; GET /parse/{id} follows it.
+     *
+     *     wiki/eduwiki: the pages of the eduwiki whose revision changed; sites/resources: the trusted sites named (all of them when
+     *     none is), their pages and the documents they link; hotel/campuslife: that site. The run (`catix-wiki autopilot`) asks the
+     *     source, builds the pages, runs its checks (lint, cards, search, answers) and commits to the `wiki` branch, or sends the
+     *     changes to a review branch when a check fails. parsing_is_needed=false asks no source: the run builds and checks the data
+     *     it already holds. The same request still waiting is queued once: asking again answers with it.
      */
     post: operations["run_parse_route"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/parse/{request_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Parse Status
+     * @description Where a request of POST /{section}/parse is: queued, running, done (with what the run did) or failed.
+     */
+    get: operations["parsers_parse_status"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -588,6 +530,11 @@ export interface components {
       query: string;
       /** Answer */
       answer: string;
+      /**
+       * Attachments
+       * @default []
+       */
+      attachments: components["schemas"]["AttachmentInfo"][];
       /** Chat Id */
       chat_id?: string | null;
       /** Ask Query Id */
@@ -607,6 +554,19 @@ export interface components {
       feedback_comment?: string | null;
       approval?: components["schemas"]["AskApproval"] | null;
     };
+    /** AttachmentInfo */
+    AttachmentInfo: {
+      /** Id */
+      id: string;
+      /** Filename */
+      filename: string;
+      /** Media Type */
+      media_type: string;
+      /** Size Bytes */
+      size_bytes: number;
+      /** Pages */
+      pages: number;
+    };
     /** Body_ask_act_by_query */
     Body_ask_act_by_query: {
       /** Query */
@@ -623,6 +583,11 @@ export interface components {
       query: string;
       /** Chat Id */
       chat_id?: string | null;
+      /**
+       * Attachment Ids
+       * @default []
+       */
+      attachment_ids: string[];
     };
     /** Body_ask_ask_by_query_stream */
     Body_ask_ask_by_query_stream: {
@@ -630,6 +595,11 @@ export interface components {
       query: string;
       /** Chat Id */
       chat_id?: string | null;
+      /**
+       * Attachment Ids
+       * @default []
+       */
+      attachment_ids: string[];
     };
     /** Body_ask_rename_chat */
     Body_ask_rename_chat: {
@@ -789,13 +759,6 @@ export interface components {
        */
       breadcrumbs: string[];
     };
-    /** MoodleCourse */
-    MoodleCourse: {
-      /** Course Id */
-      course_id: number;
-      /** Course Fullname */
-      course_fullname?: string | null;
-    };
     /** MoodleFileSource */
     MoodleFileSource: {
       /**
@@ -877,6 +840,59 @@ export interface components {
       url: string;
       /** Text */
       text: string;
+    };
+    /** ParseRequest */
+    ParseRequest: {
+      /** Id */
+      id: string;
+      /** Section */
+      section: string;
+      /**
+       * Source
+       * @enum {string}
+       */
+      source: ParseRequestSource;
+      /**
+       * Sites
+       * @description The sites the run reads (names of GET /sites)
+       */
+      sites?: string[];
+      /**
+       * Parsing
+       * @description False: no source is asked, the run builds and checks the data it holds
+       * @default true
+       */
+      parsing: boolean;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: ParseRequestStatus;
+      /**
+       * Outcome
+       * @description done: committed to the `wiki` branch (the search has it after the server pulls it), review (the changes failed a check and wait for a person in a branch wiki-review/...) or unchanged; failed: error
+       * @default
+       * @enum {string}
+       */
+      outcome: ParseRequestOutcome;
+      /**
+       * Result
+       * @description What the wiki's run did, in its own words
+       * @default
+       */
+      result: string;
+      /** Created At */
+      created_at: string;
+      /**
+       * Started At
+       * @default
+       */
+      started_at: string;
+      /**
+       * Finished At
+       * @default
+       */
+      finished_at: string;
     };
     /** PdfLocation */
     PdfLocation: {
@@ -963,6 +979,15 @@ export interface components {
       /** Search Query Id */
       search_query_id?: string | null;
     };
+    /** SiteChoice */
+    SiteChoice: {
+      /** Name */
+      name: string;
+      /** Url */
+      url: string;
+      /** About */
+      about: string;
+    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -992,6 +1017,7 @@ export type SchemaAskChat = components["schemas"]["AskChat"];
 export type SchemaAskChatHistory = components["schemas"]["AskChatHistory"];
 export type SchemaAskDecision = components["schemas"]["AskDecision"];
 export type SchemaAskResponses = components["schemas"]["AskResponses"];
+export type SchemaAttachmentInfo = components["schemas"]["AttachmentInfo"];
 export type SchemaBodyAskActByQuery =
   components["schemas"]["Body_ask_act_by_query"];
 export type SchemaBodyAskAddUserFeedback =
@@ -1011,17 +1037,18 @@ export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaHotelSource = components["schemas"]["HotelSource"];
 export type SchemaMapsSource = components["schemas"]["MapsSource"];
-export type SchemaMoodleCourse = components["schemas"]["MoodleCourse"];
 export type SchemaMoodleFileSource = components["schemas"]["MoodleFileSource"];
 export type SchemaMoodleUnknownSource =
   components["schemas"]["MoodleUnknownSource"];
 export type SchemaMoodleUrlSource = components["schemas"]["MoodleUrlSource"];
 export type SchemaPageText = components["schemas"]["PageText"];
+export type SchemaParseRequest = components["schemas"]["ParseRequest"];
 export type SchemaPdfLocation = components["schemas"]["PdfLocation"];
 export type SchemaResidentsSource = components["schemas"]["ResidentsSource"];
 export type SchemaResourcesSource = components["schemas"]["ResourcesSource"];
 export type SchemaSearchResponse = components["schemas"]["SearchResponse"];
 export type SchemaSearchResponses = components["schemas"]["SearchResponses"];
+export type SchemaSiteChoice = components["schemas"]["SiteChoice"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
@@ -1104,6 +1131,58 @@ export interface operations {
       };
     };
   };
+  search_pdf_by_url: {
+    parameters: {
+      query: {
+        url: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The PDF */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": unknown;
+        };
+      };
+      /** @description The knowledge base has no page of this document */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description The site gave no PDF */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The site did not answer in time */
+      504: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   search_add_user_feedback: {
     parameters: {
       query: {
@@ -1138,10 +1217,109 @@ export interface operations {
       };
     };
   };
-  ask_ask_by_query: {
+  ask_upload: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description UTF-8 filename encoded once with encodeURIComponent (percent encoding). */
+        "X-Attachment-Filename": string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/octet-stream": string;
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AttachmentInfo"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_content: {
     parameters: {
       query?: never;
       header?: never;
+      path: {
+        attachment_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Private attachment original */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/octet-stream": string;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        attachment_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_ask_by_query: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description The user's InNoHassle Sport token ([InNoHassle Accounts](https://api.innohassle.ru/accounts/v0/tokens/generate-my-sport-token), as the site keeps it): the assistant reads their sport hours and trainings and checks them in to a training (after they approve it) with it. Without it, or with one of another user or expired, the assistant has no access to their sport. */
+        "X-Sport-Token"?: string | null;
+      };
       path?: never;
       cookie?: never;
     };
@@ -1183,12 +1361,22 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description The language model cannot be reached; the detail says the assistant is not working now */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   ask_ask_by_query_stream: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        /** @description The user's InNoHassle Sport token ([InNoHassle Accounts](https://api.innohassle.ru/accounts/v0/tokens/generate-my-sport-token), as the site keeps it): the assistant reads their sport hours and trainings and checks them in to a training (after they approve it) with it. Without it, or with one of another user or expired, the assistant has no access to their sport. */
+        "X-Sport-Token"?: string | null;
+      };
       path?: never;
       cookie?: never;
     };
@@ -1219,7 +1407,10 @@ export interface operations {
   ask_decide: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        /** @description The user's InNoHassle Sport token ([InNoHassle Accounts](https://api.innohassle.ru/accounts/v0/tokens/generate-my-sport-token), as the site keeps it): the assistant reads their sport hours and trainings and checks them in to a training (after they approve it) with it. Without it, or with one of another user or expired, the assistant has no access to their sport. */
+        "X-Sport-Token"?: string | null;
+      };
       path: {
         chat_id: string;
       };
@@ -1282,7 +1473,10 @@ export interface operations {
   ask_decide_stream: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        /** @description The user's InNoHassle Sport token ([InNoHassle Accounts](https://api.innohassle.ru/accounts/v0/tokens/generate-my-sport-token), as the site keeps it): the assistant reads their sport hours and trainings and checks them in to a training (after they approve it) with it. Without it, or with one of another user or expired, the assistant has no access to their sport. */
+        "X-Sport-Token"?: string | null;
+      };
       path: {
         chat_id: string;
       };
@@ -1600,7 +1794,7 @@ export interface operations {
       };
     };
   };
-  moodle_get_courses_grouped_by_semester: {
+  parsers_list_sites: {
     parameters: {
       query?: never;
       header?: never;
@@ -1615,43 +1809,62 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            [key: string]: string[];
-          };
+          "application/json": components["schemas"]["SiteChoice"][];
         };
       };
     };
   };
-  moodle_get_course_names_grouped: {
+  run_parse_route: {
     parameters: {
-      query: {
-        course_fullname: string;
+      query?: {
+        /**
+         * @deprecated
+         * @description Ignored: the wiki's run always checks and indexes what it commits, and the server's index follows the `wiki` branch
+         */
+        indexing_is_needed?: boolean;
+        parsing_is_needed?: boolean;
+        /** @description Names from GET /sites; repeat to select several. Omit for all sites. */
+        sites?: string[] | null;
       };
       header?: never;
-      path?: never;
+      path: {
+        section:
+          | components["schemas"]["InfoSources"]
+          | PathsSectionParsePostParametersPathSectionAnyOf1;
+      };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
       /** @description Successful Response */
-      200: {
+      202: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": (
-            | components["schemas"]["EduwikiSource"]
-            | components["schemas"]["CampusLifeSource"]
-            | components["schemas"]["HotelSource"]
-            | components["schemas"]["ClubsSource"]
-            | components["schemas"]["MapsSource"]
-            | components["schemas"]["MoodleFileSource"]
-            | components["schemas"]["MoodleUrlSource"]
-            | components["schemas"]["MoodleUnknownSource"]
-            | components["schemas"]["ResidentsSource"]
-            | components["schemas"]["ResourcesSource"]
-          )[];
+          "application/json": components["schemas"]["ParseRequest"];
         };
+      };
+      /** @description Invalid site selection or flags */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Source has no parser */
+      410: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {
@@ -1662,17 +1875,22 @@ export interface operations {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
+      /** @description The queue of the wiki's run (Redis) is not configured or does not answer */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
-  moodle_preview_moodle: {
+  parsers_parse_status: {
     parameters: {
-      query: {
-        course_id: number;
-        module_id: number;
-        filename: string;
-      };
+      query?: never;
       header?: never;
-      path?: never;
+      path: {
+        request_id: string;
+      };
       cookie?: never;
     };
     requestBody?: never;
@@ -1683,17 +1901,10 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["ParseRequest"];
         };
       };
-      /** @description Redirect to the file */
-      307: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description File not found */
+      /** @description No such request (or finished long ago) */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1709,259 +1920,12 @@ export interface operations {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
-    };
-  };
-  moodle_get_moodle_files: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          }[];
-        };
-      };
-    };
-  };
-  moodle_courses: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["MoodleCourse"][];
-        };
-      };
-    };
-  };
-  moodle_batch_upsert_courses: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          [key: string]: unknown;
-        };
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  moodle_courses_content: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          }[];
-        };
-      };
-    };
-  };
-  moodle_course_content: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          [key: string]: unknown;
-        }[];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  moodle_need_to_upload_contents: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          [key: string]: unknown;
-        }[];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          }[];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  moodle_content_uploaded: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          [key: string]: unknown;
-        };
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  run_parse_route: {
-    parameters: {
-      query?: {
-        indexing_is_needed?: boolean;
-        parsing_is_needed?: boolean;
-      };
-      header?: never;
-      path: {
-        section: components["schemas"]["InfoSources"];
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Bad Request */
-      400: {
+      /** @description The queue (Redis) does not answer */
+      503: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
-      };
-      /** @description Unauthorized */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
       };
     };
   };
@@ -2050,6 +2014,10 @@ export enum PathsAskAsk_query_idFeedbackPostParametersQueryFeedback {
   like = "like",
   dislike = "dislike",
 }
+export enum PathsSectionParsePostParametersPathSectionAnyOf1 {
+  wiki = "wiki",
+  sites = "sites",
+}
 export enum AskDecisionDecision {
   approve = "approve",
   reject = "reject",
@@ -2091,6 +2059,23 @@ export enum MoodleUnknownSourceType {
 }
 export enum MoodleUrlSourceType {
   moodle_url = "moodle-url",
+}
+export enum ParseRequestSource {
+  eduwiki = "eduwiki",
+  sites = "sites",
+}
+export enum ParseRequestStatus {
+  queued = "queued",
+  running = "running",
+  done = "done",
+  failed = "failed",
+}
+export enum ParseRequestOutcome {
+  unspecified = "",
+  committed = "committed",
+  review = "review",
+  unchanged = "unchanged",
+  error = "error",
 }
 export enum ResidentsSourceType {
   residents = "residents",

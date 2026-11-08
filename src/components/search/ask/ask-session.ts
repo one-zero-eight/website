@@ -12,13 +12,26 @@ import {
 import { queryClient } from "@/app/query-client";
 import { useSyncExternalStore } from "react";
 
+export type DraftAttachment = {
+  info: searchTypes.SchemaAttachmentInfo;
+  // Once sent, the attachment belongs to the chat and must not be deleted as a draft.
+  bound?: boolean;
+};
+
 export type AskMessage =
-  | { role: "user"; content: string }
+  | {
+      role: "user";
+      content: string;
+      attachments?: searchTypes.SchemaAttachmentInfo[];
+    }
   | { role: "assistant"; response: searchTypes.SchemaAskResponses };
 
 type AskSession = {
   messages: AskMessage[];
   chatId: string | null;
+  draftQuery: string;
+  draftAttachments: DraftAttachment[];
+  composerId: number;
   // The answer being written and what the assistant is doing meanwhile
   answerText: string;
   status: string;
@@ -30,6 +43,7 @@ type AskSession = {
 };
 
 type AskStreamEvent =
+  | { name: "chat"; data: { chat_id: string } }
   | { name: "cancelled"; data: { detail: string } }
   | { name: "status"; data: { text: string } }
   | { name: "answer"; data: { text: string } }
@@ -42,13 +56,17 @@ type AskStreamEvent =
 // every chat of the user as well: one of them opens again from the list of chats (`openChat`)
 const STORAGE_KEY = "search-ask-session";
 
-const saved: Pick<AskSession, "messages" | "chatId"> = JSON.parse(
+const saved: Pick<AskSession, "messages" | "chatId"> &
+  Partial<Pick<AskSession, "draftQuery" | "draftAttachments">> = JSON.parse(
   sessionStorage.getItem(STORAGE_KEY) ??
     JSON.stringify({ messages: [], chatId: null }),
 );
 
 let session: AskSession = {
   ...saved,
+  draftQuery: saved.draftQuery ?? "",
+  draftAttachments: saved.draftAttachments ?? [],
+  composerId: 0,
   answerText: "",
   status: "",
   isPending: false,
@@ -63,7 +81,12 @@ function update(patch: Partial<AskSession>) {
   session = { ...session, ...patch };
   sessionStorage.setItem(
     STORAGE_KEY,
-    JSON.stringify({ messages: session.messages, chatId: session.chatId }),
+    JSON.stringify({
+      messages: session.messages,
+      chatId: session.chatId,
+      draftQuery: session.draftQuery,
+      draftAttachments: session.draftAttachments,
+    }),
   );
   listeners.forEach((listener) => listener());
 }
@@ -77,6 +100,18 @@ function subscribe(listener: () => void) {
 
 export function useAskSession() {
   return useSyncExternalStore(subscribe, () => session);
+}
+
+export function setDraftQuery(draftQuery: string) {
+  update({ draftQuery });
+}
+
+export function setDraftAttachments(
+  draftAttachments: DraftAttachment[],
+  composerId = session.composerId,
+) {
+  if (composerId !== session.composerId) return;
+  update({ draftAttachments });
 }
 
 function parseEvent(block: string): AskStreamEvent | undefined {
@@ -105,12 +140,17 @@ async function sportHeaders(): Promise<Record<string, string>> {
 async function streamAnswer(
   query: string,
   chatId: string | null,
+  attachments: searchTypes.SchemaAttachmentInfo[],
   signal: AbortSignal,
 ): Promise<searchTypes.SchemaAskResponses | undefined> {
   const { data: stream, error: requestError } = await searchFetch.POST(
     "/ask/stream",
     {
-      body: { query, chat_id: chatId },
+      body: {
+        query,
+        chat_id: chatId,
+        attachment_ids: attachments.map((file) => file.id),
+      },
       headers: await sportHeaders(),
       parseAs: "stream",
       signal,
@@ -119,7 +159,7 @@ async function streamAnswer(
   if (requestError || !stream) {
     throw new Error("Failed to start the answer");
   }
-  return readAnswer(stream);
+  return readAnswer(stream, signal);
 }
 
 // The answer to the question that waited for the user's decision on what the assistant was about to do for them
@@ -144,16 +184,18 @@ async function streamDecision(
       typeof detail === "string" ? detail : "Failed to send the decision",
     );
   }
-  return readAnswer(stream);
+  return readAnswer(stream, signal);
 }
 
 async function readAnswer(
   stream: ReadableStream<BufferSource>,
+  signal: AbortSignal,
 ): Promise<searchTypes.SchemaAskResponses | undefined> {
   const reader = stream.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";
   while (true) {
     const { done, value } = await reader.read();
+    if (signal.aborted) return undefined;
     if (done) break;
     buffer += value;
 
@@ -161,7 +203,22 @@ async function readAnswer(
     buffer = blocks.pop() ?? "";
     for (const block of blocks) {
       const event = parseEvent(block);
-      if (event?.name === "cancelled") {
+      if (event?.name === "chat") {
+        update({
+          chatId: event.data.chat_id,
+          draftAttachments:
+            session.messages.at(-1)?.role === "user"
+              ? session.draftAttachments.map((attachment) => ({
+                  ...attachment,
+                  bound: true,
+                }))
+              : session.draftAttachments,
+        });
+        // The chat and its files already exist even if generation fails or is cancelled.
+        queryClient.invalidateQueries({
+          queryKey: $search.queryOptions("get", "/ask/chats").queryKey,
+        });
+      } else if (event?.name === "cancelled") {
         return undefined;
       } else if (event?.name === "status") {
         update({ status: event.data.text });
@@ -177,7 +234,12 @@ async function readAnswer(
   throw new Error("The answer ended unexpectedly");
 }
 
-export async function askQuestion(query: string) {
+export async function askQuestion(
+  query: string,
+  attachments: searchTypes.SchemaAttachmentInfo[] = session.draftAttachments.map(
+    (attachment) => attachment.info,
+  ),
+) {
   abortController?.abort();
   const controller = new AbortController();
   abortController = controller;
@@ -188,7 +250,14 @@ export async function askQuestion(query: string) {
       ? session.messages.slice(0, -1)
       : session.messages;
   update({
-    messages: [...answered, { role: "user", content: query }],
+    messages: [...answered, { role: "user", content: query, attachments }],
+    draftQuery: "",
+    draftAttachments: attachments.map((info) => ({
+      info,
+      bound: session.draftAttachments.some(
+        (draft) => draft.info.id === info.id && draft.bound,
+      ),
+    })),
     answerText: "",
     status: "",
     error: null,
@@ -199,12 +268,18 @@ export async function askQuestion(query: string) {
     const response = await streamAnswer(
       query,
       session.chatId,
+      attachments,
       controller.signal,
     );
-    if (response) {
+    if (!controller.signal.aborted && !response) {
+      cancelQuestion();
+      return;
+    }
+    if (response && !controller.signal.aborted) {
       update({
         messages: [...session.messages, { role: "assistant", response }],
         chatId: response.chat_id ?? null,
+        draftAttachments: [],
       });
       queryClient.invalidateQueries({
         queryKey: $search.queryOptions("get", "/ask/chats").queryKey,
@@ -217,7 +292,12 @@ export async function askQuestion(query: string) {
   } finally {
     if (abortController === controller) {
       abortController = null;
-      update({ isPending: false });
+      update({
+        isPending: false,
+        draftQuery: session.error
+          ? session.draftQuery || query
+          : session.draftQuery,
+      });
     }
   }
 }
@@ -276,6 +356,7 @@ export function cancelQuestion(): string {
   update({
     isPending: false,
     messages: question ? session.messages.slice(0, -1) : session.messages,
+    draftQuery: session.draftQuery || question,
   });
   return question;
 }
@@ -286,6 +367,9 @@ export function startNewChat() {
   update({
     messages: [],
     chatId: null,
+    composerId: session.composerId + 1,
+    draftQuery: "",
+    draftAttachments: [],
     answerText: "",
     status: "",
     error: null,
@@ -308,6 +392,9 @@ export async function openChat(chatId: string) {
   update({
     messages: [],
     chatId,
+    composerId: session.composerId + 1,
+    draftQuery: "",
+    draftAttachments: [],
     answerText: "",
     status: "",
     error: null,
@@ -329,7 +416,11 @@ export async function openChat(chatId: string) {
         ...history.answers,
         ...(history.waiting ? [history.waiting] : []),
       ].flatMap((response): AskMessage[] => [
-        { role: "user", content: response.query },
+        {
+          role: "user",
+          content: response.query,
+          attachments: response.attachments ?? [],
+        },
         { role: "assistant", response },
       ]),
     });

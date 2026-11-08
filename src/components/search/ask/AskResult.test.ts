@@ -17,6 +17,7 @@ const response: searchTypes.SchemaAskResponses = {
   answer:
     "На **9 ноября** подходит вечерняя тренировка:\n\n- **Воллейбол**, 20:00–22:30, [SC] Big Hall (15 мест свободно)\n\nЗаписать вас на неё?",
   search_responses: [],
+  attachments: [],
   calendar_events: [],
   messages: [],
   approval: {

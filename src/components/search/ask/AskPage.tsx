@@ -1,12 +1,20 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import type { searchTypes } from "@/api/search";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useRef, useState } from "react";
-import AnimatedDots from "../AnimatedDots";
+import AnimatedDots from "@/components/search/AnimatedDots";
 import { AskChatList } from "./AskChatList";
+import { AskAttachment } from "./AskAttachment";
 import { AskInput } from "./AskInput";
 import { AskResult } from "./AskResult";
-import { askQuestion, cancelQuestion, useAskSession } from "./ask-session";
+import {
+  askQuestion,
+  cancelQuestion,
+  setDraftQuery,
+  setDraftAttachments,
+  useAskSession,
+} from "./ask-session";
 
 // How close to the end the chat must be scrolled to follow a new answer as it is written
 const FOLLOW_DISTANCE_PX = 80;
@@ -14,7 +22,7 @@ const FOLLOW_DISTANCE_PX = 80;
 // A chat as in messengers: the earlier messages above, the newest at the bottom over the message box
 export function AskPage({ askQuery }: { askQuery: string }) {
   useLingui();
-  const [inputText, setInputText] = useState(askQuery);
+
   const [isChatListOpen, setIsChatListOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isFollowing = useRef(true);
@@ -29,7 +37,14 @@ export function AskPage({ askQuery }: { askQuery: string }) {
     error,
     isOpening,
     openingError,
+    draftQuery,
+    draftAttachments,
+    composerId,
   } = useAskSession();
+
+  useEffect(() => {
+    if (askQuery) setDraftQuery(askQuery);
+  }, [askQuery]);
 
   // Follow the chat to its end while the user has not scrolled up to read
   useEffect(() => {
@@ -48,13 +63,12 @@ export function AskPage({ askQuery }: { askQuery: string }) {
 
   // A stopped question comes back to the box, unless the user is already writing another one
   const handleStop = () => {
-    const question = cancelQuestion();
-    if (question && !inputText.trim()) setInputText(question);
+    cancelQuestion();
   };
 
   const handleSend = (query: string) => {
     isFollowing.current = true;
-    setInputText("");
+
     askQuestion(query);
   };
 
@@ -123,7 +137,11 @@ export function AskPage({ askQuery }: { askQuery: string }) {
 
             {messages.map((message, i) =>
               message.role === "user" ? (
-                <UserMessage key={`${chatId}:${i}`} text={message.content} />
+                <UserMessage
+                  key={`${chatId}:${i}`}
+                  text={message.content}
+                  attachments={message.attachments}
+                />
               ) : (
                 <AskResult
                   key={`${chatId}:${i}`}
@@ -161,8 +179,13 @@ export function AskPage({ askQuery }: { askQuery: string }) {
 
         <div className="mx-auto w-full max-w-4xl px-4 pt-2 pb-4">
           <AskInput
-            text={inputText}
-            setText={setInputText}
+            key={composerId}
+            text={draftQuery}
+            setText={setDraftQuery}
+            attachments={isPending ? [] : draftAttachments}
+            onAttachmentsChange={(attachments) =>
+              setDraftAttachments(attachments, composerId)
+            }
             onSend={handleSend}
             onStop={handleStop}
             isPending={isPending}
@@ -173,10 +196,23 @@ export function AskPage({ askQuery }: { askQuery: string }) {
   );
 }
 
-function UserMessage({ text }: { text: string }) {
+function UserMessage({
+  text,
+  attachments,
+}: {
+  text: string;
+  attachments?: searchTypes.SchemaAttachmentInfo[];
+}) {
   return (
     <div className="bg-primary text-primary-content rounded-field max-w-[80%] self-end rounded-br-none px-4 py-2 break-words whitespace-pre-wrap">
       {text}
+      {attachments && attachments.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {attachments.map((attachment) => (
+            <AskAttachment key={attachment.id} attachment={attachment} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

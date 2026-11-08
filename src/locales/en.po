@@ -101,6 +101,11 @@ msgstr "{0, plural, one {# club has changes waiting for review} other {# clubs h
 msgid "{0, plural, one {# group} other {# groups}}"
 msgstr "{0, plural, one {# group} other {# groups}}"
 
+#. placeholder {0}: attachment.pages
+#: src/components/search/ask/AskAttachment.tsx:23
+msgid "{0, plural, one {# page} other {# pages}}"
+msgstr "{0, plural, one {# page} other {# pages}}"
+
 #. placeholder {0}: results.length
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:318
 msgid "{0, plural, one {# player} other {# players}}"
@@ -380,6 +385,10 @@ msgstr "{printSheetsCount, plural, one {Print # sheet} other {Print # sheets}}"
 #: src/components/when2meet/MeetingPage.tsx:1258
 msgid "{responsesCount, plural, one {# response} other {# responses}}"
 msgstr "{responsesCount, plural, one {# response} other {# responses}}"
+
+#: src/components/search/ask/AskAttachment.tsx:19
+msgid "{size} bytes"
+msgstr "{size} bytes"
 
 #: src/components/web-print/print-utils.ts:10
 msgid "{size} KB"
@@ -1047,6 +1056,10 @@ msgstr "Ask the assistant"
 msgid "Attach file"
 msgstr "Attach file"
 
+#: src/components/search/ask/AskInput.tsx:217
+msgid "Attach files"
+msgstr "Attach files"
+
 #: src/components/sport/SportTrainerBaamImportButton.tsx:115
 msgid "Attendance imported"
 msgstr "Attendance imported"
@@ -1480,6 +1493,11 @@ msgstr "Cancel the room booking for this meeting?"
 msgid "Cancel this match"
 msgstr "Cancel this match"
 
+#: src/components/search/ask/AskInput.tsx:168
+#: src/components/search/ask/AskInput.tsx:176
+msgid "Cancel upload"
+msgstr "Cancel upload"
+
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:363
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:87
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:170
@@ -1702,6 +1720,10 @@ msgstr "Choose file"
 #: src/components/when2meet/MeetingPage.tsx:1656
 msgid "Choose meeting time"
 msgstr "Choose meeting time"
+
+#: src/components/search/ask/AskInput.tsx:71
+msgid "Choose PDF, TXT, PNG, JPEG or WebP files."
+msgstr "Choose PDF, TXT, PNG, JPEG or WebP files."
 
 #: src/components/extension/ExtensionPage.tsx:60
 msgid "Chrome extension"
@@ -2799,6 +2821,10 @@ msgstr "Download"
 msgid "Download & Finish"
 msgstr "Download & Finish"
 
+#: src/components/search/ask/AskAttachment.tsx:90
+msgid "Download attachment"
+msgstr "Download attachment"
+
 #: src/components/editor/menus/ImageMenuItems.tsx:95
 msgid "Download original"
 msgstr "Download original"
@@ -2862,6 +2888,10 @@ msgstr "e.g. 1-5,8,16-20 (empty = all)"
 #: src/components/guard/CreateSheetPage.tsx:111
 msgid "e.g., CSE electives"
 msgstr "e.g., CSE electives"
+
+#: src/components/search/ask/AskInput.tsx:75
+msgid "Each file must be no larger than 10 MiB."
+msgstr "Each file must be no larger than 10 MiB."
 
 #: src/components/sport/SportStudentTrainingModal.tsx:286
 #: src/components/sport/SportTrainingsCalendarList.tsx:315
@@ -6611,6 +6641,10 @@ msgstr "Remove {0} from the tournament?"
 msgid "Remove {participantName} from the meeting?"
 msgstr "Remove {participantName} from the meeting?"
 
+#: src/components/search/ask/AskInput.tsx:195
+msgid "Remove attachment"
+msgstr "Remove attachment"
+
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:76
 msgid "Remove calendar {calendarName}?"
 msgstr "Remove calendar {calendarName}?"
@@ -9392,6 +9426,10 @@ msgstr "What Clubs Can Purchase"
 msgid "What did you like?"
 msgstr "What did you like?"
 
+#: src/components/search/ask/AskInput.tsx:137
+msgid "What is in the attached file?"
+msgstr "What is in the attached file?"
+
 #: src/components/dorms/DormsPage.tsx:15
 #: src/components/extension/ExtensionPage.tsx:16
 msgid "What is it?"
@@ -9559,6 +9597,10 @@ msgstr "You can add your room bookings to your favorite calendar application and
 #: src/components/calendar/import/ImportModal.tsx:156
 msgid "You can add your schedule to InNoHassle and it will be updated on schedule changes."
 msgstr "You can add your schedule to InNoHassle and it will be updated on schedule changes."
+
+#: src/components/search/ask/AskInput.tsx:67
+msgid "You can attach up to 3 files."
+msgstr "You can attach up to 3 files."
 
 #: src/components/about/AboutPage.tsx:249
 msgid "You can learn about all new community projects and our events from our Telegram channel."

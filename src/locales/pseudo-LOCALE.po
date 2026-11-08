@@ -101,6 +101,11 @@ msgstr ""
 msgid "{0, plural, one {# group} other {# groups}}"
 msgstr ""
 
+#. placeholder {0}: attachment.pages
+#: src/components/search/ask/AskAttachment.tsx:23
+msgid "{0, plural, one {# page} other {# pages}}"
+msgstr ""
+
 #. placeholder {0}: results.length
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:318
 msgid "{0, plural, one {# player} other {# players}}"
@@ -379,6 +384,10 @@ msgstr ""
 
 #: src/components/when2meet/MeetingPage.tsx:1258
 msgid "{responsesCount, plural, one {# response} other {# responses}}"
+msgstr ""
+
+#: src/components/search/ask/AskAttachment.tsx:19
+msgid "{size} bytes"
 msgstr ""
 
 #: src/components/web-print/print-utils.ts:10
@@ -1047,6 +1056,10 @@ msgstr ""
 msgid "Attach file"
 msgstr ""
 
+#: src/components/search/ask/AskInput.tsx:217
+msgid "Attach files"
+msgstr ""
+
 #: src/components/sport/SportTrainerBaamImportButton.tsx:115
 msgid "Attendance imported"
 msgstr ""
@@ -1480,6 +1493,11 @@ msgstr ""
 msgid "Cancel this match"
 msgstr ""
 
+#: src/components/search/ask/AskInput.tsx:168
+#: src/components/search/ask/AskInput.tsx:176
+msgid "Cancel upload"
+msgstr ""
+
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:363
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:87
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:170
@@ -1701,6 +1719,10 @@ msgstr ""
 
 #: src/components/when2meet/MeetingPage.tsx:1656
 msgid "Choose meeting time"
+msgstr ""
+
+#: src/components/search/ask/AskInput.tsx:71
+msgid "Choose PDF, TXT, PNG, JPEG or WebP files."
 msgstr ""
 
 #: src/components/extension/ExtensionPage.tsx:60
@@ -2799,6 +2821,10 @@ msgstr ""
 msgid "Download & Finish"
 msgstr ""
 
+#: src/components/search/ask/AskAttachment.tsx:90
+msgid "Download attachment"
+msgstr ""
+
 #: src/components/editor/menus/ImageMenuItems.tsx:95
 msgid "Download original"
 msgstr ""
@@ -2861,6 +2887,10 @@ msgstr ""
 
 #: src/components/guard/CreateSheetPage.tsx:111
 msgid "e.g., CSE electives"
+msgstr ""
+
+#: src/components/search/ask/AskInput.tsx:75
+msgid "Each file must be no larger than 10 MiB."
 msgstr ""
 
 #: src/components/sport/SportStudentTrainingModal.tsx:286
@@ -6611,6 +6641,10 @@ msgstr ""
 msgid "Remove {participantName} from the meeting?"
 msgstr ""
 
+#: src/components/search/ask/AskInput.tsx:195
+msgid "Remove attachment"
+msgstr ""
+
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:76
 msgid "Remove calendar {calendarName}?"
 msgstr ""
@@ -9392,6 +9426,10 @@ msgstr ""
 msgid "What did you like?"
 msgstr ""
 
+#: src/components/search/ask/AskInput.tsx:137
+msgid "What is in the attached file?"
+msgstr ""
+
 #: src/components/dorms/DormsPage.tsx:15
 #: src/components/extension/ExtensionPage.tsx:16
 msgid "What is it?"
@@ -9558,6 +9596,10 @@ msgstr ""
 
 #: src/components/calendar/import/ImportModal.tsx:156
 msgid "You can add your schedule to InNoHassle and it will be updated on schedule changes."
+msgstr ""
+
+#: src/components/search/ask/AskInput.tsx:67
+msgid "You can attach up to 3 files."
 msgstr ""
 
 #: src/components/about/AboutPage.tsx:249
