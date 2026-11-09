@@ -1,5 +1,15 @@
+import "katex/dist/katex.min.css";
 import Markdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+
+/** Models often write math as \(...\) and \[...\]; remark-math understands only $...$ and $$...$$. */
+function normalizeMathDelimiters(text: string) {
+  return text
+    .replace(/\\\[([\s\S]+?)\\\]/g, (_, math: string) => `$$${math}$$`)
+    .replace(/\\\(([\s\S]+?)\\\)/g, (_, math: string) => `$${math}$`);
+}
 
 type MarkdownNode = {
   type: string;
@@ -59,7 +69,12 @@ export function AskAnswerBody({
   }
   return (
     <Markdown
-      remarkPlugins={citationTargets ? [remarkGfm, linkCitations] : [remarkGfm]}
+      remarkPlugins={
+        citationTargets
+          ? [remarkGfm, remarkMath, linkCitations]
+          : [remarkGfm, remarkMath]
+      }
+      rehypePlugins={[rehypeKatex]}
       components={{
         a: ({ href, children }) =>
           href ? (
@@ -81,7 +96,7 @@ export function AskAnswerBody({
         li: ({ children }) => <li className="ml-5 list-disc">{children}</li>,
       }}
     >
-      {text}
+      {normalizeMathDelimiters(text)}
     </Markdown>
   );
 }
