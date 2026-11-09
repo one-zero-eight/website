@@ -252,6 +252,17 @@ export function AskSignupOffers({
                           {offer.booking_title}
                         </p>
                       )}
+                    {booking &&
+                      offer.status === "available" &&
+                      !offer.personal_schedule_checked && (
+                        <p className="text-base-content/70 mt-2 text-xs leading-relaxed wrap-anywhere">
+                          <Trans>
+                            Availability was checked in the booking service.
+                            Your personal calendar will be checked before
+                            booking.
+                          </Trans>
+                        </p>
+                      )}
                   </div>
                   <div
                     className={cn(

@@ -119,6 +119,12 @@ announcements and available rooms. Selecting an example only fills and focuses
 the composer; Send submits it. Drafts with text or attachments are not replaced.
 Attachments support up to three PDF, TXT or image files, up to 10 MiB each.
 
+Room Booking availability and Music Room service windows also produce booking
+cards, even without a personal-schedule recommendation. Service-only offers say
+that the personal calendar will be checked before booking. Rooms require a booking
+subject; music windows require an explicit start and duration. Only the final Book
+click submits consent; loading or choosing an interval does not create a booking.
+
 Answers render Markdown during generation and keep the server status visible.
 The backend supplies the answer and its structured `sources` separately. One compact
 source list uses the server's citation numbers and preserves document titles,

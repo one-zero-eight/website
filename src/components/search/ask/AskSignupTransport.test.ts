@@ -94,17 +94,20 @@ it.each(["sport", "events"])(
 );
 
 it.each([
-  ["rooms", false],
-  ["rooms", true],
-  ["music", false],
-  ["music", true],
+  ["rooms", "confirmed"],
+  ["rooms", "refused"],
+  ["rooms", "unknown"],
+  ["music", "confirmed"],
+  ["music", "refused"],
+  ["music", "unknown"],
 ] as const)(
-  "sends the explicit %s selection once through the real transport (lost reply: %s)",
-  async (service, lostReply) => {
+  "sends a service-only %s selection once through the real transport (outcome: %s)",
+  async (service, outcome) => {
     const item = {
       ...offer,
       service,
-      booking_title: service === "rooms" ? "Thesis rehearsal" : null,
+      personal_schedule_checked: false,
+      booking_title: null,
       music_window:
         service === "music"
           ? {
@@ -118,6 +121,22 @@ it.each([
           : null,
     } as unknown as searchTypes.SchemaSignupOffer;
     renderOffer(item);
+    expect(container.textContent).toContain(
+      "Availability was checked in the booking service. Your personal calendar will be checked before booking.",
+    );
+    expect(api.fetch).not.toHaveBeenCalled();
+    if (service === "rooms") {
+      const input = container.querySelector<HTMLInputElement>("input")!;
+      expect(input.value).toBe("");
+      act(() => {
+        Object.getOwnPropertyDescriptor(
+          HTMLInputElement.prototype,
+          "value",
+        )!.set!.call(input, "Thesis rehearsal");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      expect(api.fetch).not.toHaveBeenCalled();
+    }
     if (service === "music") {
       act(() => container.querySelector("button")!.click());
       expect(api.fetch).not.toHaveBeenCalled();
@@ -143,11 +162,19 @@ it.each([
         "chat-1",
         expect.objectContaining({ ...snapshot, status: "unknown" }),
       );
-      return lostReply
+      return outcome === "unknown"
         ? Promise.reject(new TypeError("Disconnected after booking"))
         : Promise.resolve(
             new Response(
-              JSON.stringify({ ...item, ...snapshot, status: "confirmed" }),
+              JSON.stringify({
+                ...item,
+                ...snapshot,
+                status: outcome,
+                message:
+                  outcome === "refused"
+                    ? "Your calendar now conflicts with this booking."
+                    : null,
+              }),
               { headers: { "Content-Type": "application/json" } },
             ),
           );
@@ -171,13 +198,28 @@ it.each([
         : { booking_title: "Thesis rehearsal" },
     );
     expect(container.textContent).toContain(
-      lostReply ? "Booking outcome is unknown" : "Booked",
+      outcome === "unknown"
+        ? "Booking outcome is unknown"
+        : outcome === "refused"
+          ? "Could not book"
+          : "Booked",
+    );
+    if (outcome !== "confirmed") {
+      expect(container.textContent).not.toContain("Booked");
+    }
+    if (outcome === "refused") {
+      expect(container.textContent).toContain(
+        "Your calendar now conflicts with this booking.",
+      );
+    }
+    expect(container.textContent).not.toContain(
+      "Your personal calendar will be checked before booking.",
     );
     expect(api.remember).toHaveBeenLastCalledWith(
       "chat-1",
       expect.objectContaining({
         ...snapshot,
-        status: lostReply ? "unknown" : "confirmed",
+        status: outcome,
       }),
     );
     expect(container.querySelector("button")).toBeNull();

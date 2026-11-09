@@ -1208,6 +1208,11 @@ export interface components {
       booking_title?: string | null;
       music_window?: components["schemas"]["MusicBookingWindow"] | null;
       /**
+       * Personal Schedule Checked
+       * @default false
+       */
+      personal_schedule_checked: boolean;
+      /**
        * Starts At
        * Format: date-time
        */

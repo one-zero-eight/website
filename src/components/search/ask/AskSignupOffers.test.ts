@@ -119,6 +119,25 @@ const musicOffer = {
   },
 } as unknown as searchTypes.SchemaSignupOffer;
 
+it.each([roomOffer, musicOffer])(
+  "does not warn about an unchecked personal calendar for checked $service offers",
+  (item) => {
+    render({
+      response: {
+        ...response,
+        signup_offers: [{ ...item, personal_schedule_checked: true }],
+      },
+    });
+    expect(container.textContent).not.toContain(
+      "Your personal calendar will be checked before booking.",
+    );
+    expect(container.querySelector("li button")!.textContent).toBe(
+      item.service === "music" ? "Choose time" : "Book",
+    );
+    expect(api.signup).not.toHaveBeenCalled();
+  },
+);
+
 it("constrains music choices to grid, quota, latest start and the window end without selecting a default", () => {
   render({ response: { ...response, signup_offers: [musicOffer] } });
   act(() => container.querySelector<HTMLButtonElement>("li button")!.click());
