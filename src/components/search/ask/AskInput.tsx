@@ -4,7 +4,7 @@ import {
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
 import { useLingui } from "@lingui/react/macro";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import type { DraftAttachment } from "./ask-session";
 import { AttachmentLabel } from "./AskAttachment";
 
@@ -17,6 +17,7 @@ export function AskInput({
   isPending,
   attachments,
   onAttachmentsChange,
+  inputRef,
 }: {
   text: string;
   setText: (text: string) => void;
@@ -25,6 +26,7 @@ export function AskInput({
   isPending: boolean;
   attachments: DraftAttachment[];
   onAttachmentsChange: (attachments: DraftAttachment[]) => void;
+  inputRef?: RefObject<HTMLTextAreaElement | null>;
 }) {
   const { t } = useLingui();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -230,6 +232,7 @@ export function AskInput({
           <span className="icon-[material-symbols--attach-file-rounded] text-lg" />
         </button>
         <textarea
+          ref={inputRef}
           className="field-sizing-content max-h-48 min-h-8 min-w-0 grow resize-none bg-transparent px-2 py-1 text-base outline-hidden"
           rows={1}
           autoFocus

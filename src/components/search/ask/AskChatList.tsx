@@ -17,12 +17,38 @@ const TITLE_MAX_LENGTH = 200;
 // The user's chats with the assistant, the last answered first: one opens with its questions and answers to go on with it
 export function AskChatList({ onSelect }: { onSelect?: () => void }) {
   const { chatId } = useAskSession();
+  const [retryError, setRetryError] = useState<unknown>(null);
   const {
     data: chats,
     isPending,
     error,
+    refetch,
+    isFetching,
   } = $search.useQuery("get", "/ask/chats");
 
+  if (error || retryError) {
+    return (
+      <div className="flex flex-col items-start gap-2 px-3 text-sm">
+        <span className="text-error">
+          {formatApiErrorMessage(error || retryError)}
+        </span>
+        <button
+          type="button"
+          className="btn btn-sm"
+          disabled={isFetching}
+          onClick={() => {
+            setRetryError(error);
+            void refetch().finally(() => setRetryError(null));
+          }}
+        >
+          {isFetching && (
+            <span className="loading loading-spinner loading-sm" />
+          )}
+          <Trans>Retry</Trans>
+        </button>
+      </div>
+    );
+  }
   if (isPending) {
     return (
       <div className="flex flex-col gap-1">
@@ -30,13 +56,6 @@ export function AskChatList({ onSelect }: { onSelect?: () => void }) {
         <div className="skeleton h-7 w-full" />
         <div className="skeleton h-7 w-full" />
       </div>
-    );
-  }
-  if (error) {
-    return (
-      <span className="text-error px-3 text-sm">
-        {formatApiErrorMessage(error)}
-      </span>
     );
   }
   if (chats.length === 0) {

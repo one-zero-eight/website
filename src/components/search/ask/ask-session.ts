@@ -1,3 +1,6 @@
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { i18n } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
 import { accountsFetch } from "@/api/accounts";
 import { checkIsTokenExpired } from "@/api/helpers/access-token.ts";
 import {
@@ -183,21 +186,31 @@ async function streamAnswer(
   attachments: searchTypes.SchemaAttachmentInfo[],
   signal: AbortSignal,
 ): Promise<searchTypes.SchemaAskResponses | undefined> {
-  const { data: stream, error: requestError } = await searchFetch.POST(
-    "/ask/stream",
-    {
-      body: {
-        query,
-        chat_id: chatId,
-        attachment_ids: attachments.map((file) => file.id),
-      },
-      headers: await sportHeaders(),
-      parseAs: "stream",
-      signal,
+  const {
+    data: stream,
+    error: requestError,
+    response,
+  } = await searchFetch.POST("/ask/stream", {
+    body: {
+      query,
+      chat_id: chatId,
+      attachment_ids: attachments.map((file) => file.id),
     },
-  );
-  if (requestError || !stream) {
-    throw new Error("Failed to start the answer");
+    headers: await sportHeaders(),
+    parseAs: "stream",
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(
+      formatApiErrorMessage({
+        body: requestError,
+        httpCode: response.status,
+        response,
+      }),
+    );
+  }
+  if (!stream) {
+    throw new Error(i18n._(msg`The server returned no answer stream.`));
   }
   return readAnswer(stream, signal);
 }
@@ -208,21 +221,28 @@ async function streamDecision(
   decision: searchTypes.SchemaAskDecision,
   signal: AbortSignal,
 ): Promise<searchTypes.SchemaAskResponses | undefined> {
-  const { data: stream, error: requestError } = await searchFetch.POST(
-    "/ask/{chat_id}/decision/stream",
-    {
-      params: { path: { chat_id: chatId } },
-      body: decision,
-      headers: await sportHeaders(),
-      parseAs: "stream",
-      signal,
-    },
-  );
-  if (requestError || !stream) {
-    const detail = (requestError as { detail?: unknown } | undefined)?.detail;
+  const {
+    data: stream,
+    error: requestError,
+    response,
+  } = await searchFetch.POST("/ask/{chat_id}/decision/stream", {
+    params: { path: { chat_id: chatId } },
+    body: decision,
+    headers: await sportHeaders(),
+    parseAs: "stream",
+    signal,
+  });
+  if (!response.ok) {
     throw new Error(
-      typeof detail === "string" ? detail : "Failed to send the decision",
+      formatApiErrorMessage({
+        body: requestError,
+        httpCode: response.status,
+        response,
+      }),
     );
+  }
+  if (!stream) {
+    throw new Error(i18n._(msg`The server returned no answer stream.`));
   }
   return readAnswer(stream, signal);
 }
@@ -271,7 +291,9 @@ async function readAnswer(
       }
     }
   }
-  throw new Error("The answer ended unexpectedly");
+  throw new Error(
+    i18n._(msg`The connection ended before the response was complete.`),
+  );
 }
 
 export async function askQuestion(
@@ -431,16 +453,20 @@ export function forgetChat(chatId: string) {
 
 // One of the user's chats with its questions and answers, as the server keeps them, to go on with it
 export async function openChat(chatId: string) {
-  if (chatId === session.chatId && !session.isPending && !session.isOpening) {
+  const sameChat = chatId === session.chatId;
+  if (
+    sameChat &&
+    (session.isOpening || (!session.isPending && session.openingError === null))
+  ) {
     return;
   }
-  cancelQuestion();
+  if (!sameChat || session.isPending) cancelQuestion();
   update({
     messages: [],
     chatId,
-    composerId: session.composerId + 1,
-    draftQuery: "",
-    draftAttachments: [],
+    composerId: sameChat ? session.composerId : session.composerId + 1,
+    draftQuery: sameChat ? session.draftQuery : "",
+    draftAttachments: sameChat ? session.draftAttachments : [],
     answerText: "",
     status: "",
     error: null,

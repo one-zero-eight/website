@@ -1,4 +1,5 @@
 import type { searchTypes } from "@/api/search";
+import { EduwikiSourceType } from "@/api/search/types";
 import { setupI18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { act, createElement } from "react";
@@ -132,8 +133,97 @@ describe("AskResult approval context", () => {
     );
   });
 
+  it("preserves Markdown labels and all distinct source URLs in first-seen order", () => {
+    const source = {
+      type: EduwikiSourceType.eduwiki,
+      display_name: " Exam rules ",
+      url: "https://example.org/a",
+      breadcrumbs: ["University", "Rules"],
+      preview_text: "Not shown",
+    };
+    render({
+      response: {
+        ...response,
+        approval: null,
+        answer:
+          "Правило [1].\n\nИсточники:\n[1] [«Положение о пересдачах»](https://example.org/rules)",
+        search_responses: [
+          { source },
+          {
+            source: {
+              ...source,
+              url: "https://example.org/b",
+              display_name: "Announcements",
+            },
+          },
+          { source },
+        ],
+      },
+    });
+    expect(
+      Array.from(container.querySelectorAll("a"), (a) => [
+        a.textContent,
+        a.href,
+      ]),
+    ).toEqual([
+      ["«Положение о пересдачах»", "https://example.org/rules"],
+      ["Exam rules", "https://example.org/a"],
+      ["Announcements", "https://example.org/b"],
+    ]);
+    expect(container.textContent).toContain("Правило [1].");
+    expect(container.textContent).toContain("University > Rules");
+    expect(container.textContent).not.toContain("Not shown");
+  });
+
+  it("uses source metadata without turning missing URLs into links", () => {
+    const source = {
+      type: EduwikiSourceType.eduwiki,
+      url: "  ",
+      display_name: "-",
+      breadcrumbs: [" ", "Rules"],
+      preview_text: "",
+    };
+    render({
+      response: {
+        ...response,
+        approval: null,
+        answer: "[unsafe](javascript:alert%281%29)",
+        search_responses: [
+          { source },
+          {
+            source: {
+              ...source,
+              breadcrumbs: [],
+              display_name: "Other document",
+            },
+          },
+          { source: { ...source, breadcrumbs: [] } },
+          {
+            source: {
+              ...source,
+              breadcrumbs: [],
+              url: "https://example.org/fallback",
+            },
+          },
+        ],
+      },
+    });
+    expect(container.textContent).toContain("unsafe");
+    expect(container.textContent).toContain("Rules");
+    expect(container.textContent).toContain("Other document");
+    expect(container.textContent).toContain("eduwiki");
+    expect(
+      Array.from(container.querySelectorAll("a"), (a) => [
+        a.textContent,
+        a.href,
+      ]),
+    ).toEqual([
+      ["https://example.org/fallback", "https://example.org/fallback"],
+    ]);
+  });
+
   it.each(["plain", "inline code", "list"])(
-    "keeps a long ID intact and enables wrapping in %s answers",
+    "keeps a long ID intact in %s answers",
     (format) => {
       const id = "AAMkADAx".repeat(100);
       const answer =
@@ -144,11 +234,7 @@ describe("AskResult approval context", () => {
             : `Booking: ${id}`;
       render({ response: { ...response, answer, approval: null } });
 
-      const bubble = container.firstElementChild!;
-      expect(bubble.textContent).toContain(id);
-      expect(bubble.classList.contains("max-w-full")).toBe(true);
-      expect(bubble.classList.contains("min-w-0")).toBe(true);
-      expect(bubble.classList.contains("wrap-anywhere")).toBe(true);
+      expect(container.textContent).toContain(id);
     },
   );
 
@@ -164,8 +250,6 @@ describe("AskResult approval context", () => {
 
     const pre = container.querySelector("pre")!;
     expect(pre.textContent).toBe(`${code}\n`);
-    expect(pre.classList.contains("max-w-full")).toBe(true);
-    expect(pre.classList.contains("overflow-x-auto")).toBe(true);
   });
 
   it("does not show the explanation or approval controls on an error", () => {

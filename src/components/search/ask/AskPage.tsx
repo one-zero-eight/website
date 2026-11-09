@@ -1,7 +1,6 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import type { searchTypes } from "@/api/search";
-import { useLingui } from "@lingui/react";
-import { Trans } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useEffect, useRef, useState } from "react";
 import AnimatedDots from "@/components/search/AnimatedDots";
 import { AskSources } from "./AskSources";
@@ -10,6 +9,7 @@ import { AskAttachment } from "./AskAttachment";
 import { AskInput } from "./AskInput";
 import { AskNotificationButton } from "./AskNotificationButton";
 import { AskResult } from "./AskResult";
+import { AskAnswerBody } from "./AskAnswerBody";
 import {
   askQuestion,
   openChat,
@@ -32,10 +32,11 @@ export function AskPage({
   askChat?: string;
   onChatLinkHandled?: () => void;
 }) {
-  useLingui();
+  const { t } = useLingui();
 
   const [isChatListOpen, setIsChatListOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const isFollowing = useRef(true);
 
   // The conversation stays when the user goes to another page and comes back
@@ -93,6 +94,7 @@ export function AskPage({
 
   const isEmpty =
     messages.length === 0 && !isPending && !isOpening && !openingError;
+  const lastMessage = messages.at(-1);
 
   return (
     <div className="flex min-h-0 grow">
@@ -140,8 +142,47 @@ export function AskPage({
               <div className="flex grow flex-col items-center justify-center gap-2 text-center">
                 <span className="text-lg font-medium">cAtIx</span>
                 <span className="text-base-content/70">
-                  <Trans>- Ask me anything!</Trans>
+                  <Trans>
+                    I can help with your schedule, university rules,
+                    announcements and available rooms.
+                  </Trans>
                 </span>
+                {!draftQuery.trim() && draftAttachments.length === 0 && (
+                  <>
+                    <div className="mt-2 grid w-full max-w-2xl grid-cols-1 gap-2 @2xl/content:grid-cols-2">
+                      {[
+                        t`What is on my schedule tomorrow?`,
+                        t`What are the university exam retake rules?`,
+                        t`Find a room available tomorrow from 15:00 to 16:00.`,
+                        t`What was announced in my available chats this week?`,
+                      ].map((query) => (
+                        <button
+                          key={query}
+                          type="button"
+                          className="btn btn-outline h-auto justify-start py-3 text-left font-normal whitespace-normal"
+                          onClick={() => {
+                            setDraftQuery(query);
+                            inputRef.current?.focus();
+                          }}
+                        >
+                          {query}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-base-content/60 mt-2 max-w-2xl text-sm">
+                      <Trans>
+                        You can attach up to 3 PDF, TXT or image files, up to 10
+                        MiB each.
+                      </Trans>
+                    </p>
+                    <p className="text-base-content/60 max-w-2xl text-sm">
+                      <Trans>
+                        The assistant asks for confirmation before changing data
+                        in services.
+                      </Trans>
+                    </p>
+                  </>
+                )}
               </div>
             )}
 
@@ -157,6 +198,15 @@ export function AskPage({
                 <span className="text-base-content/60 text-sm">
                   {formatApiErrorMessage(openingError)}
                 </span>
+                {chatId && !isOpening && (
+                  <button
+                    type="button"
+                    className="btn btn-sm self-start"
+                    onClick={() => void openChat(chatId)}
+                  >
+                    <Trans>Retry</Trans>
+                  </button>
+                )}
               </div>
             )}
 
@@ -179,24 +229,40 @@ export function AskPage({
 
             {isPending && (
               <div className="border-base-300 bg-base-200 text-base-content rounded-field flex max-w-full min-w-0 flex-col gap-2 self-start border! px-4 py-2 wrap-anywhere">
-                {answerText ? (
-                  <p className="whitespace-pre-wrap">{answerText}</p>
-                ) : (
-                  <div className="flex">
-                    <span>- {status}</span>
-                    <AnimatedDots></AnimatedDots>
-                  </div>
-                )}
+                {answerText && <AskAnswerBody text={answerText} />}
+                <div className="text-base-content/70 flex text-sm">
+                  <span>
+                    {status ||
+                      (answerText ? t`Receiving answer` : t`Sending request`)}
+                  </span>
+                  <AnimatedDots />
+                </div>
               </div>
             )}
             {!isPending && error && (
               <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">
                 <span>
-                  <Trans>- Sorry, I can't help you with this question.</Trans>
+                  <Trans>Could not complete the request.</Trans>
                 </span>
                 <span className="text-base-content/60 text-sm">
                   {formatApiErrorMessage(error)}
                 </span>
+                {lastMessage?.role === "user" && draftQuery.trim() && (
+                  <span className="text-sm">
+                    <Trans>
+                      Your draft is below. You can edit it and send it again.
+                    </Trans>
+                  </span>
+                )}
+                {lastMessage?.role === "assistant" &&
+                  lastMessage.response.approval && (
+                    <span className="text-sm">
+                      <Trans>
+                        The action result could not be confirmed. Check the
+                        service before trying again.
+                      </Trans>
+                    </span>
+                  )}
               </div>
             )}
           </div>
@@ -205,6 +271,7 @@ export function AskPage({
         <div className="mx-auto w-full max-w-4xl px-4 pt-2 pb-4">
           <AskInput
             key={composerId}
+            inputRef={inputRef}
             text={draftQuery}
             setText={setDraftQuery}
             attachments={isPending ? [] : draftAttachments}

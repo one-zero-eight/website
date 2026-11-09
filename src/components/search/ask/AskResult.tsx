@@ -1,8 +1,7 @@
 import { searchTypes } from "@/api/search";
 import { cn } from "@/lib/ui/cn";
 import { Trans } from "@lingui/react/macro";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { AskAnswerBody } from "./AskAnswerBody";
 import { AskApproval } from "./AskApproval";
 import { AskCalendarEvents } from "./AskCalendarEvents";
 import { AskSignupOffers } from "./AskSignupOffers";
@@ -15,7 +14,14 @@ function sourceKey(source: searchTypes.SchemaSearchResponse["source"]) {
     const { page, revision, member } = source.archive_document;
     return JSON.stringify([source.type, page, revision, member]);
   }
-  return source.type;
+  const link = (
+    "link" in source ? source.link : "url" in source ? source.url : ""
+  ).trim();
+  return JSON.stringify(
+    link
+      ? [source.type, link]
+      : [source.type, source.display_name, source.breadcrumbs],
+  );
 }
 
 export function AskResult({
@@ -39,9 +45,6 @@ export function AskResult({
       self.findIndex((s) => sourceKey(s.source) === sourceKey(item.source)),
   );
 
-  const getSourceLink = (s: searchTypes.SchemaSearchResponse) =>
-    "link" in s.source ? s.source.link : "url" in s.source ? s.source.url : "";
-
   return (
     <div
       tabIndex={0}
@@ -54,32 +57,7 @@ export function AskResult({
       )}
     >
       {!hasError ? (
-        <Markdown
-          remarkPlugins={[remarkGfm]}
-          components={{
-            a: ({ href }) => (
-              <a
-                href={href ?? "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                <Trans>link</Trans>
-              </a>
-            ),
-            p: ({ children }) => (
-              <p className="whitespace-pre-wrap">{children}</p>
-            ),
-            pre: ({ children }) => (
-              <pre className="max-w-full overflow-x-auto">{children}</pre>
-            ),
-            li: ({ children }) => (
-              <li className="ml-5 list-disc">{children}</li>
-            ),
-          }}
-        >
-          {answer}
-        </Markdown>
+        <AskAnswerBody text={answer} />
       ) : (
         <span>
           <Trans>- Sorry, I can't help you with this question.</Trans>
@@ -103,19 +81,33 @@ export function AskResult({
       )}
 
       {uniqueSources.length > 0 && (
-        <div>
+        <div className="flex flex-col gap-1">
           <span>
-            <Trans>Sources:</Trans>{" "}
+            <Trans>Sources:</Trans>
           </span>
-          {uniqueSources.map((s, i) => {
-            const link = getSourceLink(s);
-            const source = s.source;
+          {uniqueSources.map(({ source }) => {
+            const link = (
+              "link" in source ? source.link : "url" in source ? source.url : ""
+            ).trim();
+            const name = source.display_name.trim();
+            const breadcrumbs = source.breadcrumbs
+              .map((part) => part.trim())
+              .filter(Boolean)
+              .join(" > ");
+            const label =
+              (name && name !== "-" ? name : "") ||
+              breadcrumbs ||
+              link ||
+              source.type;
             const member =
               source.type === "eduwiki"
                 ? source.archive_document?.member
                 : undefined;
             return (
-              <span key={sourceKey(source)}>
+              <div
+                key={sourceKey(source)}
+                className="min-w-0 text-sm wrap-anywhere"
+              >
                 {source.type === "eduwiki" && source.archive_document ? (
                   <button
                     type="button"
@@ -125,17 +117,25 @@ export function AskResult({
                     <Trans>Open document: {member}</Trans>
                   </button>
                 ) : (
-                  <a
-                    className="text-primary hover:underline"
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {s.source.type}
-                  </a>
+                  <>
+                    {link ? (
+                      <a
+                        className="text-primary hover:underline"
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {label}
+                      </a>
+                    ) : (
+                      <span>{label}</span>
+                    )}
+                    {breadcrumbs && breadcrumbs !== label && (
+                      <div className="text-base-content/60">{breadcrumbs}</div>
+                    )}
+                  </>
                 )}
-                {i < uniqueSources.length - 1 && ", "}
-              </span>
+              </div>
             );
           })}
         </div>

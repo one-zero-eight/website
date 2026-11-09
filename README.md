@@ -95,6 +95,23 @@ submitted with `https://max.ru/`. Queries, fragments, trailing slashes, ports,
 and `http://` are not supported. Private invitations are hidden in request
 titles and messages.
 
+### cAtIx chat
+
+The empty chat offers editable examples for schedules, university rules,
+announcements and available rooms. Selecting an example only fills and focuses
+the composer; Send submits it. Drafts with text or attachments are not replaced.
+Attachments support up to three PDF, TXT or image files, up to 10 MiB each.
+
+Answers render Markdown during generation and keep the server status visible.
+Citation labels and distinct source URLs are preserved; archive document buttons
+open the exact cited member. Missing source URLs are displayed as text.
+
+History and the chat list offer explicit Retry after loading failures. Retrying
+the same failed history load preserves the composer and attachments. Request
+errors show HTTP, validation or network details without automatically repeating
+a question or decision. An unconfirmed action result must be checked in the
+service before trying again; this UI does not recover interrupted operations.
+
 ### cAtIx notification icon
 
 System reply notifications use `public/catix-notification.png`, copied from the cAtIx logo (800×800 PNG).

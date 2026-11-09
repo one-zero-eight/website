@@ -85,6 +85,59 @@ describe("ask session attachments", () => {
     act(() => root.unmount());
     vi.unstubAllGlobals();
   });
+  it("retries failed history without resetting the composer and suppresses duplicate or successful opens", async () => {
+    api.history.mockRejectedValueOnce(new Error("History unavailable"));
+    await act(async () => session.openChat("chat-1"));
+    expect(snapshot.openingError).toEqual(new Error("History unavailable"));
+    act(() => {
+      session.setDraftQuery("Keep my draft");
+      session.setDraftAttachments([{ info, bound: true }]);
+    });
+    const composerId = snapshot.composerId;
+    let finish!: (history: { answers: (typeof answer)[] }) => void;
+    api.history.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    let opening!: Promise<void>;
+    act(() => {
+      opening = session.openChat("chat-1");
+    });
+    expect(snapshot.isOpening).toBe(true);
+    expect(snapshot.openingError).toBeNull();
+    await act(async () => session.openChat("chat-1"));
+    expect(api.history).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      finish({ answers: [answer] });
+      await opening;
+    });
+    expect(snapshot.messages).toEqual([
+      { role: "user", content: answer.query, attachments: [info] },
+      { role: "assistant", response: answer },
+    ]);
+    expect(snapshot.draftQuery).toBe("Keep my draft");
+    expect(snapshot.draftAttachments).toEqual([{ info, bound: true }]);
+    expect(snapshot.composerId).toBe(composerId);
+    await act(async () => session.openChat("chat-1"));
+    expect(api.history).toHaveBeenCalledTimes(2);
+  });
+
+  it("allows another retry after history fails again", async () => {
+    api.history
+      .mockRejectedValueOnce(new Error("First failure"))
+      .mockRejectedValueOnce(new Error("Second failure"))
+      .mockResolvedValueOnce({ answers: [] });
+    await act(async () => session.openChat("chat-1"));
+    await act(async () => session.openChat("chat-1"));
+    expect(snapshot.openingError).toEqual(new Error("Second failure"));
+    await act(async () => session.openChat("chat-1"));
+    expect(snapshot.openingError).toBeNull();
+    expect(snapshot.messages).toEqual([]);
+    expect(api.history).toHaveBeenCalledTimes(3);
+  });
+
   it("announces a completed answer after saving it, without private content", async () => {
     const completed = vi.fn((event: Event) => {
       const saved = JSON.parse(sessionStorage.getItem("search-ask-session")!);
@@ -99,7 +152,10 @@ describe("ask session attachments", () => {
     });
     window.addEventListener("catix-answer-ready", completed);
     try {
-      api.post.mockResolvedValueOnce({ data: stream([["done", answer]]) });
+      api.post.mockResolvedValueOnce({
+        response: new Response(),
+        data: stream([["done", answer]]),
+      });
       await act(async () => session.askQuestion("Read it"));
       expect(completed).toHaveBeenCalledOnce();
       expect(snapshot.error).toBeNull();
@@ -113,6 +169,7 @@ describe("ask session attachments", () => {
     await act(async () => session.openChat("chat-1"));
     act(() => session.setDraftAttachments([{ info, bound: false }]));
     api.post.mockResolvedValueOnce({
+      response: new Response(),
       data: stream([
         ["chat", { chat_id: "chat-1" }],
         ["done", answer],
@@ -132,14 +189,20 @@ describe("ask session attachments", () => {
       api.history.mockResolvedValueOnce({ answers: [], waiting });
       await act(async () => session.openChat("chat-1"));
       expect(completed).not.toHaveBeenCalled();
-      api.post.mockResolvedValueOnce({ data: stream([["done", answer]]) });
+      api.post.mockResolvedValueOnce({
+        response: new Response(),
+        data: stream([["done", answer]]),
+      });
       await act(async () => session.decideApproval("approve"));
       expect(completed).toHaveBeenCalledOnce();
       expect(completed.mock.calls[0][0].detail).toEqual({
         chatId: "chat-1",
         needsApproval: false,
       });
-      api.post.mockResolvedValueOnce({ data: stream([["done", waiting]]) });
+      api.post.mockResolvedValueOnce({
+        response: new Response(),
+        data: stream([["done", waiting]]),
+      });
       await act(async () => session.askQuestion("Please do it"));
       expect(completed).toHaveBeenCalledTimes(2);
       expect(completed.mock.calls[1][0].detail).toEqual({
@@ -157,7 +220,10 @@ describe("ask session attachments", () => {
       window.addEventListener("catix-answer-ready", completed);
       try {
         if (outcome === "aborted") {
-          let finish!: (value: { data: ReadableStream<Uint8Array> }) => void;
+          let finish!: (value: {
+            data: ReadableStream<Uint8Array>;
+            response: Response;
+          }) => void;
           api.post.mockReturnValueOnce(
             new Promise((resolve) => {
               finish = resolve;
@@ -169,11 +235,15 @@ describe("ask session attachments", () => {
           });
           act(() => session.startNewChat());
           await act(async () => {
-            finish({ data: stream([["done", answer]]) });
+            finish({
+              data: stream([["done", answer]]),
+              response: new Response(),
+            });
             await pending;
           });
         } else {
           api.post.mockResolvedValueOnce({
+            response: new Response(),
             data: stream(
               outcome === "disconnected"
                 ? []
@@ -203,7 +273,10 @@ describe("ask session attachments", () => {
         .filter((message) => message.role === "user")
         .map((message) => message.attachments),
     ).toEqual([[info], [info]]);
-    api.post.mockResolvedValueOnce({ data: stream([["done", answer]]) });
+    api.post.mockResolvedValueOnce({
+      response: new Response(),
+      data: stream([["done", answer]]),
+    });
     await act(async () => session.decideApproval("approve"));
     expect(snapshot.messages[2]).toEqual({
       role: "user",
@@ -227,7 +300,7 @@ describe("ask session attachments", () => {
         );
       },
     });
-    api.post.mockResolvedValueOnce({ data: pending });
+    api.post.mockResolvedValueOnce({ response: new Response(), data: pending });
     let request!: Promise<void>;
     await act(async () => {
       request = session.askQuestion("Read it", [info]);
@@ -245,7 +318,10 @@ describe("ask session attachments", () => {
       controller.close();
       await request;
     });
-    api.post.mockResolvedValueOnce({ data: stream([["done", answer]]) });
+    api.post.mockResolvedValueOnce({
+      response: new Response(),
+      data: stream([["done", answer]]),
+    });
     await act(async () => session.askQuestion(snapshot.draftQuery));
     expect(api.post.mock.calls[1][1].body.chat_id).toBe("chat-1");
     expect(api.post.mock.calls[1][1].body.attachment_ids).toEqual([info.id]);
@@ -253,6 +329,7 @@ describe("ask session attachments", () => {
   it("ignores old stream events after switching to a new chat", async () => {
     let controller!: ReadableStreamDefaultController<Uint8Array>;
     api.post.mockResolvedValueOnce({
+      response: new Response(),
       data: new ReadableStream<Uint8Array>({
         start(value) {
           controller = value;
@@ -281,6 +358,7 @@ describe("ask session attachments", () => {
   });
   it("retains the server chat and draft attachments after a streamed failure for retry", async () => {
     api.post.mockResolvedValueOnce({
+      response: new Response(),
       data: stream([
         ["chat", { chat_id: "chat-1" }],
         ["error", { detail: "Model unavailable" }],
@@ -294,7 +372,10 @@ describe("ask session attachments", () => {
     expect(api.invalidate).toHaveBeenCalledWith({
       queryKey: ["get", "/ask/chats"],
     });
-    api.post.mockResolvedValueOnce({ data: stream([["done", answer]]) });
+    api.post.mockResolvedValueOnce({
+      response: new Response(),
+      data: stream([["done", answer]]),
+    });
     await act(async () => session.askQuestion(snapshot.draftQuery));
     expect(api.post.mock.calls[1][1].body).toEqual({
       query: "Read it",
@@ -306,6 +387,7 @@ describe("ask session attachments", () => {
   });
   it("returns a server-cancelled question to the draft with its files", async () => {
     api.post.mockResolvedValueOnce({
+      response: new Response(),
       data: stream([
         ["chat", { chat_id: "chat-1" }],
         ["cancelled", { detail: "Cancelled" }],
@@ -328,6 +410,7 @@ describe("ask session attachments", () => {
   });
   it("sends attachment IDs and stores metadata on the user question", async () => {
     api.post.mockResolvedValueOnce({
+      response: new Response(),
       data: stream([
         ["chat", { chat_id: "chat-1" }],
         ["done", answer],

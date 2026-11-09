@@ -340,28 +340,6 @@ describe("cited archive documents", () => {
     expect(container.querySelector("a")?.textContent).toBe("Go to website ->");
   });
 
-  it("keeps ordinary chat sources deduplicated by type", async () => {
-    const ordinary = { ...source, archive_document: null };
-    const response: searchTypes.SchemaAskResponses = {
-      query: "exam",
-      answer: "Answer",
-      search_responses: [
-        { source: ordinary },
-        { source: { ...ordinary, url: "https://eduwiki.example/other" } },
-      ],
-      attachments: [],
-      calendar_events: [],
-      signup_offers: [],
-      messages: [],
-    };
-    await render(createElement(AskResult, { response }));
-    expect(container.querySelectorAll("a")).toHaveLength(1);
-    expect(container.querySelector("a")?.getAttribute("href")).toBe(source.url);
-    expect(container.querySelector("a")?.textContent).toBe("eduwiki");
-    expect(container.querySelector("button")).toBeNull();
-    expect(customFetch.GET).not.toHaveBeenCalled();
-  });
-
   it.each([false, true])(
     "opens distinct same-URL citations in a Modal (mobile: %s), without hijacking a bare archive link",
     async (isMobile) => {

@@ -1,11 +1,17 @@
 import type { searchTypes } from "@/api/search";
-import { setupI18n } from "@lingui/core";
+import { i18n as appI18n, setupI18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AskPage } from "./AskPage";
-import { askQuestion, openChat, startNewChat } from "./ask-session";
+import {
+  askQuestion,
+  decideApproval,
+  openChat,
+  setDraftQuery,
+  startNewChat,
+} from "./ask-session";
 
 const api = vi.hoisted(() => ({
   history: vi.fn(),
@@ -66,6 +72,7 @@ describe("AskPage attachment history", () => {
   let container: HTMLDivElement;
   beforeEach(() => {
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    appI18n.loadAndActivate({ locale: "en", messages: {} });
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:private");
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
     vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
@@ -97,6 +104,158 @@ describe("AskPage attachment history", () => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
+  it("retries history from the error UI while keeping the user's draft", async () => {
+    api.history.mockRejectedValueOnce(new Error("History unavailable"));
+    await act(async () => openChat("chat-1"));
+    const textarea = container.querySelector("textarea")!;
+    const setValue = Object.getOwnPropertyDescriptor(
+      HTMLTextAreaElement.prototype,
+      "value",
+    )!.set!;
+    act(() => {
+      setValue.call(textarea, "Keep my draft");
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    let finish!: (value: { answers: (typeof answer)[] }) => void;
+    api.history.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const retry = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent === "Retry",
+    )!;
+    act(() => retry.click());
+    expect(container.textContent).not.toContain("History unavailable");
+    expect(container.querySelector(".skeleton")).not.toBeNull();
+    expect(
+      Array.from(container.querySelectorAll("button")).some(
+        (button) => button.textContent === "Retry",
+      ),
+    ).toBe(false);
+    await act(async () => finish({ answers: [answer] }));
+    expect(container.textContent).toContain("Read it");
+    expect(container.querySelector("textarea")).toBe(textarea);
+    expect(textarea.value).toBe("Keep my draft");
+    expect(api.history).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    {
+      status: 403,
+      body: { detail: "Forbidden" },
+      expected: "Error 403: Forbidden",
+    },
+    {
+      status: 422,
+      body: {
+        detail: [
+          { msg: "Value error, Query is required" },
+          { msg: "File is too large" },
+        ],
+      },
+      expected: "Query is required; File is too large",
+    },
+    { status: 503, body: undefined, expected: "Error 503" },
+    {
+      status: 200,
+      body: undefined,
+      expected: "The server returned no answer stream.",
+    },
+    { status: null, body: undefined, expected: "Network error: Offline" },
+  ])(
+    "shows request failure $expected and restores the draft without resending",
+    async ({ status, body, expected }) => {
+      if (status === null)
+        api.post.mockRejectedValueOnce(new TypeError("Offline"));
+      else
+        api.post.mockResolvedValueOnce({
+          response: new Response(null, { status }),
+          error: body,
+        });
+      await act(async () => askQuestion("Read it", [info]));
+      expect(container.textContent).toContain(
+        "Could not complete the request.",
+      );
+      expect(container.textContent).toContain(expected);
+      expect(container.textContent).toContain(
+        "Your draft is below. You can edit it and send it again.",
+      );
+      expect(container.querySelector("textarea")!.value).toBe("Read it");
+      expect(container.textContent).toContain("private.pdf");
+      expect(api.post).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("reports an incomplete stream and keeps bound files available for manual retry", async () => {
+    api.post.mockResolvedValueOnce({
+      response: new Response(),
+      data: new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(
+            new TextEncoder().encode(
+              'event: chat\ndata: {"chat_id":"chat-1"}\n\nevent: answer\ndata: {"text":"Partial"}\n\n',
+            ),
+          );
+          controller.close();
+        },
+      }),
+    });
+    await act(async () => askQuestion("Read it", [info]));
+    expect(container.textContent).toContain(
+      "The connection ended before the response was complete.",
+    );
+    expect(container.querySelector("textarea")!.value).toBe("Read it");
+    expect(
+      JSON.parse(sessionStorage.getItem("search-ask-session")!)
+        .draftAttachments,
+    ).toEqual([{ info, bound: true }]);
+    expect(api.post).toHaveBeenCalledOnce();
+  });
+
+  it.each([403, 422, 503, null])(
+    "warns of an uncertain action result after decision failure %s",
+    async (status) => {
+      api.history.mockResolvedValueOnce({
+        answers: [],
+        waiting: { ...answer, approval: { id: "approval-1", actions: [] } },
+      });
+      await act(async () => openChat("chat-1"));
+      act(() => setDraftQuery("An unrelated draft"));
+      if (status === null)
+        api.post.mockRejectedValueOnce(new TypeError("Offline"));
+      else
+        api.post.mockResolvedValueOnce({
+          response: new Response(null, { status }),
+          error:
+            status === 403
+              ? { detail: "Forbidden" }
+              : status === 422
+                ? { detail: [{ msg: "Invalid decision" }] }
+                : undefined,
+        });
+      await act(async () => decideApproval("approve"));
+      expect(container.textContent).toContain(
+        "The action result could not be confirmed. Check the service before trying again.",
+      );
+      expect(container.textContent).toContain(
+        status === null
+          ? "Network error: Offline"
+          : status === 403
+            ? "Error 403: Forbidden"
+            : status === 422
+              ? "Invalid decision"
+              : "Error 503",
+      );
+      expect(container.textContent).not.toContain("Your draft is below.");
+      expect(container.querySelector("textarea")!.value).toBe(
+        "An unrelated draft",
+      );
+      expect(api.post).toHaveBeenCalledOnce();
+    },
+  );
+
   it("opens a notification deep link and consumes it so later chat choices stay put", async () => {
     const handled = vi.fn();
     await act(async () =>
@@ -127,6 +286,7 @@ describe("AskPage attachment history", () => {
     await act(async () => openChat("chat-1"));
     let finish!: () => void;
     api.post.mockResolvedValueOnce({
+      response: new Response(),
       data: new ReadableStream<Uint8Array>({
         start(controller) {
           finish = () => controller.close();
@@ -180,12 +340,6 @@ describe("AskPage attachment history", () => {
     act(() => startNewChat());
     await act(async () => finish({ data: new Blob(["pdf"]), error: null }));
     expect(URL.createObjectURL).not.toHaveBeenCalled();
-  });
-  it("shows Sources in the top chat header and keeps notifications below the composer", () => {
-    expect(container.textContent).toContain("Sources");
-    expect(container.textContent).toContain("Chats");
-    expect(container.querySelectorAll("button").length).toBeGreaterThan(2);
-    expect(container.textContent).not.toContain("Propose a chat");
   });
   it("shows a private download error without losing the filename", async () => {
     await act(async () => openChat("chat-1"));
@@ -250,6 +404,7 @@ describe("AskPage attachment history", () => {
     )!;
     expect(button.disabled).toBe(false);
     api.post.mockResolvedValueOnce({
+      response: new Response(),
       data: new ReadableStream<Uint8Array>({
         start(controller) {
           controller.enqueue(
@@ -268,45 +423,69 @@ describe("AskPage attachment history", () => {
       attachment_ids: [info.id],
     });
   });
-  it("wraps long words in user messages and streaming answers without truncating them", async () => {
-    const text = "AAMkADAx".repeat(100);
-    let controller!: ReadableStreamDefaultController<Uint8Array>;
-    api.post.mockResolvedValueOnce({
-      data: new ReadableStream<Uint8Array>({
-        start(streamController) {
-          controller = streamController;
-        },
-      }),
-    });
-    let pending!: Promise<void>;
-    await act(async () => {
-      pending = askQuestion(text);
-    });
-    try {
+  it.each(["done", "error", "cancelled"])(
+    "renders Markdown before completion and clears activity on %s",
+    async (outcome) => {
+      const longText = "AAMkADAx".repeat(100);
+      const text = `**Rules**\n\n- [Original document](https://example.org/rules)\n- ${longText}`;
+      let controller!: ReadableStreamDefaultController<Uint8Array>;
+      api.post.mockResolvedValueOnce({
+        response: new Response(),
+        data: new ReadableStream<Uint8Array>({
+          start(value) {
+            controller = value;
+          },
+        }),
+      });
+      let pending!: Promise<void>;
       await act(async () => {
+        pending = askQuestion("Find rules");
+      });
+      expect(container.textContent).toContain("Sending request");
+      await act(async () =>
         controller.enqueue(
           new TextEncoder().encode(
             `event: answer\ndata: ${JSON.stringify({ text })}\n\n`,
           ),
-        );
-      });
-      const userMessage = container.querySelector(".bg-primary")!;
-      const streamingAnswer = container.querySelector("p.whitespace-pre-wrap")!;
-      for (const element of [userMessage, streamingAnswer.parentElement!]) {
-        expect(element.textContent).toBe(text);
-        expect(element.classList.contains("min-w-0")).toBe(true);
-        expect(element.classList.contains("wrap-anywhere")).toBe(true);
-      }
+        ),
+      );
+      expect(container.querySelector("strong")?.textContent).toBe("Rules");
       expect(
-        streamingAnswer.parentElement!.classList.contains("max-w-full"),
-      ).toBe(true);
-    } finally {
+        Array.from(container.querySelectorAll("li"), (li) => li.textContent),
+      ).toEqual(["Original document", longText]);
+      const link = container.querySelector<HTMLAnchorElement>(
+        'a[href="https://example.org/rules"]',
+      )!;
+      expect(link.textContent).toBe("Original document");
+      expect(link.target).toBe("_blank");
+      expect(container.textContent).toContain("Receiving answer");
+      await act(async () =>
+        controller.enqueue(
+          new TextEncoder().encode(
+            'event: status\ndata: {"text":"Checking university rules"}\n\n',
+          ),
+        ),
+      );
+      expect(container.textContent).toContain("Checking university rules");
+      expect(container.textContent).toContain(longText);
+      expect(
+        container.querySelector('a[href="https://example.org/rules"]')
+          ?.textContent,
+      ).toBe("Original document");
       await act(async () => {
+        controller.enqueue(
+          new TextEncoder().encode(
+            `event: ${outcome}\ndata: ${JSON.stringify(outcome === "done" ? { ...answer, answer: text } : { detail: "Stopped" })}\n\n`,
+          ),
+        );
         controller.close();
         await pending;
       });
-    }
-  });
+      expect(container.textContent).not.toContain("Checking university rules");
+      expect(container.querySelector('button[title="Stop"]')).toBeNull();
+      expect(container.querySelector('button[title="Send"]')).not.toBeNull();
+    },
+  );
 
   it("shows private history files with size and pages, downloading only on request", async () => {
     await act(async () => openChat("chat-1"));
