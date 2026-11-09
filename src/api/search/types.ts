@@ -574,6 +574,38 @@ export interface components {
       /** Title */
       title: string;
     };
+    /** AnswerSource */
+    AnswerSource: {
+      /** Number */
+      number: number;
+      /** Title */
+      title: string;
+      /** Url */
+      url?: string | null;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: AnswerSourceKind;
+      /** Clauses */
+      clauses?: string[];
+      /** Sections */
+      sections?: string[];
+      /** Based On */
+      based_on?: components["schemas"]["CitationLink"][];
+      archive_document?: components["schemas"]["ArchiveDocument"] | null;
+      /** Date */
+      date?: string | null;
+      /** Author */
+      author?: string | null;
+      /** Author Url */
+      author_url?: string | null;
+      /**
+       * Official
+       * @default false
+       */
+      official: boolean;
+    };
     /** ArchiveDocument */
     ArchiveDocument: {
       /** Page */
@@ -664,8 +696,11 @@ export interface components {
       chat_id?: string | null;
       /** Ask Query Id */
       ask_query_id?: string | null;
-      /** Search Responses */
-      search_responses: components["schemas"]["SearchResponse"][];
+      /**
+       * Sources
+       * @default []
+       */
+      sources: components["schemas"]["AnswerSource"][];
       /**
        * Calendar Events
        * @default []
@@ -792,6 +827,13 @@ export interface components {
        *     ]
        */
       breadcrumbs: string[];
+    };
+    /** CitationLink */
+    CitationLink: {
+      /** Title */
+      title: string;
+      /** Url */
+      url?: string | null;
     };
     /** ClubsSource */
     ClubsSource: {
@@ -1327,6 +1369,7 @@ export interface components {
 export type SchemaActResponses = components["schemas"]["ActResponses"];
 export type SchemaAddedCalendarEvent =
   components["schemas"]["AddedCalendarEvent"];
+export type SchemaAnswerSource = components["schemas"]["AnswerSource"];
 export type SchemaArchiveDocument = components["schemas"]["ArchiveDocument"];
 export type SchemaAskAction = components["schemas"]["AskAction"];
 export type SchemaAskApproval = components["schemas"]["AskApproval"];
@@ -1352,6 +1395,7 @@ export type SchemaCalendarExportKeyCreated =
 export type SchemaCalendarExportKeyStatus =
   components["schemas"]["CalendarExportKeyStatus"];
 export type SchemaCampusLifeSource = components["schemas"]["CampusLifeSource"];
+export type SchemaCitationLink = components["schemas"]["CitationLink"];
 export type SchemaClubsSource = components["schemas"]["ClubsSource"];
 export type SchemaEduwikiSource = components["schemas"]["EduwikiSource"];
 export type SchemaHttpValidationError =
@@ -2648,6 +2692,14 @@ export enum PathsSectionParsePostParametersPathSectionAnyOf1 {
   wiki = "wiki",
   sites = "sites",
 }
+export enum AnswerSourceKind {
+  official_document = "official_document",
+  guide = "guide",
+  eduwiki = "eduwiki",
+  website = "website",
+  web = "web",
+  chat = "chat",
+}
 export enum AskDecisionDecision {
   approve = "approve",
   reject = "reject",
@@ -2701,7 +2753,7 @@ export enum ParseRequestStatus {
   failed = "failed",
 }
 export enum ParseRequestOutcome {
-  pending = "",
+  none = "",
   committed = "committed",
   review = "review",
   unchanged = "unchanged",

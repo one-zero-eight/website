@@ -2,7 +2,7 @@ import type { searchTypes } from "@/api/search";
 import { customFetch } from "@/api/helpers/custom-fetch";
 import { $search } from "@/api/search";
 import { SEARCH_API_URL } from "@/api/search/links";
-import { EduwikiSourceType } from "@/api/search/types";
+import { AnswerSourceKind, EduwikiSourceType } from "@/api/search/types";
 import { setupI18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -363,12 +363,17 @@ describe("cited archive documents", () => {
       const response: searchTypes.SchemaAskResponses = {
         query: "exam",
         answer: `[original archive](${source.url})`,
-        search_responses: [
-          { source },
-          { source: second },
-          { source },
-          { source: { ...source, archive_document: null } },
-        ],
+        sources: [source, second].map((item, index) => ({
+          number: index + 1,
+          title: item.display_name,
+          url: item.url,
+          kind: AnswerSourceKind.eduwiki,
+          clauses: [],
+          sections: [],
+          based_on: [],
+          official: false,
+          archive_document: item.archive_document,
+        })),
         attachments: [],
         calendar_events: [],
         signup_offers: [],

@@ -1,17 +1,72 @@
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-export function AskAnswerBody({ text }: { text: string }) {
+type MarkdownNode = {
+  type: string;
+  value?: string;
+  url?: string;
+  children?: MarkdownNode[];
+};
+
+export function AskAnswerBody({
+  text,
+  citationTargets,
+}: {
+  text: string;
+  citationTargets?: ReadonlyMap<number, string>;
+}) {
+  function linkCitations() {
+    return (tree: MarkdownNode) => {
+      function visit(node: MarkdownNode) {
+        if (
+          !node.children ||
+          ["link", "linkReference", "code", "inlineCode", "html"].includes(
+            node.type,
+          )
+        )
+          return;
+        node.children = node.children.flatMap((child) => {
+          if (child.type !== "text" || !child.value) {
+            visit(child);
+            return [child];
+          }
+          const parts: MarkdownNode[] = [];
+          let offset = 0;
+          for (const match of child.value.matchAll(/\[(\d+(?:,\s*\d+)*)\]/g)) {
+            const numbers = match[1].split(/,\s*/).map(Number);
+            if (!numbers.every((number) => citationTargets?.has(number)))
+              continue;
+            parts.push({
+              type: "text",
+              value: child.value.slice(offset, match.index),
+            });
+            numbers.forEach((number, index) => {
+              if (index) parts.push({ type: "text", value: ", " });
+              parts.push({
+                type: "link",
+                url: `#${citationTargets!.get(number)}`,
+                children: [{ type: "text", value: `[${number}]` }],
+              });
+            });
+            offset = match.index + match[0].length;
+          }
+          parts.push({ type: "text", value: child.value.slice(offset) });
+          return parts;
+        });
+      }
+      visit(tree);
+    };
+  }
   return (
     <Markdown
-      remarkPlugins={[remarkGfm]}
+      remarkPlugins={citationTargets ? [remarkGfm, linkCitations] : [remarkGfm]}
       components={{
         a: ({ href, children }) =>
           href ? (
             <a
               href={href}
-              target="_blank"
-              rel="noopener noreferrer"
+              target={href.startsWith("#") ? undefined : "_blank"}
+              rel={href.startsWith("#") ? undefined : "noopener noreferrer"}
               className="text-primary hover:underline"
             >
               {children}

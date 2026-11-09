@@ -1,5 +1,5 @@
+import { AnswerSourceKind } from "@/api/search/types";
 import type { searchTypes } from "@/api/search";
-import { EduwikiSourceType } from "@/api/search/types";
 import { setupI18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { act, createElement } from "react";
@@ -17,7 +17,7 @@ const response: searchTypes.SchemaAskResponses = {
   query: "подбери тренировку",
   answer:
     "На **9 ноября** подходит вечерняя тренировка:\n\n- **Воллейбол**, 20:00–22:30, [SC] Big Hall (15 мест свободно)\n\nЗаписать вас на неё?",
-  search_responses: [],
+  sources: [],
   attachments: [],
   calendar_events: [],
   signup_offers: [],
@@ -133,93 +133,128 @@ describe("AskResult approval context", () => {
     );
   });
 
-  it("preserves Markdown labels and all distinct source URLs in first-seen order", () => {
-    const source = {
-      type: EduwikiSourceType.eduwiki,
-      display_name: " Exam rules ",
-      url: "https://example.org/a",
-      breadcrumbs: ["University", "Rules"],
-      preview_text: "Not shown",
-    };
+  it("renders a saved answer from before structured sources without losing its text", () => {
+    const { sources: omitted, ...savedResponse } = response;
+    void omitted;
+    render({ response: savedResponse as searchTypes.SchemaAskResponses });
+
+    expect(container.textContent).toContain("Воллейбол");
+    expect(container.querySelector("strong")?.textContent).toBe("9 ноября");
+    expect(container.querySelectorAll("button")).toHaveLength(2);
+    expect(container.querySelector("ol")).toBeNull();
+  });
+
+  it("maps citation numbers to structured sources without renumbering or merging URLs", () => {
     render({
       response: {
         ...response,
         approval: null,
         answer:
-          "Правило [1].\n\nИсточники:\n[1] [«Положение о пересдачах»](https://example.org/rules)",
-        search_responses: [
-          { source },
+          "Rule [7], [7, 12], unknown [99]. `Code [7]`. [Existing [7]](https://example.org/existing). [Original **document**](https://example.org/original)",
+        sources: [
           {
-            source: {
-              ...source,
-              url: "https://example.org/b",
-              display_name: "Announcements",
-            },
+            number: 7,
+            title: "Exam rules",
+            url: "https://example.org/rules",
+            kind: AnswerSourceKind.official_document,
+            clauses: ["2.1", "3"],
+            sections: ["Retakes"],
+            based_on: [
+              { title: "University policy", url: "https://example.org/policy" },
+            ],
+            official: true,
           },
-          { source },
+          {
+            number: 12,
+            title: "Announcement",
+            url: "https://example.org/rules",
+            kind: AnswerSourceKind.chat,
+            clauses: [],
+            sections: [],
+            based_on: [],
+            official: false,
+            date: "2026-11-09T10:00:00Z",
+            author: "Alice",
+            author_url: "https://example.org/alice",
+          },
         ],
       },
     });
+    const cards = Array.from(container.querySelectorAll("ol > li"));
+    expect(cards).toHaveLength(2);
+    expect(cards[0].getAttribute("value")).toBe("7");
+    expect(cards[0].textContent).toContain("[7] Exam rules");
+    expect(cards[0].textContent).toContain("Official document");
+    expect(cards[0].textContent).toContain("Clauses: 2.1, 3");
+    expect(cards[0].textContent).toContain("Sections: Retakes");
+    expect(cards[0].textContent).toContain("Based on: University policy");
+    expect(cards[0].querySelector("a")?.href).toBe("https://example.org/rules");
+    expect(cards[1].textContent).toContain("[12] Announcement");
+    expect(cards[1].textContent).toContain("Chat");
+    expect(cards[1].querySelector("time")?.dateTime).toBe(
+      "2026-11-09T10:00:00Z",
+    );
     expect(
-      Array.from(container.querySelectorAll("a"), (a) => [
-        a.textContent,
-        a.href,
-      ]),
-    ).toEqual([
-      ["«Положение о пересдачах»", "https://example.org/rules"],
-      ["Exam rules", "https://example.org/a"],
-      ["Announcements", "https://example.org/b"],
+      cards[1].querySelector('a[href="https://example.org/alice"]')
+        ?.textContent,
+    ).toBe("Alice");
+    const markdownLink = container.querySelector(
+      'p a[href="https://example.org/original"]',
+    );
+    expect(markdownLink?.textContent).toBe("Original document");
+    expect(markdownLink?.querySelector("strong")?.textContent).toBe("document");
+    const citationLinks = Array.from(
+      container.querySelectorAll<HTMLAnchorElement>('p a[href^="#"]'),
+    );
+    expect(citationLinks.map((link) => link.textContent)).toEqual([
+      "[7]",
+      "[7]",
+      "[12]",
     ]);
-    expect(container.textContent).toContain("Правило [1].");
-    expect(container.textContent).toContain("University > Rules");
-    expect(container.textContent).not.toContain("Not shown");
+    expect(
+      citationLinks.map((link) =>
+        document.getElementById(decodeURIComponent(link.hash.slice(1))),
+      ),
+    ).toEqual([cards[0], cards[0], cards[1]]);
+    expect(citationLinks.every((link) => !link.target)).toBe(true);
+    expect(container.querySelector("code")?.textContent).toBe("Code [7]");
+    expect(
+      container.querySelector('a[href="https://example.org/existing"]')
+        ?.textContent,
+    ).toBe("Existing [7]");
+    expect(container.textContent).toContain("unknown [99]");
   });
 
-  it("uses source metadata without turning missing URLs into links", () => {
-    const source = {
-      type: EduwikiSourceType.eduwiki,
-      url: "  ",
-      display_name: "-",
-      breadcrumbs: [" ", "Rules"],
-      preview_text: "",
-    };
+  it("renders sources and provenance without URLs as text and keeps unsafe links noninteractive", () => {
     render({
       response: {
         ...response,
         approval: null,
         answer: "[unsafe](javascript:alert%281%29)",
-        search_responses: [
-          { source },
+        sources: [
           {
-            source: {
-              ...source,
-              breadcrumbs: [],
-              display_name: "Other document",
-            },
-          },
-          { source: { ...source, breadcrumbs: [] } },
-          {
-            source: {
-              ...source,
-              breadcrumbs: [],
-              url: "https://example.org/fallback",
-            },
+            number: 3,
+            title: "Internal guide",
+            url: null,
+            kind: AnswerSourceKind.guide,
+            clauses: [],
+            sections: [],
+            official: false,
+            based_on: [
+              { title: "Unlinked policy", url: null },
+              { title: "Unsafe policy", url: "javascript:alert(1)" },
+            ],
           },
         ],
       },
     });
     expect(container.textContent).toContain("unsafe");
-    expect(container.textContent).toContain("Rules");
-    expect(container.textContent).toContain("Other document");
-    expect(container.textContent).toContain("eduwiki");
-    expect(
-      Array.from(container.querySelectorAll("a"), (a) => [
-        a.textContent,
-        a.href,
-      ]),
-    ).toEqual([
-      ["https://example.org/fallback", "https://example.org/fallback"],
-    ]);
+    expect(container.textContent).toContain("[3] Internal guide");
+    expect(container.textContent).toContain("Guide");
+    expect(container.textContent).toContain(
+      "Based on: Unlinked policy, Unsafe policy",
+    );
+    expect(container.querySelector("a")).toBeNull();
   });
 
   it.each(["plain", "inline code", "list"])(

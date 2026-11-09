@@ -31,7 +31,7 @@ const answer = {
   query: "Read it",
   answer: "Hello",
   chat_id: "chat-1",
-  search_responses: [],
+  sources: [],
   calendar_events: [],
   messages: [],
   signup_offers: [],

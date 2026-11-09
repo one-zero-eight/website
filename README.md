@@ -103,8 +103,14 @@ the composer; Send submits it. Drafts with text or attachments are not replaced.
 Attachments support up to three PDF, TXT or image files, up to 10 MiB each.
 
 Answers render Markdown during generation and keep the server status visible.
-Citation labels and distinct source URLs are preserved; archive document buttons
-open the exact cited member. Missing source URLs are displayed as text.
+The backend supplies the answer and its structured `sources` separately. One compact
+source list uses the server's citation numbers and preserves document titles,
+clauses, sections, provenance and chat metadata. Archive buttons in that same list
+open exact archive members without intercepting ordinary Markdown links.
+Previously saved answers without structured sources remain readable with their
+original text; the client does not clear chat history or drafts during the cutover.
+Numeric references in completed answers link to their source in the same response;
+source lists use the body text size. Code and existing Markdown links are unchanged.
 
 History and the chat list offer explicit Retry after loading failures. Retrying
 the same failed history load preserves the composer and attachments. Request

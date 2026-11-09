@@ -50,7 +50,7 @@ const response: searchTypes.SchemaAskResponses = {
   chat_id: "chat-1",
   query: "Recommend a training",
   answer: "An evening training fits your schedule.",
-  search_responses: [],
+  sources: [],
   calendar_events: [],
   messages: [],
   signup_offers: [offer],

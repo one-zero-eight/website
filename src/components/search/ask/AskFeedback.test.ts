@@ -46,7 +46,7 @@ vi.mock("./ask-session", () => ({
 const response: searchTypes.SchemaAskResponses = {
   query: "Summarize this file",
   answer: "The attachment describes the project.",
-  search_responses: [],
+  sources: [],
   attachments: [
     {
       id: "attachment-1",
