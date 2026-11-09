@@ -1327,6 +1327,13 @@ export interface components {
       title: string;
       /** Group Code */
       group_code: string;
+      /**
+       * Platform
+       * @enum {string}
+       */
+      platform: SourceViewPlatform;
+      /** Link */
+      link: string | null;
       /** Forum */
       forum: boolean;
       /**
@@ -2799,6 +2806,10 @@ export enum SourceTopicViewMode {
   store = "store",
   search = "search",
   off = "off",
+}
+export enum SourceViewPlatform {
+  telegram = "telegram",
+  max = "max",
 }
 export enum SourceViewDefault_mode {
   store = "store",

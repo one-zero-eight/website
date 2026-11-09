@@ -21,6 +21,8 @@ const sources = {
     {
       chat_id: "-1001",
       title: "Study forum",
+      platform: "telegram",
+      link: "https://t.me/study_forum",
       group_code: "B24-DS-01",
       forum: true,
       default_mode: "search",
@@ -33,11 +35,24 @@ const sources = {
     {
       chat_id: "-1002",
       title: "Common chat",
+      platform: "max",
+      link: "https://max.ru/join/fixture-invite",
       group_code: "all",
       forum: false,
       default_mode: "off",
       topics: [],
       has_stored_messages: true,
+    },
+    {
+      chat_id: "-1003",
+      title: "Chat without a link",
+      platform: "telegram",
+      link: null,
+      group_code: "all",
+      forum: false,
+      default_mode: "store",
+      topics: [],
+      has_stored_messages: false,
     },
   ],
 };
@@ -101,6 +116,18 @@ describe("AskSources", () => {
     expect(document.body.textContent).toContain("Announcements");
     expect(document.body.textContent).toContain("Saving messages");
     expect(document.body.textContent).toContain("Disabled");
+    expect(document.body.textContent).toContain("Telegram");
+    expect(document.body.textContent).toContain("MAX");
+    const sourceLinks = [...document.body.querySelectorAll("article h4 a")];
+    expect(sourceLinks.map((link) => link.getAttribute("href"))).toEqual([
+      "https://t.me/study_forum",
+      "https://max.ru/join/fixture-invite",
+    ]);
+    expect(
+      [...document.body.querySelectorAll("article h4")]
+        .find((heading) => heading.textContent === "Chat without a link")
+        ?.querySelector("a"),
+    ).toBeNull();
     expect(document.body.textContent).toContain(
       "Saved message history remains searchable",
     );

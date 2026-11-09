@@ -95,6 +95,12 @@ submitted with `https://max.ru/`. Queries, fragments, trailing slashes, ports,
 and `http://` are not supported. Private invitations are hidden in request
 titles and messages.
 
+Available source cards identify **Telegram** or **MAX** and link their title to
+the chat: a normal public link takes priority, with a saved invitation used when
+no public link is available. If neither is known, the title stays plain text.
+The catalogue and its links remain limited to the user's allowed source audience;
+proposal invitations stay hidden in request titles and messages.
+
 ### cAtIx chat
 
 The empty chat offers editable examples for schedules, university rules,

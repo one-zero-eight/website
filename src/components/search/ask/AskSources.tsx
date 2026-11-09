@@ -112,14 +112,33 @@ function AskSourcesContent() {
                   className="border-base-300 rounded-box flex flex-col gap-2 border p-3"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h4 className="font-medium">{source.title}</h4>
-                    <span className="badge badge-outline">
-                      {source.group_code === "all" ? (
-                        <Trans>Common source</Trans>
+                    <h4 className="min-w-0 font-medium break-words">
+                      {source.link ? (
+                        <a
+                          href={source.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link link-hover inline-flex items-center gap-1"
+                        >
+                          {source.title}
+                          <span className="icon-[material-symbols--open-in-new] shrink-0 text-sm" />
+                        </a>
                       ) : (
-                        source.group_code
+                        source.title
                       )}
-                    </span>
+                    </h4>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="badge badge-ghost">
+                        {source.platform === "telegram" ? "Telegram" : "MAX"}
+                      </span>
+                      <span className="badge badge-outline">
+                        {source.group_code === "all" ? (
+                          <Trans>Common source</Trans>
+                        ) : (
+                          source.group_code
+                        )}
+                      </span>
+                    </div>
                   </div>
                   <p className="text-base-content/70 text-sm">
                     {source.forum ? (
