@@ -414,7 +414,7 @@ msgstr ""
 msgid "{trainingTitle} (Trainer)"
 msgstr ""
 
-#: src/components/search/ask/AskBookingChoices.tsx:158
+#: src/components/search/ask/AskBookingChoices.tsx:171
 msgid "{value} min"
 msgstr ""
 
@@ -1074,7 +1074,7 @@ msgstr ""
 msgid "Ask questions or find answers at Innopolis University."
 msgstr ""
 
-#: src/components/calendar/AiCalendarCard.tsx:46
+#: src/components/calendar/AiCalendarCard.tsx:52
 msgid "Ask the assistant"
 msgstr ""
 
@@ -1259,7 +1259,7 @@ msgstr ""
 
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:1011
 #: src/components/room-booking/timeline/BookingTimeline.tsx:753
-#: src/components/search/ask/AskBookingChoices.tsx:196
+#: src/components/search/ask/AskBookingChoices.tsx:210
 msgid "Book"
 msgstr ""
 
@@ -1310,11 +1310,11 @@ msgstr ""
 msgid "Booking outcome is unknown"
 msgstr ""
 
-#: src/components/search/ask/AskBookingChoices.tsx:165
+#: src/components/search/ask/AskBookingChoices.tsx:179
 msgid "Booking subject"
 msgstr ""
 
-#: src/components/search/ask/AskBookingChoices.tsx:98
+#: src/components/search/ask/AskBookingChoices.tsx:111
 msgid "Booking subject must be 100 characters or fewer."
 msgstr ""
 
@@ -1791,7 +1791,7 @@ msgstr ""
 msgid "Chill day"
 msgstr ""
 
-#: src/components/search/ask/AskBookingChoices.tsx:79
+#: src/components/search/ask/AskBookingChoices.tsx:92
 msgid "Choose a future time within the available window."
 msgstr ""
 
@@ -1811,7 +1811,7 @@ msgstr ""
 #~ msgid "Choose a specific study group, not \"all\"."
 #~ msgstr ""
 
-#: src/components/search/ask/AskBookingChoices.tsx:74
+#: src/components/search/ask/AskBookingChoices.tsx:86
 msgid "Choose a start time and duration."
 msgstr ""
 
@@ -1832,7 +1832,7 @@ msgstr ""
 msgid "Choose color"
 msgstr ""
 
-#: src/components/search/ask/AskBookingChoices.tsx:155
+#: src/components/search/ask/AskBookingChoices.tsx:168
 msgid "Choose duration"
 msgstr ""
 
@@ -1853,11 +1853,11 @@ msgstr ""
 msgid "Choose PDF, TXT, PNG, JPEG or WebP files."
 msgstr ""
 
-#: src/components/search/ask/AskBookingChoices.tsx:133
+#: src/components/search/ask/AskBookingChoices.tsx:146
 msgid "Choose start time"
 msgstr ""
 
-#: src/components/search/ask/AskBookingChoices.tsx:112
+#: src/components/search/ask/AskBookingChoices.tsx:125
 msgid "Choose time"
 msgstr ""
 
@@ -3099,7 +3099,7 @@ msgstr ""
 msgid "Drop your file here"
 msgstr ""
 
-#: src/components/search/ask/AskBookingChoices.tsx:143
+#: src/components/search/ask/AskBookingChoices.tsx:156
 msgid "Duration"
 msgstr ""
 
@@ -3298,7 +3298,7 @@ msgstr ""
 msgid "Enrollment URL is required for external enrollment."
 msgstr ""
 
-#: src/components/search/ask/AskBookingChoices.tsx:93
+#: src/components/search/ask/AskBookingChoices.tsx:106
 msgid "Enter a booking subject."
 msgstr ""
 
@@ -8405,7 +8405,7 @@ msgstr ""
 msgid "Start qualification"
 msgstr ""
 
-#: src/components/search/ask/AskBookingChoices.tsx:121
+#: src/components/search/ask/AskBookingChoices.tsx:134
 msgid "Start time (MSK)"
 msgstr ""
 
@@ -9048,6 +9048,10 @@ msgstr ""
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:57
 #~ msgid "The start date must not be after the end date."
 #~ msgstr ""
+
+#: src/components/calendar/AiCalendarCard.tsx:31
+msgid "The Telegram bot notifies you when events are added to AI Calendar. To receive notifications, open the bot in Telegram and press Start."
+msgstr ""
 
 #: src/components/search/SourceRequests.tsx:286
 #~ msgid "The Telegram chat administrator agreed to indexing this chat and making its messages available to verified students of the selected study group."

@@ -414,7 +414,7 @@ msgstr "{totalScore}/{maxScore} {totalScore, plural, one {point} other {points}}
 msgid "{trainingTitle} (Trainer)"
 msgstr "{trainingTitle} (Trainer)"
 
-#: src/components/search/ask/AskBookingChoices.tsx:158
+#: src/components/search/ask/AskBookingChoices.tsx:171
 msgid "{value} min"
 msgstr "{value} min"
 
@@ -1070,7 +1070,7 @@ msgstr "Ask a question..."
 msgid "Ask questions or find answers at Innopolis University."
 msgstr "Ask questions or find answers at Innopolis University."
 
-#: src/components/calendar/AiCalendarCard.tsx:46
+#: src/components/calendar/AiCalendarCard.tsx:52
 msgid "Ask the assistant"
 msgstr "Ask the assistant"
 
@@ -1255,7 +1255,7 @@ msgstr "Bold"
 
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:1011
 #: src/components/room-booking/timeline/BookingTimeline.tsx:753
-#: src/components/search/ask/AskBookingChoices.tsx:196
+#: src/components/search/ask/AskBookingChoices.tsx:210
 msgid "Book"
 msgstr "Book"
 
@@ -1306,11 +1306,11 @@ msgstr "Booking details"
 msgid "Booking outcome is unknown"
 msgstr "Booking outcome is unknown"
 
-#: src/components/search/ask/AskBookingChoices.tsx:165
+#: src/components/search/ask/AskBookingChoices.tsx:179
 msgid "Booking subject"
 msgstr "Booking subject"
 
-#: src/components/search/ask/AskBookingChoices.tsx:98
+#: src/components/search/ask/AskBookingChoices.tsx:111
 msgid "Booking subject must be 100 characters or fewer."
 msgstr "Booking subject must be 100 characters or fewer."
 
@@ -1787,7 +1787,7 @@ msgstr "Checking your workouts <0>can take up to 2 weeks.</0>"
 msgid "Chill day"
 msgstr "Chill day"
 
-#: src/components/search/ask/AskBookingChoices.tsx:79
+#: src/components/search/ask/AskBookingChoices.tsx:92
 msgid "Choose a future time within the available window."
 msgstr "Choose a future time within the available window."
 
@@ -1807,7 +1807,7 @@ msgstr "Choose a source to restore the draft from."
 #~ msgid "Choose a specific study group, not \"all\"."
 #~ msgstr "Choose a specific study group, not \"all\"."
 
-#: src/components/search/ask/AskBookingChoices.tsx:74
+#: src/components/search/ask/AskBookingChoices.tsx:86
 msgid "Choose a start time and duration."
 msgstr "Choose a start time and duration."
 
@@ -1828,7 +1828,7 @@ msgstr "Choose at least one timeslot."
 msgid "Choose color"
 msgstr "Choose color"
 
-#: src/components/search/ask/AskBookingChoices.tsx:155
+#: src/components/search/ask/AskBookingChoices.tsx:168
 msgid "Choose duration"
 msgstr "Choose duration"
 
@@ -1849,11 +1849,11 @@ msgstr "Choose one of your verified study groups."
 msgid "Choose PDF, TXT, PNG, JPEG or WebP files."
 msgstr "Choose PDF, TXT, PNG, JPEG or WebP files."
 
-#: src/components/search/ask/AskBookingChoices.tsx:133
+#: src/components/search/ask/AskBookingChoices.tsx:146
 msgid "Choose start time"
 msgstr "Choose start time"
 
-#: src/components/search/ask/AskBookingChoices.tsx:112
+#: src/components/search/ask/AskBookingChoices.tsx:125
 msgid "Choose time"
 msgstr "Choose time"
 
@@ -3095,7 +3095,7 @@ msgstr "Drop here to remove from groups"
 msgid "Drop your file here"
 msgstr "Drop your file here"
 
-#: src/components/search/ask/AskBookingChoices.tsx:143
+#: src/components/search/ask/AskBookingChoices.tsx:156
 msgid "Duration"
 msgstr "Duration"
 
@@ -3294,7 +3294,7 @@ msgstr "Enrollment URL"
 msgid "Enrollment URL is required for external enrollment."
 msgstr "Enrollment URL is required for external enrollment."
 
-#: src/components/search/ask/AskBookingChoices.tsx:93
+#: src/components/search/ask/AskBookingChoices.tsx:106
 msgid "Enter a booking subject."
 msgstr "Enter a booking subject."
 
@@ -8381,7 +8381,7 @@ msgstr "Start problem"
 msgid "Start qualification"
 msgstr "Start qualification"
 
-#: src/components/search/ask/AskBookingChoices.tsx:121
+#: src/components/search/ask/AskBookingChoices.tsx:134
 msgid "Start time (MSK)"
 msgstr "Start time (MSK)"
 
@@ -9004,6 +9004,10 @@ msgstr "The slug parameter is missing or invalid."
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:57
 #~ msgid "The start date must not be after the end date."
 #~ msgstr "The start date must not be after the end date."
+
+#: src/components/calendar/AiCalendarCard.tsx:31
+msgid "The Telegram bot notifies you when events are added to AI Calendar. To receive notifications, open the bot in Telegram and press Start."
+msgstr "The Telegram bot notifies you when events are added to AI Calendar. To receive notifications, open the bot in Telegram and press Start."
 
 #: src/components/search/SourceRequests.tsx:155
 #~ msgid "The Telegram chat administrator agreed to indexing this chat and making its messages available to verified students of the target study group."

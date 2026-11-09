@@ -27,6 +27,12 @@ export function AiCalendarCard({
         <p className="text-base-content/30">
           <Trans>Events you added under the assistant's answers</Trans>
         </p>
+        <p className="text-base-content/70 text-sm">
+          <Trans>
+            The Telegram bot notifies you when events are added to AI Calendar.
+            To receive notifications, open the bot in Telegram and press Start.
+          </Trans>
+        </p>
       </div>
       <div className="flex flex-row place-items-center select-none">
         <SimpleExportButton onClick={exportButtonOnClick} />
