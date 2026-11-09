@@ -472,6 +472,24 @@ describe("AskPage attachment history", () => {
         container.querySelector('a[href="https://example.org/rules"]')
           ?.textContent,
       ).toBe("Original document");
+      await act(async () =>
+        controller.enqueue(
+          new TextEncoder().encode('event: answer\ndata: {"text":""}\n\n'),
+        ),
+      );
+      expect(container.textContent).not.toContain(longText);
+      expect(container.querySelector("strong")).toBeNull();
+      expect(container.textContent).toContain("Checking university rules");
+      expect(container.querySelector('button[title="Stop"]')).not.toBeNull();
+      await act(async () =>
+        controller.enqueue(
+          new TextEncoder().encode(
+            'event: answer\ndata: {"text":"Replacement answer"}\n\n',
+          ),
+        ),
+      );
+      expect(container.textContent).toContain("Replacement answer");
+
       await act(async () => {
         controller.enqueue(
           new TextEncoder().encode(
