@@ -1,119 +1,318 @@
-import { useMe } from "@/api/accounts/user.ts";
-import { useLingui } from "@lingui/react";
-import { Trans } from "@lingui/react/macro";
-import SearchField from "@/components/search/SearchField.tsx";
-import { AskResult } from "./AskResult";
-import { $search, searchTypes } from "@/api/search";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
-import { useEffect, useState } from "react";
-import AnimatedDots from "../AnimatedDots";
+import type { searchTypes } from "@/api/search";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { useEffect, useRef, useState } from "react";
+import AnimatedDots from "@/components/search/AnimatedDots";
+import { AskSources } from "./AskSources";
+import { AskChatList } from "./AskChatList";
+import { AskAttachment } from "./AskAttachment";
+import { AskInput } from "./AskInput";
+import { AskNotificationButton } from "./AskNotificationButton";
+import { AskResult } from "./AskResult";
+import { AskAnswerBody } from "./AskAnswerBody";
+import {
+  askQuestion,
+  openChat,
+  cancelQuestion,
+  setDraftQuery,
+  setDraftAttachments,
+  useAskSession,
+} from "./ask-session";
 
-type Message =
-  | { role: "user"; content: string }
-  | { role: "assistant"; response: searchTypes.SchemaAskResponses };
+// How close to the end the chat must be scrolled to follow a new answer as it is written
+const FOLLOW_DISTANCE_PX = 80;
 
-export function AskPage({ askQuery }: { askQuery: string }) {
-  useLingui();
-  const { me } = useMe();
+// A chat as in messengers: the earlier messages above, the newest at the bottom over the message box
+export function AskPage({
+  askQuery,
+  askChat,
+  onChatLinkHandled,
+}: {
+  askQuery: string;
+  askChat?: string;
+  onChatLinkHandled?: () => void;
+}) {
+  const { t } = useLingui();
 
-  const [inputQuery, setInputQuery] = useState(askQuery);
+  const [isChatListOpen, setIsChatListOpen] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const isFollowing = useRef(true);
 
-  const [messages, setMessages] = useState<Message[]>([]);
-
-  const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
-
-  const [chatId, setChatId] = useState<string | null>(null);
-
+  // The conversation stays when the user goes to another page and comes back
   const {
-    data: result,
+    messages,
+    chatId,
+    answerText,
+    status,
+    isPending,
     error,
-    isLoading,
-  } = $search.useQuery(
-    "post",
-    "/ask/",
-    {
-      body: { query: submittedQuery ?? "", chat_id: chatId },
-    },
-    {
-      enabled: submittedQuery !== null && submittedQuery.length > 0,
-      // Disable refetch
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-    },
-  );
+    isOpening,
+    openingError,
+    draftQuery,
+    draftAttachments,
+    composerId,
+  } = useAskSession();
 
   useEffect(() => {
-    if (result) {
-      setMessages((prev) => [...prev, { role: "assistant", response: result }]);
-      setSubmittedQuery(null);
-      setChatId(result.chat_id);
-    }
-  }, [result, submittedQuery]);
+    if (askQuery) setDraftQuery(askQuery);
+  }, [askQuery]);
 
-  const runSearch = (query: string) => {
-    setMessages((prev) => [...prev, { role: "user", content: query }]);
-    setSubmittedQuery(query);
-    setInputQuery("");
+  useEffect(() => {
+    if (!askChat) return;
+    // A notification for this chat must not cancel a newer answer in progress.
+    if (askChat !== chatId) void openChat(askChat);
+    // Consume the link so choosing another chat does not reopen this one.
+    onChatLinkHandled?.();
+  }, [askChat, chatId, onChatLinkHandled]);
+
+  // Follow the chat to its end while the user has not scrolled up to read
+  useEffect(() => {
+    const scroll = scrollRef.current;
+    if (!scroll || !isFollowing.current) return;
+    scroll.scrollTop = scroll.scrollHeight;
+  }, [messages, answerText, status, error, isOpening]);
+
+  const handleScroll = () => {
+    const scroll = scrollRef.current;
+    if (!scroll) return;
+    isFollowing.current =
+      scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight <
+      FOLLOW_DISTANCE_PX;
   };
 
-  return (
-    <div className="flex grow flex-col gap-4 p-4">
-      <SearchField
-        runSearch={runSearch}
-        currentQuery={inputQuery}
-        setCurrentQuery={setInputQuery}
-        pageType="ask"
-      />
+  // A stopped question comes back to the box, unless the user is already writing another one
+  const handleStop = () => {
+    cancelQuestion();
+  };
 
-      {messages.length === 0 && !isLoading && !error && (
-        <div className="flex flex-col gap-4">
-          <span>
-            <Trans>AI Assistant:</Trans>
-          </span>
-          <span>
-            <Trans>- Ask me anything!</Trans>
-          </span>
+  const handleSend = (query: string) => {
+    isFollowing.current = true;
+
+    askQuestion(query);
+  };
+
+  const isEmpty =
+    messages.length === 0 && !isPending && !isOpening && !openingError;
+  const lastMessage = messages.at(-1);
+
+  return (
+    <div className="flex min-h-0 grow">
+      <aside className="border-base-300 hidden w-64 shrink-0 flex-col overflow-y-auto border-r p-2 @4xl/content:flex">
+        <AskChatList />
+      </aside>
+
+      <div className="flex min-h-0 min-w-0 grow flex-col">
+        <div className="border-base-300 hidden justify-end border-b px-4 py-2 @4xl/content:flex">
+          <AskSources />
+        </div>
+        <div className="border-base-300 flex flex-col gap-2 border-b px-4 py-2 @4xl/content:hidden">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm self-start"
+              onClick={() => setIsChatListOpen((open) => !open)}
+            >
+              <span className="icon-[material-symbols--chat-outline] text-lg" />
+              <Trans>Chats</Trans>
+              <span
+                className={
+                  isChatListOpen
+                    ? "icon-[material-symbols--expand-less-rounded]"
+                    : "icon-[material-symbols--expand-more-rounded]"
+                }
+              />
+            </button>
+            <AskSources />
+          </div>
+          {isChatListOpen && (
+            <div className="max-h-64 overflow-y-auto pt-2">
+              <AskChatList onSelect={() => setIsChatListOpen(false)} />
+            </div>
+          )}
+        </div>
+
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex min-h-0 grow flex-col overflow-y-auto"
+        >
+          <div className="mx-auto flex w-full max-w-4xl grow flex-col gap-4 p-4">
+            {isEmpty && (
+              <div className="flex grow flex-col items-center justify-center gap-2 text-center">
+                <span
+                  title="cAtIx"
+                  className="text-5xl [filter:grayscale(1)_sepia(1)_saturate(4)]"
+                >
+                  🐱
+                </span>
+                <span className="text-base-content/70">
+                  <Trans>
+                    I can help with your schedule, university rules,
+                    announcements and available rooms.
+                  </Trans>
+                </span>
+                {!draftQuery.trim() && draftAttachments.length === 0 && (
+                  <>
+                    <div className="mt-2 grid w-full max-w-2xl grid-cols-1 gap-2 @2xl/content:grid-cols-2">
+                      {[
+                        t`What is on my schedule tomorrow?`,
+                        t`What are the university exam retake rules?`,
+                        t`Find a room available tomorrow from 15:00 to 16:00.`,
+                        t`What was announced in my available chats this week?`,
+                      ].map((query) => (
+                        <button
+                          key={query}
+                          type="button"
+                          className="btn btn-outline h-auto justify-start py-3 text-left font-normal whitespace-normal"
+                          onClick={() => {
+                            setDraftQuery(query);
+                            inputRef.current?.focus();
+                          }}
+                        >
+                          {query}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-base-content/60 mt-2 max-w-2xl text-sm">
+                      <Trans>
+                        You can attach up to 3 PDF, TXT or image files, up to 10
+                        MiB each.
+                      </Trans>
+                    </p>
+                    <p className="text-base-content/60 max-w-2xl text-sm">
+                      <Trans>
+                        The assistant asks for confirmation before changing data
+                        in services.
+                      </Trans>
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
+
+            {isOpening && (
+              <>
+                <div className="skeleton h-10 w-1/2 self-end" />
+                <div className="skeleton h-24 w-3/4" />
+              </>
+            )}
+            {openingError !== null && (
+              <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-1 self-start border! px-4 py-2">
+                <Trans>Could not open the chat</Trans>
+                <span className="text-base-content/60 text-sm">
+                  {formatApiErrorMessage(openingError)}
+                </span>
+                {chatId && !isOpening && (
+                  <button
+                    type="button"
+                    className="btn btn-sm self-start"
+                    onClick={() => void openChat(chatId)}
+                  >
+                    <Trans>Retry</Trans>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {messages.map((message, i) =>
+              message.role === "user" ? (
+                <UserMessage
+                  key={`${chatId}:${i}`}
+                  text={message.content}
+                  attachments={message.attachments}
+                />
+              ) : (
+                <AskResult
+                  key={`${chatId}:${i}`}
+                  response={message.response}
+                  isLast={i === messages.length - 1}
+                  isPending={isPending}
+                />
+              ),
+            )}
+
+            {isPending && (
+              <div className="border-base-300 bg-base-200 text-base-content rounded-field flex max-w-full min-w-0 flex-col gap-2 self-start border! px-4 py-2 wrap-anywhere">
+                {answerText && <AskAnswerBody text={answerText} />}
+                <div className="text-base-content/70 flex text-sm">
+                  <span>
+                    {status ||
+                      (answerText ? t`Receiving answer` : t`Sending request`)}
+                  </span>
+                  <AnimatedDots />
+                </div>
+              </div>
+            )}
+            {!isPending && error && (
+              <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">
+                <span>
+                  <Trans>Could not complete the request.</Trans>
+                </span>
+                <span className="text-base-content/60 text-sm">
+                  {formatApiErrorMessage(error)}
+                </span>
+                {lastMessage?.role === "user" && draftQuery.trim() && (
+                  <span className="text-sm">
+                    <Trans>
+                      Your draft is below. You can edit it and send it again.
+                    </Trans>
+                  </span>
+                )}
+                {lastMessage?.role === "assistant" &&
+                  lastMessage.response.approval && (
+                    <span className="text-sm">
+                      <Trans>
+                        The action result could not be confirmed. Check the
+                        service before trying again.
+                      </Trans>
+                    </span>
+                  )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="mx-auto w-full max-w-4xl px-4 pt-2 pb-4">
+          <AskInput
+            key={composerId}
+            inputRef={inputRef}
+            text={draftQuery}
+            setText={setDraftQuery}
+            attachments={isPending ? [] : draftAttachments}
+            onAttachmentsChange={(attachments) =>
+              setDraftAttachments(attachments, composerId)
+            }
+            onSend={handleSend}
+            onStop={handleStop}
+            isPending={isPending}
+          />
+          <div className="flex flex-wrap items-center justify-end gap-1">
+            <AskNotificationButton />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UserMessage({
+  text,
+  attachments,
+}: {
+  text: string;
+  attachments?: searchTypes.SchemaAttachmentInfo[];
+}) {
+  return (
+    <div className="bg-primary text-primary-content rounded-field max-w-[80%] min-w-0 self-end rounded-br-none px-4 py-2 wrap-anywhere whitespace-pre-wrap">
+      {text}
+      {attachments && attachments.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {attachments.map((attachment) => (
+            <AskAttachment key={attachment.id} attachment={attachment} />
+          ))}
         </div>
       )}
-
-      {isLoading ? (
-        <div className="border-base-300 bg-base-200 text-base-content rounded-field flex self-start border! px-4 py-2">
-          <span>
-            <Trans>- Thinking</Trans>
-          </span>
-          <AnimatedDots></AnimatedDots>
-        </div>
-      ) : error ? (
-        <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">
-          <span>
-            <Trans>- Sorry, I can't help you with this question.</Trans>
-          </span>
-          <span className="text-base-content/60 text-sm">
-            {formatApiErrorMessage(error)}
-          </span>
-        </div>
-      ) : null}
-
-      <div className="mt-4 flex flex-col-reverse gap-6">
-        {messages.map((msg, i) =>
-          msg.role === "user" ? (
-            <div className="flex max-w-[80%] flex-col gap-1 self-start">
-              <a className="text-base-content/30" href="/dashboard">
-                {me?.innopolis_info?.name?.split(" ")[0]}
-              </a>
-              <div
-                key={i}
-                className="bg-base-200 rounded-field mb-4 self-start rounded-tl-none px-4 py-2 text-white"
-              >
-                {msg.content}
-              </div>
-            </div>
-          ) : (
-            <AskResult key={i} response={msg.response} />
-          ),
-        )}
-      </div>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
 } from "@/components/calendar/ExportModal.tsx";
 import { LinkedCard } from "@/components/schedule/linked-card/LinkedCard.tsx";
 import { ImportModal } from "@/components/calendar/import/ImportModal";
+import { AiCalendarCard } from "@/components/calendar/AiCalendarCard.tsx";
 
 export function ConfigCalendarDialog({
   open,
@@ -117,6 +118,12 @@ export function ConfigCalendarDialog({
               type: "personal",
               target: TargetForExport.room_bookings,
             });
+            setExportModalOpen(true);
+          }}
+        />
+        <AiCalendarCard
+          exportButtonOnClick={() => {
+            setTargetForExport({ type: "ai-calendar" });
             setExportModalOpen(true);
           }}
         />

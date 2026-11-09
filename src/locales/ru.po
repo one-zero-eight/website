@@ -32,23 +32,22 @@ msgstr " · Тонер {0}%"
 msgid " (capacity: {capacity} people)"
 msgstr " (вместимость: {capacity} чел.)"
 
-#: src/components/search/ask/AskPage.tsx:75
-msgid "- Ask me anything!"
-msgstr "- Спрашивайте о чём угодно!"
+#: src/components/search/ask/AskPage.tsx:143
+#~ msgid "- Ask me anything!"
+#~ msgstr "- Спрашивайте о чём угодно!"
 
 #: src/components/search/act/ActPage.tsx:69
 msgid "- Executing"
 msgstr "- Выполняю"
 
 #: src/components/search/act/ActPage.tsx:82
-#: src/components/search/ask/AskPage.tsx:90
-#: src/components/search/ask/AskResult.tsx:57
+#: src/components/search/ask/AskResult.tsx:51
 msgid "- Sorry, I can't help you with this question."
 msgstr "- Извините, я не могу помочь с этим вопросом."
 
 #: src/components/search/ask/AskPage.tsx:83
-msgid "- Thinking"
-msgstr "- Думаю"
+#~ msgid "- Thinking"
+#~ msgstr "- Думаю"
 
 #: src/components/when2meet/ArchiveMeetingButton.test.ts:46
 #: src/components/when2meet/ArchiveMeetingButton.tsx:27
@@ -91,6 +90,10 @@ msgstr "(вы)"
 msgid "[{group}] Semester {semester}: <0>{range}</0>"
 msgstr "[{group}] Семестр {semester}: <0>{range}</0>"
 
+#: src/components/search/SourceRequests.tsx:146
+msgid "[private invite hidden]"
+msgstr "[приватная ссылка скрыта]"
+
 #. placeholder {0}: clubs.length
 #: src/components/clubs/ClubReviewChangesPage.tsx:42
 msgid "{0, plural, one {# club has changes waiting for review} other {# clubs have changes waiting for review}}"
@@ -100,6 +103,11 @@ msgstr "{0, plural, one {# клуб ожидает проверки измене
 #: src/components/schedule/SchedulePage.tsx:171
 msgid "{0, plural, one {# group} other {# groups}}"
 msgstr "{0, plural, one {# группа} few {# группы} many {# групп} other {# группы}}"
+
+#. placeholder {0}: attachment.pages
+#: src/components/search/ask/AskAttachment.tsx:23
+msgid "{0, plural, one {# page} other {# pages}}"
+msgstr "{0, plural, one {# страница} few {# страницы} many {# страниц} other {# страницы}}"
 
 #. placeholder {0}: results.length
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:318
@@ -381,6 +389,10 @@ msgstr "{printSheetsCount, plural, one {Напечатать # лист} few {Н
 msgid "{responsesCount, plural, one {# response} other {# responses}}"
 msgstr "{responsesCount, plural, one {# ответ} few {# ответа} many {# ответов} other {# ответов}}"
 
+#: src/components/search/ask/AskAttachment.tsx:19
+msgid "{size} bytes"
+msgstr "{size} байт"
+
 #: src/components/web-print/print-utils.ts:10
 msgid "{size} KB"
 msgstr "{size} КБ"
@@ -401,6 +413,10 @@ msgstr "{totalScore}/{maxScore} {totalScore, plural, one {балл} few {бал�
 #: src/components/sport/SportTrainerTrainingModal.tsx:46
 msgid "{trainingTitle} (Trainer)"
 msgstr "{trainingTitle} (тренер)"
+
+#: src/components/search/ask/AskBookingChoices.tsx:171
+msgid "{value} min"
+msgstr "{value} мин"
 
 #: src/components/dashboard/AcademicCalendarWidget.tsx:35
 msgid "*based on <0>Eduwiki</0>"
@@ -502,6 +518,14 @@ msgstr "<0>Чтобы снять</0> статус DEBTOR, нужно закры�
 msgid "<0>Winter break:</0> {breakDates}"
 msgstr "<0>Зимние каникулы:</0> {breakDates}"
 
+#: src/components/search/ask/AskCalendarEvents.tsx:83
+msgid "✅ Added: {title} · {start}"
+msgstr "✅ Добавлено: {title} · {start}"
+
+#: src/components/search/ask/AskCalendarEvents.tsx:87
+msgid "➕ Add to my calendar: {title} · {start}"
+msgstr "➕ В мой календарь: {title} · {start}"
+
 #: src/components/timer/lib/constants.ts:7
 msgid "1 hour"
 msgstr "1 час"
@@ -538,7 +562,7 @@ msgstr "2 страницы"
 msgid "2nd Semester"
 msgstr "2-й семестр"
 
-#: src/components/calendar/CalendarViewer.tsx:75
+#: src/components/calendar/CalendarViewer.tsx:76
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:299
 msgid "3 days"
 msgstr "3 дня"
@@ -555,11 +579,11 @@ msgstr "3 этаж"
 msgid "4 pages"
 msgstr "4 страницы"
 
-#: src/app/routes/__root.tsx:62
+#: src/app/routes/__root.tsx:63
 msgid "403 / forbidden"
 msgstr "403 / доступ запрещён"
 
-#: src/app/routes/__root.tsx:35
+#: src/app/routes/__root.tsx:36
 msgid "404 / not found"
 msgstr "404 / страница не найдена"
 
@@ -641,6 +665,7 @@ msgid "Access token"
 msgstr "Токен доступа"
 
 #: src/app/routes/_with_menu/search/act.tsx:28
+#: src/app/routes/_with_menu/search/act.tsx:35
 #: src/components/search/SearchField.tsx:52
 msgid "Act"
 msgstr "Агент"
@@ -729,7 +754,7 @@ msgstr "Добавить email в эту группу..."
 msgid "Add external host"
 msgstr "Добавить внешнего организатора"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:137
+#: src/components/calendar/ConfigCalendarDialog.tsx:144
 msgid "Add favorite calendars using star button or <0>import your own calendars</0> to InNoHassle."
 msgstr "Добавляйте избранные календари, нажимая на звездочку, или <0>импортируйте свои календари</0> в InNoHassle."
 
@@ -781,6 +806,10 @@ msgstr "Добавьте на домашний экран и пользуйте�
 #: src/components/events/drafts/DraftHostsSection.tsx:420
 msgid "Add your club"
 msgstr "Добавить свой клуб"
+
+#: src/components/search/ask/AskCalendarEvents.tsx:26
+msgid "Added to your calendar"
+msgstr "Добавлено в ваш календарь"
 
 #: src/app/routes/guard.google.files.$slug.join.tsx:126
 msgid "Adding you to the file..."
@@ -840,9 +869,12 @@ msgid "Advanced"
 msgstr "Продвинутые"
 
 #: src/components/search/act/ActPage.tsx:64
-#: src/components/search/ask/AskPage.tsx:72
 msgid "AI Assistant:"
 msgstr "ИИ-ассистент:"
+
+#: src/components/calendar/AiCalendarCard.tsx:25
+msgid "AI Calendar"
+msgstr "AI Calendar"
 
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:86
 msgid "Alias"
@@ -860,6 +892,17 @@ msgstr "Всем {0} ч"
 #: src/components/sport/SportTrainerTrainingModal.tsx:385
 msgid "All 0h"
 msgstr "Все 0 ч"
+
+#: src/components/search/SourceRequests.tsx:185
+#: src/components/search/SourceRequests.tsx:385
+msgid "All cAtIx users"
+msgstr "Все пользователи cAtIx"
+
+#: src/components/calendar/CalendarEventPopover.tsx:162
+#: src/components/calendar/CalendarViewer.tsx:465
+#: src/components/search/ask/AskSignupOffers.tsx:233
+msgid "All day"
+msgstr "Весь день"
 
 #: src/components/board-games/BoardGamesPage.tsx:247
 msgid "All games"
@@ -910,7 +953,7 @@ msgstr "Перед публикацией ваши изменения долже
 msgid "Analytics"
 msgstr "Аналитика"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:625
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:627
 msgid "Anchor active week"
 msgstr "Опорная активная неделя"
 
@@ -953,6 +996,10 @@ msgstr "Одобрено"
 #: src/components/events/submissions/SubmissionPage.tsx:242
 msgid "approved at {date}"
 msgstr "одобрено {date}"
+
+#: src/components/search/SourceRequests.tsx:459
+msgid "Approved; queued to connect"
+msgstr "Одобрено; в очереди на подключение"
 
 #: src/components/when2meet/ArchiveMeetingButton.test.ts:43
 #: src/components/when2meet/ArchiveMeetingButton.tsx:39
@@ -1010,19 +1057,30 @@ msgstr "Искусство / Культура"
 msgid "Art & Culture"
 msgstr "Искусство и культура"
 
-#: src/app/routes/_with_menu/search/ask.tsx:28
+#: src/app/routes/_with_menu/search/ask.tsx:33
 #: src/components/search/SearchField.tsx:52
-#: src/components/search/ToggleGroup.tsx:30
 msgid "Ask"
 msgstr "Спросить"
 
-#: src/app/routes/_with_menu/search/ask.tsx:31
+#: src/components/search/ask/AskInput.tsx:239
+msgid "Ask a question..."
+msgstr "Задайте вопрос..."
+
+#: src/app/routes/_with_menu/search/ask.tsx:36
 msgid "Ask questions or find answers at Innopolis University."
 msgstr "Задавайте вопросы или ищите ответы в Университете Иннополис."
+
+#: src/components/calendar/AiCalendarCard.tsx:52
+msgid "Ask the assistant"
+msgstr "Спросить ИИ-ассистента"
 
 #: src/components/web-print/FileDropzone.tsx:329
 msgid "Attach file"
 msgstr "Прикрепить файл"
+
+#: src/components/search/ask/AskInput.tsx:227
+msgid "Attach files"
+msgstr "Прикрепить файлы"
 
 #: src/components/sport/SportTrainerBaamImportButton.tsx:115
 msgid "Attendance imported"
@@ -1067,6 +1125,10 @@ msgstr "Автоматически определяет края докумен�
 msgid "Availability"
 msgstr "Общие таймслоты"
 
+#: src/components/search/ask/AskSignupOffers.tsx:259
+msgid "Availability was checked in the booking service. Your personal calendar will be checked before booking."
+msgstr "Доступность проверена в сервисе бронирования. Перед бронированием будет проверен ваш личный календарь."
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:597
 #: src/components/board-games/BoardGamesPage.tsx:412
 msgid "Available"
@@ -1075,6 +1137,22 @@ msgstr "Доступно"
 #: src/components/sport/SportOverviewSection.tsx:501
 msgid "Available medical groups"
 msgstr "Доступные медицинские группы"
+
+#: src/components/search/ask/AskSources.tsx:106
+msgid "Available sources"
+msgstr "Доступные источники"
+
+#: src/components/search/ask/AskSignupOffers.tsx:225
+msgid "Available window"
+msgstr "Свободное окно"
+
+#: src/components/search/SourceRequests.tsx:457
+msgid "Awaiting cAtIx administrator approval"
+msgstr "Ожидает одобрения администратора cAtIx"
+
+#: src/components/search/SourceRequests.tsx:252
+#~ msgid "Awaiting Telegram administrator approval"
+#~ msgstr "Ожидает одобрения администратора Telegram-чата"
 
 #: src/components/scholarship/ScholarshipCalculator.tsx:262
 msgid "B23"
@@ -1135,6 +1213,10 @@ msgstr "Заблокированные"
 msgid "banned {bannedAt}"
 msgstr "дата блокировки: {bannedAt}"
 
+#: src/components/search/ask/AskResult.tsx:137
+msgid "Based on:"
+msgstr "На основе:"
+
 #: src/components/clubs/EditClubPage.tsx:776
 msgid "Basic information"
 msgstr "Основная информация"
@@ -1173,6 +1255,7 @@ msgstr "Жирный"
 
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:1011
 #: src/components/room-booking/timeline/BookingTimeline.tsx:753
+#: src/components/search/ask/AskBookingChoices.tsx:210
 msgid "Book"
 msgstr "Забронировать"
 
@@ -1199,6 +1282,10 @@ msgstr "Забронируйте музкомнату в Иннополисе."
 msgid "Book this room"
 msgstr "Забронировать эту комнату"
 
+#: src/components/search/ask/AskSignupOffers.tsx:288
+msgid "Booked"
+msgstr "Забронировано"
+
 #: src/components/when2meet/MeetingPage.tsx:1559
 msgid "Booked room"
 msgstr "Забронированная комната"
@@ -1207,7 +1294,7 @@ msgstr "Забронированная комната"
 msgid "Booking"
 msgstr "Бронь"
 
-#: src/components/music-room/MusicRoomPage.tsx:101
+#: src/components/music-room/MusicRoomPage.tsx:98
 msgid "Booking calendar"
 msgstr "Календарь бронирований"
 
@@ -1215,9 +1302,29 @@ msgstr "Календарь бронирований"
 msgid "Booking details"
 msgstr "Детали бронирования"
 
+#: src/components/search/ask/AskSignupOffers.tsx:304
+msgid "Booking outcome is unknown"
+msgstr "Результат бронирования неизвестен"
+
+#: src/components/search/ask/AskBookingChoices.tsx:179
+msgid "Booking subject"
+msgstr "Название брони"
+
+#: src/components/search/ask/AskBookingChoices.tsx:111
+msgid "Booking subject must be 100 characters or fewer."
+msgstr "Название брони должно быть не длиннее 100 символов."
+
 #: src/components/when2meet/MeetingPage.tsx:1594
 msgid "Booking time differs from the selected meeting time."
 msgstr "Время бронирования отличается от выбранного времени встречи."
+
+#: src/components/search/ask/AskSignupOffers.tsx:312
+msgid "Booking unavailable"
+msgstr "Бронирование недоступно"
+
+#: src/components/search/ask/AskSignupOffers.tsx:279
+msgid "Booking…"
+msgstr "Бронируем…"
 
 #: src/components/board-games/ReservationDetailsModal.tsx:180
 #: src/components/board-games/ReservationDetailsModal.tsx:282
@@ -1333,7 +1440,7 @@ msgid "Calendar update failed"
 msgstr "Не удалось обновить календарь"
 
 #. placeholder {0}: moment(event.extendedProps.updatedAt).format( "DD.MM HH:mm", )
-#: src/components/calendar/CalendarEventPopover.tsx:262
+#: src/components/calendar/CalendarEventPopover.tsx:296
 msgid "Calendar updated at: {0}"
 msgstr "Обновлено: {0}"
 
@@ -1457,6 +1564,11 @@ msgstr "Отменить бронирование комнаты для этой
 msgid "Cancel this match"
 msgstr "Отменить этот матч"
 
+#: src/components/search/ask/AskInput.tsx:178
+#: src/components/search/ask/AskInput.tsx:186
+msgid "Cancel upload"
+msgstr "Отменить загрузку"
+
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:363
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:87
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:170
@@ -1503,7 +1615,7 @@ msgstr "Вместимость {capacity}"
 msgid "Capacity must be empty or at least 1."
 msgstr "Оставьте вместимость пустой или укажите число не меньше 1."
 
-#: src/components/calendar/CalendarViewer.tsx:79
+#: src/components/calendar/CalendarViewer.tsx:80
 #: src/components/events/calendar/EventsCalendarPage.tsx:22
 msgid "Cards"
 msgstr "Карточки"
@@ -1511,6 +1623,14 @@ msgstr "Карточки"
 #: src/components/board-games/BoardGamesAdminPage.tsx:760
 msgid "Catan"
 msgstr "Catan"
+
+#: src/components/search/ask/AskNotifications.tsx:66
+msgid "cAtIx is waiting for confirmation"
+msgstr "cAtIx ждёт подтверждения"
+
+#: src/components/search/ask/AskNotifications.tsx:67
+msgid "cAtIx replied"
+msgstr "cAtIx ответил"
 
 #: src/components/editor/extensions/Callout.ts:42
 msgid "Caution"
@@ -1555,8 +1675,29 @@ msgid "Channel"
 msgstr "Канал"
 
 #: src/components/clubs/constants.ts:85
+#: src/components/search/ask/AskResult.tsx:224
 msgid "Chat"
 msgstr "Чат"
+
+#: src/components/search/ask/AskChatList.tsx:166
+msgid "Chat name"
+msgstr "Название чата"
+
+#: src/components/search/SourceRequests.tsx:381
+msgid "Chat request"
+msgstr "Заявка на подключение чата"
+
+#: src/components/search/SourceRequests.tsx:55
+msgid "Chat source requests"
+msgstr "Заявки на подключение чатов"
+
+#: src/components/search/ask/AskPage.tsx:117
+msgid "Chats"
+msgstr "Чаты"
+
+#: src/components/search/ask/AskSignupOffers.tsx:372
+msgid "Check booking in the service"
+msgstr "Проверить бронь в сервисе"
 
 #: src/components/sport/SportStudentTrainingModal.tsx:467
 #: src/components/sport/SportTrainingsCalendarList.tsx:270
@@ -1583,6 +1724,10 @@ msgstr "Исходный код, сообщения о багах и вклад 
 msgid "Check out this room: {roomTitle}"
 msgstr "Посмотрите эту комнату: {roomTitle}"
 
+#: src/components/search/ask/AskSignupOffers.tsx:374
+msgid "Check registration in the service"
+msgstr "Проверить запись в сервисе"
+
 #: src/components/layout/Offline.tsx:52
 msgid "Check that airplane mode is disabled."
 msgstr "Убедитесь, что режим полёта выключен."
@@ -1591,6 +1736,14 @@ msgstr "Убедитесь, что режим полёта выключен."
 #: src/components/tabletennis/PlayersField.tsx:364
 msgid "Check the players ({0}): pick the right one, fix the email, add as a guest, or remove."
 msgstr "Проверьте игроков ({0}): выберите нужного, исправьте email, добавьте как гостя или удалите."
+
+#: src/components/search/ask/AskSignupOffers.tsx:65
+msgid "Check the service before trying again. Do not repeat an uncertain booking."
+msgstr "Проверьте бронь в сервисе. Не повторяйте бронирование, пока результат неизвестен."
+
+#: src/components/search/ask/AskSignupOffers.tsx:66
+msgid "Check the service before trying again. Do not repeat an uncertain registration."
+msgstr "Проверьте запись в сервисе. Не повторяйте её, пока результат неизвестен."
 
 #: src/components/sport/SportStudentTrainingModal.tsx:79
 #: src/components/sport/SportTrainingsCalendarList.tsx:129
@@ -1634,6 +1787,10 @@ msgstr "Проверка ваших тренировок <0>может заня�
 msgid "Chill day"
 msgstr "Сегодня чиллим"
 
+#: src/components/search/ask/AskBookingChoices.tsx:92
+msgid "Choose a future time within the available window."
+msgstr "Выберите будущее время внутри свободного окна."
+
 #: src/components/when2meet/MeetingPage.tsx:1057
 msgid "Choose a meeting start time in the future."
 msgstr "Выберите время начала встречи в будущем."
@@ -1645,6 +1802,14 @@ msgstr "Сначала выберите время встречи на сетк�
 #: src/components/events/drafts/RestoreDraftModal.tsx:28
 msgid "Choose a source to restore the draft from."
 msgstr "Выберите источник для восстановления черновика."
+
+#: src/components/search/SourceRequests.tsx:135
+#~ msgid "Choose a specific study group, not \"all\"."
+#~ msgstr "Укажите конкретную учебную группу, а не «all»."
+
+#: src/components/search/ask/AskBookingChoices.tsx:86
+msgid "Choose a start time and duration."
+msgstr "Выберите время начала и длительность."
 
 #: src/components/when2meet/CreationPage.tsx:261
 #: src/components/when2meet/CreationPage.tsx:312
@@ -1663,6 +1828,10 @@ msgstr "Выберите хотя бы один слот."
 msgid "Choose color"
 msgstr "Выберите цвет"
 
+#: src/components/search/ask/AskBookingChoices.tsx:168
+msgid "Choose duration"
+msgstr "Выберите длительность"
+
 #: src/components/clubs/EditClubPage.tsx:729
 #: src/components/web-print/FileDropzone.tsx:267
 msgid "Choose file"
@@ -1672,9 +1841,29 @@ msgstr "Выберите файл"
 msgid "Choose meeting time"
 msgstr "Выбрать время встречи"
 
+#: src/components/search/SourceRequests.tsx:271
+msgid "Choose one of your verified study groups."
+msgstr "Выберите одну из подтверждённых для вас учебных групп."
+
+#: src/components/search/ask/AskInput.tsx:76
+msgid "Choose PDF, TXT, PNG, JPEG or WebP files."
+msgstr "Выберите файлы PDF, TXT, PNG, JPEG или WebP."
+
+#: src/components/search/ask/AskBookingChoices.tsx:146
+msgid "Choose start time"
+msgstr "Выберите время начала"
+
+#: src/components/search/ask/AskBookingChoices.tsx:125
+msgid "Choose time"
+msgstr "Выбрать время"
+
 #: src/components/extension/ExtensionPage.tsx:60
 msgid "Chrome extension"
 msgstr "Расширение для Chrome"
+
+#: src/components/calendar/CalendarEventPopover.tsx:173
+msgid "Clarify end time with the assistant"
+msgstr "Уточнить окончание с ассистентом"
 
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:387
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2405
@@ -1685,13 +1874,17 @@ msgstr "Занятие"
 msgid "Class · {course}"
 msgstr "Занятие · {course}"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:647
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:649
 msgid "Class dates: {previewDates}."
 msgstr "Даты занятий: {previewDates}."
 
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:88
 msgid "Classes this semester"
 msgstr "Занятия за семестр"
+
+#: src/components/search/ask/AskResult.tsx:127
+msgid "Clauses:"
+msgstr "Пункты:"
 
 #: src/components/when2meet/MeetingMobileBar.tsx:112
 #: src/components/when2meet/MeetingPage.tsx:1353
@@ -1724,6 +1917,7 @@ msgid "Click to upload or paste an image"
 msgstr "Нажмите, чтобы загрузить, или вставьте изображение"
 
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
+#: src/components/search/IframePreviewCard.tsx:180
 #: src/components/sport/SportOverviewSection.tsx:669
 #: src/components/sport/SportStudentTrainingModal.tsx:362
 #: src/components/sport/SportTrainerAttendanceModal.tsx:148
@@ -1732,7 +1926,7 @@ msgstr "Нажмите, чтобы загрузить, или вставьте �
 msgid "Close"
 msgstr "Закрыть"
 
-#: src/components/toast/ToastItem.tsx:111
+#: src/components/toast/ToastItem.tsx:125
 msgid "Close notification"
 msgstr "Закрыть уведомление"
 
@@ -1887,11 +2081,23 @@ msgstr "Колледжист"
 msgid "College only"
 msgstr "Только колледж"
 
+#: src/components/search/SourceRequests.tsx:277
+msgid "Comment (optional)"
+msgstr "Комментарий (необязательно)"
+
+#: src/components/search/SourceRequests.tsx:289
+msgid "Comment must be 2000 characters or fewer."
+msgstr "Комментарий должен содержать не более 2000 символов."
+
 #: src/components/board-games/ReservationDetailsModal.tsx:175
 #: src/components/board-games/UserReservationDetailsModal.tsx:116
 #: src/components/board-games/UserReservationDetailsModal.tsx:369
 msgid "Comments"
 msgstr "Комментарии"
+
+#: src/components/search/ask/AskSources.tsx:136
+msgid "Common source"
+msgstr "Общий источник"
 
 #: src/components/about/CarouselImage.tsx:300
 msgid "Community photo {photoNumber}"
@@ -1929,9 +2135,9 @@ msgstr "Завершённые турниры"
 msgid "Component {componentNumber}"
 msgstr "Компонент {componentNumber}"
 
-#: src/components/calendar/CalendarViewer.tsx:723
-#: src/components/calendar/CalendarViewer.tsx:866
-#: src/components/calendar/ConfigCalendarDialog.tsx:43
+#: src/components/calendar/CalendarViewer.tsx:724
+#: src/components/calendar/CalendarViewer.tsx:867
+#: src/components/calendar/ConfigCalendarDialog.tsx:44
 #: src/components/layout/UserMenu.tsx:138
 msgid "Config & Export"
 msgstr "Настройки и экспорт"
@@ -1950,6 +2156,7 @@ msgstr "Настройте параметры и запустите сканир
 #: src/components/onboarding/OnboardingSteps.tsx:371
 #: src/components/room-booking/timeline/BookingModal.tsx:712
 #: src/components/room-booking/timeline/BookingModal.tsx:742
+#: src/components/search/ask/AskApproval.tsx:41
 #: src/components/tabletennis/LiveTournament.tsx:366
 #: src/components/tabletennis/PlayerActionMenu.tsx:240
 #: src/components/toast/ConfirmDialog.tsx:22
@@ -1963,6 +2170,10 @@ msgstr "Подтвердить получателя"
 #: src/components/tabletennis/PlayerActionMenu.tsx:208
 msgid "Confirm status change"
 msgstr "Подтвердить изменение статуса"
+
+#: src/components/search/SourceRequests.tsx:314
+msgid "Confirm the chat administrator's consent for this audience."
+msgstr "Подтвердите согласие администратора чата для выбранной аудитории."
 
 #: src/app/routes/_with_menu/42.tsx:34
 msgid "Congratulations! You've Unlocked a Special Link!"
@@ -1994,6 +2205,14 @@ msgstr "Подключитесь к Wi‑Fi или мобильному инте
 #: src/components/account/ConnectTelegramPage.tsx:77
 msgid "Connect your Telegram"
 msgstr "Подключите Telegram"
+
+#: src/components/search/SourceRequests.tsx:461
+msgid "Connecting chat"
+msgstr "Подключение чата"
+
+#: src/components/search/SourceRequests.tsx:469
+msgid "Connection failed"
+msgstr "Не удалось подключить чат"
 
 #: src/components/clubs/constants.ts:87
 msgid "Contact"
@@ -2027,7 +2246,7 @@ msgstr "Скопировано"
 #: src/components/forms/GeneratedLink.tsx:33
 #: src/components/guard/CopyLinkButton.tsx:34
 #: src/components/guard/Instructions.tsx:29
-#: src/components/schedule/ScheduleLinkCopy.tsx:45
+#: src/components/schedule/ScheduleLinkCopy.tsx:54
 msgid "Copied!"
 msgstr "Скопировано!"
 
@@ -2037,7 +2256,7 @@ msgstr "Копии"
 
 #: src/components/account/MyTokenPage.tsx:88
 #: src/components/forms/GeneratedLink.tsx:38
-#: src/components/schedule/ScheduleLinkCopy.tsx:45
+#: src/components/schedule/ScheduleLinkCopy.tsx:54
 msgid "Copy"
 msgstr "Копировать"
 
@@ -2062,9 +2281,13 @@ msgstr "Копировать таблицу"
 msgid "Copy sheet — Guard"
 msgstr "Копировать лист — Guard"
 
-#: src/components/calendar/ExportModal.tsx:92
+#: src/components/calendar/ExportModal.tsx:107
 msgid "Copy the link."
 msgstr "Скопируйте ссылку."
+
+#: src/components/calendar/ExportModal.tsx:293
+msgid "Copy the private link."
+msgstr "Скопируйте приватную ссылку."
 
 #: src/components/guard/CopySheetPage.tsx:204
 msgid "Copying..."
@@ -2086,9 +2309,21 @@ msgstr "Исправить этот счёт"
 msgid "Could not add game"
 msgstr "Не удалось добавить игру"
 
+#: src/components/search/ask/AskCalendarEvents.tsx:30
+msgid "Could not add the event to the calendar"
+msgstr "Не удалось добавить событие в календарь"
+
+#: src/components/search/ask/AskSignupOffers.tsx:296
+msgid "Could not book"
+msgstr "Не удалось забронировать"
+
 #: src/components/board-games/BoardGamesTabs.tsx:51
 msgid "Could not check access"
 msgstr "Не удалось проверить доступ"
+
+#: src/components/search/ask/AskPage.tsx:250
+msgid "Could not complete the request."
+msgstr "Не удалось завершить запрос."
 
 #: src/components/when2meet/MeetingPage.tsx:1143
 msgid "Could not copy link to clipboard."
@@ -2102,6 +2337,10 @@ msgstr "Не удалось удалить игру"
 #: src/components/board-games/UserReservationDetailsModal.tsx:61
 msgid "Could not delete reservation"
 msgstr "Не удалось удалить бронирование"
+
+#: src/components/search/ask/AskChatList.tsx:130
+msgid "Could not delete the chat"
+msgstr "Не удалось удалить чат"
 
 #: src/components/maps/viewer/MapView.tsx:158
 #: src/components/maps/viewer/MapView.tsx:169
@@ -2139,9 +2378,29 @@ msgstr "Не удалось загрузить предпросмотр"
 msgid "Could not load reservations"
 msgstr "Не удалось загрузить бронирования"
 
+#: src/components/search/ask/AskSources.tsx:71
+msgid "Could not load sources."
+msgstr "Не удалось загрузить источники."
+
+#: src/components/search/SourceRequests.tsx:358
+msgid "Could not load your requests. Refresh to try again."
+msgstr "Не удалось загрузить ваши заявки. Обновите список, чтобы повторить попытку."
+
 #: src/components/sport/SportTrainerBaamImportButton.tsx:123
 msgid "Could not mark attendance"
 msgstr "Не удалось отметить посещаемость"
+
+#: src/components/search/ask/AskPage.tsx:202
+msgid "Could not open the chat"
+msgstr "Не удалось открыть чат"
+
+#: src/components/search/IframePreviewCard.tsx:206
+msgid "Could not open this archive document. It may be missing or changed."
+msgstr "Не удалось открыть этот документ из архива. Возможно, он удалён или изменён."
+
+#: src/components/search/ask/AskChatList.tsx:109
+msgid "Could not rename the chat"
+msgstr "Не удалось переименовать чат"
 
 #: src/components/editor/menus/ImageMenuItems.tsx:51
 msgid "Could not replace image"
@@ -2150,6 +2409,22 @@ msgstr "Не удалось заменить изображение"
 #: src/components/board-games/BoardGamesPage.tsx:467
 msgid "Could not reserve game"
 msgstr "Не удалось забронировать игру"
+
+#: src/components/search/ask/AskFeedback.tsx:50
+msgid "Could not save the rating"
+msgstr "Не удалось сохранить оценку"
+
+#: src/components/search/ask/AskFeedback.tsx:71
+msgid "Could not send the comment"
+msgstr "Не удалось отправить комментарий"
+
+#: src/components/search/ask/AskSignupOffers.tsx:298
+msgid "Could not sign up"
+msgstr "Не удалось записаться"
+
+#: src/components/search/SourceRequests.tsx:442
+msgid "Could not submit the request. Check the invite link, study group and consent, then retry. If the connection was interrupted, refresh your requests before trying again."
+msgstr "Не удалось отправить заявку. Проверьте ссылку-приглашение, учебную группу и согласие, затем повторите попытку. Если соединение прервалось, сначала обновите список заявок."
 
 #: src/components/sport/SportTrainerAttendanceModal.tsx:69
 #: src/components/sport/SportTrainerTrainingModal.tsx:204
@@ -2160,6 +2435,10 @@ msgstr "Не удалось обновить посещаемость"
 #: src/components/board-games/BoardGamesAdminPage.tsx:664
 msgid "Could not update game"
 msgstr "Не удалось обновить игру"
+
+#: src/components/search/ask/AskNotificationButton.tsx:80
+msgid "Could not update notification settings. Please try again."
+msgstr "Не удалось изменить настройки уведомлений. Попробуйте ещё раз."
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:310
 #: src/components/board-games/ReservationDetailsModal.tsx:67
@@ -2220,6 +2499,10 @@ msgstr "Создайте новую защищённую Google-таблицу �
 msgid "Create a new protected spreadsheet from scratch"
 msgstr "Создать новую защищённую таблицу с нуля"
 
+#: src/components/calendar/ExportModal.tsx:257
+msgid "Create a private link to subscribe to AI Calendar events. Creating it does not add anything to your calendar."
+msgstr "Создайте приватную ссылку для подписки на события AI Calendar. Это не добавит их в ваш календарь."
+
 #: src/components/clubs/HowToCreateClubPage.tsx:226
 msgid "Create an <0>avatar or logo</0> for your club."
 msgstr "Создайте <0>логотип</0> для клуба."
@@ -2232,6 +2515,10 @@ msgstr "Создать занятие"
 #: src/components/events/drafts/DraftsPage.tsx:116
 msgid "Create draft"
 msgstr "Создать черновик"
+
+#: src/components/calendar/ExportModal.tsx:274
+msgid "Create link"
+msgstr "Создать ссылку"
 
 #: src/components/when2meet/CreateMeetingButton.tsx:20
 #: src/components/when2meet/MeetingsLandingPage.tsx:109
@@ -2404,7 +2691,7 @@ msgstr "Дата вне допустимого периода"
 msgid "Dates"
 msgstr "Даты"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1014
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1016
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:3170
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:3595
 msgid "Day"
@@ -2439,6 +2726,7 @@ msgstr "Долг: {debt}ч"
 #: src/components/events/submissions/SubmissionPage.tsx:207
 #: src/components/events/submissions/SubmissionPage.tsx:368
 #: src/components/events/submissions/SubmissionPage.tsx:382
+#: src/components/search/ask/AskApproval.tsx:48
 msgid "Decline"
 msgstr "Отклонить"
 
@@ -2477,10 +2765,12 @@ msgstr "Задайте правила для своей комнаты"
 #: src/components/guard/FileDetails.tsx:81
 #: src/components/guard/FileDetails.tsx:196
 #: src/components/room-booking/timeline/BookingModal.tsx:777
+#: src/components/search/ask/AskChatList.tsx:216
 #: src/components/tabletennis/LiveTournament.tsx:395
 #: src/components/tabletennis/ValidationMatches.tsx:709
 #: src/components/toast/ToastProvider.test.ts:73
 #: src/components/toast/ToastProvider.test.ts:129
+#: src/components/toast/ToastProvider.test.ts:184
 #: src/components/when2meet/MeetingPage.tsx:1159
 msgid "Delete"
 msgstr "Удалить"
@@ -2519,7 +2809,7 @@ msgid "Delete column"
 msgstr "Удалить столбец"
 
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:284
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1201
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1203
 msgid "Delete date"
 msgstr "Удалить дату"
 
@@ -2569,9 +2859,13 @@ msgstr "Удалить строку"
 msgid "Delete sheet"
 msgstr "Удалить таблицу"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1036
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1038
 msgid "Delete slot"
 msgstr "Удалить слот"
+
+#: src/components/search/ask/AskChatList.tsx:141
+msgid "Delete the chat \"{title}\"? Its questions and answers cannot be restored."
+msgstr "Удалить чат «{title}»? Его вопросы и ответы нельзя будет вернуть."
 
 #. placeholder {0}: getName(scoring.p1)
 #. placeholder {1}: getName(scoring.p2)
@@ -2606,8 +2900,8 @@ msgid "Delete your reservation for {gameTitle}? This action cannot be undone."
 msgstr "Удалить ваше бронирование игры «{gameTitle}»? Это действие нельзя отменить."
 
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:365
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1118
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1273
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1120
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1275
 msgid "Deleted"
 msgstr "Удалено"
 
@@ -2678,6 +2972,10 @@ msgstr "Device flow подтверждён без id комнаты."
 msgid "Did you mean"
 msgstr "Возможно, вы имели в виду"
 
+#: src/components/search/ask/AskSources.tsx:13
+msgid "Disabled"
+msgstr "Отключено"
+
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:242
 msgid "Discard the proposed changes to \"{clubTitle}\"? The leader will need to resubmit."
 msgstr "Отклонить предложенные изменения клуба «{clubTitle}»? Лидеру придётся отправить их заново."
@@ -2728,6 +3026,7 @@ msgstr "Точка: не расставлено / частично / всё ра
 msgid "Downgrade to Beginner"
 msgstr "Перевести в новички"
 
+#: src/components/search/IframePreviewCard.tsx:304
 #: src/components/search/PdfPreview.tsx:132
 msgid "Download"
 msgstr "Скачать"
@@ -2735,6 +3034,10 @@ msgstr "Скачать"
 #: src/components/web-print/ScanPage.tsx:479
 msgid "Download & Finish"
 msgstr "Скачать и завершить"
+
+#: src/components/search/ask/AskAttachment.tsx:90
+msgid "Download attachment"
+msgstr "Скачать вложение"
 
 #: src/components/editor/menus/ImageMenuItems.tsx:95
 msgid "Download original"
@@ -2792,6 +3095,10 @@ msgstr "Отпустите здесь, чтобы убрать из групп"
 msgid "Drop your file here"
 msgstr "Перетащите файл сюда"
 
+#: src/components/search/ask/AskBookingChoices.tsx:156
+msgid "Duration"
+msgstr "Длительность"
+
 #: src/components/web-print/PrintPage.tsx:632
 msgid "e.g. 1-5,8,16-20 (empty = all)"
 msgstr "напр. 1-5,8,16-20 (пусто = все)"
@@ -2799,6 +3106,10 @@ msgstr "напр. 1-5,8,16-20 (пусто = все)"
 #: src/components/guard/CreateSheetPage.tsx:111
 msgid "e.g., CSE electives"
 msgstr "напр. элективы CSE"
+
+#: src/components/search/ask/AskInput.tsx:80
+msgid "Each file must be no larger than 10 MiB."
+msgstr "Размер каждого файла не должен превышать 10 МиБ."
 
 #: src/components/sport/SportStudentTrainingModal.tsx:286
 #: src/components/sport/SportTrainingsCalendarList.tsx:315
@@ -2897,6 +3208,10 @@ msgstr "Редактировать календарь"
 msgid "Edit: {prefix}"
 msgstr "Изменить: {prefix}"
 
+#: src/components/search/ask/AskResult.tsx:218
+msgid "EduWiki"
+msgstr "EduWiki"
+
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:199
 #~ msgid "Effective window for the selected groups:"
 #~ msgstr "Фактический период с учётом выбранных групп:"
@@ -2932,7 +3247,15 @@ msgstr "Время окончания должно быть позже врем�
 msgid "End time must be later than start time."
 msgstr "Время окончания должно быть позже времени начала."
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:421
+#: src/components/calendar/calendar-list-view.tsx:33
+#: src/components/calendar/CalendarEventPopover.tsx:149
+#: src/components/calendar/CalendarEventTime.tsx:20
+#: src/components/when2meet/useWhen2MeetPersonalCalendarOverlay.ts:100
+#: src/components/when2meet/utils/calendar-overlay.ts:219
+msgid "end time not specified"
+msgstr "окончание не указано"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:423
 msgid "End: {endError}"
 msgstr "Конец: {endError}"
 
@@ -2971,6 +3294,10 @@ msgstr "URL записи"
 msgid "Enrollment URL is required for external enrollment."
 msgstr "Для внешней регистрации необходимо указать ссылку."
 
+#: src/components/search/ask/AskBookingChoices.tsx:106
+msgid "Enter a booking subject."
+msgstr "Введите название брони."
+
 #: src/components/schedule-assistant/DateInput.tsx:203
 msgid "Enter a date"
 msgstr "Укажите дату"
@@ -2988,8 +3315,8 @@ msgstr "Укажите день для строки {row}."
 msgid "Enter a form URL to generate a link with the respondent's email pre-filled"
 msgstr "Введите URL формы, чтобы создать ссылку с заранее заполненным email респондента"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:264
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:269
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:266
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:271
 msgid "Enter a time"
 msgstr "Укажите время"
 
@@ -3003,6 +3330,14 @@ msgstr "Укажите время для строки {row}."
 msgid "Enter a valid email."
 msgstr "Введите корректный email."
 
+#: src/components/search/SourceRequests.tsx:
+#~ msgid "Enter a valid private Telegram invite link."
+#~ msgstr "Введите действительную приватную ссылку-приглашение Telegram."
+
+#: src/components/search/SourceRequests.tsx:223
+msgid "Enter a valid Telegram or MAX chat, channel or invite link."
+msgstr "Введите корректную ссылку на чат, канал или приглашение Telegram или MAX."
+
 #: src/components/clubs/AddClubDialog.tsx:97
 msgid "Enter club title"
 msgstr "Введите название клуба"
@@ -3011,7 +3346,7 @@ msgstr "Введите название клуба"
 msgid "Enter Innopolis email to set as new club leader"
 msgstr "Введите email Иннополис, чтобы назначить нового лидера клуба"
 
-#: src/components/search/SearchField.tsx:81
+#: src/components/search/SearchField.tsx:82
 msgid "Enter query..."
 msgstr "Введите запрос..."
 
@@ -3203,6 +3538,10 @@ msgctxt "about-us"
 msgid "Events"
 msgstr "Мероприятия"
 
+#: src/components/calendar/AiCalendarCard.tsx:28
+msgid "Events you added under the assistant's answers"
+msgstr "События, которые вы добавили под ответами ИИ-ассистента"
+
 #: src/components/clubs/ClubLeaguePage.tsx:156
 msgid "Every criterion requires proof"
 msgstr "Каждый критерий требует подтверждения"
@@ -3227,8 +3566,8 @@ msgstr "каждый понедельник"
 msgid "Every Monday"
 msgstr "Каждый понедельник"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:461
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:604
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:463
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:606
 msgid "Every other week"
 msgstr "Через неделю"
 
@@ -3285,8 +3624,8 @@ msgid "every week"
 msgstr "каждую неделю"
 
 #: src/components/schedule-assistant/timetable/sessionRowMarks.ts:39
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:461
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:603
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:463
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:605
 msgid "Every week"
 msgstr "Каждую неделю"
 
@@ -3323,7 +3662,7 @@ msgstr "Расширьте своё резюме"
 msgid "Expires at: {0}"
 msgstr "Действует до: {0}"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:150
+#: src/components/calendar/ConfigCalendarDialog.tsx:157
 msgid "Explore schedules"
 msgstr "Смотреть расписания"
 
@@ -3331,6 +3670,10 @@ msgstr "Смотреть расписания"
 #: src/components/schedule/ExportButton.tsx:21
 msgid "Export"
 msgstr "Экспорт"
+
+#: src/components/calendar/ExportModal.tsx:88
+msgid "Export AI Calendar"
+msgstr "Экспорт AI Calendar"
 
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1716
 msgid "Export all sections to XLSX"
@@ -3349,11 +3692,11 @@ msgstr "Не удалось экспортировать"
 msgid "Export is not available on the instructor and location tabs"
 msgstr "Экспорт недоступен на вкладках преподавателей и локаций"
 
-#: src/components/calendar/ExportModal.tsx:143
+#: src/components/calendar/ExportModal.tsx:361
 msgid "Export Moodle deadlines"
 msgstr "Экспорт дедлайнов Moodle"
 
-#: src/components/calendar/ExportModal.tsx:133
+#: src/components/calendar/ExportModal.tsx:351
 msgid "Export music room bookings"
 msgstr "Экспорт бронирований музкомнаты"
 
@@ -3361,16 +3704,16 @@ msgstr "Экспорт бронирований музкомнаты"
 msgid "Export PDF"
 msgstr "Экспорт PDF"
 
-#: src/components/calendar/ExportModal.tsx:148
+#: src/components/calendar/ExportModal.tsx:366
 msgid "Export room bookings"
 msgstr "Экспорт бронирований аудиторий"
 
-#: src/components/calendar/ExportModal.tsx:138
+#: src/components/calendar/ExportModal.tsx:356
 msgid "Export sport trainings"
 msgstr "Экспорт спортивных тренировок"
 
-#: src/components/calendar/ExportModal.tsx:80
-#: src/components/calendar/ExportModal.tsx:154
+#: src/components/calendar/ExportModal.tsx:91
+#: src/components/calendar/ExportModal.tsx:372
 msgid "Export to your calendar"
 msgstr "Экспорт в календарь"
 
@@ -3378,7 +3721,7 @@ msgstr "Экспорт в календарь"
 msgid "Export XLSX"
 msgstr "Экспорт XLSX"
 
-#: src/components/music-room/MusicRoomPage.tsx:104
+#: src/components/music-room/MusicRoomPage.tsx:101
 msgid "Export your personal calendar"
 msgstr "Экспорт личного календаря"
 
@@ -3544,6 +3887,10 @@ msgstr "Итоговое время"
 msgid "Financial support:"
 msgstr "Финансовая поддержка:"
 
+#: src/components/search/ask/AskPage.tsx:161
+msgid "Find a room available tomorrow from 15:00 to 16:00."
+msgstr "Найди свободную аудиторию завтра с 15:00 до 16:00."
+
 #: src/components/schedule/SearchBar.tsx:13
 msgid "Find the group..."
 msgstr "Найти группу..."
@@ -3594,6 +3941,10 @@ msgstr "Этаж"
 msgid "Football, Basketball, Volleyball, Badminton, Yoga"
 msgstr "Футбол, баскетбол, волейбол, бадминтон, йога"
 
+#: src/components/calendar/ExportModal.tsx:312
+msgid "For other apps, find the add-by-URL option in settings."
+msgstr "В других приложениях найдите в настройках добавление календаря по URL."
+
 #: src/components/scholarship/ScholarshipPage.tsx:26
 msgid "For the first semester — scholarship from the admissions department."
 msgstr "В первом семестре — стипендия от приёмной комиссии."
@@ -3631,7 +3982,7 @@ msgstr "Формы"
 msgid "Founder"
 msgstr "Основатель"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:598
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:600
 msgid "Frequency"
 msgstr "Очерёдность"
 
@@ -3806,8 +4157,8 @@ msgstr "Перейти к {navigationTarget}"
 msgid "Go to calendar"
 msgstr "В календарь"
 
-#: src/app/routes/__root.tsx:38
-#: src/app/routes/__root.tsx:68
+#: src/app/routes/__root.tsx:39
+#: src/app/routes/__root.tsx:69
 msgid "Go to dashboard"
 msgstr "Перейти на главную"
 
@@ -3831,11 +4182,11 @@ msgstr "К выбранному выше"
 msgid "Go to selected below"
 msgstr "К выбранному ниже"
 
-#: src/components/calendar/CalendarEventPopover.tsx:281
+#: src/components/calendar/CalendarEventPopover.tsx:315
 msgid "Go to source"
 msgstr "Перейти к источнику"
 
-#: src/components/search/IframePreviewCard.tsx:117
+#: src/components/search/IframePreviewCard.tsx:374
 msgid "Go to website ->"
 msgstr "Перейти на сайт →"
 
@@ -3843,7 +4194,7 @@ msgstr "Перейти на сайт →"
 msgid "Go to your dashboard"
 msgstr "Перейти в личный кабинет"
 
-#: src/components/calendar/CalendarViewer.tsx:832
+#: src/components/calendar/CalendarViewer.tsx:833
 msgid "Go today"
 msgstr "Сегодня"
 
@@ -3851,7 +4202,8 @@ msgstr "Сегодня"
 msgid "Goal"
 msgstr "Цель"
 
-#: src/components/calendar/ExportModal.tsx:106
+#: src/components/calendar/ExportModal.tsx:123
+#: src/components/calendar/ExportModal.tsx:309
 msgid "Google Calendar"
 msgstr "Google Календарь"
 
@@ -3937,6 +4289,10 @@ msgstr "Только гости"
 msgid "Guests Role"
 msgstr "Роль гостей"
 
+#: src/components/search/ask/AskResult.tsx:216
+msgid "Guide"
+msgstr "Сводка"
+
 #: src/app/routes/_with_menu/clubs/new.tsx:20
 #: src/components/clubs/HowToCreateClubPage.tsx:12
 msgid "Have an idea for a club? Start your own community and make a difference at Innopolis University!"
@@ -3961,6 +4317,10 @@ msgstr "Заголовок 2"
 #: src/components/editor/menus/BlockTypeDropdown.tsx:55
 msgid "Heading 3"
 msgstr "Заголовок 3"
+
+#: src/components/calendar/CalendarEventPopover.tsx:109
+msgid "Help me specify the end time of my AI Calendar event \"{title}\" starting at {start}. Ask me for the end time; do not guess it."
+msgstr "Помоги уточнить время окончания моего события AI Calendar «{title}» с началом {start}. Спроси у меня время окончания, не придумывай его."
 
 #: src/components/common/CompactColorPicker.tsx:197
 msgid "HEX"
@@ -4055,6 +4415,10 @@ msgstr "Как пройти в музкомнату?"
 #: src/components/clubs/HowToCreateClubPage.tsx:150
 msgid "How to Register Your Club"
 msgstr "Как зарегистрировать клуб"
+
+#: src/components/search/ask/AskPage.tsx:150
+msgid "I can help with your schedule, university rules, announcements and available rooms."
+msgstr "Помогу с расписанием, правилами университета, объявлениями и свободными аудиториями."
 
 #: src/components/search/act/ActPage.tsx:97
 msgid "I can help you to book the music room."
@@ -4156,6 +4520,10 @@ msgstr "в шаблоне"
 msgid "In template: {patternLabel}"
 msgstr "В шаблоне: {patternLabel}"
 
+#: src/components/calendar/ExportModal.tsx:302
+msgid "In your calendar app, add a calendar by URL."
+msgstr "В календаре добавьте календарь по URL."
+
 #: src/components/clubs/ClubAdminCard.tsx:53
 #: src/components/clubs/ClubPage.tsx:133
 msgid "Inactive"
@@ -4180,6 +4548,10 @@ msgstr "Повышенная государственная академичес
 #: src/components/scholarship/ScholarshipPage.tsx:89
 msgid "Increased State Social Scholarship for bachelor's and master's students — <0>15,500₽</0>."
 msgstr "Повышенная государственная социальная стипендия для бакалавров и магистров — <0>15 500₽</0>."
+
+#: src/components/search/SourceRequests.tsx:191
+msgid "Indexed messages will be visible to students verified for the selected study group, including students who are not chat members."
+msgstr "Проиндексированные сообщения будут доступны студентам, подтверждённым для выбранной учебной группы, в том числе тем, кто не состоит в чате."
 
 #: src/components/guard/GuardTabs.tsx:8
 #: src/components/web-print/WebPrintTabs.tsx:8
@@ -4317,6 +4689,12 @@ msgstr "Некорректная дата"
 msgid "Invalid enrollment"
 msgstr "Некорректные настройки регистрации"
 
+#: src/components/search/ask/AskCalendarEvents.tsx:67
+#: src/components/search/ask/AskSignupOffers.tsx:167
+#: src/components/search/ask/AskSignupOffers.tsx:230
+msgid "Invalid event interval"
+msgstr "Некорректное время события"
+
 #: src/components/guard/CopySheetPage.tsx:46
 msgid "Invalid Google Spreadsheet URL"
 msgstr "Некорректная ссылка на Google Таблицу"
@@ -4330,8 +4708,8 @@ msgstr "Некорректные данные организатора"
 msgid "Invalid link"
 msgstr "Неверная ссылка"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:267
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:272
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:269
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:274
 msgid "Invalid time"
 msgstr "Некорректное время"
 
@@ -4487,9 +4865,9 @@ msgstr "Оставьте отзыв и оцените"
 msgid "Let us know if you have ideas for our projects or run into any issues."
 msgstr "Напишите нам, если у вас есть идеи проектов или вы столкнулись с проблемой."
 
-#: src/components/search/ask/AskResult.tsx:42
-msgid "link"
-msgstr "ссылка"
+#: src/components/search/ask/AskResult.tsx:67
+#~ msgid "link"
+#~ msgstr "ссылка"
 
 #: src/components/clubs/constants.ts:91
 #: src/components/editor/menus/LinkButton.tsx:34
@@ -4535,7 +4913,7 @@ msgstr "Привязать ТВ к комнате"
 msgid "Links"
 msgstr "Ссылки"
 
-#: src/components/calendar/CalendarViewer.tsx:78
+#: src/components/calendar/CalendarViewer.tsx:79
 #: src/components/clubs/ClubsTabs.tsx:11
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:298
 msgid "List"
@@ -4578,9 +4956,17 @@ msgstr "Загрузка клубов..."
 msgid "Loading current booking details..."
 msgstr "Загрузка деталей текущего бронирования..."
 
-#: src/components/search/SearchPage.tsx:191
+#: src/components/search/SourceRequests.tsx:353
+msgid "Loading requests…"
+msgstr "Загрузка заявок…"
+
+#: src/components/search/SearchPage.tsx:219
 msgid "Loading search results..."
 msgstr "Загрузка результатов поиска..."
+
+#: src/components/search/ask/AskSources.tsx:63
+msgid "Loading sources"
+msgstr "Загрузка источников"
 
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2094
 msgid "Loading table…"
@@ -4588,6 +4974,9 @@ msgstr "Загрузка таблицы…"
 
 #: src/components/about/TeamMembers.tsx:218
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:197
+#: src/components/search/ArchiveDocumentModal.tsx:32
+#: src/components/search/IframePreviewCard.tsx:194
+#: src/components/search/IframePreviewCard.tsx:314
 msgid "Loading..."
 msgstr "Загрузка..."
 
@@ -4601,7 +4990,7 @@ msgstr "локация"
 
 #: src/components/events/shared/LocationField.tsx:73
 #: src/components/schedule-assistant/timetable/MeetingInstanceMetadata.tsx:128
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:936
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:938
 #: src/components/sport/SportStudentTrainingModal.tsx:269
 msgid "Location"
 msgstr "Место"
@@ -4747,6 +5136,10 @@ msgstr "Максимальный размер файла — <0>20 МБ</0>"
 msgid "Max participants"
 msgstr "Макс. участников"
 
+#: src/components/search/SourceRequests.tsx:285
+msgid "Maximum 2000 characters."
+msgstr "Не более 2000 символов."
+
 #: src/components/sport/SportOverviewSection.tsx:455
 msgid "Medical group change request was submitted."
 msgstr "Запрос на смену медицинской группы отправлен."
@@ -4852,6 +5245,10 @@ msgstr "мяу!"
 msgid "Merch of the club"
 msgstr "Мерч клуба"
 
+#: src/components/search/SourceRequests.tsx:198
+msgid "Messages will be visible to all cAtIx users, including people who are not members of your study group or chat."
+msgstr "Сообщения будут доступны всем пользователям cAtIx, в том числе тем, кто не состоит ни в вашей учебной группе, ни в чате."
+
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:232
 msgid "Min"
 msgstr "Мин."
@@ -4889,13 +5286,13 @@ msgstr "Пн"
 msgid "Monday"
 msgstr "Понедельник"
 
-#: src/components/calendar/CalendarViewer.tsx:77
+#: src/components/calendar/CalendarViewer.tsx:78
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:301
 #: src/components/tabletennis/DrawTable.tsx:42
 msgid "Month"
 msgstr "Месяц"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:100
+#: src/components/calendar/ConfigCalendarDialog.tsx:101
 msgid "Moodle"
 msgstr "Moodle"
 
@@ -4938,7 +5335,7 @@ msgstr "Переместить вверх"
 #: src/app/routes/_with_menu/music-room.index.tsx:24
 #: src/app/routes/_with_menu/music-room.instructions.tsx:17
 #: src/app/routes/_with_menu/music-room.instructions.tsx:24
-#: src/components/calendar/ConfigCalendarDialog.tsx:86
+#: src/components/calendar/ConfigCalendarDialog.tsx:87
 msgid "Music room"
 msgstr "Музкомната"
 
@@ -4983,6 +5380,10 @@ msgstr "Мои встречи"
 #: src/components/sport/SportSchedulePage.tsx:316
 msgid "My upcoming trainings"
 msgstr "Мои ближайшие тренировки"
+
+#: src/components/search/SourceRequests.tsx:182
+msgid "My verified study group"
+msgstr "Моя подтверждённая учебная группа"
 
 #: src/components/admin/AdminUserDetails.tsx:267
 #: src/components/calendar/import/ImportModal.tsx:163
@@ -5043,6 +5444,10 @@ msgstr "Нейтральное время"
 #: src/components/room-booking/timeline/BookingModal.tsx:808
 msgid "New booking"
 msgstr "Новое бронирование"
+
+#: src/components/search/ask/NewChatButton.tsx:16
+msgid "New chat"
+msgstr "Новый чат"
 
 #: src/components/guard/SetupResult.tsx:35
 msgid "New file was created under <0/> ownership. You were added with editor role."
@@ -5153,6 +5558,10 @@ msgstr "Пока нет участников."
 msgid "No audience to schedule"
 msgstr "Нет аудитории для размещения"
 
+#: src/components/search/ask/AskSources.tsx:178
+msgid "No available sources."
+msgstr "Нет доступных источников."
+
 #: src/components/guard/BannedList.tsx:33
 msgid "No banned users"
 msgstr "Нет заблокированных пользователей"
@@ -5172,6 +5581,10 @@ msgstr "Нет изменений для проверки у этого клуб
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:455
 msgid "No changes to save."
 msgstr "Нет изменений для сохранения."
+
+#: src/components/search/ask/AskChatList.tsx:64
+msgid "No chats yet"
+msgstr "Чатов пока нет"
 
 #: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:91
 #: src/components/schedule-assistant/timetable/pickerLabels.ts:30
@@ -5254,7 +5667,7 @@ msgstr "Документ не указан"
 msgid "No drafts yet."
 msgstr "Пока нет черновиков."
 
-#: src/components/calendar/CalendarViewer.tsx:522
+#: src/components/calendar/CalendarViewer.tsx:523
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:1031
 msgid "No events this month"
 msgstr "В этом месяце нет событий"
@@ -5375,7 +5788,7 @@ msgstr "Без локации"
 msgid "No logo"
 msgstr "Нет логотипа"
 
-#: src/components/search/SearchPage.tsx:184
+#: src/components/search/SearchPage.tsx:212
 msgid "No matched results for: {searchedFor}"
 msgstr "Ничего не найдено по запросу: {searchedFor}"
 
@@ -5453,6 +5866,10 @@ msgstr "Нет предпочтений."
 msgid "No qualification was played in this tournament."
 msgstr "Квалификация в этом турнире не проводилась."
 
+#: src/components/search/SourceRequests.tsx:363
+msgid "No requests yet."
+msgstr "У вас пока нет заявок."
+
 #: src/components/board-games/ReservationsAdminPage.tsx:212
 msgid "No reservations match these filters."
 msgstr "Нет бронирований по этим фильтрам."
@@ -5526,6 +5943,10 @@ msgstr "Пользователи не найдены."
 msgid "No users in this group."
 msgstr "В этой группе нет пользователей."
 
+#: src/components/search/SourceRequests.tsx:259
+msgid "No verified study groups are available. Choose all cAtIx users or refresh after verification is available."
+msgstr "Нет доступных подтверждённых учебных групп. Выберите всех пользователей cAtIx или обновите список после подтверждения группы."
+
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1550
 msgid "No weeks"
 msgstr "Нет недель"
@@ -5535,7 +5956,7 @@ msgstr "Нет недель"
 msgid "None"
 msgstr "Нет"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:474
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:476
 msgid "none in the study period"
 msgstr "нет в учебном периоде"
 
@@ -5551,6 +5972,10 @@ msgstr "недоступно для этой встречи"
 #: src/components/when2meet/MeetingPage.tsx:1228
 msgid "Not available for this meeting"
 msgstr "Недоступно для этой встречи"
+
+#: src/components/search/ask/AskApproval.tsx:30
+msgid "Not done: a newer question was asked."
+msgstr "Не выполнено: после этого был задан новый вопрос."
 
 #: src/components/tabletennis/ValidationMatches.tsx:452
 msgid "Not in a group"
@@ -5625,6 +6050,19 @@ msgstr "Ничего не выбрано"
 msgid "Nothing to import"
 msgstr "Нечего импортировать"
 
+#: src/components/search/ask/AskNotificationButton.tsx:49
+msgid "Notifications are blocked. Allow them in your browser settings."
+msgstr "Уведомления заблокированы. Разрешите их в настройках браузера."
+
+#: src/components/search/ask/AskNotificationButton.tsx:103
+msgid "Notifications on"
+msgstr "Уведомления включены"
+
+#: src/components/search/ask/AskNotificationButton.tsx:97
+#: src/components/search/ask/AskNotificationButton.tsx:105
+msgid "Notify me when cAtIx replies"
+msgstr "Уведомлять об ответах cAtIx"
+
 #. placeholder {0}: getViewUserName(targetUser)
 #: src/components/admin/useImpersonation.ts:103
 msgid "Now impersonating {0}"
@@ -5633,6 +6071,14 @@ msgstr "Теперь вы действуете от имени {0}"
 #: src/components/editor/menus/BlockTypeDropdown.tsx:83
 msgid "Numbered list"
 msgstr "Нумерованный список"
+
+#: src/components/search/ask/AskResult.tsx:94
+msgid "Official"
+msgstr "Официальный источник"
+
+#: src/components/search/ask/AskResult.tsx:214
+msgid "Official document"
+msgstr "Документ университета"
 
 #: src/components/scholarship/ScholarshipPage.tsx:129
 msgid "Official sources:"
@@ -5709,7 +6155,7 @@ msgstr "по средам"
 msgid "one of {trimmed}"
 msgstr "одна из {trimmed}"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:658
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:660
 msgid "One-off changes for inactive weeks ({ignoredCount}) are saved but not applied: {ignoredDates}."
 msgstr "Разовые изменения неактивных недель ({ignoredCount}) сохранены, но не применяются: {ignoredDates}."
 
@@ -5738,6 +6184,10 @@ msgstr "Только администраторы могут изменять с
 msgid "Only administrators can create tournaments"
 msgstr "Только администраторы могут создавать турниры"
 
+#: src/components/search/SourceRequests.tsx:264
+msgid "Only groups verified for your account can be selected."
+msgstr "Можно выбрать только группы, подтверждённые для вашего аккаунта."
+
 #: src/components/when2meet/CreationPage.tsx:140
 msgid "Only the meeting owner can edit this event."
 msgstr "Редактировать может только владелец встречи."
@@ -5761,15 +6211,36 @@ msgstr "Откройте <0>/tv</0> на экране устройства, вв
 msgid "Open bracket"
 msgstr "Открыть турнирную сетку"
 
+#: src/components/search/ask/AskNotifications.tsx:78
+msgid "Open chat"
+msgstr "Открыть чат"
+
 #: src/components/room-booking/bookings-list/BookingsListPage.tsx:113
 #: src/components/when2meet/MeetingPage.tsx:1580
 msgid "Open details"
 msgstr "Открыть подробности"
 
-#: src/components/calendar/CalendarEventPopover.tsx:251
+#. placeholder {0}: source.archive_document.member
+#: src/components/search/ask/AskResult.tsx:138
+#~ msgid "Open document: {0}"
+#~ msgstr "Открыть документ: {0}"
+
+#: src/components/search/ask/AskResult.tsx:161
+msgid "Open document: {member}"
+msgstr "Открыть документ: {member}"
+
+#: src/components/calendar/CalendarEventPopover.tsx:285
 #: src/components/events/calendar/EventsCalendarPopover.tsx:182
 msgid "Open event page"
 msgstr "Открыть страницу мероприятия"
+
+#: src/components/search/IframePreviewCard.tsx:217
+msgid "Open original archive"
+msgstr "Открыть исходный архив"
+
+#: src/components/search/ask/AskSignupOffers.tsx:337
+msgid "Open registration"
+msgstr "Открыть регистрацию"
 
 #: src/components/guard/SetupResult.tsx:56
 msgid "Open spreadsheet"
@@ -5785,7 +6256,15 @@ msgstr "Открыть таблицу"
 msgid "Open Telegram bot"
 msgstr "Открыть Telegram-бота"
 
-#: src/components/calendar/ExportModal.tsx:99
+#: src/components/search/ask/AskCalendarEvents.tsx:106
+msgid "Open the calendar"
+msgstr "Открыть календарь"
+
+#: src/components/search/ask/AskNotifications.tsx:37
+msgid "Open the chat to read the reply."
+msgstr "Откройте чат, чтобы прочитать ответ."
+
+#: src/components/calendar/ExportModal.tsx:114
 msgid "Open your calendar settings to add a calendar by URL."
 msgstr "Откройте настройки календаря, чтобы добавить календарь по URL."
 
@@ -5814,7 +6293,11 @@ msgstr "Организатор"
 msgid "Other"
 msgstr "Другой"
 
-#: src/components/calendar/ExportModal.tsx:110
+#: src/components/search/ask/AskSources.tsx:145
+msgid "Other and new topics"
+msgstr "Остальные и новые темы"
+
+#: src/components/calendar/ExportModal.tsx:127
 msgid "Other applications: find in settings"
 msgstr "Другие приложения: найдите в настройках"
 
@@ -5869,7 +6352,7 @@ msgstr "API Outlook сейчас недоступно"
 
 #: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:111
 #: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:278
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:170
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:172
 msgid "overridden in template"
 msgstr "переопределено в шаблоне"
 
@@ -5960,7 +6443,11 @@ msgstr "Прошлая неделя"
 msgid "Paste from clipboard"
 msgstr "Вставить из буфера обмена"
 
-#: src/components/calendar/ExportModal.tsx:114
+#: src/components/calendar/ExportModal.tsx:318
+msgid "Paste the link and add it."
+msgstr "Вставьте ссылку и добавьте календарь."
+
+#: src/components/calendar/ExportModal.tsx:131
 msgid "Paste the link and click Add."
 msgstr "Вставьте ссылку и нажмите «Добавить»."
 
@@ -5996,7 +6483,7 @@ msgstr "На рассмотрении"
 msgid "per day"
 msgstr "за день"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:558
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:560
 msgid "Period"
 msgstr "Период"
 
@@ -6148,7 +6635,9 @@ msgid "Preferred time"
 msgstr "Предпочтительное время"
 
 #: src/components/clubs/EditClubPage.tsx:914
-#: src/components/search/IframePreviewCard.tsx:95
+#: src/components/search/IframePreviewCard.tsx:201
+#: src/components/search/IframePreviewCard.tsx:320
+#: src/components/search/IframePreviewCard.tsx:352
 #: src/components/web-print/PrintPage.tsx:445
 #: src/components/web-print/ScanPage.tsx:400
 msgid "Preview"
@@ -6248,6 +6737,10 @@ msgstr "Идёт печать…"
 msgid "Priority Order in Crediting Decision Making"
 msgstr "Приоритет при принятии решений о зачёте"
 
+#: src/components/search/SourceRequests.tsx:110
+#~ msgid "Private Telegram invite link"
+#~ msgstr "Приватная ссылка-приглашение в Telegram"
+
 #: src/components/web-print/PrintPage.tsx:333
 msgid "Probably, the printer is busy — try to reboot it."
 msgstr "Возможно, принтер занят — попробуйте перезагрузить его."
@@ -6274,6 +6767,10 @@ msgstr "Языки программирования, робототехника,
 msgid "Projects"
 msgstr "Проекты"
 
+#: src/components/search/SourceRequests.tsx:50
+msgid "Propose a chat"
+msgstr "Предложить чат"
+
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:51
 msgid "Proposed"
 msgstr "Предложено"
@@ -6281,6 +6778,10 @@ msgstr "Предложено"
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:393
 msgid "Proposed by the club leader, waiting for your review."
 msgstr "Предложено лидером клуба, ожидает вашей проверки."
+
+#: src/components/search/ask/AskCalendarEvents.tsx:96
+msgid "Proposed duration: 90 minutes (end time not specified)."
+msgstr "Предлагаемая длительность: 90 минут (время окончания не указано)."
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:336
 msgid "Proposed logo"
@@ -6382,6 +6883,10 @@ msgstr "Рейтинг:"
 msgid "Rating: {0}"
 msgstr "Рейтинг: {0}"
 
+#: src/components/search/ask/AskFeedback.tsx:83
+msgid "Rating: {chosenEmoji}"
+msgstr "Оценка: {chosenEmoji}"
+
 #: src/components/music-room/MusicRoomPage.tsx:46
 msgid "Read rules and guides on how to access the Music room. Every visitor should accept these conditions."
 msgstr "Прочитайте правила и инструкции по доступу в музкомнату. Каждый посетитель должен принять эти условия."
@@ -6393,6 +6898,10 @@ msgstr "Читатель"
 #: src/components/dashboard/AdvWidget.tsx:44
 msgid "Receive a monthly stipend from IU alumni"
 msgstr "Ежемесячная стипендия от выпускников IU"
+
+#: src/components/search/ask/AskPage.tsx:241
+msgid "Receiving answer"
+msgstr "Получаю ответ"
 
 #: src/components/clubs/EditClubPage.tsx:763
 msgid "Recommended: Square image, at least 400x400px, PNG, JPG or WEBP format"
@@ -6453,6 +6962,10 @@ msgstr "Перераспределить игроков"
 msgid "Redo"
 msgstr "Повторить"
 
+#: src/components/search/SourceRequests.tsx:372
+msgid "Refresh requests"
+msgstr "Обновить заявки"
+
 #: src/components/tabletennis/Registration.tsx:58
 msgid "Register"
 msgstr "Зарегистрироваться"
@@ -6468,6 +6981,10 @@ msgstr "Зарегистрируйтесь, чтобы увидеть списо
 #: src/components/tabletennis/Registration.tsx:30
 msgid "Register to start playing and tracking your rating. Your results will be visible on the leaderboard."
 msgstr "Зарегистрируйтесь, чтобы начать играть и отслеживать свой рейтинг. Ваши результаты появятся в таблице лидеров."
+
+#: src/components/search/ask/AskSignupOffers.tsx:306
+msgid "Registration outcome is unknown"
+msgstr "Результат записи неизвестен"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:81
 msgid "Regular Schedule & Resources"
@@ -6523,6 +7040,10 @@ msgstr "Удалить игрока {0} из турнира?"
 msgid "Remove {participantName} from the meeting?"
 msgstr "Удалить участника {participantName} из встречи?"
 
+#: src/components/search/ask/AskInput.tsx:205
+msgid "Remove attachment"
+msgstr "Удалить вложение"
+
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:76
 msgid "Remove calendar {calendarName}?"
 msgstr "Удалить календарь «{calendarName}»?"
@@ -6576,6 +7097,10 @@ msgstr "Убрать это мероприятие из публичного к�
 msgid "Remove this participant from the meeting?"
 msgstr "Удалить этого участника из встречи?"
 
+#: src/components/search/ask/AskChatList.tsx:205
+msgid "Rename"
+msgstr "Переименовать"
+
 #: src/components/tabletennis/ArchivedTournament.tsx:64
 #: src/components/tabletennis/ArchivedTournament.tsx:149
 msgid "Reopen"
@@ -6609,9 +7134,21 @@ msgstr "Сообщить о проблеме"
 msgid "Report form will be published to Club Leaders telegram group every month, according to which points will be credited."
 msgstr "Форма отчёта публикуется каждый месяц в Telegram-группе лидеров клубов; по ней начисляются баллы."
 
+#: src/components/search/SourceRequests.tsx:471
+msgid "Request rejected"
+msgstr "Заявка отклонена"
+
 #: src/components/clubs/HowToCreateClubPage.tsx:82
 msgid "Request rooms, projectors, sports halls, and other resources for your club's meetings."
 msgstr "Запрашивайте аудитории, проекторы, спортзалы и другие ресурсы для встреч клуба."
+
+#: src/components/search/SourceRequests.tsx:326
+msgid "Request saved. Current status: <0/>"
+msgstr "Заявка сохранена. Текущий статус: <0/>"
+
+#: src/components/search/SourceRequests.tsx:162
+#~ msgid "Request submitted for review. The chat has not been joined or connected yet."
+#~ msgstr "Заявка отправлена на проверку. Вступление в чат и его подключение ещё не выполнены."
 
 #: src/components/web-print/PrintPage.tsx:452
 msgid "Required"
@@ -6687,7 +7224,7 @@ msgstr "Участники"
 msgid "Restore"
 msgstr "Восстановить"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1201
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1203
 msgid "Restore date"
 msgstr "Вернуть дату"
 
@@ -6696,7 +7233,7 @@ msgstr "Вернуть дату"
 msgid "Restore draft"
 msgstr "Восстановить черновик"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1036
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:1038
 msgid "Restore slot"
 msgstr "Вернуть слот"
 
@@ -6704,7 +7241,7 @@ msgstr "Вернуть слот"
 msgid "Result"
 msgstr "Результат"
 
-#: src/components/search/SearchPage.tsx:182
+#: src/components/search/SearchPage.tsx:210
 msgid "Results for: {searchedFor}"
 msgstr "Результаты по запросу: {searchedFor}"
 
@@ -6719,6 +7256,7 @@ msgstr "Пересдача"
 #: src/components/admin/AdminPredefinedPage.tsx:86
 #: src/components/admin/AdminRoomsPage.tsx:170
 #: src/components/admin/AdminUserPage.tsx:70
+#: src/components/calendar/ExportModal.tsx:247
 #: src/components/events/calendar/EventsCardsView.tsx:45
 #: src/components/events/drafts/DraftPage.tsx:272
 #: src/components/events/drafts/DraftsPage.tsx:99
@@ -6728,6 +7266,9 @@ msgstr "Пересдача"
 #: src/components/schedule-assistant/timetable/PublicTimetablePage.tsx:115
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
+#: src/components/search/ask/AskChatList.tsx:47
+#: src/components/search/ask/AskPage.tsx:212
+#: src/components/search/ask/AskSources.tsx:78
 #: src/components/sport/SportStudentTrainingModal.tsx:413
 #: src/components/sport/SportStudentTrainingModal.tsx:462
 #: src/components/sport/SportTrainingsCalendarList.tsx:263
@@ -6806,6 +7347,10 @@ msgstr "Просмотрите заявки на мероприятия."
 msgid "Review Events"
 msgstr "Модерация"
 
+#: src/components/calendar/ExportModal.tsx:334
+msgid "Revoke link"
+msgstr "Отозвать ссылку"
+
 #: src/components/guard/FileDetails.tsx:209
 msgid "Role granted when someone joins via the link"
 msgstr "Роль, выдаваемая при присоединении по ссылке"
@@ -6824,7 +7369,7 @@ msgstr "Комната забронирована"
 #: src/app/routes/_with_menu/room-booking/list.tsx:25
 #: src/app/routes/_with_menu/room-booking/rooms.index.tsx:25
 #: src/app/routes/_with_menu/room-booking/rules.tsx:24
-#: src/components/calendar/ConfigCalendarDialog.tsx:112
+#: src/components/calendar/ConfigCalendarDialog.tsx:113
 msgid "Room booking"
 msgstr "Бронирование"
 
@@ -6952,9 +7497,17 @@ msgstr "Сохранить время встречи"
 msgid "Save timeslots"
 msgstr "Сохранить слоты"
 
+#: src/components/search/ask/AskSources.tsx:168
+msgid "Saved message history remains searchable even when collection is disabled."
+msgstr "Сохранённая история сообщений остаётся доступной для поиска, даже если сбор отключён."
+
 #: src/components/tabletennis/ValidationMatches.tsx:563
 msgid "Saved, other admins see these groups"
 msgstr "Сохранено, другие админы видят эти группы"
+
+#: src/components/search/ask/AskSources.tsx:11
+msgid "Saving messages"
+msgstr "Сохранение сообщений"
 
 #: src/components/clubs/EditClubPage.tsx:1278
 msgid "Saving..."
@@ -7056,9 +7609,9 @@ msgid "Scores are entered by the organiser."
 msgstr "Счёт вводит организатор."
 
 #: src/app/routes/_with_menu/search/index.tsx:29
+#: src/app/routes/_with_menu/search/index.tsx:36
 #: src/components/clubs/ClubsSidebar.tsx:38
 #: src/components/search/SearchField.tsx:52
-#: src/components/search/ToggleGroup.tsx:19
 msgid "Search"
 msgstr "Поиск"
 
@@ -7146,6 +7699,10 @@ msgstr "Искать..."
 msgid "Search…"
 msgstr "Поиск…"
 
+#: src/components/search/ask/AskSources.tsx:12
+msgid "Searching on request"
+msgstr "Поиск по запросу"
+
 #: src/components/timer/components/TimerInput.tsx:34
 msgid "Seconds"
 msgstr "Секунды"
@@ -7153,6 +7710,10 @@ msgstr "Секунды"
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:359
 msgid "Section"
 msgstr "Секция"
+
+#: src/components/search/ask/AskResult.tsx:132
+msgid "Sections:"
+msgstr "Разделы:"
 
 #: src/components/scholarship/ScholarshipPage.tsx:132
 msgid "See more information about scholarships in <0>Student's Handbook</0>."
@@ -7214,6 +7775,10 @@ msgstr "Выберите дату и время в будущем. Таймер 
 #: src/components/admin/useImpersonation.ts:70
 msgid "Select a user to impersonate."
 msgstr "Выберите пользователя для имперсонации."
+
+#: src/components/search/SourceRequests.tsx:244
+msgid "Select a verified study group"
+msgstr "Выберите подтверждённую учебную группу"
 
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:83
 msgid "Select all"
@@ -7294,6 +7859,15 @@ msgstr "Селф-спорт: {0}ч"
 #: src/components/clubs/HowToCreateClubPage.tsx:96
 msgid "Semestral Budget"
 msgstr "Бюджет на семестр"
+
+#: src/components/search/ask/AskFeedback.tsx:116
+#: src/components/search/ask/AskInput.tsx:262
+msgid "Send"
+msgstr "Отправить"
+
+#: src/components/search/ask/AskPage.tsx:241
+msgid "Sending request"
+msgstr "Отправляю запрос"
 
 #: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:385
 msgid "Series"
@@ -7557,6 +8131,18 @@ msgstr "Войти через Innopolis SSO"
 msgid "Sign out"
 msgstr "Выйти"
 
+#: src/components/search/ask/AskSignupOffers.tsx:353
+msgid "Sign up"
+msgstr "Записаться"
+
+#: src/components/search/ask/AskSignupOffers.tsx:281
+msgid "Signing up…"
+msgstr "Записываем…"
+
+#: src/components/search/ask/AskSignupOffers.tsx:314
+msgid "Signup unavailable"
+msgstr "Запись недоступна"
+
 #: src/components/onboarding/OnboardingSteps.tsx:262
 msgid "Skip"
 msgstr "Пропустить"
@@ -7599,22 +8185,29 @@ msgstr "Произошла ошибка"
 msgid "Some players were not found, see the list below"
 msgstr "Некоторые игроки не найдены, см. список ниже"
 
-#: src/components/search/SearchPage.tsx:249
+#: src/components/search/SearchPage.tsx:286
 msgid "Sorry, something gone wrong."
 msgstr "Извините, что-то пошло не так."
 
-#: src/components/search/IframePreviewCard.tsx:14
-#: src/components/search/IframePreviewCard.tsx:104
+#: src/components/search/IframePreviewCard.tsx:18
+#: src/components/search/IframePreviewCard.tsx:361
 msgid "Sorry, this site does not support preview. Please, open it directly."
 msgstr "Извините, этот сайт не поддерживает предпросмотр. Откройте его напрямую."
 
+#: src/components/search/SourceRequests.tsx:466
+msgid "Source enabled; message history may still be loading"
+msgstr "Источник включён; история сообщений может ещё загружаться"
+
+#: src/components/search/ask/AskResult.tsx:74
+#: src/components/search/ask/AskSources.tsx:26
+#: src/components/search/ask/AskSources.tsx:31
 #: src/components/search/SelectSourcesFilterButton.tsx:21
 msgid "Sources"
 msgstr "Источники"
 
-#: src/components/search/ask/AskResult.tsx:64
-msgid "Sources:"
-msgstr "Источники:"
+#: src/components/search/ask/AskResult.tsx:83
+#~ msgid "Sources:"
+#~ msgstr "Источники:"
 
 #: src/components/clubs/constants.ts:40
 #: src/components/clubs/HowToCreateClubPage.tsx:140
@@ -7658,7 +8251,7 @@ msgstr "Разделить игроков на группы"
 #: src/app/routes/_with_menu/sport/index.tsx:26
 #: src/app/routes/_with_menu/sport/profile.tsx:26
 #: src/app/routes/_with_menu/sport/trainer.tsx:26
-#: src/components/calendar/ConfigCalendarDialog.tsx:72
+#: src/components/calendar/ConfigCalendarDialog.tsx:73
 msgid "Sport"
 msgstr "Спорт"
 
@@ -7792,6 +8385,10 @@ msgstr "Ошибка запуска"
 msgid "Start qualification"
 msgstr "Начать квалификацию"
 
+#: src/components/search/ask/AskBookingChoices.tsx:134
+msgid "Start time (MSK)"
+msgstr "Время начала (МСК)"
+
 #: src/components/events/utils/datetime.ts:98
 msgid "Start time cannot be in the past."
 msgstr "Время начала не может быть в прошлом."
@@ -7800,7 +8397,7 @@ msgstr "Время начала не может быть в прошлом."
 msgid "Start Timer"
 msgstr "Запустить таймер"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:420
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:422
 msgid "Start: {startError}"
 msgstr "Начало: {startError}"
 
@@ -7867,6 +8464,7 @@ msgstr "Шаг 4: Подготовьте материалы клуба"
 msgid "Step 5: Fill Registration Form"
 msgstr "Шаг 5: Заполните регистрационную форму"
 
+#: src/components/search/ask/AskInput.tsx:253
 #: src/components/timer/TimerPage.tsx:302
 msgid "Stop"
 msgstr "Стоп"
@@ -7920,6 +8518,22 @@ msgstr "Студенты могут бронировать только не в 
 msgid "Students not found"
 msgstr "Студенты не найдены"
 
+#: src/components/search/SourceRequests.tsx:231
+msgid "Study group"
+msgstr "Учебная группа"
+
+#: src/components/search/SourceRequests.tsx:169
+msgid "Study group verification is not proof of chat membership."
+msgstr "Подтверждённая учебная группа не подтверждает участие в чате."
+
+#: src/components/search/SourceRequests.tsx:103
+#~ msgid "Study group verification is not proof of Telegram chat membership. Indexed messages will be available to verified students of the target study group, including those who are not in the Telegram chat."
+#~ msgstr "Подтверждённая учебная группа не подтверждает участие в Telegram-чате. Проиндексированные сообщения будут доступны проверенным студентам указанной учебной группы, в том числе тем, кто не состоит в Telegram-чате."
+
+#: src/components/search/ask/AskSources.tsx:97
+msgid "Study group verification is unavailable. Common sources are still available."
+msgstr "Подтверждение учебной группы недоступно. Общие источники по-прежнему доступны."
+
 #: src/components/events/drafts/RestoreDraftModal.tsx:47
 msgid "Submission"
 msgstr "Заявка"
@@ -7942,6 +8556,10 @@ msgstr "Подать медицинскую справку"
 #: src/components/events/drafts/DraftPage.tsx:886
 msgid "Submit on review"
 msgstr "Отправить на проверку"
+
+#: src/components/search/SourceRequests.tsx:341
+msgid "Submit request"
+msgstr "Отправить заявку"
 
 #: src/components/sport/SportOverviewSection.tsx:251
 #: src/components/sport/SportOverviewSection.tsx:454
@@ -7968,13 +8586,21 @@ msgstr "Отправлено, ожидает проверки"
 msgid "Submitted: <0>{0}</0>"
 msgstr "Отправлено: <0>{0}</0>"
 
+#: src/components/search/SourceRequests.tsx:153
+msgid "Submitting a request does not join the chat. A cAtIx administrator must review it first. Approval queues the account worker to join the Telegram or MAX chat automatically. The chat administrator may still need to approve the join request. Indexing and history loading start only after chat access is confirmed."
+msgstr "Отправка заявки не приводит к вступлению в чат. Сначала её должен проверить администратор cAtIx. После одобрения заявка попадает в очередь обработчика пользовательского аккаунта для автоматического вступления в чат Telegram или MAX. Администратору чата может потребоваться одобрить вступление. Индексация и загрузка истории начинаются только после подтверждения доступа к чату."
+
+#: src/components/search/SourceRequests.tsx:345
+msgid "Submitting your request…"
+msgstr "Отправляем заявку…"
+
 #: src/components/admin/AdminRoomsPage.tsx:73
 #: src/components/admin/useImpersonation.ts:102
 #: src/components/admin/useImpersonation.ts:123
 #: src/components/admin/usePredefinedDataEditor.ts:33
 #: src/components/toast/ToastProvider.test.ts:66
 #: src/components/toast/ToastProvider.test.ts:108
-#: src/components/toast/ToastProvider.test.ts:178
+#: src/components/toast/ToastProvider.test.ts:230
 msgid "Success"
 msgstr "Успех"
 
@@ -8197,6 +8823,10 @@ msgstr "ID Telegram: {0}"
 msgid "Telegram not provided"
 msgstr "Telegram не указан"
 
+#: src/components/search/SourceRequests.tsx:205
+msgid "Telegram or MAX chat or channel link"
+msgstr "Ссылка на чат или канал Telegram или MAX"
+
 #: src/components/clubs/EditClubPage.tsx:1203
 msgid "Telegram User"
 msgstr "Пользователь Telegram"
@@ -8210,9 +8840,33 @@ msgstr "Предварительно"
 msgid "Text"
 msgstr "Текст"
 
+#: src/components/search/ask/AskFeedback.tsx:67
+msgid "Thank you for the comment!"
+msgstr "Спасибо за комментарий!"
+
+#: src/components/search/ask/AskFeedback.tsx:45
+msgid "Thank you, we will look into it"
+msgstr "Спасибо, разберём"
+
+#: src/components/search/ask/AskFeedback.tsx:44
+msgid "Thank you!"
+msgstr "Спасибо!"
+
 #: src/components/sport/SportOverviewSection.tsx:611
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "<0>Пропущенная из‑за болезни неделя</0> <1>компенсируется двумя спортивными часами.</1>"
+
+#: src/components/search/ask/AskPage.tsx:265
+msgid "The action result could not be confirmed. Check the service before trying again."
+msgstr "Результат действия не подтверждён. Проверьте его в сервисе перед повторной попыткой."
+
+#: src/components/search/ask/AskPage.tsx:184
+msgid "The assistant asks for confirmation before changing data in services."
+msgstr "Перед изменениями в сервисах ассистент запросит подтверждение."
+
+#: src/components/search/ask/AskApproval.tsx:19
+msgid "The assistant needs your approval to do this:"
+msgstr "Ассистенту нужно ваше подтверждение, чтобы сделать это:"
 
 #: src/components/when2meet/MeetingPage.tsx:465
 msgid "The booking no longer exists in Room Booking, so it was removed from the meeting."
@@ -8222,6 +8876,14 @@ msgstr "Бронирование больше не существует в се�
 msgid "The bracket appears when the organiser starts qualification."
 msgstr "Сетка появляется, когда организатор начинает квалификацию."
 
+#: src/components/search/SourceRequests.tsx:306
+msgid "The chat administrator agreed to indexing this chat and making its messages available to verified students of the selected study group."
+msgstr "Администратор чата согласился на индексацию чата и показ его сообщений студентам, подтверждённым для выбранной учебной группы."
+
+#: src/components/search/SourceRequests.tsx:301
+msgid "The chat administrator agreed to indexing this chat and making its messages visible to all cAtIx users."
+msgstr "Администратор чата согласился на индексацию чата и показ его сообщений всем пользователям cAtIx."
+
 #: src/components/clubs/ClubPage.tsx:313
 msgid "The club leader should connect their Telegram account to InNoHassle using the <0>link</0>."
 msgstr "Лидеру клуба нужно подключить свой аккаунт Telegram к InNoHassle по <0>ссылке</0>."
@@ -8229,6 +8891,10 @@ msgstr "Лидеру клуба нужно подключить свой акк�
 #: src/components/clubs/ClubLeaguePage.tsx:232
 msgid "The club manager collects orders from the club leaders in advance, and later makes a purchase in the form of an official order"
 msgstr "Менеджер клубов заранее собирает заказы у лидеров и затем оформляет покупку официальным заказом"
+
+#: src/components/search/ask/ask-session.ts:295
+msgid "The connection ended before the response was complete."
+msgstr "Соединение прервалось до завершения ответа."
 
 #: src/components/sport/SportTrainerBaamImportButton.tsx:147
 msgid "The file contains no student emails."
@@ -8289,7 +8955,7 @@ msgstr "Организатор формирует группы."
 msgid "The person has to register in table tennis first."
 msgstr "Сначала нужно зарегистрироваться в настольном теннисе."
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:640
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:642
 msgid "The phase covers the whole study period: every 14 days before and after the anchor week, not starting from this date."
 msgstr "Фаза на весь учебный период: каждые 14 дней до и после опорной недели, а не начиная с этой даты."
 
@@ -8326,6 +8992,11 @@ msgstr "Период серии не пересекается с учебным 
 #~ msgid "The series window does not overlap the selected groups' teaching period."
 #~ msgstr "Период серии не пересекается с учебным периодом выбранных групп."
 
+#: src/components/search/ask/ask-session.ts:213
+#: src/components/search/ask/ask-session.ts:245
+msgid "The server returned no answer stream."
+msgstr "Сервер не вернул поток ответа."
+
 #: src/app/routes/forms.submit.tsx:131
 msgid "The slug parameter is missing or invalid."
 msgstr "Параметр slug отсутствует или некорректен."
@@ -8333,6 +9004,14 @@ msgstr "Параметр slug отсутствует или некорректе
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:57
 #~ msgid "The start date must not be after the end date."
 #~ msgstr "Начало периода должно быть не позже окончания."
+
+#: src/components/calendar/AiCalendarCard.tsx:31
+msgid "The Telegram bot notifies you when events are added to AI Calendar. To receive notifications, open the bot in Telegram and press Start."
+msgstr "Telegram-бот уведомляет о добавлении событий в ИИ-календарь. Чтобы получать уведомления, откройте бота в Telegram и нажмите «Запустить»."
+
+#: src/components/search/SourceRequests.tsx:155
+#~ msgid "The Telegram chat administrator agreed to indexing this chat and making its messages available to verified students of the target study group."
+#~ msgstr "Администратор Telegram-чата согласился на индексацию чата и предоставление доступа к его сообщениям проверенным студентам указанной учебной группы."
 
 #: src/components/timer/lib/useTimer.ts:148
 msgid "The timer paused"
@@ -8379,6 +9058,10 @@ msgstr "Бронирований пока нет."
 msgid "There is no file to be printed!"
 msgstr "Нет файла для печати!"
 
+#: src/components/search/ask/AskSources.tsx:183
+msgid "These are configured capabilities, not a guarantee that a source is currently online."
+msgstr "Это настроенные возможности, а не гарантия, что источник сейчас в сети."
+
 #: src/components/clubs/HowToCreateClubPage.tsx:205
 msgid "Think about your <0>aims and goals</0> to keep your club going purposefully. Consider writing mission and vision statements to clarify your club's purpose."
 msgstr "Продумайте <0>цели и задачи</0>, чтобы клуб развивался осмысленно. Зафиксируйте миссию и видение."
@@ -8399,6 +9082,10 @@ msgstr "У этого клуба есть изменения, ожидающие
 msgid "This email is already in the group."
 msgstr "Этот email уже есть в группе."
 
+#: src/components/search/IframePreviewCard.tsx:294
+msgid "This file cannot be previewed in the browser."
+msgstr "Этот файл нельзя просмотреть в браузере."
+
 #: src/components/board-games/BoardGamesPage.tsx:544
 msgid "This game cannot be reserved right now. You may already have an active reservation, or no copies may be available."
 msgstr "Сейчас эту игру нельзя забронировать. Возможно, у вас уже есть активное бронирование или нет свободных копий."
@@ -8406,6 +9093,10 @@ msgstr "Сейчас эту игру нельзя забронировать. В
 #: src/components/board-games/BoardGamesPage.tsx:547
 msgid "This game is no longer available. Refresh the page and choose another game."
 msgstr "Эта игра больше недоступна. Обновите страницу и выберите другую."
+
+#: src/components/search/SourceRequests.tsx:424
+msgid "This invitation already has a rejected or failed request. Refresh your requests and contact a cAtIx administrator for review, or use a new invitation."
+msgstr "Для этого приглашения уже есть отклонённая или завершившаяся ошибкой заявка. Обновите список заявок и обратитесь к администратору cAtIx для пересмотра или используйте новое приглашение."
 
 #: src/app/routes/forms.submit.tsx:177
 msgid "This link may be invalid, expired, or you may not have access."
@@ -8415,16 +9106,28 @@ msgstr "Ссылка может быть недействительной, ус�
 msgid "This logo change will be cancelled when you save."
 msgstr "Это изменение логотипа будет отменено при сохранении."
 
+#: src/components/search/ask/AskSignupOffers.tsx:320
+msgid "This offer has expired. Ask for current availability."
+msgstr "Предложение устарело. Запросите актуальные свободные варианты."
+
+#: src/components/search/ask/AskSignupOffers.tsx:325
+msgid "This offer has expired. Ask for current events."
+msgstr "Предложение устарело. Попросите подобрать актуальные события."
+
 #: src/components/admin/RequireInnohassleAdmin.tsx:23
 msgid "This page is available only for InNoHassle admins."
 msgstr "Эта страница доступна только админам InNoHassle."
+
+#: src/components/calendar/ExportModal.tsx:284
+msgid "This private link grants read access to your AI Calendar. External calendar apps refresh on their own schedule; revoking the link cannot erase events already copied by an app. The feed includes only AI Calendar events and does not include their source-message provenance."
+msgstr "Эта приватная ссылка предоставляет доступ на чтение к вашему AI Calendar. Внешние календарные приложения обновляют данные по собственному расписанию; отзыв ссылки не удалит события, уже скопированные приложением. Лента содержит только события AI Calendar и не включает сведения об исходных сообщениях."
 
 #: src/components/when2meet/MeetingPage.tsx:1572
 msgid "This room booking no longer exists."
 msgstr "Этого бронирования комнаты больше нет."
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:718
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:766
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:720
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:768
 msgid "this same class"
 msgstr "это же занятие"
 
@@ -8478,7 +9181,7 @@ msgid "time"
 msgstr "время"
 
 #: src/components/room-booking/tv/RoomTvPage.tsx:200
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:367
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:369
 msgid "Time"
 msgstr "Время"
 
@@ -8605,7 +9308,7 @@ msgstr "К источнику"
 msgid "To teach student club leaders to run reports"
 msgstr "Учить лидеров студенческих клубов вести отчётность"
 
-#: src/components/calendar/CalendarViewer.tsx:697
+#: src/components/calendar/CalendarViewer.tsx:698
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:297
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:647
 #: src/components/sport/SportSchedulePage.tsx:237
@@ -8713,6 +9416,10 @@ msgstr "Вт"
 #: src/components/schedule-assistant/timetable/timetableViewerModel.ts:49
 msgid "Tuesday"
 msgstr "Вторник"
+
+#: src/components/search/ask/AskNotificationButton.tsx:96
+msgid "Turn off reply notifications"
+msgstr "Выключить уведомления об ответах"
 
 #. placeholder {0}: lastApproval.roomId
 #. placeholder {1}: new Date(lastApproval.at).toLocaleString(i18n.locale, { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", })
@@ -8947,9 +9654,21 @@ msgstr "Идентификатор для URL (например, «robotics-club
 msgid "URL-friendly identifier for the club"
 msgstr "URL-идентификатор клуба"
 
+#: src/components/search/SourceRequests.tsx:119
+#~ msgid "Use https://t.me/+HASH or https://t.me/joinchat/HASH. Public chat links are not supported."
+#~ msgstr "Используйте https://t.me/+HASH или https://t.me/joinchat/HASH. Ссылки на публичные чаты не поддерживаются."
+
 #: src/components/account/MyTokenPage.tsx:72
 msgid "Use only for development. Do not send it to untrusted people or applications!"
 msgstr "Используйте только для разработки. Не передавайте его людям и приложениям, которым не доверяете!"
+
+#: src/components/search/SourceRequests.tsx:111
+#~ msgid "Use t.me/+HASH or t.me/joinchat/HASH. Public chat links are not supported."
+#~ msgstr "Используйте t.me/+HASH или t.me/joinchat/HASH. Ссылки на публичные чаты не поддерживаются."
+
+#: src/components/search/SourceRequests.tsx:214
+msgid "Use t.me/username or max.ru/username for a public chat or channel, t.me/+HASH or t.me/joinchat/HASH for a private Telegram invitation, or max.ru/join/HASH for a private MAX invitation. Links with https:// are also supported."
+msgstr "Для публичного чата или канала используйте t.me/username или max.ru/username, для приватного приглашения Telegram — t.me/+HASH или t.me/joinchat/HASH, для приватного приглашения MAX — max.ru/join/HASH. Ссылки с https:// тоже поддерживаются."
 
 #: src/components/account/SignInModal.tsx:23
 msgid "Use your Innopolis account to access all features of this service."
@@ -9009,6 +9728,10 @@ msgstr "Проверка URL..."
 #: src/components/tabletennis/LiveTournament.tsx:242
 msgid "Validation"
 msgstr "Групповой этап"
+
+#: src/components/search/ask/AskSources.tsx:85
+msgid "Verified study groups"
+msgstr "Подтверждённые учебные группы"
 
 #: src/components/onboarding/OnboardingSteps.tsx:309
 msgid "Verify your groups"
@@ -9112,6 +9835,10 @@ msgstr "против"
 msgid "Waiting"
 msgstr "Ожидание"
 
+#: src/components/search/SourceRequests.tsx:463
+msgid "Waiting for chat access confirmation"
+msgstr "Ожидает подтверждения доступа к чату"
+
 #: src/components/clubs/ClubReviewChangesPage.tsx:70
 msgid "Waiting for review"
 msgstr "Ожидает проверки"
@@ -9147,7 +9874,7 @@ msgstr "WARNING"
 #: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:97
 #: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:203
 #: src/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx:264
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:159
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:161
 msgid "Was:"
 msgstr "Было:"
 
@@ -9199,7 +9926,12 @@ msgstr "мы пишем код и поддерживаем продукты"
 msgid "Weak GPS signal (±{accuracyM}m)"
 msgstr "Слабый сигнал GPS (±{accuracyM} м)"
 
+#: src/components/search/ask/AskResult.tsx:222
+msgid "Web search"
+msgstr "Веб-поиск"
+
 #: src/components/clubs/constants.ts:89
+#: src/components/search/ask/AskResult.tsx:220
 msgid "Website"
 msgstr "Сайт"
 
@@ -9223,13 +9955,13 @@ msgstr "Ср"
 msgid "Wednesday"
 msgstr "Среда"
 
-#: src/components/calendar/CalendarViewer.tsx:76
+#: src/components/calendar/CalendarViewer.tsx:77
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:300
 msgid "Week"
 msgstr "Неделя"
 
 #: src/components/calendar/CalendarViewer.tsx:445
-#: src/components/calendar/CalendarViewer.tsx:500
+#: src/components/calendar/CalendarViewer.tsx:501
 #: src/components/sport/SportTrainingsCalendarList.tsx:368
 msgid "Week {week}"
 msgstr "Неделя {week}"
@@ -9266,14 +9998,38 @@ msgstr "Добро пожаловать в сообщество <0/><1>one-zero-
 msgid "Welcome to InNoHassle"
 msgstr "Добро пожаловать в InNoHassle"
 
+#: src/components/search/ask/AskPage.tsx:160
+msgid "What are the university exam retake rules?"
+msgstr "Какие в университете правила пересдач?"
+
 #: src/components/clubs/ClubLeaguePage.tsx:179
 msgid "What Clubs Can Purchase"
 msgstr "Что могут покупать клубы"
+
+#: src/components/search/ask/AskFeedback.tsx:94
+msgid "What did you like?"
+msgstr "Что понравилось?"
+
+#: src/components/search/ask/AskInput.tsx:147
+msgid "What is in the attached file?"
+msgstr "Что в прикреплённом файле?"
 
 #: src/components/dorms/DormsPage.tsx:15
 #: src/components/extension/ExtensionPage.tsx:16
 msgid "What is it?"
 msgstr "Что это?"
+
+#: src/components/search/ask/AskPage.tsx:159
+msgid "What is on my schedule tomorrow?"
+msgstr "Что у меня завтра по расписанию?"
+
+#: src/components/search/ask/AskPage.tsx:162
+msgid "What was announced in my available chats this week?"
+msgstr "Что объявляли в доступных мне чатах на этой неделе?"
+
+#: src/components/search/ask/AskFeedback.tsx:95
+msgid "What was wrong?"
+msgstr "Что было не так?"
 
 #: src/components/board-games/ReservationDetailsModal.tsx:169
 #: src/components/board-games/UserReservationDetailsModal.tsx:110
@@ -9293,6 +10049,10 @@ msgstr "При открытии:"
 msgid "When registering your club, you'll need to choose one of the following categories. Each type has specific criteria in the Club League."
 msgstr "При регистрации клуба нужно выбрать одну из категорий. У каждого типа свои критерии в Club League."
 
+#: src/components/search/SourceRequests.tsx:162
+msgid "While waiting for access, the chat administrator may need to approve the join request. If joining times out, the worker checks access without blindly repeating the join."
+msgstr "Пока ожидается доступ, администратору чата может потребоваться одобрить заявку на вступление. При таймауте вступления обработчик проверяет доступ, не повторяя вступление вслепую."
+
 #: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:671
 msgid "Who can teach"
 msgstr "Кто может вести"
@@ -9301,15 +10061,23 @@ msgstr "Кто может вести"
 msgid "Who is it?"
 msgstr "Кто это?"
 
+#: src/components/search/SourceRequests.tsx:172
+msgid "Who should be able to see indexed messages?"
+msgstr "Кто сможет видеть проиндексированные сообщения?"
+
 #: src/components/about/AboutPage.tsx:32
 msgid "Who we are"
 msgstr "Кто мы"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:101
+#: src/components/search/ask/AskSources.tsx:147
+msgid "Whole chat"
+msgstr "Весь чат"
+
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:103
 msgid "whole semester"
 msgstr "весь семестр"
 
-#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:563
+#: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:565
 msgid "Whole semester"
 msgstr "Весь семестр"
 
@@ -9409,30 +10177,42 @@ msgstr "Вы офлайн"
 msgid "You are outside this map"
 msgstr "Вы вне этой карты"
 
-#: src/components/calendar/ExportModal.tsx:144
+#: src/components/search/ask/AskSignupOffers.tsx:290
+msgid "You are signed up"
+msgstr "Вы записаны"
+
+#: src/components/calendar/ExportModal.tsx:362
 msgid "You can add deadlines from your Moodle courses to your favorite calendar application and it will be updated on changes."
 msgstr "Вы можете добавить дедлайны курсов из Moodle в любимое приложение календаря — оно будет обновляться при изменениях."
 
-#: src/components/calendar/ExportModal.tsx:88
-#: src/components/calendar/ExportModal.tsx:155
+#: src/components/calendar/ExportModal.tsx:103
+#: src/components/calendar/ExportModal.tsx:373
 msgid "You can add the schedule to your favorite calendar application and it will be updated on schedule changes."
 msgstr "Вы можете добавить расписание в любимое приложение календаря — оно будет обновляться при изменениях."
 
-#: src/components/calendar/ExportModal.tsx:134
+#: src/components/calendar/ExportModal.tsx:352
 msgid "You can add your personal music room schedule to your favorite calendar application and it will be updated on changes."
 msgstr "Вы можете добавить личное расписание музкомнаты в любимое приложение календаря — оно будет обновляться при изменениях."
 
-#: src/components/calendar/ExportModal.tsx:139
+#: src/components/calendar/ExportModal.tsx:357
 msgid "You can add your personal sport trainings schedule to your favorite calendar application and it will be updated on changes."
 msgstr "Вы можете добавить личное расписание спортивных тренировок в любимое приложение календаря — оно будет обновляться при изменениях."
 
-#: src/components/calendar/ExportModal.tsx:149
+#: src/components/calendar/ExportModal.tsx:367
 msgid "You can add your room bookings to your favorite calendar application and it will be updated on changes."
 msgstr "Вы можете добавить бронирования аудиторий в любимое приложение календаря — оно будет обновляться при изменениях."
 
 #: src/components/calendar/import/ImportModal.tsx:156
 msgid "You can add your schedule to InNoHassle and it will be updated on schedule changes."
 msgstr "Вы можете добавить свой календарь в InNoHassle — он будет обновляться при изменениях."
+
+#: src/components/search/ask/AskInput.tsx:72
+msgid "You can attach up to 3 files."
+msgstr "Можно прикрепить до 3 файлов."
+
+#: src/components/search/ask/AskPage.tsx:178
+msgid "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
+msgstr "Можно прикрепить до 3 файлов PDF, TXT или изображений, до 10 МиБ каждый."
 
 #: src/components/about/AboutPage.tsx:249
 msgid "You can learn about all new community projects and our events from our Telegram channel."
@@ -9464,7 +10244,7 @@ msgstr "У вас нет доступа к админке настольных �
 msgid "You don't have any bookings now."
 msgstr "У вас нет бронирований."
 
-#: src/app/routes/__root.tsx:65
+#: src/app/routes/__root.tsx:66
 msgid "You don't have permission to access this page."
 msgstr "У вас нет доступа к этой странице."
 
@@ -9491,6 +10271,10 @@ msgstr "У вас нет бронирований"
 #: src/components/board-games/BoardGamesPage.tsx:129
 msgid "You have no reservations yet."
 msgstr "У вас пока нет бронирований."
+
+#: src/components/search/SourceRequests.tsx:433
+msgid "You have reached the daily limit for new requests. Wait 24 hours before submitting a new invitation. You can still refresh your existing requests."
+msgstr "Вы достигли суточного лимита новых заявок. Подождите 24 часа перед отправкой нового приглашения. Список существующих заявок можно обновлять."
 
 #: src/components/clubs/EditClubPage.tsx:241
 msgid "You have unsaved changes. Are you sure you want to leave?"
@@ -9537,6 +10321,10 @@ msgstr "Ваш клуб приглашён как организатор это�
 msgid "Your document was sent to the printer"
 msgstr "Документ отправлен на принтер"
 
+#: src/components/search/ask/AskPage.tsx:257
+msgid "Your draft is below. You can edit it and send it again."
+msgstr "Черновик ниже. Его можно изменить и отправить снова."
+
 #: src/components/events/drafts/DraftsPage.tsx:109
 msgid "Your drafts"
 msgstr "Ваши черновики"
@@ -9557,13 +10345,17 @@ msgstr "Ваши группы и занятия преподавателя по�
 msgid "Your medical group ({medicalGroup}) is not eligible for this training."
 msgstr "Ваша медицинская группа ({medicalGroup}) не допускается к этой тренировке."
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:101
+#: src/components/calendar/ConfigCalendarDialog.tsx:102
 msgid "Your Moodle deadlines"
 msgstr "Ваши дедлайны из Moodle"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:87
+#: src/components/calendar/ConfigCalendarDialog.tsx:88
 msgid "Your music room bookings"
 msgstr "Ваши бронирования музкомнаты"
+
+#: src/components/search/SourceRequests.tsx:349
+msgid "Your requests"
+msgstr "Ваши заявки"
 
 #: src/components/board-games/UserReservationDetailsModal.tsx:55
 msgid "Your reservation was removed."
@@ -9573,9 +10365,13 @@ msgstr "Ваше бронирование удалено."
 msgid "Your reservations"
 msgstr "Ваши бронирования"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:113
+#: src/components/calendar/ConfigCalendarDialog.tsx:114
 msgid "Your room bookings"
 msgstr "Ваши бронирования аудиторий"
+
+#: src/components/search/SourceRequests.tsx:416
+msgid "Your selected study group is no longer verified. Refresh your requests and select a currently verified group before submitting."
+msgstr "Выбранная учебная группа больше не подтверждена. Обновите заявки и перед отправкой выберите группу, подтверждённую сейчас."
 
 #: src/components/guard/FilesSection.tsx:17
 #: src/components/guard/GuardLandingPage.tsx:75
@@ -9590,9 +10386,13 @@ msgstr "Ваши таблицы"
 msgid "Your sheets — Guard"
 msgstr "Ваши листы — Guard"
 
-#: src/components/calendar/ConfigCalendarDialog.tsx:73
+#: src/components/calendar/ConfigCalendarDialog.tsx:74
 msgid "Your sport checkins"
 msgstr "Ваши записи на спорт"
+
+#: src/components/search/SourceRequests.tsx:254
+msgid "Your study groups could not be verified. Refresh to try again, or choose all cAtIx users."
+msgstr "Не удалось проверить ваши учебные группы. Обновите список или выберите всех пользователей cAtIx."
 
 #: src/components/sport/SportCheckinRulesModal.tsx:33
 msgid "Your university pass grants access only to the sessions you have checked in for. In case of misuse of the university pass, you may be subject to sanctions, including a monetary fine from the sports complex and disciplinary action from the university."

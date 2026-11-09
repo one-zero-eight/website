@@ -1,7 +1,7 @@
-import { useLingui } from "@lingui/react/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { ActPage } from "@/components/search/act/ActPage";
-import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
+import { Topbar } from "@/components/layout/Topbar";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
@@ -32,7 +32,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <TopbarWithToggleGroup currentTabText={q ?? ""} />
+      <Topbar title={<Trans>Act</Trans>} />
       <RequireAuth>
         <ActPage actQuery={q ?? ""} />
       </RequireAuth>

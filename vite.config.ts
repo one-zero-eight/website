@@ -48,6 +48,7 @@ export default defineConfig({
     VitePWA({
       registerType: "prompt",
       workbox: {
+        importScripts: ["ask-notifications-sw.js"],
         globPatterns: ["**/*.{js,css,html,json,svg,png,woff2}"],
         navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/callback\//, /^\/assets\//],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB

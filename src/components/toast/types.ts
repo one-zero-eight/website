@@ -9,6 +9,7 @@ export interface Toast {
   type: ToastType;
   title: ToastText;
   message?: ToastText;
+  action?: { label: ToastText; onClick: () => void };
   duration?: number;
   isVisible?: boolean;
 }

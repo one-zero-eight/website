@@ -76,6 +76,78 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
 > [!TIP]
 > After adding UI strings wrapped in Lingui macros (`Trans` / `msg` / `t`), run `pnpm lingui:extract` and fill Russian `msgstr` in `src/locales/ru.po`.
 
+### Proposing chat sources
+
+In cAtIx Sources, choose **Propose a chat** to request a Telegram or MAX chat
+for your verified study group or all cAtIx users. The chat administrator must
+consent to indexing for the selected audience, including users outside the chat.
+Requests use the existing `POST /sources/requests` payload
+(`invite_link`, `group_code`, `comment`, `consent`) and require cAtIx administrator review.
+Submitting does not join the chat. Approval queues the account worker to join the
+Telegram or MAX chat automatically; MAX uses a user account, not an official bot,
+and does not require administrator rights. A chat administrator may still need to
+approve the join request. **Approved; queued to connect** is not proof of access;
+**Waiting for chat access confirmation** can mean chat-side approval is pending.
+Indexing and history loading start only after fresh access confirmation.
+If a join times out, the worker reconciles current access without blindly repeating
+the join. This moderated, approved join is the only exception to passive MAX
+operation: no messages, read receipts, typing, or reactions are sent.
+After deploying this change, restart the existing MAX account worker to process
+already approved requests; no manual database update is needed. This describes the
+workflow, not a claim of live MAX verification.
+
+Telegram accepts public `t.me/username` and private `t.me/+HASH` or
+`t.me/joinchat/HASH` links. MAX accepts public `max.ru/username` and private
+`max.ru/join/HASH` links, optionally prefixed with `https://`. MAX names and
+invitation tokens contain 1–128 ASCII letters, digits, underscores, or hyphens;
+the bare `max.ru/join` path is invalid. MAX path case is preserved, and links are
+submitted with `https://max.ru/`. Queries, fragments, trailing slashes, ports,
+and `http://` are not supported. Private invitations are hidden in request
+titles and messages.
+Untitled requests display **Chat request**; their selected audience is shown separately.
+
+Available source cards identify **Telegram** or **MAX** and link their title to
+the chat: a normal public link takes priority, with a saved invitation used when
+no public link is available. If neither is known, the title stays plain text.
+The catalogue and its links remain limited to the user's allowed source audience;
+proposal invitations stay hidden in request titles and messages.
+
+### cAtIx chat
+
+The empty chat offers editable examples for schedules, university rules,
+announcements and available rooms. Selecting an example only fills and focuses
+the composer; Send submits it. Drafts with text or attachments are not replaced.
+Attachments support up to three PDF, TXT or image files, up to 10 MiB each.
+
+Room Booking availability and Music Room service windows also produce booking
+cards, even without a personal-schedule recommendation. Service-only offers say
+that the personal calendar will be checked before booking. Rooms require a booking
+subject. Music offers with exactly one legal future start/duration pair show Book
+directly; multiple possible pairs keep Choose time, even within one window. Only
+the final Book click submits consent; loading or choosing an interval does not
+create a booking.
+
+Answers render Markdown during generation and keep the server status visible.
+The backend supplies the answer and its structured `sources` separately. One compact
+source list uses the server's citation numbers and preserves document titles,
+clauses, sections, provenance and chat metadata. Archive buttons in that same list
+open exact archive members without intercepting ordinary Markdown links.
+Previously saved answers without structured sources remain readable with their
+original text; the client does not clear chat history or drafts during the cutover.
+Numeric references in completed answers link to their source in the same response;
+source lists use the body text size. Code and existing Markdown links are unchanged.
+
+History and the chat list offer explicit Retry after loading failures. Retrying
+the same failed history load preserves the composer and attachments. Request
+errors show HTTP, validation or network details without automatically repeating
+a question or decision. An unconfirmed action result must be checked in the
+service before trying again; this UI does not recover interrupted operations.
+
+### cAtIx notification icon
+
+System reply notifications use `public/catix-notification.png`, copied from the cAtIx logo (800×800 PNG).
+The `icon` option in `src/components/search/ask/AskNotifications.tsx` applies to both service-worker and desktop notifications; favicon and PWA icons are independent.
+
 ### Development preview on Android via ADB (USB or Wi‑Fi)
 
 Use this setup if you want to open the local dev version on a physical Android device over USB or Wi‑Fi.

@@ -1,13 +1,16 @@
 import { useLingui } from "@lingui/react/macro";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { AskPage } from "@/components/search/ask/AskPage";
-import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
+import { NewChatButton } from "@/components/search/ask/NewChatButton";
+import { CatixTitle } from "@/components/search/ask/CatixTitle";
+import { Topbar } from "@/components/layout/Topbar";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
 
 type AskParams = {
   q?: string;
+  chat?: string;
 };
 
 export const Route = createFileRoute("/_with_menu/search/ask")({
@@ -15,13 +18,15 @@ export const Route = createFileRoute("/_with_menu/search/ask")({
   validateSearch: (ask: Record<string, unknown>): AskParams => {
     return {
       q: (ask.q as string | undefined) ?? "",
+      chat: typeof ask.chat === "string" && ask.chat ? ask.chat : undefined,
     };
   },
 });
 
 function RouteComponent() {
   const { t } = useLingui();
-  const { q } = Route.useSearch();
+  const { q, chat } = Route.useSearch();
+  const navigate = Route.useNavigate();
   return (
     <Suspense>
       <Helmet>
@@ -32,9 +37,15 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <TopbarWithToggleGroup currentTabText={q} />
+      <Topbar title={<CatixTitle />} titleAction={<NewChatButton />} />
       <RequireAuth>
-        <AskPage askQuery={q ?? ""} />
+        <AskPage
+          askQuery={q ?? ""}
+          askChat={chat}
+          onChatLinkHandled={() => {
+            void navigate({ search: { q }, replace: true });
+          }}
+        />
       </RequireAuth>
     </Suspense>
   );

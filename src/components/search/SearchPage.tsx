@@ -12,13 +12,23 @@ import SearchField from "@/components/search/SearchField.tsx";
 import SearchResult from "@/components/search/SearchResult.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSessionStorage } from "usehooks-ts";
 import IframePreviewCard from "./IframePreviewCard";
+import { ArchiveDocumentModal } from "./ArchiveDocumentModal";
 
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
   useLingui();
   const navigate = useNavigate();
 
-  const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
+  // The last search and its filters stay when the user goes to another page and comes back (in this tab); the results come
+  // from the query cache then
+  const [savedQuery, setSavedQuery] = useSessionStorage(
+    "search-last-query",
+    "",
+  );
+  const [submittedQuery, setSubmittedQuery] = useState<string | null>(
+    searchQuery || savedQuery || null,
+  );
   const didInit = useRef<boolean>(false);
 
   const [previewSource, setPreviewSource] =
@@ -44,10 +54,11 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     },
   };
 
-  const [appliedFilters, setAppliedFilters] =
-    useState<Record<string, Record<string, boolean>>>(initialFiltersState);
+  const [appliedFilters, setAppliedFilters] = useSessionStorage<
+    Record<string, Record<string, boolean>>
+  >("search-filters", initialFiltersState);
   const [selectedFilters, setSelectedFilters] =
-    useState<Record<string, Record<string, boolean>>>(initialFiltersState);
+    useState<Record<string, Record<string, boolean>>>(appliedFilters);
 
   const checks = (group: string, value: string) => {
     setSelectedFilters((prev) => ({
@@ -104,16 +115,19 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
         }
 
         const url = "url" in e.source ? e.source.url : "";
+        const isPdfDocument =
+          (e.source.type === "eduwiki" && !!e.source.archive_document) ||
+          url.endsWith(".pdf");
 
         const isPdf =
           filters.response_types.includes(
             PathsSearchSearchGetParametersQueryResponse_types.pdf,
-          ) && url.endsWith(".pdf");
+          ) && isPdfDocument;
 
         const isLink =
           filters.response_types.includes(
             PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
-          ) && !url.endsWith(".pdf");
+          ) && !isPdfDocument;
 
         return isPdf || isLink;
       })
@@ -132,8 +146,13 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
 
   useEffect(() => {
     const first = filteredResponses[0];
-    if (first && previewSource === undefined && !isMobile) {
-      // Reset preview source when search result changes and it has an appropriate type for preview
+    if (
+      first &&
+      previewSource === undefined &&
+      !isMobile &&
+      !(first.source.type === "eduwiki" && first.source.archive_document)
+    ) {
+      // Archive documents require explicit selection; other sources preview automatically.
       setPreviewSource(first.source);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -155,7 +174,16 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     }
   }, [searchQuery]);
 
+  useEffect(() => {
+    // Opened from the menu (no query in the address): the last search
+    if (!searchQuery && savedQuery) {
+      navigate({ to: "/search", search: { q: savedQuery }, replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const runSearch = (query: string) => {
+    setSavedQuery(query);
     navigate({ to: "/search", search: { q: query } });
     if (query === submittedQuery) {
       refetch();
@@ -233,7 +261,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
             ) : (
               previewSource &&
               !isMobile &&
-              "url" in previewSource && (
+              "url" in previewSource &&
+              !!previewSource.url && (
                 <IframePreviewCard
                   source={previewSource}
                   onClose={() => setPreviewSource(undefined)}
@@ -243,6 +272,14 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
           </div>
         </div>
       )}
+      {isMobile &&
+        previewSource?.type === "eduwiki" &&
+        previewSource.archive_document && (
+          <ArchiveDocumentModal
+            source={previewSource}
+            onClose={() => setPreviewSource(undefined)}
+          />
+        )}
       {error && (
         <div>
           <p className="text-base-content py-4 text-xl font-semibold">
