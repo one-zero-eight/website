@@ -140,7 +140,12 @@ export function AskPage({
           <div className="mx-auto flex w-full max-w-4xl grow flex-col gap-4 p-4">
             {isEmpty && (
               <div className="flex grow flex-col items-center justify-center gap-2 text-center">
-                <span className="text-lg font-medium">cAtIx</span>
+                <span
+                  title="cAtIx"
+                  className="text-5xl [filter:grayscale(1)_sepia(1)_saturate(4)]"
+                >
+                  🐱
+                </span>
                 <span className="text-base-content/70">
                   <Trans>
                     I can help with your schedule, university rules,
