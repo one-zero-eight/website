@@ -226,6 +226,69 @@ it.each([
   },
 );
 
+it.each([60, null])(
+  "books the sole music interval exactly once through the real transport (duration: %s)",
+  async (duration_minutes) => {
+    const item = {
+      ...offer,
+      service: "music",
+      music_window: {
+        starts_at: offer.starts_at,
+        ends_at:
+          duration_minutes === 60
+            ? "2099-11-12T19:00:00+03:00"
+            : "2099-11-12T18:30:00+03:00",
+        latest_start_at: offer.starts_at,
+        max_duration_minutes: 90,
+        duration_minutes,
+        step_minutes: 30,
+      },
+    } as searchTypes.SchemaSignupOffer;
+    const ends_at = item.music_window!.ends_at;
+    renderOffer(item);
+    expect(container.querySelector("button")?.textContent).toBe("Book");
+    expect(container.querySelector("select")).toBeNull();
+    expect(api.fetch).not.toHaveBeenCalled();
+    expect(api.remember).not.toHaveBeenCalled();
+    api.fetch.mockImplementation(() => {
+      expect(api.remember).toHaveBeenCalledWith(
+        "chat-1",
+        expect.objectContaining({
+          starts_at: offer.starts_at,
+          ends_at,
+          status: "unknown",
+        }),
+      );
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({ ...item, ends_at, status: "confirmed" }),
+          {
+            headers: { "Content-Type": "application/json" },
+          },
+        ),
+      );
+    });
+    await act(async () => {
+      const button = container.querySelector("button")!;
+      button.click();
+      button.click();
+    });
+    expect(api.fetch).toHaveBeenCalledTimes(1);
+    const request = api.fetch.mock.calls[0][0] as Request;
+    expect(request.method).toBe("POST");
+    expect(request.url).toBe(
+      "https://search.test/ask/chat-1/signup/opaque-offer-1",
+    );
+    expect(request.headers.get("X-Sport-Token")).toBeNull();
+    expect(await request.json()).toEqual({
+      time_from: "18:00",
+      time_to: duration_minutes === 60 ? "19:00" : "18:30",
+    });
+    expect(container.textContent).toContain("Booked");
+    expect(container.querySelector("button")).toBeNull();
+  },
+);
+
 it.each([
   {},
   { ...offer, status: "available" },

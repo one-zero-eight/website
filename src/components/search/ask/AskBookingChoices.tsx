@@ -34,27 +34,35 @@ export function AskBookingChoices({
     window?.duration_minutes?.toString() ?? "",
   );
   const [error, setError] = useState("");
-  const starts: number[] = [];
+  const availableStarts: number[] = [];
+  const now = Date.now();
   if (window) {
     const last = Math.min(
       Date.parse(window.latest_start_at),
-      Date.parse(window.ends_at) - Number(duration || 30) * minute,
+      Date.parse(window.ends_at) - (window.duration_minutes ?? 30) * minute,
     );
     for (
       let value = Date.parse(window.starts_at);
       value <= last;
       value += 30 * minute
     ) {
-      if (value > Date.now()) starts.push(value);
+      if (value > now) availableStarts.push(value);
     }
   }
+  const starts = availableStarts.filter(
+    (value) =>
+      value + Number(duration || window?.duration_minutes || 30) * minute <=
+      Date.parse(window!.ends_at),
+  );
   const selectedStart = starts.find((value) => clock(value) === start);
+  const onlyStart =
+    availableStarts.length === 1 ? availableStarts[0] : undefined;
   const durations: number[] = [];
   if (window) {
     const max = Math.min(
       window.max_duration_minutes,
       (Date.parse(window.ends_at) -
-        (selectedStart ?? Date.parse(window.starts_at))) /
+        (selectedStart ?? onlyStart ?? Date.parse(window.starts_at))) /
         minute,
     );
     for (let value = 30; value <= max; value += 30) {
@@ -62,19 +70,24 @@ export function AskBookingChoices({
         durations.push(value);
     }
   }
+  const singleInterval = onlyStart != null && durations.length === 1;
+  const bookingStart = singleInterval ? onlyStart : selectedStart;
+  const bookingDuration = singleInterval ? durations[0] : Number(duration);
   const selectedEnd =
-    selectedStart != null && durations.includes(Number(duration))
-      ? selectedStart + Number(duration) * minute
+    bookingStart != null && durations.includes(bookingDuration)
+      ? bookingStart + bookingDuration * minute
       : null;
 
   function handleBook() {
+    if (disabled) return;
     setError("");
     if (music) {
-      if (selectedStart == null || selectedEnd == null) {
+      if (bookingStart == null || selectedEnd == null) {
         setError(t`Choose a start time and duration.`);
         return;
       }
-      if (selectedStart <= Date.now()) {
+      if (bookingStart <= Date.now()) {
+        setOpen(true);
         setStart("");
         setError(t`Choose a future time within the available window.`);
         return;
@@ -82,10 +95,10 @@ export function AskBookingChoices({
       onBook(
         {
           ...offer,
-          starts_at: timestamp(selectedStart),
+          starts_at: timestamp(bookingStart),
           ends_at: timestamp(selectedEnd),
         },
-        { time_from: clock(selectedStart), time_to: clock(selectedEnd) },
+        { time_from: clock(bookingStart), time_to: clock(selectedEnd) },
       );
       return;
     }
@@ -101,7 +114,7 @@ export function AskBookingChoices({
     onBook({ ...offer, booking_title: title }, { booking_title: title });
   }
 
-  if (music && !open)
+  if (music && !open && !singleInterval)
     return (
       <button
         type="button"
@@ -115,7 +128,7 @@ export function AskBookingChoices({
 
   return (
     <div className="grid w-full min-w-0 gap-3">
-      {music ? (
+      {music && !singleInterval && (
         <div className="grid min-w-0 gap-3 @min-[28rem]/signup:grid-cols-2">
           <label className="grid min-w-0 gap-1 text-xs">
             <Trans>Start time (MSK)</Trans>
@@ -160,7 +173,8 @@ export function AskBookingChoices({
             </select>
           </label>
         </div>
-      ) : (
+      )}
+      {!music && (
         <label className="grid min-w-0 gap-1 text-xs">
           <Trans>Booking subject</Trans>
           <input
@@ -175,15 +189,15 @@ export function AskBookingChoices({
           />
         </label>
       )}
-      {selectedStart != null && selectedEnd != null && (
+      {bookingStart != null && selectedEnd != null && (
         <p className="text-sm wrap-anywhere tabular-nums">
-          {new Date(selectedStart).toLocaleDateString(i18n.locale, {
+          {new Date(bookingStart).toLocaleDateString(i18n.locale, {
             timeZone: "Europe/Moscow",
             year: "numeric",
             month: "short",
             day: "numeric",
           })}
-          , {clock(selectedStart)}–{clock(selectedEnd)} · MSK
+          , {clock(bookingStart)}–{clock(selectedEnd)} · MSK
         </p>
       )}
       {error && <p className="text-error text-xs">{error}</p>}

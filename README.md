@@ -122,8 +122,10 @@ Attachments support up to three PDF, TXT or image files, up to 10 MiB each.
 Room Booking availability and Music Room service windows also produce booking
 cards, even without a personal-schedule recommendation. Service-only offers say
 that the personal calendar will be checked before booking. Rooms require a booking
-subject; music windows require an explicit start and duration. Only the final Book
-click submits consent; loading or choosing an interval does not create a booking.
+subject. Music offers with exactly one legal future start/duration pair show Book
+directly; multiple possible pairs keep Choose time, even within one window. Only
+the final Book click submits consent; loading or choosing an interval does not
+create a booking.
 
 Answers render Markdown during generation and keep the server status visible.
 The backend supplies the answer and its structured `sources` separately. One compact
