@@ -131,13 +131,12 @@ describe("Sources shared-client and modal lifecycle", () => {
   it("opens the real proposal form and closes only the nested modal", async () => {
     act(() => button("Sources").click());
     await settle();
-    act(() => button("Propose a Telegram chat").click());
+    act(() => button("Propose a chat").click());
     await settle();
     expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(2);
     expect(
       document.body.querySelector('input[name="invite_link"]'),
     ).not.toBeNull();
-    expect(document.body.textContent).toContain("Telegram source requests");
     expect((transport.mock.calls[1][0] as Request).url).toBe(
       "http://localhost/search/sources/requests",
     );

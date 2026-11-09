@@ -76,6 +76,25 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
 > [!TIP]
 > After adding UI strings wrapped in Lingui macros (`Trans` / `msg` / `t`), run `pnpm lingui:extract` and fill Russian `msgstr` in `src/locales/ru.po`.
 
+### Proposing chat sources
+
+In cAtIx Sources, choose **Propose a chat** to request a Telegram or MAX chat
+for your verified study group or all cAtIx users. The chat administrator must
+consent to indexing for the selected audience, including users outside the chat.
+Requests use the existing `POST /sources/requests` payload
+(`invite_link`, `group_code`, `comment`, `consent`) and require cAtIx administrator review.
+Submitting does not join the chat. For MAX, the chat administrator must add the
+MAX bot as an administrator with access to read messages; it cannot join automatically.
+
+Telegram accepts public `t.me/username` and private `t.me/+HASH` or
+`t.me/joinchat/HASH` links. MAX accepts public `max.ru/username` and private
+`max.ru/join/HASH` links, optionally prefixed with `https://`. MAX names and
+invitation tokens contain 1–128 ASCII letters, digits, underscores, or hyphens;
+the bare `max.ru/join` path is invalid. MAX path case is preserved, and links are
+submitted with `https://max.ru/`. Queries, fragments, trailing slashes, ports,
+and `http://` are not supported. Private invitations are hidden in request
+titles and messages.
+
 ### cAtIx notification icon
 
 System reply notifications use `public/catix-notification.png`, copied from the cAtIx logo (800×800 PNG).

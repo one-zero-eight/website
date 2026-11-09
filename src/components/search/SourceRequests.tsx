@@ -27,6 +27,16 @@ function normalizeTelegramLink(value: string): string | undefined {
   return `https://t.me/${username}`;
 }
 
+function normalizeChatLink(value: string): string | undefined {
+  const link = value.trim();
+  const maxPath =
+    /^(?:https:\/\/)?max\.ru\/(join\/[A-Za-z0-9_-]{1,128}|[A-Za-z0-9_-]{1,128})$/.exec(
+      link,
+    )?.[1];
+  if (maxPath && maxPath !== "join") return `https://max.ru/${maxPath}`;
+  return normalizeTelegramLink(link);
+}
+
 export function SourceRequests() {
   const [open, setOpen] = useState(false);
   return (
@@ -37,12 +47,12 @@ export function SourceRequests() {
         onClick={() => setOpen(true)}
       >
         <span className="icon-[material-symbols--add-circle-outline] text-lg" />
-        <Trans>Propose a Telegram chat</Trans>
+        <Trans>Propose a chat</Trans>
       </button>
       <Modal
         open={open}
         onOpenChange={setOpen}
-        title={<Trans>Telegram source requests</Trans>}
+        title={<Trans>Chat source requests</Trans>}
         containerClassName="max-h-[85dvh] overflow-y-auto"
       >
         {open && (
@@ -97,7 +107,7 @@ function SourceRequestsContent() {
       });
     },
   });
-  const normalizedInvite = normalizeTelegramLink(inviteLink);
+  const normalizedInvite = normalizeChatLink(inviteLink);
   const validInvite = normalizedInvite !== undefined;
   const validGroup =
     audience === "all" ||
@@ -132,7 +142,7 @@ function SourceRequestsContent() {
 
   function hideInviteLinks(text: string) {
     return text.replace(
-      /(?:https?:\/\/)?t\.me\/(?:\+|joinchat\/)[^\s]+/gi,
+      /(?:https?:\/\/)?(?:t\.me\/(?:\+|joinchat\/)|max\.ru\/join\/)[^\s]+/gi,
       t`[private invite hidden]`,
     );
   }
@@ -142,13 +152,13 @@ function SourceRequestsContent() {
       <p className="text-base-content/70 text-sm">
         <Trans>
           Submitting a request does not join the chat. A cAtIx administrator
-          must review it first; Telegram may then require its own approval.
+          must review it first. Telegram may then require its own approval. For
+          MAX, the chat administrator must add the MAX bot as an administrator
+          with access to read messages; the bot cannot join automatically.
         </Trans>
       </p>
       <p className="text-base-content/70 text-sm">
-        <Trans>
-          Study group verification is not proof of Telegram chat membership.
-        </Trans>
+        <Trans>Study group verification is not proof of chat membership.</Trans>
       </p>
       <label className="flex flex-col gap-1">
         <Trans>Who should be able to see indexed messages?</Trans>
@@ -172,20 +182,19 @@ function SourceRequestsContent() {
         <p className="text-base-content/70 text-sm">
           <Trans>
             Indexed messages will be visible to students verified for the
-            selected study group, including students who are not Telegram chat
-            members.
+            selected study group, including students who are not chat members.
           </Trans>
         </p>
       ) : (
         <p className="alert alert-warning text-sm">
           <Trans>
             Messages will be visible to all cAtIx users, including people who
-            are not members of your study group or Telegram chat.
+            are not members of your study group or chat.
           </Trans>
         </p>
       )}
       <label className="flex flex-col gap-1">
-        <Trans>Telegram chat or channel link</Trans>
+        <Trans>Telegram or MAX chat or channel link</Trans>
         <input
           className="input w-full"
           name="invite_link"
@@ -195,14 +204,17 @@ function SourceRequestsContent() {
         />
         <span className="text-base-content/70 text-xs">
           <Trans>
-            Use t.me/username for a public chat or channel, or t.me/+HASH or
-            t.me/joinchat/HASH for a private invitation. Links with https:// are
-            also supported.
+            Use t.me/username or max.ru/username for a public chat or channel,
+            t.me/+HASH or t.me/joinchat/HASH for a private Telegram invitation,
+            or max.ru/join/HASH for a private MAX invitation. Links with
+            https:// are also supported.
           </Trans>
         </span>
         {!validInvite && (
           <span className="text-error text-sm">
-            <Trans>Enter a valid Telegram chat, channel or invite link.</Trans>
+            <Trans>
+              Enter a valid Telegram or MAX chat, channel or invite link.
+            </Trans>
           </span>
         )}
       </label>
@@ -279,14 +291,13 @@ function SourceRequestsContent() {
         />
         {audience === "all" ? (
           <Trans>
-            The Telegram chat administrator agreed to indexing this chat and
-            making its messages visible to all cAtIx users.
+            The chat administrator agreed to indexing this chat and making its
+            messages visible to all cAtIx users.
           </Trans>
         ) : (
           <Trans>
-            The Telegram chat administrator agreed to indexing this chat and
-            making its messages available to verified students of the selected
-            study group.
+            The chat administrator agreed to indexing this chat and making its
+            messages available to verified students of the selected study group.
           </Trans>
         )}
       </label>
@@ -442,11 +453,11 @@ function SourceRequestStatus({
     case "pending":
       return <Trans>Awaiting cAtIx administrator approval</Trans>;
     case "approved":
-      return <Trans>Approved; queued to join</Trans>;
+      return <Trans>Approved; queued to connect</Trans>;
     case "joining":
-      return <Trans>Joining Telegram chat</Trans>;
+      return <Trans>Connecting chat</Trans>;
     case "waiting_join":
-      return <Trans>Waiting for Telegram membership confirmation</Trans>;
+      return <Trans>Waiting for chat access confirmation</Trans>;
     case "connected":
       return (
         <Trans>Source enabled; message history may still be loading</Trans>

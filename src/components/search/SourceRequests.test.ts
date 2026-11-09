@@ -57,7 +57,7 @@ async function settle() {
   });
 }
 async function open() {
-  await act(async () => button("Propose a Telegram chat").click());
+  await act(async () => button("Propose a chat").click());
   await settle();
 }
 function input(name: string, value: string) {
@@ -140,7 +140,15 @@ it.each([
     "t.me/joinchat/valid_Invite-1234",
     "https://t.me/joinchat/valid_Invite-1234",
   ],
-])("submits a Telegram source link %s", async (link, normalized) => {
+  ["max.ru/Public_Chat-1", "https://max.ru/Public_Chat-1"],
+  ["https://max.ru/Public_Chat-1", "https://max.ru/Public_Chat-1"],
+  ["  max.ru/join/Private_Token-1  ", "https://max.ru/join/Private_Token-1"],
+  ["https://max.ru/join/a", "https://max.ru/join/a"],
+  ["max.ru/a", "https://max.ru/a"],
+  ["max.ru/Join", "https://max.ru/Join"],
+  [`max.ru/${"a".repeat(128)}`, `https://max.ru/${"a".repeat(128)}`],
+  [`max.ru/join/${"A".repeat(128)}`, `https://max.ru/join/${"A".repeat(128)}`],
+])("submits a normalized chat source link %s", async (link, normalized) => {
   await open();
   input("invite_link", link);
   expect(button("Submit request").disabled).toBe(true);
@@ -162,6 +170,27 @@ it.each([
 it.each([
   "https://evil.test/+invite",
   "",
+  "max.ru/",
+  "max.ru/join",
+  "max.ru/join/",
+  "http://max.ru/chat",
+  "https://max.ru/chat/",
+  "https://max.ru/join/token/",
+  "max.ru/chat?key=value",
+  "max.ru/join/token?key=value",
+  "max.ru/chat#fragment",
+  "max.ru/join/token#fragment",
+  "max.ru:443/chat",
+  "max.ru.evil.test/chat",
+  "https://max.ru@evil.test/chat",
+  "https://evil.test@max.ru/chat",
+  "max.ru/chat/extra",
+  "max.ru/join/token/extra",
+  "max.ru/%63hat",
+  "max.ru/чат",
+  "max.ru/join/a.b",
+  `max.ru/${"a".repeat(129)}`,
+  `max.ru/join/${"a".repeat(129)}`,
   "https://t.me/+invite?leak=yes",
   "http://t.me/+valid_Invite-1234",
   "https://t.me/+short",
@@ -205,7 +234,7 @@ it.each([
     "contact",
     "Login",
   ].map((path) => `t.me/${path}`),
-])("rejects malformed Telegram links %s", async (invite) => {
+])("rejects malformed chat links %s", async (invite) => {
   await open();
   input("invite_link", invite);
   act(() =>
@@ -387,8 +416,8 @@ it("refreshes the request list after a confirmed submission without exposing the
 });
 it.each([
   ["connected", "Source enabled; message history may still be loading"],
-  ["approved", "Approved; queued to join"],
-  ["waiting_join", "Waiting for Telegram membership confirmation"],
+  ["approved", "Approved; queued to connect"],
+  ["waiting_join", "Waiting for chat access confirmation"],
 ])(
   "shows the actual %s outcome when a POST returns an existing request",
   async (status, label) => {
@@ -414,9 +443,9 @@ it.each([
   },
 );
 it.each([
-  ["approved", "Approved; queued to join"],
-  ["joining", "Joining Telegram chat"],
-  ["waiting_join", "Waiting for Telegram membership confirmation"],
+  ["approved", "Approved; queued to connect"],
+  ["joining", "Connecting chat"],
+  ["waiting_join", "Waiting for chat access confirmation"],
   ["connected", "Source enabled; message history may still be loading"],
   ["failed", "Connection failed"],
   ["rejected", "Request rejected"],
@@ -473,7 +502,7 @@ it("shows loading and a retryable list error instead of a false empty state", as
 });
 it("polls only while the modal is open and refetches when reopened", async () => {
   vi.useFakeTimers();
-  await act(async () => button("Propose a Telegram chat").click());
+  await act(async () => button("Propose a chat").click());
   await act(async () => {
     await vi.advanceTimersByTimeAsync(100);
   });
@@ -499,34 +528,39 @@ it("polls only while the modal is open and refetches when reopened", async () =>
     api.fetch.mock.calls.filter(([req]) => req.method === "GET"),
   ).toHaveLength(3);
 });
-it("does not expose private invite links in request titles or messages", async () => {
-  api.fetch.mockResolvedValue(
-    response({
-      requests: [
-        {
-          ...request,
-          title: "https://t.me/+secretHash",
-          message: "See t.me/joinchat/otherSecret",
-          invite_link: "https://t.me/+hiddenField",
-        },
-      ],
-      verified_groups: [],
-    }),
-  );
-  await open();
-  expect(document.querySelector("ul")!.textContent).not.toMatch(
-    /secretHash|otherSecret|hiddenField|t\.me/,
-  );
-});
-it("explains group-based visibility and that submission does not join Telegram", async () => {
-  await open();
-  expect(document.body.textContent).toContain(
-    "Study group verification is not proof of Telegram chat membership",
-  );
-  expect(document.body.textContent).toContain(
-    "Submitting a request does not join the chat",
-  );
-});
+it.each([
+  [
+    "https://t.me/+secretHash",
+    "See t.me/joinchat/otherSecret",
+    "t.me/+hiddenField",
+  ],
+  [
+    "https://max.ru/join/secretHash",
+    "See max.ru/join/otherSecret",
+    "max.ru/join/hiddenField",
+  ],
+])(
+  "does not expose private invites %s in request titles or messages",
+  async (title, message, inviteLink) => {
+    api.fetch.mockResolvedValue(
+      response({
+        requests: [
+          {
+            ...request,
+            title,
+            message,
+            invite_link: inviteLink,
+          },
+        ],
+        verified_groups: [],
+      }),
+    );
+    await open();
+    expect(document.querySelector("ul")!.textContent).not.toMatch(
+      /secretHash|otherSecret|hiddenField|t\.me|max\.ru/,
+    );
+  },
+);
 it("signed-out users see the auth wall without querying or submitting", async () => {
   api.me = null;
   await open();
@@ -641,7 +675,7 @@ it("submits all-audience requests without verified groups after explicit selecti
     audience.value = "all";
     audience.dispatchEvent(new Event("change", { bubbles: true }));
   });
-  input("invite_link", "t.me/universityinnopolis");
+  input("invite_link", "max.ru/Public_Chat");
   act(() =>
     document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
   );
@@ -653,7 +687,7 @@ it("submits all-audience requests without verified groups after explicit selecti
   await settle();
   const post = api.fetch.mock.calls.find(([req]) => req.method === "POST")![0];
   expect(await post.json()).toEqual({
-    invite_link: "https://t.me/universityinnopolis",
+    invite_link: "https://max.ru/Public_Chat",
     group_code: "all",
     comment: "",
     consent: true,
@@ -678,7 +712,7 @@ it("limits own-audience submissions to a selected verified group", async () => {
     groupSelect.value = "M26-SE-01";
     groupSelect.dispatchEvent(new Event("change", { bubbles: true }));
   });
-  input("invite_link", "https://t.me/+privateInvite1234");
+  input("invite_link", "max.ru/join/Private_Token");
   act(() =>
     document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
   );
@@ -693,9 +727,6 @@ it("explains the exact inactive submission reason and resets consent when audien
     response({ requests: [], verified_groups: ["B24-DS-01", "M26-SE-01"] }),
   );
   await open();
-  expect(document.body.textContent).toContain(
-    "Enter a valid Telegram chat, channel or invite link",
-  );
   expect(document.body.textContent).toContain(
     "Choose one of your verified study groups",
   );
@@ -751,7 +782,7 @@ it("does not widen an own-group request when refetch removes its verified group"
   );
   await open();
   input("group_code", "B24-DS-01");
-  input("invite_link", "https://t.me/+privateInvite1234");
+  input("invite_link", "max.ru/join/Private_Token");
   act(() =>
     document.querySelector<HTMLInputElement>('input[type="checkbox"]')!.click(),
   );

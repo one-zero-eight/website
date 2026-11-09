@@ -18,7 +18,7 @@ const api = vi.hoisted(() => ({
 vi.mock("./AskChatList", () => ({ AskChatList: () => null }));
 vi.mock("./AskResult", () => ({ AskResult: () => null }));
 vi.mock("@/components/search/SourceRequests", () => ({
-  SourceRequests: () => "Propose a Telegram chat",
+  SourceRequests: () => "Propose a chat",
 }));
 vi.mock("./AskSources", () => ({
   AskSources: () => createElement("button", { type: "button" }, "Sources"),
@@ -185,7 +185,7 @@ describe("AskPage attachment history", () => {
     expect(container.textContent).toContain("Sources");
     expect(container.textContent).toContain("Chats");
     expect(container.querySelectorAll("button").length).toBeGreaterThan(2);
-    expect(container.textContent).not.toContain("Propose a Telegram chat");
+    expect(container.textContent).not.toContain("Propose a chat");
   });
   it("shows a private download error without losing the filename", async () => {
     await act(async () => openChat("chat-1"));

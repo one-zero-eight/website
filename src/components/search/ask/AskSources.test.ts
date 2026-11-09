@@ -12,7 +12,7 @@ vi.mock("@/components/common/AuthWall", () => ({
 }));
 vi.mock("@/components/search/SourceRequests", () => ({
   SourceRequests: () =>
-    createElement("button", { type: "button" }, "Propose a Telegram chat"),
+    createElement("button", { type: "button" }, "Propose a chat"),
 }));
 
 const sources = {
@@ -104,10 +104,10 @@ describe("AskSources", () => {
     expect(document.body.textContent).toContain(
       "Saved message history remains searchable",
     );
-    expect(document.body.textContent).toContain("Propose a Telegram chat");
-    expect(
-      document.body.textContent!.indexOf("Propose a Telegram chat"),
-    ).toBeLessThan(document.body.textContent!.indexOf("Verified study groups"));
+    expect(document.body.textContent).toContain("Propose a chat");
+    expect(document.body.textContent!.indexOf("Propose a chat")).toBeLessThan(
+      document.body.textContent!.indexOf("Verified study groups"),
+    );
     expect(query).toHaveBeenCalledWith(
       "get",
       "/sources",
