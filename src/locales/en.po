@@ -8575,10 +8575,6 @@ msgstr "Submitted, waiting for review"
 msgid "Submitted: <0>{0}</0>"
 msgstr "Submitted: <0>{0}</0>"
 
-#: src/components/search/SourceRequests.tsx:153
-msgid "Submitting a request does not join the chat. A cAtIx administrator must review it first. Telegram may then require its own approval. For MAX, the chat administrator must add the MAX bot as an administrator with access to read messages; the bot cannot join automatically."
-msgstr "Submitting a request does not join the chat. A cAtIx administrator must review it first. Telegram may then require its own approval. For MAX, the chat administrator must add the MAX bot as an administrator with access to read messages; the bot cannot join automatically."
-
 #: src/components/search/SourceRequests.tsx:337
 msgid "Submitting your request…"
 msgstr "Submitting your request…"
@@ -10378,3 +10374,16 @@ msgstr "Your study groups could not be verified. Refresh to try again, or choose
 #: src/components/sport/SportCheckinRulesModal.tsx:33
 msgid "Your university pass grants access only to the sessions you have checked in for. In case of misuse of the university pass, you may be subject to sanctions, including a monetary fine from the sports complex and disciplinary action from the university."
 msgstr "Your university pass grants access only to the sessions you have checked in for. In case of misuse of the university pass, you may be subject to sanctions, including a monetary fine from the sports complex and disciplinary action from the university."
+
+
+#: src/components/search/SourceRequests.tsx:381
+msgid "Chat request"
+msgstr "Chat request"
+
+#: src/components/search/SourceRequests.tsx:153
+msgid "Submitting a request does not join the chat. A cAtIx administrator must review it first. Approval queues the account worker to join the Telegram or MAX chat automatically. The chat administrator may still need to approve the join request. Indexing and history loading start only after chat access is confirmed."
+msgstr "Submitting a request does not join the chat. A cAtIx administrator must review it first. Approval queues the account worker to join the Telegram or MAX chat automatically. The chat administrator may still need to approve the join request. Indexing and history loading start only after chat access is confirmed."
+
+#: src/components/search/SourceRequests.tsx:162
+msgid "While waiting for access, the chat administrator may need to approve the join request. If joining times out, the worker checks access without blindly repeating the join."
+msgstr "While waiting for access, the chat administrator may need to approve the join request. If joining times out, the worker checks access without blindly repeating the join."

@@ -83,8 +83,18 @@ for your verified study group or all cAtIx users. The chat administrator must
 consent to indexing for the selected audience, including users outside the chat.
 Requests use the existing `POST /sources/requests` payload
 (`invite_link`, `group_code`, `comment`, `consent`) and require cAtIx administrator review.
-Submitting does not join the chat. For MAX, the chat administrator must add the
-MAX bot as an administrator with access to read messages; it cannot join automatically.
+Submitting does not join the chat. Approval queues the account worker to join the
+Telegram or MAX chat automatically; MAX uses a user account, not an official bot,
+and does not require administrator rights. A chat administrator may still need to
+approve the join request. **Approved; queued to connect** is not proof of access;
+**Waiting for chat access confirmation** can mean chat-side approval is pending.
+Indexing and history loading start only after fresh access confirmation.
+If a join times out, the worker reconciles current access without blindly repeating
+the join. This moderated, approved join is the only exception to passive MAX
+operation: no messages, read receipts, typing, or reactions are sent.
+After deploying this change, restart the existing MAX account worker to process
+already approved requests; no manual database update is needed. This describes the
+workflow, not a claim of live MAX verification.
 
 Telegram accepts public `t.me/username` and private `t.me/+HASH` or
 `t.me/joinchat/HASH` links. MAX accepts public `max.ru/username` and private
@@ -94,6 +104,7 @@ the bare `max.ru/join` path is invalid. MAX path case is preserved, and links ar
 submitted with `https://max.ru/`. Queries, fragments, trailing slashes, ports,
 and `http://` are not supported. Private invitations are hidden in request
 titles and messages.
+Untitled requests display **Chat request**; their selected audience is shown separately.
 
 Available source cards identify **Telegram** or **MAX** and link their title to
 the chat: a normal public link takes priority, with a saved invitation used when

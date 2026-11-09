@@ -152,9 +152,17 @@ function SourceRequestsContent() {
       <p className="text-base-content/70 text-sm">
         <Trans>
           Submitting a request does not join the chat. A cAtIx administrator
-          must review it first. Telegram may then require its own approval. For
-          MAX, the chat administrator must add the MAX bot as an administrator
-          with access to read messages; the bot cannot join automatically.
+          must review it first. Approval queues the account worker to join the
+          Telegram or MAX chat automatically. The chat administrator may still
+          need to approve the join request. Indexing and history loading start
+          only after chat access is confirmed.
+        </Trans>
+      </p>
+      <p className="text-base-content/70 text-sm">
+        <Trans>
+          While waiting for access, the chat administrator may need to approve
+          the join request. If joining times out, the worker checks access
+          without blindly repeating the join.
         </Trans>
       </p>
       <p className="text-base-content/70 text-sm">
@@ -370,12 +378,7 @@ function SourceRequestsContent() {
             className="border-base-300 rounded-box border p-3 text-sm"
           >
             <p className="font-medium break-words">
-              {hideInviteLinks(
-                request.title ??
-                  (request.group_code === "all"
-                    ? t`All cAtIx users`
-                    : request.group_code),
-              )}
+              {hideInviteLinks(request.title ?? t`Chat request`)}
             </p>
             <p>
               {request.group_code === "all"

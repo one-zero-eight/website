@@ -761,7 +761,7 @@ it("explains the exact inactive submission reason and resets consent when audien
   ).toBe(false);
 });
 
-it("labels all-audience requests instead of showing the raw all group code", async () => {
+it("keeps the request title separate from its all-users audience", async () => {
   api.fetch.mockResolvedValue(
     response({
       requests: [{ ...request, group_code: "all", title: null }],
@@ -773,7 +773,39 @@ it("labels all-audience requests instead of showing the raw all group code", asy
     [...document.querySelectorAll("ul li p")]
       .slice(0, 2)
       .map((item) => item.textContent),
-  ).toEqual(["All cAtIx users", "All cAtIx users"]);
+  ).toEqual(["Chat request", "All cAtIx users"]);
+});
+
+it("uses a generic title for untitled own-group requests without repeating the audience", async () => {
+  api.fetch.mockResolvedValue(
+    response({ requests: [request], verified_groups: [request.group_code] }),
+  );
+  await open();
+  expect(
+    [...document.querySelectorAll("ul li p")]
+      .slice(0, 2)
+      .map((item) => item.textContent),
+  ).toEqual(["Chat request", request.group_code]);
+});
+
+it("explains moderated automatic account joining and confirmed access before indexing", async () => {
+  await open();
+  const text = document.body.textContent!.replace(/\s+/g, " ");
+  expect(text).toContain("Submitting a request does not join the chat.");
+  expect(text).toContain(
+    "Approval queues the account worker to join the Telegram or MAX chat automatically.",
+  );
+  expect(text).toContain(
+    "The chat administrator may still need to approve the join request.",
+  );
+  expect(text).toContain(
+    "Indexing and history loading start only after chat access is confirmed.",
+  );
+  expect(text).toContain(
+    "If joining times out, the worker checks access without blindly repeating the join.",
+  );
+  expect(text).not.toContain("MAX bot");
+  expect(text).not.toContain("bot cannot join automatically");
 });
 
 it("does not widen an own-group request when refetch removes its verified group", async () => {

@@ -8579,10 +8579,6 @@ msgstr "Отправлено, ожидает проверки"
 msgid "Submitted: <0>{0}</0>"
 msgstr "Отправлено: <0>{0}</0>"
 
-#: src/components/search/SourceRequests.tsx:153
-msgid "Submitting a request does not join the chat. A cAtIx administrator must review it first. Telegram may then require its own approval. For MAX, the chat administrator must add the MAX bot as an administrator with access to read messages; the bot cannot join automatically."
-msgstr "Отправка заявки не приводит к вступлению в чат. Сначала её должен проверить администратор cAtIx. После этого может потребоваться отдельное одобрение в Telegram. Для MAX администратор чата должен добавить MAX-бота с правами администратора и доступом к чтению сообщений; бот не может вступить в чат автоматически."
-
 #: src/components/search/SourceRequests.tsx:337
 msgid "Submitting your request…"
 msgstr "Отправляем заявку…"
@@ -10382,3 +10378,16 @@ msgstr "Не удалось проверить ваши учебные груп�
 #: src/components/sport/SportCheckinRulesModal.tsx:33
 msgid "Your university pass grants access only to the sessions you have checked in for. In case of misuse of the university pass, you may be subject to sanctions, including a monetary fine from the sports complex and disciplinary action from the university."
 msgstr "Университетский пропуск даёт доступ только на те занятия, на которые вы записались. За неправомерное использование пропуска могут применяться санкции, в том числе денежный штраф от спортивного комплекса и дисциплинарные меры со стороны университета."
+
+
+#: src/components/search/SourceRequests.tsx:381
+msgid "Chat request"
+msgstr "Заявка на подключение чата"
+
+#: src/components/search/SourceRequests.tsx:153
+msgid "Submitting a request does not join the chat. A cAtIx administrator must review it first. Approval queues the account worker to join the Telegram or MAX chat automatically. The chat administrator may still need to approve the join request. Indexing and history loading start only after chat access is confirmed."
+msgstr "Отправка заявки не приводит к вступлению в чат. Сначала её должен проверить администратор cAtIx. После одобрения заявка попадает в очередь обработчика пользовательского аккаунта для автоматического вступления в чат Telegram или MAX. Администратору чата может потребоваться одобрить вступление. Индексация и загрузка истории начинаются только после подтверждения доступа к чату."
+
+#: src/components/search/SourceRequests.tsx:162
+msgid "While waiting for access, the chat administrator may need to approve the join request. If joining times out, the worker checks access without blindly repeating the join."
+msgstr "Пока ожидается доступ, администратору чата может потребоваться одобрить заявку на вступление. При таймауте вступления обработчик проверяет доступ, не повторяя вступление вслепую."
