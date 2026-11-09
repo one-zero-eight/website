@@ -35,6 +35,7 @@ export function AskNotifications() {
           return;
         const options: NotificationOptions = {
           body: t`Open the chat to read the reply.`,
+          icon: "/catix-notification.png",
           tag: `catix-answer-${chatId ?? "current"}`,
           data: { kind: "catix-answer", chatId },
         };

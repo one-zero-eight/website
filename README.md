@@ -76,6 +76,11 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
 > [!TIP]
 > After adding UI strings wrapped in Lingui macros (`Trans` / `msg` / `t`), run `pnpm lingui:extract` and fill Russian `msgstr` in `src/locales/ru.po`.
 
+### cAtIx notification icon
+
+System reply notifications use `public/catix-notification.png`, copied from the cAtIx logo (800×800 PNG).
+The `icon` option in `src/components/search/ask/AskNotifications.tsx` applies to both service-worker and desktop notifications; favicon and PWA icons are independent.
+
 ### Development preview on Android via ADB (USB or Wi‑Fi)
 
 Use this setup if you want to open the local dev version on a physical Android device over USB or Wi‑Fi.
