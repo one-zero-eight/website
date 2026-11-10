@@ -7,13 +7,93 @@ on:
       - reopened
       - transferred
 
+env:
+  # DEFAULT_SERVICE_NAME: Sport
+
 jobs:
   add-to-project:
     name: Add issue to project
     if: github.repository_owner == 'one-zero-eight' # Do not run in forks
     runs-on: ubuntu-latest
+    permissions:
+      issues: write # required to set the org-level issue field with GITHUB_TOKEN
     steps:
-      - uses: actions/add-to-project@v1.0.2
+      - uses: actions/add-to-project@v2.0.1
         with:
           project-url: https://github.com/orgs/one-zero-eight/projects/4
           github-token: ${{ secrets.ACTIONS_PAT_PROJECTS }}
+
+      - name: Set "Service" field
+        env:
+          PROJECTS_TOKEN: ${{ secrets.ACTIONS_PAT_PROJECTS }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Organization-level issue field that should be populated.
+          service_field_name=Service
+
+          # No fallback: an absent or empty DEFAULT_SERVICE_NAME means "no default".
+          default_service_name="${DEFAULT_SERVICE_NAME:-}"
+
+          org="$GITHUB_REPOSITORY_OWNER"
+          repo="$GITHUB_REPOSITORY"
+          number=$(jq -r '.issue.number' "$GITHUB_EVENT_PATH")
+          title=$(jq -r '.issue.title' "$GITHUB_EVENT_PATH")
+
+          # "[Sport] Fix standings" -> "Sport"; no usable prefix -> the default.
+          service=""
+          if [[ $title =~ ^\[([^]]+)\] ]]; then
+            service=${BASH_REMATCH[1]}
+            service=${service#"${service%%[![:space:]]*}"} # trim left
+            service=${service%"${service##*[![:space:]]}"} # trim right
+          fi
+          if [[ -z $service ]]; then
+            service="$default_service_name"
+          fi
+
+          if [[ -z $service ]]; then
+            echo "No service name in the issue title and no default configured — not setting '$service_field_name'"
+            exit 0
+          fi
+          echo "Resolved service: '$service'"
+
+          # The numeric field ID is only discoverable at the organization level,
+          # which GITHUB_TOKEN cannot read -> resolve it with the projects PAT.
+          if ! fields=$(GH_TOKEN="$PROJECTS_TOKEN" gh api "orgs/$org/issue-fields" \
+                          -H "X-GitHub-Api-Version: 2026-03-10"); then
+            echo "::warning::Cannot list organization issue fields — the projects token needs 'read:org' (classic) or 'Issue Fields: read' (fine-grained). Skipping."
+            exit 0
+          fi
+
+          field_id=$(jq -r --arg n "$service_field_name" \
+                       '.[] | select(.name == $n) | .id' <<< "$fields")
+          if [[ -z $field_id ]]; then
+            echo "::warning::Organization '$org' has no issue field named '$service_field_name'. Skipping."
+            exit 0
+          fi
+
+          if ! jq -e --arg n "$service_field_name" --arg v "$service" \
+                 '.[] | select(.name == $n) | (.options // []) | any(.name == $v)' \
+                 <<< "$fields" > /dev/null; then
+            echo "::warning::'$service' is not an option of '$service_field_name'. Known options: $(jq -r --arg n "$service_field_name" '.[] | select(.name == $n) | (.options // []) | map(.name) | join(", ")' <<< "$fields")"
+            exit 0
+          fi
+
+          # Never overwrite a Service that is already set on the issue
+          current=$(gh api "repos/$repo/issues/$number/issue-field-values")
+          if jq -e --argjson id "$field_id" \
+               'any(.[]; .issue_field_id == $id)' <<< "$current" > /dev/null; then
+            echo "$service_field_name is already set — leaving it alone"
+            exit 0
+          fi
+
+          payload=$(jq -cn --argjson id "$field_id" --arg v "$service" \
+            '{issue_field_values: [{field_id: $id, value: $v}]}')
+
+          printf '%s' "$payload" | gh api "repos/$repo/issues/$number/issue-field-values" \
+            -X POST \
+            -H "X-GitHub-Api-Version: 2026-03-10" \
+            --input - > /dev/null
+
+          echo "$service_field_name set to '$service'"
