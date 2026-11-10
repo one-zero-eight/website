@@ -66,6 +66,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/board-games-api/, ""),
       },
+      "/timer-api": {
+        target: "http://127.0.0.1:8025",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/timer-api/, ""),
+      },
     },
   },
 

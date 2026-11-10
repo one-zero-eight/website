@@ -1,3 +1,4 @@
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { Navigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { CreateTimerModal } from "./components/CreateTimerModal";
@@ -7,10 +8,34 @@ import { useLastOpenedHackathon } from "./lib/useLastOpenedHackathon";
 
 // Opens the last opened timer, or offers to create/join one if there are none
 export function HackathonStartPage() {
-  const { timers } = useHackathonTimers();
+  const { timers, isError, error, refetch } = useHackathonTimers();
   const lastOpenedTimerId = useLastOpenedHackathon();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isJoinOpen, setIsJoinOpen] = useState(false);
+
+  if (isError) {
+    return (
+      <div className="flex grow flex-col items-center justify-center gap-4 p-4">
+        <p className="text-error text-xl">{formatApiErrorMessage(error)}</p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => refetch()}
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  if (!timers) {
+    return (
+      <div className="flex grow flex-col items-center justify-center gap-6 p-4">
+        <div className="skeleton h-8 w-64" />
+        <div className="skeleton h-12 w-72" />
+      </div>
+    );
+  }
 
   const timerToOpen =
     timers.find((timer) => timer.id === lastOpenedTimerId) ?? timers[0];
@@ -18,7 +43,7 @@ export function HackathonStartPage() {
     return (
       <Navigate
         to="/timer/hackathon/$id"
-        params={{ id: timerToOpen.id }}
+        params={{ id: String(timerToOpen.id) }}
         replace
       />
     );

@@ -1,8 +1,9 @@
+import { $timer } from "@/api/timer";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useHackathonTimers } from "../lib/useHackathonTimers";
-import { createJoinedTimerPlaceholder } from "../utils";
+import { useRefreshTimers } from "../lib/useHackathonTimers";
 
 export function JoinTimerModal({
   open,
@@ -12,46 +13,59 @@ export function JoinTimerModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const navigate = useNavigate();
-  const { timers, addTimer } = useHackathonTimers();
-  const [joinCode, setJoinCode] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const refreshTimers = useRefreshTimers();
+  const [invitation, setInvitation] = useState("");
+  const invitationUuid = invitation.trim();
+
+  const {
+    mutate: joinTimer,
+    isPending,
+    error,
+    reset,
+  } = $timer.useMutation("post", "/invitations/{invitation_uuid}/join", {
+    onSuccess: refreshTimers,
+  });
 
   function handleOpenChange(isOpen: boolean) {
     if (!isOpen) {
-      setJoinCode("");
-      setError(null);
+      setInvitation("");
+      reset();
     }
     onOpenChange(isOpen);
   }
 
   function handleJoin() {
-    if (timers.some((timer) => timer.joinCode === joinCode)) {
-      setError("You have already joined this timer");
-      return;
-    }
-    const joinedTimer = createJoinedTimerPlaceholder(joinCode);
-    addTimer(joinedTimer);
-    handleOpenChange(false);
-    navigate({ to: "/timer/hackathon/$id", params: { id: joinedTimer.id } });
+    if (!invitationUuid) return;
+    joinTimer(
+      { params: { path: { invitation_uuid: invitationUuid } } },
+      {
+        onSuccess: (joinedTimer) => {
+          handleOpenChange(false);
+          navigate({
+            to: "/timer/hackathon/$id",
+            params: { id: String(joinedTimer.id) },
+          });
+        },
+      },
+    );
   }
 
   return (
     <Modal open={open} onOpenChange={handleOpenChange} title="Join timer">
       <label className="flex flex-col gap-1">
-        <span className="text-base-content/70 text-sm">Join code</span>
+        <span className="text-base-content/70 text-sm">Invitation UUID</span>
         <input
           type="text"
-          className="input w-full font-mono tracking-widest uppercase"
-          placeholder="ABCDE"
-          maxLength={5}
-          value={joinCode}
+          className="input w-full"
+          placeholder="Invitation UUID"
+          value={invitation}
           onChange={(e) => {
-            setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, ""));
-            setError(null);
+            setInvitation(e.target.value.trim());
+            reset();
           }}
         />
       </label>
-      {error && <p className="text-error">{error}</p>}
+      {error && <p className="text-error">{formatApiErrorMessage(error)}</p>}
       <div className="mt-4 flex justify-end gap-2">
         <button
           type="button"
@@ -63,9 +77,10 @@ export function JoinTimerModal({
         <button
           type="button"
           className="btn btn-primary"
-          disabled={joinCode.length !== 5}
+          disabled={!invitationUuid || isPending}
           onClick={handleJoin}
         >
+          {isPending && <span className="loading loading-spinner loading-sm" />}
           Join
         </button>
       </div>

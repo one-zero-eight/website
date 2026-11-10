@@ -1,8 +1,11 @@
+import { $timer } from "@/api/timer";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { Modal } from "@/components/common/Modal.tsx";
+import { useToast } from "@/components/toast";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useHackathonTimers } from "../lib/useHackathonTimers";
-import { createEmptyTimer } from "../utils";
+import { useRefreshTimers } from "../lib/useHackathonTimers";
+import { createEmptyDraft, toTimerBody } from "../utils";
 import { TimelineEditor } from "./TimelineEditor";
 
 export function CreateTimerModal({
@@ -13,18 +16,37 @@ export function CreateTimerModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const navigate = useNavigate();
-  const { addTimer } = useHackathonTimers();
-  const [draft, setDraft] = useState(createEmptyTimer);
+  const { showError } = useToast();
+  const refreshTimers = useRefreshTimers();
+  const [draft, setDraft] = useState(createEmptyDraft);
+
+  const { mutate: createTimer, isPending } = $timer.useMutation(
+    "post",
+    "/timers",
+    {
+      onSuccess: refreshTimers,
+      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+    },
+  );
 
   function handleOpenChange(isOpen: boolean) {
-    if (!isOpen) setDraft(createEmptyTimer());
+    if (!isOpen) setDraft(createEmptyDraft());
     onOpenChange(isOpen);
   }
 
   function handleCreate() {
-    addTimer(draft);
-    handleOpenChange(false);
-    navigate({ to: "/timer/hackathon/$id", params: { id: draft.id } });
+    createTimer(
+      { body: toTimerBody(draft) },
+      {
+        onSuccess: (createdTimer) => {
+          handleOpenChange(false);
+          navigate({
+            to: "/timer/hackathon/$id",
+            params: { id: String(createdTimer.id) },
+          });
+        },
+      },
+    );
   }
 
   return (
@@ -36,10 +58,11 @@ export function CreateTimerModal({
       containerClassName="max-w-3xl"
     >
       <TimelineEditor
-        timer={draft}
-        onTimerChange={setDraft}
+        draft={draft}
+        onDraftChange={setDraft}
         heading="Create timer"
         doneLabel="Create"
+        isSaving={isPending}
         onDone={handleCreate}
         onCancel={() => handleOpenChange(false)}
       />

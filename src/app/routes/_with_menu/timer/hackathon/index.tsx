@@ -1,3 +1,4 @@
+import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { HackathonStartPage } from "@/components/timer/hackathon/HackathonStartPage.tsx";
 import { TimerPageTabs } from "@/components/timer/TimerPageTabs.tsx";
@@ -21,7 +22,9 @@ function RouteComponent() {
 
       <Topbar title="Hackathon Timer" />
       <TimerPageTabs />
-      <HackathonStartPage />
+      <RequireAuth>
+        <HackathonStartPage />
+      </RequireAuth>
     </>
   );
 }

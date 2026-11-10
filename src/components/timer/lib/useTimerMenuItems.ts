@@ -8,7 +8,7 @@ export function useTimerMenuItems(): ItemType[] {
   const { lastUsedTimer } = useLastUsedTimer();
   const { timers } = useHackathonTimers();
   const lastOpenedTimerId = useLastOpenedHackathon();
-  const lastHackathonId = timers.find(
+  const lastHackathonId = timers?.find(
     (timer) => timer.id === lastOpenedTimerId,
   )?.id;
 
@@ -19,7 +19,7 @@ export function useTimerMenuItems(): ItemType[] {
       return {
         ...item,
         to: "/timer/hackathon/$id",
-        params: { id: lastHackathonId },
+        params: { id: String(lastHackathonId) },
       } as unknown as ItemType;
     }
     return { ...item, to: TIMER_PATHS[lastUsedTimer] };

@@ -1,3 +1,5 @@
+import { timerTypes } from "@/api/timer";
+
 export type Milestone = {
   id: string;
   title: string;
@@ -6,20 +8,24 @@ export type Milestone = {
 };
 
 export type HackathonTimer = {
-  id: string;
-  /** Five latin letters. Exists only after the owner created a join code. */
-  joinCode: string | null;
+  id: number;
   title: string;
-  ownerName: string;
-  isOwner: boolean;
+  /** Local date and time in `datetime-local` format: YYYY-MM-DDTHH:mm */
   start: string;
+  /** Local date and time in `datetime-local` format: YYYY-MM-DDTHH:mm */
   finish: string;
   milestones: Milestone[];
+  /** Only the creator can edit, delete and invite */
+  isCreator: boolean;
 };
 
+/** Editable part of a timer, the same for a new and an existing timer */
+export type TimerDraft = Pick<
+  HackathonTimer,
+  "title" | "start" | "finish" | "milestones"
+>;
+
 const HOUR_MS = 60 * 60 * 1000;
-const JOIN_CODE_LENGTH = 5;
-const JOIN_CODE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 export function toInputValue(date: Date) {
   const offsetMs = date.getTimezoneOffset() * 60 * 1000;
@@ -30,82 +36,71 @@ function hoursFromNow(hours: number) {
   return toInputValue(new Date(Date.now() + hours * HOUR_MS));
 }
 
-export function createEmptyTimer(): HackathonTimer {
+export function createEmptyDraft(): TimerDraft {
   return {
-    id: crypto.randomUUID(),
-    joinCode: null,
     title: "",
-    ownerName: "You",
-    isOwner: true,
     start: hoursFromNow(0),
     finish: hoursFromNow(24),
     milestones: [],
   };
 }
 
-export function generateJoinCode(takenCodes: (string | null)[]) {
-  let code = "";
-  while (code.length < JOIN_CODE_LENGTH || takenCodes.includes(code)) {
-    code = Array.from(
-      { length: JOIN_CODE_LENGTH },
-      () =>
-        JOIN_CODE_ALPHABET[
-          Math.floor(Math.random() * JOIN_CODE_ALPHABET.length)
-        ],
-    ).join("");
-  }
-  return code;
+export function toDraft(timer: HackathonTimer): TimerDraft {
+  return {
+    title: timer.title,
+    start: timer.start,
+    finish: timer.finish,
+    milestones: timer.milestones,
+  };
+}
+
+export function isFinishAfterStart(draft: TimerDraft) {
+  return new Date(draft.finish).getTime() > new Date(draft.start).getTime();
+}
+
+export function isDraftValid(draft: TimerDraft) {
+  return (
+    draft.title.trim() !== "" &&
+    draft.milestones.every((milestone) => milestone.title.trim() !== "") &&
+    isFinishAfterStart(draft)
+  );
+}
+
+export function toHackathonTimer(
+  timer: timerTypes.SchemaViewTimer,
+  userId: string,
+): HackathonTimer {
+  const me = timer.participants.find(
+    (participant) => participant.user_id === userId,
+  );
+  return {
+    id: timer.id,
+    title: timer.title,
+    start: toInputValue(new Date(timer.start_time)),
+    finish: toInputValue(new Date(timer.end_time)),
+    milestones: timer.checkpoints.map((checkpoint, index) => ({
+      id: String(index),
+      title: checkpoint.title,
+      time: toInputValue(new Date(checkpoint.time)),
+    })),
+    isCreator: me?.user_type === "creator",
+  };
+}
+
+export function toTimerBody(draft: TimerDraft): timerTypes.SchemaUpdateTimer {
+  return {
+    title: draft.title.trim(),
+    start_time: new Date(draft.start).toISOString(),
+    end_time: new Date(draft.finish).toISOString(),
+    checkpoints: draft.milestones.map((milestone) => ({
+      title: milestone.title.trim(),
+      time: new Date(milestone.time).toISOString(),
+    })),
+  };
 }
 
 export function isFinished(timer: HackathonTimer) {
   return new Date(timer.finish).getTime() <= Date.now();
-}
-
-export function createSeedTimers(): HackathonTimer[] {
-  const sprintMilestones = [
-    { id: "kickoff", title: "Kickoff call", time: hoursFromNow(-2) },
-    { id: "lecture", title: "Lecture on architecture", time: hoursFromNow(1) },
-    { id: "sync", title: "Sync on tasks", time: hoursFromNow(5) },
-    { id: "freeze", title: "Feature freeze", time: hoursFromNow(18) },
-    { id: "demo", title: "Demo rehearsal", time: hoursFromNow(26) },
-  ];
-
-  return [
-    {
-      id: "seed-release-sprint",
-      joinCode: "KQZXP",
-      title: "Release sprint",
-      ownerName: "You",
-      isOwner: true,
-      start: hoursFromNow(-3),
-      finish: hoursFromNow(30),
-      milestones: sprintMilestones,
-    },
-    {
-      id: "seed-innohack",
-      joinCode: "MNBVC",
-      title: "InnoHack 2026",
-      ownerName: "Ivan Petrov",
-      isOwner: false,
-      start: hoursFromNow(-10),
-      finish: hoursFromNow(14),
-      milestones: [
-        { id: "mentors", title: "Mentors call", time: hoursFromNow(-6) },
-        { id: "checkpoint", title: "Checkpoint", time: hoursFromNow(4) },
-        { id: "pitch", title: "Pitch", time: hoursFromNow(12) },
-      ],
-    },
-    {
-      id: "seed-old-demo-day",
-      joinCode: null,
-      title: "Demo day (private)",
-      ownerName: "You",
-      isOwner: true,
-      start: hoursFromNow(-72),
-      finish: hoursFromNow(-48),
-      milestones: [{ id: "demo", title: "Demos", time: hoursFromNow(-50) }],
-    },
-  ];
 }
 
 export function sortMilestones(milestones: Milestone[]) {
@@ -134,21 +129,4 @@ export function formatCountdown(totalMs: number) {
     .map((value) => String(value).padStart(2, "0"))
     .join(":");
   return { days, clock };
-}
-
-// There is no backend yet, so joining by code creates a placeholder timer
-export function createJoinedTimerPlaceholder(joinCode: string): HackathonTimer {
-  return {
-    id: crypto.randomUUID(),
-    joinCode,
-    title: `Timer ${joinCode}`,
-    ownerName: "Another user",
-    isOwner: false,
-    start: hoursFromNow(-1),
-    finish: hoursFromNow(12),
-    milestones: [
-      { id: "sync", title: "Sync", time: hoursFromNow(3) },
-      { id: "demo", title: "Demo", time: hoursFromNow(10) },
-    ],
-  };
 }

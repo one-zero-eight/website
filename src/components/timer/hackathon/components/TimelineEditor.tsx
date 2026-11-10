@@ -1,36 +1,35 @@
-import { CopyCodeButton } from "./CopyCodeButton";
-import { DateTimeInput } from "./DateTimeInput";
-import { useHackathonTimers } from "../lib/useHackathonTimers";
 import {
-  generateJoinCode,
-  HackathonTimer,
+  isDraftValid,
+  isFinishAfterStart,
   Milestone,
+  TimerDraft,
   toInputValue,
 } from "../utils";
+import { DateTimeInput } from "./DateTimeInput";
 
 export function TimelineEditor({
-  timer,
-  onTimerChange,
+  draft,
+  onDraftChange,
   heading,
   doneLabel,
+  isSaving,
   onDone,
   onCancel,
   onDelete,
 }: {
-  timer: HackathonTimer;
-  onTimerChange: (timer: HackathonTimer) => void;
+  draft: TimerDraft;
+  onDraftChange: (draft: TimerDraft) => void;
   heading: string;
   doneLabel: string;
+  isSaving: boolean;
   onDone: () => void;
   onCancel?: () => void;
   onDelete?: () => void;
 }) {
-  const { timers } = useHackathonTimers();
-
   function updateMilestone(id: string, changes: Partial<Milestone>) {
-    onTimerChange({
-      ...timer,
-      milestones: timer.milestones.map((milestone) =>
+    onDraftChange({
+      ...draft,
+      milestones: draft.milestones.map((milestone) =>
         milestone.id === id ? { ...milestone, ...changes } : milestone,
       ),
     });
@@ -42,22 +41,17 @@ export function TimelineEditor({
       title: "",
       time: toInputValue(new Date()),
     };
-    onTimerChange({
-      ...timer,
-      milestones: [...timer.milestones, newMilestone],
+    onDraftChange({
+      ...draft,
+      milestones: [...draft.milestones, newMilestone],
     });
   }
 
   function handleDeleteMilestone(id: string) {
-    onTimerChange({
-      ...timer,
-      milestones: timer.milestones.filter((milestone) => milestone.id !== id),
+    onDraftChange({
+      ...draft,
+      milestones: draft.milestones.filter((milestone) => milestone.id !== id),
     });
-  }
-
-  function handleCreateJoinCode() {
-    const takenCodes = timers.map((item) => item.joinCode);
-    onTimerChange({ ...timer, joinCode: generateJoinCode(takenCodes) });
   }
 
   return (
@@ -73,10 +67,14 @@ export function TimelineEditor({
           <button
             type="button"
             className="btn btn-primary"
-            disabled={!timer.title.trim()}
+            disabled={!isDraftValid(draft) || isSaving}
             onClick={onDone}
           >
-            <span className="icon-[material-symbols--check]" />
+            {isSaving ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              <span className="icon-[material-symbols--check]" />
+            )}
             {doneLabel}
           </button>
         </div>
@@ -88,8 +86,8 @@ export function TimelineEditor({
           type="text"
           className="input w-full"
           placeholder="Timer title"
-          value={timer.title}
-          onChange={(e) => onTimerChange({ ...timer, title: e.target.value })}
+          value={draft.title}
+          onChange={(e) => onDraftChange({ ...draft, title: e.target.value })}
         />
       </label>
 
@@ -97,47 +95,25 @@ export function TimelineEditor({
         <div className="flex flex-col gap-1">
           <span className="text-base-content/70 text-sm">Start</span>
           <DateTimeInput
-            value={timer.start}
-            onChange={(start) => onTimerChange({ ...timer, start })}
+            value={draft.start}
+            onChange={(start) => onDraftChange({ ...draft, start })}
           />
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-base-content/70 text-sm">Finish</span>
           <DateTimeInput
-            value={timer.finish}
-            onChange={(finish) => onTimerChange({ ...timer, finish })}
+            value={draft.finish}
+            onChange={(finish) => onDraftChange({ ...draft, finish })}
           />
         </div>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <span className="text-base-content/70 text-sm">Join code</span>
-        {timer.joinCode ? (
-          <div className="flex items-center gap-3">
-            <CopyCodeButton code={timer.joinCode} />
-            <span className="text-base-content/70 text-sm">
-              Anyone with this code can join the timer
-            </span>
-          </div>
-        ) : (
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              className="btn btn-outline"
-              onClick={handleCreateJoinCode}
-            >
-              <span className="icon-[material-symbols--key-outline]" />
-              Create join code
-            </button>
-            <span className="text-base-content/70 text-sm">
-              The timer is private until you create a code
-            </span>
-          </div>
-        )}
-      </div>
+      {!isFinishAfterStart(draft) && (
+        <p className="text-error">Finish must be after start</p>
+      )}
 
       <div className="flex flex-col gap-2">
-        {timer.milestones.map((milestone) => (
+        {draft.milestones.map((milestone) => (
           <div
             key={milestone.id}
             className="bg-base-200 rounded-box flex items-center gap-2 p-3"
@@ -167,7 +143,7 @@ export function TimelineEditor({
             </button>
           </div>
         ))}
-        {timer.milestones.length === 0 && (
+        {draft.milestones.length === 0 && (
           <p className="text-base-content/60">No milestones yet</p>
         )}
       </div>

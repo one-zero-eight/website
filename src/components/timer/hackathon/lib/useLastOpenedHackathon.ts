@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
-export function useLastOpenedHackathon(openedTimerId?: string) {
+export function useLastOpenedHackathon(openedTimerId?: number) {
   const [lastOpenedTimerId, setLastOpenedTimerId] = useLocalStorage<
-    string | null
+    number | null
   >("last-opened-hackathon-timer", null);
 
   useEffect(() => {

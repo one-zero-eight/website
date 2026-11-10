@@ -19,8 +19,8 @@ import { isFinished } from "../utils";
 import { CreateTimerModal } from "./CreateTimerModal";
 import { JoinTimerModal } from "./JoinTimerModal";
 
-export function TimersDropdown({ currentTimerId }: { currentTimerId: string }) {
-  const { timers } = useHackathonTimers();
+export function TimersDropdown({ currentTimerId }: { currentTimerId: number }) {
+  const { timers = [] } = useHackathonTimers();
   const [isOpen, setIsOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isJoinOpen, setIsJoinOpen] = useState(false);
@@ -104,7 +104,7 @@ export function TimersDropdown({ currentTimerId }: { currentTimerId: string }) {
               <Link
                 key={timer.id}
                 to="/timer/hackathon/$id"
-                params={{ id: timer.id }}
+                params={{ id: String(timer.id) }}
                 className={cn(
                   "hover:bg-base-300 rounded-field flex items-center justify-between gap-2 px-3 py-2",
                   timer.id === currentTimerId && "bg-base-200 font-semibold",

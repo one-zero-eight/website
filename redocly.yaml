@@ -74,6 +74,11 @@ apis:
     x-openapi-ts:
       output: ./src/api/board-games/types.ts
       #  --root-types --enum
+  timer:
+    root: https://api.innohassle.ru/timer/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/timer/types.ts
+      #  --root-types --enum
   sport:
     root: https://sport.innopolis.university/api/v3/openapi.json
     x-openapi-ts:

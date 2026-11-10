@@ -1,3 +1,6 @@
+import { $timer } from "@/api/timer";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useFullscreenCursor } from "@/components/timer/lib/useFullScreenCursor";
 import { useLastUsedTimer } from "@/components/timer/lib/useLastUsedTimer";
@@ -5,18 +8,20 @@ import { useFullscreen } from "@/components/timer/lib/utils";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useInterval } from "usehooks-ts";
-import { CopyCodeButton } from "./components/CopyCodeButton";
 import { RemoveTimerModal } from "./components/RemoveTimerModal";
 import { TimersDropdown } from "./components/TimersDropdown";
 import { TimelineEditor } from "./components/TimelineEditor";
 import { TimelineWheel } from "./components/TimelineWheel";
-import { useHackathonTimers } from "./lib/useHackathonTimers";
+import { useHackathonTimers, useRefreshTimers } from "./lib/useHackathonTimers";
 import { useLastOpenedHackathon } from "./lib/useLastOpenedHackathon";
 import {
   formatCountdown,
   formatDateTime,
   HackathonTimer,
   sortMilestones,
+  TimerDraft,
+  toDraft,
+  toTimerBody,
 } from "./utils";
 
 // Digits are about 0.6em wide, so the clock font size is chosen to fill the column
@@ -24,9 +29,33 @@ const CLOCK_CHAR_WIDTH_EM = 0.6;
 const CLOCK_WIDTH_PERCENT = 100;
 
 export function HackathonTimerPage({ id }: { id: string }) {
-  const { timers } = useHackathonTimers();
-  const timer = timers.find((item) => item.id === id);
+  const { timers, isError, error, refetch } = useHackathonTimers();
 
+  if (isError) {
+    return (
+      <div className="flex grow flex-col items-center justify-center gap-4 p-4">
+        <p className="text-error text-xl">{formatApiErrorMessage(error)}</p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => refetch()}
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  if (!timers) {
+    return (
+      <div className="flex grow flex-col gap-8 p-4 md:p-8">
+        <div className="skeleton h-12 w-full max-w-md self-center" />
+        <div className="skeleton h-48 w-full max-w-5xl self-center" />
+      </div>
+    );
+  }
+
+  const timer = timers.find((item) => item.id === Number(id));
   if (!timer) {
     return (
       <div className="flex grow flex-col items-center justify-center gap-4 p-4">
@@ -45,14 +74,33 @@ function HackathonTimerView({ timer }: { timer: HackathonTimer }) {
   useLastUsedTimer("hackathon");
   useLastOpenedHackathon(timer.id);
   const navigate = useNavigate();
-  const { updateTimer, removeTimer } = useHackathonTimers();
+  const { showError } = useToast();
+  const refreshTimers = useRefreshTimers();
   const [isRemoveOpen, setIsRemoveOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const isFullscreen = useFullscreen();
   useFullscreenCursor(containerRef, 5000);
   const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState<TimerDraft>(() => toDraft(timer));
   const [nowMs, setNowMs] = useState(Date.now);
   const [scrolledIndex, setScrolledIndex] = useState<number | null>(null);
+
+  const { mutate: updateTimer, isPending: isUpdating } = $timer.useMutation(
+    "put",
+    "/timers/{timer_id}",
+    {
+      onSuccess: refreshTimers,
+      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+    },
+  );
+  const { mutate: deleteTimer, isPending: isDeleting } = $timer.useMutation(
+    "delete",
+    "/timers/{timer_id}",
+    {
+      onSuccess: refreshTimers,
+      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+    },
+  );
 
   useInterval(() => setNowMs(Date.now()), 1000);
 
@@ -82,15 +130,31 @@ function HackathonTimerView({ timer }: { timer: HackathonTimer }) {
     milestones.length - 1,
   );
 
+  function handleStartEditing() {
+    setDraft(toDraft(timer));
+    setIsEditing(true);
+  }
+
   function handleDoneEditing() {
-    updateTimer({ ...timer, milestones });
-    setScrolledIndex(null);
-    setIsEditing(false);
+    updateTimer(
+      {
+        params: { path: { timer_id: timer.id } },
+        body: toTimerBody(draft),
+      },
+      {
+        onSuccess: () => {
+          setScrolledIndex(null);
+          setIsEditing(false);
+        },
+      },
+    );
   }
 
   function handleConfirmRemove() {
-    removeTimer(timer.id);
-    navigate({ to: "/timer/hackathon" });
+    deleteTimer(
+      { params: { path: { timer_id: timer.id } } },
+      { onSuccess: () => navigate({ to: "/timer/hackathon" }) },
+    );
   }
 
   function handleSwitchFullscreen() {
@@ -115,28 +179,14 @@ function HackathonTimerView({ timer }: { timer: HackathonTimer }) {
             <TimersDropdown currentTimerId={timer.id} />
           </div>
         )}
-        {timer.joinCode && !isFullscreen && (
-          <CopyCodeButton code={timer.joinCode} />
-        )}
-        {!isFullscreen && !isEditing && (
+        {timer.isCreator && !isFullscreen && !isEditing && (
           <button
             type="button"
             className="btn btn-lg"
-            onClick={() =>
-              timer.isOwner ? setIsEditing(true) : setIsRemoveOpen(true)
-            }
+            onClick={handleStartEditing}
           >
-            {timer.isOwner ? (
-              <>
-                <span className="icon-[material-symbols--edit-outline]" />
-                Edit
-              </>
-            ) : (
-              <>
-                <span className="icon-[material-symbols--logout]" />
-                Unsubscribe
-              </>
-            )}
+            <span className="icon-[material-symbols--edit-outline]" />
+            Edit
           </button>
         )}
         <button
@@ -155,10 +205,11 @@ function HackathonTimerView({ timer }: { timer: HackathonTimer }) {
       {isEditing ? (
         <div className="flex grow justify-center">
           <TimelineEditor
-            timer={timer}
-            onTimerChange={updateTimer}
+            draft={draft}
+            onDraftChange={setDraft}
             heading="Edit timer"
             doneLabel="Done"
+            isSaving={isUpdating}
             onDone={handleDoneEditing}
             onDelete={() => setIsRemoveOpen(true)}
           />
@@ -225,6 +276,7 @@ function HackathonTimerView({ timer }: { timer: HackathonTimer }) {
 
       <RemoveTimerModal
         timer={isRemoveOpen ? timer : null}
+        isDeleting={isDeleting}
         onClose={() => setIsRemoveOpen(false)}
         onConfirm={handleConfirmRemove}
       />
