@@ -522,24 +522,28 @@ export function CalendarViewer({
     const calendarApi = calendarRef.current?.getApi();
     if (!calendarApi) return;
 
+    function makeId(event: EventInput | EventApi) {
+      return event.id + event.startStr + event.endStr;
+    }
+
     // Run in the next tick
     setTimeout(() => {
       const prevEvents = calendarApi.getEvents();
       const nextEventIds = new Set(
-        events.map((event) => event.id).filter(Boolean) as string[],
+        events.map(makeId).filter(Boolean) as string[],
       );
 
       // Remove old events that are not in the list
       for (const prevEvent of prevEvents) {
-        if (!nextEventIds.has(prevEvent.id)) {
+        if (!nextEventIds.has(makeId(prevEvent))) {
           prevEvent.remove();
         }
       }
 
       // Add new events
       for (const newEvent of events) {
-        const existingEvent = newEvent.id
-          ? calendarApi.getEventById(newEvent.id)
+        const existingEvent = makeId(newEvent)
+          ? calendarApi.getEventById(makeId(newEvent))
           : null;
 
         // TODO: Do not remove existing event, just update its values if there are changes
