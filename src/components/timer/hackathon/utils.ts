@@ -26,6 +26,8 @@ export type TimerDraft = Pick<
 >;
 
 const HOUR_MS = 60 * 60 * 1000;
+const INVITATION_UUID_PATTERN =
+  /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 
 export function toInputValue(date: Date) {
   const offsetMs = date.getTimezoneOffset() * 60 * 1000;
@@ -52,6 +54,15 @@ export function toDraft(timer: HackathonTimer): TimerDraft {
     finish: timer.finish,
     milestones: timer.milestones,
   };
+}
+
+/** Finds the invitation UUID in a pasted invitation link or in the bare UUID */
+export function findInvitationUuid(text: string) {
+  return text.match(INVITATION_UUID_PATTERN)?.[0] ?? null;
+}
+
+export function createInvitationLink(invitationUuid: string) {
+  return `${window.location.origin}/timer/join/${invitationUuid}`;
 }
 
 export function isFinishAfterStart(draft: TimerDraft) {

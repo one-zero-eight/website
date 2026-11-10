@@ -6,6 +6,7 @@ import {
   toInputValue,
 } from "../utils";
 import { DateTimeInput } from "./DateTimeInput";
+import { InvitationSection } from "./InvitationSection";
 
 export function TimelineEditor({
   draft,
@@ -16,6 +17,7 @@ export function TimelineEditor({
   onDone,
   onCancel,
   onDelete,
+  timerId,
 }: {
   draft: TimerDraft;
   onDraftChange: (draft: TimerDraft) => void;
@@ -25,6 +27,8 @@ export function TimelineEditor({
   onDone: () => void;
   onCancel?: () => void;
   onDelete?: () => void;
+  /** Invitations can be created only for an existing timer */
+  timerId?: number;
 }) {
   function updateMilestone(id: string, changes: Partial<Milestone>) {
     onDraftChange({
@@ -111,6 +115,8 @@ export function TimelineEditor({
       {!isFinishAfterStart(draft) && (
         <p className="text-error">Finish must be after start</p>
       )}
+
+      {timerId !== undefined && <InvitationSection timerId={timerId} />}
 
       <div className="flex flex-col gap-2">
         {draft.milestones.map((milestone) => (

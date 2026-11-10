@@ -94,6 +94,7 @@ import { Route as With_menuClubsSlugIndexRouteImport } from "./routes/_with_menu
 import { Route as With_menuBoardGamesAdminIndexRouteImport } from "./routes/_with_menu/board-games/admin/index";
 import { Route as With_menuAdminUsersIndexRouteImport } from "./routes/_with_menu/admin/users.index";
 import { Route as With_menuWhen2meetMeetingIdEditRouteImport } from "./routes/_with_menu/when2meet/$meetingId.edit";
+import { Route as With_menuTimerJoinCodeRouteImport } from "./routes/_with_menu/timer/join/$code";
 import { Route as With_menuTimerHackathonIdRouteImport } from "./routes/_with_menu/timer/hackathon/$id";
 import { Route as With_menuScheduleEventGroupsAliasRouteImport } from "./routes/_with_menu/schedule/event-groups.$alias";
 import { Route as With_menuRoomBookingRoomsRoomRouteImport } from "./routes/_with_menu/room-booking/rooms.$room";
@@ -563,6 +564,11 @@ const With_menuWhen2meetMeetingIdEditRoute =
     path: "/when2meet/$meetingId/edit",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
+const With_menuTimerJoinCodeRoute = With_menuTimerJoinCodeRouteImport.update({
+  id: "/timer/join/$code",
+  path: "/timer/join/$code",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuTimerHackathonIdRoute =
   With_menuTimerHackathonIdRouteImport.update({
     id: "/timer/hackathon/$id",
@@ -711,6 +717,7 @@ export interface FileRoutesByFullPath {
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
   "/timer/hackathon/$id": typeof With_menuTimerHackathonIdRoute;
+  "/timer/join/$code": typeof With_menuTimerJoinCodeRoute;
   "/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/admin/users/": typeof With_menuAdminUsersIndexRoute;
   "/board-games/admin/": typeof With_menuBoardGamesAdminIndexRoute;
@@ -805,6 +812,7 @@ export interface FileRoutesByTo {
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
   "/timer/hackathon/$id": typeof With_menuTimerHackathonIdRoute;
+  "/timer/join/$code": typeof With_menuTimerJoinCodeRoute;
   "/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/admin/users": typeof With_menuAdminUsersIndexRoute;
   "/board-games/admin": typeof With_menuBoardGamesAdminIndexRoute;
@@ -904,6 +912,7 @@ export interface FileRoutesById {
   "/_with_menu/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/_with_menu/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
   "/_with_menu/timer/hackathon/$id": typeof With_menuTimerHackathonIdRoute;
+  "/_with_menu/timer/join/$code": typeof With_menuTimerJoinCodeRoute;
   "/_with_menu/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/_with_menu/admin/users/": typeof With_menuAdminUsersIndexRoute;
   "/_with_menu/board-games/admin/": typeof With_menuBoardGamesAdminIndexRoute;
@@ -1003,6 +1012,7 @@ export interface FileRouteTypes {
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
     | "/timer/hackathon/$id"
+    | "/timer/join/$code"
     | "/when2meet/$meetingId/edit"
     | "/admin/users/"
     | "/board-games/admin/"
@@ -1097,6 +1107,7 @@ export interface FileRouteTypes {
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
     | "/timer/hackathon/$id"
+    | "/timer/join/$code"
     | "/when2meet/$meetingId/edit"
     | "/admin/users"
     | "/board-games/admin"
@@ -1195,6 +1206,7 @@ export interface FileRouteTypes {
     | "/_with_menu/room-booking/rooms/$room"
     | "/_with_menu/schedule/event-groups/$alias"
     | "/_with_menu/timer/hackathon/$id"
+    | "/_with_menu/timer/join/$code"
     | "/_with_menu/when2meet/$meetingId/edit"
     | "/_with_menu/admin/users/"
     | "/_with_menu/board-games/admin/"
@@ -1816,6 +1828,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuWhen2meetMeetingIdEditRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/timer/join/$code": {
+      id: "/_with_menu/timer/join/$code";
+      path: "/timer/join/$code";
+      fullPath: "/timer/join/$code";
+      preLoaderRoute: typeof With_menuTimerJoinCodeRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/timer/hackathon/$id": {
       id: "/_with_menu/timer/hackathon/$id";
       path: "/timer/hackathon/$id";
@@ -1983,6 +2002,7 @@ interface With_menuRouteRouteChildren {
   With_menuRoomBookingRoomsRoomRoute: typeof With_menuRoomBookingRoomsRoomRoute;
   With_menuScheduleEventGroupsAliasRoute: typeof With_menuScheduleEventGroupsAliasRoute;
   With_menuTimerHackathonIdRoute: typeof With_menuTimerHackathonIdRoute;
+  With_menuTimerJoinCodeRoute: typeof With_menuTimerJoinCodeRoute;
   With_menuWhen2meetMeetingIdEditRoute: typeof With_menuWhen2meetMeetingIdEditRoute;
   With_menuAdminUsersIndexRoute: typeof With_menuAdminUsersIndexRoute;
   With_menuClubsSlugIndexRoute: typeof With_menuClubsSlugIndexRoute;
@@ -2065,6 +2085,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuScheduleEventGroupsAliasRoute:
     With_menuScheduleEventGroupsAliasRoute,
   With_menuTimerHackathonIdRoute: With_menuTimerHackathonIdRoute,
+  With_menuTimerJoinCodeRoute: With_menuTimerJoinCodeRoute,
   With_menuWhen2meetMeetingIdEditRoute: With_menuWhen2meetMeetingIdEditRoute,
   With_menuAdminUsersIndexRoute: With_menuAdminUsersIndexRoute,
   With_menuClubsSlugIndexRoute: With_menuClubsSlugIndexRoute,

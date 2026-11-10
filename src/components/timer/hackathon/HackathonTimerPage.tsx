@@ -207,6 +207,7 @@ function HackathonTimerView({ timer }: { timer: HackathonTimer }) {
           <TimelineEditor
             draft={draft}
             onDraftChange={setDraft}
+            timerId={timer.id}
             heading="Edit timer"
             doneLabel="Done"
             isSaving={isUpdating}

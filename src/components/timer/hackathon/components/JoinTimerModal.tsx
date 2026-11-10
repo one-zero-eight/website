@@ -4,6 +4,7 @@ import { Modal } from "@/components/common/Modal.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useRefreshTimers } from "../lib/useHackathonTimers";
+import { findInvitationUuid } from "../utils";
 
 export function JoinTimerModal({
   open,
@@ -15,7 +16,7 @@ export function JoinTimerModal({
   const navigate = useNavigate();
   const refreshTimers = useRefreshTimers();
   const [invitation, setInvitation] = useState("");
-  const invitationUuid = invitation.trim();
+  const invitationUuid = findInvitationUuid(invitation);
 
   const {
     mutate: joinTimer,
@@ -53,11 +54,11 @@ export function JoinTimerModal({
   return (
     <Modal open={open} onOpenChange={handleOpenChange} title="Join timer">
       <label className="flex flex-col gap-1">
-        <span className="text-base-content/70 text-sm">Invitation UUID</span>
+        <span className="text-base-content/70 text-sm">Invitation link</span>
         <input
           type="text"
           className="input w-full"
-          placeholder="Invitation UUID"
+          placeholder="https://.../timer/join/..."
           value={invitation}
           onChange={(e) => {
             setInvitation(e.target.value.trim());
