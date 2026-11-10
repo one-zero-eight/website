@@ -1,12 +1,17 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $when2meet } from "@/api/when2meet";
+import { EventInput } from "@fullcalendar/core";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { when2MeetEventsToCalendarEvents } from "./when2meet-events.ts";
 
-export function useWhen2MeetCalendarEvents() {
+export function useWhen2MeetCalendarEvents({
+  enabled,
+}: {
+  enabled?: boolean;
+}): EventInput[] {
   const { me } = useMe();
-  const isEnabled = !!me?.id;
+  const isEnabled = enabled && !!me?.id;
 
   const { data: ownedMeetings = [] } = $when2meet.useQuery(
     "get",
@@ -41,11 +46,17 @@ export function useWhen2MeetCalendarEvents() {
     })),
   });
 
-  return useMemo(() => {
+  const result = useMemo(() => {
     const events = meetingQueries
       .map((query) => query.data)
       .filter((event): event is NonNullable<typeof event> => !!event);
 
     return when2MeetEventsToCalendarEvents(events);
   }, [meetingQueries]);
+
+  if (!enabled) {
+    return [];
+  }
+
+  return result;
 }

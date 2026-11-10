@@ -1,13 +1,24 @@
-/*
-from https://github.com/mifi/ical-expander
-released under https://github.com/mifi/ical-expander/blob/master/LICENSE
-operates entirely in UTC
-*/
+// Based on https://github.com/mifi/ical-expander/tree/v3.2.0
 
 import ICAL from "ical.js";
 
+type ExpansionResults = {
+  events: ICAL.Event[];
+  occurrences: ReturnType<ICAL.Event["getOccurrenceDetails"]>[];
+};
+
 export class IcalExpander {
-  constructor(opts) {
+  maxIterations: number;
+  skipInvalidDates: boolean;
+  jCalData: any;
+  component: ICAL.Component;
+  events: ICAL.Event[];
+
+  constructor(opts: {
+    maxIterations?: number;
+    skipInvalidDates?: boolean;
+    ics: string;
+  }) {
     this.maxIterations = opts.maxIterations != null ? opts.maxIterations : 1000;
     this.skipInvalidDates =
       opts.skipInvalidDates != null ? opts.skipInvalidDates : false;
@@ -24,7 +35,7 @@ export class IcalExpander {
           evt.startDate.toJSDate();
           evt.endDate.toJSDate();
           return true;
-        } catch (err) {
+        } catch {
           // skipping events with invalid time
           return false;
         }
@@ -32,15 +43,19 @@ export class IcalExpander {
     }
   }
 
-  between(after, before) {
-    function isEventWithinRange(startTime, endTime) {
+  between(after: Date | undefined, before: Date | undefined): ExpansionResults {
+    function isEventWithinRange(startTime: number, endTime: number) {
       return (
         (!after || endTime >= after.getTime()) &&
         (!before || startTime <= before.getTime())
       );
     }
 
-    function getTimes(eventOrOccurrence) {
+    function getTimes(
+      eventOrOccurrence:
+        | ICAL.Event
+        | ReturnType<ICAL.Event["getOccurrenceDetails"]>,
+    ) {
       const startTime = eventOrOccurrence.startDate.toJSDate().getTime();
       let endTime = eventOrOccurrence.endDate.toJSDate().getTime();
 
@@ -53,24 +68,24 @@ export class IcalExpander {
       return { startTime, endTime };
     }
 
-    const exceptions = [];
+    const exceptions: ICAL.Event[] = [];
 
     this.events.forEach((event) => {
       if (event.isRecurrenceException()) exceptions.push(event);
     });
 
-    const ret = {
-      events: [],
-      occurrences: [],
+    const result = {
+      events: [] as ICAL.Event[],
+      occurrences: [] as ReturnType<ICAL.Event["getOccurrenceDetails"]>[],
     };
 
     this.events
       .filter((e) => !e.isRecurrenceException())
       .forEach((event) => {
-        const exdates = [];
+        const exdates: number[] = [];
 
         event.component.getAllProperties("exdate").forEach((exdateProp) => {
-          const exdate = exdateProp.getFirstValue();
+          const exdate = exdateProp.getFirstValue() as ICAL.Time;
           exdates.push(exdate.toJSDate().getTime());
         });
 
@@ -105,9 +120,9 @@ export class IcalExpander {
               // Check that we are within our range
               if (isEventWithinRange(startTime, endTime)) {
                 if (exception) {
-                  ret.events.push(exception);
+                  result.events.push(exception);
                 } else if (!isOccurrenceExcluded) {
-                  ret.occurrences.push(occurrence);
+                  result.occurrences.push(occurrence);
                 }
               }
             }
@@ -119,21 +134,21 @@ export class IcalExpander {
         // Non-recurring event:
         const { startTime, endTime } = getTimes(event);
 
-        if (isEventWithinRange(startTime, endTime)) ret.events.push(event);
+        if (isEventWithinRange(startTime, endTime)) result.events.push(event);
       });
 
-    return ret;
+    return result;
   }
 
-  before(before) {
+  before(before: Date): ExpansionResults {
     return this.between(undefined, before);
   }
 
-  after(after) {
-    return this.between(after);
+  after(after: Date): ExpansionResults {
+    return this.between(after, undefined);
   }
 
-  all() {
-    return this.between();
+  all(): ExpansionResults {
+    return this.between(undefined, undefined);
   }
 }

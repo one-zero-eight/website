@@ -1,5 +1,5 @@
 import { addDays } from "@fullcalendar/core/internal";
-import { IcalExpander } from "@/components/calendar/iCalendarPlugin/ical-expander/IcalExpander";
+import { IcalExpander } from "@/api/schedule/calendars/IcalExpander.ts";
 import ICAL from "ical.js";
 import { getTimeSlotDurationMinutes, slotKeyToDateRange } from "./api-slots.ts";
 import { getSlotKey } from "./slots.ts";

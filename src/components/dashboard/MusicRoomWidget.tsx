@@ -2,7 +2,7 @@ import { useMyMusicRoom } from "@/api/schedule/event-group.ts";
 import { i18n } from "@lingui/core";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
-import { IcalExpander } from "@/components/calendar/iCalendarPlugin/ical-expander/IcalExpander.js";
+import { IcalExpander } from "@/api/schedule/calendars/IcalExpander.js";
 import { useNowMS } from "@/lib/utils/use-now.ts";
 import ICAL from "ical.js";
 import { useEffect, useMemo } from "react";

@@ -247,12 +247,14 @@ export function ImportModal({
       {/* Calendar itself */}
       {calendarURL.length > 0 && (
         <Calendar
-          urls={[
-            {
-              url: calendarURL,
-              color: calendarColor,
-            },
-          ]}
+          config={{
+            urls: [
+              {
+                url: calendarURL,
+                color: calendarColor,
+              },
+            ],
+          }}
           viewStorageId="popup"
           onEventSourceSuccess={() => setIsCalendarChecked(true)}
           isHidden={!showPreview}

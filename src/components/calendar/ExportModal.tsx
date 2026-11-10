@@ -5,7 +5,7 @@ import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 import ScheduleLinkCopy from "@/components/schedule/ScheduleLinkCopy.tsx";
 import { useRef } from "react";
-import { getICSLink, getPersonalLink } from "@/api/schedule/links.ts";
+import { getICSLink, getPersonalLink } from "@/api/schedule/calendars/links.ts";
 import { TargetForExport } from "@/api/schedule/types.ts";
 
 export type ExportTarget =
@@ -116,9 +116,11 @@ export function ExportModal({
       </ul>
       <div className="-m-4">
         <Calendar
-          urls={
-            calendarURL ? [{ url: calendarURL, eventGroup: eventGroup }] : []
-          }
+          config={{
+            urls: calendarURL
+              ? [{ url: calendarURL, eventGroup: eventGroup }]
+              : [],
+          }}
           viewStorageId="popup"
         />
       </div>
