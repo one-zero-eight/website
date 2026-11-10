@@ -37,11 +37,10 @@ msgstr ""
 #~ msgstr ""
 
 #: src/components/search/act/ActPage.tsx:69
-msgid "- Executing"
-msgstr ""
+#~ msgid "- Executing"
+#~ msgstr ""
 
-#: src/components/search/act/ActPage.tsx:82
-#: src/components/search/ask/AskResult.tsx:88
+#: src/components/search/ask/AskResult.tsx:89
 msgid "- Sorry, I can't help you with this question."
 msgstr ""
 
@@ -667,8 +666,8 @@ msgstr ""
 #: src/app/routes/_with_menu/search/act.tsx:28
 #: src/app/routes/_with_menu/search/act.tsx:35
 #: src/components/search/SearchField.tsx:52
-msgid "Act"
-msgstr ""
+#~ msgid "Act"
+#~ msgstr ""
 
 #: src/components/dashboard/TelegramReconnectWidget.tsx:16
 msgid "Action Required"
@@ -869,8 +868,8 @@ msgid "Advanced"
 msgstr ""
 
 #: src/components/search/act/ActPage.tsx:64
-msgid "AI Assistant:"
-msgstr ""
+#~ msgid "AI Assistant:"
+#~ msgstr ""
 
 #: src/components/calendar/AiCalendarCard.tsx:25
 msgid "AI Calendar"
@@ -1062,7 +1061,6 @@ msgid "Art & Culture"
 msgstr ""
 
 #: src/app/routes/_with_menu/search/ask.tsx:33
-#: src/components/search/SearchField.tsx:52
 msgid "Ask"
 msgstr ""
 
@@ -1217,7 +1215,7 @@ msgstr ""
 msgid "banned {bannedAt}"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:179
+#: src/components/search/ask/AskResult.tsx:180
 msgid "Based on:"
 msgstr ""
 
@@ -1679,7 +1677,7 @@ msgid "Channel"
 msgstr ""
 
 #: src/components/clubs/constants.ts:85
-#: src/components/search/ask/AskResult.tsx:355
+#: src/components/search/ask/AskResult.tsx:356
 msgid "Chat"
 msgstr ""
 
@@ -1886,7 +1884,7 @@ msgstr ""
 msgid "Classes this semester"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:169
+#: src/components/search/ask/AskResult.tsx:170
 msgid "Clauses:"
 msgstr ""
 
@@ -1921,7 +1919,7 @@ msgid "Click to upload or paste an image"
 msgstr ""
 
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
-#: src/components/search/IframePreviewCard.tsx:131
+#: src/components/search/IframePreviewCard.tsx:130
 #: src/components/sport/SportOverviewSection.tsx:669
 #: src/components/sport/SportStudentTrainingModal.tsx:362
 #: src/components/sport/SportTrainerAttendanceModal.tsx:148
@@ -2398,7 +2396,7 @@ msgstr ""
 msgid "Could not open the chat"
 msgstr ""
 
-#: src/components/search/IframePreviewCard.tsx:157
+#: src/components/search/IframePreviewCard.tsx:156
 msgid "Could not open this archive document. It may be missing or changed."
 msgstr ""
 
@@ -3008,7 +3006,6 @@ msgstr ""
 msgid "Documents processing problem"
 msgstr ""
 
-#: src/components/search/SelectSourcesFilterModal.tsx:54
 #: src/components/web-print/PrintPage.tsx:489
 msgid "Done"
 msgstr ""
@@ -3030,8 +3027,7 @@ msgstr ""
 msgid "Downgrade to Beginner"
 msgstr ""
 
-#: src/components/search/IframePreviewCard.tsx:247
-#: src/components/search/PdfPreview.tsx:132
+#: src/components/search/IframePreviewCard.tsx:243
 msgid "Download"
 msgstr ""
 
@@ -3212,7 +3208,7 @@ msgstr ""
 msgid "Edit: {prefix}"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:349
+#: src/components/search/ask/AskResult.tsx:350
 msgid "EduWiki"
 msgstr ""
 
@@ -3351,8 +3347,8 @@ msgid "Enter Innopolis email to set as new club leader"
 msgstr ""
 
 #: src/components/search/SearchField.tsx:82
-msgid "Enter query..."
-msgstr ""
+#~ msgid "Enter query..."
+#~ msgstr ""
 
 #: src/components/tabletennis/ValidationMatches.tsx:1117
 msgid "Enter score"
@@ -3507,8 +3503,8 @@ msgid "Error Loading Schedule"
 msgstr ""
 
 #: src/components/search/PdfPreview.tsx:60
-msgid "Error while loading PDF file"
-msgstr ""
+#~ msgid "Error while loading PDF file"
+#~ msgstr ""
 
 #: src/app/routes/guard.google.files.$slug.join.tsx:160
 msgid "Error:"
@@ -3646,8 +3642,8 @@ msgid "Everything is scheduled"
 msgstr ""
 
 #: src/components/search/SearchExample.tsx:32
-msgid "Example: <0>{example}</0>"
-msgstr ""
+#~ msgid "Example: <0>{example}</0>"
+#~ msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:368
 msgid "Examples: <0>{examples}</0>"
@@ -3857,8 +3853,8 @@ msgid "Fewer groups"
 msgstr ""
 
 #: src/components/search/PdfPreview.tsx:88
-msgid "File has not yet been uploaded"
-msgstr ""
+#~ msgid "File has not yet been uploaded"
+#~ msgstr ""
 
 #: src/components/web-print/FileDropzone.tsx:47
 msgid "File is too large!"
@@ -4150,8 +4146,8 @@ msgid "Gmail is required"
 msgstr ""
 
 #: src/components/search/MoodleUrlPreview.tsx:19
-msgid "Go To"
-msgstr ""
+#~ msgid "Go To"
+#~ msgstr ""
 
 #: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:300
 msgid "Go to {navigationTarget}"
@@ -4190,7 +4186,7 @@ msgstr ""
 msgid "Go to source"
 msgstr ""
 
-#: src/components/search/IframePreviewCard.tsx:322
+#: src/components/search/IframePreviewCard.tsx:318
 msgid "Go to website ->"
 msgstr ""
 
@@ -4293,7 +4289,7 @@ msgstr ""
 msgid "Guests Role"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:347
+#: src/components/search/ask/AskResult.tsx:348
 msgid "Guide"
 msgstr ""
 
@@ -4331,8 +4327,8 @@ msgid "HEX"
 msgstr ""
 
 #: src/components/search/act/ActPage.tsx:94
-msgid "Hi! I'm AI Assistant."
-msgstr ""
+#~ msgid "Hi! I'm AI Assistant."
+#~ msgstr ""
 
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:408
 msgid "hidden"
@@ -4425,8 +4421,8 @@ msgid "I can help with your schedule, university rules, announcements and availa
 msgstr ""
 
 #: src/components/search/act/ActPage.tsx:97
-msgid "I can help you to book the music room."
-msgstr ""
+#~ msgid "I can help you to book the music room."
+#~ msgstr ""
 
 #: src/components/admin/AdminUserDetails.tsx:207
 #: src/components/admin/AdminUserDetails.tsx:299
@@ -4608,24 +4604,24 @@ msgid "Innopolis"
 msgstr ""
 
 #: src/components/search/SearchField.tsx:12
-msgid "Innopolis clubs"
-msgstr ""
+#~ msgid "Innopolis clubs"
+#~ msgstr ""
 
 #: src/components/search/SearchField.tsx:13
-msgid "Innopolis University"
-msgstr ""
+#~ msgid "Innopolis University"
+#~ msgstr ""
 
 #: src/components/search/SearchField.tsx:14
-msgid "Innopolis University courses"
-msgstr ""
+#~ msgid "Innopolis University courses"
+#~ msgstr ""
 
 #: src/components/search/SearchField.tsx:16
-msgid "Innopolis University events"
-msgstr ""
+#~ msgid "Innopolis University events"
+#~ msgstr ""
 
 #: src/components/search/SearchField.tsx:15
-msgid "Innopolis University professors"
-msgstr ""
+#~ msgid "Innopolis University professors"
+#~ msgstr ""
 
 #: src/components/dashboard/PwaWidget.tsx:34
 msgid "Install"
@@ -4973,8 +4969,8 @@ msgid "Loading requests…"
 msgstr ""
 
 #: src/components/search/SearchPage.tsx:219
-msgid "Loading search results..."
-msgstr ""
+#~ msgid "Loading search results..."
+#~ msgstr ""
 
 #: src/components/search/ask/AskSources.tsx:63
 msgid "Loading sources"
@@ -4986,8 +4982,8 @@ msgstr ""
 
 #: src/components/about/TeamMembers.tsx:218
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:197
-#: src/components/search/IframePreviewCard.tsx:145
-#: src/components/search/IframePreviewCard.tsx:257
+#: src/components/search/IframePreviewCard.tsx:144
+#: src/components/search/IframePreviewCard.tsx:253
 #: src/components/search/SourcePreviewModal.tsx:32
 msgid "Loading..."
 msgstr ""
@@ -5494,8 +5490,8 @@ msgid "New rating"
 msgstr ""
 
 #: src/components/search/PdfPreview.tsx:171
-msgid "New tab"
-msgstr ""
+#~ msgid "New tab"
+#~ msgstr ""
 
 #: src/components/dashboard/CountdownWidget.tsx:30
 msgid "New Year countdown"
@@ -5805,8 +5801,8 @@ msgid "No logo"
 msgstr ""
 
 #: src/components/search/SearchPage.tsx:212
-msgid "No matched results for: {searchedFor}"
-msgstr ""
+#~ msgid "No matched results for: {searchedFor}"
+#~ msgstr ""
 
 #: src/components/tabletennis/TableTennisMyMatches.tsx:152
 msgid "No matches yet."
@@ -6088,11 +6084,11 @@ msgstr ""
 msgid "Numbered list"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:136
+#: src/components/search/ask/AskResult.tsx:137
 msgid "Official"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:345
+#: src/components/search/ask/AskResult.tsx:346
 msgid "Official document"
 msgstr ""
 
@@ -6241,7 +6237,7 @@ msgstr ""
 #~ msgid "Open document: {0}"
 #~ msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:216
+#: src/components/search/ask/AskResult.tsx:217
 msgid "Open document: {member}"
 msgstr ""
 
@@ -6250,11 +6246,11 @@ msgstr ""
 msgid "Open event page"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:331
+#: src/components/search/ask/AskResult.tsx:332
 msgid "Open in chat ->"
 msgstr ""
 
-#: src/components/search/IframePreviewCard.tsx:168
+#: src/components/search/IframePreviewCard.tsx:167
 msgid "Open original archive"
 msgstr ""
 
@@ -6480,8 +6476,8 @@ msgid "Pause"
 msgstr ""
 
 #: src/components/search/PdfPreview.tsx:56
-msgid "PDF file is missing"
-msgstr ""
+#~ msgid "PDF file is missing"
+#~ msgstr ""
 
 #: src/components/web-print/FileDropzone.tsx:271
 msgid "PDF, Word, Excel, images, and more — max 20 MB"
@@ -6655,18 +6651,18 @@ msgid "Preferred time"
 msgstr ""
 
 #: src/components/clubs/EditClubPage.tsx:914
-#: src/components/search/IframePreviewCard.tsx:152
-#: src/components/search/IframePreviewCard.tsx:263
-#: src/components/search/IframePreviewCard.tsx:272
-#: src/components/search/IframePreviewCard.tsx:300
+#: src/components/search/IframePreviewCard.tsx:151
+#: src/components/search/IframePreviewCard.tsx:259
+#: src/components/search/IframePreviewCard.tsx:268
+#: src/components/search/IframePreviewCard.tsx:296
 #: src/components/web-print/PrintPage.tsx:445
 #: src/components/web-print/ScanPage.tsx:400
 msgid "Preview"
 msgstr ""
 
 #: src/components/search/PdfPreview.tsx:58
-msgid "Preview available for PDF only"
-msgstr ""
+#~ msgid "Preview available for PDF only"
+#~ msgstr ""
 
 #: src/components/clubs/EditClubPage.tsx:676
 msgid "Preview unavailable"
@@ -7267,8 +7263,8 @@ msgid "Result"
 msgstr ""
 
 #: src/components/search/SearchPage.tsx:210
-msgid "Results for: {searchedFor}"
-msgstr ""
+#~ msgid "Results for: {searchedFor}"
+#~ msgstr ""
 
 #: src/components/timer/TimerPage.tsx:283
 msgid "Resume"
@@ -7633,10 +7629,7 @@ msgstr ""
 msgid "Scores are entered by the organiser."
 msgstr ""
 
-#: src/app/routes/_with_menu/search/index.tsx:29
-#: src/app/routes/_with_menu/search/index.tsx:36
 #: src/components/clubs/ClubsSidebar.tsx:38
-#: src/components/search/SearchField.tsx:52
 msgid "Search"
 msgstr ""
 
@@ -7649,8 +7642,8 @@ msgid "Search any place"
 msgstr ""
 
 #: src/app/routes/_with_menu/search/index.tsx:32
-msgid "Search anything at Innopolis University."
-msgstr ""
+#~ msgid "Search anything at Innopolis University."
+#~ msgstr ""
 
 #: src/components/board-games/ReservationsAdminPage.tsx:148
 msgid "Search by game name"
@@ -7736,7 +7729,7 @@ msgstr ""
 msgid "Section"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:174
+#: src/components/search/ask/AskResult.tsx:175
 msgid "Sections:"
 msgstr ""
 
@@ -8202,7 +8195,6 @@ msgstr ""
 
 #: src/components/editor/DescriptionEditor.tsx:19
 #: src/components/editor/DescriptionViewer.tsx:41
-#: src/components/search/PreviewCard.tsx:50
 msgid "Some error occurred"
 msgstr ""
 
@@ -8211,11 +8203,11 @@ msgid "Some players were not found, see the list below"
 msgstr ""
 
 #: src/components/search/SearchPage.tsx:286
-msgid "Sorry, something gone wrong."
-msgstr ""
+#~ msgid "Sorry, something gone wrong."
+#~ msgstr ""
 
-#: src/components/search/IframePreviewCard.tsx:15
-#: src/components/search/IframePreviewCard.tsx:309
+#: src/components/search/IframePreviewCard.tsx:14
+#: src/components/search/IframePreviewCard.tsx:305
 msgid "Sorry, this site does not support preview. Please, open it directly."
 msgstr ""
 
@@ -8223,10 +8215,9 @@ msgstr ""
 msgid "Source enabled; message history may still be loading"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:111
+#: src/components/search/ask/AskResult.tsx:112
 #: src/components/search/ask/AskSources.tsx:26
 #: src/components/search/ask/AskSources.tsx:31
-#: src/components/search/SelectSourcesFilterButton.tsx:21
 msgid "Sources"
 msgstr ""
 
@@ -8746,8 +8737,8 @@ msgid "Tags"
 msgstr ""
 
 #: src/app/routes/_with_menu/search/act.tsx:31
-msgid "Take actions based on search results or suggestions."
-msgstr ""
+#~ msgid "Take actions based on search results or suggestions."
+#~ msgstr ""
 
 #: src/components/board-games/shared.tsx:10
 msgid "Taken"
@@ -8801,8 +8792,8 @@ msgid "Technical"
 msgstr ""
 
 #: src/components/search/TruncatableMarkdown.tsx:35
-msgid "Tel: {phoneNumber}"
-msgstr ""
+#~ msgid "Tel: {phoneNumber}"
+#~ msgstr ""
 
 #: src/components/admin/AdminUserDetails.tsx:298
 #: src/components/layout/MorePage.tsx:36
@@ -9139,7 +9130,7 @@ msgstr ""
 msgid "This email is already in the group."
 msgstr ""
 
-#: src/components/search/IframePreviewCard.tsx:237
+#: src/components/search/IframePreviewCard.tsx:233
 msgid "This file cannot be previewed in the browser."
 msgstr ""
 
@@ -9358,8 +9349,8 @@ msgstr ""
 #: src/components/search/MoodleUnknownPreview.tsx:18
 #: src/components/search/MoodleUrlPreview.tsx:41
 #: src/components/search/PdfPreview.tsx:164
-msgid "To source"
-msgstr ""
+#~ msgid "To source"
+#~ msgstr ""
 
 #: src/components/clubs/ClubLeaguePage.tsx:42
 msgid "To teach student club leaders to run reports"
@@ -9991,12 +9982,12 @@ msgstr ""
 msgid "Weak GPS signal (±{accuracyM}m)"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:353
+#: src/components/search/ask/AskResult.tsx:354
 msgid "Web search"
 msgstr ""
 
 #: src/components/clubs/constants.ts:89
-#: src/components/search/ask/AskResult.tsx:351
+#: src/components/search/ask/AskResult.tsx:352
 msgid "Website"
 msgstr ""
 

@@ -11,7 +11,6 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import IframePreviewCard from "./IframePreviewCard";
 import { AskResult } from "./ask/AskResult";
-import { SearchPage } from "./SearchPage";
 
 const { useSearchQuery } = vi.hoisted(() => ({ useSearchQuery: vi.fn() }));
 
@@ -27,9 +26,6 @@ vi.mock("@/components/maps/MapsPage", () => ({ MapsPage: () => null }));
 vi.mock("./ask/AskApproval", () => ({ AskApproval: () => null }));
 vi.mock("./ask/AskCalendarEvents", () => ({ AskCalendarEvents: () => null }));
 vi.mock("./ask/AskFeedback", () => ({ AskFeedback: () => null }));
-vi.mock("./SearchField", () => ({ default: () => null }));
-vi.mock("./PreviewCard", () => ({ default: () => null }));
-vi.mock("@tanstack/react-router", () => ({ useNavigate: () => vi.fn() }));
 
 const source = {
   type: EduwikiSourceType.eduwiki,
@@ -597,168 +593,5 @@ describe("cited archive documents", () => {
     ).toBe("Open in chat ->");
     expect(dialog.querySelector("iframe")).toBeNull();
     expect(customFetch.GET).not.toHaveBeenCalled();
-  });
-
-  it.each([false, true])(
-    "waits for an explicit search result click before requesting its exact archive document (mobile: %s)",
-    async (isMobile) => {
-      vi.stubGlobal(
-        "matchMedia",
-        vi.fn(() => ({ matches: isMobile })),
-      );
-      vi.spyOn(window, "open").mockImplementation(() => null);
-      vi.mocked(customFetch.GET).mockResolvedValue({
-        data: new Blob(["pdf"]),
-        response: new Response(),
-      });
-      const selectedSource = {
-        ...source,
-        display_name: "Exam solutions",
-        archive_document: {
-          page: "courses/solutions #2",
-          revision: "sha256:second+revision",
-          member: "2026/solutions.pdf",
-        },
-      };
-      useSearchQuery.mockReturnValue({
-        data: {
-          searched_for: "exam",
-          responses: [{ source }, { source: selectedSource }],
-        },
-      });
-      await render(createElement(SearchPage, { searchQuery: "exam" }));
-      const results = Array.from(
-        container.querySelectorAll<HTMLElement>('div[tabindex="0"]'),
-      );
-      expect(results).toHaveLength(2);
-      expect(customFetch.GET).not.toHaveBeenCalled();
-      expect(container.querySelector(".border-primary")).toBeNull();
-      expect(container.querySelector("iframe")).toBeNull();
-      const selectedResult = results.find(
-        (result) =>
-          result.querySelector("p")?.textContent ===
-          selectedSource.display_name,
-      );
-      expect(selectedResult).toBeDefined();
-      await act(async () => selectedResult!.click());
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-      expect(window.open).not.toHaveBeenCalled();
-      const preview = isMobile
-        ? document.querySelector('[role="dialog"]')
-        : container;
-      expect(preview?.querySelector("iframe")?.getAttribute("src")).toBe(
-        "blob:archive-pdf",
-      );
-      expect(preview?.textContent).toContain(
-        selectedSource.archive_document.member,
-      );
-      expect(customFetch.GET).toHaveBeenCalledTimes(1);
-      const requestUrl = new URL(
-        vi.mocked(customFetch.GET).mock.calls[0][0] as string,
-      );
-      expect(requestUrl.origin + requestUrl.pathname).toBe(
-        `${SEARCH_API_URL}/search/archive-document`,
-      );
-      expect(Object.fromEntries(requestUrl.searchParams)).toEqual({
-        page: selectedSource.archive_document.page,
-        revision: selectedSource.archive_document.revision,
-      });
-      if (isMobile) {
-        await act(async () =>
-          (
-            preview?.querySelector('button[title="Close"]') as HTMLButtonElement
-          ).click(),
-        );
-        expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:archive-pdf");
-      }
-    },
-  );
-
-  it("still automatically previews an ordinary desktop search PDF", async () => {
-    vi.stubGlobal(
-      "matchMedia",
-      vi.fn(() => ({ matches: false })),
-    );
-    const url = "https://eduwiki.example/direct.pdf";
-    vi.mocked(customFetch.GET).mockResolvedValue({
-      data: new Blob(["pdf"]),
-      response: new Response(),
-    });
-    useSearchQuery.mockReturnValue({
-      data: {
-        searched_for: "exam",
-        responses: [{ source: { ...source, url, archive_document: null } }],
-      },
-    });
-    await render(createElement(SearchPage, { searchQuery: "exam" }));
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    });
-    expect(container.querySelector('div[tabindex="0"]')?.classList).toContain(
-      "border-primary",
-    );
-    expect(customFetch.GET).toHaveBeenCalledExactlyOnceWith(
-      `${SEARCH_API_URL}/search/pdf?url=${encodeURIComponent(url)}`,
-      expect.any(Object),
-    );
-    expect(container.querySelector("iframe")?.getAttribute("src")).toBe(
-      "blob:archive-pdf",
-    );
-  });
-
-  it("still opens an ordinary mobile search URL directly", async () => {
-    vi.stubGlobal(
-      "matchMedia",
-      vi.fn(() => ({ matches: true })),
-    );
-    vi.spyOn(window, "open").mockImplementation(() => null);
-    useSearchQuery.mockReturnValue({
-      data: {
-        searched_for: "exam",
-        responses: [{ source: { ...source, archive_document: null } }],
-      },
-    });
-    await render(createElement(SearchPage, { searchQuery: "exam" }));
-    act(() =>
-      (container.querySelector('div[tabindex="0"]') as HTMLElement).click(),
-    );
-    expect(window.open).toHaveBeenCalledExactlyOnceWith(source.url, "_blank");
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
-    expect(customFetch.GET).not.toHaveBeenCalled();
-  });
-
-  it("keeps archive PDF documents in PDF-only search results", async () => {
-    window.sessionStorage.setItem(
-      "search-filters",
-      JSON.stringify({
-        fileType: { pdf: true, link_to_source: false },
-        source: { eduwiki: true },
-      }),
-    );
-    vi.stubGlobal(
-      "matchMedia",
-      vi.fn(() => ({ matches: false })),
-    );
-    vi.mocked(customFetch.GET).mockResolvedValue({
-      data: new Blob(["pdf"]),
-      response: new Response(),
-    });
-    useSearchQuery.mockReturnValue({
-      data: { searched_for: "exam", responses: [{ source }] },
-    });
-    await render(createElement(SearchPage, { searchQuery: "exam" }));
-    expect(container.textContent).toContain("Results for: exam");
-    expect(customFetch.GET).not.toHaveBeenCalled();
-    await act(async () =>
-      (container.querySelector('div[tabindex="0"]') as HTMLElement).click(),
-    );
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    });
-    expect(container.querySelector("iframe")?.getAttribute("src")).toBe(
-      "blob:archive-pdf",
-    );
   });
 });

@@ -1,42 +1,21 @@
-import { Trans, useLingui } from "@lingui/react/macro";
-import { RequireAuth } from "@/components/common/AuthWall.tsx";
-import { SearchPage } from "@/components/search/SearchPage.tsx";
-import { Topbar } from "@/components/layout/Topbar";
-import { createFileRoute } from "@tanstack/react-router";
-import { Suspense } from "react";
-import { Helmet } from "@dr.pogodin/react-helmet";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 type SearchParams = {
-  // User's search query
   q?: string;
 };
 
 export const Route = createFileRoute("/_with_menu/search/")({
-  component: RouteComponent,
-  validateSearch: (search: Record<string, unknown>): SearchParams => {
-    return {
-      q: (search.q as string | undefined) ?? "",
-    };
+  component: () => null,
+  validateSearch: (search: Record<string, unknown>): SearchParams => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+  }),
+
+  // The search page is gone: its links open the assistant with the query in the input
+  beforeLoad: ({ search }) => {
+    throw redirect({
+      to: "/search/ask",
+      search: search.q ? { q: search.q } : {},
+      replace: true,
+    });
   },
 });
-
-function RouteComponent() {
-  const { t } = useLingui();
-  const { q } = Route.useSearch();
-  return (
-    <Suspense>
-      <Helmet>
-        <title>{t`Search`}</title>
-        <meta
-          name="description"
-          content={t`Search anything at Innopolis University.`}
-        />
-      </Helmet>
-
-      <Topbar title={<Trans>Search</Trans>} />
-      <RequireAuth>
-        <SearchPage searchQuery={q ?? ""} />
-      </RequireAuth>
-    </Suspense>
-  );
-}

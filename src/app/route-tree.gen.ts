@@ -63,7 +63,6 @@ import { Route as With_menuSportProfileRouteImport } from "./routes/_with_menu/s
 import { Route as With_menuSportHistoryRouteImport } from "./routes/_with_menu/sport/history";
 import { Route as With_menuSportFaqRouteImport } from "./routes/_with_menu/sport/faq";
 import { Route as With_menuSearchAskRouteImport } from "./routes/_with_menu/search/ask";
-import { Route as With_menuSearchActRouteImport } from "./routes/_with_menu/search/act";
 import { Route as With_menuScheduleCategoryRouteImport } from "./routes/_with_menu/schedule/$category";
 import { Route as With_menuRoomBookingRulesRouteImport } from "./routes/_with_menu/room-booking/rules";
 import { Route as With_menuRoomBookingListRouteImport } from "./routes/_with_menu/room-booking/list";
@@ -386,11 +385,6 @@ const With_menuSearchAskRoute = With_menuSearchAskRouteImport.update({
   path: "/search/ask",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
-const With_menuSearchActRoute = With_menuSearchActRouteImport.update({
-  id: "/search/act",
-  path: "/search/act",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
 const With_menuScheduleCategoryRoute =
   With_menuScheduleCategoryRouteImport.update({
     id: "/schedule/$category",
@@ -642,7 +636,6 @@ export interface FileRoutesByFullPath {
   "/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
-  "/search/act": typeof With_menuSearchActRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
   "/sport/faq": typeof With_menuSportFaqRoute;
   "/sport/history": typeof With_menuSportHistoryRoute;
@@ -732,7 +725,6 @@ export interface FileRoutesByTo {
   "/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
-  "/search/act": typeof With_menuSearchActRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
   "/sport/faq": typeof With_menuSportFaqRoute;
   "/sport/history": typeof With_menuSportHistoryRoute;
@@ -827,7 +819,6 @@ export interface FileRoutesById {
   "/_with_menu/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/_with_menu/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/_with_menu/schedule/$category": typeof With_menuScheduleCategoryRoute;
-  "/_with_menu/search/act": typeof With_menuSearchActRoute;
   "/_with_menu/search/ask": typeof With_menuSearchAskRoute;
   "/_with_menu/sport/faq": typeof With_menuSportFaqRoute;
   "/_with_menu/sport/history": typeof With_menuSportHistoryRoute;
@@ -922,7 +913,6 @@ export interface FileRouteTypes {
     | "/room-booking/list"
     | "/room-booking/rules"
     | "/schedule/$category"
-    | "/search/act"
     | "/search/ask"
     | "/sport/faq"
     | "/sport/history"
@@ -1012,7 +1002,6 @@ export interface FileRouteTypes {
     | "/room-booking/list"
     | "/room-booking/rules"
     | "/schedule/$category"
-    | "/search/act"
     | "/search/ask"
     | "/sport/faq"
     | "/sport/history"
@@ -1106,7 +1095,6 @@ export interface FileRouteTypes {
     | "/_with_menu/room-booking/list"
     | "/_with_menu/room-booking/rules"
     | "/_with_menu/schedule/$category"
-    | "/_with_menu/search/act"
     | "/_with_menu/search/ask"
     | "/_with_menu/sport/faq"
     | "/_with_menu/sport/history"
@@ -1548,13 +1536,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuSearchAskRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/search/act": {
-      id: "/_with_menu/search/act";
-      path: "/search/act";
-      fullPath: "/search/act";
-      preLoaderRoute: typeof With_menuSearchActRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
     "/_with_menu/schedule/$category": {
       id: "/_with_menu/schedule/$category";
       path: "/schedule/$category";
@@ -1866,7 +1847,6 @@ interface With_menuRouteRouteChildren {
   With_menuRoomBookingListRoute: typeof With_menuRoomBookingListRoute;
   With_menuRoomBookingRulesRoute: typeof With_menuRoomBookingRulesRoute;
   With_menuScheduleCategoryRoute: typeof With_menuScheduleCategoryRoute;
-  With_menuSearchActRoute: typeof With_menuSearchActRoute;
   With_menuSearchAskRoute: typeof With_menuSearchAskRoute;
   With_menuSportFaqRoute: typeof With_menuSportFaqRoute;
   With_menuSportHistoryRoute: typeof With_menuSportHistoryRoute;
@@ -1943,7 +1923,6 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuRoomBookingListRoute: With_menuRoomBookingListRoute,
   With_menuRoomBookingRulesRoute: With_menuRoomBookingRulesRoute,
   With_menuScheduleCategoryRoute: With_menuScheduleCategoryRoute,
-  With_menuSearchActRoute: With_menuSearchActRoute,
   With_menuSearchAskRoute: With_menuSearchAskRoute,
   With_menuSportFaqRoute: With_menuSportFaqRoute,
   With_menuSportHistoryRoute: With_menuSportHistoryRoute,

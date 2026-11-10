@@ -41,6 +41,21 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://innohassle.ru/board-games</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/board-games/admin</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/board-games/admin/reservations</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://innohassle.ru/calendar</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -181,22 +196,32 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://innohassle.ru/search</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://innohassle.ru/search/act</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://innohassle.ru/search/ask</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://innohassle.ru/sport</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/sport/faq</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/sport/history</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/sport/profile</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/sport/trainer</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -212,11 +237,6 @@
   </url>
   <url>
     <loc>https://innohassle.ru/tabletennis</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://innohassle.ru/tabletennis/events</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -237,6 +257,11 @@
   </url>
   <url>
     <loc>https://innohassle.ru/timer</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/timetable</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

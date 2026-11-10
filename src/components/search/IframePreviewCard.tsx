@@ -2,7 +2,6 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { searchTypes } from "@/api/search";
 import { SEARCH_API_URL } from "@/api/search/links.ts";
 import { usePreviewFile } from "@/api/search/use-preview-file.ts";
-import { cn } from "@/lib/ui/cn";
 import { useEffect, useState } from "react";
 import { componentByPath, resolvePageByUrl } from "./innohassleRoutes";
 import { MapsPage } from "../maps/MapsPage";
@@ -212,12 +211,7 @@ function OrdinaryPreviewCard({
   );
 
   return (
-    <div
-      className={cn(
-        "border-base-300 bg-base-200 rounded-field flex h-fit max-h-full w-full min-w-0 flex-col gap-2 border p-4",
-        "fixed static inset-8 top-8 z-8 md:sticky md:inset-0 md:top-4",
-      )}
-    >
+    <div className="border-base-300 bg-base-200 rounded-field flex h-fit max-h-full w-full min-w-0 flex-col gap-2 border p-4">
       <div className="flex flex-row items-center justify-between">
         <p className="truncate text-xs font-semibold md:text-2xl dark:text-white">
           {source.display_name}
