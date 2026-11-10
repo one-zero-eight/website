@@ -21,26 +21,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/search/page": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Page By Url
-     * @description The text of a page of the knowledge base by the address of its original: for sites that cannot be shown in a frame.
-     */
-    get: operations["search_page_by_url"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/search/pdf": {
     parameters: {
       query?: never;
@@ -600,6 +580,8 @@ export interface components {
       author?: string | null;
       /** Author Url */
       author_url?: string | null;
+      /** Text */
+      text?: string | null;
       /**
        * Official
        * @default false
@@ -1043,15 +1025,6 @@ export interface components {
        */
       step_minutes: 30;
     };
-    /** PageText */
-    PageText: {
-      /** Title */
-      title: string;
-      /** Url */
-      url: string;
-      /** Text */
-      text: string;
-    };
     /** ParseRequest */
     ParseRequest: {
       /** Id */
@@ -1420,7 +1393,6 @@ export type SchemaMoodleUnknownSource =
 export type SchemaMoodleUrlSource = components["schemas"]["MoodleUrlSource"];
 export type SchemaMusicBookingWindow =
   components["schemas"]["MusicBookingWindow"];
-export type SchemaPageText = components["schemas"]["PageText"];
 export type SchemaParseRequest = components["schemas"]["ParseRequest"];
 export type SchemaPdfLocation = components["schemas"]["PdfLocation"];
 export type SchemaResidentsSource = components["schemas"]["ResidentsSource"];
@@ -1467,44 +1439,6 @@ export interface operations {
       };
       /** @description Search timed out */
       408: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  search_page_by_url: {
-    parameters: {
-      query: {
-        url: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Success */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["PageText"];
-        };
-      };
-      /** @description The knowledge base has no copy of the page */
-      404: {
         headers: {
           [name: string]: unknown;
         };

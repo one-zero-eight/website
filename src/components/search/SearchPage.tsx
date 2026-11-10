@@ -14,7 +14,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import IframePreviewCard from "./IframePreviewCard";
-import { ArchiveDocumentModal } from "./ArchiveDocumentModal";
+import { SourcePreviewModal } from "./SourcePreviewModal";
 
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
   useLingui();
@@ -275,7 +275,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       {isMobile &&
         previewSource?.type === "eduwiki" &&
         previewSource.archive_document && (
-          <ArchiveDocumentModal
+          <SourcePreviewModal
             source={previewSource}
             onClose={() => setPreviewSource(undefined)}
           />

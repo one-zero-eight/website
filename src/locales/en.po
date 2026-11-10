@@ -41,7 +41,7 @@ msgid "- Executing"
 msgstr "- Executing"
 
 #: src/components/search/act/ActPage.tsx:82
-#: src/components/search/ask/AskResult.tsx:51
+#: src/components/search/ask/AskResult.tsx:88
 msgid "- Sorry, I can't help you with this question."
 msgstr "- Sorry, I can't help you with this question."
 
@@ -1213,7 +1213,7 @@ msgstr "Banned"
 msgid "banned {bannedAt}"
 msgstr "banned {bannedAt}"
 
-#: src/components/search/ask/AskResult.tsx:137
+#: src/components/search/ask/AskResult.tsx:179
 msgid "Based on:"
 msgstr "Based on:"
 
@@ -1675,7 +1675,7 @@ msgid "Channel"
 msgstr "Channel"
 
 #: src/components/clubs/constants.ts:85
-#: src/components/search/ask/AskResult.tsx:224
+#: src/components/search/ask/AskResult.tsx:355
 msgid "Chat"
 msgstr "Chat"
 
@@ -1882,7 +1882,7 @@ msgstr "Class dates: {previewDates}."
 msgid "Classes this semester"
 msgstr "Classes this semester"
 
-#: src/components/search/ask/AskResult.tsx:127
+#: src/components/search/ask/AskResult.tsx:169
 msgid "Clauses:"
 msgstr "Clauses:"
 
@@ -1917,7 +1917,7 @@ msgid "Click to upload or paste an image"
 msgstr "Click to upload or paste an image"
 
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
-#: src/components/search/IframePreviewCard.tsx:180
+#: src/components/search/IframePreviewCard.tsx:131
 #: src/components/sport/SportOverviewSection.tsx:669
 #: src/components/sport/SportStudentTrainingModal.tsx:362
 #: src/components/sport/SportTrainerAttendanceModal.tsx:148
@@ -2394,7 +2394,7 @@ msgstr "Could not mark attendance"
 msgid "Could not open the chat"
 msgstr "Could not open the chat"
 
-#: src/components/search/IframePreviewCard.tsx:206
+#: src/components/search/IframePreviewCard.tsx:157
 msgid "Could not open this archive document. It may be missing or changed."
 msgstr "Could not open this archive document. It may be missing or changed."
 
@@ -3026,7 +3026,7 @@ msgstr "Dot: not scheduled / partially / fully scheduled."
 msgid "Downgrade to Beginner"
 msgstr "Downgrade to Beginner"
 
-#: src/components/search/IframePreviewCard.tsx:304
+#: src/components/search/IframePreviewCard.tsx:247
 #: src/components/search/PdfPreview.tsx:132
 msgid "Download"
 msgstr "Download"
@@ -3208,7 +3208,7 @@ msgstr "Edit this calendar"
 msgid "Edit: {prefix}"
 msgstr "Edit: {prefix}"
 
-#: src/components/search/ask/AskResult.tsx:218
+#: src/components/search/ask/AskResult.tsx:349
 msgid "EduWiki"
 msgstr "EduWiki"
 
@@ -4182,7 +4182,7 @@ msgstr "Go to selected below"
 msgid "Go to source"
 msgstr "Go to source"
 
-#: src/components/search/IframePreviewCard.tsx:374
+#: src/components/search/IframePreviewCard.tsx:322
 msgid "Go to website ->"
 msgstr "Go to website ->"
 
@@ -4285,7 +4285,7 @@ msgstr "Guests only"
 msgid "Guests Role"
 msgstr "Guests Role"
 
-#: src/components/search/ask/AskResult.tsx:216
+#: src/components/search/ask/AskResult.tsx:347
 msgid "Guide"
 msgstr "Guide"
 
@@ -4970,9 +4970,9 @@ msgstr "Loading table…"
 
 #: src/components/about/TeamMembers.tsx:218
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:197
-#: src/components/search/ArchiveDocumentModal.tsx:32
-#: src/components/search/IframePreviewCard.tsx:194
-#: src/components/search/IframePreviewCard.tsx:314
+#: src/components/search/IframePreviewCard.tsx:145
+#: src/components/search/IframePreviewCard.tsx:257
+#: src/components/search/SourcePreviewModal.tsx:32
 msgid "Loading..."
 msgstr "Loading..."
 
@@ -6068,11 +6068,11 @@ msgstr "Now impersonating {0}"
 msgid "Numbered list"
 msgstr "Numbered list"
 
-#: src/components/search/ask/AskResult.tsx:94
+#: src/components/search/ask/AskResult.tsx:136
 msgid "Official"
 msgstr "Official"
 
-#: src/components/search/ask/AskResult.tsx:214
+#: src/components/search/ask/AskResult.tsx:345
 msgid "Official document"
 msgstr "Official document"
 
@@ -6221,7 +6221,7 @@ msgstr "Open details"
 #~ msgid "Open document: {0}"
 #~ msgstr "Open document: {0}"
 
-#: src/components/search/ask/AskResult.tsx:161
+#: src/components/search/ask/AskResult.tsx:216
 msgid "Open document: {member}"
 msgstr "Open document: {member}"
 
@@ -6230,7 +6230,11 @@ msgstr "Open document: {member}"
 msgid "Open event page"
 msgstr "Open event page"
 
-#: src/components/search/IframePreviewCard.tsx:217
+#: src/components/search/ask/AskResult.tsx:331
+msgid "Open in chat ->"
+msgstr "Open in chat ->"
+
+#: src/components/search/IframePreviewCard.tsx:168
 msgid "Open original archive"
 msgstr "Open original archive"
 
@@ -6631,9 +6635,10 @@ msgid "Preferred time"
 msgstr "Preferred time"
 
 #: src/components/clubs/EditClubPage.tsx:914
-#: src/components/search/IframePreviewCard.tsx:201
-#: src/components/search/IframePreviewCard.tsx:320
-#: src/components/search/IframePreviewCard.tsx:352
+#: src/components/search/IframePreviewCard.tsx:152
+#: src/components/search/IframePreviewCard.tsx:263
+#: src/components/search/IframePreviewCard.tsx:272
+#: src/components/search/IframePreviewCard.tsx:300
 #: src/components/web-print/PrintPage.tsx:445
 #: src/components/web-print/ScanPage.tsx:400
 msgid "Preview"
@@ -7707,7 +7712,7 @@ msgstr "Seconds"
 msgid "Section"
 msgstr "Section"
 
-#: src/components/search/ask/AskResult.tsx:132
+#: src/components/search/ask/AskResult.tsx:174
 msgid "Sections:"
 msgstr "Sections:"
 
@@ -8185,8 +8190,8 @@ msgstr "Some players were not found, see the list below"
 msgid "Sorry, something gone wrong."
 msgstr "Sorry, something gone wrong."
 
-#: src/components/search/IframePreviewCard.tsx:18
-#: src/components/search/IframePreviewCard.tsx:361
+#: src/components/search/IframePreviewCard.tsx:15
+#: src/components/search/IframePreviewCard.tsx:309
 msgid "Sorry, this site does not support preview. Please, open it directly."
 msgstr "Sorry, this site does not support preview. Please, open it directly."
 
@@ -8194,7 +8199,7 @@ msgstr "Sorry, this site does not support preview. Please, open it directly."
 msgid "Source enabled; message history may still be loading"
 msgstr "Source enabled; message history may still be loading"
 
-#: src/components/search/ask/AskResult.tsx:74
+#: src/components/search/ask/AskResult.tsx:111
 #: src/components/search/ask/AskSources.tsx:26
 #: src/components/search/ask/AskSources.tsx:31
 #: src/components/search/SelectSourcesFilterButton.tsx:21
@@ -9082,7 +9087,7 @@ msgstr "This club has changes waiting for review"
 msgid "This email is already in the group."
 msgstr "This email is already in the group."
 
-#: src/components/search/IframePreviewCard.tsx:294
+#: src/components/search/IframePreviewCard.tsx:237
 msgid "This file cannot be previewed in the browser."
 msgstr "This file cannot be previewed in the browser."
 
@@ -9926,12 +9931,12 @@ msgstr "we write code and maintain products"
 msgid "Weak GPS signal (±{accuracyM}m)"
 msgstr "Weak GPS signal (±{accuracyM}m)"
 
-#: src/components/search/ask/AskResult.tsx:222
+#: src/components/search/ask/AskResult.tsx:353
 msgid "Web search"
 msgstr "Web search"
 
 #: src/components/clubs/constants.ts:89
-#: src/components/search/ask/AskResult.tsx:220
+#: src/components/search/ask/AskResult.tsx:351
 msgid "Website"
 msgstr "Website"
 

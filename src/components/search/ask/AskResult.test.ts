@@ -188,7 +188,15 @@ describe("AskResult approval context", () => {
     expect(cards[0].textContent).toContain("Clauses: 2.1, 3");
     expect(cards[0].textContent).toContain("Sections: Retakes");
     expect(cards[0].textContent).toContain("Based on: University policy");
-    expect(cards[0].querySelector("a")?.href).toBe("https://example.org/rules");
+    expect(
+      Array.from(cards[0].querySelectorAll("button")).map(
+        (button) => button.textContent,
+      ),
+    ).toEqual(["Exam rules", "University policy"]);
+    expect(cards[0].querySelector("a")).toBeNull();
+    // A chat message the answer carries no text of stays a link
+    expect(cards[1].querySelector("a")?.href).toBe("https://example.org/rules");
+    expect(cards[1].querySelector("button")).toBeNull();
     expect(cards[1].textContent).toContain("[12] Announcement");
     expect(cards[1].textContent).toContain("Chat");
     expect(cards[1].querySelector("time")?.dateTime).toBe(
@@ -255,6 +263,7 @@ describe("AskResult approval context", () => {
       "Based on: Unlinked policy, Unsafe policy",
     );
     expect(container.querySelector("a")).toBeNull();
+    expect(container.querySelector("button")).toBeNull();
   });
 
   it.each(["plain", "inline code", "list"])(

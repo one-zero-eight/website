@@ -340,6 +340,59 @@ describe("cited archive documents", () => {
     expect(container.querySelector("a")?.textContent).toBe("Go to website ->");
   });
 
+  it("shows an ordinary page from the search API in a sandboxed frame", async () => {
+    const url = "https://innopolis.university/team-rector/";
+    vi.mocked(customFetch.GET).mockResolvedValue({
+      data: new Blob(["<html></html>"]),
+      response: new Response(),
+    });
+    await render(
+      createElement(IframePreviewCard, {
+        source: { ...source, url, archive_document: null },
+        onClose: vi.fn(),
+      }),
+    );
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    });
+    expect(customFetch.GET).toHaveBeenCalledWith(
+      `${SEARCH_API_URL}/search/html?url=${encodeURIComponent(url)}`,
+      expect.any(Object),
+    );
+    const frame = container.querySelector("iframe");
+    expect(frame?.getAttribute("src")).toBe("blob:archive-pdf");
+    expect(frame?.getAttribute("sandbox")).toBe(
+      "allow-popups allow-popups-to-escape-sandbox",
+    );
+    const body = vi.mocked(URL.createObjectURL).mock.calls[0][0] as Blob;
+    expect(body.type).toBe("text/html;charset=utf-8");
+  });
+
+  it("says the site cannot be previewed when the API could not read the page", async () => {
+    vi.mocked(customFetch.GET).mockResolvedValue({
+      data: undefined,
+      error: {},
+      response: new Response(null, { status: 502 }),
+    });
+    await render(
+      createElement(IframePreviewCard, {
+        source: {
+          ...source,
+          url: "https://innopolis.university/team-rector/",
+          archive_document: null,
+        },
+        onClose: vi.fn(),
+      }),
+    );
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    });
+    expect(container.querySelector("iframe")).toBeNull();
+    expect(container.textContent).toContain(
+      "Sorry, this site does not support preview",
+    );
+  });
+
   it.each([false, true])(
     "opens distinct same-URL citations in a Modal (mobile: %s), without hijacking a bare archive link",
     async (isMobile) => {
@@ -417,6 +470,134 @@ describe("cited archive documents", () => {
       expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:archive-pdf");
     },
   );
+
+  const answerWith = (
+    sources: Partial<searchTypes.SchemaAnswerSource>[],
+  ): searchTypes.SchemaAskResponses =>
+    ({
+      query: "exam",
+      answer: "Answer",
+      sources: sources.map((item, index) => ({
+        number: index + 1,
+        clauses: [],
+        sections: [],
+        official: false,
+        based_on: [],
+        ...item,
+      })),
+      attachments: [],
+      calendar_events: [],
+      signup_offers: [],
+      messages: [],
+    }) as searchTypes.SchemaAskResponses;
+
+  const settle = () =>
+    act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    });
+
+  it("previews a cited page of the knowledge base and its PDF provenance from their titles in a Modal", async () => {
+    const url = "https://innopolis.university/team-rector/";
+    const policy = "https://innopolis.university/upload/policy.pdf";
+    vi.mocked(customFetch.GET).mockResolvedValue({
+      data: new Blob(["x"]),
+      response: new Response(),
+    });
+    await render(
+      createElement(AskResult, {
+        response: answerWith([
+          {
+            title: "Rector",
+            url,
+            kind: AnswerSourceKind.website,
+            based_on: [{ title: "Policy", url: policy }],
+          },
+        ]),
+      }),
+    );
+    expect(
+      Array.from(container.querySelectorAll("ol button")).map(
+        (button) => button.textContent,
+      ),
+    ).toEqual(["Rector", "Policy"]);
+    expect(container.querySelector("ol a")).toBeNull();
+    expect(customFetch.GET).not.toHaveBeenCalled();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    const [rector, policyButton] = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("ol button"),
+    );
+    await act(async () => rector.click());
+    await settle();
+    expect(customFetch.GET).toHaveBeenCalledWith(
+      `${SEARCH_API_URL}/search/html?url=${encodeURIComponent(url)}`,
+      expect.any(Object),
+    );
+    let dialog = document.querySelector('[role="dialog"]') as HTMLElement;
+    const frame = dialog.querySelector("iframe");
+    expect(frame?.getAttribute("src")).toBe("blob:archive-pdf");
+    expect(frame?.getAttribute("sandbox")).toBe(
+      "allow-popups allow-popups-to-escape-sandbox",
+    );
+    expect(dialog.querySelector(`a[href="${url}"]`)?.textContent).toBe(
+      "Go to website ->",
+    );
+    await act(async () => dialog.querySelector("button")?.click());
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    await act(async () => policyButton.click());
+    await settle();
+    expect(customFetch.GET).toHaveBeenLastCalledWith(
+      `${SEARCH_API_URL}/search/pdf?url=${encodeURIComponent(policy)}`,
+      expect.any(Object),
+    );
+    dialog = document.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog.querySelector("iframe")?.hasAttribute("sandbox")).toBe(false);
+  });
+
+  it("shows the text of a cited chat message in a Modal and leaves web pages and textless messages as links", async () => {
+    await render(
+      createElement(AskResult, {
+        response: answerWith([
+          {
+            title: "B23 chat",
+            url: "https://t.me/c/1/2",
+            kind: AnswerSourceKind.chat,
+            date: "2026-11-09T10:00:00Z",
+            author: "Alice",
+            text: "Экзамен перенесён\nна 12 ноября",
+          },
+          {
+            title: "Old chat",
+            url: "https://t.me/c/1/3",
+            kind: AnswerSourceKind.chat,
+          },
+          {
+            title: "News",
+            url: "https://example.org/news",
+            kind: AnswerSourceKind.web,
+          },
+        ]),
+      }),
+    );
+    const buttons = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("ol button"),
+    );
+    expect(buttons.map((button) => button.textContent)).toEqual(["B23 chat"]);
+    expect(
+      Array.from(container.querySelectorAll("ol a")).map((a) =>
+        a.getAttribute("href"),
+      ),
+    ).toEqual(["https://t.me/c/1/3", "https://example.org/news"]);
+    await act(async () => buttons[0].click());
+    await settle();
+    const dialog = document.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog.textContent).toContain("Экзамен перенесён\nна 12 ноября");
+    expect(dialog.textContent).toContain("Alice");
+    expect(
+      dialog.querySelector('a[href="https://t.me/c/1/2"]')?.textContent,
+    ).toBe("Open in chat ->");
+    expect(dialog.querySelector("iframe")).toBeNull();
+    expect(customFetch.GET).not.toHaveBeenCalled();
+  });
 
   it.each([false, true])(
     "waits for an explicit search result click before requesting its exact archive document (mobile: %s)",

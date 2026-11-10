@@ -5,7 +5,7 @@ import { lazy, Suspense } from "react";
 
 const IframePreviewCard = lazy(() => import("./IframePreviewCard"));
 
-export function ArchiveDocumentModal({
+export function SourcePreviewModal({
   source,
   onClose,
 }: {

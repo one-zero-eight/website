@@ -8,7 +8,46 @@ import { AskCalendarEvents } from "./AskCalendarEvents";
 import { AskSignupOffers } from "./AskSignupOffers";
 import { AskFeedback } from "./AskFeedback";
 import { useId, useState } from "react";
-import { ArchiveDocumentModal } from "@/components/search/ArchiveDocumentModal";
+import { SourcePreviewModal } from "@/components/search/SourcePreviewModal";
+import { Modal } from "@/components/common/Modal";
+
+type Preview =
+  | { document: searchTypes.SchemaEduwikiSource }
+  | { message: searchTypes.SchemaAnswerSource };
+
+function isWebUrl(url?: string | null): url is string {
+  return !!url && /^https?:\/\//i.test(url);
+}
+
+// A cited document as a result of the search: its preview card shows both
+function asDocument(
+  title: string,
+  url: string,
+  archive_document: searchTypes.SchemaArchiveDocument | null = null,
+): searchTypes.SchemaEduwikiSource {
+  return {
+    type: EduwikiSourceType.eduwiki,
+    display_name: title,
+    url,
+    preview_text: "",
+    breadcrumbs: [],
+    archive_document,
+  };
+}
+
+// What a click on the title of a source shows; nothing for what stays a link
+function previewOf(
+  source: searchTypes.SchemaAnswerSource,
+): Preview | undefined {
+  // Telegram and MAX show no message in a frame of another site: the answer carries the text of the message
+  if (source.kind === "chat")
+    return source.text ? { message: source } : undefined;
+  // An archive is opened by its member (the button below); a page of the web search is not in the knowledge base,
+  // and the search API gives only what is
+  if (source.archive_document || source.kind === "web" || !isWebUrl(source.url))
+    return undefined;
+  return { document: asDocument(source.title, source.url) };
+}
 
 export function AskResult({
   response,
@@ -23,8 +62,7 @@ export function AskResult({
 }) {
   const { answer, sources = [], approval } = response;
   const { i18n } = useLingui();
-  const [previewSource, setPreviewSource] =
-    useState<searchTypes.SchemaEduwikiSource>();
+  const [preview, setPreview] = useState<Preview>();
   const citationId = useId();
   const citationTargets = new Map(
     sources.map((source) => [
@@ -76,6 +114,7 @@ export function AskResult({
           <ol className="flex list-none flex-col gap-2">
             {sources.map((source) => {
               const member = source.archive_document?.member;
+              const shown = previewOf(source);
               return (
                 <li
                   key={source.number}
@@ -85,7 +124,11 @@ export function AskResult({
                   className="min-w-0 wrap-anywhere"
                 >
                   <span className="font-medium">[{source.number}] </span>
-                  <CitationLink title={source.title} url={source.url} />
+                  <CitationLink
+                    title={source.title}
+                    url={source.url}
+                    onPreview={shown && (() => setPreview(shown))}
+                  />
                   <div className="text-base-content/70">
                     <SourceKind kind={source.kind} />
                     {source.official && source.kind !== "official_document" && (
@@ -135,12 +178,26 @@ export function AskResult({
                   {!!source.based_on?.length && (
                     <div>
                       <Trans>Based on:</Trans>{" "}
-                      {source.based_on.map((link, index) => (
-                        <span key={JSON.stringify([link.title, link.url])}>
-                          {index > 0 && ", "}
-                          <CitationLink title={link.title} url={link.url} />
-                        </span>
-                      ))}
+                      {source.based_on.map((link, index) => {
+                        const url = link.url;
+                        return (
+                          <span key={JSON.stringify([link.title, link.url])}>
+                            {index > 0 && ", "}
+                            <CitationLink
+                              title={link.title}
+                              url={url}
+                              onPreview={
+                                isWebUrl(url)
+                                  ? () =>
+                                      setPreview({
+                                        document: asDocument(link.title, url),
+                                      })
+                                  : undefined
+                              }
+                            />
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
                   {source.archive_document && (
@@ -148,13 +205,12 @@ export function AskResult({
                       type="button"
                       className="text-primary text-left hover:underline"
                       onClick={() =>
-                        setPreviewSource({
-                          type: EduwikiSourceType.eduwiki,
-                          display_name: source.title,
-                          url: source.url ?? "",
-                          preview_text: "",
-                          breadcrumbs: [],
-                          archive_document: source.archive_document,
+                        setPreview({
+                          document: asDocument(
+                            source.title,
+                            source.url ?? "",
+                            source.archive_document,
+                          ),
                         })
                       }
                     >
@@ -168,10 +224,16 @@ export function AskResult({
         </div>
       )}
 
-      {previewSource && (
-        <ArchiveDocumentModal
-          source={previewSource}
-          onClose={() => setPreviewSource(undefined)}
+      {preview && "document" in preview && (
+        <SourcePreviewModal
+          source={preview.document}
+          onClose={() => setPreview(undefined)}
+        />
+      )}
+      {preview && "message" in preview && (
+        <ChatMessageModal
+          source={preview.message}
+          onClose={() => setPreview(undefined)}
         />
       )}
 
@@ -190,8 +252,26 @@ export function AskResult({
   );
 }
 
-function CitationLink({ title, url }: { title: string; url?: string | null }) {
-  if (!url || !/^https?:\/\//i.test(url)) return <>{title}</>;
+function CitationLink({
+  title,
+  url,
+  onPreview,
+}: {
+  title: string;
+  url?: string | null;
+  onPreview?: () => void;
+}) {
+  if (onPreview)
+    return (
+      <button
+        type="button"
+        className="text-primary inline text-left hover:underline"
+        onClick={onPreview}
+      >
+        {title}
+      </button>
+    );
+  if (!isWebUrl(url)) return <>{title}</>;
   return (
     <a
       href={url}
@@ -201,6 +281,58 @@ function CitationLink({ title, url }: { title: string; url?: string | null }) {
     >
       {title}
     </a>
+  );
+}
+
+function ChatMessageModal({
+  source,
+  onClose,
+}: {
+  source: searchTypes.SchemaAnswerSource;
+  onClose: () => void;
+}) {
+  const { i18n } = useLingui();
+  return (
+    <Modal
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      title={source.title}
+      containerClassName="max-w-2xl"
+    >
+      {(source.author || source.date) && (
+        <p className="text-base-content/70 text-sm">
+          {source.author}
+          {source.author && source.date && " · "}
+          {source.date && (
+            <time dateTime={source.date}>
+              {new Date(source.date).toLocaleString(i18n.locale, {
+                timeZone: "Europe/Moscow",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </time>
+          )}
+        </p>
+      )}
+      <p className="max-h-[60vh] overflow-y-auto wrap-anywhere whitespace-pre-wrap">
+        {source.text}
+      </p>
+      {isWebUrl(source.url) && (
+        <a
+          href={source.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary self-center hover:underline"
+        >
+          <Trans>Open in chat -&gt;</Trans>
+        </a>
+      )}
+    </Modal>
   );
 }
 
