@@ -421,19 +421,13 @@ test("build metadata describes real, distinct production bundles with verified i
   expect(workerInfo).toEqual({
     serviceWorkerHash: workerInfo.serviceWorkerHash,
   });
-  expect(appInfo.commitHash).toMatch(/^[\da-f]{40}$/);
-  expect(Number.isNaN(Date.parse(appInfo.builtAt))).toBe(false);
+  // The commit and build time are recorded only in the manifest.
+  expect(builds.a.manifest.commitHash).toMatch(/^[\da-f]{40}$/);
+  expect(Number.isNaN(Date.parse(builds.a.manifest.builtAt))).toBe(false);
 
   expect(
     new Set(
       Object.values(builds).map((item) => item.manifest.buildInfo.buildId),
-    ).size,
-  ).toBe(3);
-  expect(
-    new Set(
-      Object.values(builds).map(
-        (item) => item.manifest.buildInfo.resourcesBuildHash,
-      ),
     ).size,
   ).toBe(3);
   for (const version of ["a", "b", "c"] as const) {
@@ -446,12 +440,37 @@ test("build metadata describes real, distinct production bundles with verified i
     // Named per build, so no cache can pair it with another build's HTML.
     const infoUrl = `/assets/build-info-${manifest.buildInfo.buildId}.js`;
     expect(manifest.resources.map((item) => item.url)).toContain(infoUrl);
-    const hashResources = manifest.resources.filter(
-      (item) => item.url !== infoUrl,
+    const { version: appVersion, buildId } = manifest.buildInfo;
+    expect(await (await request.get(infoUrl)).text()).toBe(
+      `globalThis.BUILD_INFO = ${JSON.stringify({ version: appVersion, buildId })};\n`,
     );
+    // buildId hashes the version and every file, while index.html still had a
+    // placeholder instead of the id and the build-info file did not exist yet.
+    const html = Buffer.from(
+      (await (await request.get("/index.html")).text()).replaceAll(
+        buildId,
+        "__BUILD_ID__",
+      ),
+    );
+    const hashedResources = manifest.resources
+      .filter((item) => item.url !== infoUrl)
+      .map((item) =>
+        item.url === "/index.html"
+          ? {
+              url: item.url,
+              integrity: `sha384-${createHash("sha384").update(html).digest("base64")}`,
+              size: html.byteLength,
+            }
+          : item,
+      );
     expect(
-      createHash("sha256").update(JSON.stringify(hashResources)).digest("hex"),
-    ).toBe(manifest.buildInfo.resourcesBuildHash);
+      createHash("sha256")
+        .update(
+          JSON.stringify({ version: appVersion, resources: hashedResources }),
+        )
+        .digest("hex")
+        .slice(0, 16),
+    ).toBe(buildId);
     expect(
       manifest.resources.some(
         (item) => item.url === "/sw.js" || item.url === "/build-manifest.json",
@@ -660,13 +679,15 @@ test("the HTML build marker is baked into every build without JavaScript", async
     const labels = new Set<string>();
     for (const version of ["a", "b", "c"] as const) {
       await setServerState(request, { version });
-      const info = builds[version].manifest.buildInfo;
       const response = await page.goto("/debug");
       expect(response?.status()).toBe(200);
       const marker = page.locator("#debug-html-build");
       const label = `HTML · ${builds[version].htmlBuildLabel}`;
       await expect(marker).toHaveText(label);
-      await expect(marker).toHaveAttribute("title", info.builtAt);
+      await expect(marker).toHaveAttribute(
+        "title",
+        builds[version].manifest.builtAt,
+      );
       await expect(page.locator("#debug-title")).toHaveCount(0);
       labels.add(label);
     }
@@ -1865,4 +1886,35 @@ test("API caches keep the 128 most recently saved responses", async ({
   expect(cached).toHaveLength(128);
   expect(cached).toContain("/schedule/feed-0.ics");
   expect(cached).not.toContain("/schedule/feed-1.ics");
+});
+
+test("rebuilding the same code from another commit produces identical files", async ({
+  request,
+}) => {
+  const response = await request.get("/__test/rebuilds");
+  expect(response.ok()).toBe(true);
+  const [first, second]: BuildManifest[] = await response.json();
+  expect(first.commitHash).not.toBe(second.commitHash);
+  expect(second.buildInfo).toEqual(first.buildInfo);
+  expect(second.resources).toEqual(first.resources);
+});
+
+test("tabs also switch automatically when the server rolls back to an older build", async ({
+  context,
+  request,
+}) => {
+  const page = await openControlledPage(context, request);
+  await page.locator('aside a[href="/about"]').click();
+  await expect(page).toHaveURL(/\/about$/);
+  for (const version of ["b", "a"] as const) {
+    await setServerState(request, { version });
+    // Not awaited through RPC: the page reloads as soon as the build is ready.
+    await page.evaluate(() =>
+      navigator.serviceWorker.controller!.postMessage({
+        type: "CHECK_MANIFEST",
+      }),
+    );
+    await expectVersion(page, version);
+  }
+  expect(await loadCount(page)).toBe(3);
 });

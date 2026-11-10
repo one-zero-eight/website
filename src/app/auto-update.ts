@@ -1,7 +1,4 @@
-import type {
-  BuildInfo,
-  BuildReadyNotification,
-} from "@/service-worker/protocol.ts";
+import type { BuildReadyNotification } from "@/service-worker/protocol.ts";
 import { useEffect } from "react";
 import { queryClient } from "./query-client.ts";
 import { checkManifest } from "./sw-client.ts";
@@ -66,17 +63,14 @@ export function useAutoUpdateBlocker(enabled = true) {
   }, [enabled]);
 }
 
-export function isNewerAppBuild(candidate: BuildInfo, current: BuildInfo) {
-  return (
-    candidate.buildId !== current.buildId &&
-    Date.parse(candidate.builtAt) > Date.parse(current.builtAt)
-  );
-}
-
 /**
- * Page-side owner of automatic reloads. Pages update by default once a newer
- * build is completely ready, unless the page is offline, navigating, mutating,
- * or a component registered a blocker. Never opens confirmation UI.
+ * Page-side owner of automatic reloads. A BUILD_READY from the worker only
+ * triggers a check: the target is the server's current build, once it is
+ * completely ready and differs from this page's build. Builds are not ordered,
+ * so rolling back to an older build updates the tabs too.
+ *
+ * Pages update by default, unless offline, navigating, mutating, or a
+ * component registered a blocker. Never opens confirmation UI.
  */
 export function createAutoUpdateController({
   isNavigationIdle,
@@ -87,7 +81,8 @@ export function createAutoUpdateController({
   reload: () => void;
   onStatusChange: (status: AutoUpdateStatus) => void;
 }) {
-  let pendingBuild: BuildReadyNotification | null = null;
+  /** The build to switch to: announced, then confirmed by the server. */
+  let pendingBuildId: string | null = null;
   let verifying = false;
   let stopped = false;
   let checkTimer: number | undefined;
@@ -98,7 +93,7 @@ export function createAutoUpdateController({
   };
 
   function reportStatus(blockedReason: AutoUpdateBlockReason | null) {
-    status.pendingBuildId = pendingBuild?.buildInfo.buildId ?? null;
+    status.pendingBuildId = pendingBuildId;
     status.blockedReason = blockedReason;
     onStatusChange({ ...status });
   }
@@ -114,7 +109,7 @@ export function createAutoUpdateController({
   }
 
   function scheduleCheck() {
-    if (stopped || !pendingBuild) return;
+    if (stopped || !pendingBuildId) return;
     window.clearTimeout(checkTimer);
     // Let the current render install/remove its component blockers first.
     checkTimer = window.setTimeout(() => {
@@ -127,10 +122,9 @@ export function createAutoUpdateController({
   }
 
   async function applyPendingBuild() {
-    if (stopped || verifying || !pendingBuild) return;
-    const candidate = pendingBuild;
-    const { buildId } = candidate.buildInfo;
-    const blockedReason = getBlockReason(buildId);
+    if (stopped || verifying || !pendingBuildId) return;
+    let candidate = pendingBuildId;
+    const blockedReason = getBlockReason(candidate);
     reportStatus(blockedReason);
     if (blockedReason) return;
     verifying = true;
@@ -139,22 +133,31 @@ export function createAutoUpdateController({
       // A re-announced BUILD_READY alone does not prove that the server is
       // reachable; the worker answers only after the build is completely ready.
       const latest = await checkManifest();
-      if (stopped || pendingBuild !== candidate) return;
-      if (latest?.buildId !== buildId) {
+      if (stopped || pendingBuildId !== candidate) return;
+      if (!latest) {
         reportStatus("not-ready");
         return;
       }
+      if (latest.buildId === BUILD_INFO.buildId) {
+        // An announcement of another build, but the server serves this one.
+        pendingBuildId = null;
+        reportStatus(null);
+        return;
+      }
+      pendingBuildId = candidate = latest.buildId;
       // A component blocker, mutation or navigation may have started meanwhile.
-      const finalBlockedReason = getBlockReason(buildId);
+      const finalBlockedReason = getBlockReason(candidate);
       reportStatus(finalBlockedReason);
       if (finalBlockedReason) return;
-      sessionStorage.setItem(autoReloadTargetStorageKey, buildId);
+      sessionStorage.setItem(autoReloadTargetStorageKey, candidate);
       status.lastReloadAttemptAt = new Date().toISOString();
       reportStatus(null);
       reload();
     } finally {
       verifying = false;
-      if (!stopped && pendingBuild !== candidate) scheduleCheck();
+      // Another build was announced during the check.
+      if (!stopped && pendingBuildId && pendingBuildId !== candidate)
+        scheduleCheck();
     }
   }
 
@@ -164,29 +167,16 @@ export function createAutoUpdateController({
     .subscribe(scheduleCheck);
 
   return {
-    handleBuildReady(message: BuildReadyNotification) {
-      if (stopped || !isNewerAppBuild(message.buildInfo, BUILD_INFO)) return;
-      const pending = pendingBuild;
-      if (
-        pending &&
-        message.buildInfo.buildId !== pending.buildInfo.buildId &&
-        !isNewerAppBuild(message.buildInfo, pending.buildInfo)
-      )
-        return;
-      // Keep the same object for repeated announcements, so they do not
-      // interrupt a verification already in progress.
-      if (
-        pending?.buildInfo.buildId !== message.buildInfo.buildId ||
-        pending.generation !== message.generation
-      )
-        pendingBuild = message;
+    handleBuildReady({ buildInfo }: BuildReadyNotification) {
+      if (stopped || buildInfo.buildId === BUILD_INFO.buildId) return;
+      pendingBuildId = buildInfo.buildId;
       scheduleCheck();
     },
     recheck: scheduleCheck,
     stop() {
       if (stopped) return;
       stopped = true;
-      pendingBuild = null;
+      pendingBuildId = null;
       window.clearTimeout(checkTimer);
       window.removeEventListener(blockersChangedEvent, scheduleCheck);
       unsubscribeMutations();

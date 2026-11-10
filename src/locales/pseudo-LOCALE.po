@@ -1398,7 +1398,7 @@ msgstr ""
 msgid "bye"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:291
+#: src/components/debug/WorkerDiagnostics.tsx:294
 msgid "Cache Storage observed by this worker"
 msgstr ""
 
@@ -3805,7 +3805,7 @@ msgstr ""
 msgid "Full and short official names"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:378
+#: src/components/debug/WorkerDiagnostics.tsx:384
 msgid "Full GET_DIAGNOSTICS response from this worker"
 msgstr ""
 
@@ -3814,8 +3814,8 @@ msgstr ""
 msgid "Full name"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:253
-#: src/components/debug/WorkerDiagnostics.tsx:370
+#: src/components/debug/WorkerDiagnostics.tsx:256
+#: src/components/debug/WorkerDiagnostics.tsx:376
 msgid "Full stored manifest"
 msgstr ""
 
@@ -4605,7 +4605,7 @@ msgstr ""
 msgid "Last CLIENT_HELLO sent by this App, acknowledgement, and target"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:286
+#: src/components/debug/WorkerDiagnostics.tsx:289
 msgid "Last manifest check"
 msgstr ""
 
@@ -4617,11 +4617,11 @@ msgstr ""
 msgid "Last worker notification observed by this App"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:344
+#: src/components/debug/WorkerDiagnostics.tsx:347
 msgid "Latest ready"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:320
+#: src/components/debug/WorkerDiagnostics.tsx:323
 msgid "Latest ready is the offline fallback, not necessarily the build loaded by this page. A snapshot refresh does not fetch the server's current manifest."
 msgstr ""
 
@@ -4921,7 +4921,7 @@ msgstr ""
 msgid "Manifest selected for this page"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:316
+#: src/components/debug/WorkerDiagnostics.tsx:319
 msgid "Manifests stored by the worker"
 msgstr ""
 
@@ -5378,7 +5378,7 @@ msgstr ""
 msgid "No banned users match your search"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:296
+#: src/components/debug/WorkerDiagnostics.tsx:299
 msgid "No caches."
 msgstr ""
 
@@ -5722,7 +5722,7 @@ msgstr ""
 msgid "No sport hours history yet."
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:328
+#: src/components/debug/WorkerDiagnostics.tsx:331
 msgid "No stored manifests."
 msgstr ""
 
@@ -7716,7 +7716,7 @@ msgstr ""
 msgid "Share this room"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:273
+#: src/components/debug/WorkerDiagnostics.tsx:276
 msgid "Shared offline storage state"
 msgstr ""
 
@@ -8791,7 +8791,7 @@ msgid "This logo change will be cancelled when you save."
 msgstr ""
 
 #: src/components/debug/WorkerDiagnostics.tsx:61
-#: src/components/debug/WorkerDiagnostics.tsx:349
+#: src/components/debug/WorkerDiagnostics.tsx:352
 msgid "This page"
 msgstr ""
 
@@ -8849,7 +8849,7 @@ msgstr ""
 msgid "This worker did not answer GET_DIAGNOSTICS. No data from another worker is substituted."
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:259
+#: src/components/debug/WorkerDiagnostics.tsx:262
 msgid "This worker has no stored manifest for this page's pin. This does not mean that the page is running the latest ready build."
 msgstr ""
 

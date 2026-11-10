@@ -242,7 +242,10 @@ export function WorkerDiagnostics({
                     </span>
                   )}
                 </p>
-                <BuildMetadata info={pageBuild.manifest.buildInfo} />
+                <BuildMetadata
+                  info={pageBuild.manifest.buildInfo}
+                  manifest={pageBuild.manifest}
+                />
                 <DiagnosticFields
                   values={{
                     state: pageBuild.state,
@@ -353,7 +356,10 @@ export function WorkerDiagnostics({
                     {build.completed} / {build.manifest.resources.length}
                   </span>
                 </div>
-                <BuildMetadata info={build.manifest.buildInfo} />
+                <BuildMetadata
+                  info={build.manifest.buildInfo}
+                  manifest={build.manifest}
+                />
                 <DiagnosticFields
                   values={{
                     cacheName: build.cacheName,

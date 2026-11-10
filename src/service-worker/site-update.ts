@@ -182,20 +182,24 @@ async function fetchManifest(signal: AbortSignal) {
   return manifest;
 }
 
+function hasSameFiles(left: BuildManifest, right: BuildManifest) {
+  const files = ({ buildInfo, entrypoint, resources }: BuildManifest) =>
+    JSON.stringify({ buildInfo, entrypoint, resources });
+  return files(left) === files(right);
+}
+
 /** Find or create the build record for this manifest. */
 async function registerBuild(manifest: BuildManifest, generation: number) {
   return withWorkerState(async (state) => {
     assertGeneration(state, generation);
     const existing = findBuild(state, manifest.buildInfo.buildId);
-    // buildId is a deploy UUID; colliding ids with different contents means a
-    // broken pipeline, not something we can safely merge.
-    if (
-      existing &&
-      JSON.stringify(existing.manifest) !== JSON.stringify(manifest)
-    )
+    // buildId is a hash of the files, so the same id must list the same files.
+    // Only the commit and build time may differ (a rebuild of the same code).
+    if (existing && !hasSameFiles(existing.manifest, manifest))
       throw new Error("Build ID was reused with different resources");
     state.manifestCheck!.buildId = manifest.buildInfo.buildId;
     if (existing) {
+      existing.manifest = manifest;
       existing.error = null;
       return existing;
     }
@@ -361,11 +365,7 @@ async function prepareLatestBuild(): Promise<BuildInfo | null> {
     if (latest.buildInfo.buildId !== manifest.buildInfo.buildId)
       throw new Error("Deployment changed during build download");
     await promoteBuild(build, generation, startedAt);
-    await broadcast({
-      type: "BUILD_READY",
-      buildInfo: manifest.buildInfo,
-      generation,
-    });
+    await broadcast({ type: "BUILD_READY", buildInfo: manifest.buildInfo });
     await collectUnusedBuilds();
     return manifest.buildInfo;
   } catch (error) {
@@ -567,7 +567,6 @@ export async function handleClientHello(
     source.postMessage({
       type: "BUILD_READY",
       buildInfo: ready.manifest.buildInfo,
-      generation: state.generation,
     } satisfies BuildReadyNotification);
   await collectUnusedBuilds();
   return {

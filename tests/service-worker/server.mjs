@@ -37,12 +37,11 @@ const labelHistoryFile = resolve(outputRoot, "build-labels.txt");
 await writeFile(labelHistoryFile, "");
 process.env.INNOHASSLE_BUILD_LABEL_HISTORY = labelHistoryFile;
 
-const builds = {};
-for (const [index, version] of ["a", "b", "c"].entries()) {
+async function buildVersion(version, directory) {
   await build({
     configFile: resolve(root, "vite.config.ts"),
     logLevel: "error",
-    build: { outDir: resolve(outputRoot, version), emptyOutDir: true },
+    build: { outDir: directory, emptyOutDir: true },
     plugins: [
       {
         name: "service-worker-e2e-version",
@@ -83,10 +82,15 @@ for (const [index, version] of ["a", "b", "c"].entries()) {
       },
     ],
   });
-  const directory = resolve(outputRoot, version);
-  const manifest = JSON.parse(
+  return JSON.parse(
     await readFile(resolve(directory, "build-manifest.json"), "utf8"),
   );
+}
+
+const builds = {};
+for (const [index, version] of ["a", "b", "c"].entries()) {
+  const directory = resolve(outputRoot, version);
+  const manifest = await buildVersion(version, directory);
   let lazyResource;
   for (const resource of manifest.resources.filter((item) =>
     item.url.endsWith(".js"),
@@ -104,6 +108,24 @@ for (const [index, version] of ["a", "b", "c"].entries()) {
     throw new Error(`Build ${version} has no nonessential lazy chunk`);
   builds[version] = { manifest, lazyResource, htmlBuildLabel: index + 1 };
 }
+
+// Production rebuilds of A from two commits: identical code must give identical
+// files. Production builds are not numbered, so the label history is disabled.
+const environment = {
+  labelHistory: process.env.INNOHASSLE_BUILD_LABEL_HISTORY,
+  commitHash: process.env.GITHUB_SHA,
+};
+delete process.env.INNOHASSLE_BUILD_LABEL_HISTORY;
+const rebuilds = [];
+for (const commitHash of ["1".repeat(40), "2".repeat(40)]) {
+  process.env.GITHUB_SHA = commitHash;
+  rebuilds.push(
+    await buildVersion("a", resolve(outputRoot, `a-rebuild-${commitHash[0]}`)),
+  );
+}
+process.env.INNOHASSLE_BUILD_LABEL_HISTORY = environment.labelHistory;
+if (environment.commitHash === undefined) delete process.env.GITHUB_SHA;
+else process.env.GITHUB_SHA = environment.commitHash;
 
 const defaults = {
   version: "a",
@@ -141,6 +163,10 @@ function json(response, value, status = 200) {
 async function control(request, response, pathname) {
   if (pathname === "/__test/builds") {
     json(response, builds);
+    return true;
+  }
+  if (pathname === "/__test/rebuilds") {
+    json(response, rebuilds);
     return true;
   }
   if (pathname !== "/__test/state") return false;

@@ -1,4 +1,4 @@
-import type { BuildInfo } from "@/service-worker/protocol.ts";
+import type { BuildInfo, BuildManifest } from "@/service-worker/protocol.ts";
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { ReactNode } from "react";
 
@@ -67,20 +67,28 @@ export function RawDiagnosticData({
   );
 }
 
-export function BuildMetadata({ info }: { info: BuildInfo }) {
+/** Build identity, plus the commit and time recorded in a manifest. */
+export function BuildMetadata({
+  info,
+  manifest,
+}: {
+  info: BuildInfo;
+  manifest?: Pick<BuildManifest, "commitHash" | "builtAt">;
+}) {
   const { i18n } = useLingui();
   return (
     <DiagnosticFields
       values={{
         version: info.version,
         buildId: info.buildId,
-        resourcesBuildHash: info.resourcesBuildHash,
-        commitHash: info.commitHash,
-        builtAt: (
-          <time dateTime={info.builtAt} title={info.builtAt}>
-            {new Date(info.builtAt).toLocaleString(i18n.locale)}
-          </time>
-        ),
+        ...(manifest && {
+          "manifest.commitHash": manifest.commitHash,
+          "manifest.builtAt": (
+            <time dateTime={manifest.builtAt} title={manifest.builtAt}>
+              {new Date(manifest.builtAt).toLocaleString(i18n.locale)}
+            </time>
+          ),
+        }),
       }}
     />
   );

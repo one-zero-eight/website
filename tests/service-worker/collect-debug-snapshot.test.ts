@@ -16,9 +16,6 @@ vi.mock("@/app/sw-client.ts", () => ({ requestWorker: vi.fn() }));
 const appBuildInfo: BuildInfo = {
   version: "1.7.0",
   buildId: "page-build",
-  resourcesBuildHash: "page-resources-hash",
-  commitHash: "page-commit",
-  builtAt: "2026-11-10T10:00:00.000Z",
 };
 
 function worker(state: ServiceWorkerState = "activated") {

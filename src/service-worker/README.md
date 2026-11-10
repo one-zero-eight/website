@@ -32,35 +32,36 @@ It is a hand-written worker (no Workbox). It exists only in production builds: `
 2. The worker regularly downloads the manifest and copies the build into Cache Storage. Only new or changed files are downloaded.
 3. A build becomes **ready** only when every file is downloaded and its hash is verified.
 4. Online, pages always load from the network. Offline, the worker serves the latest **ready** build. A partly downloaded build is never used.
-5. When a newer build is ready, open tabs reload automatically, unless a component asks to wait.
+5. When the server's build differs from a tab's build and is ready, the tab reloads automatically, unless a component asks to wait.
+6. Rebuilding the same code produces the same files, so a deploy without changes is not an update at all.
 
 ## Where the code is
 
-| File                                     | What it does                                                                       |
-| ---------------------------------------- | ---------------------------------------------------------------------------------- |
-| `src/service-worker/sw.ts`               | Worker entry: startup cleanup, install/activate, routing of requests and commands. |
-| `src/service-worker/site-update.ts`      | Downloading builds, offline navigation, serving files, deleting old builds.        |
-| `src/service-worker/api-cache.ts`        | Caching selected API responses.                                                    |
-| `src/service-worker/storage.ts`          | The worker's state in IndexedDB, the storage lock, purge.                          |
-| `src/service-worker/protocol.ts`         | Shared types and constants for the worker and the pages.                           |
-| `src/app/register-sw.ts`                 | Page side: registers the worker, reports the tab, schedules update checks.         |
-| `src/app/sw-client.ts`                   | Page side: sending commands to the worker, manifest check, reset.                  |
-| `src/app/auto-update.ts`                 | Page side: automatic reloads and `useAutoUpdateBlocker`.                           |
-| `src/app/site-availability.ts`           | Whether this page was opened from the offline copy (drives the offline banner).    |
-| `src/app/AppUpdatePrompt.tsx`            | "Reload" prompt, used only on TV pages.                                            |
-| `src/components/debug/`                  | The `/debug` page.                                                                 |
-| `scripts/build-service-worker.ts`        | Vite plugin that creates `sw.js`, the manifest and the build-info file.            |
-| `scripts/build-labels.ts`, `preview.mjs` | Build number for the Debug page; `pnpm preview`.                                   |
-| `tests/service-worker/`                  | All tests and the visible demo.                                                    |
+| File                                                                                                   | What it does                                                                       |
+| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| [`src/service-worker/sw.ts`](sw.ts)                                                                    | Worker entry: startup cleanup, install/activate, routing of requests and commands. |
+| [`src/service-worker/site-update.ts`](site-update.ts)                                                  | Downloading builds, offline navigation, serving files, deleting old builds.        |
+| [`src/service-worker/api-cache.ts`](api-cache.ts)                                                      | Caching selected API responses.                                                    |
+| [`src/service-worker/storage.ts`](storage.ts)                                                          | The worker's state in IndexedDB, the storage lock, purge.                          |
+| [`src/service-worker/protocol.ts`](protocol.ts)                                                        | Shared types and constants for the worker and the pages.                           |
+| [`src/app/register-sw.ts`](../app/register-sw.ts)                                                      | Page side: registers the worker, reports the tab, schedules update checks.         |
+| [`src/app/sw-client.ts`](../app/sw-client.ts)                                                          | Page side: sending commands to the worker, manifest check, reset.                  |
+| [`src/app/auto-update.ts`](../app/auto-update.ts)                                                      | Page side: automatic reloads and `useAutoUpdateBlocker`.                           |
+| [`src/app/site-availability.ts`](../app/site-availability.ts)                                          | Whether this page was opened from the offline copy (drives the offline banner).    |
+| [`src/app/AppUpdatePrompt.tsx`](../app/AppUpdatePrompt.tsx)                                            | "Reload" prompt, used only on TV pages.                                            |
+| [`src/components/debug/`](../components/debug/)                                                        | The `/debug` page.                                                                 |
+| [`scripts/build-service-worker.ts`](../../scripts/build-service-worker.ts)                             | Vite plugin that creates `sw.js`, the manifest and the build-info file.            |
+| [`scripts/build-labels.ts`](../../scripts/build-labels.ts), [`preview.mjs`](../../scripts/preview.mjs) | Local build number for the Debug page; `pnpm preview`.                             |
+| [`tests/service-worker/`](../../tests/service-worker/)                                                 | All tests and the visible demo.                                                    |
 
 ## What a build produces
 
-| File                              | Contents                                                                               |
-| --------------------------------- | -------------------------------------------------------------------------------------- |
-| `index.html`                      | `<html data-build-id="…">` and, first in `<head>`, a script with the build-info file.  |
-| `/assets/build-info-<buildId>.js` | Sets `globalThis.BUILD_INFO` for the app.                                              |
-| `/build-manifest.json`            | Build info, entry point (`/index.html`) and every file with its URL, SHA-384 and size. |
-| `/sw.js`                          | First line: `globalThis.BUILD_INFO = { serviceWorkerHash }`. Then the worker code.     |
+| File                              | Contents                                                                                                   |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| [`index.html`](../../index.html)  | `<html data-build-id="…">` and, first in `<head>`, a script with the build-info file.                      |
+| `/assets/build-info-<buildId>.js` | Sets `globalThis.BUILD_INFO` for the app.                                                                  |
+| `/build-manifest.json`            | Build info, commit, build time, entry point (`/index.html`) and every file with its URL, SHA-384 and size. |
+| `/sw.js`                          | First line: `globalThis.BUILD_INFO = { serviceWorkerHash }`. Then the worker code.                         |
 
 The manifest lists every file of the build except `sw.js`, the manifest itself and source maps.
 
@@ -68,20 +69,31 @@ The manifest lists every file of the build except `sw.js`, the manifest itself a
 
 The app and the worker have separate identities:
 
-| Field                | Where                        | Meaning                                                             |
-| -------------------- | ---------------------------- | ------------------------------------------------------------------- |
-| `buildId`            | App (`BUILD_INFO`)           | Random UUID of this build. Names its cache and its build-info file. |
-| `builtAt`            | App                          | Build time. A build counts as newer only if this is later.          |
-| `resourcesBuildHash` | App                          | SHA-256 of the file list (without the build-info file).             |
-| `commitHash`         | App                          | Git commit.                                                         |
-| `version`            | App                          | Version from `package.json`.                                        |
-| `serviceWorkerHash`  | Worker (`sw.js`, first line) | SHA-256 of the worker code only.                                    |
+| Field               | Where                        | Meaning                                                                     |
+| ------------------- | ---------------------------- | --------------------------------------------------------------------------- |
+| `buildId`           | App (`BUILD_INFO`)           | Hash of the build's files (see below). Names its cache and build-info file. |
+| `version`           | App (`BUILD_INFO`)           | Version from [`package.json`](../../package.json).                          |
+| `commitHash`        | Manifest only                | Git commit of the build that published the manifest.                        |
+| `builtAt`           | Manifest only                | Time of that build.                                                         |
+| `serviceWorkerHash` | Worker (`sw.js`, first line) | SHA-256 of the worker code only.                                            |
+
+**The same code always gets the same `buildId`.** It is the first 16 hex digits of SHA-256 over `version` and the list of built files (URL, SHA-384, size). The id is computed after the build: at that moment `index.html` still has the `__BUILD_ID__` placeholder, and the build-info file does not exist yet. Then the id is written into `index.html` and the build-info file name.
+
+So the commit and the build time are kept out of the built files: a commit that does not change the site (for example, a README edit) or a repeated deploy produces exactly the same files. Clients then download nothing and no tab reloads. The commit and time are still recorded in the manifest and shown on the Debug page.
 
 Because `sw.js` contains only the worker's own hash, it stays byte-identical when only the app changes. The browser therefore keeps the same worker, and the app update goes through the manifest.
 
 The build-info file is named after `buildId`. HTML always loads exactly its own build's metadata, whatever the HTTP cache or CDN does.
 
-Next to the Debug page title, a static `HTML · N` marker shows the local build number. It is baked into the HTML and does not depend on JavaScript. Each local `pnpm build` / `pnpm preview` increases it. The history is in `build-labels.txt` (ignored by git). In `pnpm dev` it shows `dev`.
+Next to the Debug page title, a static `HTML · …` marker shows which HTML the page was loaded from. It is baked into the HTML and does not depend on JavaScript:
+
+| Build                         | Marker                                                            |
+| ----------------------------- | ----------------------------------------------------------------- |
+| `pnpm dev`                    | `HTML · dev`                                                      |
+| `pnpm preview` (local)        | `HTML · N`, increased on every run; history in `build-labels.txt` |
+| `pnpm build` (production, CI) | `HTML · production`                                               |
+
+The number is enabled by the `INNOHASSLE_BUILD_LABEL_HISTORY` variable (path to the history file). `pnpm preview` sets it to `build-labels.txt` (ignored by git); the tests use their own file.
 
 ## How an update arrives
 
@@ -160,7 +172,7 @@ The very first visit cannot work offline: the worker is not installed yet.
 
 ## Automatic reloads
 
-When a tab receives `BUILD_READY` for a **newer** build (later `builtAt`), it reloads once it is safe. It waits while any of these is true, in this order:
+When a tab receives `BUILD_READY` for a build other than its own, it reloads once it is safe. It waits while any of these is true, in this order:
 
 | Reason              | Meaning                                                                |
 | ------------------- | ---------------------------------------------------------------------- |
@@ -170,7 +182,9 @@ When a tab receives `BUILD_READY` for a **newer** build (later `builtAt`), it re
 | `mutation`          | A TanStack Query mutation is running.                                  |
 | `component-blocker` | A component called `useAutoUpdateBlocker`.                             |
 
-Then the tab asks the worker to check the manifest again. It reloads only if the server still has this build and the build is ready. After this asynchronous check, the conditions are checked once more.
+Then the tab asks the worker to check the manifest again. The target is **the build the server serves now**, once it is completely ready — not necessarily the one that was announced. If that is the tab's own build, nothing happens. After this asynchronous check, the conditions are checked once more.
+
+Builds are not ordered by time. So rolling the server back to an older build switches the tabs back as well.
 
 This applies to every page, including hidden tabs. The current status is shown on the Debug page.
 
@@ -211,7 +225,7 @@ Only `GET` responses with status 200 are stored. URLs are matched against the `V
 
 - Each cache keeps up to **128** entries. The entries saved longest ago are removed first. Every online view saves an entry again, so frequently used entries stay.
 - There is no expiry time.
-- `api-user-data` is deleted on logout (`AuthManager`). It contains the user's calendar URLs, including access keys of linked calendars.
+- `api-user-data` is deleted on logout ([`AuthManager`](../api/helpers/AuthManager.tsx)). It contains the user's calendar URLs, including access keys of linked calendars.
 - Access tokens are never cached.
 
 ## Storage
@@ -248,7 +262,7 @@ If a purge is interrupted (for example, the browser stops the worker), `resetPen
 
 ## Messages between pages and the worker
 
-Commands go over a `MessageChannel` (`requestWorker` in `sw-client.ts`). The timeout is 15 seconds, or 2 minutes for `CHECK_MANIFEST`.
+Commands go over a `MessageChannel` (`requestWorker` in [`sw-client.ts`](../app/sw-client.ts)). The timeout is 15 seconds, or 2 minutes for `CHECK_MANIFEST`.
 
 | Command           | Reply                                                                             |
 | ----------------- | --------------------------------------------------------------------------------- |
@@ -282,10 +296,7 @@ The code no longer depends on HTTP caching for correctness. The recommended head
 | `/index.html`, SPA routes, `/sw.js`, `/build-manifest.json` | `no-cache`                            |
 | `/assets/*`                                                 | `public, max-age=31536000, immutable` |
 
-Also:
-
-- Keep the old `/assets/*` files for a while after a deploy. This helps tabs that have no offline copy yet.
-- Roll back by rebuilding an older commit, not by re-uploading an old `dist/`. Otherwise its `builtAt` is older, and open tabs will not switch to it automatically.
+Also keep the old `/assets/*` files for a while after a deploy. This helps tabs that have no offline copy yet.
 
 ## Tests
 
@@ -296,17 +307,17 @@ pnpm run test:sw:preview --pause-ms 1000 --final-pause-ms 10000 --port 3001
 pnpm exec playwright install chromium   # once, if Chromium is missing
 ```
 
-- The Playwright tests build three real versions of the site (A, B, C) and serve them on port 5201, with a mock API on 5202. They cover:
-  - partial and interrupted downloads, and downloading only changed files;
+- The Playwright tests build three real versions of the site (A, B, C) and serve them on port 5201, with a mock API on 5202. They also rebuild A from two commits to check that the files are identical. They cover:
+  - identical rebuilds, partial and interrupted downloads, and downloading only changed files;
   - offline, connection-error and 5xx navigation;
   - pins and deleting old builds;
-  - automatic reloads and blockers;
+  - automatic reloads, rollbacks and blockers;
   - TV, reset, worker restarts, the API cache and removal of old caches.
 - The demo opens a visible Chromium window and walks through the main scenarios step by step. It uses its own ports in 3000–3099 and a temporary directory. It never stops other servers.
 
 ## Known limitations
 
 - **Unsaved input can be lost.** Automatic reloads happen on every page that has no `useAutoUpdateBlocker`, including forms with drafts.
-- **Every check re-verifies all cached files** (about 5 MB of SHA-384). On TV this happens every minute.
+- **Every check re-verifies all cached files.** That is SHA-384 of the whole build, about 13 MB (71 files) at the moment. On TV this happens every minute.
 - **Old tabs.** Tabs opened before this worker was deployed do not reload automatically until they are reloaded once.
 - **Browser support.** Requires Web Locks, `BroadcastChannel` and `Array.prototype.findLast`, so Safari / iOS 15.4 or newer.

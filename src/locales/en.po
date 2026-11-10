@@ -1398,7 +1398,7 @@ msgstr "By rating"
 msgid "bye"
 msgstr "bye"
 
-#: src/components/debug/WorkerDiagnostics.tsx:291
+#: src/components/debug/WorkerDiagnostics.tsx:294
 msgid "Cache Storage observed by this worker"
 msgstr "Cache Storage observed by this worker"
 
@@ -3805,7 +3805,7 @@ msgstr "Full"
 msgid "Full and short official names"
 msgstr "Full and short official names"
 
-#: src/components/debug/WorkerDiagnostics.tsx:378
+#: src/components/debug/WorkerDiagnostics.tsx:384
 msgid "Full GET_DIAGNOSTICS response from this worker"
 msgstr "Full GET_DIAGNOSTICS response from this worker"
 
@@ -3814,8 +3814,8 @@ msgstr "Full GET_DIAGNOSTICS response from this worker"
 msgid "Full name"
 msgstr "Full name"
 
-#: src/components/debug/WorkerDiagnostics.tsx:253
-#: src/components/debug/WorkerDiagnostics.tsx:370
+#: src/components/debug/WorkerDiagnostics.tsx:256
+#: src/components/debug/WorkerDiagnostics.tsx:376
 msgid "Full stored manifest"
 msgstr "Full stored manifest"
 
@@ -4605,7 +4605,7 @@ msgstr "Last CLIENT_HELLO recorded in shared storage"
 msgid "Last CLIENT_HELLO sent by this App, acknowledgement, and target"
 msgstr "Last CLIENT_HELLO sent by this App, acknowledgement, and target"
 
-#: src/components/debug/WorkerDiagnostics.tsx:286
+#: src/components/debug/WorkerDiagnostics.tsx:289
 msgid "Last manifest check"
 msgstr "Last manifest check"
 
@@ -4617,11 +4617,11 @@ msgstr "Last name"
 msgid "Last worker notification observed by this App"
 msgstr "Last worker notification observed by this App"
 
-#: src/components/debug/WorkerDiagnostics.tsx:344
+#: src/components/debug/WorkerDiagnostics.tsx:347
 msgid "Latest ready"
 msgstr "Latest ready"
 
-#: src/components/debug/WorkerDiagnostics.tsx:320
+#: src/components/debug/WorkerDiagnostics.tsx:323
 msgid "Latest ready is the offline fallback, not necessarily the build loaded by this page. A snapshot refresh does not fetch the server's current manifest."
 msgstr "Latest ready is the offline fallback, not necessarily the build loaded by this page. A snapshot refresh does not fetch the server's current manifest."
 
@@ -4921,7 +4921,7 @@ msgstr "Management"
 msgid "Manifest selected for this page"
 msgstr "Manifest selected for this page"
 
-#: src/components/debug/WorkerDiagnostics.tsx:316
+#: src/components/debug/WorkerDiagnostics.tsx:319
 msgid "Manifests stored by the worker"
 msgstr "Manifests stored by the worker"
 
@@ -5378,7 +5378,7 @@ msgstr "No banned users"
 msgid "No banned users match your search"
 msgstr "No banned users match your search"
 
-#: src/components/debug/WorkerDiagnostics.tsx:296
+#: src/components/debug/WorkerDiagnostics.tsx:299
 msgid "No caches."
 msgstr "No caches."
 
@@ -5722,7 +5722,7 @@ msgstr "No slot selected"
 msgid "No sport hours history yet."
 msgstr "No sport hours history yet."
 
-#: src/components/debug/WorkerDiagnostics.tsx:328
+#: src/components/debug/WorkerDiagnostics.tsx:331
 msgid "No stored manifests."
 msgstr "No stored manifests."
 
@@ -7716,7 +7716,7 @@ msgstr "Share the join link to grant access"
 msgid "Share this room"
 msgstr "Share this room"
 
-#: src/components/debug/WorkerDiagnostics.tsx:273
+#: src/components/debug/WorkerDiagnostics.tsx:276
 msgid "Shared offline storage state"
 msgstr "Shared offline storage state"
 
@@ -8791,7 +8791,7 @@ msgid "This logo change will be cancelled when you save."
 msgstr "This logo change will be cancelled when you save."
 
 #: src/components/debug/WorkerDiagnostics.tsx:61
-#: src/components/debug/WorkerDiagnostics.tsx:349
+#: src/components/debug/WorkerDiagnostics.tsx:352
 msgid "This page"
 msgstr "This page"
 
@@ -8849,7 +8849,7 @@ msgstr "This will permanently remove the last scanned page from the document. Ar
 msgid "This worker did not answer GET_DIAGNOSTICS. No data from another worker is substituted."
 msgstr "This worker did not answer GET_DIAGNOSTICS. No data from another worker is substituted."
 
-#: src/components/debug/WorkerDiagnostics.tsx:259
+#: src/components/debug/WorkerDiagnostics.tsx:262
 msgid "This worker has no stored manifest for this page's pin. This does not mean that the page is running the latest ready build."
 msgstr "This worker has no stored manifest for this page's pin. This does not mean that the page is running the latest ready build."
 

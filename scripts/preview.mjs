@@ -17,6 +17,12 @@ if (!Number.isInteger(port) || port < 3000 || port > 3099) {
 const root = fileURLToPath(new URL("../", import.meta.url));
 const outDir = resolve(root, values.outDir);
 
+// Local previews are numbered on the Debug page; production builds show "production".
+process.env.INNOHASSLE_BUILD_LABEL_HISTORY ??= resolve(
+  root,
+  "build-labels.txt",
+);
+
 console.info("[preview] Building the application...");
 await build({ root, logLevel: "error", build: { outDir } });
 const server = await preview({

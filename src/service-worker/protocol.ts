@@ -1,15 +1,18 @@
+/**
+ * The app's identity, embedded in the build as BUILD_INFO. It depends only on
+ * the built files, so rebuilding the same code produces the same build.
+ */
 export type BuildInfo = {
   version: string;
-  /** Opaque per-deploy id; used for cache names and HTML data-build-id pinning. */
+  /**
+   * First 16 hex digits of SHA-256 over the version and the built files.
+   * Names the build's cache and build-info file; HTML carries it as data-build-id.
+   */
   buildId: string;
-  /** Digest of the app resource list (not of sw.js). */
-  resourcesBuildHash: string;
-  commitHash: string;
-  builtAt: string;
 };
 
 /**
- * Only the worker code digest is embedded in sw.js. App buildId/builtAt must
+ * Only the worker code digest is embedded in sw.js. The app's buildId must
  * not appear here — otherwise every site deploy would change sw.js bytes and
  * force a service-worker update in the browser.
  */
@@ -23,14 +26,18 @@ export type BuildResource = { url: string; integrity: string; size: number };
 /**
  * External app snapshot, fetched at runtime (not baked into sw.js).
  *
- * resourcesBuildHash = SHA-256(JSON.stringify(resources sorted by URL)), excluding
- * the build's own build-info file, sw.js, this manifest and source maps.
- * Resource integrity is SHA-384 of final bytes; the build-info file is still
- * verified and stored in the complete snapshot, but cannot hash its own digest.
+ * Resources are every built file except sw.js, this manifest and source maps,
+ * sorted by URL. Integrity is SHA-384 of the final bytes.
  */
 export type BuildManifest = {
   schemaVersion: 1;
   buildInfo: BuildInfo;
+  /**
+   * Commit and time of the build that published this manifest. They are not
+   * part of the build's identity: the same files can come from several commits.
+   */
+  commitHash: string;
+  builtAt: string;
   entrypoint: string;
   resources: BuildResource[];
 };
@@ -142,7 +149,6 @@ export type WorkerCommand =
 export type BuildReadyNotification = {
   type: "BUILD_READY";
   buildInfo: BuildInfo;
-  generation: number;
 };
 
 /**

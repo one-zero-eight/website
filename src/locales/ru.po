@@ -1398,7 +1398,7 @@ msgstr "По рейтингу"
 msgid "bye"
 msgstr "без соперника"
 
-#: src/components/debug/WorkerDiagnostics.tsx:291
+#: src/components/debug/WorkerDiagnostics.tsx:294
 msgid "Cache Storage observed by this worker"
 msgstr "Cache Storage глазами этого воркера"
 
@@ -3805,7 +3805,7 @@ msgstr "Мест нет"
 msgid "Full and short official names"
 msgstr "Полное и краткое официальные названия"
 
-#: src/components/debug/WorkerDiagnostics.tsx:378
+#: src/components/debug/WorkerDiagnostics.tsx:384
 msgid "Full GET_DIAGNOSTICS response from this worker"
 msgstr "Полный ответ GET_DIAGNOSTICS этого воркера"
 
@@ -3814,8 +3814,8 @@ msgstr "Полный ответ GET_DIAGNOSTICS этого воркера"
 msgid "Full name"
 msgstr "Полное имя"
 
-#: src/components/debug/WorkerDiagnostics.tsx:253
-#: src/components/debug/WorkerDiagnostics.tsx:370
+#: src/components/debug/WorkerDiagnostics.tsx:256
+#: src/components/debug/WorkerDiagnostics.tsx:376
 msgid "Full stored manifest"
 msgstr "Полный сохранённый манифест"
 
@@ -4605,7 +4605,7 @@ msgstr "Последнее CLIENT_HELLO в общем хранилище"
 msgid "Last CLIENT_HELLO sent by this App, acknowledgement, and target"
 msgstr "Последнее CLIENT_HELLO от этой App, подтверждение и получатель"
 
-#: src/components/debug/WorkerDiagnostics.tsx:286
+#: src/components/debug/WorkerDiagnostics.tsx:289
 msgid "Last manifest check"
 msgstr "Последняя проверка манифеста"
 
@@ -4617,11 +4617,11 @@ msgstr "Фамилия"
 msgid "Last worker notification observed by this App"
 msgstr "Последнее уведомление воркера, полученное этой App"
 
-#: src/components/debug/WorkerDiagnostics.tsx:344
+#: src/components/debug/WorkerDiagnostics.tsx:347
 msgid "Latest ready"
 msgstr "Последняя готовая"
 
-#: src/components/debug/WorkerDiagnostics.tsx:320
+#: src/components/debug/WorkerDiagnostics.tsx:323
 msgid "Latest ready is the offline fallback, not necessarily the build loaded by this page. A snapshot refresh does not fetch the server's current manifest."
 msgstr "Последняя готовая сборка используется для офлайна и не обязательно совпадает со сборкой этой страницы. Обновление снимка не загружает текущий манифест с сервера."
 
@@ -4921,7 +4921,7 @@ msgstr "Управление"
 msgid "Manifest selected for this page"
 msgstr "Манифест, выбранный для этой страницы"
 
-#: src/components/debug/WorkerDiagnostics.tsx:316
+#: src/components/debug/WorkerDiagnostics.tsx:319
 msgid "Manifests stored by the worker"
 msgstr "Манифесты в хранилище воркера"
 
@@ -5378,7 +5378,7 @@ msgstr "Нет заблокированных пользователей"
 msgid "No banned users match your search"
 msgstr "Нет заблокированных пользователей по вашему запросу"
 
-#: src/components/debug/WorkerDiagnostics.tsx:296
+#: src/components/debug/WorkerDiagnostics.tsx:299
 msgid "No caches."
 msgstr "Кешей нет."
 
@@ -5722,7 +5722,7 @@ msgstr "Слот не выбран"
 msgid "No sport hours history yet."
 msgstr "Истории спортивных часов пока нет."
 
-#: src/components/debug/WorkerDiagnostics.tsx:328
+#: src/components/debug/WorkerDiagnostics.tsx:331
 msgid "No stored manifests."
 msgstr "Сохранённых манифестов нет."
 
@@ -7716,7 +7716,7 @@ msgstr "Поделитесь ссылкой для доступа"
 msgid "Share this room"
 msgstr "Поделиться комнатой"
 
-#: src/components/debug/WorkerDiagnostics.tsx:273
+#: src/components/debug/WorkerDiagnostics.tsx:276
 msgid "Shared offline storage state"
 msgstr "Состояние общего офлайн-хранилища"
 
@@ -8791,7 +8791,7 @@ msgid "This logo change will be cancelled when you save."
 msgstr "Это изменение логотипа будет отменено при сохранении."
 
 #: src/components/debug/WorkerDiagnostics.tsx:61
-#: src/components/debug/WorkerDiagnostics.tsx:349
+#: src/components/debug/WorkerDiagnostics.tsx:352
 msgid "This page"
 msgstr "Эта страница"
 
@@ -8849,7 +8849,7 @@ msgstr "Последняя отсканированная страница бу�
 msgid "This worker did not answer GET_DIAGNOSTICS. No data from another worker is substituted."
 msgstr "Этот воркер не ответил на GET_DIAGNOSTICS. Данные другого воркера не подставляются."
 
-#: src/components/debug/WorkerDiagnostics.tsx:259
+#: src/components/debug/WorkerDiagnostics.tsx:262
 msgid "This worker has no stored manifest for this page's pin. This does not mean that the page is running the latest ready build."
 msgstr "В хранилище нет манифеста для привязки этой страницы. Это не означает, что страница работает на последней готовой сборке."
 

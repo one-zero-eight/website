@@ -1,7 +1,6 @@
 import {
   autoReloadTargetStorageKey,
   createAutoUpdateController,
-  isNewerAppBuild,
   registerAutoUpdateBlocker,
   type AutoUpdateStatus,
 } from "@/app/auto-update.ts";
@@ -18,19 +17,8 @@ vi.mock("@/app/query-client.ts", () => ({
   },
 }));
 
-const current: BuildInfo = {
-  version: "1.7.0",
-  buildId: "build-a",
-  resourcesBuildHash: "resources-a",
-  commitHash: "commit-a",
-  builtAt: "2026-11-10T10:00:00.000Z",
-};
-const next: BuildInfo = {
-  ...current,
-  buildId: "build-b",
-  resourcesBuildHash: "resources-b",
-  builtAt: "2026-11-10T10:01:00.000Z",
-};
+const current: BuildInfo = { version: "1.7.0", buildId: "build-a" };
+const next: BuildInfo = { version: "1.7.0", buildId: "build-b" };
 
 let controller: ReturnType<typeof createAutoUpdateController>;
 let status: AutoUpdateStatus;
@@ -74,13 +62,13 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-async function announceNextBuild() {
-  controller.handleBuildReady({
-    type: "BUILD_READY",
-    buildInfo: next,
-    generation: 0,
-  });
+async function announce(buildInfo: BuildInfo) {
+  controller.handleBuildReady({ type: "BUILD_READY", buildInfo });
   await vi.advanceTimersByTimeAsync(0);
+}
+
+function announceNextBuild() {
+  return announce(next);
 }
 
 describe("automatic update controller", () => {
@@ -176,18 +164,36 @@ describe("automatic update controller", () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it.each([
-    ["not ready or unreachable", null],
-    ["superseded by another deployment", { ...next, buildId: "build-c" }],
-  ])(
-    "does not rely on a re-announced BUILD_READY when the build is %s",
-    async (_, latest) => {
-      vi.mocked(checkManifest).mockResolvedValue(latest);
-      await announceNextBuild();
-      expect(status.blockedReason).toBe("not-ready");
-      expect(reload).not.toHaveBeenCalled();
-    },
-  );
+  it("does not rely on a re-announced BUILD_READY when the server's build is not ready", async () => {
+    vi.mocked(checkManifest).mockResolvedValue(null);
+    await announceNextBuild();
+    expect(status.blockedReason).toBe("not-ready");
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it("ignores an announcement of this page's own build", async () => {
+    await announce(current);
+    expect(checkManifest).not.toHaveBeenCalled();
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it("switches to the server's current build, not the announced one, so rollbacks apply too", async () => {
+    const rolledBack: BuildInfo = { version: "1.6.0", buildId: "build-old" };
+    vi.mocked(checkManifest).mockResolvedValue(rolledBack);
+    await announceNextBuild();
+    expect(sessionStorage.getItem(autoReloadTargetStorageKey)).toBe(
+      rolledBack.buildId,
+    );
+    expect(status.pendingBuildId).toBe(rolledBack.buildId);
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("drops a stale announcement when the server still serves this page's build", async () => {
+    vi.mocked(checkManifest).mockResolvedValue(current);
+    await announceNextBuild();
+    expect(status).toMatchObject({ pendingBuildId: null, blockedReason: null });
+    expect(reload).not.toHaveBeenCalled();
+  });
 
   it("does not resurrect an update after reset stops an in-flight verification", async () => {
     const pending = Promise.withResolvers<BuildInfo>();
@@ -198,22 +204,5 @@ describe("automatic update controller", () => {
     await vi.advanceTimersByTimeAsync(0);
     expect(status.blockedReason).toBe("stopped");
     expect(reload).not.toHaveBeenCalled();
-  });
-});
-
-describe("isNewerAppBuild", () => {
-  it("only accepts newer app builds, not an older offline fallback or the same build", () => {
-    const newer = { ...current, buildId: "new", builtAt: next.builtAt };
-    const older = {
-      ...current,
-      buildId: "old",
-      builtAt: "2026-11-10T09:59:00.000Z",
-    };
-    expect(isNewerAppBuild(newer, current)).toBe(true);
-    expect(isNewerAppBuild(older, current)).toBe(false);
-    expect(isNewerAppBuild(current, current)).toBe(false);
-    expect(isNewerAppBuild({ ...current, buildId: "same-time" }, current)).toBe(
-      false,
-    );
   });
 });
