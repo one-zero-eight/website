@@ -49,9 +49,12 @@ export type CalendarConfig = {
   mergeDuplicates?: boolean;
 };
 
+const NO_EVENTS: EventInput[] = [];
+
 /**
  * Fetch calendars and extract events in FullCalendar's format (EventInput).
- * May return events outside 'start' and 'end' (TODO: fix this?).
+ * Returns a wider window than 'start'-'end': the range is expanded on both
+ * sides, so that the events of the neighbouring ranges are loaded in advance.
  */
 export function useCalendarEvents({
   urls,
@@ -66,14 +69,26 @@ export function useCalendarEvents({
   // TODO: specify how to handle hidden calendars
   // TODO: use mergeDuplicates
 
+  // FullCalendar renders the new date range before the parent component learns
+  // about it (via `datesSet`), so the events of the neighbouring ranges must be
+  // loaded in advance. Otherwise the view flashes blank until the events of the
+  // new range are added.
+  const expandedRange = useMemo(() => {
+    const duration = start && end ? end.getTime() - start.getTime() : 0;
+    return {
+      start: start ? new Date(start.getTime() - duration) : undefined,
+      end: end ? new Date(end.getTime() + duration) : undefined,
+    };
+  }, [start, end]);
+
   // Request events that are to be requested from API
   const when2meetEvents = useWhen2MeetCalendarEvents({
     enabled: includePersonalWhen2meet,
   });
   const sportEvents = usePersonalSportEvents({
     enabled: includePersonalSport,
-    start,
-    end,
+    start: expandedRange.start,
+    end: expandedRange.end,
   });
 
   // Gather all calendar sources (.ics urls)
@@ -91,38 +106,37 @@ export function useCalendarEvents({
   const icsQueries = useQueries({
     queries: icsCalendarsToFetch.map(queryCalendar),
   });
-  const icsExpandedEventsQueries = useQueries({
-    queries: icsQueries.map(({ data }, i) => {
-      return {
-        queryKey: [
-          "calendar-ics-events",
-          data?.fetchUrl,
-          start?.getTime(),
-          end?.getTime(),
-        ],
-        enabled: !!data,
-        queryFn: () => {
-          if (!data?.expander) return [];
-          return expandICalEvents(
-            data.expander,
-            start,
-            end,
-            icsCalendarsToFetch[i],
-          );
-        },
-      };
-    }),
-  });
 
-  return useMemo(() => {
-    const result: EventInput[] = [];
-    for (const expandedEvents of icsExpandedEventsQueries) {
-      if (expandedEvents.data) result.push(...expandedEvents.data);
-    }
-    result.push(...when2meetEvents);
-    result.push(...sportEvents);
-    return result;
-  }, [icsExpandedEventsQueries, when2meetEvents, sportEvents]);
+  // Expand the documents synchronously instead of using a query: a pending
+  // query would drop the events on every date change, and the calendar would
+  // show an empty range until the query resolves.
+  const loadedDocumentsKey = icsQueries
+    .map(
+      ({ data, dataUpdatedAt }) => `${data?.fetchUrl ?? ""}@${dataUpdatedAt}`,
+    )
+    .join("\n");
+  const icsEvents = useMemo(
+    () =>
+      icsQueries.flatMap(({ data }, index) =>
+        data
+          ? expandICalEvents(
+              data.expander,
+              expandedRange.start,
+              expandedRange.end,
+              icsCalendarsToFetch[index],
+            )
+          : [],
+      ),
+    // 'loadedDocumentsKey' describes which documents are loaded and when, while
+    // the query results array is recreated on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [loadedDocumentsKey, expandedRange],
+  );
+
+  return useMemo(
+    () => [...icsEvents, ...when2meetEvents, ...sportEvents],
+    [icsEvents, when2meetEvents, sportEvents],
+  );
 }
 
 function queryCalendar(source: CalendarSource) {
@@ -264,10 +278,10 @@ function usePersonalSportEvents({
   );
 
   if (!enabled) {
-    return [];
+    return NO_EVENTS;
   }
 
-  return data ?? [];
+  return data ?? NO_EVENTS;
 }
 
 export function getPersonalCalendarIcsUrls({

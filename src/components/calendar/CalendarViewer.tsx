@@ -83,6 +83,19 @@ function toCalendarSpace(date: Date): Date {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
 }
 
+/**
+ * Key of an event occurrence. 'id' is not enough, because all occurrences of a
+ * recurring event share it. The calendar source is a part of the key, so events
+ * from different calendars are still deduplicated by FullCalendar (it merges
+ * their 'calendarURLs' in 'eventsSet').
+ */
+function getEventOccurrenceKey(event: EventInput): string {
+  const start =
+    event.start instanceof Date ? event.start.getTime() : event.start;
+  const end = event.end instanceof Date ? event.end.getTime() : event.end;
+  const source = event.extendedProps?.calendarURLs?.[0] ?? "";
+  return `${event.id ?? ""}|${start ?? ""}|${end ?? ""}|${source}`;
+}
 const DEFAULT_VIEWS_IDS = defaultViews.map(({ id }) => id);
 const DEFAULT_CUSTOM_VIEWS: CalendarCustomView[] = [];
 
@@ -236,7 +249,14 @@ export function CalendarViewer({
 
   const handleDatesSet = useCallback(
     ({ view, start, end }: { view: ViewApi; start: Date; end: Date }) => {
-      setRange({ start, end });
+      // Bail out when the range didn't change: 'datesSet' can fire repeatedly
+      // with the same range, while every change refetches the events.
+      setRange((prev) =>
+        prev.start?.getTime() === start.getTime() &&
+        prev.end?.getTime() === end.getTime()
+          ? prev
+          : { start, end },
+      );
 
       // Bail out when the range didn't change: 'view.currentStart' is a fresh
       // Date on every call, so without this comparison the component would
@@ -522,37 +542,42 @@ export function CalendarViewer({
     const calendarApi = calendarRef.current?.getApi();
     if (!calendarApi) return;
 
-    function makeId(event: EventInput | EventApi) {
-      return event.id + event.startStr + event.endStr;
-    }
-
     // Run in the next tick
     setTimeout(() => {
-      const prevEvents = calendarApi.getEvents();
-      const nextEventIds = new Set(
-        events.map(makeId).filter(Boolean) as string[],
-      );
-
-      // Remove old events that are not in the list
-      for (const prevEvent of prevEvents) {
-        if (!nextEventIds.has(makeId(prevEvent))) {
-          prevEvent.remove();
+      // Events that are already on calendar
+      const existingEvents = new Map<string, EventApi>();
+      for (const event of calendarApi.getEvents()) {
+        const occurrenceKey = event.extendedProps.occurrenceKey;
+        if (typeof occurrenceKey === "string") {
+          existingEvents.set(occurrenceKey, event);
         }
       }
+      const nextOccurrenceKeys = new Set(events.map(getEventOccurrenceKey));
 
-      // Add new events
-      for (const newEvent of events) {
-        const existingEvent = makeId(newEvent)
-          ? calendarApi.getEventById(makeId(newEvent))
-          : null;
-
-        // TODO: Do not remove existing event, just update its values if there are changes
-        if (existingEvent) {
-          // existingEvent.remove();
-        } else {
-          calendarApi.addEvent(newEvent);
+      // Batch the mutations to optimize re-renders (uses FullCalendar internal API)
+      const batchApi = calendarApi as unknown as {
+        batchRendering: (callback: () => void) => void;
+      };
+      batchApi.batchRendering(() => {
+        // Remove events that are not required anymore
+        for (const [occurrenceKey, event] of existingEvents) {
+          if (!nextOccurrenceKeys.has(occurrenceKey)) {
+            event.remove();
+          }
         }
-      }
+
+        // Add new events
+        for (const event of events) {
+          const occurrenceKey = getEventOccurrenceKey(event);
+          if (existingEvents.has(occurrenceKey)) {
+            continue;
+          }
+          calendarApi.addEvent({
+            ...event,
+            extendedProps: { ...event.extendedProps, occurrenceKey },
+          });
+        }
+      });
     });
   }, [events, isFullPage]);
 

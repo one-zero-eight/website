@@ -5,6 +5,8 @@ import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { when2MeetEventsToCalendarEvents } from "./when2meet-events.ts";
 
+const NO_EVENTS: EventInput[] = [];
+
 export function useWhen2MeetCalendarEvents({
   enabled,
 }: {
@@ -46,16 +48,23 @@ export function useWhen2MeetCalendarEvents({
     })),
   });
 
+  const loadedMeetingsKey = meetingQueries
+    .map(({ status, dataUpdatedAt }) => `${status}@${dataUpdatedAt}`)
+    .join("|");
+
   const result = useMemo(() => {
     const events = meetingQueries
       .map((query) => query.data)
       .filter((event): event is NonNullable<typeof event> => !!event);
 
     return when2MeetEventsToCalendarEvents(events);
-  }, [meetingQueries]);
+    // 'loadedMeetingsKey' describes which meetings are loaded and when, while
+    // the query results array is recreated on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadedMeetingsKey]);
 
   if (!enabled) {
-    return [];
+    return NO_EVENTS;
   }
 
   return result;
