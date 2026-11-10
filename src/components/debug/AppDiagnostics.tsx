@@ -85,7 +85,7 @@ export function AppDiagnostics({ app }: { app: DebugSnapshot["app"] }) {
       </div>
       <DiagnosticSection
         title={<Trans>Automatic update</Trans>}
-        source="auto-update.ts → pageWorkerCommunication.autoUpdate; auto-update-safety.ts → policy and live guards"
+        source="auto-update.ts → pageWorkerCommunication.autoUpdate"
       >
         <DiagnosticFields values={app.communication.autoUpdate} />
         <p className="text-base-content/70 text-sm">

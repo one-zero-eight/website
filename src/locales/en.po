@@ -619,7 +619,7 @@ msgid "a new series will be created"
 msgstr "a new series will be created"
 
 #: src/components/clubs/ClubPage.tsx:165
-#: src/components/clubs/EditClubPage.tsx:902
+#: src/components/clubs/EditClubPage.tsx:904
 msgid "About"
 msgstr "About"
 
@@ -787,7 +787,7 @@ msgstr "Add game"
 msgid "Add link"
 msgstr "Add link"
 
-#: src/components/clubs/EditClubPage.tsx:1142
+#: src/components/clubs/EditClubPage.tsx:1144
 #: src/components/editor/menus/LinkButton.tsx:234
 msgid "Add Link"
 msgstr "Add Link"
@@ -946,7 +946,7 @@ msgstr "Allow InNoHassle to message you on Telegram."
 msgid "Amazing discovery! You've found the exclusive Ryan Gosling resource link. And the correct answer is <0>108</0>, not 42."
 msgstr "Amazing discovery! You've found the exclusive Ryan Gosling resource link. And the correct answer is <0>108</0>, not 42."
 
-#: src/components/clubs/EditClubPage.tsx:412
+#: src/components/clubs/EditClubPage.tsx:414
 msgid "An admin needs to review your changes before they go live."
 msgstr "An admin needs to review your changes before they go live."
 
@@ -1166,7 +1166,7 @@ msgstr "Back"
 msgid "Back in storage"
 msgstr "Back in storage"
 
-#: src/components/clubs/EditClubPage.tsx:589
+#: src/components/clubs/EditClubPage.tsx:591
 msgid "Back to Club"
 msgstr "Back to Club"
 
@@ -1208,7 +1208,7 @@ msgstr "Banned"
 msgid "banned {bannedAt}"
 msgstr "banned {bannedAt}"
 
-#: src/components/clubs/EditClubPage.tsx:778
+#: src/components/clubs/EditClubPage.tsx:780
 msgid "Basic information"
 msgstr "Basic information"
 
@@ -1318,7 +1318,7 @@ msgstr "Borrower name <0>*</0>"
 msgid "Bot"
 msgstr "Bot"
 
-#: src/components/clubs/EditClubPage.tsx:890
+#: src/components/clubs/EditClubPage.tsx:892
 msgid "Brief description for cards"
 msgstr "Brief description for cards"
 
@@ -1456,8 +1456,8 @@ msgstr "Can be played now"
 #: src/components/clubs/AddClubDialog.tsx:160
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:232
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:244
-#: src/components/clubs/EditClubPage.tsx:1036
-#: src/components/clubs/EditClubPage.tsx:1266
+#: src/components/clubs/EditClubPage.tsx:1038
+#: src/components/clubs/EditClubPage.tsx:1268
 #: src/components/events/drafts/CreateDraftModal.tsx:187
 #: src/components/events/drafts/DraftHostsSection.tsx:405
 #: src/components/events/drafts/DraftHostsSection.tsx:591
@@ -1630,7 +1630,7 @@ msgstr "Change"
 msgid "Change callout type"
 msgstr "Change callout type"
 
-#: src/components/clubs/EditClubPage.tsx:1015
+#: src/components/clubs/EditClubPage.tsx:1017
 msgid "Change Leader"
 msgstr "Change Leader"
 
@@ -1769,7 +1769,7 @@ msgstr "Choose at least one timeslot."
 msgid "Choose color"
 msgstr "Choose color"
 
-#: src/components/clubs/EditClubPage.tsx:731
+#: src/components/clubs/EditClubPage.tsx:733
 #: src/components/web-print/FileDropzone.tsx:267
 msgid "Choose file"
 msgstr "Choose file"
@@ -1820,7 +1820,7 @@ msgstr "Clear game filter"
 msgid "Clear input"
 msgstr "Clear input"
 
-#: src/components/clubs/EditClubPage.tsx:756
+#: src/components/clubs/EditClubPage.tsx:758
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:81
 msgid "Clear selection"
 msgstr "Clear selection"
@@ -1868,12 +1868,12 @@ msgstr "Club Fest"
 msgid "Club Fest page."
 msgstr "Club Fest page."
 
-#: src/components/clubs/EditClubPage.tsx:798
+#: src/components/clubs/EditClubPage.tsx:800
 msgid "Club is active <0>(show in the list of clubs)</0>"
 msgstr "Club is active <0>(show in the list of clubs)</0>"
 
 #: src/components/clubs/ClubPage.tsx:269
-#: src/components/clubs/EditClubPage.tsx:948
+#: src/components/clubs/EditClubPage.tsx:950
 msgid "Club Leader"
 msgstr "Club Leader"
 
@@ -1902,7 +1902,7 @@ msgstr "Club League Criteria"
 msgid "Club logo"
 msgstr "Club logo"
 
-#: src/components/clubs/EditClubPage.tsx:627
+#: src/components/clubs/EditClubPage.tsx:629
 msgid "Club Logo"
 msgstr "Club Logo"
 
@@ -1916,7 +1916,7 @@ msgid "Club logos or training restrictions could not be loaded."
 msgstr "Club logos or training restrictions could not be loaded."
 
 #: src/components/clubs/ClubPage.tsx:73
-#: src/components/clubs/EditClubPage.tsx:564
+#: src/components/clubs/EditClubPage.tsx:566
 msgid "Club not found"
 msgstr "Club not found"
 
@@ -1928,7 +1928,7 @@ msgstr "Club Purchases"
 msgid "Club Types"
 msgstr "Club Types"
 
-#: src/components/clubs/EditClubPage.tsx:842
+#: src/components/clubs/EditClubPage.tsx:844
 msgid "club-slug"
 msgstr "club-slug"
 
@@ -1937,7 +1937,7 @@ msgid "club-url-slug"
 msgstr "club-url-slug"
 
 #. placeholder {0}: club.title
-#: src/components/clubs/EditClubPage.tsx:596
+#: src/components/clubs/EditClubPage.tsx:598
 msgid "Club: {0}"
 msgstr "Club: {0}"
 
@@ -2457,7 +2457,7 @@ msgid "Current League Points"
 msgstr "Current League Points"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:324
-#: src/components/clubs/EditClubPage.tsx:640
+#: src/components/clubs/EditClubPage.tsx:642
 msgid "Current logo"
 msgstr "Current logo"
 
@@ -2500,7 +2500,7 @@ msgstr "Current week"
 msgid "Currently impersonating {0}"
 msgstr "Currently impersonating {0}"
 
-#: src/components/clubs/EditClubPage.tsx:1247
+#: src/components/clubs/EditClubPage.tsx:1249
 msgid "Custom display label"
 msgstr "Custom display label"
 
@@ -2781,7 +2781,7 @@ msgstr "Description could not be loaded."
 msgid "Description for your calendar..."
 msgstr "Description for your calendar..."
 
-#: src/components/clubs/EditClubPage.tsx:1292
+#: src/components/clubs/EditClubPage.tsx:1294
 msgid "Description Preview"
 msgstr "Description Preview"
 
@@ -2960,7 +2960,7 @@ msgid "Edit"
 msgstr "Edit"
 
 #. placeholder {0}: club.title
-#: src/components/clubs/EditClubPage.tsx:573
+#: src/components/clubs/EditClubPage.tsx:575
 msgid "Edit {0}"
 msgstr "Edit {0}"
 
@@ -2980,7 +2980,7 @@ msgstr "Edit board game"
 msgid "Edit club"
 msgstr "Edit club"
 
-#: src/components/clubs/EditClubPage.tsx:581
+#: src/components/clubs/EditClubPage.tsx:583
 msgid "Edit Club"
 msgstr "Edit Club"
 
@@ -3048,7 +3048,7 @@ msgstr "Edit: {prefix}"
 #~ msgstr "Effective window for the selected groups:"
 
 #: src/components/admin/AdminUserDetails.tsx:266
-#: src/components/clubs/EditClubPage.tsx:978
+#: src/components/clubs/EditClubPage.tsx:980
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:79
 msgid "Email"
 msgstr "Email"
@@ -3153,7 +3153,7 @@ msgstr "Enter a valid email."
 msgid "Enter club title"
 msgstr "Enter club title"
 
-#: src/components/clubs/EditClubPage.tsx:1048
+#: src/components/clubs/EditClubPage.tsx:1050
 msgid "Enter Innopolis email to set as new club leader"
 msgstr "Enter Innopolis email to set as new club leader"
 
@@ -3552,7 +3552,7 @@ msgstr "External enrollment"
 msgid "External host name is required."
 msgstr "External host name is required."
 
-#: src/components/clubs/EditClubPage.tsx:1208
+#: src/components/clubs/EditClubPage.tsx:1210
 msgid "External URL"
 msgstr "External URL"
 
@@ -4232,7 +4232,7 @@ msgstr "I can help you to book the music room."
 msgid "ID"
 msgstr "ID"
 
-#: src/components/clubs/EditClubPage.tsx:1109
+#: src/components/clubs/EditClubPage.tsx:1111
 msgid "ID from InnoSport system"
 msgstr "ID from InnoSport system"
 
@@ -4527,7 +4527,7 @@ msgstr "Invited"
 msgid "Invited by {invitedBy}"
 msgstr "Invited by {invitedBy}"
 
-#: src/components/clubs/EditClubPage.tsx:1091
+#: src/components/clubs/EditClubPage.tsx:1093
 msgid "Is InnoSport club"
 msgstr "Is InnoSport club"
 
@@ -4584,7 +4584,7 @@ msgstr "Keep"
 msgid "Keep room"
 msgstr "Keep room"
 
-#: src/components/clubs/EditClubPage.tsx:695
+#: src/components/clubs/EditClubPage.tsx:697
 msgid "Keep submitted logo"
 msgstr "Keep submitted logo"
 
@@ -4592,7 +4592,7 @@ msgstr "Keep submitted logo"
 #~ msgid "L"
 #~ msgstr "L"
 
-#: src/components/clubs/EditClubPage.tsx:1237
+#: src/components/clubs/EditClubPage.tsx:1239
 msgid "Label (Optional)"
 msgstr "Label (Optional)"
 
@@ -4694,7 +4694,7 @@ msgid "Link"
 msgstr "Link"
 
 #. placeholder {0}: index + 1
-#: src/components/clubs/EditClubPage.tsx:1167
+#: src/components/clubs/EditClubPage.tsx:1169
 msgid "Link {0}"
 msgstr "Link {0}"
 
@@ -4769,7 +4769,7 @@ msgid "Loading changes for review..."
 msgstr "Loading changes for review..."
 
 #: src/components/clubs/ClubPage.tsx:63
-#: src/components/clubs/EditClubPage.tsx:554
+#: src/components/clubs/EditClubPage.tsx:556
 msgid "Loading club information..."
 msgstr "Loading club information..."
 
@@ -4839,7 +4839,7 @@ msgstr "Lock the groups on the Validation tab first."
 msgid "Logo"
 msgstr "Logo"
 
-#: src/components/clubs/EditClubPage.tsx:661
+#: src/components/clubs/EditClubPage.tsx:663
 msgid "Logo preview"
 msgstr "Logo preview"
 
@@ -5094,7 +5094,7 @@ msgstr "Mode"
 msgid "Moderator feedback"
 msgstr "Moderator feedback"
 
-#: src/components/clubs/EditClubPage.tsx:1310
+#: src/components/clubs/EditClubPage.tsx:1312
 msgid "Modified"
 msgstr "Modified"
 
@@ -5204,7 +5204,7 @@ msgstr "My upcoming trainings"
 #: src/components/admin/AdminUserDetails.tsx:267
 #: src/components/calendar/import/ImportModal.tsx:163
 #: src/components/clubs/ClubPage.tsx:278
-#: src/components/clubs/EditClubPage.tsx:965
+#: src/components/clubs/EditClubPage.tsx:967
 #: src/components/events/drafts/DraftHostsSection.tsx:560
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:73
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:338
@@ -5504,7 +5504,7 @@ msgstr "No FAQ entries."
 msgid "No feedback."
 msgstr "No feedback."
 
-#: src/components/clubs/EditClubPage.tsx:734
+#: src/components/clubs/EditClubPage.tsx:736
 msgid "No file selected"
 msgstr "No file selected"
 
@@ -5581,7 +5581,7 @@ msgstr "No leader information available."
 msgid "No links"
 msgstr "No links"
 
-#: src/components/clubs/EditClubPage.tsx:1151
+#: src/components/clubs/EditClubPage.tsx:1153
 msgid "No links added yet. Click \"Add Link\" to add resources."
 msgstr "No links added yet. Click \"Add Link\" to add resources."
 
@@ -6378,7 +6378,7 @@ msgstr "Please submit an image of the medical reference. Specify the range of da
 msgid "Please submit an image of the reference document (e.g. a medical certificate) that supports your request to change medical group."
 msgstr "Please submit an image of the reference document (e.g. a medical certificate) that supports your request to change medical group."
 
-#: src/app/AppUpdatePrompt.tsx:48
+#: src/app/AppUpdatePrompt.tsx:46
 msgid "Please, reload the page."
 msgstr "Please, reload the page."
 
@@ -6419,7 +6419,7 @@ msgstr "Preferred pickup time"
 msgid "Preferred time"
 msgstr "Preferred time"
 
-#: src/components/clubs/EditClubPage.tsx:916
+#: src/components/clubs/EditClubPage.tsx:918
 #: src/components/search/IframePreviewCard.tsx:95
 #: src/components/web-print/PrintPage.tsx:445
 #: src/components/web-print/ScanPage.tsx:400
@@ -6430,7 +6430,7 @@ msgstr "Preview"
 msgid "Preview available for PDF only"
 msgstr "Preview available for PDF only"
 
-#: src/components/clubs/EditClubPage.tsx:678
+#: src/components/clubs/EditClubPage.tsx:680
 msgid "Preview unavailable"
 msgstr "Preview unavailable"
 
@@ -6670,7 +6670,7 @@ msgstr "Reader"
 msgid "Receive a monthly stipend from IU alumni"
 msgstr "Receive a monthly stipend from IU alumni"
 
-#: src/components/clubs/EditClubPage.tsx:765
+#: src/components/clubs/EditClubPage.tsx:767
 msgid "Recommended: Square image, at least 400x400px, PNG, JPG or WEBP format"
 msgstr "Recommended: Square image, at least 400x400px, PNG, JPG or WEBP format"
 
@@ -6780,7 +6780,7 @@ msgstr "Reject"
 msgid "Reject changes"
 msgstr "Reject changes"
 
-#: src/app/AppUpdatePrompt.tsx:64
+#: src/app/AppUpdatePrompt.tsx:62
 msgid "Reload"
 msgstr "Reload"
 
@@ -6839,7 +6839,7 @@ msgstr "Remove last page"
 msgid "Remove last page?"
 msgstr "Remove last page?"
 
-#: src/components/clubs/EditClubPage.tsx:1174
+#: src/components/clubs/EditClubPage.tsx:1176
 msgid "Remove link"
 msgstr "Remove link"
 
@@ -6977,7 +6977,7 @@ msgid "Resetting…"
 msgstr "Resetting…"
 
 #: src/components/clubs/ClubPage.tsx:234
-#: src/components/clubs/EditClubPage.tsx:1128
+#: src/components/clubs/EditClubPage.tsx:1130
 msgid "Resources & Links"
 msgstr "Resources & Links"
 
@@ -7079,11 +7079,11 @@ msgstr "Return date is required."
 msgid "Returned"
 msgstr "Returned"
 
-#: src/components/clubs/EditClubPage.tsx:1336
+#: src/components/clubs/EditClubPage.tsx:1338
 msgid "Revert changes"
 msgstr "Revert changes"
 
-#: src/components/clubs/EditClubPage.tsx:1333
+#: src/components/clubs/EditClubPage.tsx:1335
 msgid "Revert this section to the published values"
 msgstr "Revert this section to the published values"
 
@@ -7251,7 +7251,7 @@ msgstr "Save"
 msgid "Save changes"
 msgstr "Save changes"
 
-#: src/components/clubs/EditClubPage.tsx:1283
+#: src/components/clubs/EditClubPage.tsx:1285
 msgid "Save Changes"
 msgstr "Save Changes"
 
@@ -7275,7 +7275,7 @@ msgstr "Save timeslots"
 msgid "Saved, other admins see these groups"
 msgstr "Saved, other admins see these groups"
 
-#: src/components/clubs/EditClubPage.tsx:1280
+#: src/components/clubs/EditClubPage.tsx:1282
 msgid "Saving..."
 msgstr "Saving..."
 
@@ -7503,7 +7503,7 @@ msgstr "Select a course and component"
 msgid "Select a course and component."
 msgstr "Select a course and component."
 
-#: src/components/clubs/EditClubPage.tsx:709
+#: src/components/clubs/EditClubPage.tsx:711
 msgid "Select a file to preview"
 msgstr "Select a file to preview"
 
@@ -7655,7 +7655,7 @@ msgstr "Set a start time before the end time."
 msgid "Set guests role to {newRole, select, writer {Writer} other {Reader}}"
 msgstr "Set guests role to {newRole, select, writer {Writer} other {Reader}}"
 
-#: src/components/clubs/EditClubPage.tsx:1025
+#: src/components/clubs/EditClubPage.tsx:1027
 msgid "Set New Leader (Innopolis Email)"
 msgstr "Set New Leader (Innopolis Email)"
 
@@ -7728,7 +7728,7 @@ msgstr "Sheets"
 msgid "Short description"
 msgstr "Short description"
 
-#: src/components/clubs/EditClubPage.tsx:880
+#: src/components/clubs/EditClubPage.tsx:882
 msgid "Short Description"
 msgstr "Short Description"
 
@@ -7896,7 +7896,7 @@ msgstr "Skip"
 msgid "Slot"
 msgstr "Slot"
 
-#: src/components/clubs/EditClubPage.tsx:832
+#: src/components/clubs/EditClubPage.tsx:834
 msgid "Slug"
 msgstr "Slug"
 
@@ -8032,11 +8032,11 @@ msgid "Sport hours: <0>{earned} out of {required, plural, one {# hour} other {# 
 msgstr "Sport hours: <0>{earned} out of {required, plural, one {# hour} other {# hours}}</0>"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:291
-#: src/components/clubs/EditClubPage.tsx:1101
+#: src/components/clubs/EditClubPage.tsx:1103
 msgid "Sport ID"
 msgstr "Sport ID"
 
-#: src/components/clubs/EditClubPage.tsx:1067
+#: src/components/clubs/EditClubPage.tsx:1069
 msgid "Sport Information"
 msgstr "Sport Information"
 
@@ -8056,7 +8056,7 @@ msgstr "Sport progress could not be loaded."
 msgid "Sport trainer"
 msgstr "Sport trainer"
 
-#: src/components/clubs/EditClubPage.tsx:1113
+#: src/components/clubs/EditClubPage.tsx:1115
 msgid "Sport type ID from InnoSport system"
 msgstr "Sport type ID from InnoSport system"
 
@@ -8296,15 +8296,15 @@ msgstr "Submit on review"
 msgid "Submitted"
 msgstr "Submitted"
 
-#: src/components/clubs/EditClubPage.tsx:411
+#: src/components/clubs/EditClubPage.tsx:413
 msgid "Submitted for review"
 msgstr "Submitted for review"
 
-#: src/components/clubs/EditClubPage.tsx:670
+#: src/components/clubs/EditClubPage.tsx:672
 msgid "Submitted logo"
 msgstr "Submitted logo"
 
-#: src/components/clubs/EditClubPage.tsx:700
+#: src/components/clubs/EditClubPage.tsx:702
 msgid "Submitted, waiting for review"
 msgstr "Submitted, waiting for review"
 
@@ -8521,7 +8521,7 @@ msgstr "Telegram bot"
 msgid "Telegram channel"
 msgstr "Telegram channel"
 
-#: src/components/clubs/EditClubPage.tsx:1199
+#: src/components/clubs/EditClubPage.tsx:1201
 msgid "Telegram Channel"
 msgstr "Telegram Channel"
 
@@ -8529,7 +8529,7 @@ msgstr "Telegram Channel"
 msgid "Telegram chat"
 msgstr "Telegram chat"
 
-#: src/components/clubs/EditClubPage.tsx:1202
+#: src/components/clubs/EditClubPage.tsx:1204
 msgid "Telegram Chat"
 msgstr "Telegram Chat"
 
@@ -8548,7 +8548,7 @@ msgstr "Telegram ID {0}"
 msgid "Telegram not provided"
 msgstr "Telegram not provided"
 
-#: src/components/clubs/EditClubPage.tsx:1205
+#: src/components/clubs/EditClubPage.tsx:1207
 msgid "Telegram User"
 msgstr "Telegram User"
 
@@ -8585,11 +8585,11 @@ msgstr "The club manager collects orders from the club leaders in advance, and l
 msgid "The file contains no student emails."
 msgstr "The file contains no student emails."
 
-#: src/components/clubs/EditClubPage.tsx:612
+#: src/components/clubs/EditClubPage.tsx:614
 msgid "The form below shows the leader's submitted changes. Saving will apply your edits directly to the club."
 msgstr "The form below shows the leader's submitted changes. Saving will apply your edits directly to the club."
 
-#: src/components/clubs/EditClubPage.tsx:613
+#: src/components/clubs/EditClubPage.tsx:615
 msgid "The form below shows what you submitted, not what is published yet. Keep editing and save again to update the request."
 msgstr "The form below shows what you submitted, not what is published yet. Keep editing and save again to update the request."
 
@@ -8710,7 +8710,7 @@ msgstr "The timer stopped"
 msgid "The website is an ecosystem that brings together all <0/> team services and useful Innopolis resources for students in one place."
 msgstr "The website is an ecosystem that brings together all <0/> team services and useful Innopolis resources for students in one place."
 
-#: src/app/AppUpdatePrompt.tsx:45
+#: src/app/AppUpdatePrompt.tsx:43
 msgid "The website is updated."
 msgstr "The website is updated."
 
@@ -8758,7 +8758,7 @@ msgstr "This clears ALL Cache Storage caches for this origin, unregisters all se
 msgid "This club has changes waiting for admin review."
 msgstr "This club has changes waiting for admin review."
 
-#: src/components/clubs/EditClubPage.tsx:607
+#: src/components/clubs/EditClubPage.tsx:609
 msgid "This club has changes waiting for review"
 msgstr "This club has changes waiting for review"
 
@@ -8786,7 +8786,7 @@ msgstr "This game is no longer in the catalogue."
 msgid "This link may be invalid, expired, or you may not have access."
 msgstr "This link may be invalid, expired, or you may not have access."
 
-#: src/components/clubs/EditClubPage.tsx:686
+#: src/components/clubs/EditClubPage.tsx:688
 msgid "This logo change will be cancelled when you save."
 msgstr "This logo change will be cancelled when you save."
 
@@ -8833,7 +8833,7 @@ msgstr "This training is for college students only."
 msgid "This training is for university students only."
 msgstr "This training is for university students only."
 
-#: src/components/clubs/EditClubPage.tsx:741
+#: src/components/clubs/EditClubPage.tsx:743
 msgid "This will be uploaded when you save changes below."
 msgstr "This will be uploaded when you save changes below."
 
@@ -8937,7 +8937,7 @@ msgstr "TIP"
 #: src/components/board-games/BoardGamesAdminPage.tsx:735
 #: src/components/board-games/BoardGamesAdminPage.tsx:929
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:260
-#: src/components/clubs/EditClubPage.tsx:816
+#: src/components/clubs/EditClubPage.tsx:818
 #: src/components/guard/CreateSheetPage.tsx:101
 #: src/components/room-booking/tv/RoomTvPage.tsx:194
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:354
@@ -9124,8 +9124,8 @@ msgid "Two printers are available on campus right now:"
 msgstr "Two printers are available on campus right now:"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:276
-#: src/components/clubs/EditClubPage.tsx:854
-#: src/components/clubs/EditClubPage.tsx:1184
+#: src/components/clubs/EditClubPage.tsx:856
+#: src/components/clubs/EditClubPage.tsx:1186
 msgid "Type"
 msgstr "Type"
 
@@ -9280,7 +9280,7 @@ msgstr "Update Link"
 #~ msgid "Update status"
 #~ msgstr "Update status"
 
-#: src/components/clubs/EditClubPage.tsx:593
+#: src/components/clubs/EditClubPage.tsx:595
 msgid "Update the club information below"
 msgstr "Update the club information below"
 
@@ -9305,7 +9305,7 @@ msgstr "Upload a file, pick a printer, send the job"
 msgid "Upload config.yaml in the “Settings” tab."
 msgstr "Upload config.yaml in the “Settings” tab."
 
-#: src/components/clubs/EditClubPage.tsx:654
+#: src/components/clubs/EditClubPage.tsx:656
 msgid "Upload new logo"
 msgstr "Upload new logo"
 
@@ -9313,7 +9313,7 @@ msgstr "Upload new logo"
 msgid "Uploading image..."
 msgstr "Uploading image..."
 
-#: src/components/clubs/EditClubPage.tsx:1282
+#: src/components/clubs/EditClubPage.tsx:1284
 msgid "Uploading logo..."
 msgstr "Uploading logo..."
 
@@ -9326,7 +9326,7 @@ msgstr "URL"
 msgid "URL (optional)"
 msgstr "URL (optional)"
 
-#: src/components/clubs/EditClubPage.tsx:1216
+#: src/components/clubs/EditClubPage.tsx:1218
 msgid "URL <0>*</0>"
 msgstr "URL <0>*</0>"
 
@@ -9338,7 +9338,7 @@ msgstr "URL is required."
 msgid "URL-friendly identifier (e.g., \"robotics-club\")"
 msgstr "URL-friendly identifier (e.g., \"robotics-club\")"
 
-#: src/components/clubs/EditClubPage.tsx:846
+#: src/components/clubs/EditClubPage.tsx:848
 msgid "URL-friendly identifier for the club"
 msgstr "URL-friendly identifier for the club"
 
@@ -9912,7 +9912,7 @@ msgstr "You don't have any bookings now."
 msgid "You don't have permission to access this page."
 msgstr "You don't have permission to access this page."
 
-#: src/components/clubs/EditClubPage.tsx:608
+#: src/components/clubs/EditClubPage.tsx:610
 msgid "You have changes waiting for review"
 msgstr "You have changes waiting for review"
 
@@ -9936,7 +9936,7 @@ msgstr "You have no bookings"
 msgid "You have no reservations yet."
 msgstr "You have no reservations yet."
 
-#: src/components/clubs/EditClubPage.tsx:243
+#: src/components/clubs/EditClubPage.tsx:245
 msgid "You have unsaved changes. Are you sure you want to leave?"
 msgstr "You have unsaved changes. Are you sure you want to leave?"
 

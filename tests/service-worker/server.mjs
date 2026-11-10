@@ -117,6 +117,8 @@ const defaults = {
   accountConnectionError: false,
   delayApi: false,
   runtimeVersion: "a",
+  // Like a server without Cache-Control: browsers may then reuse HTML for a while.
+  cacheableHtml: false,
 };
 let state = { ...defaults };
 let requests = [];
@@ -278,6 +280,10 @@ const apiServer = createServer(async (request, response) => {
     });
     return;
   }
+  if (url.pathname === "/accounts/tokens/generate-my-token") {
+    json(response, { access_token: "never-persist-access-token" });
+    return;
+  }
   if (url.pathname === "/maps/scenes/") {
     json(response, [
       {
@@ -425,7 +431,10 @@ const appServer = createServer(async (request, response) => {
     response.writeHead(200, {
       "Content-Type":
         mimeTypes[extname(filePath)] ?? "application/octet-stream",
-      "Cache-Control": "no-store",
+      "Cache-Control":
+        state.cacheableHtml && relativePath === "index.html"
+          ? "max-age=3600"
+          : "no-store",
     });
     response.end(content);
   } catch (error) {

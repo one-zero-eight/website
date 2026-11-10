@@ -42,7 +42,7 @@ function formatError(error: unknown) {
 }
 
 /** App-owned values: no browser registration or worker response is read here. */
-export function readAppSnapshot() {
+function readAppSnapshot() {
   return {
     observedAt: new Date().toISOString(),
     url: window.location.href,

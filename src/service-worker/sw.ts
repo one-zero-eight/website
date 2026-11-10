@@ -1,30 +1,36 @@
 /**
  * Service worker entrypoint.
  *
- * Feature modules own their fetch/message logic. This file only:
- * - owns lifecycle (install / activate / reset),
- * - routes RPC and fetch to the active features,
- * - exposes debug status.
+ * site-update.ts owns the app's offline snapshots (same-origin requests);
+ * api-cache.ts keeps selected API responses. This file only:
+ * - owns lifecycle (startup cleanup / install / activate / reset),
+ * - routes fetch and RPC commands,
+ * - exposes diagnostics.
  *
  * Site updates are independent of the worker script bytes: app deploys change
  * build-manifest.json while sw.js stays identical until worker logic changes.
  */
+import { handleApiCacheFetch } from "./api-cache.ts";
 import {
-  handleSiteUpdateFetch,
-  handleSiteUpdateMessage,
-} from "./features/site-update.ts";
-import type {
-  WorkerBuildInfo,
-  WorkerCommand,
-  WorkerDiagnosticsSnapshot,
-  WorkerStatus,
+  mapsCacheName,
+  userDataCacheName,
+  type CacheSummary,
+  type WorkerBuildInfo,
+  type WorkerCommand,
+  type WorkerDiagnosticsSnapshot,
 } from "./protocol.ts";
-import { abortBackground, broadcast, errorMessage } from "./shared.ts";
 import {
+  abortDownloads,
+  checkManifest,
+  errorMessage,
+  handleClientHello,
+  handleSiteUpdateFetch,
+} from "./site-update.ts";
+import {
+  deleteUnknownCaches,
   purgeWorkerCaches,
   readWorkerState,
   recoverPendingPurge,
-  withWorkerState,
 } from "./storage.ts";
 
 declare const self: ServiceWorkerGlobalScope;
@@ -32,43 +38,48 @@ declare const BUILD_INFO: WorkerBuildInfo;
 
 console.info("[Service Worker] Build Info:", BUILD_INFO);
 
-async function getStatus(): Promise<WorkerStatus> {
-  return withWorkerState(async (state) => {
-    const summaries = [];
-    for (const name of await caches.keys()) {
-      const cache = await caches.open(name);
-      const keys = await cache.keys();
-      let bytes = 0;
-      for (const key of keys) {
-        const response = await cache.match(key);
-        if (response) bytes += (await response.arrayBuffer()).byteLength;
-      }
-      summaries.push({ name, entries: keys.length, bytes });
+/**
+ * Runs on every worker start. Finishes a purge that crashed midway (purge
+ * raises the `blocked` gate before deleting, so fetches need not wait), then
+ * removes caches this worker does not own, such as the former Workbox ones.
+ */
+const startupCleanup = (async () => {
+  await recoverPendingPurge();
+  await deleteUnknownCaches([userDataCacheName, mapsCacheName]);
+  indexedDB.deleteDatabase("workbox-expiration");
+})().catch((error) =>
+  console.error("[Service Worker] Startup cleanup failed:", error),
+);
+
+async function summarizeCaches(): Promise<CacheSummary[]> {
+  const summaries = [];
+  for (const name of await caches.keys()) {
+    const cache = await caches.open(name);
+    const keys = await cache.keys();
+    let bytes = 0;
+    for (const key of keys) {
+      const response = await cache.match(key);
+      if (response) bytes += (await response.arrayBuffer()).byteLength;
     }
-    return {
-      ...state,
-      buildInfo: BUILD_INFO,
-      scope: self.registration.scope,
-      caches: summaries,
-    };
-  });
+    summaries.push({ name, entries: keys.length, bytes });
+  }
+  return summaries;
 }
 
 async function getDiagnostics(
   requestingClientId: string | null,
 ): Promise<WorkerDiagnosticsSnapshot> {
-  const [
-    { buildInfo, scope, caches: cacheStorage, ...storage },
-    controlledClients,
-    allClients,
-  ] = await Promise.all([
-    getStatus(),
-    self.clients.matchAll({ type: "window" }),
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }),
-  ]);
+  const scope = self.registration.scope;
+  const [storage, cacheStorage, controlledClients, allClients] =
+    await Promise.all([
+      readWorkerState(),
+      summarizeCaches(),
+      self.clients.matchAll({ type: "window" }),
+      self.clients.matchAll({ type: "window", includeUncontrolled: true }),
+    ]);
   const controlledIds = new Set(controlledClients.map((client) => client.id));
   return {
-    worker: { buildInfo, scriptURL: self.location.href, scope },
+    worker: { buildInfo: BUILD_INFO, scriptURL: self.location.href, scope },
     storage,
     runtimeClients: {
       requestingClientId,
@@ -88,34 +99,24 @@ async function getDiagnostics(
 
 async function handleMessage(event: ExtendableMessageEvent) {
   const command = event.data as WorkerCommand;
+  const source = event.source instanceof Client ? event.source : null;
   switch (command.type) {
-    case "GET_BUILD_INFO":
-      return BUILD_INFO;
-    case "GET_STATUS":
-      return getStatus();
-    case "GET_DIAGNOSTICS": {
-      const source = event.source;
-      return getDiagnostics(source && "id" in source ? source.id : null);
-    }
+    case "CLIENT_HELLO":
+      if (!source) throw new Error("Missing client");
+      return handleClientHello(command, source);
+    case "CHECK_MANIFEST":
+      return checkManifest();
     case "GET_STATE":
       return readWorkerState();
-    case "RESET": {
-      // Abort in-flight downloads before wiping caches so a late put cannot
-      // recreate storage after the reset gate is raised.
-      abortBackground();
-      const state = await purgeWorkerCaches(true);
-      await broadcast({
-        type: "CACHE_INVALIDATED",
-        generation: state.generation,
-        reset: true,
-      });
-      return state;
-    }
-    default: {
-      const result = await handleSiteUpdateMessage(command, event);
-      if (result !== undefined) return result;
-      throw new Error(`Unknown service worker command: ${command.type}`);
-    }
+    case "GET_DIAGNOSTICS":
+      return getDiagnostics(source?.id ?? null);
+    case "RESET":
+      abortDownloads();
+      return purgeWorkerCaches();
+    default:
+      throw new Error(
+        `Unknown service worker command: ${(command as { type: string }).type}`,
+      );
   }
 }
 
@@ -124,17 +125,11 @@ self.addEventListener("install", (event) =>
   event.waitUntil(self.skipWaiting()),
 );
 self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    (async () => {
-      // A previous worker may have crashed mid-purge; finish that before claiming.
-      await recoverPendingPurge();
-      await self.clients.claim();
-    })(),
-  );
+  event.waitUntil(startupCleanup.then(() => self.clients.claim()));
 });
 self.addEventListener("message", (event) => {
   event.waitUntil(
-    recoverPendingPurge()
+    startupCleanup
       .then(() => handleMessage(event))
       .then(
         (result) => event.ports[0]?.postMessage({ ok: true, result }),
@@ -147,7 +142,7 @@ self.addEventListener("message", (event) => {
   );
 });
 self.addEventListener("fetch", (event) => {
-  // Keep the reset gate honest even when pages only talk via network traffic.
-  event.waitUntil(recoverPendingPurge());
-  if (handleSiteUpdateFetch(event)) return;
+  if (new URL(event.request.url).origin === self.location.origin)
+    handleSiteUpdateFetch(event);
+  else handleApiCacheFetch(event);
 });

@@ -619,7 +619,7 @@ msgid "a new series will be created"
 msgstr "будет создана новая серия"
 
 #: src/components/clubs/ClubPage.tsx:165
-#: src/components/clubs/EditClubPage.tsx:902
+#: src/components/clubs/EditClubPage.tsx:904
 msgid "About"
 msgstr "О клубе"
 
@@ -787,7 +787,7 @@ msgstr "Добавить игру"
 msgid "Add link"
 msgstr "Добавить ссылку"
 
-#: src/components/clubs/EditClubPage.tsx:1142
+#: src/components/clubs/EditClubPage.tsx:1144
 #: src/components/editor/menus/LinkButton.tsx:234
 msgid "Add Link"
 msgstr "Добавить ссылку"
@@ -946,7 +946,7 @@ msgstr "Разрешите InNoHassle писать вам в Telegram."
 msgid "Amazing discovery! You've found the exclusive Ryan Gosling resource link. And the correct answer is <0>108</0>, not 42."
 msgstr "Вот это открытие! Вы нашли эксклюзивную ссылку на ресурс Райана Гослинга. А правильный ответ — <0>108</0>, а не 42."
 
-#: src/components/clubs/EditClubPage.tsx:412
+#: src/components/clubs/EditClubPage.tsx:414
 msgid "An admin needs to review your changes before they go live."
 msgstr "Перед публикацией ваши изменения должен проверить администратор."
 
@@ -1166,7 +1166,7 @@ msgstr "Назад"
 msgid "Back in storage"
 msgstr "Вернулась на склад"
 
-#: src/components/clubs/EditClubPage.tsx:589
+#: src/components/clubs/EditClubPage.tsx:591
 msgid "Back to Club"
 msgstr "Назад к клубу"
 
@@ -1208,7 +1208,7 @@ msgstr "Заблокированные"
 msgid "banned {bannedAt}"
 msgstr "дата блокировки: {bannedAt}"
 
-#: src/components/clubs/EditClubPage.tsx:778
+#: src/components/clubs/EditClubPage.tsx:780
 msgid "Basic information"
 msgstr "Основная информация"
 
@@ -1318,7 +1318,7 @@ msgstr "Имя взявшего <0>*</0>"
 msgid "Bot"
 msgstr "Бот"
 
-#: src/components/clubs/EditClubPage.tsx:890
+#: src/components/clubs/EditClubPage.tsx:892
 msgid "Brief description for cards"
 msgstr "Краткое описание для карточек"
 
@@ -1456,8 +1456,8 @@ msgstr "Можно играть сейчас"
 #: src/components/clubs/AddClubDialog.tsx:160
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:232
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:244
-#: src/components/clubs/EditClubPage.tsx:1036
-#: src/components/clubs/EditClubPage.tsx:1266
+#: src/components/clubs/EditClubPage.tsx:1038
+#: src/components/clubs/EditClubPage.tsx:1268
 #: src/components/events/drafts/CreateDraftModal.tsx:187
 #: src/components/events/drafts/DraftHostsSection.tsx:405
 #: src/components/events/drafts/DraftHostsSection.tsx:591
@@ -1630,7 +1630,7 @@ msgstr "Изменить"
 msgid "Change callout type"
 msgstr "Изменить тип выноски"
 
-#: src/components/clubs/EditClubPage.tsx:1015
+#: src/components/clubs/EditClubPage.tsx:1017
 msgid "Change Leader"
 msgstr "Сменить лидера"
 
@@ -1769,7 +1769,7 @@ msgstr "Выберите хотя бы один слот."
 msgid "Choose color"
 msgstr "Выберите цвет"
 
-#: src/components/clubs/EditClubPage.tsx:731
+#: src/components/clubs/EditClubPage.tsx:733
 #: src/components/web-print/FileDropzone.tsx:267
 msgid "Choose file"
 msgstr "Выберите файл"
@@ -1820,7 +1820,7 @@ msgstr "Сбросить фильтр игр"
 msgid "Clear input"
 msgstr "Очистить поле"
 
-#: src/components/clubs/EditClubPage.tsx:756
+#: src/components/clubs/EditClubPage.tsx:758
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:81
 msgid "Clear selection"
 msgstr "Сбросить выбор"
@@ -1868,12 +1868,12 @@ msgstr "Club Fest"
 msgid "Club Fest page."
 msgstr "Страница Club Fest."
 
-#: src/components/clubs/EditClubPage.tsx:798
+#: src/components/clubs/EditClubPage.tsx:800
 msgid "Club is active <0>(show in the list of clubs)</0>"
 msgstr "Клуб активен <0>(показывать в списке клубов)</0>"
 
 #: src/components/clubs/ClubPage.tsx:269
-#: src/components/clubs/EditClubPage.tsx:948
+#: src/components/clubs/EditClubPage.tsx:950
 msgid "Club Leader"
 msgstr "Лидер клуба"
 
@@ -1902,7 +1902,7 @@ msgstr "Критерии лиги клубов"
 msgid "Club logo"
 msgstr "Логотип клуба"
 
-#: src/components/clubs/EditClubPage.tsx:627
+#: src/components/clubs/EditClubPage.tsx:629
 msgid "Club Logo"
 msgstr "Логотип клуба"
 
@@ -1916,7 +1916,7 @@ msgid "Club logos or training restrictions could not be loaded."
 msgstr "Не удалось загрузить логотипы клубов или ограничения тренировок."
 
 #: src/components/clubs/ClubPage.tsx:73
-#: src/components/clubs/EditClubPage.tsx:564
+#: src/components/clubs/EditClubPage.tsx:566
 msgid "Club not found"
 msgstr "Клуб не найден"
 
@@ -1928,7 +1928,7 @@ msgstr "Покупки клуба"
 msgid "Club Types"
 msgstr "Типы клубов"
 
-#: src/components/clubs/EditClubPage.tsx:842
+#: src/components/clubs/EditClubPage.tsx:844
 msgid "club-slug"
 msgstr "club-slug"
 
@@ -1937,7 +1937,7 @@ msgid "club-url-slug"
 msgstr "club-url-slug"
 
 #. placeholder {0}: club.title
-#: src/components/clubs/EditClubPage.tsx:596
+#: src/components/clubs/EditClubPage.tsx:598
 msgid "Club: {0}"
 msgstr "Клуб: {0}"
 
@@ -2457,7 +2457,7 @@ msgid "Current League Points"
 msgstr "Текущие очки лиги"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:324
-#: src/components/clubs/EditClubPage.tsx:640
+#: src/components/clubs/EditClubPage.tsx:642
 msgid "Current logo"
 msgstr "Текущий логотип"
 
@@ -2500,7 +2500,7 @@ msgstr "Текущая неделя"
 msgid "Currently impersonating {0}"
 msgstr "Вы действуете от имени {0}"
 
-#: src/components/clubs/EditClubPage.tsx:1247
+#: src/components/clubs/EditClubPage.tsx:1249
 msgid "Custom display label"
 msgstr "Своя подпись"
 
@@ -2781,7 +2781,7 @@ msgstr "Не удалось загрузить описание."
 msgid "Description for your calendar..."
 msgstr "Описание для вашего календаря..."
 
-#: src/components/clubs/EditClubPage.tsx:1292
+#: src/components/clubs/EditClubPage.tsx:1294
 msgid "Description Preview"
 msgstr "Предпросмотр описания"
 
@@ -2960,7 +2960,7 @@ msgid "Edit"
 msgstr "Редактировать"
 
 #. placeholder {0}: club.title
-#: src/components/clubs/EditClubPage.tsx:573
+#: src/components/clubs/EditClubPage.tsx:575
 msgid "Edit {0}"
 msgstr "Редактировать «{0}»"
 
@@ -2980,7 +2980,7 @@ msgstr "Редактировать игру"
 msgid "Edit club"
 msgstr "Редактировать клуб"
 
-#: src/components/clubs/EditClubPage.tsx:581
+#: src/components/clubs/EditClubPage.tsx:583
 msgid "Edit Club"
 msgstr "Редактировать клуб"
 
@@ -3048,7 +3048,7 @@ msgstr "Изменить: {prefix}"
 #~ msgstr "Фактический период с учётом выбранных групп:"
 
 #: src/components/admin/AdminUserDetails.tsx:266
-#: src/components/clubs/EditClubPage.tsx:978
+#: src/components/clubs/EditClubPage.tsx:980
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:79
 msgid "Email"
 msgstr "Почта"
@@ -3153,7 +3153,7 @@ msgstr "Введите корректный email."
 msgid "Enter club title"
 msgstr "Введите название клуба"
 
-#: src/components/clubs/EditClubPage.tsx:1048
+#: src/components/clubs/EditClubPage.tsx:1050
 msgid "Enter Innopolis email to set as new club leader"
 msgstr "Введите email Иннополис, чтобы назначить нового лидера клуба"
 
@@ -3552,7 +3552,7 @@ msgstr "Внешняя запись"
 msgid "External host name is required."
 msgstr "Укажите название внешнего организатора."
 
-#: src/components/clubs/EditClubPage.tsx:1208
+#: src/components/clubs/EditClubPage.tsx:1210
 msgid "External URL"
 msgstr "Внешний URL"
 
@@ -4232,7 +4232,7 @@ msgstr "Я могу помочь забронировать музкомнату
 msgid "ID"
 msgstr "ID"
 
-#: src/components/clubs/EditClubPage.tsx:1109
+#: src/components/clubs/EditClubPage.tsx:1111
 msgid "ID from InnoSport system"
 msgstr "ID из системы InnoSport"
 
@@ -4527,7 +4527,7 @@ msgstr "Приглашён"
 msgid "Invited by {invitedBy}"
 msgstr "Приглашение от {invitedBy}"
 
-#: src/components/clubs/EditClubPage.tsx:1091
+#: src/components/clubs/EditClubPage.tsx:1093
 msgid "Is InnoSport club"
 msgstr "Клуб InnoSport"
 
@@ -4584,7 +4584,7 @@ msgstr "Оставить"
 msgid "Keep room"
 msgstr "Оставить комнату"
 
-#: src/components/clubs/EditClubPage.tsx:695
+#: src/components/clubs/EditClubPage.tsx:697
 msgid "Keep submitted logo"
 msgstr "Оставить отправленный логотип"
 
@@ -4592,7 +4592,7 @@ msgstr "Оставить отправленный логотип"
 #~ msgid "L"
 #~ msgstr "П"
 
-#: src/components/clubs/EditClubPage.tsx:1237
+#: src/components/clubs/EditClubPage.tsx:1239
 msgid "Label (Optional)"
 msgstr "Подпись (необязательно)"
 
@@ -4694,7 +4694,7 @@ msgid "Link"
 msgstr "Ссылка"
 
 #. placeholder {0}: index + 1
-#: src/components/clubs/EditClubPage.tsx:1167
+#: src/components/clubs/EditClubPage.tsx:1169
 msgid "Link {0}"
 msgstr "Ссылка {0}"
 
@@ -4769,7 +4769,7 @@ msgid "Loading changes for review..."
 msgstr "Загрузка изменений на проверку..."
 
 #: src/components/clubs/ClubPage.tsx:63
-#: src/components/clubs/EditClubPage.tsx:554
+#: src/components/clubs/EditClubPage.tsx:556
 msgid "Loading club information..."
 msgstr "Загрузка информации о клубе..."
 
@@ -4839,7 +4839,7 @@ msgstr "Сначала зафиксируйте группы на вкладке
 msgid "Logo"
 msgstr "Логотип"
 
-#: src/components/clubs/EditClubPage.tsx:661
+#: src/components/clubs/EditClubPage.tsx:663
 msgid "Logo preview"
 msgstr "Предпросмотр логотипа"
 
@@ -5094,7 +5094,7 @@ msgstr "Режим"
 msgid "Moderator feedback"
 msgstr "Отзыв модератора"
 
-#: src/components/clubs/EditClubPage.tsx:1310
+#: src/components/clubs/EditClubPage.tsx:1312
 msgid "Modified"
 msgstr "Изменено"
 
@@ -5204,7 +5204,7 @@ msgstr "Мои ближайшие тренировки"
 #: src/components/admin/AdminUserDetails.tsx:267
 #: src/components/calendar/import/ImportModal.tsx:163
 #: src/components/clubs/ClubPage.tsx:278
-#: src/components/clubs/EditClubPage.tsx:965
+#: src/components/clubs/EditClubPage.tsx:967
 #: src/components/events/drafts/DraftHostsSection.tsx:560
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:73
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:338
@@ -5504,7 +5504,7 @@ msgstr "Нет записей FAQ."
 msgid "No feedback."
 msgstr "Нет отзывов."
 
-#: src/components/clubs/EditClubPage.tsx:734
+#: src/components/clubs/EditClubPage.tsx:736
 msgid "No file selected"
 msgstr "Файл не выбран"
 
@@ -5581,7 +5581,7 @@ msgstr "Информация о лидере недоступна."
 msgid "No links"
 msgstr "Нет ссылок"
 
-#: src/components/clubs/EditClubPage.tsx:1151
+#: src/components/clubs/EditClubPage.tsx:1153
 msgid "No links added yet. Click \"Add Link\" to add resources."
 msgstr "Ссылок пока нет. Нажмите «Добавить ссылку», чтобы добавить ресурсы."
 
@@ -6378,7 +6378,7 @@ msgstr "Пожалуйста, загрузите изображение меди
 msgid "Please submit an image of the reference document (e.g. a medical certificate) that supports your request to change medical group."
 msgstr "Пожалуйста, загрузите изображение подтверждающего документа (например, медицинской справки) для запроса на смену медицинской группы."
 
-#: src/app/AppUpdatePrompt.tsx:48
+#: src/app/AppUpdatePrompt.tsx:46
 msgid "Please, reload the page."
 msgstr "Пожалуйста, перезагрузите страницу."
 
@@ -6419,7 +6419,7 @@ msgstr "Предпочтительное время получения"
 msgid "Preferred time"
 msgstr "Предпочтительное время"
 
-#: src/components/clubs/EditClubPage.tsx:916
+#: src/components/clubs/EditClubPage.tsx:918
 #: src/components/search/IframePreviewCard.tsx:95
 #: src/components/web-print/PrintPage.tsx:445
 #: src/components/web-print/ScanPage.tsx:400
@@ -6430,7 +6430,7 @@ msgstr "Предпросмотр"
 msgid "Preview available for PDF only"
 msgstr "Предпросмотр доступен только для PDF"
 
-#: src/components/clubs/EditClubPage.tsx:678
+#: src/components/clubs/EditClubPage.tsx:680
 msgid "Preview unavailable"
 msgstr "Предпросмотр недоступен"
 
@@ -6670,7 +6670,7 @@ msgstr "Читатель"
 msgid "Receive a monthly stipend from IU alumni"
 msgstr "Ежемесячная стипендия от выпускников IU"
 
-#: src/components/clubs/EditClubPage.tsx:765
+#: src/components/clubs/EditClubPage.tsx:767
 msgid "Recommended: Square image, at least 400x400px, PNG, JPG or WEBP format"
 msgstr "Рекомендуется квадратное изображение размером не менее 400×400 пикселей в формате PNG, JPG или WEBP"
 
@@ -6780,7 +6780,7 @@ msgstr "Отклонить"
 msgid "Reject changes"
 msgstr "Отклонить изменения"
 
-#: src/app/AppUpdatePrompt.tsx:64
+#: src/app/AppUpdatePrompt.tsx:62
 msgid "Reload"
 msgstr "Перезагрузить"
 
@@ -6839,7 +6839,7 @@ msgstr "Удалить последнюю страницу"
 msgid "Remove last page?"
 msgstr "Удалить последнюю страницу?"
 
-#: src/components/clubs/EditClubPage.tsx:1174
+#: src/components/clubs/EditClubPage.tsx:1176
 msgid "Remove link"
 msgstr "Удалить ссылку"
 
@@ -6977,7 +6977,7 @@ msgid "Resetting…"
 msgstr "Сброс…"
 
 #: src/components/clubs/ClubPage.tsx:234
-#: src/components/clubs/EditClubPage.tsx:1128
+#: src/components/clubs/EditClubPage.tsx:1130
 msgid "Resources & Links"
 msgstr "Ресурсы и ссылки"
 
@@ -7079,11 +7079,11 @@ msgstr "Укажите дату возврата."
 msgid "Returned"
 msgstr "Возвращено"
 
-#: src/components/clubs/EditClubPage.tsx:1336
+#: src/components/clubs/EditClubPage.tsx:1338
 msgid "Revert changes"
 msgstr "Отменить изменения"
 
-#: src/components/clubs/EditClubPage.tsx:1333
+#: src/components/clubs/EditClubPage.tsx:1335
 msgid "Revert this section to the published values"
 msgstr "Вернуть этот раздел к опубликованным значениям"
 
@@ -7251,7 +7251,7 @@ msgstr "Сохранить"
 msgid "Save changes"
 msgstr "Сохранить изменения"
 
-#: src/components/clubs/EditClubPage.tsx:1283
+#: src/components/clubs/EditClubPage.tsx:1285
 msgid "Save Changes"
 msgstr "Сохранить изменения"
 
@@ -7275,7 +7275,7 @@ msgstr "Сохранить слоты"
 msgid "Saved, other admins see these groups"
 msgstr "Сохранено, другие админы видят эти группы"
 
-#: src/components/clubs/EditClubPage.tsx:1280
+#: src/components/clubs/EditClubPage.tsx:1282
 msgid "Saving..."
 msgstr "Сохранение..."
 
@@ -7503,7 +7503,7 @@ msgstr "Выберите предмет и компонент"
 msgid "Select a course and component."
 msgstr "Выберите предмет и компонент."
 
-#: src/components/clubs/EditClubPage.tsx:709
+#: src/components/clubs/EditClubPage.tsx:711
 msgid "Select a file to preview"
 msgstr "Выберите файл для предпросмотра"
 
@@ -7655,7 +7655,7 @@ msgstr "Укажите время начала раньше времени ок�
 msgid "Set guests role to {newRole, select, writer {Writer} other {Reader}}"
 msgstr "Назначить гостям права {newRole, select, writer {редактора} other {читателя}}"
 
-#: src/components/clubs/EditClubPage.tsx:1025
+#: src/components/clubs/EditClubPage.tsx:1027
 msgid "Set New Leader (Innopolis Email)"
 msgstr "Назначить нового лидера (email Иннополис)"
 
@@ -7728,7 +7728,7 @@ msgstr "Таблицы"
 msgid "Short description"
 msgstr "Краткое описание"
 
-#: src/components/clubs/EditClubPage.tsx:880
+#: src/components/clubs/EditClubPage.tsx:882
 msgid "Short Description"
 msgstr "Краткое описание"
 
@@ -7896,7 +7896,7 @@ msgstr "Пропустить"
 msgid "Slot"
 msgstr "Слот"
 
-#: src/components/clubs/EditClubPage.tsx:832
+#: src/components/clubs/EditClubPage.tsx:834
 msgid "Slug"
 msgstr "Идентификатор в URL"
 
@@ -8032,11 +8032,11 @@ msgid "Sport hours: <0>{earned} out of {required, plural, one {# hour} other {# 
 msgstr "Спортивные часы: <0>{earned} из {required, plural, one {# часа} few {# часов} many {# часов} other {# часа}}</0>"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:291
-#: src/components/clubs/EditClubPage.tsx:1101
+#: src/components/clubs/EditClubPage.tsx:1103
 msgid "Sport ID"
 msgstr "Sport ID"
 
-#: src/components/clubs/EditClubPage.tsx:1067
+#: src/components/clubs/EditClubPage.tsx:1069
 msgid "Sport Information"
 msgstr "Спортивная информация"
 
@@ -8056,7 +8056,7 @@ msgstr "Не удалось загрузить прогресс по спорт�
 msgid "Sport trainer"
 msgstr "Спорт: тренер"
 
-#: src/components/clubs/EditClubPage.tsx:1113
+#: src/components/clubs/EditClubPage.tsx:1115
 msgid "Sport type ID from InnoSport system"
 msgstr "ID типа спорта из системы InnoSport"
 
@@ -8296,15 +8296,15 @@ msgstr "Отправить на проверку"
 msgid "Submitted"
 msgstr "Отправлено"
 
-#: src/components/clubs/EditClubPage.tsx:411
+#: src/components/clubs/EditClubPage.tsx:413
 msgid "Submitted for review"
 msgstr "Отправлено на проверку"
 
-#: src/components/clubs/EditClubPage.tsx:670
+#: src/components/clubs/EditClubPage.tsx:672
 msgid "Submitted logo"
 msgstr "Отправленный логотип"
 
-#: src/components/clubs/EditClubPage.tsx:700
+#: src/components/clubs/EditClubPage.tsx:702
 msgid "Submitted, waiting for review"
 msgstr "Отправлено, ожидает проверки"
 
@@ -8521,7 +8521,7 @@ msgstr "Telegram-бот"
 msgid "Telegram channel"
 msgstr "Канал Telegram"
 
-#: src/components/clubs/EditClubPage.tsx:1199
+#: src/components/clubs/EditClubPage.tsx:1201
 msgid "Telegram Channel"
 msgstr "Telegram-канал"
 
@@ -8529,7 +8529,7 @@ msgstr "Telegram-канал"
 msgid "Telegram chat"
 msgstr "Чат Telegram"
 
-#: src/components/clubs/EditClubPage.tsx:1202
+#: src/components/clubs/EditClubPage.tsx:1204
 msgid "Telegram Chat"
 msgstr "Telegram-чат"
 
@@ -8548,7 +8548,7 @@ msgstr "ID Telegram: {0}"
 msgid "Telegram not provided"
 msgstr "Telegram не указан"
 
-#: src/components/clubs/EditClubPage.tsx:1205
+#: src/components/clubs/EditClubPage.tsx:1207
 msgid "Telegram User"
 msgstr "Пользователь Telegram"
 
@@ -8585,11 +8585,11 @@ msgstr "Менеджер клубов заранее собирает заказ
 msgid "The file contains no student emails."
 msgstr "В файле нет email студентов."
 
-#: src/components/clubs/EditClubPage.tsx:612
+#: src/components/clubs/EditClubPage.tsx:614
 msgid "The form below shows the leader's submitted changes. Saving will apply your edits directly to the club."
 msgstr "Ниже показаны изменения, отправленные лидером. Сохранение применит ваши правки сразу к клубу."
 
-#: src/components/clubs/EditClubPage.tsx:613
+#: src/components/clubs/EditClubPage.tsx:615
 msgid "The form below shows what you submitted, not what is published yet. Keep editing and save again to update the request."
 msgstr "Ниже показано то, что вы отправили, а не опубликованная версия. Продолжайте редактировать и сохраните снова, чтобы обновить заявку."
 
@@ -8710,7 +8710,7 @@ msgstr "Таймер остановлен"
 msgid "The website is an ecosystem that brings together all <0/> team services and useful Innopolis resources for students in one place."
 msgstr "Это экосистема, объединяющая все сервисы команды <0/> и полезные ресурсы Иннополиса для студентов в одном месте."
 
-#: src/app/AppUpdatePrompt.tsx:45
+#: src/app/AppUpdatePrompt.tsx:43
 msgid "The website is updated."
 msgstr "Сайт обновлён."
 
@@ -8758,7 +8758,7 @@ msgstr "Будут очищены ВСЕ кеши Cache Storage этого origi
 msgid "This club has changes waiting for admin review."
 msgstr "У этого клуба есть изменения, ожидающие проверки администратором."
 
-#: src/components/clubs/EditClubPage.tsx:607
+#: src/components/clubs/EditClubPage.tsx:609
 msgid "This club has changes waiting for review"
 msgstr "У этого клуба есть изменения, ожидающие проверки"
 
@@ -8786,7 +8786,7 @@ msgstr "Этой игры больше нет в каталоге."
 msgid "This link may be invalid, expired, or you may not have access."
 msgstr "Ссылка может быть недействительной, устаревшей, или у вас нет доступа."
 
-#: src/components/clubs/EditClubPage.tsx:686
+#: src/components/clubs/EditClubPage.tsx:688
 msgid "This logo change will be cancelled when you save."
 msgstr "Это изменение логотипа будет отменено при сохранении."
 
@@ -8833,7 +8833,7 @@ msgstr "Эта тренировка только для студентов ко�
 msgid "This training is for university students only."
 msgstr "Эта тренировка только для студентов университета."
 
-#: src/components/clubs/EditClubPage.tsx:741
+#: src/components/clubs/EditClubPage.tsx:743
 msgid "This will be uploaded when you save changes below."
 msgstr "Это будет загружено при сохранении изменений ниже."
 
@@ -8937,7 +8937,7 @@ msgstr "TIP"
 #: src/components/board-games/BoardGamesAdminPage.tsx:735
 #: src/components/board-games/BoardGamesAdminPage.tsx:929
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:260
-#: src/components/clubs/EditClubPage.tsx:816
+#: src/components/clubs/EditClubPage.tsx:818
 #: src/components/guard/CreateSheetPage.tsx:101
 #: src/components/room-booking/tv/RoomTvPage.tsx:194
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:354
@@ -9124,8 +9124,8 @@ msgid "Two printers are available on campus right now:"
 msgstr "Сейчас в кампусе доступны два принтера:"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:276
-#: src/components/clubs/EditClubPage.tsx:854
-#: src/components/clubs/EditClubPage.tsx:1184
+#: src/components/clubs/EditClubPage.tsx:856
+#: src/components/clubs/EditClubPage.tsx:1186
 msgid "Type"
 msgstr "Тип"
 
@@ -9280,7 +9280,7 @@ msgstr "Обновить ссылку"
 #~ msgid "Update status"
 #~ msgstr "Обновить статус"
 
-#: src/components/clubs/EditClubPage.tsx:593
+#: src/components/clubs/EditClubPage.tsx:595
 msgid "Update the club information below"
 msgstr "Обновите информацию о клубе ниже"
 
@@ -9305,7 +9305,7 @@ msgstr "Загрузите файл, выберите принтер, отпра
 msgid "Upload config.yaml in the “Settings” tab."
 msgstr "Загрузите config.yaml во вкладке «Настройки»."
 
-#: src/components/clubs/EditClubPage.tsx:654
+#: src/components/clubs/EditClubPage.tsx:656
 msgid "Upload new logo"
 msgstr "Загрузить новый логотип"
 
@@ -9313,7 +9313,7 @@ msgstr "Загрузить новый логотип"
 msgid "Uploading image..."
 msgstr "Загрузка изображения..."
 
-#: src/components/clubs/EditClubPage.tsx:1282
+#: src/components/clubs/EditClubPage.tsx:1284
 msgid "Uploading logo..."
 msgstr "Загрузка логотипа..."
 
@@ -9326,7 +9326,7 @@ msgstr "URL"
 msgid "URL (optional)"
 msgstr "URL (необязательно)"
 
-#: src/components/clubs/EditClubPage.tsx:1216
+#: src/components/clubs/EditClubPage.tsx:1218
 msgid "URL <0>*</0>"
 msgstr "Ссылка <0>*</0>"
 
@@ -9338,7 +9338,7 @@ msgstr "Нужно указать URL."
 msgid "URL-friendly identifier (e.g., \"robotics-club\")"
 msgstr "Идентификатор для URL (например, «robotics-club»)"
 
-#: src/components/clubs/EditClubPage.tsx:846
+#: src/components/clubs/EditClubPage.tsx:848
 msgid "URL-friendly identifier for the club"
 msgstr "URL-идентификатор клуба"
 
@@ -9912,7 +9912,7 @@ msgstr "У вас нет бронирований."
 msgid "You don't have permission to access this page."
 msgstr "У вас нет доступа к этой странице."
 
-#: src/components/clubs/EditClubPage.tsx:608
+#: src/components/clubs/EditClubPage.tsx:610
 msgid "You have changes waiting for review"
 msgstr "У вас есть изменения на проверке"
 
@@ -9936,7 +9936,7 @@ msgstr "У вас нет бронирований"
 msgid "You have no reservations yet."
 msgstr "У вас пока нет бронирований."
 
-#: src/components/clubs/EditClubPage.tsx:243
+#: src/components/clubs/EditClubPage.tsx:245
 msgid "You have unsaved changes. Are you sure you want to leave?"
 msgstr "Есть несохранённые изменения. Точно уйти?"
 

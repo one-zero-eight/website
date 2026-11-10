@@ -9,6 +9,7 @@ import {
   invalidateMySportAccessToken,
   useMySportAccessToken,
 } from "@/api/helpers/sport-access-token.ts";
+import { userDataCacheName } from "@/service-worker/protocol.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
@@ -50,6 +51,10 @@ export function AuthManager({ children }: PropsWithChildren) {
         console.log("[auth] User logged out, removing tokens");
         invalidateMyAccessToken();
         invalidateMySportAccessToken();
+        // Cached calendar feeds and account data belong to this user; don't
+        // leave them for the next person on the device.
+        if (typeof caches !== "undefined")
+          void caches.delete(userDataCacheName);
       }
     }
   }, [me, isPending, isNetworkError, setStoredMe]);

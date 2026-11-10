@@ -1,4 +1,8 @@
-import type { WorkerState } from "./protocol.ts";
+import {
+  resetChannelName,
+  type ResetNotification,
+  type WorkerState,
+} from "./protocol.ts";
 
 /**
  * Durable worker metadata lives in IndexedDB (survives SW stop/restart).
@@ -8,7 +12,7 @@ import type { WorkerState } from "./protocol.ts";
  * worker still finishing work, and uncontrolled pages that call purge/reset
  * directly when no controller is available.
  */
-export const STORAGE_LOCK = "innohassle-sw-storage";
+const STORAGE_LOCK = "innohassle-sw-storage";
 const DATABASE_NAME = "innohassle-service-worker";
 
 export function emptyWorkerState(): WorkerState {
@@ -33,48 +37,22 @@ function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
-/** Drop fields from older schemas (e.g. removed API-cache identity). */
-function normalizeWorkerState(
-  raw: Partial<WorkerState> | undefined,
-): WorkerState {
-  const empty = emptyWorkerState();
-  if (!raw) return empty;
-  return {
-    generation: raw.generation ?? empty.generation,
-    blocked: raw.blocked ?? empty.blocked,
-    resetPending: raw.resetPending ?? empty.resetPending,
-    latestReadyBuildId: raw.latestReadyBuildId ?? empty.latestReadyBuildId,
-    builds: raw.builds ?? empty.builds,
-    clients: (raw.clients ?? empty.clients).map((pin) => ({
-      clientId: pin.clientId,
-      buildId: pin.buildId,
-      pathname: pin.pathname,
-      interval: pin.interval,
-      nextCheckAt: pin.nextCheckAt,
-      navigationSource: pin.navigationSource,
-      reservedAt: pin.reservedAt,
-      lastHello: pin.lastHello,
-    })),
-    manifestCheck: raw.manifestCheck ?? empty.manifestCheck,
-    lastSuccessfulCheckAt:
-      raw.lastSuccessfulCheckAt ?? empty.lastSuccessfulCheckAt,
-  };
-}
-
 export async function readWorkerState(): Promise<WorkerState> {
   const database = await openDatabase();
   return new Promise((resolve, reject) => {
     const transaction = database.transaction("state", "readonly");
     const request = transaction.objectStore("state").get("current");
     request.onsuccess = () =>
-      resolve(normalizeWorkerState(request.result as Partial<WorkerState>));
+      resolve(
+        (request.result as WorkerState | undefined) ?? emptyWorkerState(),
+      );
     request.onerror = () => reject(request.error);
     transaction.oncomplete = () => database.close();
     transaction.onabort = () => database.close();
   });
 }
 
-export async function writeWorkerState(state: WorkerState) {
+async function writeWorkerState(state: WorkerState) {
   const database = await openDatabase();
   return new Promise<void>((resolve, reject) => {
     const transaction = database.transaction("state", "readwrite");
@@ -90,6 +68,16 @@ export async function writeWorkerState(state: WorkerState) {
   });
 }
 
+/** Read under the lock (e.g. so a cache cannot be deleted meanwhile), without writing back. */
+export async function inspectWorkerState<T>(
+  callback: (state: WorkerState) => Promise<T>,
+): Promise<T> {
+  return navigator.locks.request(STORAGE_LOCK, async () =>
+    callback(await readWorkerState()),
+  );
+}
+
+/** Read, modify and persist under the lock. Nothing is written if the callback throws. */
 export async function withWorkerState<T>(
   callback: (state: WorkerState) => Promise<T>,
 ): Promise<T> {
@@ -101,15 +89,18 @@ export async function withWorkerState<T>(
   });
 }
 
+async function deleteAllCaches() {
+  for (const name of await caches.keys()) await caches.delete(name);
+}
+
 /**
- * Wipe every Cache Storage entry and bump generation.
+ * Wipe every Cache Storage entry, bump generation and announce the reset.
  *
- * reset=true keeps `blocked` so a dying worker cannot repopulate caches until
- * a fresh page registration clears the gate. reset=false is unused today but
- * leaves the worker usable after a non-debug purge.
+ * Keeps `blocked` so a dying worker cannot repopulate caches until a fresh
+ * page registration clears the gate.
  */
-export async function purgeWorkerCaches(reset = false) {
-  return navigator.locks.request(STORAGE_LOCK, async () => {
+export async function purgeWorkerCaches() {
+  const state = await navigator.locks.request(STORAGE_LOCK, async () => {
     const previous = await readWorkerState();
     const state = emptyWorkerState();
     state.generation = previous.generation + 1;
@@ -118,11 +109,33 @@ export async function purgeWorkerCaches(reset = false) {
     // finishes the wipe on the next start.
     state.resetPending = true;
     await writeWorkerState(state);
-    for (const name of await caches.keys()) await caches.delete(name);
+    await deleteAllCaches();
     state.resetPending = false;
-    state.blocked = reset;
     await writeWorkerState(state);
     return state;
+  });
+  const channel = new BroadcastChannel(resetChannelName);
+  channel.postMessage({
+    type: "CACHE_INVALIDATED",
+    generation: state.generation,
+  } satisfies ResetNotification);
+  channel.close();
+  return state;
+}
+
+/**
+ * Delete caches that neither a stored build nor `keep` refers to: those of a
+ * previous worker implementation, or an orphan of an interrupted operation.
+ */
+export async function deleteUnknownCaches(keep: string[]) {
+  await navigator.locks.request(STORAGE_LOCK, async () => {
+    const state = await readWorkerState();
+    const known = new Set([
+      ...keep,
+      ...state.builds.map((build) => build.cacheName),
+    ]);
+    for (const name of await caches.keys())
+      if (!known.has(name)) await caches.delete(name);
   });
 }
 
@@ -130,7 +143,7 @@ export async function recoverPendingPurge() {
   return navigator.locks.request(STORAGE_LOCK, async () => {
     const state = await readWorkerState();
     if (!state.resetPending) return;
-    for (const name of await caches.keys()) await caches.delete(name);
+    await deleteAllCaches();
     state.resetPending = false;
     state.blocked = true;
     await writeWorkerState(state);

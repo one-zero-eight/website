@@ -24,9 +24,9 @@ export type BuildResource = { url: string; integrity: string; size: number };
  * External app snapshot, fetched at runtime (not baked into sw.js).
  *
  * resourcesBuildHash = SHA-256(JSON.stringify(resources sorted by URL)), excluding
- * runtime build-info.js, sw.js, this manifest and source maps. Resource
- * integrity is SHA-384 of final bytes; build-info.js is still verified and
- * stored in the complete snapshot, but cannot hash its own digest.
+ * the build's own build-info file, sw.js, this manifest and source maps.
+ * Resource integrity is SHA-384 of final bytes; the build-info file is still
+ * verified and stored in the complete snapshot, but cannot hash its own digest.
  */
 export type BuildManifest = {
   schemaVersion: 1;
@@ -58,7 +58,7 @@ export type ClientPin = {
   interval: number;
   nextCheckAt: string | null;
   navigationSource?: "network" | "cache";
-  /** Temporary pin created during navigate before CLIENT_HELLO arrives. */
+  /** Set only on a navigation pin, which is kept briefly until CLIENT_HELLO replaces it. */
   reservedAt?: number;
   /** Actual last page report; absent for navigation-only or previously stored pins. */
   lastHello?: {
@@ -108,11 +108,7 @@ export type WorkerState = {
   lastSuccessfulCheckAt: string | null;
 };
 
-export type WorkerStatus = WorkerState & {
-  buildInfo: WorkerBuildInfo;
-  scope: string;
-  caches: { name: string; entries: number; bytes: number }[];
-};
+export type CacheSummary = { name: string; entries: number; bytes: number };
 
 /** Each source stays separate; storage is shared, worker identity and clients are not. */
 export type WorkerDiagnosticsSnapshot = {
@@ -132,21 +128,36 @@ export type WorkerDiagnosticsSnapshot = {
       controlled: boolean;
     }[];
   };
-  cacheStorage: WorkerStatus["caches"];
+  cacheStorage: CacheSummary[];
 };
 
 export type WorkerCommand =
   | ClientHelloCommand
   | { type: "CHECK_MANIFEST" }
-  | { type: "GET_STATUS" }
-  | { type: "GET_DIAGNOSTICS" }
   | { type: "GET_STATE" }
-  | { type: "GET_BUILD_INFO" }
+  | { type: "GET_DIAGNOSTICS" }
   | { type: "RESET" };
 
-export type WorkerNotification =
-  | { type: "BUILD_READY"; buildInfo: BuildInfo; generation: number }
-  | { type: "CACHE_INVALIDATED"; generation: number; reset: boolean };
+/** Sent by the worker to each window when a complete build becomes ready. */
+export type BuildReadyNotification = {
+  type: "BUILD_READY";
+  buildInfo: BuildInfo;
+  generation: number;
+};
+
+/**
+ * Every reset (by the worker or, without a controller, by a page) is announced
+ * on this channel, so controlled, uncontrolled and resetting pages all hear it.
+ */
+export const resetChannelName = "innohassle-sw-reset";
+export type ResetNotification = {
+  type: "CACHE_INVALIDATED";
+  generation: number;
+};
+
+/** API responses of the signed-in user (calendar feeds, schedule, account); deleted on logout. */
+export const userDataCacheName = "api-user-data";
+export const mapsCacheName = "api-maps";
 
 export function isTvPath(pathname: string) {
   return pathname === "/tv" || pathname.startsWith("/tv/");

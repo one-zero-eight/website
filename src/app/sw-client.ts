@@ -1,9 +1,15 @@
-import type { WorkerCommand } from "@/service-worker/protocol.ts";
-import { queryClient } from "./query-client.ts";
+import type { BuildInfo, WorkerCommand } from "@/service-worker/protocol.ts";
 import {
   purgeWorkerCaches,
   withWorkerState,
 } from "@/service-worker/storage.ts";
+import { queryClient } from "./query-client.ts";
+import { setSiteUnavailable } from "./site-availability.ts";
+
+/** Dispatched on window after every completed manifest check. */
+export const manifestCheckedEvent = "sw-manifest-checked";
+/** Dispatched on window before a debug reset, so automatic work stops first. */
+export const resetStartedEvent = "sw-reset-started";
 
 export async function requestWorker<T>(
   command: WorkerCommand,
@@ -36,23 +42,27 @@ export async function requestWorker<T>(
   });
 }
 
+/**
+ * Ask the worker to fetch the server's manifest and download that build.
+ * Resolves to its build info once it is completely ready, otherwise null.
+ */
+export async function checkManifest() {
+  const readyBuild = await requestWorker<BuildInfo | null>({
+    type: "CHECK_MANIFEST",
+  });
+  // The manifest came from the server, so it is reachable again.
+  if (readyBuild) setSiteUnavailable(false);
+  window.dispatchEvent(new Event(manifestCheckedEvent));
+  return readyBuild;
+}
+
 /** Debug-page hard reset: wipe caches, unregister, reload into a clean generation. */
 export async function resetServiceWorker() {
-  window.dispatchEvent(new Event("sw-reset-started"));
+  window.dispatchEvent(new Event(resetStartedEvent));
+  // Without a controller (broken/mid-reset state), purge from the page context.
   if (navigator.serviceWorker?.controller)
     await requestWorker({ type: "RESET" });
-  else {
-    // No controller (broken/mid-reset state): purge from the page context and
-    // notify other tabs via BroadcastChannel the same way the worker would.
-    const state = await purgeWorkerCaches(true);
-    const channel = new BroadcastChannel("innohassle-sw-control");
-    channel.postMessage({
-      type: "CACHE_INVALIDATED",
-      generation: state.generation,
-      reset: true,
-    });
-    channel.close();
-  }
+  else await purgeWorkerCaches();
   const registrations =
     (await navigator.serviceWorker?.getRegistrations()) ?? [];
   for (const registration of registrations) await registration.unregister();

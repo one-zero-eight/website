@@ -1,21 +1,19 @@
 import {
   appUpdateAvailableEvent,
-  getPendingAppUpdate,
+  getIsAppUpdatePending,
 } from "@/app/register-sw.ts";
 import { Trans } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 import { useEffect, useState } from "react";
 
 export function AppUpdatePrompt() {
-  const [reloadWebsite, setReloadWebsite] = useState<(() => void) | undefined>(
-    () => getPendingAppUpdate(),
-  );
+  const [isUpdatePending, setIsUpdatePending] = useState(getIsAppUpdatePending);
   const [isReloading, setIsReloading] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
     function handleAppUpdateAvailable() {
-      setReloadWebsite(() => getPendingAppUpdate());
+      setIsUpdatePending(getIsAppUpdatePending());
       setIsDismissed(false);
       setIsReloading(false);
     }
@@ -30,7 +28,7 @@ export function AppUpdatePrompt() {
     };
   }, []);
 
-  if (!reloadWebsite || isDismissed) return null;
+  if (!isUpdatePending || isDismissed) return null;
 
   return (
     <div className="pointer-events-none fixed top-[calc(3rem+env(safe-area-inset-bottom)+0.75rem)] right-4 left-4 z-50 flex justify-center sm:top-4 sm:bottom-auto sm:left-auto sm:justify-end">
@@ -55,7 +53,7 @@ export function AppUpdatePrompt() {
             disabled={isReloading}
             onClick={() => {
               setIsReloading(true);
-              reloadWebsite();
+              window.location.reload();
             }}
           >
             {isReloading && (

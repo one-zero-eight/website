@@ -16,8 +16,23 @@ function sha256(source: string) {
   return createHash("sha256").update(source).digest("hex");
 }
 
+function createResource(url: string, source: string | Buffer): BuildResource {
+  return {
+    url,
+    integrity: `sha384-${createHash("sha384").update(source).digest("base64")}`,
+    size: Buffer.byteLength(source),
+  };
+}
+
+function sortByUrl(resources: BuildResource[]) {
+  return resources.sort((left, right) =>
+    left.url < right.url ? -1 : left.url > right.url ? 1 : 0,
+  );
+}
+
 async function collectResources(
   directory: string,
+  infoFile: string,
   root = directory,
 ): Promise<BuildResource[]> {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -26,34 +41,32 @@ async function collectResources(
   for (const entry of entries) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) {
-      resources.push(...(await collectResources(path, root)));
+      resources.push(...(await collectResources(path, infoFile, root)));
       continue;
     }
     if (!entry.isFile()) continue;
 
     const file = relative(root, path).split("\\").join("/");
     // sw.js / manifest are update-control files, not part of an app snapshot.
-    // build-info.js is appended after resourcesBuildHash is computed (it embeds that hash).
+    // The build-info file is appended after resourcesBuildHash is computed (it embeds that hash).
     if (
       file === "sw.js" ||
       file === manifestFile ||
-      file === "build-info.js" ||
+      file === infoFile ||
       file.endsWith(".map")
     ) {
       continue;
     }
 
-    const source = await readFile(path);
-    resources.push({
-      url: `/${file.split("/").map(encodeURIComponent).join("/")}`,
-      integrity: `sha384-${createHash("sha384").update(source).digest("base64")}`,
-      size: source.byteLength,
-    });
+    resources.push(
+      createResource(
+        `/${file.split("/").map(encodeURIComponent).join("/")}`,
+        await readFile(path),
+      ),
+    );
   }
 
-  return resources.sort((left, right) =>
-    left.url < right.url ? -1 : left.url > right.url ? 1 : 0,
-  );
+  return sortByUrl(resources);
 }
 
 async function compileWorker(config: ResolvedConfig) {
@@ -105,8 +118,12 @@ export function serviceWorkerBuildPlugin(version: string): Plugin {
       }).trim(),
     builtAt: new Date().toISOString(),
   };
-  const infoFile = "build-info.js";
   let config: ResolvedConfig;
+  /**
+   * Named per build, so HTML always loads its own metadata: unlike a fixed
+   * name, no HTTP cache or CDN can pair it with another build's HTML.
+   */
+  let infoFile: string;
   let outputWritten = false;
   let buildLabel: Promise<number> | undefined;
 
@@ -115,6 +132,7 @@ export function serviceWorkerBuildPlugin(version: string): Plugin {
     enforce: "post",
     configResolved(resolvedConfig) {
       config = resolvedConfig;
+      infoFile = `${config.build.assetsDir}/build-info-${identity.buildId}.js`;
     },
     transformIndexHtml: {
       order: "post",
@@ -179,31 +197,24 @@ export function serviceWorkerBuildPlugin(version: string): Plugin {
 
         const workerCode = await compileWorker(config);
         const directory = resolve(config.root, config.build.outDir);
-        const resources = await collectResources(directory);
-        // Hash the asset list before injecting build-info.js (which embeds that hash).
+        const resources = await collectResources(directory, infoFile);
+        // Hash the asset list before writing the build-info file (which embeds that hash).
         const buildInfo: BuildInfo = {
           ...identity,
           resourcesBuildHash: sha256(JSON.stringify(resources)),
         };
-        // Guard rejects a cached HTML shell paired with a mismatched build-info.js.
-        const infoSource = `if (document.documentElement.dataset.buildId !== ${JSON.stringify(buildInfo.buildId)}) throw new Error("Build metadata does not match this document"); globalThis.BUILD_INFO = ${JSON.stringify(buildInfo)};\n`;
+        const infoSource = `globalThis.BUILD_INFO = ${JSON.stringify(buildInfo)};\n`;
         await writeFile(join(directory, infoFile), infoSource);
-        // Still ship build-info.js inside the offline snapshot so navigations
-        // can verify integrity; it is just excluded from resourcesBuildHash inputs above.
-        resources.push({
-          url: `/${infoFile}`,
-          integrity: `sha384-${createHash("sha384").update(infoSource).digest("base64")}`,
-          size: Buffer.byteLength(infoSource),
-        });
-        resources.sort((left, right) =>
-          left.url < right.url ? -1 : left.url > right.url ? 1 : 0,
-        );
-
+        // Still ship it inside the offline snapshot; it is only excluded from
+        // the resourcesBuildHash inputs above.
         const manifest: BuildManifest = {
           schemaVersion: 1,
           buildInfo,
           entrypoint: "/index.html",
-          resources,
+          resources: sortByUrl([
+            ...resources,
+            createResource(`/${infoFile}`, infoSource),
+          ]),
         };
         await writeFile(
           join(directory, manifestFile),

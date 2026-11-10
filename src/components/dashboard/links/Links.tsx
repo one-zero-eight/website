@@ -11,7 +11,7 @@ import {
 } from "@/components/dashboard/links/searchUtils.ts";
 import { cn } from "@/lib/ui/cn";
 import { useAppLocale } from "@/locales/lib";
-import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
+import { useAutoUpdateBlocker } from "@/app/auto-update.ts";
 import { Trans } from "@lingui/react/macro";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 

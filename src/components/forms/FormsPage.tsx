@@ -5,7 +5,7 @@ import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useState } from "react";
-import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
+import { useAutoUpdateBlocker } from "@/app/auto-update.ts";
 import {
   FormUrlInput,
   GenerateButton,

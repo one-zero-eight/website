@@ -10,11 +10,9 @@ import type {
   BuildInfo,
   BuildManifest,
   BuildResource,
-  WorkerBuildInfo,
   WorkerCommand,
   WorkerDiagnosticsSnapshot,
   WorkerState,
-  WorkerStatus,
 } from "../../src/service-worker/protocol";
 import {
   classifyResourceChanges,
@@ -32,6 +30,9 @@ type ServerState = {
   version: Version;
   connectionError?: boolean;
   httpStatus?: number;
+  cacheableHtml?: boolean;
+  runtimeVersion?: Version;
+  delayApi?: boolean;
   delayResource?: boolean;
   resourceStatus?: number;
   corruptResource?: boolean;
@@ -95,8 +96,8 @@ async function rpc<T>(page: Page, command: WorkerCommand): Promise<T> {
   }, command);
 }
 
-function status(page: Page) {
-  return rpc<WorkerStatus>(page, { type: "GET_STATUS" });
+function diagnostics(page: Page) {
+  return rpc<WorkerDiagnosticsSnapshot>(page, { type: "GET_DIAGNOSTICS" });
 }
 
 function workerState(page: Page) {
@@ -132,22 +133,20 @@ async function expectOfflineBuild(
   await expect(
     page.getByText("You are offline", { exact: true }),
   ).toBeVisible();
-  const diagnostics = await rpc<WorkerDiagnosticsSnapshot>(page, {
-    type: "GET_DIAGNOSTICS",
-  });
+  const reply = await diagnostics(page);
   expect(
-    diagnostics.storage.clients.find(
-      (pin) => pin.clientId === diagnostics.runtimeClients.requestingClientId,
+    reply.storage.clients.find(
+      (pin) => pin.clientId === reply.runtimeClients.requestingClientId,
     ),
   ).toMatchObject({
     buildId: build.manifest.buildInfo.buildId,
     navigationSource: "cache",
   });
-  expect(diagnostics.storage.latestReadyBuildId).toBe(
+  expect(reply.storage.latestReadyBuildId).toBe(
     build.manifest.buildInfo.buildId,
   );
   expect(
-    diagnostics.storage.builds.find(
+    reply.storage.builds.find(
       (cached) =>
         cached.manifest.buildInfo.buildId === build.manifest.buildInfo.buildId,
     )?.state,
@@ -339,6 +338,61 @@ async function advanceToPoll(page: Page, interval: number) {
   await page.clock.resume();
 }
 
+/** Stop the page's active worker through DevTools, as the browser does when idle. */
+async function stopRunningWorker(context: BrowserContext, page: Page) {
+  const session = await context.newCDPSession(page);
+  type WorkerVersion = {
+    versionId: string;
+    scriptURL: string;
+    runningStatus: string;
+    status: string;
+  };
+  const versions = new Map<string, WorkerVersion>();
+  const lifecycle: { versionId: string; runningStatus: string }[] = [];
+  session.on(
+    "ServiceWorker.workerVersionUpdated",
+    ({ versions: changed }: { versions: WorkerVersion[] }) => {
+      for (const version of changed) {
+        versions.set(version.versionId, version);
+        lifecycle.push({
+          versionId: version.versionId,
+          runningStatus: version.runningStatus,
+        });
+      }
+    },
+  );
+  await session.send("ServiceWorker.enable");
+  function findRunning() {
+    return [...versions.values()].find(
+      (item) =>
+        item.scriptURL.endsWith("/sw.js") &&
+        item.status === "activated" &&
+        item.runningStatus === "running",
+    );
+  }
+  await expect.poll(() => !!findRunning()).toBe(true);
+  const { versionId } = findRunning()!;
+  function reachedAfter(boundary: number, runningStatus: string) {
+    return lifecycle
+      .slice(boundary)
+      .some(
+        (event) =>
+          event.versionId === versionId &&
+          event.runningStatus === runningStatus,
+      );
+  }
+  const stopBoundary = lifecycle.length;
+  await session.send("ServiceWorker.stopWorker", { versionId });
+  await expect.poll(() => reachedAfter(stopBoundary, "stopped")).toBe(true);
+  expect(versions.get(versionId)?.runningStatus).toBe("stopped");
+  const wakeBoundary = lifecycle.length;
+  return {
+    session,
+    expectRunning: () =>
+      expect.poll(() => reachedAfter(wakeBoundary, "running")).toBe(true),
+  };
+}
+
 test.beforeEach(async ({ request }) => {
   await setServerState(request, { version: "a", clearRequests: true });
 });
@@ -354,9 +408,7 @@ test("build metadata describes real, distinct production bundles with verified i
       (globalThis as typeof globalThis & { BUILD_INFO: BuildInfo }).BUILD_INFO,
   );
   expect(appInfo).toEqual(builds.a.manifest.buildInfo);
-  const workerInfo = await rpc<WorkerBuildInfo>(page, {
-    type: "GET_BUILD_INFO",
-  });
+  const workerInfo = (await diagnostics(page)).worker.buildInfo;
   expect(workerInfo.serviceWorkerHash).toMatch(/^[\da-f]{64}$/);
   const workerResponse = await request.get("/sw.js");
   expect(workerResponse.status()).toBe(200);
@@ -369,7 +421,6 @@ test("build metadata describes real, distinct production bundles with verified i
   expect(workerInfo).toEqual({
     serviceWorkerHash: workerInfo.serviceWorkerHash,
   });
-  expect((await status(page)).buildInfo).toEqual(workerInfo);
   expect(appInfo.commitHash).toMatch(/^[\da-f]{40}$/);
   expect(Number.isNaN(Date.parse(appInfo.builtAt))).toBe(false);
 
@@ -392,8 +443,11 @@ test("build metadata describes real, distinct production bundles with verified i
     expect(
       manifest.resources.some((item) => item.url === manifest.entrypoint),
     ).toBe(true);
+    // Named per build, so no cache can pair it with another build's HTML.
+    const infoUrl = `/assets/build-info-${manifest.buildInfo.buildId}.js`;
+    expect(manifest.resources.map((item) => item.url)).toContain(infoUrl);
     const hashResources = manifest.resources.filter(
-      (item) => item.url !== "/build-info.js",
+      (item) => item.url !== infoUrl,
     );
     expect(
       createHash("sha256").update(JSON.stringify(hashResources)).digest("hex"),
@@ -440,7 +494,7 @@ test("updates A → B → C download only changed/new resources and ready rechec
     expect(updated.map((resource) => resource.url)).toEqual(
       expect.arrayContaining([
         "/index.html",
-        "/build-info.js",
+        `/assets/build-info-${manifest.buildInfo.buildId}.js`,
         builds[version].lazyResource,
       ]),
     );
@@ -670,9 +724,7 @@ test("diagnostics keep App, browser roles, worker reports, and live tabs separat
 }) => {
   const builds = await getBuilds(request);
   const oldPage = await openControlledPage(context, request);
-  const oldReply = await rpc<WorkerDiagnosticsSnapshot>(oldPage, {
-    type: "GET_DIAGNOSTICS",
-  });
+  const oldReply = await diagnostics(oldPage);
   const oldClientId = oldReply.runtimeClients.requestingClientId;
   expect(oldClientId).not.toBeNull();
   expect(oldReply.runtimeClients.windows).toContainEqual(
@@ -697,9 +749,7 @@ test("diagnostics keep App, browser roles, worker reports, and live tabs separat
   await expectVersion(newPage, "b");
   await rpc(newPage, { type: "CHECK_MANIFEST" });
   await expectReady(newPage, builds.b.manifest.buildInfo);
-  const newReply = await rpc<WorkerDiagnosticsSnapshot>(newPage, {
-    type: "GET_DIAGNOSTICS",
-  });
+  const newReply = await diagnostics(newPage);
   expect(newReply.runtimeClients.requestingClientId).not.toBe(oldClientId);
   expect(newReply.runtimeClients.windows.map((client) => client.id)).toEqual(
     expect.arrayContaining([
@@ -748,9 +798,7 @@ test("diagnostics keep App, browser roles, worker reports, and live tabs separat
   await expect(tabs.locator("article")).toHaveCount(2);
   await expect(tabs).toContainText(builds.a.manifest.buildInfo.buildId);
   await expect(tabs).toContainText(builds.b.manifest.buildInfo.buildId);
-  const current = await rpc<WorkerDiagnosticsSnapshot>(oldPage, {
-    type: "GET_DIAGNOSTICS",
-  });
+  const current = await diagnostics(oldPage);
   expect(current.storage.latestReadyBuildId).toBe(
     builds.b.manifest.buildInfo.buildId,
   );
@@ -858,7 +906,7 @@ test("first manual reload renders B immediately while nonessential resources dow
   await expect
     .poll(async () => (await serverSnapshot(request)).delayedResources)
     .toBeGreaterThan(0);
-  const downloading = await status(page);
+  const downloading = await workerState(page);
   expect(downloading.latestReadyBuildId).toBe(
     builds.a.manifest.buildInfo.buildId,
   );
@@ -1224,7 +1272,7 @@ test("TV polls after one minute and reloads once, only after every resource is r
     .toBeGreaterThan(0);
   await expectVersion(page, "a");
   expect(await loadCount(page)).toBe(1);
-  expect((await status(page)).latestReadyBuildId).toBe(
+  expect((await workerState(page)).latestReadyBuildId).toBe(
     builds.a.manifest.buildInfo.buildId,
   );
   await setServerState(request, { version: "b" });
@@ -1293,14 +1341,14 @@ test("old ready caches remain pinned by live tabs, serve removed lazy assets, an
   await first.reload();
   await expectVersion(first, "b");
   await expectReady(first, builds.b.manifest.buildInfo);
-  const retained = await status(first);
-  const oldBuild = retained.builds.find(
+  const retained = await diagnostics(first);
+  const oldBuild = retained.storage.builds.find(
     (item) =>
       item.manifest.buildInfo.buildId === builds.a.manifest.buildInfo.buildId,
   )!;
   expect(oldBuild.state).toBe("ready");
   expect(
-    retained.caches.some((cache) => cache.name === oldBuild.cacheName),
+    retained.cacheStorage.some((cache) => cache.name === oldBuild.cacheName),
   ).toBe(true);
   expect((await request.get(builds.a.lazyResource)).status()).toBe(404);
   const imported = await pinned.evaluate(async () => {
@@ -1314,13 +1362,13 @@ test("old ready caches remain pinned by live tabs, serve removed lazy assets, an
   await rpc(first, { type: "CHECK_MANIFEST" });
   await expect
     .poll(async () =>
-      (await status(first)).builds.some(
+      (await workerState(first)).builds.some(
         (item) => item.cacheName === oldBuild.cacheName,
       ),
     )
     .toBe(false);
   expect(
-    (await status(first)).caches.some(
+    (await diagnostics(first)).cacheStorage.some(
       (cache) => cache.name === oldBuild.cacheName,
     ),
   ).toBe(false);
@@ -1452,77 +1500,13 @@ test("a stopped worker restarts offline with durable build pins", async ({
   await expect(
     page.getByRole("button", { name: "Refresh snapshot", exact: true }),
   ).toBeEnabled();
-  const before = await status(page);
+  const before = await workerState(page);
   expect(before.latestReadyBuildId).toBeTruthy();
-  const session = await context.newCDPSession(page);
-  type WorkerVersion = {
-    versionId: string;
-    scriptURL: string;
-    runningStatus: string;
-    status: string;
-  };
-  const versions = new Map<string, WorkerVersion>();
-  const lifecycle: { versionId: string; runningStatus: string }[] = [];
-  session.on(
-    "ServiceWorker.workerVersionUpdated",
-    ({ versions: changed }: { versions: WorkerVersion[] }) => {
-      for (const version of changed) {
-        versions.set(version.versionId, version);
-        lifecycle.push({
-          versionId: version.versionId,
-          runningStatus: version.runningStatus,
-        });
-      }
-    },
-  );
-  await session.send("ServiceWorker.enable");
-  await expect
-    .poll(() =>
-      [...versions.values()].some(
-        (version) =>
-          version.scriptURL.endsWith("/sw.js") &&
-          version.status === "activated" &&
-          version.runningStatus === "running",
-      ),
-    )
-    .toBe(true);
-  const version = [...versions.values()].find(
-    (item) =>
-      item.scriptURL.endsWith("/sw.js") &&
-      item.status === "activated" &&
-      item.runningStatus === "running",
-  )!;
-  const stopBoundary = lifecycle.length;
-  await session.send("ServiceWorker.stopWorker", {
-    versionId: version.versionId,
-  });
-  await expect
-    .poll(() =>
-      lifecycle
-        .slice(stopBoundary)
-        .some(
-          (event) =>
-            event.versionId === version.versionId &&
-            event.runningStatus === "stopped",
-        ),
-    )
-    .toBe(true);
-  expect(versions.get(version.versionId)?.runningStatus).toBe("stopped");
-  const wakeBoundary = lifecycle.length;
+  const worker = await stopRunningWorker(context, page);
   await page.reload();
   await expectVersion(page, "a");
-  await expect
-    .poll(() =>
-      lifecycle
-        .slice(wakeBoundary)
-        .some(
-          (event) =>
-            event.versionId === version.versionId &&
-            event.runningStatus === "running",
-        ),
-    )
-    .toBe(true);
-  const restarted = await status(page);
+  await worker.expectRunning();
+  const restarted = await workerState(page);
   expect(restarted.generation).toBe(before.generation);
   expect(restarted.latestReadyBuildId).toBe(before.latestReadyBuildId);
   expect(
@@ -1537,8 +1521,51 @@ test("a stopped worker restarts offline with durable build pins", async ({
     })),
   );
   expect(await loadCount(page)).toBe(2);
-  await session.detach();
+  await worker.session.detach();
   await context.setOffline(false);
+});
+
+test("a restarted worker finishes a reset that was interrupted mid-purge", async ({
+  context,
+  request,
+}) => {
+  const page = await openControlledPage(context, request);
+  const before = await workerState(page);
+  expect(await page.evaluate(() => caches.keys())).not.toEqual([]);
+  // The state purgeWorkerCaches persists before deleting caches, as if it crashed there.
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open("innohassle-service-worker", 1);
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const transaction = open.result.transaction("state", "readwrite");
+          const store = transaction.objectStore("state");
+          const read = store.get("current");
+          read.onsuccess = () =>
+            store.put(
+              { ...read.result, blocked: true, resetPending: true },
+              "current",
+            );
+          transaction.oncomplete = () => {
+            open.result.close();
+            resolve();
+          };
+          transaction.onerror = () => reject(transaction.error);
+        };
+      }),
+  );
+  const worker = await stopRunningWorker(context, page);
+  // Any event restarts the worker; recovery runs before it answers commands.
+  const recovered = await workerState(page);
+  await worker.expectRunning();
+  expect(recovered).toMatchObject({
+    generation: before.generation,
+    blocked: true,
+    resetPending: false,
+  });
+  expect(await page.evaluate(() => caches.keys())).toEqual([]);
+  await worker.session.detach();
 });
 
 test("reset aborts delayed work and prevents old workers from recreating any cache", async ({
@@ -1558,16 +1585,27 @@ test("reset aborts delayed work and prevents old workers from recreating any cac
   await expect
     .poll(async () => (await serverSnapshot(request)).delayedResources)
     .toBeGreaterThan(0);
-  const before = await status(page);
+  const before = await diagnostics(page);
   const reset = await rpc<WorkerState>(page, { type: "RESET" });
-  expect(reset.generation).toBeGreaterThan(before.generation);
+  expect(reset.generation).toBeGreaterThan(before.storage.generation);
   expect(reset.blocked).toBe(true);
   expect(reset.builds).toEqual([]);
-  const workerInfo = await rpc<WorkerBuildInfo>(page, {
-    type: "GET_BUILD_INFO",
-  });
-  expect(workerInfo).toEqual(before.buildInfo);
-  expect((await status(page)).buildInfo).toEqual(before.buildInfo);
+  expect((await diagnostics(page)).worker.buildInfo).toEqual(
+    before.worker.buildInfo,
+  );
+  // The worker announces the reset on the shared channel; open pages stop automatic work.
+  await page
+    .getByRole("button", { name: "Refresh snapshot", exact: true })
+    .click();
+  const section = (name: string) =>
+    page
+      .getByRole("heading", { name, exact: true })
+      .locator("..")
+      .locator("..");
+  await expect(section("Automatic update")).toContainText("stopped");
+  await expect(
+    section("Last worker notification observed by this App"),
+  ).toContainText("CACHE_INVALIDATED");
   expect(await page.evaluate(() => caches.keys())).toEqual([]);
   await setServerState(request, { version: "b" });
   expect(await rpc(page, { type: "CHECK_MANIFEST" })).toBeNull();
@@ -1580,7 +1618,7 @@ test("debug reset clears every old cache, unregisters, and reloads safely into a
   request,
 }) => {
   const page = await openControlledPage(context, request);
-  const previous = await status(page);
+  const previous = await workerState(page);
   const previousNames = await page.evaluate(() => caches.keys());
   await page.evaluate(async () => {
     const extra = await caches.open("unrelated-debug-reset-cache");
@@ -1604,11 +1642,227 @@ test("debug reset clears every old cache, unregisters, and reloads safely into a
     .poll(() => page.evaluate(() => !!navigator.serviceWorker.controller))
     .toBe(true);
   await expect
-    .poll(async () => (await status(page)).generation)
+    .poll(async () => (await workerState(page)).generation)
     .toBeGreaterThan(previous.generation);
   const names = await page.evaluate(() => caches.keys());
   expect(names).not.toContain("unrelated-debug-reset-cache");
   expect(names.some((name) => previousNames.includes(name))).toBe(false);
-  expect((await status(page)).blocked).toBe(false);
+  expect((await workerState(page)).blocked).toBe(false);
   expect(await loadCount(page)).toBe(2);
+});
+
+test("navigations revalidate HTML even when the server allows caching it", async ({
+  context,
+  request,
+}) => {
+  await setServerState(request, { version: "a", cacheableHtml: true });
+  const page = await openControlledPage(context, request);
+  // The worker's own HTTP fetch now has a fresh copy of /about from build A.
+  await page.goto("/about");
+  await expectVersion(page, "a");
+  await page.goto("/debug");
+  await setServerState(request, { version: "b", cacheableHtml: true });
+  const loads = await loadCount(page);
+  await page.goto("/about");
+  // The navigation itself must deliver B; an automatic update would reload later.
+  expect(await page.locator("html").getAttribute("data-sw-test-version")).toBe(
+    "b",
+  );
+  expect(await loadCount(page)).toBe(loads + 1);
+});
+
+const apiOrigin = "http://127.0.0.1:5202";
+
+async function fetchApi(page: Page, path: string) {
+  return page.evaluate(async (url) => {
+    try {
+      const response = await fetch(url, { credentials: "include" });
+      return `${response.status} ${await response.text()}`;
+    } catch {
+      return "network error";
+    }
+  }, `${apiOrigin}${path}`);
+}
+
+async function cachedApiUrls(page: Page, cacheName: string) {
+  return page.evaluate(async (name) => {
+    if (!(await caches.has(name))) return [];
+    const keys = await (await caches.open(name)).keys();
+    return keys.map((key) => new URL(key.url).pathname);
+  }, cacheName);
+}
+
+test("calendar, account and maps API responses are cached for offline use", async ({
+  context,
+  request,
+}) => {
+  // Signed in, so the app does not treat the visitor as logged out and clear the cache.
+  await context.addCookies([
+    { name: "sw-e2e-user", value: "sw-test", url: apiOrigin },
+  ]);
+  const page = await openControlledPage(context, request);
+  expect(await fetchApi(page, "/accounts/tokens/generate-my-token")).toMatch(
+    /^200 /,
+  );
+  expect(await fetchApi(page, "/schedule/feed.ics")).toContain(
+    "Offline algorithms a",
+  );
+  expect(await fetchApi(page, "/schedule/users/me")).toMatch(/^200 /);
+  expect(await fetchApi(page, "/accounts/users/me")).toMatch(/^200 /);
+  expect(await fetchApi(page, "/maps/scenes/")).toContain("University a");
+  expect(await fetchApi(page, "/schedule/tags/")).toMatch(/^200 /);
+  await expect
+    .poll(() => cachedApiUrls(page, "api-user-data"))
+    .toEqual(
+      expect.arrayContaining([
+        "/schedule/feed.ics",
+        "/schedule/users/me",
+        "/accounts/users/me",
+      ]),
+    );
+  // Uncached: unrelated API calls and access tokens.
+  expect(await cachedApiUrls(page, "api-user-data")).not.toContain(
+    "/schedule/tags/",
+  );
+  expect(await cachedApiUrls(page, "api-user-data")).not.toContain(
+    "/accounts/tokens/generate-my-token",
+  );
+  await expect
+    .poll(() => cachedApiUrls(page, "api-maps"))
+    .toEqual(["/maps/scenes/"]);
+
+  // Online, the user's data comes from the network; maps first from the cache.
+  await setServerState(request, { version: "a", runtimeVersion: "b" });
+  expect(await fetchApi(page, "/schedule/feed.ics")).toContain(
+    "Offline algorithms b",
+  );
+  expect(await fetchApi(page, "/maps/scenes/")).toContain("University a");
+  await expect
+    .poll(() => fetchApi(page, "/maps/scenes/"))
+    .toContain("University b");
+
+  // A slow network falls back to the cached copy after the timeout.
+  await setServerState(request, {
+    version: "a",
+    runtimeVersion: "c",
+    delayApi: true,
+  });
+  const startedAt = Date.now();
+  expect(await fetchApi(page, "/schedule/feed.ics")).toContain(
+    "Offline algorithms b",
+  );
+  expect(Date.now() - startedAt).toBeLessThan(10_000);
+  await setServerState(request, { version: "a", runtimeVersion: "b" });
+
+  await context.setOffline(true);
+  expect(await fetchApi(page, "/schedule/feed.ics")).toContain(
+    "Offline algorithms b",
+  );
+  expect(await fetchApi(page, "/schedule/users/me")).toContain(
+    "Service Worker Test",
+  );
+  expect(await fetchApi(page, "/accounts/users/me")).toContain("sw-test");
+  expect(await fetchApi(page, "/maps/scenes/")).toContain("University b");
+  expect(await fetchApi(page, "/schedule/tags/")).toBe("network error");
+  await context.setOffline(false);
+});
+
+test("logging out deletes the user's cached API responses but keeps maps", async ({
+  context,
+  request,
+}) => {
+  await context.addCookies([
+    { name: "sw-e2e-user", value: "sw-test", url: apiOrigin },
+  ]);
+  const page = await openControlledPage(context, request);
+  await fetchApi(page, "/schedule/users/me");
+  await fetchApi(page, "/maps/scenes/");
+  await expect
+    .poll(() => cachedApiUrls(page, "api-user-data"))
+    .toContain("/schedule/users/me");
+  await expect
+    .poll(() => cachedApiUrls(page, "api-maps"))
+    .toEqual(["/maps/scenes/"]);
+  await context.clearCookies();
+  await page.reload();
+  await expectVersion(page, "a");
+  await expect
+    .poll(() => page.evaluate(() => caches.has("api-user-data")))
+    .toBe(false);
+  expect(await cachedApiUrls(page, "api-maps")).toEqual(["/maps/scenes/"]);
+});
+
+test("a worker start removes caches it does not own, such as the former Workbox ones", async ({
+  context,
+  request,
+}) => {
+  const page = await openControlledPage(context, request);
+  const buildCaches = await page.evaluate(() => caches.keys());
+  await page.evaluate(async () => {
+    for (const name of [
+      "workbox-precache-v2-http://127.0.0.1:5201/",
+      "calendar-feeds",
+      "maps",
+    ])
+      await (await caches.open(name)).put("/__test/old", new Response("old"));
+    await new Promise<void>((resolve, reject) => {
+      const open = indexedDB.open("workbox-expiration", 1);
+      open.onupgradeneeded = () => open.result.createObjectStore("entries");
+      open.onsuccess = () => {
+        open.result.close();
+        resolve();
+      };
+      open.onerror = () => reject(open.error);
+    });
+  });
+  const worker = await stopRunningWorker(context, page);
+  await workerState(page);
+  await worker.expectRunning();
+  expect((await page.evaluate(() => caches.keys())).sort()).toEqual(
+    buildCaches.sort(),
+  );
+  await expect
+    .poll(async () =>
+      (await page.evaluate(() => indexedDB.databases())).map(
+        (database) => database.name,
+      ),
+    )
+    .not.toContain("workbox-expiration");
+  await worker.session.detach();
+});
+
+test("API caches keep the 128 most recently saved responses", async ({
+  context,
+  request,
+}) => {
+  await context.addCookies([
+    { name: "sw-e2e-user", value: "sw-test", url: apiOrigin },
+  ]);
+  const page = await openControlledPage(context, request);
+  const feeds = (from: number, to: number) =>
+    Array.from(
+      { length: to - from },
+      (_, index) => `/schedule/feed-${from + index}.ics`,
+    );
+  async function fetchFeeds(paths: string[]) {
+    for (const path of paths)
+      expect(await fetchApi(page, path)).toMatch(/^200 /);
+  }
+  await fetchFeeds(feeds(0, 128));
+  await expect
+    .poll(async () => (await cachedApiUrls(page, "api-user-data")).length)
+    .toBe(128);
+  // Saving again (each online view does) moves an entry to the end.
+  await fetchFeeds(["/schedule/feed-0.ics"]);
+  await expect
+    .poll(async () => (await cachedApiUrls(page, "api-user-data")).at(-1))
+    .toBe("/schedule/feed-0.ics");
+  await fetchFeeds(["/schedule/feed-128.ics"]);
+  await expect
+    .poll(() => cachedApiUrls(page, "api-user-data"))
+    .toContain("/schedule/feed-128.ics");
+  const cached = await cachedApiUrls(page, "api-user-data");
+  expect(cached).toHaveLength(128);
+  expect(cached).toContain("/schedule/feed-0.ics");
+  expect(cached).not.toContain("/schedule/feed-1.ics");
 });

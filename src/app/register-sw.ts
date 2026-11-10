@@ -1,19 +1,25 @@
-import { requestWorker } from "./sw-client.ts";
+import {
+  isTvPath,
+  manifestPollInterval,
+  resetChannelName,
+  type BuildReadyNotification,
+  type ClientHelloCommand,
+  type ClientHelloReply,
+  type ResetNotification,
+} from "@/service-worker/protocol.ts";
+import { withWorkerState } from "@/service-worker/storage.ts";
 import {
   createAutoUpdateController,
   type AutoUpdateStatus,
 } from "./auto-update.ts";
 import { queryClient } from "./query-client.ts";
+import type { getRouter } from "./router.ts";
 import { setSiteUnavailable } from "./site-availability.ts";
 import {
-  isTvPath,
-  manifestPollInterval,
-  type BuildInfo,
-  type ClientHelloCommand,
-  type ClientHelloReply,
-  type WorkerNotification,
-} from "@/service-worker/protocol.ts";
-import { withWorkerState } from "@/service-worker/storage.ts";
+  checkManifest,
+  requestWorker,
+  resetStartedEvent,
+} from "./sw-client.ts";
 
 // Page-side observations only. Worker-reported state is collected separately by RPC.
 const pageWorkerCommunication: {
@@ -26,7 +32,7 @@ const pageWorkerCommunication: {
     error: string | null;
   } | null;
   lastNotification: {
-    message: WorkerNotification;
+    message: BuildReadyNotification | ResetNotification;
     sourceScriptURL: string | null;
     receivedAt: string;
   } | null;
@@ -45,24 +51,27 @@ export function getPageWorkerCommunication() {
   return structuredClone(pageWorkerCommunication);
 }
 
+/** TV only: a manual prompt in case a beforeunload handler cancels the automatic reload. */
 export const appUpdateAvailableEvent = "app-update-available";
-let pendingUpdate: (() => void) | undefined;
-export function getPendingAppUpdate() {
-  return pendingUpdate;
+let isAppUpdatePending = false;
+
+export function getIsAppUpdatePending() {
+  return isAppUpdatePending;
+}
+
+function setAppUpdatePending(value: boolean) {
+  isAppUpdatePending = value;
+  window.dispatchEvent(new Event(appUpdateAvailableEvent));
 }
 
 /**
  * Page-side controller for the site-update feature.
  *
- * Poll on schedule and on return to the page. Fully ready updates reload by default;
- * components can pause them with useAutoUpdateBlocker.
- * TV retains its manual prompt if a native beforeunload handler blocks a reload.
+ * Reports this page's build to the worker, and checks for a deployment on
+ * schedule, on return to the page and when connectivity returns. Fully ready
+ * updates reload by default; components can pause them with useAutoUpdateBlocker.
  */
-export function registerServiceWorker({
-  isNavigationIdle,
-}: {
-  isNavigationIdle: () => boolean;
-}) {
+export function registerServiceWorker(router: ReturnType<typeof getRouter>) {
   if (!("serviceWorker" in navigator)) return;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let stopped = false;
@@ -72,24 +81,21 @@ export function registerServiceWorker({
   let nextCheckAt: string | null = null;
   let navigationSourceReceived = false;
 
-  function handleAppReload() {
-    window.location.reload();
-  }
-
   const autoUpdates = createAutoUpdateController({
-    isNavigationIdle,
+    isNavigationIdle: () =>
+      router.state.status === "idle" &&
+      !router.state.isLoading &&
+      router.state.matches.length > 0,
     onStatusChange: (status) => {
       pageWorkerCommunication.autoUpdate = status;
     },
     reload: () => {
-      if (isTvPath(window.location.pathname)) {
-        pendingUpdate = handleAppReload;
-        window.dispatchEvent(new Event(appUpdateAvailableEvent));
-      }
-      handleAppReload();
+      if (isTvPath(window.location.pathname)) setAppUpdatePending(true);
+      window.location.reload();
     },
   });
 
+  /** Failures are recorded for diagnostics; the next report retries. */
   async function sendHello() {
     const controller = navigator.serviceWorker.controller;
     if (!controller || stopped) return;
@@ -114,13 +120,13 @@ export function registerServiceWorker({
         controller,
       );
       report.acknowledgedAt = new Date().toISOString();
+      // Only this document's own navigation decides; a later successful check clears it.
       if (!navigationSourceReceived && report.reply.navigationSource !== null) {
         navigationSourceReceived = true;
         setSiteUnavailable(report.reply.navigationSource === "cache");
       }
     } catch (error) {
       report.error = error instanceof Error ? error.message : String(error);
-      throw error;
     }
   }
 
@@ -133,8 +139,7 @@ export function registerServiceWorker({
   }
 
   async function checkForUpdate() {
-    // Offline checks would only fail and burn battery; navigation already
-    // triggers a manifest check when connectivity returns.
+    // Offline checks would only fail; the online event triggers one later.
     if (stopped || !navigator.serviceWorker.controller || !navigator.onLine)
       return;
     if (checking) {
@@ -146,17 +151,13 @@ export function registerServiceWorker({
     nextCheckAt = null;
     try {
       await sendHello();
-      const readyBuild = await requestWorker<BuildInfo | null>({
-        type: "CHECK_MANIFEST",
-      });
-      if (readyBuild) setSiteUnavailable(false);
-      window.dispatchEvent(new Event("sw-check-completed"));
+      await checkManifest();
     } catch (error) {
       console.warn("[Service Worker] Update check failed:", error);
     } finally {
       checking = false;
       scheduleCheck();
-      void sendHello().catch(() => undefined);
+      void sendHello();
       autoUpdates.recheck();
       if (checkRequested) {
         checkRequested = false;
@@ -166,78 +167,70 @@ export function registerServiceWorker({
   }
 
   function handleRouteChange() {
-    const nextPathname = window.location.pathname;
-    if (pathname === nextPathname) {
-      autoUpdates.recheck();
-      return;
-    }
-    pathname = nextPathname;
     autoUpdates.recheck();
-    // Leaving a route dismisses a pending update prompt; the next BUILD_READY
-    // or manual reload can offer it again if still relevant.
-    pendingUpdate = undefined;
-    window.dispatchEvent(new Event(appUpdateAvailableEvent));
+    if (pathname === window.location.pathname) return;
+    pathname = window.location.pathname;
+    // Leaving a route dismisses a pending update prompt.
+    if (isAppUpdatePending) setAppUpdatePending(false);
     scheduleCheck();
-    void sendHello().catch(() => undefined);
+    void sendHello();
   }
 
-  function handleCacheInvalidated(message: WorkerNotification) {
-    if (message.type !== "CACHE_INVALIDATED" || !message.reset) return;
+  function handlePageReturn() {
+    handleRouteChange();
+    void checkForUpdate();
+  }
+
+  function stop() {
     stopped = true;
     autoUpdates.stop();
     clearTimeout(timer);
-    void queryClient.cancelQueries().then(() => queryClient.clear());
   }
 
-  // Pages without an active controller (mid-reset) still hear the reset broadcast.
-  const controlChannel = new BroadcastChannel("innohassle-sw-control");
-  controlChannel.onmessage = (event: MessageEvent<WorkerNotification>) => {
-    handleCacheInvalidated(event.data);
-  };
+  function recordNotification(
+    message: BuildReadyNotification | ResetNotification,
+    sourceScriptURL: string | null,
+  ) {
+    pageWorkerCommunication.lastNotification = {
+      message,
+      sourceScriptURL,
+      receivedAt: new Date().toISOString(),
+    };
+  }
 
   navigator.serviceWorker.addEventListener(
     "message",
-    (event: MessageEvent<WorkerNotification>) => {
-      const message = event.data;
-      pageWorkerCommunication.lastNotification = {
-        message,
-        sourceScriptURL:
-          event.source instanceof ServiceWorker ? event.source.scriptURL : null,
-        receivedAt: new Date().toISOString(),
-      };
-      if (message.type === "CACHE_INVALIDATED") {
-        handleCacheInvalidated(message);
-        return;
-      }
-      if (message.type === "BUILD_READY" && !stopped)
-        autoUpdates.handleBuildReady(message);
+    (event: MessageEvent<BuildReadyNotification>) => {
+      recordNotification(
+        event.data,
+        event.source instanceof ServiceWorker ? event.source.scriptURL : null,
+      );
+      if (event.data.type === "BUILD_READY" && !stopped)
+        autoUpdates.handleBuildReady(event.data);
     },
   );
+  new BroadcastChannel(resetChannelName).onmessage = (
+    event: MessageEvent<ResetNotification>,
+  ) => {
+    recordNotification(event.data, null);
+    stop();
+    void queryClient.cancelQueries().then(() => queryClient.clear());
+  };
+  window.addEventListener(resetStartedEvent, stop);
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     scheduleCheck();
     void checkForUpdate();
   });
-  window.addEventListener("sw-reset-started", () => {
-    stopped = true;
-    autoUpdates.stop();
-    clearTimeout(timer);
-  });
   window.addEventListener("online", () => void checkForUpdate());
-  function handlePageReturn() {
-    handleRouteChange();
-    void sendHello().catch(() => undefined);
-    void checkForUpdate();
-  }
   window.addEventListener("pageshow", handlePageReturn);
   window.addEventListener("focus", handlePageReturn);
-  window.addEventListener("popstate", handleRouteChange);
-  window.addEventListener("sw-route-changed", handleRouteChange);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") handlePageReturn();
   });
+  router.subscribe("onResolved", handleRouteChange);
 
   // Report cached navigation even when offline SW re-registration cannot reach sw.js.
-  void sendHello().catch(() => undefined);
+  void sendHello();
 
   void (async () => {
     // Debug reset leaves blocked=true so a replaced worker cannot refill caches.

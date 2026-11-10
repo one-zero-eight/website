@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/ui/cn";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Link, useBlocker, useNavigate } from "@tanstack/react-router";
-import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
+import { useAutoUpdateBlocker } from "@/app/auto-update.ts";
 import { getClubTypeLabel } from "./constants.ts";
 import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor";
 import { DescriptionEditor } from "@/components/editor/DescriptionEditor.tsx";

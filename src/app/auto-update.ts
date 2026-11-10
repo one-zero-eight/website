@@ -1,19 +1,25 @@
-import {
-  autoReloadTargetStorageKey,
-  autoUpdateSafetyChangedEvent,
-  getAutoUpdateBlockReason,
-  hasAutoReloadBlocker,
-  isNewerAppBuild,
-  type AutoUpdateBlockReason,
-} from "./auto-update-safety.ts";
-import { queryClient } from "./query-client.ts";
-import { setSiteUnavailable } from "./site-availability.ts";
-import { requestWorker } from "./sw-client.ts";
 import type {
   BuildInfo,
-  WorkerNotification,
-  WorkerState,
+  BuildReadyNotification,
 } from "@/service-worker/protocol.ts";
+import { useEffect } from "react";
+import { queryClient } from "./query-client.ts";
+import { checkManifest } from "./sw-client.ts";
+
+/** Remembers the target across the reload, so a failed update cannot loop. */
+export const autoReloadTargetStorageKey = "innohassle-auto-reload-target";
+export const blockersChangedEvent = "app-auto-update-blockers-changed";
+
+export type AutoUpdateBlockReason =
+  | "offline"
+  | "navigation"
+  | "mutation"
+  | "component-blocker"
+  | "already-attempted"
+  | "verifying"
+  | "not-ready"
+  | "check-failed"
+  | "stopped";
 
 export type AutoUpdateStatus = {
   pendingBuildId: string | null;
@@ -21,9 +27,57 @@ export type AutoUpdateStatus = {
   lastReloadAttemptAt: string | null;
 };
 
-type ReadyBuild = Extract<WorkerNotification, { type: "BUILD_READY" }>;
+const blockers = new Set<symbol>();
 
-/** Page-side owner of safe automatic reloads. It never invokes route confirmation functions. */
+/** Pause automatic reloads until the returned function is called. In components, use useAutoUpdateBlocker. */
+export function registerAutoUpdateBlocker() {
+  const blocker = Symbol("auto-update-blocker");
+  blockers.add(blocker);
+  window.dispatchEvent(new Event(blockersChangedEvent));
+  return () => {
+    blockers.delete(blocker);
+    window.dispatchEvent(new Event(blockersChangedEvent));
+  };
+}
+
+export function hasAutoUpdateBlocker() {
+  return blockers.size > 0;
+}
+
+/**
+ * Pauses automatic application reloads while this component has active work.
+ *
+ * @param enabled Whether to pause auto-updates. Defaults to `true` for the
+ * entire mounted lifetime. Pass a condition to block only while work is active.
+ * Changing it to `false` or unmounting releases this blocker. Pending verified
+ * updates can resume once all blockers are released.
+ *
+ * Does not block manual navigation, F5/reload or closing the tab, and does not
+ * show confirmation dialogs. Use TanStack Router's `useBlocker` separately
+ * when navigation or before-unload protection is also needed.
+ *
+ * @example
+ * useAutoUpdateBlocker(searchQuery.length > 0);
+ */
+export function useAutoUpdateBlocker(enabled = true) {
+  useEffect(() => {
+    if (!enabled) return;
+    return registerAutoUpdateBlocker();
+  }, [enabled]);
+}
+
+export function isNewerAppBuild(candidate: BuildInfo, current: BuildInfo) {
+  return (
+    candidate.buildId !== current.buildId &&
+    Date.parse(candidate.builtAt) > Date.parse(current.builtAt)
+  );
+}
+
+/**
+ * Page-side owner of automatic reloads. Pages update by default once a newer
+ * build is completely ready, unless the page is offline, navigating, mutating,
+ * or a component registered a blocker. Never opens confirmation UI.
+ */
 export function createAutoUpdateController({
   isNavigationIdle,
   reload,
@@ -33,11 +87,10 @@ export function createAutoUpdateController({
   reload: () => void;
   onStatusChange: (status: AutoUpdateStatus) => void;
 }) {
-  let pendingBuild: ReadyBuild | null = null;
+  let pendingBuild: BuildReadyNotification | null = null;
   let verifying = false;
   let stopped = false;
   let checkTimer: number | undefined;
-  const reloadAttempts = new Set<string>();
   const status: AutoUpdateStatus = {
     pendingBuildId: null,
     blockedReason: null,
@@ -50,17 +103,14 @@ export function createAutoUpdateController({
     onStatusChange({ ...status });
   }
 
-  function readBlockReason(candidate: ReadyBuild) {
-    return getAutoUpdateBlockReason({
-      online: navigator.onLine,
-      navigationIdle: isNavigationIdle(),
-      hasPendingMutations: queryClient.isMutating() > 0,
-      hasComponentBlocker: hasAutoReloadBlocker(),
-      alreadyAttempted:
-        reloadAttempts.has(candidate.buildInfo.buildId) ||
-        sessionStorage.getItem(autoReloadTargetStorageKey) ===
-          candidate.buildInfo.buildId,
-    });
+  function getBlockReason(buildId: string): AutoUpdateBlockReason | null {
+    if (sessionStorage.getItem(autoReloadTargetStorageKey) === buildId)
+      return "already-attempted";
+    if (!navigator.onLine) return "offline";
+    if (!isNavigationIdle()) return "navigation";
+    if (queryClient.isMutating() > 0) return "mutation";
+    if (hasAutoUpdateBlocker()) return "component-blocker";
+    return null;
   }
 
   function scheduleCheck() {
@@ -79,43 +129,26 @@ export function createAutoUpdateController({
   async function applyPendingBuild() {
     if (stopped || verifying || !pendingBuild) return;
     const candidate = pendingBuild;
-    const blockedReason = readBlockReason(candidate);
+    const { buildId } = candidate.buildInfo;
+    const blockedReason = getBlockReason(buildId);
     reportStatus(blockedReason);
     if (blockedReason) return;
     verifying = true;
     reportStatus("verifying");
     try {
-      // A cached BUILD_READY re-announcement alone is not evidence that the server is reachable.
-      const latest = await requestWorker<BuildInfo | null>({
-        type: "CHECK_MANIFEST",
-      });
+      // A re-announced BUILD_READY alone does not prove that the server is
+      // reachable; the worker answers only after the build is completely ready.
+      const latest = await checkManifest();
       if (stopped || pendingBuild !== candidate) return;
-      if (!latest || latest.buildId !== candidate.buildInfo.buildId) {
+      if (latest?.buildId !== buildId) {
         reportStatus("not-ready");
         return;
       }
-      setSiteUnavailable(false);
-      const state = await requestWorker<WorkerState>({ type: "GET_STATE" });
-      const ready = state.builds.find(
-        (build) => build.manifest.buildInfo.buildId === latest.buildId,
-      );
-      if (stopped || pendingBuild !== candidate) return;
-      if (
-        state.blocked ||
-        state.generation !== candidate.generation ||
-        state.latestReadyBuildId !== latest.buildId ||
-        ready?.state !== "ready" ||
-        ready.completed !== ready.manifest.resources.length
-      ) {
-        reportStatus("not-ready");
-        return;
-      }
-      // A component blocker, mutation or navigation may have started during verification.
-      const finalBlockedReason = readBlockReason(candidate);
+      // A component blocker, mutation or navigation may have started meanwhile.
+      const finalBlockedReason = getBlockReason(buildId);
       reportStatus(finalBlockedReason);
       if (finalBlockedReason) return;
-      sessionStorage.setItem(autoReloadTargetStorageKey, latest.buildId);
-      reloadAttempts.add(latest.buildId);
+      sessionStorage.setItem(autoReloadTargetStorageKey, buildId);
       status.lastReloadAttemptAt = new Date().toISOString();
       reportStatus(null);
       reload();
@@ -125,27 +158,28 @@ export function createAutoUpdateController({
     }
   }
 
-  window.addEventListener(autoUpdateSafetyChangedEvent, scheduleCheck);
+  window.addEventListener(blockersChangedEvent, scheduleCheck);
   const unsubscribeMutations = queryClient
     .getMutationCache()
     .subscribe(scheduleCheck);
 
   return {
-    handleBuildReady(message: ReadyBuild) {
+    handleBuildReady(message: BuildReadyNotification) {
       if (stopped || !isNewerAppBuild(message.buildInfo, BUILD_INFO)) return;
+      const pending = pendingBuild;
       if (
-        pendingBuild &&
-        message.buildInfo.buildId !== pendingBuild.buildInfo.buildId &&
-        !isNewerAppBuild(message.buildInfo, pendingBuild.buildInfo)
+        pending &&
+        message.buildInfo.buildId !== pending.buildInfo.buildId &&
+        !isNewerAppBuild(message.buildInfo, pending.buildInfo)
       )
         return;
+      // Keep the same object for repeated announcements, so they do not
+      // interrupt a verification already in progress.
       if (
-        !pendingBuild ||
-        pendingBuild.buildInfo.buildId !== message.buildInfo.buildId ||
-        pendingBuild.generation !== message.generation
-      ) {
+        pending?.buildInfo.buildId !== message.buildInfo.buildId ||
+        pending.generation !== message.generation
+      )
         pendingBuild = message;
-      }
       scheduleCheck();
     },
     recheck: scheduleCheck,
@@ -154,7 +188,7 @@ export function createAutoUpdateController({
       stopped = true;
       pendingBuild = null;
       window.clearTimeout(checkTimer);
-      window.removeEventListener(autoUpdateSafetyChangedEvent, scheduleCheck);
+      window.removeEventListener(blockersChangedEvent, scheduleCheck);
       unsubscribeMutations();
       reportStatus("stopped");
     },

@@ -14,16 +14,9 @@ import { SnowVisibilityProvider } from "@/components/snow/SnowContext.tsx";
 initializeI18n();
 console.info("[App] Build info:", BUILD_INFO);
 
-// Create the router before SW registration so automatic reloads can check navigation state.
+// Automatic updates wait for navigation to finish, so the worker client needs the router.
 const router = getRouter();
-
-// Init service worker
-registerServiceWorker({
-  isNavigationIdle: () =>
-    router.state.status === "idle" &&
-    !router.state.isLoading &&
-    router.state.matches.length > 0,
-});
+registerServiceWorker(router);
 
 // Render the app
 const container = document.getElementById("app") as HTMLDivElement;

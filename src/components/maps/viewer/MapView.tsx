@@ -11,7 +11,7 @@ import { useUserLocation } from "@/components/maps/viewer/useUserLocation.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { FloatingOverlay, FloatingPortal } from "@floating-ui/react";
-import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
+import { useAutoUpdateBlocker } from "@/app/auto-update.ts";
 import {
   PropsWithChildren,
   useCallback,

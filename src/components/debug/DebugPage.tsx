@@ -1,8 +1,8 @@
-import { resetServiceWorker } from "@/app/sw-client.ts";
+import { manifestCheckedEvent, resetServiceWorker } from "@/app/sw-client.ts";
 import { cn } from "@/lib/ui/cn";
 import { Trans } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
-import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
+import { useAutoUpdateBlocker } from "@/app/auto-update.ts";
 import { useEffect, useState } from "react";
 import { AppDiagnostics } from "./AppDiagnostics.tsx";
 import { BrowserDiagnostics } from "./BrowserDiagnostics.tsx";
@@ -43,7 +43,7 @@ export function DebugPage() {
     }
     window.addEventListener("online", handleConnectionChange);
     window.addEventListener("offline", handleConnectionChange);
-    window.addEventListener("sw-check-completed", handleRefresh);
+    window.addEventListener(manifestCheckedEvent, handleRefresh);
     if ("serviceWorker" in navigator)
       navigator.serviceWorker.addEventListener(
         "controllerchange",
@@ -52,7 +52,7 @@ export function DebugPage() {
     return () => {
       window.removeEventListener("online", handleConnectionChange);
       window.removeEventListener("offline", handleConnectionChange);
-      window.removeEventListener("sw-check-completed", handleRefresh);
+      window.removeEventListener(manifestCheckedEvent, handleRefresh);
       if ("serviceWorker" in navigator)
         navigator.serviceWorker.removeEventListener(
           "controllerchange",

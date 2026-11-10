@@ -1,19 +1,16 @@
 import {
+  autoReloadTargetStorageKey,
   createAutoUpdateController,
+  isNewerAppBuild,
+  registerAutoUpdateBlocker,
   type AutoUpdateStatus,
 } from "@/app/auto-update.ts";
-import {
-  autoReloadTargetStorageKey,
-  registerAutoReloadBlocker,
-} from "@/app/auto-update-safety.ts";
 import { queryClient } from "@/app/query-client.ts";
-import { requestWorker } from "@/app/sw-client.ts";
-import type { BuildInfo, WorkerState } from "@/service-worker/protocol.ts";
-import { emptyWorkerState } from "@/service-worker/storage.ts";
+import { checkManifest } from "@/app/sw-client.ts";
+import type { BuildInfo } from "@/service-worker/protocol.ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/app/sw-client.ts", () => ({ requestWorker: vi.fn() }));
-vi.mock("@/app/site-availability.ts", () => ({ setSiteUnavailable: vi.fn() }));
+vi.mock("@/app/sw-client.ts", () => ({ checkManifest: vi.fn() }));
 vi.mock("@/app/query-client.ts", () => ({
   queryClient: {
     isMutating: vi.fn(() => 0),
@@ -34,24 +31,6 @@ const next: BuildInfo = {
   resourcesBuildHash: "resources-b",
   builtAt: "2026-11-10T10:01:00.000Z",
 };
-const readyState: WorkerState = {
-  ...emptyWorkerState(),
-  latestReadyBuildId: next.buildId,
-  builds: [
-    {
-      state: "ready",
-      completed: 1,
-      error: null,
-      cacheName: "build-b-cache",
-      manifest: {
-        schemaVersion: 1,
-        buildInfo: next,
-        entrypoint: "/index.html",
-        resources: [{ url: "/index.html", size: 1, integrity: "sha384-test" }],
-      },
-    },
-  ],
-};
 
 let controller: ReturnType<typeof createAutoUpdateController>;
 let status: AutoUpdateStatus;
@@ -60,7 +39,7 @@ const reload = vi.fn();
 const removeBlockers: (() => void)[] = [];
 
 function addBlocker() {
-  const remove = registerAutoReloadBlocker();
+  const remove = registerAutoUpdateBlocker();
   removeBlockers.push(remove);
   return remove;
 }
@@ -75,9 +54,7 @@ beforeEach(() => {
   sessionStorage.clear();
   navigationIdle = true;
   vi.mocked(queryClient.isMutating).mockReturnValue(0);
-  vi.mocked(requestWorker).mockImplementation(async (command) =>
-    command.type === "CHECK_MANIFEST" ? next : readyState,
-  );
+  vi.mocked(checkManifest).mockResolvedValue(next);
   controller = createAutoUpdateController({
     isNavigationIdle: () => navigationIdle,
     reload,
@@ -97,26 +74,24 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function announceNextBuild() {
+async function announceNextBuild() {
   controller.handleBuildReady({
     type: "BUILD_READY",
     buildInfo: next,
     generation: 0,
   });
+  await vi.advanceTimersByTimeAsync(0);
 }
 
 describe("automatic update controller", () => {
-  it("verifies a complete current build and records its target before reloading once", async () => {
-    announceNextBuild();
-    await vi.advanceTimersByTimeAsync(0);
-    expect(requestWorker).toHaveBeenCalledWith({ type: "CHECK_MANIFEST" });
-    expect(requestWorker).toHaveBeenCalledWith({ type: "GET_STATE" });
+  it("confirms the build is ready on the server and records its target before reloading once", async () => {
+    await announceNextBuild();
+    expect(checkManifest).toHaveBeenCalledTimes(1);
     expect(sessionStorage.getItem(autoReloadTargetStorageKey)).toBe(
       next.buildId,
     );
     expect(reload).toHaveBeenCalledTimes(1);
-    announceNextBuild();
-    await vi.advanceTimersByTimeAsync(0);
+    await announceNextBuild();
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
@@ -130,8 +105,7 @@ describe("automatic update controller", () => {
     "auto-updates %s by default when no component has registered a blocker",
     async (pathname) => {
       window.history.replaceState(null, "", pathname);
-      announceNextBuild();
-      await vi.advanceTimersByTimeAsync(0);
+      await announceNextBuild();
       expect(reload).toHaveBeenCalledTimes(1);
     },
   );
@@ -148,29 +122,30 @@ describe("automatic update controller", () => {
     input.value = "component-owned draft";
     input.dispatchEvent(new Event("input", { bubbles: true }));
     button.click();
-    announceNextBuild();
-    await vi.advanceTimersByTimeAsync(0);
+    await announceNextBuild();
     expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits while offline without contacting the worker", async () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    await announceNextBuild();
+    expect(status.blockedReason).toBe("offline");
+    expect(checkManifest).not.toHaveBeenCalled();
+    expect(reload).not.toHaveBeenCalled();
   });
 
   it.each(["component-blocker", "mutation", "navigation"] as const)(
     "rechecks %s after asynchronous verification, preserving newly started work",
     async (reason) => {
-      const pending = Promise.withResolvers<WorkerState>();
-      vi.mocked(requestWorker).mockImplementation(async (command) =>
-        command.type === "CHECK_MANIFEST" ? next : pending.promise,
-      );
-      announceNextBuild();
-      await vi.advanceTimersByTimeAsync(0);
-      expect(requestWorker).toHaveBeenCalledWith({ type: "GET_STATE" });
-      if (reason === "component-blocker") {
-        addBlocker();
-      } else if (reason === "mutation") {
+      const pending = Promise.withResolvers<BuildInfo>();
+      vi.mocked(checkManifest).mockReturnValue(pending.promise);
+      await announceNextBuild();
+      expect(status.blockedReason).toBe("verifying");
+      if (reason === "component-blocker") addBlocker();
+      else if (reason === "mutation")
         vi.mocked(queryClient.isMutating).mockReturnValue(1);
-      } else {
-        navigationIdle = false;
-      }
-      pending.resolve(readyState);
+      else navigationIdle = false;
+      pending.resolve(next);
       await vi.advanceTimersByTimeAsync(0);
       expect(status.blockedReason).toBe(reason);
       expect(reload).not.toHaveBeenCalled();
@@ -181,10 +156,9 @@ describe("automatic update controller", () => {
   it("applies the pending update on the same page when the last component blocker is removed", async () => {
     const removeFirst = addBlocker();
     const removeSecond = addBlocker();
-    announceNextBuild();
-    await vi.advanceTimersByTimeAsync(0);
+    await announceNextBuild();
     expect(status.blockedReason).toBe("component-blocker");
-    expect(requestWorker).not.toHaveBeenCalled();
+    expect(checkManifest).not.toHaveBeenCalled();
     removeFirst();
     await vi.advanceTimersByTimeAsync(0);
     expect(reload).not.toHaveBeenCalled();
@@ -196,43 +170,50 @@ describe("automatic update controller", () => {
 
   it("does not loop if the previous document already tried this target build", async () => {
     sessionStorage.setItem(autoReloadTargetStorageKey, next.buildId);
-    announceNextBuild();
-    await vi.advanceTimersByTimeAsync(0);
+    await announceNextBuild();
     expect(status.blockedReason).toBe("already-attempted");
-    expect(requestWorker).not.toHaveBeenCalled();
+    expect(checkManifest).not.toHaveBeenCalled();
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it("does not reload an incomplete snapshot or rely on a cached BUILD_READY while disconnected", async () => {
-    vi.mocked(requestWorker).mockResolvedValue(null);
-    announceNextBuild();
-    await vi.advanceTimersByTimeAsync(0);
-    expect(status.blockedReason).toBe("not-ready");
-    expect(reload).not.toHaveBeenCalled();
-    vi.mocked(requestWorker).mockImplementation(async (command) =>
-      command.type === "CHECK_MANIFEST"
-        ? next
-        : {
-            ...readyState,
-            builds: [
-              { ...readyState.builds[0], state: "downloading", completed: 0 },
-            ],
-          },
-    );
-    controller.recheck();
-    await vi.advanceTimersByTimeAsync(0);
-    expect(reload).not.toHaveBeenCalled();
-  });
+  it.each([
+    ["not ready or unreachable", null],
+    ["superseded by another deployment", { ...next, buildId: "build-c" }],
+  ])(
+    "does not rely on a re-announced BUILD_READY when the build is %s",
+    async (_, latest) => {
+      vi.mocked(checkManifest).mockResolvedValue(latest);
+      await announceNextBuild();
+      expect(status.blockedReason).toBe("not-ready");
+      expect(reload).not.toHaveBeenCalled();
+    },
+  );
 
   it("does not resurrect an update after reset stops an in-flight verification", async () => {
     const pending = Promise.withResolvers<BuildInfo>();
-    vi.mocked(requestWorker).mockReturnValue(pending.promise);
-    announceNextBuild();
-    await vi.advanceTimersByTimeAsync(0);
+    vi.mocked(checkManifest).mockReturnValue(pending.promise);
+    await announceNextBuild();
     controller.stop();
     pending.resolve(next);
     await vi.advanceTimersByTimeAsync(0);
     expect(status.blockedReason).toBe("stopped");
     expect(reload).not.toHaveBeenCalled();
+  });
+});
+
+describe("isNewerAppBuild", () => {
+  it("only accepts newer app builds, not an older offline fallback or the same build", () => {
+    const newer = { ...current, buildId: "new", builtAt: next.builtAt };
+    const older = {
+      ...current,
+      buildId: "old",
+      builtAt: "2026-11-10T09:59:00.000Z",
+    };
+    expect(isNewerAppBuild(newer, current)).toBe(true);
+    expect(isNewerAppBuild(older, current)).toBe(false);
+    expect(isNewerAppBuild(current, current)).toBe(false);
+    expect(isNewerAppBuild({ ...current, buildId: "same-time" }, current)).toBe(
+      false,
+    );
   });
 });
