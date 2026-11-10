@@ -5,14 +5,6 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-const commonRestrictedImports = [
-  {
-    name: "@lingui/macro",
-    message:
-      "Use @lingui/react/macro (JSX) or @lingui/core/macro (JS) instead.",
-  },
-];
-
 export default tseslint.config(
   { ignores: ["dist/**", "build/**", "coverage/**"] },
   {
@@ -50,22 +42,14 @@ export default tseslint.config(
         "error",
         {
           paths: [
-            ...commonRestrictedImports,
             {
-              name: "@tanstack/react-router",
-              importNames: ["useBlocker"],
+              name: "@lingui/macro",
               message:
-                "Use useAutoUpdateBlocker from @/app/use-auto-update-blocker.ts instead.",
+                "Use @lingui/react/macro (JSX) or @lingui/core/macro (JS) instead.",
             },
           ],
         },
       ],
-    },
-  },
-  {
-    files: ["src/app/use-auto-update-blocker.ts"],
-    rules: {
-      "no-restricted-imports": ["error", { paths: commonRestrictedImports }],
     },
   },
 );

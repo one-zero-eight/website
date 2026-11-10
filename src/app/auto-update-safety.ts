@@ -3,32 +3,32 @@ import type { BuildInfo } from "@/service-worker/protocol.ts";
 export const autoUpdateSafetyChangedEvent = "app-auto-update-safety-changed";
 export const autoReloadTargetStorageKey = "innohassle-auto-reload-target";
 
-const navigationBlockers = new Set<symbol>();
+const autoReloadBlockers = new Set<symbol>();
 
 export type AutoUpdateBlockReason =
   | "offline"
   | "navigation"
   | "mutation"
-  | "navigation-blocker"
+  | "component-blocker"
   | "already-attempted"
   | "verifying"
   | "not-ready"
   | "check-failed"
   | "stopped";
 
-/** An active TanStack useBlocker also pauses auto-updates, even with enableBeforeUnload: false. */
+/** Register one auto-update blocker independently of navigation. Dispose it when work ends. */
 export function registerAutoReloadBlocker() {
-  const blocker = Symbol("navigation-blocker");
-  navigationBlockers.add(blocker);
+  const blocker = Symbol("auto-update-blocker");
+  autoReloadBlockers.add(blocker);
   window.dispatchEvent(new Event(autoUpdateSafetyChangedEvent));
   return () => {
-    navigationBlockers.delete(blocker);
+    autoReloadBlockers.delete(blocker);
     window.dispatchEvent(new Event(autoUpdateSafetyChangedEvent));
   };
 }
 
 export function hasAutoReloadBlocker() {
-  return navigationBlockers.size > 0;
+  return autoReloadBlockers.size > 0;
 }
 
 export function isNewerAppBuild(candidate: BuildInfo, current: BuildInfo) {
@@ -43,19 +43,19 @@ export function getAutoUpdateBlockReason({
   online,
   navigationIdle,
   hasPendingMutations,
-  hasNavigationBlocker,
+  hasComponentBlocker,
   alreadyAttempted,
 }: {
   online: boolean;
   navigationIdle: boolean;
   hasPendingMutations: boolean;
-  hasNavigationBlocker: boolean;
+  hasComponentBlocker: boolean;
   alreadyAttempted: boolean;
 }): AutoUpdateBlockReason | null {
   if (alreadyAttempted) return "already-attempted";
   if (!online) return "offline";
   if (!navigationIdle) return "navigation";
   if (hasPendingMutations) return "mutation";
-  if (hasNavigationBlocker) return "navigation-blocker";
+  if (hasComponentBlocker) return "component-blocker";
   return null;
 }

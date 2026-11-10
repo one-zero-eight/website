@@ -930,7 +930,7 @@ test("explicitly paused Debug keeps A while polling warms B; manual and new tabs
   expect(await loadCount(idle)).toBe(1);
 });
 
-test("Debug updates by default without a route allowlist or an active useBlocker", async ({
+test("Debug updates by default without a route allowlist or an active useAutoUpdateBlocker", async ({
   context,
   request,
 }) => {
@@ -946,7 +946,7 @@ test("Debug updates by default without a route allowlist or an active useBlocker
   expect(await loadCount(page)).toBe(2);
 });
 
-test("disabling a component useBlocker applies a pending build on the same page without dialogs", async ({
+test("disabling useAutoUpdateBlocker applies a pending build on the same page without dialogs", async ({
   context,
   request,
 }) => {
@@ -1055,7 +1055,7 @@ test("resuming an existing frozen viewing tab applies B without a Reload button"
   }
 });
 
-test("an existing router F5 blocker prevents automatic reload without invoking a confirmation", async ({
+test("a standalone navigation guard does not implicitly register an auto-update blocker", async ({
   context,
   request,
 }) => {
@@ -1065,9 +1065,9 @@ test("an existing router F5 blocker prevents automatic reload without invoking a
   await page.evaluate(() =>
     (
       globalThis as typeof globalThis & {
-        __SW_TEST_ADD_RELOAD_BLOCKER__: () => void;
+        __SW_TEST_ADD_NAVIGATION_BLOCKER__: () => void;
       }
-    ).__SW_TEST_ADD_RELOAD_BLOCKER__(),
+    ).__SW_TEST_ADD_NAVIGATION_BLOCKER__(),
   );
   let dialogs = 0;
   page.on("dialog", (dialog) => {
@@ -1076,29 +1076,13 @@ test("an existing router F5 blocker prevents automatic reload without invoking a
   });
   await setServerState(request, { version: "b" });
   await rpc(page, { type: "CHECK_MANIFEST" });
-  await expectReady(page, builds.b.manifest.buildInfo);
-  await page.waitForTimeout(1500);
-  await expectVersion(page, "a");
-  expect(await loadCount(page)).toBe(1);
-  expect(dialogs).toBe(0);
-  expect(
-    await page.evaluate(
-      () =>
-        (
-          globalThis as typeof globalThis & {
-            __SW_TEST_BLOCKER_CALLS__: number;
-          }
-        ).__SW_TEST_BLOCKER_CALLS__,
-    ),
-  ).toBe(0);
-  await page.evaluate(() =>
-    (
-      globalThis as typeof globalThis & {
-        __SW_TEST_REMOVE_RELOAD_BLOCKER__: () => void;
-      }
-    ).__SW_TEST_REMOVE_RELOAD_BLOCKER__(),
-  );
   await expectVersion(page, "b");
+  await expectReady(page, builds.b.manifest.buildInfo);
+  expect(
+    await page.evaluate(() =>
+      sessionStorage.getItem("sw-test-navigation-blocker-calls"),
+    ),
+  ).toBe("0");
   expect(await loadCount(page)).toBe(2);
   expect(dialogs).toBe(0);
 });

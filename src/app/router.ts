@@ -1,6 +1,5 @@
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./route-tree.gen.ts";
-import { registerAutoReloadBlocker } from "./auto-update-safety.ts";
 
 export function getRouter() {
   // Create the router instance from the generated route tree
@@ -12,18 +11,6 @@ export function getRouter() {
       isAuthenticated: false,
     },
   });
-  // Active useBlocker registrations pause automatic updates without invoking shouldBlockFn.
-  // `disabled` controls the registration; enableBeforeUnload only controls manual F5/unload.
-  const blockHistory = router.history.block.bind(router.history);
-  router.history.block = (blocker) => {
-    const unblock = blockHistory(blocker);
-    const removeAutoReloadBlocker = registerAutoReloadBlocker();
-    return () => {
-      unblock();
-      removeAutoReloadBlocker();
-    };
-  };
-
   router.subscribe("onResolved", () =>
     window.dispatchEvent(new Event("sw-route-changed")),
   );

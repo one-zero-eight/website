@@ -61,11 +61,15 @@ for (const [index, version] of ["a", "b", "c"].entries()) {
           return `${source}
             globalThis.__SW_TEST_VERSION__ = ${JSON.stringify(version)};
             globalThis.__SW_TEST_LOAD_LAZY__ = () => import("virtual:sw-test-lazy");
-            globalThis.__SW_TEST_ADD_RELOAD_BLOCKER__ = () => {
-              globalThis.__SW_TEST_BLOCKER_CALLS__ = 0;
-              globalThis.__SW_TEST_REMOVE_RELOAD_BLOCKER__ = router.history.block({
-                blockerFn: () => { globalThis.__SW_TEST_BLOCKER_CALLS__++; return true; },
-                enableBeforeUnload: true,
+            globalThis.__SW_TEST_ADD_NAVIGATION_BLOCKER__ = () => {
+              sessionStorage.setItem("sw-test-navigation-blocker-calls", "0");
+              router.history.block({
+                blockerFn: () => {
+                  const key = "sw-test-navigation-blocker-calls";
+                  sessionStorage.setItem(key, String(Number(sessionStorage.getItem(key)) + 1));
+                  return true;
+                },
+                enableBeforeUnload: false,
               });
             };
           `;

@@ -344,7 +344,7 @@ try {
     })
     .toBe(firstBuild.buildInfo.buildId);
   console.info(
-    "Первая сборка закеширована. В Debug явно включена пауза автообновления через компонентный useBlocker.",
+    "Первая сборка закеширована. В Debug явно включена пауза через useAutoUpdateBlocker и собственный реестр блокеров.",
   );
   const viewingTab = await openAppTab(context, origin, firstBuild, "/about");
   const timerTab = await openAppTab(context, origin, firstBuild, "/timer");
@@ -440,7 +440,7 @@ try {
     "Новая вкладка тоже не скачивала файлы готового снимка повторно: 0 запросов к серверу за этими файлами.",
   );
   console.info(
-    `[6/12] Debug остаётся на своей сборке из-за включённого useBlocker. About обновляется по умолчанию; таймер защищает свой компонент.`,
+    `[6/12] Debug остаётся на своей сборке из-за включённого useAutoUpdateBlocker. About обновляется по умолчанию; таймер защищает свой компонент.`,
   );
   await viewingTab.page.bringToFront();
   await expect(viewingTab.page.locator("#debug-html-build")).toHaveText(

@@ -9,7 +9,7 @@ import { Helmet } from "@dr.pogodin/react-helmet";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/ui/cn";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useBlocker, useNavigate } from "@tanstack/react-router";
 import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
 import { getClubTypeLabel } from "./constants.ts";
 import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor";
@@ -235,7 +235,9 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     cancelPendingLogo,
   ]);
 
-  useAutoUpdateBlocker(true, {
+  useAutoUpdateBlocker();
+
+  useBlocker({
     enableBeforeUnload: true,
     shouldBlockFn: () => {
       if (hasUnsavedChanges()) {

@@ -153,7 +153,7 @@ describe("automatic update controller", () => {
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
-  it.each(["navigation-blocker", "mutation", "navigation"] as const)(
+  it.each(["component-blocker", "mutation", "navigation"] as const)(
     "rechecks %s after asynchronous verification, preserving newly started work",
     async (reason) => {
       const pending = Promise.withResolvers<WorkerState>();
@@ -163,7 +163,7 @@ describe("automatic update controller", () => {
       announceNextBuild();
       await vi.advanceTimersByTimeAsync(0);
       expect(requestWorker).toHaveBeenCalledWith({ type: "GET_STATE" });
-      if (reason === "navigation-blocker") {
+      if (reason === "component-blocker") {
         addBlocker();
       } else if (reason === "mutation") {
         vi.mocked(queryClient.isMutating).mockReturnValue(1);
@@ -183,7 +183,7 @@ describe("automatic update controller", () => {
     const removeSecond = addBlocker();
     announceNextBuild();
     await vi.advanceTimersByTimeAsync(0);
-    expect(status.blockedReason).toBe("navigation-blocker");
+    expect(status.blockedReason).toBe("component-blocker");
     expect(requestWorker).not.toHaveBeenCalled();
     removeFirst();
     await vi.advanceTimersByTimeAsync(0);

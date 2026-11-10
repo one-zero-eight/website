@@ -11,7 +11,7 @@ const idlePage = {
   online: true,
   navigationIdle: true,
   hasPendingMutations: false,
-  hasNavigationBlocker: false,
+  hasComponentBlocker: false,
   alreadyAttempted: false,
 };
 const current: BuildInfo = {
@@ -31,7 +31,7 @@ describe("default-on automatic update policy", () => {
     ["online", false, "offline"],
     ["navigationIdle", false, "navigation"],
     ["hasPendingMutations", true, "mutation"],
-    ["hasNavigationBlocker", true, "navigation-blocker"],
+    ["hasComponentBlocker", true, "component-blocker"],
     ["alreadyAttempted", true, "already-attempted"],
   ] as const)("blocks while %s is %s", (key, value, reason) => {
     expect(getAutoUpdateBlockReason({ ...idlePage, [key]: value })).toBe(

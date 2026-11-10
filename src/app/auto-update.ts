@@ -55,7 +55,7 @@ export function createAutoUpdateController({
       online: navigator.onLine,
       navigationIdle: isNavigationIdle(),
       hasPendingMutations: queryClient.isMutating() > 0,
-      hasNavigationBlocker: hasAutoReloadBlocker(),
+      hasComponentBlocker: hasAutoReloadBlocker(),
       alreadyAttempted:
         reloadAttempts.has(candidate.buildInfo.buildId) ||
         sessionStorage.getItem(autoReloadTargetStorageKey) ===

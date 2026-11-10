@@ -1,54 +1,25 @@
-import {
-  useBlocker,
-  type RegisteredRouter,
-  type UseBlockerOpts,
-} from "@tanstack/react-router";
-
-function shouldBlockNavigation() {
-  return false;
-}
+import { useEffect } from "react";
+import { registerAutoReloadBlocker } from "./auto-update-safety.ts";
 
 /**
  * Pauses automatic application reloads while this component has active work.
- * Must be called inside the application's TanStack Router provider.
+ * Does not depend on TanStack Router or require a RouterProvider.
  *
  * @param enabled Whether to pause auto-updates. Defaults to `true` for the
  * entire mounted lifetime. Pass a condition to block only while work is active.
  * Changing it to `false` or unmounting releases this blocker. Pending verified
  * updates can resume once all blockers are released.
- * @param options Optional TanStack blocker settings. By default manual
- * navigation, F5/reload and closing the tab are allowed without confirmation.
- * Supply `shouldBlockFn` to guard navigation and `enableBeforeUnload` to guard
- * unload. Use `enabled`, not `disabled`, to control this blocker's lifetime.
  *
- * Automatic updates never invoke `shouldBlockFn` or open its confirmation UI;
- * they wait until all active blockers are released.
- *
- * @returns TanStack's blocker resolver when `withResolver: true` is supplied.
+ * Does not block manual navigation, F5/reload or closing the tab, and does not
+ * show confirmation dialogs. Use TanStack Router's `useBlocker` separately
+ * when navigation or before-unload protection is also needed.
  *
  * @example
  * useAutoUpdateBlocker(searchQuery.length > 0);
- *
- * @example
- * useAutoUpdateBlocker(isDirty, {
- *   shouldBlockFn: () => !window.confirm("Discard unsaved changes?"),
- *   enableBeforeUnload: true,
- * });
  */
-export function useAutoUpdateBlocker<TWithResolver extends boolean = false>(
-  enabled = true,
-  {
-    shouldBlockFn = shouldBlockNavigation,
-    enableBeforeUnload = false,
-    withResolver,
-  }: Partial<
-    Omit<UseBlockerOpts<RegisteredRouter, TWithResolver>, "disabled">
-  > = {},
-) {
-  return useBlocker<RegisteredRouter, TWithResolver>({
-    disabled: !enabled,
-    shouldBlockFn,
-    enableBeforeUnload,
-    withResolver,
-  });
+export function useAutoUpdateBlocker(enabled = true) {
+  useEffect(() => {
+    if (!enabled) return;
+    return registerAutoReloadBlocker();
+  }, [enabled]);
 }
