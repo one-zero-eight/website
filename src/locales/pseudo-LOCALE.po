@@ -619,7 +619,7 @@ msgid "a new series will be created"
 msgstr ""
 
 #: src/components/clubs/ClubPage.tsx:165
-#: src/components/clubs/EditClubPage.tsx:900
+#: src/components/clubs/EditClubPage.tsx:902
 msgid "About"
 msgstr ""
 
@@ -706,6 +706,10 @@ msgstr ""
 msgid "Active tournaments"
 msgstr ""
 
+#: src/components/debug/BrowserDiagnostics.tsx:69
+msgid "Active worker of a registration; not necessarily this page's controller."
+msgstr ""
+
 #: src/components/sport/SportOverviewSection.tsx:365
 msgid "Activity link"
 msgstr ""
@@ -783,7 +787,7 @@ msgstr ""
 msgid "Add link"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1140
+#: src/components/clubs/EditClubPage.tsx:1142
 #: src/components/editor/menus/LinkButton.tsx:234
 msgid "Add Link"
 msgstr ""
@@ -814,7 +818,7 @@ msgstr ""
 msgid "Add to favorites"
 msgstr ""
 
-#: src/components/dashboard/PwaWidget.tsx:25
+#: src/components/dashboard/PwaWidget.tsx:38
 msgid "Add to home screen and use it like a native app."
 msgstr ""
 
@@ -926,7 +930,7 @@ msgstr ""
 msgid "All tournaments"
 msgstr ""
 
-#: src/components/dashboard/links/Links.tsx:120
+#: src/components/dashboard/links/Links.tsx:122
 msgid "All University Services"
 msgstr ""
 
@@ -942,7 +946,7 @@ msgstr ""
 msgid "Amazing discovery! You've found the exclusive Ryan Gosling resource link. And the correct answer is <0>108</0>, not 42."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:410
+#: src/components/clubs/EditClubPage.tsx:412
 msgid "An admin needs to review your changes before they go live."
 msgstr ""
 
@@ -952,6 +956,18 @@ msgstr ""
 
 #: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:627
 msgid "Anchor active week"
+msgstr ""
+
+#: src/components/debug/DebugPage.tsx:81
+msgid "App and offline diagnostics"
+msgstr ""
+
+#: src/components/debug/DebugPage.tsx:84
+msgid "App observations, browser roles, and worker replies are separate sources. Each worker is queried directly; the same instance can have several roles."
+msgstr ""
+
+#: src/components/debug/AppDiagnostics.tsx:15
+msgid "App's view"
 msgstr ""
 
 #: src/components/web-print/ScanPage.tsx:608
@@ -1099,6 +1115,10 @@ msgstr ""
 msgid "Automatic conversion of PDF, Word, Excel, images, and more for printing"
 msgstr ""
 
+#: src/components/debug/AppDiagnostics.tsx:87
+msgid "Automatic update"
+msgstr ""
+
 #: src/components/web-print/ScanPage.tsx:654
 msgid "Automatically detects the document edges and crops the PDF to match."
 msgstr ""
@@ -1146,7 +1166,7 @@ msgstr ""
 msgid "Back in storage"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:587
+#: src/components/clubs/EditClubPage.tsx:589
 msgid "Back to Club"
 msgstr ""
 
@@ -1188,7 +1208,7 @@ msgstr ""
 msgid "banned {bannedAt}"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:776
+#: src/components/clubs/EditClubPage.tsx:778
 msgid "Basic information"
 msgstr ""
 
@@ -1268,7 +1288,7 @@ msgstr ""
 msgid "Booking"
 msgstr ""
 
-#: src/components/music-room/MusicRoomPage.tsx:101
+#: src/components/music-room/MusicRoomPage.tsx:98
 msgid "Booking calendar"
 msgstr ""
 
@@ -1298,13 +1318,17 @@ msgstr ""
 msgid "Bot"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:888
+#: src/components/clubs/EditClubPage.tsx:890
 msgid "Brief description for cards"
 msgstr ""
 
 #: src/app/routes/_with_menu/extension.tsx:16
 #: src/app/routes/_with_menu/extension.tsx:23
 msgid "Browser extension"
+msgstr ""
+
+#: src/components/debug/BrowserDiagnostics.tsx:18
+msgid "Browser's view"
 msgstr ""
 
 #: src/components/clubs/ClubLeaguePage.tsx:139
@@ -1374,6 +1398,10 @@ msgstr ""
 msgid "bye"
 msgstr ""
 
+#: src/components/debug/WorkerDiagnostics.tsx:291
+msgid "Cache Storage observed by this worker"
+msgstr ""
+
 #: src/app/routes/_with_menu/scholarship.tsx:19
 msgid "Calculate your scholarship at Innopolis University. Type your marks for the previous semester to see the expected scholarship."
 msgstr ""
@@ -1428,8 +1456,8 @@ msgstr ""
 #: src/components/clubs/AddClubDialog.tsx:160
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:232
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:244
-#: src/components/clubs/EditClubPage.tsx:1034
-#: src/components/clubs/EditClubPage.tsx:1264
+#: src/components/clubs/EditClubPage.tsx:1036
+#: src/components/clubs/EditClubPage.tsx:1266
 #: src/components/events/drafts/CreateDraftModal.tsx:187
 #: src/components/events/drafts/DraftHostsSection.tsx:405
 #: src/components/events/drafts/DraftHostsSection.tsx:591
@@ -1550,6 +1578,10 @@ msgstr ""
 #~ msgid "Cannot delete a block referenced by series: {references}. Change their windows first."
 #~ msgstr ""
 
+#: src/components/layout/Offline.tsx:52
+msgid "Cannot reach the server. You are viewing a saved version of the website."
+msgstr ""
+
 #: src/components/when2meet/MeetingPage.tsx:1056
 msgid "Cannot select a past time"
 msgstr ""
@@ -1598,7 +1630,7 @@ msgstr ""
 msgid "Change callout type"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1013
+#: src/components/clubs/EditClubPage.tsx:1015
 msgid "Change Leader"
 msgstr ""
 
@@ -1653,7 +1685,7 @@ msgstr ""
 msgid "Check out this room: {roomTitle}"
 msgstr ""
 
-#: src/components/layout/Offline.tsx:52
+#: src/components/layout/Offline.tsx:56
 msgid "Check that airplane mode is disabled."
 msgstr ""
 
@@ -1737,7 +1769,7 @@ msgstr ""
 msgid "Choose color"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:729
+#: src/components/clubs/EditClubPage.tsx:731
 #: src/components/web-print/FileDropzone.tsx:267
 msgid "Choose file"
 msgstr ""
@@ -1772,6 +1804,10 @@ msgstr ""
 msgid "Clear all"
 msgstr ""
 
+#: src/components/debug/DebugPage.tsx:188
+msgid "Clear ALL caches, unregister, and reload"
+msgstr ""
+
 #: src/components/board-games/ReservationsAdminPage.tsx:197
 msgid "Clear filters"
 msgstr ""
@@ -1784,7 +1820,7 @@ msgstr ""
 msgid "Clear input"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:754
+#: src/components/clubs/EditClubPage.tsx:756
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:81
 msgid "Clear selection"
 msgstr ""
@@ -1832,12 +1868,12 @@ msgstr ""
 msgid "Club Fest page."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:796
+#: src/components/clubs/EditClubPage.tsx:798
 msgid "Club is active <0>(show in the list of clubs)</0>"
 msgstr ""
 
 #: src/components/clubs/ClubPage.tsx:269
-#: src/components/clubs/EditClubPage.tsx:946
+#: src/components/clubs/EditClubPage.tsx:948
 msgid "Club Leader"
 msgstr ""
 
@@ -1866,7 +1902,7 @@ msgstr ""
 msgid "Club logo"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:625
+#: src/components/clubs/EditClubPage.tsx:627
 msgid "Club Logo"
 msgstr ""
 
@@ -1880,7 +1916,7 @@ msgid "Club logos or training restrictions could not be loaded."
 msgstr ""
 
 #: src/components/clubs/ClubPage.tsx:73
-#: src/components/clubs/EditClubPage.tsx:562
+#: src/components/clubs/EditClubPage.tsx:564
 msgid "Club not found"
 msgstr ""
 
@@ -1892,7 +1928,7 @@ msgstr ""
 msgid "Club Types"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:840
+#: src/components/clubs/EditClubPage.tsx:842
 msgid "club-slug"
 msgstr ""
 
@@ -1901,7 +1937,7 @@ msgid "club-url-slug"
 msgstr ""
 
 #. placeholder {0}: club.title
-#: src/components/clubs/EditClubPage.tsx:594
+#: src/components/clubs/EditClubPage.tsx:596
 msgid "Club: {0}"
 msgstr ""
 
@@ -1945,7 +1981,7 @@ msgstr ""
 msgid "Code from TV"
 msgstr ""
 
-#: src/components/dashboard/links/Links.tsx:239
+#: src/components/dashboard/links/Links.tsx:241
 msgid "Collapse"
 msgstr ""
 
@@ -2066,11 +2102,11 @@ msgstr ""
 msgid "Connect Telegram user to InNoHassle Account."
 msgstr ""
 
-#: src/components/layout/Offline.tsx:49
+#: src/components/layout/Offline.tsx:53
 msgid "Connect to the internet to keep using InNoHassle."
 msgstr ""
 
-#: src/components/layout/Offline.tsx:51
+#: src/components/layout/Offline.tsx:55
 msgid "Connect to WiFi or mobile internet."
 msgstr ""
 
@@ -2198,8 +2234,8 @@ msgstr ""
 msgid "Could not delete reservation"
 msgstr ""
 
-#: src/components/maps/viewer/MapView.tsx:158
-#: src/components/maps/viewer/MapView.tsx:169
+#: src/components/maps/viewer/MapView.tsx:160
+#: src/components/maps/viewer/MapView.tsx:171
 msgid "Could not download maps PDF."
 msgstr ""
 
@@ -2207,7 +2243,7 @@ msgstr ""
 msgid "Could not import attendance"
 msgstr ""
 
-#: src/app/routes/forms.submit.tsx:174
+#: src/app/routes/forms.submit.tsx:178
 msgid "Could not load form"
 msgstr ""
 
@@ -2269,7 +2305,7 @@ msgstr ""
 msgid "Could not update reservation"
 msgstr ""
 
-#: src/components/layout/Offline.tsx:60
+#: src/components/layout/Offline.tsx:64
 msgid "Couldn't connect to InNoHassle servers"
 msgstr ""
 
@@ -2421,7 +2457,7 @@ msgid "Current League Points"
 msgstr ""
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:324
-#: src/components/clubs/EditClubPage.tsx:638
+#: src/components/clubs/EditClubPage.tsx:640
 msgid "Current logo"
 msgstr ""
 
@@ -2464,7 +2500,7 @@ msgstr ""
 msgid "Currently impersonating {0}"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1245
+#: src/components/clubs/EditClubPage.tsx:1247
 msgid "Custom display label"
 msgstr ""
 
@@ -2745,7 +2781,7 @@ msgstr ""
 msgid "Description for your calendar..."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1290
+#: src/components/clubs/EditClubPage.tsx:1292
 msgid "Description Preview"
 msgstr ""
 
@@ -2924,7 +2960,7 @@ msgid "Edit"
 msgstr ""
 
 #. placeholder {0}: club.title
-#: src/components/clubs/EditClubPage.tsx:571
+#: src/components/clubs/EditClubPage.tsx:573
 msgid "Edit {0}"
 msgstr ""
 
@@ -2944,7 +2980,7 @@ msgstr ""
 msgid "Edit club"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:579
+#: src/components/clubs/EditClubPage.tsx:581
 msgid "Edit Club"
 msgstr ""
 
@@ -3012,7 +3048,7 @@ msgstr ""
 #~ msgstr ""
 
 #: src/components/admin/AdminUserDetails.tsx:266
-#: src/components/clubs/EditClubPage.tsx:976
+#: src/components/clubs/EditClubPage.tsx:978
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:79
 msgid "Email"
 msgstr ""
@@ -3094,7 +3130,7 @@ msgstr ""
 msgid "Enter a day for row {row}."
 msgstr ""
 
-#: src/components/forms/FormsPage.tsx:178
+#: src/components/forms/FormsPage.tsx:186
 msgid "Enter a form URL to generate a link with the respondent's email pre-filled"
 msgstr ""
 
@@ -3117,7 +3153,7 @@ msgstr ""
 msgid "Enter club title"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1046
+#: src/components/clubs/EditClubPage.tsx:1048
 msgid "Enter Innopolis email to set as new club leader"
 msgstr ""
 
@@ -3158,11 +3194,11 @@ msgstr ""
 #: src/components/admin/AdminRoomsPage.tsx:79
 #: src/components/admin/AdminRoomsPage.tsx:87
 #: src/components/admin/AdminRoomsPage.tsx:92
-#: src/components/admin/useImpersonation.ts:70
-#: src/components/admin/useImpersonation.ts:75
-#: src/components/admin/useImpersonation.ts:84
+#: src/components/admin/useImpersonation.ts:73
+#: src/components/admin/useImpersonation.ts:78
 #: src/components/admin/useImpersonation.ts:89
-#: src/components/admin/useImpersonation.ts:114
+#: src/components/admin/useImpersonation.ts:94
+#: src/components/admin/useImpersonation.ts:125
 #: src/components/admin/usePredefinedDataEditor.ts:36
 #: src/components/admin/usePredefinedDataEditor.ts:65
 #: src/components/admin/usePredefinedDataEditor.ts:71
@@ -3194,7 +3230,7 @@ msgstr ""
 #: src/components/events/submissions/SubmissionPage.tsx:91
 #: src/components/events/submissions/SubmissionPage.tsx:105
 #: src/components/events/submissions/SubmissionPage.tsx:119
-#: src/components/forms/FormsPage.tsx:36
+#: src/components/forms/FormsPage.tsx:37
 #: src/components/schedule-assistant/timetable/CreateClassModal.tsx:846
 #: src/components/schedule-assistant/timetable/CreateClassModal.tsx:850
 #: src/components/schedule-assistant/timetable/CreateClassModal.tsx:855
@@ -3450,8 +3486,8 @@ msgstr ""
 msgid "Export error"
 msgstr ""
 
-#: src/components/maps/viewer/MapView.tsx:158
-#: src/components/maps/viewer/MapView.tsx:169
+#: src/components/maps/viewer/MapView.tsx:160
+#: src/components/maps/viewer/MapView.tsx:171
 msgid "Export failed"
 msgstr ""
 
@@ -3467,7 +3503,7 @@ msgstr ""
 msgid "Export music room bookings"
 msgstr ""
 
-#: src/components/maps/viewer/MapView.tsx:239
+#: src/components/maps/viewer/MapView.tsx:241
 msgid "Export PDF"
 msgstr ""
 
@@ -3488,7 +3524,7 @@ msgstr ""
 msgid "Export XLSX"
 msgstr ""
 
-#: src/components/music-room/MusicRoomPage.tsx:104
+#: src/components/music-room/MusicRoomPage.tsx:101
 msgid "Export your personal calendar"
 msgstr ""
 
@@ -3516,7 +3552,7 @@ msgstr ""
 msgid "External host name is required."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1206
+#: src/components/clubs/EditClubPage.tsx:1208
 msgid "External URL"
 msgstr ""
 
@@ -3631,7 +3667,7 @@ msgstr ""
 msgid "fill {fillPercent}"
 msgstr ""
 
-#: src/components/dashboard/links/Links.tsx:141
+#: src/components/dashboard/links/Links.tsx:143
 msgid "Filter"
 msgstr ""
 
@@ -3716,11 +3752,11 @@ msgstr ""
 msgid "Forbidden time"
 msgstr ""
 
-#: src/app/routes/forms.submit.tsx:122
-#: src/app/routes/forms.submit.tsx:141
-#: src/app/routes/forms.submit.tsx:155
-#: src/app/routes/forms.submit.tsx:168
-#: src/app/routes/forms.submit.tsx:197
+#: src/app/routes/forms.submit.tsx:126
+#: src/app/routes/forms.submit.tsx:145
+#: src/app/routes/forms.submit.tsx:159
+#: src/app/routes/forms.submit.tsx:172
+#: src/app/routes/forms.submit.tsx:201
 msgid "Form"
 msgstr ""
 
@@ -3769,9 +3805,18 @@ msgstr ""
 msgid "Full and short official names"
 msgstr ""
 
+#: src/components/debug/WorkerDiagnostics.tsx:378
+msgid "Full GET_DIAGNOSTICS response from this worker"
+msgstr ""
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:418
 #: src/components/board-games/ReservationDetailsModal.tsx:252
 msgid "Full name"
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:253
+#: src/components/debug/WorkerDiagnostics.tsx:370
+msgid "Full stored manifest"
 msgstr ""
 
 #: src/components/schedule-assistant/timetable/createMeetingUtils.ts:576
@@ -4047,6 +4092,10 @@ msgstr ""
 msgid "Guests Role"
 msgstr ""
 
+#: src/components/debug/BrowserDiagnostics.tsx:65
+msgid "Handles requests from this page."
+msgstr ""
+
 #: src/app/routes/_with_menu/clubs/new.tsx:20
 #: src/components/clubs/HowToCreateClubPage.tsx:12
 msgid "Have an idea for a club? Start your own community and make a difference at Innopolis University!"
@@ -4166,6 +4215,14 @@ msgstr ""
 msgid "How to Register Your Club"
 msgstr ""
 
+#: src/components/debug/AppDiagnostics.tsx:37
+msgid "HTML and App build IDs differ."
+msgstr ""
+
+#: src/components/debug/AppDiagnostics.tsx:33
+msgid "HTML and App build IDs match."
+msgstr ""
+
 #: src/components/search/act/ActPage.tsx:97
 msgid "I can help you to book the music room."
 msgstr ""
@@ -4175,7 +4232,7 @@ msgstr ""
 msgid "ID"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1107
+#: src/components/clubs/EditClubPage.tsx:1109
 msgid "ID from InnoSport system"
 msgstr ""
 
@@ -4202,11 +4259,11 @@ msgstr ""
 msgid "Impersonate"
 msgstr ""
 
-#: src/components/admin/useImpersonation.ts:123
+#: src/components/admin/useImpersonation.ts:137
 msgid "Impersonation cleared"
 msgstr ""
 
-#: src/components/admin/useImpersonation.ts:89
+#: src/components/admin/useImpersonation.ts:94
 msgid "Impersonation token was not returned."
 msgstr ""
 
@@ -4357,11 +4414,11 @@ msgstr ""
 msgid "Innopolis University professors"
 msgstr ""
 
-#: src/components/dashboard/PwaWidget.tsx:34
+#: src/components/dashboard/PwaWidget.tsx:47
 msgid "Install"
 msgstr ""
 
-#: src/components/dashboard/PwaWidget.tsx:21
+#: src/components/dashboard/PwaWidget.tsx:34
 msgid "Install as PWA"
 msgstr ""
 
@@ -4375,6 +4432,10 @@ msgstr ""
 
 #: src/components/extension/ExtensionPage.tsx:85
 msgid "Install the extension for Firefox-based browsers from our servers (supports automatic updates)."
+msgstr ""
+
+#: src/components/debug/BrowserDiagnostics.tsx:76
+msgid "Installed worker waiting to activate."
 msgstr ""
 
 #: src/components/music-room/MusicRoomPage.tsx:46
@@ -4435,7 +4496,7 @@ msgstr ""
 msgid "Invalid host"
 msgstr ""
 
-#: src/app/routes/forms.submit.tsx:128
+#: src/app/routes/forms.submit.tsx:132
 #: src/components/events/drafts/DraftLinksSection.tsx:140
 msgid "Invalid link"
 msgstr ""
@@ -4466,7 +4527,7 @@ msgstr ""
 msgid "Invited by {invitedBy}"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1089
+#: src/components/clubs/EditClubPage.tsx:1091
 msgid "Is InnoSport club"
 msgstr ""
 
@@ -4503,7 +4564,7 @@ msgstr ""
 msgid "Joins"
 msgstr ""
 
-#: src/app/routes/forms.submit.tsx:112
+#: src/app/routes/forms.submit.tsx:116
 msgid "Just a moment, we're redirecting you to the form..."
 msgstr ""
 
@@ -4523,7 +4584,7 @@ msgstr ""
 msgid "Keep room"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:693
+#: src/components/clubs/EditClubPage.tsx:695
 msgid "Keep submitted logo"
 msgstr ""
 
@@ -4531,14 +4592,40 @@ msgstr ""
 #~ msgid "L"
 #~ msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1235
+#: src/components/clubs/EditClubPage.tsx:1237
 msgid "Label (Optional)"
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:97
+#: src/components/debug/WorkerDiagnostics.tsx:212
+msgid "Last CLIENT_HELLO recorded in shared storage"
+msgstr ""
+
+#: src/components/debug/AppDiagnostics.tsx:65
+msgid "Last CLIENT_HELLO sent by this App, acknowledgement, and target"
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:286
+msgid "Last manifest check"
 msgstr ""
 
 #: src/components/admin/AdminUserDetails.tsx:301
 msgid "Last name"
 msgstr ""
 
+#: src/components/debug/AppDiagnostics.tsx:100
+msgid "Last worker notification observed by this App"
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:344
+msgid "Latest ready"
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:320
+msgid "Latest ready is the offline fallback, not necessarily the build loaded by this page. A snapshot refresh does not fetch the server's current manifest."
+msgstr ""
+
+#: src/components/about/TeamMembers.tsx:106
 #: src/components/clubs/ClubAdminCard.tsx:99
 #: src/components/clubs/ClubCard.tsx:50
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:299
@@ -4607,7 +4694,7 @@ msgid "Link"
 msgstr ""
 
 #. placeholder {0}: index + 1
-#: src/components/clubs/EditClubPage.tsx:1165
+#: src/components/clubs/EditClubPage.tsx:1167
 msgid "Link {0}"
 msgstr ""
 
@@ -4669,6 +4756,10 @@ msgstr ""
 msgid "Live standings showing points earned by clubs throughout the semester"
 msgstr ""
 
+#: src/components/debug/WorkerDiagnostics.tsx:34
+msgid "Live windows come from the worker's Clients API. Stored pins and page reports come from IndexedDB. A stored pin alone does not mean the tab is still open."
+msgstr ""
+
 #: src/components/sport/SportTrainerBaamImportButton.tsx:184
 msgid "Load from Baam"
 msgstr ""
@@ -4678,7 +4769,7 @@ msgid "Loading changes for review..."
 msgstr ""
 
 #: src/components/clubs/ClubPage.tsx:63
-#: src/components/clubs/EditClubPage.tsx:552
+#: src/components/clubs/EditClubPage.tsx:554
 msgid "Loading club information..."
 msgstr ""
 
@@ -4723,11 +4814,11 @@ msgstr ""
 msgid "Location · {value}"
 msgstr ""
 
-#: src/components/maps/viewer/MapView.tsx:105
+#: src/components/maps/viewer/MapView.tsx:107
 msgid "Location access denied"
 msgstr ""
 
-#: src/components/maps/viewer/MapView.tsx:111
+#: src/components/maps/viewer/MapView.tsx:113
 msgid "Location unavailable"
 msgstr ""
 
@@ -4748,7 +4839,7 @@ msgstr ""
 msgid "Logo"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:659
+#: src/components/clubs/EditClubPage.tsx:661
 msgid "Logo preview"
 msgstr ""
 
@@ -4824,6 +4915,14 @@ msgstr ""
 
 #: src/components/about/aboutConstants.ts:15
 msgid "Management"
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:224
+msgid "Manifest selected for this page"
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:316
+msgid "Manifests stored by the worker"
 msgstr ""
 
 #: src/components/web-print/ScanPage.tsx:574
@@ -4995,7 +5094,7 @@ msgstr ""
 msgid "Moderator feedback"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1308
+#: src/components/clubs/EditClubPage.tsx:1310
 msgid "Modified"
 msgstr ""
 
@@ -5105,7 +5204,7 @@ msgstr ""
 #: src/components/admin/AdminUserDetails.tsx:267
 #: src/components/calendar/import/ImportModal.tsx:163
 #: src/components/clubs/ClubPage.tsx:278
-#: src/components/clubs/EditClubPage.tsx:963
+#: src/components/clubs/EditClubPage.tsx:965
 #: src/components/events/drafts/DraftHostsSection.tsx:560
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:73
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:338
@@ -5279,6 +5378,10 @@ msgstr ""
 msgid "No banned users match your search"
 msgstr ""
 
+#: src/components/debug/WorkerDiagnostics.tsx:296
+msgid "No caches."
+msgstr ""
+
 #: src/components/clubs/ClubReviewChangesPage.tsx:33
 msgid "No changes to review"
 msgstr ""
@@ -5308,6 +5411,14 @@ msgstr ""
 
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:835
 msgid "No classes this week."
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:218
+msgid "No CLIENT_HELLO was recorded for this page."
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:104
+msgid "No CLIENT_HELLO was recorded for this pin."
 msgstr ""
 
 #: src/components/events/drafts/DraftHostsSection.tsx:512
@@ -5393,7 +5504,7 @@ msgstr ""
 msgid "No feedback."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:732
+#: src/components/clubs/EditClubPage.tsx:734
 msgid "No file selected"
 msgstr ""
 
@@ -5419,7 +5530,7 @@ msgstr ""
 msgid "No games match \"{trimmedSearchQuery}\"."
 msgstr ""
 
-#: src/components/maps/viewer/MapView.tsx:115
+#: src/components/maps/viewer/MapView.tsx:117
 msgid "No GPS signal"
 msgstr ""
 
@@ -5470,7 +5581,7 @@ msgstr ""
 msgid "No links"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1149
+#: src/components/clubs/EditClubPage.tsx:1151
 msgid "No links added yet. Click \"Add Link\" to add resources."
 msgstr ""
 
@@ -5571,11 +5682,15 @@ msgstr ""
 msgid "No qualification was played in this tournament."
 msgstr ""
 
+#: src/components/debug/BrowserDiagnostics.tsx:43
+msgid "No registrations for this origin."
+msgstr ""
+
 #: src/components/board-games/ReservationsAdminPage.tsx:226
 msgid "No reservations match these filters."
 msgstr ""
 
-#: src/components/dashboard/links/Links.tsx:245
+#: src/components/dashboard/links/Links.tsx:247
 msgid "No results found."
 msgstr ""
 
@@ -5607,8 +5722,16 @@ msgstr ""
 msgid "No sport hours history yet."
 msgstr ""
 
+#: src/components/debug/WorkerDiagnostics.tsx:328
+msgid "No stored manifests."
+msgstr ""
+
 #: src/components/sport/SportTrainerTrainingModal.tsx:584
 msgid "No students found."
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:42
+msgid "No tabs or stored pins."
 msgstr ""
 
 #: src/components/about/TeamMembers.tsx:243
@@ -5745,7 +5868,7 @@ msgid "Nothing to import"
 msgstr ""
 
 #. placeholder {0}: getViewUserName(targetUser)
-#: src/components/admin/useImpersonation.ts:103
+#: src/components/admin/useImpersonation.ts:112
 msgid "Now impersonating {0}"
 msgstr ""
 
@@ -5757,6 +5880,7 @@ msgstr ""
 msgid "Official sources:"
 msgstr ""
 
+#: src/components/debug/DebugPage.tsx:116
 #: src/components/web-print/PrintPage.tsx:570
 #: src/components/web-print/ScanPage.tsx:528
 msgid "Offline"
@@ -5836,6 +5960,7 @@ msgstr ""
 msgid "one-zero-eight team is the community of students of Innopolis University passionate about technology"
 msgstr ""
 
+#: src/components/debug/DebugPage.tsx:116
 #: src/components/web-print/PrintPage.tsx:570
 #: src/components/web-print/ScanPage.tsx:528
 msgid "Online"
@@ -5857,11 +5982,15 @@ msgstr ""
 msgid "Only administrators can create tournaments"
 msgstr ""
 
+#: src/components/debug/AppDiagnostics.tsx:92
+#~ msgid "Only explicitly safe viewing pages reload automatically. Forms, timers, editors, and pages with ongoing work keep their current build."
+#~ msgstr ""
+
 #: src/components/when2meet/CreationPage.tsx:140
 msgid "Only the meeting owner can edit this event."
 msgstr ""
 
-#: src/components/forms/FormsPage.tsx:65
+#: src/components/forms/FormsPage.tsx:73
 msgid "Only Yandex Forms URLs are supported"
 msgstr ""
 
@@ -5902,6 +6031,10 @@ msgstr ""
 #: src/components/schedule/personal-card/PersonalCard.tsx:66
 #: src/components/schedule/personal-card/PersonalCard.tsx:84
 msgid "Open Telegram bot"
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:91
+msgid "Open the manifest used by this tab"
 msgstr ""
 
 #: src/components/calendar/ExportModal.tsx:99
@@ -6021,6 +6154,14 @@ msgstr ""
 msgid "Page"
 msgstr ""
 
+#: src/components/debug/AppDiagnostics.tsx:92
+msgid "Pages update automatically by default. An active useAutoUpdateBlocker in a component pauses updates until it is disabled or unmounted."
+msgstr ""
+
+#: src/components/debug/AppDiagnostics.tsx:92
+#~ msgid "Pages update automatically by default. An active useBlocker in a component pauses updates until it is disabled or unmounted."
+#~ msgstr ""
+
 #: src/components/sport/SportTrainingsCalendarList.tsx:204
 msgid "Paid"
 msgstr ""
@@ -6091,8 +6232,12 @@ msgstr ""
 msgid "Paste your link here..."
 msgstr ""
 
-#: src/components/timer/TimerPage.tsx:292
+#: src/components/timer/TimerPage.tsx:305
 msgid "Pause"
+msgstr ""
+
+#: src/components/debug/DebugPage.tsx:106
+msgid "Pause automatic updates on this page"
 msgstr ""
 
 #: src/components/search/PdfPreview.tsx:56
@@ -6213,7 +6358,7 @@ msgstr ""
 msgid "Please enter a valid Gmail address"
 msgstr ""
 
-#: src/components/forms/FormsPage.tsx:70
+#: src/components/forms/FormsPage.tsx:78
 msgid "Please enter a valid URL"
 msgstr ""
 
@@ -6233,7 +6378,7 @@ msgstr ""
 msgid "Please submit an image of the reference document (e.g. a medical certificate) that supports your request to change medical group."
 msgstr ""
 
-#: src/app/AppUpdatePrompt.tsx:46
+#: src/app/AppUpdatePrompt.tsx:48
 msgid "Please, reload the page."
 msgstr ""
 
@@ -6274,7 +6419,7 @@ msgstr ""
 msgid "Preferred time"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:914
+#: src/components/clubs/EditClubPage.tsx:916
 #: src/components/search/IframePreviewCard.tsx:95
 #: src/components/web-print/PrintPage.tsx:445
 #: src/components/web-print/ScanPage.tsx:400
@@ -6285,7 +6430,7 @@ msgstr ""
 msgid "Preview available for PDF only"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:676
+#: src/components/clubs/EditClubPage.tsx:678
 msgid "Preview unavailable"
 msgstr ""
 
@@ -6509,6 +6654,10 @@ msgstr ""
 msgid "Rating: {0}"
 msgstr ""
 
+#: src/components/debug/DiagnosticData.tsx:61
+msgid "Raw data"
+msgstr ""
+
 #: src/components/music-room/MusicRoomPage.tsx:49
 msgid "Read rules and guides on how to access the Music room. Every visitor should accept these conditions."
 msgstr ""
@@ -6521,7 +6670,7 @@ msgstr ""
 msgid "Receive a monthly stipend from IU alumni"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:763
+#: src/components/clubs/EditClubPage.tsx:765
 msgid "Recommended: Square image, at least 400x400px, PNG, JPG or WEBP format"
 msgstr ""
 
@@ -6554,8 +6703,8 @@ msgstr ""
 msgid "Redirecting to spreadsheet in <0>{countdown}</0> seconds..."
 msgstr ""
 
-#: src/app/routes/forms.submit.tsx:86
-#: src/app/routes/forms.submit.tsx:99
+#: src/app/routes/forms.submit.tsx:90
+#: src/app/routes/forms.submit.tsx:103
 msgid "Redirecting to the form"
 msgstr ""
 
@@ -6564,7 +6713,7 @@ msgid "Redirecting to the Student Affairs Helpdesk"
 msgstr ""
 
 #: src/app/routes/_with_menu/student-affairs/sign-in.tsx:62
-#: src/app/routes/forms.submit.tsx:109
+#: src/app/routes/forms.submit.tsx:113
 msgid "Redirecting..."
 msgstr ""
 
@@ -6578,6 +6727,14 @@ msgstr ""
 
 #: src/components/editor/menus/EditorMenuItems.tsx:135
 msgid "Redo"
+msgstr ""
+
+#: src/components/debug/DebugPage.tsx:134
+msgid "Refresh snapshot"
+msgstr ""
+
+#: src/components/debug/DebugPage.tsx:91
+msgid "Refreshes every 5 seconds while visible. Reading a snapshot does not check for a deployment or download a build. Sources are sampled at different times."
 msgstr ""
 
 #: src/components/tabletennis/Registration.tsx:58
@@ -6594,6 +6751,10 @@ msgstr ""
 
 #: src/components/tabletennis/Registration.tsx:30
 msgid "Register to start playing and tracking your rating. Your results will be visible on the leaderboard."
+msgstr ""
+
+#: src/components/debug/BrowserDiagnostics.tsx:21
+msgid "Registrations and worker roles"
 msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:81
@@ -6619,11 +6780,11 @@ msgstr ""
 msgid "Reject changes"
 msgstr ""
 
-#: src/app/AppUpdatePrompt.tsx:62
+#: src/app/AppUpdatePrompt.tsx:64
 msgid "Reload"
 msgstr ""
 
-#: src/components/layout/Offline.tsx:53
+#: src/components/layout/Offline.tsx:57
 msgid "Reload the page after the connection is restored."
 msgstr ""
 
@@ -6678,7 +6839,7 @@ msgstr ""
 msgid "Remove last page?"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1172
+#: src/components/clubs/EditClubPage.tsx:1174
 msgid "Remove link"
 msgstr ""
 
@@ -6799,16 +6960,24 @@ msgstr ""
 msgid "Reset changes"
 msgstr ""
 
-#: src/components/maps/viewer/MapView.tsx:247
+#: src/components/maps/viewer/MapView.tsx:249
 msgid "Reset north"
+msgstr ""
+
+#: src/components/debug/DebugPage.tsx:164
+msgid "Reset offline storage"
 msgstr ""
 
 #: src/components/tabletennis/QualificationMatches.tsx:357
 msgid "Reset to results"
 msgstr ""
 
+#: src/components/debug/DebugPage.tsx:186
+msgid "Resetting…"
+msgstr ""
+
 #: src/components/clubs/ClubPage.tsx:234
-#: src/components/clubs/EditClubPage.tsx:1126
+#: src/components/clubs/EditClubPage.tsx:1128
 msgid "Resources & Links"
 msgstr ""
 
@@ -6843,7 +7012,7 @@ msgstr ""
 msgid "Results for: {searchedFor}"
 msgstr ""
 
-#: src/components/timer/TimerPage.tsx:283
+#: src/components/timer/TimerPage.tsx:296
 msgid "Resume"
 msgstr ""
 
@@ -6910,11 +7079,11 @@ msgstr ""
 msgid "Returned"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1334
+#: src/components/clubs/EditClubPage.tsx:1336
 msgid "Revert changes"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1331
+#: src/components/clubs/EditClubPage.tsx:1333
 msgid "Revert this section to the published values"
 msgstr ""
 
@@ -7082,7 +7251,7 @@ msgstr ""
 msgid "Save changes"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1281
+#: src/components/clubs/EditClubPage.tsx:1283
 msgid "Save Changes"
 msgstr ""
 
@@ -7106,7 +7275,7 @@ msgstr ""
 msgid "Saved, other admins see these groups"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1278
+#: src/components/clubs/EditClubPage.tsx:1280
 msgid "Saving..."
 msgstr ""
 
@@ -7216,7 +7385,7 @@ msgstr ""
 msgid "Search and review all board game reservations."
 msgstr ""
 
-#: src/components/maps/MapsPageTabs.tsx:37
+#: src/components/maps/MapsPageTabs.tsx:39
 msgid "Search any place"
 msgstr ""
 
@@ -7334,7 +7503,7 @@ msgstr ""
 msgid "Select a course and component."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:707
+#: src/components/clubs/EditClubPage.tsx:709
 msgid "Select a file to preview"
 msgstr ""
 
@@ -7361,7 +7530,7 @@ msgstr ""
 msgid "Select a specific date and time in the future. The timer will count down until that moment."
 msgstr ""
 
-#: src/components/admin/useImpersonation.ts:70
+#: src/components/admin/useImpersonation.ts:73
 msgid "Select a user to impersonate."
 msgstr ""
 
@@ -7470,6 +7639,10 @@ msgstr ""
 msgid "Service for board games reservation."
 msgstr ""
 
+#: src/components/debug/BrowserDiagnostics.tsx:36
+msgid "Service workers are not supported in this browser."
+msgstr ""
+
 #: src/app/routes/_with_menu/menu.tsx:16
 msgid "Services list for navigation."
 msgstr ""
@@ -7482,7 +7655,7 @@ msgstr ""
 msgid "Set guests role to {newRole, select, writer {Writer} other {Reader}}"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1023
+#: src/components/clubs/EditClubPage.tsx:1025
 msgid "Set New Leader (Innopolis Email)"
 msgstr ""
 
@@ -7543,6 +7716,10 @@ msgstr ""
 msgid "Share this room"
 msgstr ""
 
+#: src/components/debug/WorkerDiagnostics.tsx:273
+msgid "Shared offline storage state"
+msgstr ""
+
 #: src/components/guard/FileDetails.tsx:137
 msgid "Sheets"
 msgstr ""
@@ -7551,7 +7728,7 @@ msgstr ""
 msgid "Short description"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:878
+#: src/components/clubs/EditClubPage.tsx:880
 msgid "Short Description"
 msgstr ""
 
@@ -7576,7 +7753,7 @@ msgstr ""
 msgid "Show all"
 msgstr ""
 
-#: src/components/dashboard/links/Links.tsx:230
+#: src/components/dashboard/links/Links.tsx:232
 msgid "Show all ({resourceCount})"
 msgstr ""
 
@@ -7634,7 +7811,7 @@ msgstr ""
 msgid "Show location in the details panel"
 msgstr ""
 
-#: src/components/maps/viewer/MapView.tsx:282
+#: src/components/maps/viewer/MapView.tsx:284
 msgid "Show my location"
 msgstr ""
 
@@ -7719,7 +7896,7 @@ msgstr ""
 msgid "Slot"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:830
+#: src/components/clubs/EditClubPage.tsx:832
 msgid "Slug"
 msgstr ""
 
@@ -7760,6 +7937,10 @@ msgstr ""
 #: src/components/search/IframePreviewCard.tsx:14
 #: src/components/search/IframePreviewCard.tsx:104
 msgid "Sorry, this site does not support preview. Please, open it directly."
+msgstr ""
+
+#: src/components/debug/DiagnosticData.tsx:19
+msgid "Source:"
 msgstr ""
 
 #: src/components/search/SelectSourcesFilterButton.tsx:21
@@ -7851,11 +8032,11 @@ msgid "Sport hours: <0>{earned} out of {required, plural, one {# hour} other {# 
 msgstr ""
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:291
-#: src/components/clubs/EditClubPage.tsx:1099
+#: src/components/clubs/EditClubPage.tsx:1101
 msgid "Sport ID"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1065
+#: src/components/clubs/EditClubPage.tsx:1067
 msgid "Sport Information"
 msgstr ""
 
@@ -7875,7 +8056,7 @@ msgstr ""
 msgid "Sport trainer"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1111
+#: src/components/clubs/EditClubPage.tsx:1113
 msgid "Sport type ID from InnoSport system"
 msgstr ""
 
@@ -7916,7 +8097,7 @@ msgstr ""
 
 #: src/components/room-booking/timeline/BookingModal.tsx:572
 #: src/components/tabletennis/ValidationMatches.tsx:815
-#: src/components/timer/TimerPage.tsx:272
+#: src/components/timer/TimerPage.tsx:285
 msgid "Start"
 msgstr ""
 
@@ -8021,7 +8202,7 @@ msgstr ""
 msgid "Step 5: Fill Registration Form"
 msgstr ""
 
-#: src/components/timer/TimerPage.tsx:302
+#: src/components/timer/TimerPage.tsx:315
 msgid "Stop"
 msgstr ""
 
@@ -8032,6 +8213,18 @@ msgstr ""
 
 #: src/components/room-booking/timeline/BookingModal.tsx:759
 msgid "Stopping booking..."
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:238
+msgid "Stored manifest metadata differs from this App's BUILD_INFO."
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:232
+msgid "Stored manifest metadata matches this App's BUILD_INFO."
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:66
+msgid "Stored pin only"
 msgstr ""
 
 #: src/components/editor/menus/EditorMenuItems.tsx:62
@@ -8103,15 +8296,15 @@ msgstr ""
 msgid "Submitted"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:409
+#: src/components/clubs/EditClubPage.tsx:411
 msgid "Submitted for review"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:668
+#: src/components/clubs/EditClubPage.tsx:670
 msgid "Submitted logo"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:698
+#: src/components/clubs/EditClubPage.tsx:700
 msgid "Submitted, waiting for review"
 msgstr ""
 
@@ -8123,8 +8316,8 @@ msgid "Submitted: <0>{0}</0>"
 msgstr ""
 
 #: src/components/admin/AdminRoomsPage.tsx:73
-#: src/components/admin/useImpersonation.ts:102
-#: src/components/admin/useImpersonation.ts:123
+#: src/components/admin/useImpersonation.ts:111
+#: src/components/admin/useImpersonation.ts:137
 #: src/components/admin/usePredefinedDataEditor.ts:33
 #: src/components/toast/ToastProvider.test.ts:66
 #: src/components/toast/ToastProvider.test.ts:108
@@ -8228,6 +8421,10 @@ msgstr ""
 msgid "Table tennis site"
 msgstr ""
 
+#: src/components/debug/WorkerDiagnostics.tsx:30
+msgid "Tabs known to this worker"
+msgstr ""
+
 #: src/components/schedule/EventGroupPage.tsx:83
 msgid "Tags"
 msgstr ""
@@ -8324,7 +8521,7 @@ msgstr ""
 msgid "Telegram channel"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1197
+#: src/components/clubs/EditClubPage.tsx:1199
 msgid "Telegram Channel"
 msgstr ""
 
@@ -8332,7 +8529,7 @@ msgstr ""
 msgid "Telegram chat"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1200
+#: src/components/clubs/EditClubPage.tsx:1202
 msgid "Telegram Chat"
 msgstr ""
 
@@ -8351,7 +8548,7 @@ msgstr ""
 msgid "Telegram not provided"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1203
+#: src/components/clubs/EditClubPage.tsx:1205
 msgid "Telegram User"
 msgstr ""
 
@@ -8388,11 +8585,11 @@ msgstr ""
 msgid "The file contains no student emails."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:610
+#: src/components/clubs/EditClubPage.tsx:612
 msgid "The form below shows the leader's submitted changes. Saving will apply your edits directly to the club."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:611
+#: src/components/clubs/EditClubPage.tsx:613
 msgid "The form below shows what you submitted, not what is published yet. Keep editing and save again to update the request."
 msgstr ""
 
@@ -8438,6 +8635,11 @@ msgstr ""
 msgid "The organiser is forming the groups."
 msgstr ""
 
+#: src/components/debug/AppDiagnostics.tsx:79
+#: src/components/debug/WorkerDiagnostics.tsx:204
+msgid "The page sends a build ID, not a manifest. The worker downloads manifests from the server independently."
+msgstr ""
+
 #: src/components/tabletennis/MergeGuestModal.tsx:131
 msgid "The person has to register in table tennis first."
 msgstr ""
@@ -8479,7 +8681,7 @@ msgstr ""
 #~ msgid "The series window does not overlap the selected groups' teaching period."
 #~ msgstr ""
 
-#: src/app/routes/forms.submit.tsx:131
+#: src/app/routes/forms.submit.tsx:135
 msgid "The slug parameter is missing or invalid."
 msgstr ""
 
@@ -8508,7 +8710,7 @@ msgstr ""
 msgid "The website is an ecosystem that brings together all <0/> team services and useful Innopolis resources for students in one place."
 msgstr ""
 
-#: src/app/AppUpdatePrompt.tsx:43
+#: src/app/AppUpdatePrompt.tsx:45
 msgid "The website is updated."
 msgstr ""
 
@@ -8536,15 +8738,27 @@ msgstr ""
 msgid "Think about your <0>aims and goals</0> to keep your club going purposefully. Consider writing mission and vision statements to clarify your club's purpose."
 msgstr ""
 
+#: src/components/debug/AppDiagnostics.tsx:116
+msgid "This App has not received a worker notification yet."
+msgstr ""
+
+#: src/components/debug/AppDiagnostics.tsx:75
+msgid "This App has not sent CLIENT_HELLO yet."
+msgstr ""
+
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:381
 msgid "This class is cancelled in the configuration."
+msgstr ""
+
+#: src/components/debug/DebugPage.tsx:167
+msgid "This clears ALL Cache Storage caches for this origin, unregisters all service workers, and reloads the page. All cached builds will be removed."
 msgstr ""
 
 #: src/components/clubs/ClubPage.tsx:92
 msgid "This club has changes waiting for admin review."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:605
+#: src/components/clubs/EditClubPage.tsx:607
 msgid "This club has changes waiting for review"
 msgstr ""
 
@@ -8568,12 +8782,17 @@ msgstr ""
 msgid "This game is no longer in the catalogue."
 msgstr ""
 
-#: src/app/routes/forms.submit.tsx:177
+#: src/app/routes/forms.submit.tsx:181
 msgid "This link may be invalid, expired, or you may not have access."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:684
+#: src/components/clubs/EditClubPage.tsx:686
 msgid "This logo change will be cancelled when you save."
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:61
+#: src/components/debug/WorkerDiagnostics.tsx:349
+msgid "This page"
 msgstr ""
 
 #: src/components/admin/RequireInnohassleAdmin.tsx:23
@@ -8614,7 +8833,7 @@ msgstr ""
 msgid "This training is for university students only."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:739
+#: src/components/clubs/EditClubPage.tsx:741
 msgid "This will be uploaded when you save changes below."
 msgstr ""
 
@@ -8624,6 +8843,14 @@ msgstr ""
 
 #: src/components/web-print/ScanPage.tsx:741
 msgid "This will permanently remove the last scanned page from the document. Are you sure?"
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:160
+msgid "This worker did not answer GET_DIAGNOSTICS. No data from another worker is substituted."
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:259
+msgid "This worker has no stored manifest for this page's pin. This does not mean that the page is running the latest ready build."
 msgstr ""
 
 #: src/components/schedule-assistant/settings/weekdays.ts:47
@@ -8683,7 +8910,7 @@ msgstr ""
 msgid "Timer set to maximum (99:59:59)"
 msgstr ""
 
-#: src/components/timer/TimerPage.tsx:189
+#: src/components/timer/TimerPage.tsx:202
 msgid "Timer title..."
 msgstr ""
 
@@ -8710,7 +8937,7 @@ msgstr ""
 #: src/components/board-games/BoardGamesAdminPage.tsx:735
 #: src/components/board-games/BoardGamesAdminPage.tsx:929
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:260
-#: src/components/clubs/EditClubPage.tsx:814
+#: src/components/clubs/EditClubPage.tsx:816
 #: src/components/guard/CreateSheetPage.tsx:101
 #: src/components/room-booking/tv/RoomTvPage.tsx:194
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:354
@@ -8861,11 +9088,11 @@ msgstr ""
 msgid "Trainings in progress or finished less than 3 days ago. Click a training to manage student attendance."
 msgstr ""
 
-#: src/app/routes/forms.submit.tsx:188
+#: src/app/routes/forms.submit.tsx:192
 msgid "Try again"
 msgstr ""
 
-#: src/components/layout/Offline.tsx:61
+#: src/components/layout/Offline.tsx:65
 msgid "Try to disable VPN and connect to University WiFi, then reload the page."
 msgstr ""
 
@@ -8897,8 +9124,8 @@ msgid "Two printers are available on campus right now:"
 msgstr ""
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:276
-#: src/components/clubs/EditClubPage.tsx:852
-#: src/components/clubs/EditClubPage.tsx:1182
+#: src/components/clubs/EditClubPage.tsx:854
+#: src/components/clubs/EditClubPage.tsx:1184
 msgid "Type"
 msgstr ""
 
@@ -9018,7 +9245,7 @@ msgstr ""
 msgid "Unspent points from last semester expire"
 msgstr ""
 
-#: src/components/timer/TimerPage.tsx:209
+#: src/components/timer/TimerPage.tsx:222
 msgid "Until exact time"
 msgstr ""
 
@@ -9053,7 +9280,7 @@ msgstr ""
 #~ msgid "Update status"
 #~ msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:591
+#: src/components/clubs/EditClubPage.tsx:593
 msgid "Update the club information below"
 msgstr ""
 
@@ -9078,7 +9305,7 @@ msgstr ""
 msgid "Upload config.yaml in the “Settings” tab."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:652
+#: src/components/clubs/EditClubPage.tsx:654
 msgid "Upload new logo"
 msgstr ""
 
@@ -9086,7 +9313,7 @@ msgstr ""
 msgid "Uploading image..."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1280
+#: src/components/clubs/EditClubPage.tsx:1282
 msgid "Uploading logo..."
 msgstr ""
 
@@ -9099,7 +9326,7 @@ msgstr ""
 msgid "URL (optional)"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:1214
+#: src/components/clubs/EditClubPage.tsx:1216
 msgid "URL <0>*</0>"
 msgstr ""
 
@@ -9111,7 +9338,7 @@ msgstr ""
 msgid "URL-friendly identifier (e.g., \"robotics-club\")"
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:844
+#: src/components/clubs/EditClubPage.tsx:846
 msgid "URL-friendly identifier for the club"
 msgstr ""
 
@@ -9145,7 +9372,7 @@ msgstr ""
 msgid "User email"
 msgstr ""
 
-#: src/components/admin/useImpersonation.ts:75
+#: src/components/admin/useImpersonation.ts:78
 msgid "User email is required for impersonation."
 msgstr ""
 
@@ -9368,7 +9595,7 @@ msgstr ""
 msgid "we write code and maintain products"
 msgstr ""
 
-#: src/components/maps/viewer/MapView.tsx:122
+#: src/components/maps/viewer/MapView.tsx:124
 msgid "Weak GPS signal (±{accuracyM}m)"
 msgstr ""
 
@@ -9448,6 +9675,26 @@ msgstr ""
 msgid "What is it?"
 msgstr ""
 
+#: src/components/debug/WorkerDiagnostics.tsx:150
+msgid "What the browser knows about this worker"
+msgstr ""
+
+#: src/components/debug/AppDiagnostics.tsx:19
+msgid "What this App knows about itself"
+msgstr ""
+
+#: src/components/debug/AppDiagnostics.tsx:43
+msgid "What this App sent to its controller"
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:172
+msgid "What this worker knows about itself"
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:186
+msgid "What this worker knows about this page's report"
+msgstr ""
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:351
 #: src/components/board-games/UserReservationDetailsModal.tsx:112
 #: src/components/board-games/UserReservationDetailsModal.tsx:376
@@ -9518,6 +9765,14 @@ msgstr ""
 msgid "Wins"
 msgstr ""
 
+#: src/components/debug/BrowserDiagnostics.tsx:80
+msgid "Worker currently being installed."
+msgstr ""
+
+#: src/components/debug/BrowserDiagnostics.tsx:84
+msgid "worker-N is a local reference within this snapshot, not a persistent browser ID. Equal script URLs alone do not identify the same worker instance."
+msgstr ""
+
 #: src/components/board-games/reservation-presentation.ts:42
 msgid "With the borrower"
 msgstr ""
@@ -9542,7 +9797,7 @@ msgstr ""
 msgid "Wrong? Reconnect"
 msgstr ""
 
-#: src/app/routes/forms.submit.tsx:208
+#: src/app/routes/forms.submit.tsx:212
 msgid "Yandex Form"
 msgstr ""
 
@@ -9590,11 +9845,11 @@ msgstr ""
 msgid "You are not registered as a sport trainer."
 msgstr ""
 
-#: src/components/layout/Offline.tsx:48
+#: src/components/layout/Offline.tsx:50
 msgid "You are offline"
 msgstr ""
 
-#: src/components/maps/viewer/MapView.tsx:126
+#: src/components/maps/viewer/MapView.tsx:128
 msgid "You are outside this map"
 msgstr ""
 
@@ -9657,7 +9912,7 @@ msgstr ""
 msgid "You don't have permission to access this page."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:606
+#: src/components/clubs/EditClubPage.tsx:608
 msgid "You have changes waiting for review"
 msgstr ""
 
@@ -9681,7 +9936,7 @@ msgstr ""
 msgid "You have no reservations yet."
 msgstr ""
 
-#: src/components/clubs/EditClubPage.tsx:241
+#: src/components/clubs/EditClubPage.tsx:243
 msgid "You have unsaved changes. Are you sure you want to leave?"
 msgstr ""
 

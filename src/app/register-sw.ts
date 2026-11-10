@@ -1,12 +1,49 @@
 import { requestWorker } from "./sw-client.ts";
+import {
+  createAutoUpdateController,
+  type AutoUpdateStatus,
+} from "./auto-update.ts";
 import { queryClient } from "./query-client.ts";
+import { setSiteUnavailable } from "./site-availability.ts";
 import {
   isTvPath,
   manifestPollInterval,
+  type BuildInfo,
+  type ClientHelloCommand,
+  type ClientHelloReply,
   type WorkerNotification,
-  type WorkerState,
 } from "@/service-worker/protocol.ts";
 import { withWorkerState } from "@/service-worker/storage.ts";
+
+// Page-side observations only. Worker-reported state is collected separately by RPC.
+const pageWorkerCommunication: {
+  lastHello: {
+    message: ClientHelloCommand;
+    targetScriptURL: string;
+    sentAt: string;
+    acknowledgedAt: string | null;
+    reply: ClientHelloReply | null;
+    error: string | null;
+  } | null;
+  lastNotification: {
+    message: WorkerNotification;
+    sourceScriptURL: string | null;
+    receivedAt: string;
+  } | null;
+  autoUpdate: AutoUpdateStatus;
+} = {
+  lastHello: null,
+  lastNotification: null,
+  autoUpdate: {
+    pendingBuildId: null,
+    blockedReason: null,
+    lastReloadAttemptAt: null,
+  },
+};
+
+export function getPageWorkerCommunication() {
+  return structuredClone(pageWorkerCommunication);
+}
 
 export const appUpdateAvailableEvent = "app-update-available";
 let pendingUpdate: (() => void) | undefined;
@@ -17,12 +54,15 @@ export function getPendingAppUpdate() {
 /**
  * Page-side controller for the site-update feature.
  *
- * Normal tabs: poll the manifest in the background; the user keeps the build
- * they already loaded until they reload/navigate.
- * TV tabs: when a newer build is fully ready, reload once automatically
- * (AppUpdatePrompt covers the rare case where beforeunload blocks that reload).
+ * Poll on schedule and on return to the page. Fully ready updates reload by default;
+ * components can pause them with useAutoUpdateBlocker.
+ * TV retains its manual prompt if a native beforeunload handler blocks a reload.
  */
-export function registerServiceWorker() {
+export function registerServiceWorker({
+  isNavigationIdle,
+}: {
+  isNavigationIdle: () => boolean;
+}) {
   if (!("serviceWorker" in navigator)) return;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let stopped = false;
@@ -30,21 +70,58 @@ export function registerServiceWorker() {
   let checkRequested = false;
   let pathname = window.location.pathname;
   let nextCheckAt: string | null = null;
-  const reloadAttempts = new Set<string>();
+  let navigationSourceReceived = false;
 
   function handleAppReload() {
     window.location.reload();
   }
 
+  const autoUpdates = createAutoUpdateController({
+    isNavigationIdle,
+    onStatusChange: (status) => {
+      pageWorkerCommunication.autoUpdate = status;
+    },
+    reload: () => {
+      if (isTvPath(window.location.pathname)) {
+        pendingUpdate = handleAppReload;
+        window.dispatchEvent(new Event(appUpdateAvailableEvent));
+      }
+      handleAppReload();
+    },
+  });
+
   async function sendHello() {
-    if (!navigator.serviceWorker.controller || stopped) return;
-    await requestWorker({
-      type: "CLIENT_HELLO",
-      buildId: BUILD_INFO.buildId,
-      pathname,
-      interval: manifestPollInterval(pathname),
-      nextCheckAt,
-    });
+    const controller = navigator.serviceWorker.controller;
+    if (!controller || stopped) return;
+    const report: NonNullable<typeof pageWorkerCommunication.lastHello> = {
+      message: {
+        type: "CLIENT_HELLO",
+        buildId: BUILD_INFO.buildId,
+        pathname,
+        interval: manifestPollInterval(pathname),
+        nextCheckAt,
+      },
+      targetScriptURL: controller.scriptURL,
+      sentAt: new Date().toISOString(),
+      acknowledgedAt: null,
+      reply: null,
+      error: null,
+    };
+    pageWorkerCommunication.lastHello = report;
+    try {
+      report.reply = await requestWorker<ClientHelloReply>(
+        report.message,
+        controller,
+      );
+      report.acknowledgedAt = new Date().toISOString();
+      if (!navigationSourceReceived && report.reply.navigationSource !== null) {
+        navigationSourceReceived = true;
+        setSiteUnavailable(report.reply.navigationSource === "cache");
+      }
+    } catch (error) {
+      report.error = error instanceof Error ? error.message : String(error);
+      throw error;
+    }
   }
 
   function scheduleCheck() {
@@ -69,7 +146,10 @@ export function registerServiceWorker() {
     nextCheckAt = null;
     try {
       await sendHello();
-      await requestWorker({ type: "CHECK_MANIFEST" });
+      const readyBuild = await requestWorker<BuildInfo | null>({
+        type: "CHECK_MANIFEST",
+      });
+      if (readyBuild) setSiteUnavailable(false);
       window.dispatchEvent(new Event("sw-check-completed"));
     } catch (error) {
       console.warn("[Service Worker] Update check failed:", error);
@@ -77,6 +157,7 @@ export function registerServiceWorker() {
       checking = false;
       scheduleCheck();
       void sendHello().catch(() => undefined);
+      autoUpdates.recheck();
       if (checkRequested) {
         checkRequested = false;
         void checkForUpdate();
@@ -86,8 +167,12 @@ export function registerServiceWorker() {
 
   function handleRouteChange() {
     const nextPathname = window.location.pathname;
-    if (pathname === nextPathname) return;
+    if (pathname === nextPathname) {
+      autoUpdates.recheck();
+      return;
+    }
     pathname = nextPathname;
+    autoUpdates.recheck();
     // Leaving a route dismisses a pending update prompt; the next BUILD_READY
     // or manual reload can offer it again if still relevant.
     pendingUpdate = undefined;
@@ -99,6 +184,7 @@ export function registerServiceWorker() {
   function handleCacheInvalidated(message: WorkerNotification) {
     if (message.type !== "CACHE_INVALIDATED" || !message.reset) return;
     stopped = true;
+    autoUpdates.stop();
     clearTimeout(timer);
     void queryClient.cancelQueries().then(() => queryClient.clear());
   }
@@ -113,38 +199,18 @@ export function registerServiceWorker() {
     "message",
     (event: MessageEvent<WorkerNotification>) => {
       const message = event.data;
+      pageWorkerCommunication.lastNotification = {
+        message,
+        sourceScriptURL:
+          event.source instanceof ServiceWorker ? event.source.scriptURL : null,
+        receivedAt: new Date().toISOString(),
+      };
       if (message.type === "CACHE_INVALIDATED") {
         handleCacheInvalidated(message);
         return;
       }
-      if (
-        message.type !== "BUILD_READY" ||
-        stopped ||
-        message.buildInfo.buildId === BUILD_INFO.buildId
-      )
-        return;
-      // Non-TV: keep the open session on its current build; only TV should
-      // interrupt itself when a complete newer snapshot is available.
-      if (
-        !isTvPath(window.location.pathname) ||
-        reloadAttempts.has(message.buildInfo.buildId)
-      )
-        return;
-      reloadAttempts.add(message.buildInfo.buildId);
-      void (async () => {
-        const state = await requestWorker<WorkerState>({ type: "GET_STATE" });
-        if (
-          stopped ||
-          !isTvPath(window.location.pathname) ||
-          state.blocked ||
-          state.generation !== message.generation ||
-          state.latestReadyBuildId !== message.buildInfo.buildId
-        )
-          return;
-        pendingUpdate = handleAppReload;
-        window.dispatchEvent(new Event(appUpdateAvailableEvent));
-        handleAppReload();
-      })().catch(() => undefined);
+      if (message.type === "BUILD_READY" && !stopped)
+        autoUpdates.handleBuildReady(message);
     },
   );
   navigator.serviceWorker.addEventListener("controllerchange", () => {
@@ -153,22 +219,25 @@ export function registerServiceWorker() {
   });
   window.addEventListener("sw-reset-started", () => {
     stopped = true;
+    autoUpdates.stop();
     clearTimeout(timer);
   });
   window.addEventListener("online", () => void checkForUpdate());
-  window.addEventListener("pageshow", () => {
+  function handlePageReturn() {
     handleRouteChange();
     void sendHello().catch(() => undefined);
-  });
+    void checkForUpdate();
+  }
+  window.addEventListener("pageshow", handlePageReturn);
+  window.addEventListener("focus", handlePageReturn);
   window.addEventListener("popstate", handleRouteChange);
   window.addEventListener("sw-route-changed", handleRouteChange);
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState !== "visible") return;
-    handleRouteChange();
-    if (!nextCheckAt || Date.now() >= Date.parse(nextCheckAt))
-      void checkForUpdate();
-    else void sendHello().catch(() => undefined);
+    if (document.visibilityState === "visible") handlePageReturn();
   });
+
+  // Report cached navigation even when offline SW re-registration cannot reach sw.js.
+  void sendHello().catch(() => undefined);
 
   void (async () => {
     // Debug reset leaves blocked=true so a replaced worker cannot refill caches.

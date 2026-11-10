@@ -17,7 +17,15 @@ function RouteComponent() {
           content="Inspect app builds, service workers, and offline caches."
         />
       </Helmet>
-      <Topbar title="Debug" />
+      <Topbar
+        title={
+          <span className="inline-block pr-32">
+            <span id="debug-title" className="[anchor-name:--debug-title]">
+              Debug
+            </span>
+          </span>
+        }
+      />
       <DebugPage />
     </>
   );

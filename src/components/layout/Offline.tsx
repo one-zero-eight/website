@@ -1,10 +1,12 @@
 import { useAccountsApiAvailability } from "@/api/accounts/api-availability.ts";
+import { useSiteUnavailable } from "@/app/site-availability.ts";
 import { cn } from "@/lib/ui/cn";
 import { useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo, useState } from "react";
 
 export function ConnectivityNotification() {
   const { t } = useLingui();
+  const isSiteUnavailable = useSiteUnavailable();
   const { isUnavailable: isAccountsApiUnavailable } =
     useAccountsApiAvailability();
   const [isOffline, setIsOffline] = useState(
@@ -36,17 +38,19 @@ export function ConnectivityNotification() {
   }, []);
 
   useEffect(() => {
-    if (!isAccountsApiUnavailable) {
+    if (!isAccountsApiUnavailable || isSiteUnavailable) {
       setIsClosed(false);
       setIsExpanded(false);
     }
-  }, [isAccountsApiUnavailable]);
+  }, [isAccountsApiUnavailable, isSiteUnavailable]);
 
   const issue = useMemo(() => {
-    if (isOffline) {
+    if (isOffline || isSiteUnavailable) {
       return {
         title: t`You are offline`,
-        description: t`Connect to the internet to keep using InNoHassle.`,
+        description: isSiteUnavailable
+          ? t`Cannot reach the server. You are viewing a saved version of the website.`
+          : t`Connect to the internet to keep using InNoHassle.`,
         suggestions: [
           t`Connect to WiFi or mobile internet.`,
           t`Check that airplane mode is disabled.`,
@@ -63,7 +67,7 @@ export function ConnectivityNotification() {
     }
 
     return null;
-  }, [isAccountsApiUnavailable, isOffline, t]);
+  }, [isAccountsApiUnavailable, isOffline, isSiteUnavailable, t]);
 
   if (!issue || isClosed) {
     return null;

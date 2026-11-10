@@ -4,6 +4,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
+import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
 import { useEffect } from "react";
 
 export type FormSubmitParams = {
@@ -77,6 +78,9 @@ function RouteComponent() {
     data?.url != null && data.url.trim() !== ""
       ? buildIframeSrc(data.url)
       : undefined;
+
+  // Cross-origin form drafts cannot be inspected; keep the embedded form intact.
+  useAutoUpdateBlocker(Boolean(iframeSrc) || isLegacyFormQuery);
 
   if (isLegacyFormQuery) {
     if (!me) {

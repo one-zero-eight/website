@@ -5,11 +5,19 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+const commonRestrictedImports = [
+  {
+    name: "@lingui/macro",
+    message:
+      "Use @lingui/react/macro (JSX) or @lingui/core/macro (JS) instead.",
+  },
+];
+
 export default tseslint.config(
   { ignores: ["dist/**", "build/**", "coverage/**"] },
   {
     ...pluginLingui.configs["flat/recommended"],
-    files: ["src/**/*.{js,jsx,ts,tsx}"],
+    files: ["src/**/*.{js,jsx,ts,tsx}", "tests/service-worker/**/*.test.ts"],
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
@@ -22,7 +30,7 @@ export default tseslint.config(
       "react-refresh": reactRefresh,
     },
     ignores: ["__generated__"],
-    files: ["src/**/*.ts", "src/**/*.tsx"],
+    files: ["src/**/*.ts", "src/**/*.tsx", "tests/service-worker/**/*.test.ts"],
     rules: {
       ...reactHooks.configs.recommended.rules,
       "@typescript-eslint/no-explicit-any": "off",
@@ -42,14 +50,22 @@ export default tseslint.config(
         "error",
         {
           paths: [
+            ...commonRestrictedImports,
             {
-              name: "@lingui/macro",
+              name: "@tanstack/react-router",
+              importNames: ["useBlocker"],
               message:
-                "Use @lingui/react/macro (JSX) or @lingui/core/macro (JS) instead.",
+                "Use useAutoUpdateBlocker from @/app/use-auto-update-blocker.ts instead.",
             },
           ],
         },
       ],
+    },
+  },
+  {
+    files: ["src/app/use-auto-update-blocker.ts"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: commonRestrictedImports }],
     },
   },
 );

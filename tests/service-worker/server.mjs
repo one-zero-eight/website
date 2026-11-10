@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
@@ -31,11 +31,17 @@ for (const [name, path] of Object.entries({
 }
 process.env.VITE_CALENDAR_EXPORT_HOST = "127.0.0.1:5202";
 
+// Fixture builds have an isolated counter and must not consume local preview labels.
+await mkdir(outputRoot, { recursive: true });
+const labelHistoryFile = resolve(outputRoot, "build-labels.txt");
+await writeFile(labelHistoryFile, "");
+process.env.INNOHASSLE_BUILD_LABEL_HISTORY = labelHistoryFile;
+
 const builds = {};
-for (const version of ["a", "b", "c"]) {
+for (const [index, version] of ["a", "b", "c"].entries()) {
   await build({
     configFile: resolve(root, "vite.config.ts"),
-    logLevel: "warn",
+    logLevel: "error",
     build: { outDir: resolve(outputRoot, version), emptyOutDir: true },
     plugins: [
       {
@@ -52,7 +58,17 @@ for (const version of ["a", "b", "c"]) {
         transform(source, id) {
           if (id.split("?")[0] !== resolve(root, "src/app/entry-client.tsx"))
             return;
-          return `${source}\nglobalThis.__SW_TEST_VERSION__ = ${JSON.stringify(version)};\nglobalThis.__SW_TEST_LOAD_LAZY__ = () => import("virtual:sw-test-lazy");\n`;
+          return `${source}
+            globalThis.__SW_TEST_VERSION__ = ${JSON.stringify(version)};
+            globalThis.__SW_TEST_LOAD_LAZY__ = () => import("virtual:sw-test-lazy");
+            globalThis.__SW_TEST_ADD_RELOAD_BLOCKER__ = () => {
+              globalThis.__SW_TEST_BLOCKER_CALLS__ = 0;
+              globalThis.__SW_TEST_REMOVE_RELOAD_BLOCKER__ = router.history.block({
+                blockerFn: () => { globalThis.__SW_TEST_BLOCKER_CALLS__++; return true; },
+                enableBeforeUnload: true,
+              });
+            };
+          `;
         },
         transformIndexHtml(html) {
           return html.replace(
@@ -82,7 +98,7 @@ for (const version of ["a", "b", "c"]) {
   }
   if (!lazyResource)
     throw new Error(`Build ${version} has no nonessential lazy chunk`);
-  builds[version] = { manifest, lazyResource };
+  builds[version] = { manifest, lazyResource, htmlBuildLabel: index + 1 };
 }
 
 const defaults = {
@@ -237,7 +253,7 @@ const apiServer = createServer(async (request, response) => {
       return;
     }
     const accountId = request.headers.cookie?.match(
-      /(?:^|;\s*)sw-e2e-user=(sw-test|sw-other)(?:;|$)/,
+      /(?:^|;\s*)sw-e2e-user=(sw-test|sw-other|sw-staff)(?:;|$)/,
     )?.[1];
     if (!accountId) {
       json(response, { detail: "Not authenticated" }, 401);
@@ -249,7 +265,7 @@ const apiServer = createServer(async (request, response) => {
         email: fixtureUser.email,
         name: fixtureUser.name,
         is_student: true,
-        is_staff: false,
+        is_staff: accountId === "sw-staff",
         is_college: false,
         updated_at: "2026-10-05T08:00:00Z",
       },
@@ -345,12 +361,21 @@ const apiServer = createServer(async (request, response) => {
 
 const appServer = createServer(async (request, response) => {
   try {
-    const pathname = decodeURIComponent(
-      new URL(request.url, "http://127.0.0.1:5201").pathname,
-    );
+    const requestUrl = new URL(request.url, "http://127.0.0.1:5201");
+    const pathname = decodeURIComponent(requestUrl.pathname);
     if (await control(request, response, pathname)) return;
     const version = state.version;
-    requests.push({ url: pathname, version });
+    const resourceRequest = {
+      url: requestUrl.pathname,
+      version,
+      destination: request.headers["sec-fetch-dest"] ?? null,
+      status: null,
+      bytes: 0,
+    };
+    requests.push(resourceRequest);
+    response.once("finish", () => {
+      resourceRequest.status = response.statusCode;
+    });
     if (state.connectionError) {
       request.socket.destroy();
       return;
@@ -367,6 +392,11 @@ const appServer = createServer(async (request, response) => {
     if (isDelayedChunk && state.delayResource)
       await new Promise((resume) => resourceWaiters.add(resume));
     if (response.destroyed) return;
+    // A connection can disappear while an already-started resource is delayed.
+    if (state.connectionError) {
+      request.socket.destroy();
+      return;
+    }
     if (isDelayedChunk && state.resourceStatus !== 200) {
       response.writeHead(state.resourceStatus);
       response.end("Test resource unavailable");
@@ -387,6 +417,7 @@ const appServer = createServer(async (request, response) => {
     let content = await readFile(filePath);
     if (isDelayedChunk && state.corruptResource)
       content = Buffer.from("/* corrupted deployment chunk */");
+    resourceRequest.bytes = content.byteLength;
     response.writeHead(200, {
       "Content-Type":
         mimeTypes[extname(filePath)] ?? "application/octet-stream",

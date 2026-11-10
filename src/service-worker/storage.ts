@@ -51,7 +51,9 @@ function normalizeWorkerState(
       pathname: pin.pathname,
       interval: pin.interval,
       nextCheckAt: pin.nextCheckAt,
+      navigationSource: pin.navigationSource,
       reservedAt: pin.reservedAt,
+      lastHello: pin.lastHello,
     })),
     manifestCheck: raw.manifestCheck ?? empty.manifestCheck,
     lastSuccessfulCheckAt:

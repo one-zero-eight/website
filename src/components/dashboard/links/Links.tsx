@@ -11,6 +11,7 @@ import {
 } from "@/components/dashboard/links/searchUtils.ts";
 import { cn } from "@/lib/ui/cn";
 import { useAppLocale } from "@/locales/lib";
+import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
 import { Trans } from "@lingui/react/macro";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -21,6 +22,7 @@ const Links = () => {
   const [visibleItems, setVisibleItems] = useState<number[]>([]);
   const timeoutRef = useRef<number>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  useAutoUpdateBlocker(searchQuery.length > 0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAll, setShowAll] = useState(false);
 

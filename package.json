@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite dev --port 3000 --host",
     "build": "pnpm gen:sitemap && vite build",
-    "preview": "vite build && vite preview --port 3000 --host 0.0.0.0",
+    "preview": "node scripts/preview.mjs",
     "gen:sitemap": "node scripts/generate-sitemap.mjs --exclude=/42,/account/,/catalogue,/clubs/admin,/clubs/review,/events/admin,/forms/submit,/student-affairs/,/schedule-assistant,/schedule-assistant/,/tv ",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
@@ -24,7 +24,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:sw": "playwright test --config playwright.sw.config.ts",
+    "test:sw": "vitest run tests/service-worker && playwright test --config playwright.sw.config.ts",
+    "test:sw:preview": "node tests/service-worker/preview-new-tab.mjs",
     "test:e2e:ui": "playwright test --ui",
     "lingui:extract": "lingui extract",
     "lingui:extract:watch": "lingui extract --watch"

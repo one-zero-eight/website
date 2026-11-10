@@ -3,6 +3,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 import { build, type Plugin, type ResolvedConfig } from "vite";
+import { createBuildLabel } from "./build-labels";
 import type {
   BuildInfo,
   BuildManifest,
@@ -32,7 +33,7 @@ async function collectResources(
 
     const file = relative(root, path).split("\\").join("/");
     // sw.js / manifest are update-control files, not part of an app snapshot.
-    // build-info.js is appended after buildHash is computed (it embeds that hash).
+    // build-info.js is appended after resourcesBuildHash is computed (it embeds that hash).
     if (
       file === "sw.js" ||
       file === manifestFile ||
@@ -62,7 +63,7 @@ async function compileWorker(config: ResolvedConfig) {
     publicDir: false,
     envDir: config.envDir,
     mode: config.mode,
-    logLevel: "warn",
+    logLevel: config.logLevel === "info" ? "warn" : config.logLevel,
     resolve: { alias: config.resolve.alias },
     build: {
       target: "es2022",
@@ -107,6 +108,7 @@ export function serviceWorkerBuildPlugin(version: string): Plugin {
   const infoFile = "build-info.js";
   let config: ResolvedConfig;
   let outputWritten = false;
+  let buildLabel: Promise<number> | undefined;
 
   return {
     name: "innohassle-service-worker-build",
@@ -116,13 +118,27 @@ export function serviceWorkerBuildPlugin(version: string): Plugin {
     },
     transformIndexHtml: {
       order: "post",
-      handler(html) {
+      async handler(html) {
+        const htmlBuildLabel =
+          config.command === "build"
+            ? await (buildLabel ??= createBuildLabel(
+                resolve(
+                  config.root,
+                  process.env.INNOHASSLE_BUILD_LABEL_HISTORY ??
+                    "build-labels.txt",
+                ),
+                identity.builtAt,
+              ))
+            : "dev";
         const developmentInfo: BuildInfo = {
           ...identity,
-          buildHash: sha256(JSON.stringify(identity)),
+          resourcesBuildHash: sha256(JSON.stringify(identity)),
         };
         return {
-          html: html.replace("__BUILD_ID__", identity.buildId),
+          html: html
+            .replace("__BUILD_ID__", identity.buildId)
+            .replace("__HTML_BUILD_LABEL__", String(htmlBuildLabel))
+            .replace("__HTML_BUILD_AT__", identity.builtAt),
           tags: [
             config.command === "serve"
               ? {
@@ -167,13 +183,13 @@ export function serviceWorkerBuildPlugin(version: string): Plugin {
         // Hash the asset list before injecting build-info.js (which embeds that hash).
         const buildInfo: BuildInfo = {
           ...identity,
-          buildHash: sha256(JSON.stringify(resources)),
+          resourcesBuildHash: sha256(JSON.stringify(resources)),
         };
         // Guard rejects a cached HTML shell paired with a mismatched build-info.js.
         const infoSource = `if (document.documentElement.dataset.buildId !== ${JSON.stringify(buildInfo.buildId)}) throw new Error("Build metadata does not match this document"); globalThis.BUILD_INFO = ${JSON.stringify(buildInfo)};\n`;
         await writeFile(join(directory, infoFile), infoSource);
         // Still ship build-info.js inside the offline snapshot so navigations
-        // can verify integrity; it is just excluded from buildHash inputs above.
+        // can verify integrity; it is just excluded from resourcesBuildHash inputs above.
         resources.push({
           url: `/${infoFile}`,
           integrity: `sha384-${createHash("sha384").update(infoSource).digest("base64")}`,
@@ -194,11 +210,11 @@ export function serviceWorkerBuildPlugin(version: string): Plugin {
           `${JSON.stringify(manifest, null, 2)}\n`,
         );
         // Worker identity is tied only to its standalone code, not app assets.
-        // Only buildHash is embedded so identical SW code keeps byte-identical sw.js
+        // Only serviceWorkerHash is embedded so identical code keeps byte-identical sw.js
         // across app-only deployments (buildId/builtAt must not force SW updates).
         await writeFile(
           join(directory, "sw.js"),
-          `globalThis.BUILD_INFO = ${JSON.stringify({ buildHash: sha256(workerCode) })};\n${workerCode}`,
+          `globalThis.BUILD_INFO = ${JSON.stringify({ serviceWorkerHash: sha256(workerCode) })};\n${workerCode}`,
         );
       },
     },

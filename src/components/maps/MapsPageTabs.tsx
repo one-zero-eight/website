@@ -2,6 +2,7 @@ import { useLingui } from "@lingui/react/macro";
 import { $maps } from "@/api/maps";
 import { cn } from "@/lib/ui/cn";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
 import { useEffect, useRef, useState } from "react";
 
 export function MapsPageTabs() {
@@ -11,6 +12,7 @@ export function MapsPageTabs() {
   const { scene: sceneId, q } = useLocation({ select: ({ search }) => search });
   const [searchText, setSearchText] = useState(q ?? "");
   const inputRef = useRef<HTMLInputElement>(null);
+  useAutoUpdateBlocker(searchText !== (q ?? ""));
 
   useEffect(() => {
     // Show current search query

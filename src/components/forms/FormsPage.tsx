@@ -5,6 +5,7 @@ import { formatApiErrorDescriptor } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useState } from "react";
+import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
 import {
   FormUrlInput,
   GenerateButton,
@@ -36,6 +37,13 @@ export function FormsPage() {
         showError(msg`Error`, formatApiErrorDescriptor(error));
       },
     });
+
+  useAutoUpdateBlocker(
+    formUrl.length > 0 ||
+      generatedUrl.length > 0 ||
+      isGenerating ||
+      isValidating,
+  );
 
   const validateUrl = (rawUrl: string): MessageDescriptor | null => {
     if (!rawUrl.trim()) return null;

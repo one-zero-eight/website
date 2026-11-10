@@ -7,6 +7,7 @@ import {
 } from "@/components/timer/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useEventListener } from "usehooks-ts";
+import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
 import { cn } from "@/lib/ui/cn";
 import { useTimer } from "./lib/useTimer";
 import { useTimerRestore } from "./lib/useTimerRestore";
@@ -41,6 +42,18 @@ const TimerPage = () => {
     isRunning,
     isPaused,
   } = timer.state;
+
+  useAutoUpdateBlocker(
+    isRunning ||
+      isPaused ||
+      title.length > 0 ||
+      hours !== "00" ||
+      minutes !== "00" ||
+      seconds !== "00" ||
+      showStopDialog ||
+      showTimeUpMessage ||
+      showCustomTimeModal,
+  );
 
   const { hoursRef, minutesRef, secondsRef, audioRef, hasAdjustedTimerRef } =
     timer.refs;

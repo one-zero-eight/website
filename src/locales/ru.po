@@ -619,7 +619,7 @@ msgid "a new series will be created"
 msgstr "будет создана новая серия"
 
 #: src/components/clubs/ClubPage.tsx:165
-#: src/components/clubs/EditClubPage.tsx:900
+#: src/components/clubs/EditClubPage.tsx:902
 msgid "About"
 msgstr "О клубе"
 
@@ -706,6 +706,10 @@ msgstr "Активные"
 msgid "Active tournaments"
 msgstr "Активные турниры"
 
+#: src/components/debug/BrowserDiagnostics.tsx:69
+msgid "Active worker of a registration; not necessarily this page's controller."
+msgstr "Активный воркер регистрации; не обязательно контролирует эту страницу."
+
 #: src/components/sport/SportOverviewSection.tsx:365
 msgid "Activity link"
 msgstr "Ссылка на активность"
@@ -783,7 +787,7 @@ msgstr "Добавить игру"
 msgid "Add link"
 msgstr "Добавить ссылку"
 
-#: src/components/clubs/EditClubPage.tsx:1140
+#: src/components/clubs/EditClubPage.tsx:1142
 #: src/components/editor/menus/LinkButton.tsx:234
 msgid "Add Link"
 msgstr "Добавить ссылку"
@@ -814,7 +818,7 @@ msgstr "Добавить в календарь"
 msgid "Add to favorites"
 msgstr "Добавить в избранное"
 
-#: src/components/dashboard/PwaWidget.tsx:25
+#: src/components/dashboard/PwaWidget.tsx:38
 msgid "Add to home screen and use it like a native app."
 msgstr "Добавьте на домашний экран и пользуйтесь как обычным приложением."
 
@@ -926,7 +930,7 @@ msgstr "За всё время"
 msgid "All tournaments"
 msgstr "Все турниры"
 
-#: src/components/dashboard/links/Links.tsx:120
+#: src/components/dashboard/links/Links.tsx:122
 msgid "All University Services"
 msgstr "Все сервисы университета"
 
@@ -942,7 +946,7 @@ msgstr "Разрешите InNoHassle писать вам в Telegram."
 msgid "Amazing discovery! You've found the exclusive Ryan Gosling resource link. And the correct answer is <0>108</0>, not 42."
 msgstr "Вот это открытие! Вы нашли эксклюзивную ссылку на ресурс Райана Гослинга. А правильный ответ — <0>108</0>, а не 42."
 
-#: src/components/clubs/EditClubPage.tsx:410
+#: src/components/clubs/EditClubPage.tsx:412
 msgid "An admin needs to review your changes before they go live."
 msgstr "Перед публикацией ваши изменения должен проверить администратор."
 
@@ -953,6 +957,18 @@ msgstr "Аналитика"
 #: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:627
 msgid "Anchor active week"
 msgstr "Опорная активная неделя"
+
+#: src/components/debug/DebugPage.tsx:81
+msgid "App and offline diagnostics"
+msgstr "Диагностика приложения и офлайн-хранилища"
+
+#: src/components/debug/DebugPage.tsx:84
+msgid "App observations, browser roles, and worker replies are separate sources. Each worker is queried directly; the same instance can have several roles."
+msgstr "Наблюдения App, роли в браузере и ответы воркеров — отдельные источники. Каждый воркер опрашивается напрямую; один экземпляр может иметь несколько ролей."
+
+#: src/components/debug/AppDiagnostics.tsx:15
+msgid "App's view"
+msgstr "Взгляд App"
 
 #: src/components/web-print/ScanPage.tsx:608
 msgid "Applicable only for automatic mode"
@@ -1099,6 +1115,10 @@ msgstr "Автоматически"
 msgid "Automatic conversion of PDF, Word, Excel, images, and more for printing"
 msgstr "Автоматическая конвертация PDF, Word, Excel, изображений и другого для печати"
 
+#: src/components/debug/AppDiagnostics.tsx:87
+msgid "Automatic update"
+msgstr "Автоматическое обновление"
+
 #: src/components/web-print/ScanPage.tsx:654
 msgid "Automatically detects the document edges and crops the PDF to match."
 msgstr "Автоматически определяет края документа и обрезает PDF по ним."
@@ -1146,7 +1166,7 @@ msgstr "Назад"
 msgid "Back in storage"
 msgstr "Вернулась на склад"
 
-#: src/components/clubs/EditClubPage.tsx:587
+#: src/components/clubs/EditClubPage.tsx:589
 msgid "Back to Club"
 msgstr "Назад к клубу"
 
@@ -1188,7 +1208,7 @@ msgstr "Заблокированные"
 msgid "banned {bannedAt}"
 msgstr "дата блокировки: {bannedAt}"
 
-#: src/components/clubs/EditClubPage.tsx:776
+#: src/components/clubs/EditClubPage.tsx:778
 msgid "Basic information"
 msgstr "Основная информация"
 
@@ -1268,7 +1288,7 @@ msgstr "Забронированная комната"
 msgid "Booking"
 msgstr "Бронь"
 
-#: src/components/music-room/MusicRoomPage.tsx:101
+#: src/components/music-room/MusicRoomPage.tsx:98
 msgid "Booking calendar"
 msgstr "Календарь бронирований"
 
@@ -1298,7 +1318,7 @@ msgstr "Имя взявшего <0>*</0>"
 msgid "Bot"
 msgstr "Бот"
 
-#: src/components/clubs/EditClubPage.tsx:888
+#: src/components/clubs/EditClubPage.tsx:890
 msgid "Brief description for cards"
 msgstr "Краткое описание для карточек"
 
@@ -1306,6 +1326,10 @@ msgstr "Краткое описание для карточек"
 #: src/app/routes/_with_menu/extension.tsx:23
 msgid "Browser extension"
 msgstr "Браузерное расширение"
+
+#: src/components/debug/BrowserDiagnostics.tsx:18
+msgid "Browser's view"
+msgstr "Взгляд браузера"
 
 #: src/components/clubs/ClubLeaguePage.tsx:139
 msgid "Budget must be spent before the end of the semester"
@@ -1374,6 +1398,10 @@ msgstr "По рейтингу"
 msgid "bye"
 msgstr "без соперника"
 
+#: src/components/debug/WorkerDiagnostics.tsx:291
+msgid "Cache Storage observed by this worker"
+msgstr "Cache Storage глазами этого воркера"
+
 #: src/app/routes/_with_menu/scholarship.tsx:19
 msgid "Calculate your scholarship at Innopolis University. Type your marks for the previous semester to see the expected scholarship."
 msgstr "Рассчитайте стипендию в Университете Иннополис. Введите оценки за прошлый семестр, чтобы узнать ожидаемый размер стипендии."
@@ -1428,8 +1456,8 @@ msgstr "Можно играть сейчас"
 #: src/components/clubs/AddClubDialog.tsx:160
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:232
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:244
-#: src/components/clubs/EditClubPage.tsx:1034
-#: src/components/clubs/EditClubPage.tsx:1264
+#: src/components/clubs/EditClubPage.tsx:1036
+#: src/components/clubs/EditClubPage.tsx:1266
 #: src/components/events/drafts/CreateDraftModal.tsx:187
 #: src/components/events/drafts/DraftHostsSection.tsx:405
 #: src/components/events/drafts/DraftHostsSection.tsx:591
@@ -1550,6 +1578,10 @@ msgstr "Нельзя отклонить без комментария"
 #~ msgid "Cannot delete a block referenced by series: {references}. Change their windows first."
 #~ msgstr "Нельзя удалить блок, на который ссылаются серии: {references}. Сначала измените их периоды."
 
+#: src/components/layout/Offline.tsx:52
+msgid "Cannot reach the server. You are viewing a saved version of the website."
+msgstr "Нет связи с сервером. Вы просматриваете сохранённую версию сайта."
+
 #: src/components/when2meet/MeetingPage.tsx:1056
 msgid "Cannot select a past time"
 msgstr "Нельзя выбрать время в прошлом"
@@ -1598,7 +1630,7 @@ msgstr "Изменить"
 msgid "Change callout type"
 msgstr "Изменить тип выноски"
 
-#: src/components/clubs/EditClubPage.tsx:1013
+#: src/components/clubs/EditClubPage.tsx:1015
 msgid "Change Leader"
 msgstr "Сменить лидера"
 
@@ -1653,7 +1685,7 @@ msgstr "Исходный код, сообщения о багах и вклад 
 msgid "Check out this room: {roomTitle}"
 msgstr "Посмотрите эту комнату: {roomTitle}"
 
-#: src/components/layout/Offline.tsx:52
+#: src/components/layout/Offline.tsx:56
 msgid "Check that airplane mode is disabled."
 msgstr "Убедитесь, что режим полёта выключен."
 
@@ -1737,7 +1769,7 @@ msgstr "Выберите хотя бы один слот."
 msgid "Choose color"
 msgstr "Выберите цвет"
 
-#: src/components/clubs/EditClubPage.tsx:729
+#: src/components/clubs/EditClubPage.tsx:731
 #: src/components/web-print/FileDropzone.tsx:267
 msgid "Choose file"
 msgstr "Выберите файл"
@@ -1772,6 +1804,10 @@ msgstr "Занятия за семестр"
 msgid "Clear all"
 msgstr "Очистить всё"
 
+#: src/components/debug/DebugPage.tsx:188
+msgid "Clear ALL caches, unregister, and reload"
+msgstr "Очистить ВСЕ кеши, удалить регистрации и перезагрузить"
+
 #: src/components/board-games/ReservationsAdminPage.tsx:197
 msgid "Clear filters"
 msgstr "Сбросить фильтры"
@@ -1784,7 +1820,7 @@ msgstr "Сбросить фильтр игр"
 msgid "Clear input"
 msgstr "Очистить поле"
 
-#: src/components/clubs/EditClubPage.tsx:754
+#: src/components/clubs/EditClubPage.tsx:756
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:81
 msgid "Clear selection"
 msgstr "Сбросить выбор"
@@ -1832,12 +1868,12 @@ msgstr "Club Fest"
 msgid "Club Fest page."
 msgstr "Страница Club Fest."
 
-#: src/components/clubs/EditClubPage.tsx:796
+#: src/components/clubs/EditClubPage.tsx:798
 msgid "Club is active <0>(show in the list of clubs)</0>"
 msgstr "Клуб активен <0>(показывать в списке клубов)</0>"
 
 #: src/components/clubs/ClubPage.tsx:269
-#: src/components/clubs/EditClubPage.tsx:946
+#: src/components/clubs/EditClubPage.tsx:948
 msgid "Club Leader"
 msgstr "Лидер клуба"
 
@@ -1866,7 +1902,7 @@ msgstr "Критерии лиги клубов"
 msgid "Club logo"
 msgstr "Логотип клуба"
 
-#: src/components/clubs/EditClubPage.tsx:625
+#: src/components/clubs/EditClubPage.tsx:627
 msgid "Club Logo"
 msgstr "Логотип клуба"
 
@@ -1880,7 +1916,7 @@ msgid "Club logos or training restrictions could not be loaded."
 msgstr "Не удалось загрузить логотипы клубов или ограничения тренировок."
 
 #: src/components/clubs/ClubPage.tsx:73
-#: src/components/clubs/EditClubPage.tsx:562
+#: src/components/clubs/EditClubPage.tsx:564
 msgid "Club not found"
 msgstr "Клуб не найден"
 
@@ -1892,7 +1928,7 @@ msgstr "Покупки клуба"
 msgid "Club Types"
 msgstr "Типы клубов"
 
-#: src/components/clubs/EditClubPage.tsx:840
+#: src/components/clubs/EditClubPage.tsx:842
 msgid "club-slug"
 msgstr "club-slug"
 
@@ -1901,7 +1937,7 @@ msgid "club-url-slug"
 msgstr "club-url-slug"
 
 #. placeholder {0}: club.title
-#: src/components/clubs/EditClubPage.tsx:594
+#: src/components/clubs/EditClubPage.tsx:596
 msgid "Club: {0}"
 msgstr "Клуб: {0}"
 
@@ -1945,7 +1981,7 @@ msgstr "Код"
 msgid "Code from TV"
 msgstr "Код с ТВ"
 
-#: src/components/dashboard/links/Links.tsx:239
+#: src/components/dashboard/links/Links.tsx:241
 msgid "Collapse"
 msgstr "Свернуть"
 
@@ -2066,11 +2102,11 @@ msgstr "Подключите Telegram в настройках аккаунта �
 msgid "Connect Telegram user to InNoHassle Account."
 msgstr "Привяжите пользователя Telegram к аккаунту InNoHassle."
 
-#: src/components/layout/Offline.tsx:49
+#: src/components/layout/Offline.tsx:53
 msgid "Connect to the internet to keep using InNoHassle."
 msgstr "Подключитесь к интернету, чтобы продолжить пользоваться InNoHassle."
 
-#: src/components/layout/Offline.tsx:51
+#: src/components/layout/Offline.tsx:55
 msgid "Connect to WiFi or mobile internet."
 msgstr "Подключитесь к Wi‑Fi или мобильному интернету."
 
@@ -2198,8 +2234,8 @@ msgstr "Не удалось удалить игру"
 msgid "Could not delete reservation"
 msgstr "Не удалось удалить бронирование"
 
-#: src/components/maps/viewer/MapView.tsx:158
-#: src/components/maps/viewer/MapView.tsx:169
+#: src/components/maps/viewer/MapView.tsx:160
+#: src/components/maps/viewer/MapView.tsx:171
 msgid "Could not download maps PDF."
 msgstr "Не удалось скачать PDF карты."
 
@@ -2207,7 +2243,7 @@ msgstr "Не удалось скачать PDF карты."
 msgid "Could not import attendance"
 msgstr "Не удалось импортировать посещаемость"
 
-#: src/app/routes/forms.submit.tsx:174
+#: src/app/routes/forms.submit.tsx:178
 msgid "Could not load form"
 msgstr "Не удалось загрузить форму"
 
@@ -2269,7 +2305,7 @@ msgstr "Не удалось обновить игру"
 msgid "Could not update reservation"
 msgstr "Не удалось обновить бронирование"
 
-#: src/components/layout/Offline.tsx:60
+#: src/components/layout/Offline.tsx:64
 msgid "Couldn't connect to InNoHassle servers"
 msgstr "Не удалось подключиться к серверам InNoHassle"
 
@@ -2421,7 +2457,7 @@ msgid "Current League Points"
 msgstr "Текущие очки лиги"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:324
-#: src/components/clubs/EditClubPage.tsx:638
+#: src/components/clubs/EditClubPage.tsx:640
 msgid "Current logo"
 msgstr "Текущий логотип"
 
@@ -2464,7 +2500,7 @@ msgstr "Текущая неделя"
 msgid "Currently impersonating {0}"
 msgstr "Вы действуете от имени {0}"
 
-#: src/components/clubs/EditClubPage.tsx:1245
+#: src/components/clubs/EditClubPage.tsx:1247
 msgid "Custom display label"
 msgstr "Своя подпись"
 
@@ -2745,7 +2781,7 @@ msgstr "Не удалось загрузить описание."
 msgid "Description for your calendar..."
 msgstr "Описание для вашего календаря..."
 
-#: src/components/clubs/EditClubPage.tsx:1290
+#: src/components/clubs/EditClubPage.tsx:1292
 msgid "Description Preview"
 msgstr "Предпросмотр описания"
 
@@ -2924,7 +2960,7 @@ msgid "Edit"
 msgstr "Редактировать"
 
 #. placeholder {0}: club.title
-#: src/components/clubs/EditClubPage.tsx:571
+#: src/components/clubs/EditClubPage.tsx:573
 msgid "Edit {0}"
 msgstr "Редактировать «{0}»"
 
@@ -2944,7 +2980,7 @@ msgstr "Редактировать игру"
 msgid "Edit club"
 msgstr "Редактировать клуб"
 
-#: src/components/clubs/EditClubPage.tsx:579
+#: src/components/clubs/EditClubPage.tsx:581
 msgid "Edit Club"
 msgstr "Редактировать клуб"
 
@@ -3012,7 +3048,7 @@ msgstr "Изменить: {prefix}"
 #~ msgstr "Фактический период с учётом выбранных групп:"
 
 #: src/components/admin/AdminUserDetails.tsx:266
-#: src/components/clubs/EditClubPage.tsx:976
+#: src/components/clubs/EditClubPage.tsx:978
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:79
 msgid "Email"
 msgstr "Почта"
@@ -3094,7 +3130,7 @@ msgstr "Укажите дату для строки {row}."
 msgid "Enter a day for row {row}."
 msgstr "Укажите день для строки {row}."
 
-#: src/components/forms/FormsPage.tsx:178
+#: src/components/forms/FormsPage.tsx:186
 msgid "Enter a form URL to generate a link with the respondent's email pre-filled"
 msgstr "Введите URL формы, чтобы создать ссылку с заранее заполненным email респондента"
 
@@ -3117,7 +3153,7 @@ msgstr "Введите корректный email."
 msgid "Enter club title"
 msgstr "Введите название клуба"
 
-#: src/components/clubs/EditClubPage.tsx:1046
+#: src/components/clubs/EditClubPage.tsx:1048
 msgid "Enter Innopolis email to set as new club leader"
 msgstr "Введите email Иннополис, чтобы назначить нового лидера клуба"
 
@@ -3158,11 +3194,11 @@ msgstr "Оборудование"
 #: src/components/admin/AdminRoomsPage.tsx:79
 #: src/components/admin/AdminRoomsPage.tsx:87
 #: src/components/admin/AdminRoomsPage.tsx:92
-#: src/components/admin/useImpersonation.ts:70
-#: src/components/admin/useImpersonation.ts:75
-#: src/components/admin/useImpersonation.ts:84
+#: src/components/admin/useImpersonation.ts:73
+#: src/components/admin/useImpersonation.ts:78
 #: src/components/admin/useImpersonation.ts:89
-#: src/components/admin/useImpersonation.ts:114
+#: src/components/admin/useImpersonation.ts:94
+#: src/components/admin/useImpersonation.ts:125
 #: src/components/admin/usePredefinedDataEditor.ts:36
 #: src/components/admin/usePredefinedDataEditor.ts:65
 #: src/components/admin/usePredefinedDataEditor.ts:71
@@ -3194,7 +3230,7 @@ msgstr "Оборудование"
 #: src/components/events/submissions/SubmissionPage.tsx:91
 #: src/components/events/submissions/SubmissionPage.tsx:105
 #: src/components/events/submissions/SubmissionPage.tsx:119
-#: src/components/forms/FormsPage.tsx:36
+#: src/components/forms/FormsPage.tsx:37
 #: src/components/schedule-assistant/timetable/CreateClassModal.tsx:846
 #: src/components/schedule-assistant/timetable/CreateClassModal.tsx:850
 #: src/components/schedule-assistant/timetable/CreateClassModal.tsx:855
@@ -3450,8 +3486,8 @@ msgstr "Экспорт всех разделов в XLSX"
 msgid "Export error"
 msgstr "Ошибка экспорта"
 
-#: src/components/maps/viewer/MapView.tsx:158
-#: src/components/maps/viewer/MapView.tsx:169
+#: src/components/maps/viewer/MapView.tsx:160
+#: src/components/maps/viewer/MapView.tsx:171
 msgid "Export failed"
 msgstr "Не удалось экспортировать"
 
@@ -3467,7 +3503,7 @@ msgstr "Экспорт дедлайнов Moodle"
 msgid "Export music room bookings"
 msgstr "Экспорт бронирований музкомнаты"
 
-#: src/components/maps/viewer/MapView.tsx:239
+#: src/components/maps/viewer/MapView.tsx:241
 msgid "Export PDF"
 msgstr "Экспорт PDF"
 
@@ -3488,7 +3524,7 @@ msgstr "Экспорт в календарь"
 msgid "Export XLSX"
 msgstr "Экспорт XLSX"
 
-#: src/components/music-room/MusicRoomPage.tsx:104
+#: src/components/music-room/MusicRoomPage.tsx:101
 msgid "Export your personal calendar"
 msgstr "Экспорт личного календаря"
 
@@ -3516,7 +3552,7 @@ msgstr "Внешняя запись"
 msgid "External host name is required."
 msgstr "Укажите название внешнего организатора."
 
-#: src/components/clubs/EditClubPage.tsx:1206
+#: src/components/clubs/EditClubPage.tsx:1208
 msgid "External URL"
 msgstr "Внешний URL"
 
@@ -3631,7 +3667,7 @@ msgstr "Файл слишком большой!"
 msgid "fill {fillPercent}"
 msgstr "заполн. {fillPercent}"
 
-#: src/components/dashboard/links/Links.tsx:141
+#: src/components/dashboard/links/Links.tsx:143
 msgid "Filter"
 msgstr "Фильтр"
 
@@ -3716,11 +3752,11 @@ msgstr "На следующие семестры — по следующей ф�
 msgid "Forbidden time"
 msgstr "Запрещённое время"
 
-#: src/app/routes/forms.submit.tsx:122
-#: src/app/routes/forms.submit.tsx:141
-#: src/app/routes/forms.submit.tsx:155
-#: src/app/routes/forms.submit.tsx:168
-#: src/app/routes/forms.submit.tsx:197
+#: src/app/routes/forms.submit.tsx:126
+#: src/app/routes/forms.submit.tsx:145
+#: src/app/routes/forms.submit.tsx:159
+#: src/app/routes/forms.submit.tsx:172
+#: src/app/routes/forms.submit.tsx:201
 msgid "Form"
 msgstr "Форма"
 
@@ -3769,10 +3805,19 @@ msgstr "Мест нет"
 msgid "Full and short official names"
 msgstr "Полное и краткое официальные названия"
 
+#: src/components/debug/WorkerDiagnostics.tsx:378
+msgid "Full GET_DIAGNOSTICS response from this worker"
+msgstr "Полный ответ GET_DIAGNOSTICS этого воркера"
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:418
 #: src/components/board-games/ReservationDetailsModal.tsx:252
 msgid "Full name"
 msgstr "Полное имя"
+
+#: src/components/debug/WorkerDiagnostics.tsx:253
+#: src/components/debug/WorkerDiagnostics.tsx:370
+msgid "Full stored manifest"
+msgstr "Полный сохранённый манифест"
 
 #: src/components/schedule-assistant/timetable/createMeetingUtils.ts:576
 msgid "fully scheduled"
@@ -4047,6 +4092,10 @@ msgstr "Только гости"
 msgid "Guests Role"
 msgstr "Роль гостей"
 
+#: src/components/debug/BrowserDiagnostics.tsx:65
+msgid "Handles requests from this page."
+msgstr "Обрабатывает запросы этой страницы."
+
 #: src/app/routes/_with_menu/clubs/new.tsx:20
 #: src/components/clubs/HowToCreateClubPage.tsx:12
 msgid "Have an idea for a club? Start your own community and make a difference at Innopolis University!"
@@ -4166,6 +4215,14 @@ msgstr "Как пройти в музкомнату?"
 msgid "How to Register Your Club"
 msgstr "Как зарегистрировать клуб"
 
+#: src/components/debug/AppDiagnostics.tsx:37
+msgid "HTML and App build IDs differ."
+msgstr "Идентификаторы сборок HTML и App различаются."
+
+#: src/components/debug/AppDiagnostics.tsx:33
+msgid "HTML and App build IDs match."
+msgstr "Идентификаторы сборок HTML и App совпадают."
+
 #: src/components/search/act/ActPage.tsx:97
 msgid "I can help you to book the music room."
 msgstr "Я могу помочь забронировать музкомнату."
@@ -4175,7 +4232,7 @@ msgstr "Я могу помочь забронировать музкомнату
 msgid "ID"
 msgstr "ID"
 
-#: src/components/clubs/EditClubPage.tsx:1107
+#: src/components/clubs/EditClubPage.tsx:1109
 msgid "ID from InnoSport system"
 msgstr "ID из системы InnoSport"
 
@@ -4202,11 +4259,11 @@ msgstr "Изображение"
 msgid "Impersonate"
 msgstr "Войти от имени"
 
-#: src/components/admin/useImpersonation.ts:123
+#: src/components/admin/useImpersonation.ts:137
 msgid "Impersonation cleared"
 msgstr "Имперсонация сброшена"
 
-#: src/components/admin/useImpersonation.ts:89
+#: src/components/admin/useImpersonation.ts:94
 msgid "Impersonation token was not returned."
 msgstr "Токен имперсонации не получен."
 
@@ -4357,11 +4414,11 @@ msgstr "События Университета Иннополис"
 msgid "Innopolis University professors"
 msgstr "Преподаватели Университета Иннополис"
 
-#: src/components/dashboard/PwaWidget.tsx:34
+#: src/components/dashboard/PwaWidget.tsx:47
 msgid "Install"
 msgstr "Установить"
 
-#: src/components/dashboard/PwaWidget.tsx:21
+#: src/components/dashboard/PwaWidget.tsx:34
 msgid "Install as PWA"
 msgstr "Установить как PWA"
 
@@ -4376,6 +4433,10 @@ msgstr "Установите расширение для браузеров на
 #: src/components/extension/ExtensionPage.tsx:85
 msgid "Install the extension for Firefox-based browsers from our servers (supports automatic updates)."
 msgstr "Установите расширение для браузеров на Firefox с наших серверов (поддерживает автообновления)."
+
+#: src/components/debug/BrowserDiagnostics.tsx:76
+msgid "Installed worker waiting to activate."
+msgstr "Установленный воркер, ожидающий активации."
 
 #: src/components/music-room/MusicRoomPage.tsx:46
 #: src/components/music-room/MusicRoomPageTabs.tsx:11
@@ -4435,7 +4496,7 @@ msgstr "Некорректная ссылка на Google Таблицу"
 msgid "Invalid host"
 msgstr "Некорректные данные организатора"
 
-#: src/app/routes/forms.submit.tsx:128
+#: src/app/routes/forms.submit.tsx:132
 #: src/components/events/drafts/DraftLinksSection.tsx:140
 msgid "Invalid link"
 msgstr "Неверная ссылка"
@@ -4466,7 +4527,7 @@ msgstr "Приглашён"
 msgid "Invited by {invitedBy}"
 msgstr "Приглашение от {invitedBy}"
 
-#: src/components/clubs/EditClubPage.tsx:1089
+#: src/components/clubs/EditClubPage.tsx:1091
 msgid "Is InnoSport club"
 msgstr "Клуб InnoSport"
 
@@ -4503,7 +4564,7 @@ msgstr "Участие в студенческой организации пом
 msgid "Joins"
 msgstr "Присоединения"
 
-#: src/app/routes/forms.submit.tsx:112
+#: src/app/routes/forms.submit.tsx:116
 msgid "Just a moment, we're redirecting you to the form..."
 msgstr "Секунду, перенаправляем вас на форму..."
 
@@ -4523,7 +4584,7 @@ msgstr "Оставить"
 msgid "Keep room"
 msgstr "Оставить комнату"
 
-#: src/components/clubs/EditClubPage.tsx:693
+#: src/components/clubs/EditClubPage.tsx:695
 msgid "Keep submitted logo"
 msgstr "Оставить отправленный логотип"
 
@@ -4531,14 +4592,40 @@ msgstr "Оставить отправленный логотип"
 #~ msgid "L"
 #~ msgstr "П"
 
-#: src/components/clubs/EditClubPage.tsx:1235
+#: src/components/clubs/EditClubPage.tsx:1237
 msgid "Label (Optional)"
 msgstr "Подпись (необязательно)"
+
+#: src/components/debug/WorkerDiagnostics.tsx:97
+#: src/components/debug/WorkerDiagnostics.tsx:212
+msgid "Last CLIENT_HELLO recorded in shared storage"
+msgstr "Последнее CLIENT_HELLO в общем хранилище"
+
+#: src/components/debug/AppDiagnostics.tsx:65
+msgid "Last CLIENT_HELLO sent by this App, acknowledgement, and target"
+msgstr "Последнее CLIENT_HELLO от этой App, подтверждение и получатель"
+
+#: src/components/debug/WorkerDiagnostics.tsx:286
+msgid "Last manifest check"
+msgstr "Последняя проверка манифеста"
 
 #: src/components/admin/AdminUserDetails.tsx:301
 msgid "Last name"
 msgstr "Фамилия"
 
+#: src/components/debug/AppDiagnostics.tsx:100
+msgid "Last worker notification observed by this App"
+msgstr "Последнее уведомление воркера, полученное этой App"
+
+#: src/components/debug/WorkerDiagnostics.tsx:344
+msgid "Latest ready"
+msgstr "Последняя готовая"
+
+#: src/components/debug/WorkerDiagnostics.tsx:320
+msgid "Latest ready is the offline fallback, not necessarily the build loaded by this page. A snapshot refresh does not fetch the server's current manifest."
+msgstr "Последняя готовая сборка используется для офлайна и не обязательно совпадает со сборкой этой страницы. Обновление снимка не загружает текущий манифест с сервера."
+
+#: src/components/about/TeamMembers.tsx:106
 #: src/components/clubs/ClubAdminCard.tsx:99
 #: src/components/clubs/ClubCard.tsx:50
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:299
@@ -4607,7 +4694,7 @@ msgid "Link"
 msgstr "Ссылка"
 
 #. placeholder {0}: index + 1
-#: src/components/clubs/EditClubPage.tsx:1165
+#: src/components/clubs/EditClubPage.tsx:1167
 msgid "Link {0}"
 msgstr "Ссылка {0}"
 
@@ -4669,6 +4756,10 @@ msgstr "идёт"
 msgid "Live standings showing points earned by clubs throughout the semester"
 msgstr "Текущий рейтинг баллов, набранных клубами за семестр"
 
+#: src/components/debug/WorkerDiagnostics.tsx:34
+msgid "Live windows come from the worker's Clients API. Stored pins and page reports come from IndexedDB. A stored pin alone does not mean the tab is still open."
+msgstr "Открытые окна получены через Clients API воркера. Сохранённые привязки и сообщения страниц — из IndexedDB. Наличие привязки не означает, что вкладка всё ещё открыта."
+
 #: src/components/sport/SportTrainerBaamImportButton.tsx:184
 msgid "Load from Baam"
 msgstr "Загрузить из Baam"
@@ -4678,7 +4769,7 @@ msgid "Loading changes for review..."
 msgstr "Загрузка изменений на проверку..."
 
 #: src/components/clubs/ClubPage.tsx:63
-#: src/components/clubs/EditClubPage.tsx:552
+#: src/components/clubs/EditClubPage.tsx:554
 msgid "Loading club information..."
 msgstr "Загрузка информации о клубе..."
 
@@ -4723,11 +4814,11 @@ msgstr "Место"
 msgid "Location · {value}"
 msgstr "Локация · {value}"
 
-#: src/components/maps/viewer/MapView.tsx:105
+#: src/components/maps/viewer/MapView.tsx:107
 msgid "Location access denied"
 msgstr "Доступ к геолокации запрещён"
 
-#: src/components/maps/viewer/MapView.tsx:111
+#: src/components/maps/viewer/MapView.tsx:113
 msgid "Location unavailable"
 msgstr "Геолокация недоступна"
 
@@ -4748,7 +4839,7 @@ msgstr "Сначала зафиксируйте группы на вкладке
 msgid "Logo"
 msgstr "Логотип"
 
-#: src/components/clubs/EditClubPage.tsx:659
+#: src/components/clubs/EditClubPage.tsx:661
 msgid "Logo preview"
 msgstr "Предпросмотр логотипа"
 
@@ -4825,6 +4916,14 @@ msgstr "Управляйте бронированиями аудиторий в 
 #: src/components/about/aboutConstants.ts:15
 msgid "Management"
 msgstr "Управление"
+
+#: src/components/debug/WorkerDiagnostics.tsx:224
+msgid "Manifest selected for this page"
+msgstr "Манифест, выбранный для этой страницы"
+
+#: src/components/debug/WorkerDiagnostics.tsx:316
+msgid "Manifests stored by the worker"
+msgstr "Манифесты в хранилище воркера"
 
 #: src/components/web-print/ScanPage.tsx:574
 msgid "Manual"
@@ -4995,7 +5094,7 @@ msgstr "Режим"
 msgid "Moderator feedback"
 msgstr "Отзыв модератора"
 
-#: src/components/clubs/EditClubPage.tsx:1308
+#: src/components/clubs/EditClubPage.tsx:1310
 msgid "Modified"
 msgstr "Изменено"
 
@@ -5105,7 +5204,7 @@ msgstr "Мои ближайшие тренировки"
 #: src/components/admin/AdminUserDetails.tsx:267
 #: src/components/calendar/import/ImportModal.tsx:163
 #: src/components/clubs/ClubPage.tsx:278
-#: src/components/clubs/EditClubPage.tsx:963
+#: src/components/clubs/EditClubPage.tsx:965
 #: src/components/events/drafts/DraftHostsSection.tsx:560
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:73
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:338
@@ -5279,6 +5378,10 @@ msgstr "Нет заблокированных пользователей"
 msgid "No banned users match your search"
 msgstr "Нет заблокированных пользователей по вашему запросу"
 
+#: src/components/debug/WorkerDiagnostics.tsx:296
+msgid "No caches."
+msgstr "Кешей нет."
+
 #: src/components/clubs/ClubReviewChangesPage.tsx:33
 msgid "No changes to review"
 msgstr "Нет изменений для проверки"
@@ -5309,6 +5412,14 @@ msgstr "На следующей неделе занятий нет."
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:835
 msgid "No classes this week."
 msgstr "На этой неделе занятий нет."
+
+#: src/components/debug/WorkerDiagnostics.tsx:218
+msgid "No CLIENT_HELLO was recorded for this page."
+msgstr "Для этой страницы CLIENT_HELLO не записано."
+
+#: src/components/debug/WorkerDiagnostics.tsx:104
+msgid "No CLIENT_HELLO was recorded for this pin."
+msgstr "Для этой привязки CLIENT_HELLO не записано."
 
 #: src/components/events/drafts/DraftHostsSection.tsx:512
 msgid "No clubs available to invite."
@@ -5393,7 +5504,7 @@ msgstr "Нет записей FAQ."
 msgid "No feedback."
 msgstr "Нет отзывов."
 
-#: src/components/clubs/EditClubPage.tsx:732
+#: src/components/clubs/EditClubPage.tsx:734
 msgid "No file selected"
 msgstr "Файл не выбран"
 
@@ -5419,7 +5530,7 @@ msgstr "Игры ещё не добавлены."
 msgid "No games match \"{trimmedSearchQuery}\"."
 msgstr "По запросу «{trimmedSearchQuery}» игры не найдены."
 
-#: src/components/maps/viewer/MapView.tsx:115
+#: src/components/maps/viewer/MapView.tsx:117
 msgid "No GPS signal"
 msgstr "Нет сигнала GPS"
 
@@ -5470,7 +5581,7 @@ msgstr "Информация о лидере недоступна."
 msgid "No links"
 msgstr "Нет ссылок"
 
-#: src/components/clubs/EditClubPage.tsx:1149
+#: src/components/clubs/EditClubPage.tsx:1151
 msgid "No links added yet. Click \"Add Link\" to add resources."
 msgstr "Ссылок пока нет. Нажмите «Добавить ссылку», чтобы добавить ресурсы."
 
@@ -5571,11 +5682,15 @@ msgstr "Нет предпочтений."
 msgid "No qualification was played in this tournament."
 msgstr "Квалификация в этом турнире не проводилась."
 
+#: src/components/debug/BrowserDiagnostics.tsx:43
+msgid "No registrations for this origin."
+msgstr "Для этого origin нет регистраций."
+
 #: src/components/board-games/ReservationsAdminPage.tsx:226
 msgid "No reservations match these filters."
 msgstr "Нет бронирований по этим фильтрам."
 
-#: src/components/dashboard/links/Links.tsx:245
+#: src/components/dashboard/links/Links.tsx:247
 msgid "No results found."
 msgstr "Ничего не найдено."
 
@@ -5607,9 +5722,17 @@ msgstr "Слот не выбран"
 msgid "No sport hours history yet."
 msgstr "Истории спортивных часов пока нет."
 
+#: src/components/debug/WorkerDiagnostics.tsx:328
+msgid "No stored manifests."
+msgstr "Сохранённых манифестов нет."
+
 #: src/components/sport/SportTrainerTrainingModal.tsx:584
 msgid "No students found."
 msgstr "Студенты не найдены."
+
+#: src/components/debug/WorkerDiagnostics.tsx:42
+msgid "No tabs or stored pins."
+msgstr "Вкладок и сохранённых привязок нет."
 
 #: src/components/about/TeamMembers.tsx:243
 msgid "No team members found."
@@ -5745,7 +5868,7 @@ msgid "Nothing to import"
 msgstr "Нечего импортировать"
 
 #. placeholder {0}: getViewUserName(targetUser)
-#: src/components/admin/useImpersonation.ts:103
+#: src/components/admin/useImpersonation.ts:112
 msgid "Now impersonating {0}"
 msgstr "Теперь вы действуете от имени {0}"
 
@@ -5757,6 +5880,7 @@ msgstr "Нумерованный список"
 msgid "Official sources:"
 msgstr "Официальные источники:"
 
+#: src/components/debug/DebugPage.tsx:116
 #: src/components/web-print/PrintPage.tsx:570
 #: src/components/web-print/ScanPage.tsx:528
 msgid "Offline"
@@ -5836,6 +5960,7 @@ msgstr "Разовые изменения неактивных недель ({ig
 msgid "one-zero-eight team is the community of students of Innopolis University passionate about technology"
 msgstr "one-zero-eight — сообщество студентов Университета Иннополис, увлечённых технологиями"
 
+#: src/components/debug/DebugPage.tsx:116
 #: src/components/web-print/PrintPage.tsx:570
 #: src/components/web-print/ScanPage.tsx:528
 msgid "Online"
@@ -5857,11 +5982,15 @@ msgstr "Только администраторы могут изменять с
 msgid "Only administrators can create tournaments"
 msgstr "Только администраторы могут создавать турниры"
 
+#: src/components/debug/AppDiagnostics.tsx:92
+#~ msgid "Only explicitly safe viewing pages reload automatically. Forms, timers, editors, and pages with ongoing work keep their current build."
+#~ msgstr "Автоматически перезагружаются только страницы просмотра, для которых это явно разрешено. Формы, таймеры, редакторы и страницы с незавершённой работой остаются на текущей сборке."
+
 #: src/components/when2meet/CreationPage.tsx:140
 msgid "Only the meeting owner can edit this event."
 msgstr "Редактировать может только владелец встречи."
 
-#: src/components/forms/FormsPage.tsx:65
+#: src/components/forms/FormsPage.tsx:73
 msgid "Only Yandex Forms URLs are supported"
 msgstr "Поддерживаются только URL Яндекс Форм"
 
@@ -5903,6 +6032,10 @@ msgstr "Открыть таблицу"
 #: src/components/schedule/personal-card/PersonalCard.tsx:84
 msgid "Open Telegram bot"
 msgstr "Открыть Telegram-бота"
+
+#: src/components/debug/WorkerDiagnostics.tsx:91
+msgid "Open the manifest used by this tab"
+msgstr "Открыть манифест этой вкладки"
 
 #: src/components/calendar/ExportModal.tsx:99
 msgid "Open your calendar settings to add a calendar by URL."
@@ -6021,6 +6154,14 @@ msgstr "Gmail владельца"
 msgid "Page"
 msgstr "Страница"
 
+#: src/components/debug/AppDiagnostics.tsx:92
+msgid "Pages update automatically by default. An active useAutoUpdateBlocker in a component pauses updates until it is disabled or unmounted."
+msgstr "По умолчанию страницы обновляются автоматически. Активный useAutoUpdateBlocker в компоненте приостанавливает обновления до его отключения или размонтирования компонента."
+
+#: src/components/debug/AppDiagnostics.tsx:92
+#~ msgid "Pages update automatically by default. An active useBlocker in a component pauses updates until it is disabled or unmounted."
+#~ msgstr "По умолчанию страницы обновляются автоматически. Активный useBlocker в компоненте приостанавливает обновления до его отключения или размонтирования компонента."
+
 #: src/components/sport/SportTrainingsCalendarList.tsx:204
 msgid "Paid"
 msgstr "Платно"
@@ -6091,9 +6232,13 @@ msgstr "Вставьте ссылку и нажмите «Добавить»."
 msgid "Paste your link here..."
 msgstr "Вставьте ссылку сюда..."
 
-#: src/components/timer/TimerPage.tsx:292
+#: src/components/timer/TimerPage.tsx:305
 msgid "Pause"
 msgstr "Пауза"
+
+#: src/components/debug/DebugPage.tsx:106
+msgid "Pause automatic updates on this page"
+msgstr "Приостановить автоматические обновления этой страницы"
 
 #: src/components/search/PdfPreview.tsx:56
 msgid "PDF file is missing"
@@ -6213,7 +6358,7 @@ msgstr "Пожалуйста, не забудьте сменную обувь."
 msgid "Please enter a valid Gmail address"
 msgstr "Введите корректный адрес Gmail"
 
-#: src/components/forms/FormsPage.tsx:70
+#: src/components/forms/FormsPage.tsx:78
 msgid "Please enter a valid URL"
 msgstr "Введите корректный URL"
 
@@ -6233,7 +6378,7 @@ msgstr "Пожалуйста, загрузите изображение меди
 msgid "Please submit an image of the reference document (e.g. a medical certificate) that supports your request to change medical group."
 msgstr "Пожалуйста, загрузите изображение подтверждающего документа (например, медицинской справки) для запроса на смену медицинской группы."
 
-#: src/app/AppUpdatePrompt.tsx:46
+#: src/app/AppUpdatePrompt.tsx:48
 msgid "Please, reload the page."
 msgstr "Пожалуйста, перезагрузите страницу."
 
@@ -6274,7 +6419,7 @@ msgstr "Предпочтительное время получения"
 msgid "Preferred time"
 msgstr "Предпочтительное время"
 
-#: src/components/clubs/EditClubPage.tsx:914
+#: src/components/clubs/EditClubPage.tsx:916
 #: src/components/search/IframePreviewCard.tsx:95
 #: src/components/web-print/PrintPage.tsx:445
 #: src/components/web-print/ScanPage.tsx:400
@@ -6285,7 +6430,7 @@ msgstr "Предпросмотр"
 msgid "Preview available for PDF only"
 msgstr "Предпросмотр доступен только для PDF"
 
-#: src/components/clubs/EditClubPage.tsx:676
+#: src/components/clubs/EditClubPage.tsx:678
 msgid "Preview unavailable"
 msgstr "Предпросмотр недоступен"
 
@@ -6509,6 +6654,10 @@ msgstr "Рейтинг:"
 msgid "Rating: {0}"
 msgstr "Рейтинг: {0}"
 
+#: src/components/debug/DiagnosticData.tsx:61
+msgid "Raw data"
+msgstr "Исходные данные"
+
 #: src/components/music-room/MusicRoomPage.tsx:49
 msgid "Read rules and guides on how to access the Music room. Every visitor should accept these conditions."
 msgstr "Прочитайте правила и инструкции по доступу в музкомнату. Каждый посетитель должен принять эти условия."
@@ -6521,7 +6670,7 @@ msgstr "Читатель"
 msgid "Receive a monthly stipend from IU alumni"
 msgstr "Ежемесячная стипендия от выпускников IU"
 
-#: src/components/clubs/EditClubPage.tsx:763
+#: src/components/clubs/EditClubPage.tsx:765
 msgid "Recommended: Square image, at least 400x400px, PNG, JPG or WEBP format"
 msgstr "Рекомендуется квадратное изображение размером не менее 400×400 пикселей в формате PNG, JPG или WEBP"
 
@@ -6554,8 +6703,8 @@ msgstr "Красный уровень доступа (для сотрудник�
 msgid "Redirecting to spreadsheet in <0>{countdown}</0> seconds..."
 msgstr "Переход к таблице через <0>{countdown}</0> сек..."
 
-#: src/app/routes/forms.submit.tsx:86
-#: src/app/routes/forms.submit.tsx:99
+#: src/app/routes/forms.submit.tsx:90
+#: src/app/routes/forms.submit.tsx:103
 msgid "Redirecting to the form"
 msgstr "Перенаправление на форму"
 
@@ -6564,7 +6713,7 @@ msgid "Redirecting to the Student Affairs Helpdesk"
 msgstr "Перенаправление в Student Affairs Helpdesk"
 
 #: src/app/routes/_with_menu/student-affairs/sign-in.tsx:62
-#: src/app/routes/forms.submit.tsx:109
+#: src/app/routes/forms.submit.tsx:113
 msgid "Redirecting..."
 msgstr "Перенаправление..."
 
@@ -6579,6 +6728,14 @@ msgstr "Перераспределить игроков"
 #: src/components/editor/menus/EditorMenuItems.tsx:135
 msgid "Redo"
 msgstr "Повторить"
+
+#: src/components/debug/DebugPage.tsx:134
+msgid "Refresh snapshot"
+msgstr "Обновить снимок"
+
+#: src/components/debug/DebugPage.tsx:91
+msgid "Refreshes every 5 seconds while visible. Reading a snapshot does not check for a deployment or download a build. Sources are sampled at different times."
+msgstr "Обновляется каждые 5 секунд, пока страница видима. Чтение снимка не проверяет обновления сайта и не скачивает сборку. Источники опрашиваются в разное время."
 
 #: src/components/tabletennis/Registration.tsx:58
 msgid "Register"
@@ -6595,6 +6752,10 @@ msgstr "Зарегистрируйтесь, чтобы увидеть списо
 #: src/components/tabletennis/Registration.tsx:30
 msgid "Register to start playing and tracking your rating. Your results will be visible on the leaderboard."
 msgstr "Зарегистрируйтесь, чтобы начать играть и отслеживать свой рейтинг. Ваши результаты появятся в таблице лидеров."
+
+#: src/components/debug/BrowserDiagnostics.tsx:21
+msgid "Registrations and worker roles"
+msgstr "Регистрации и роли воркеров"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:81
 msgid "Regular Schedule & Resources"
@@ -6619,11 +6780,11 @@ msgstr "Отклонить"
 msgid "Reject changes"
 msgstr "Отклонить изменения"
 
-#: src/app/AppUpdatePrompt.tsx:62
+#: src/app/AppUpdatePrompt.tsx:64
 msgid "Reload"
 msgstr "Перезагрузить"
 
-#: src/components/layout/Offline.tsx:53
+#: src/components/layout/Offline.tsx:57
 msgid "Reload the page after the connection is restored."
 msgstr "Обновите страницу после восстановления соединения."
 
@@ -6678,7 +6839,7 @@ msgstr "Удалить последнюю страницу"
 msgid "Remove last page?"
 msgstr "Удалить последнюю страницу?"
 
-#: src/components/clubs/EditClubPage.tsx:1172
+#: src/components/clubs/EditClubPage.tsx:1174
 msgid "Remove link"
 msgstr "Удалить ссылку"
 
@@ -6799,16 +6960,24 @@ msgstr "Забронировано {createdAt}"
 msgid "Reset changes"
 msgstr "Сбросить изменения"
 
-#: src/components/maps/viewer/MapView.tsx:247
+#: src/components/maps/viewer/MapView.tsx:249
 msgid "Reset north"
 msgstr "Сбросить на север"
+
+#: src/components/debug/DebugPage.tsx:164
+msgid "Reset offline storage"
+msgstr "Сброс офлайн-хранилища"
 
 #: src/components/tabletennis/QualificationMatches.tsx:357
 msgid "Reset to results"
 msgstr "Сбросить к результатам"
 
+#: src/components/debug/DebugPage.tsx:186
+msgid "Resetting…"
+msgstr "Сброс…"
+
 #: src/components/clubs/ClubPage.tsx:234
-#: src/components/clubs/EditClubPage.tsx:1126
+#: src/components/clubs/EditClubPage.tsx:1128
 msgid "Resources & Links"
 msgstr "Ресурсы и ссылки"
 
@@ -6843,7 +7012,7 @@ msgstr "Результат"
 msgid "Results for: {searchedFor}"
 msgstr "Результаты по запросу: {searchedFor}"
 
-#: src/components/timer/TimerPage.tsx:283
+#: src/components/timer/TimerPage.tsx:296
 msgid "Resume"
 msgstr "Продолжить"
 
@@ -6910,11 +7079,11 @@ msgstr "Укажите дату возврата."
 msgid "Returned"
 msgstr "Возвращено"
 
-#: src/components/clubs/EditClubPage.tsx:1334
+#: src/components/clubs/EditClubPage.tsx:1336
 msgid "Revert changes"
 msgstr "Отменить изменения"
 
-#: src/components/clubs/EditClubPage.tsx:1331
+#: src/components/clubs/EditClubPage.tsx:1333
 msgid "Revert this section to the published values"
 msgstr "Вернуть этот раздел к опубликованным значениям"
 
@@ -7082,7 +7251,7 @@ msgstr "Сохранить"
 msgid "Save changes"
 msgstr "Сохранить изменения"
 
-#: src/components/clubs/EditClubPage.tsx:1281
+#: src/components/clubs/EditClubPage.tsx:1283
 msgid "Save Changes"
 msgstr "Сохранить изменения"
 
@@ -7106,7 +7275,7 @@ msgstr "Сохранить слоты"
 msgid "Saved, other admins see these groups"
 msgstr "Сохранено, другие админы видят эти группы"
 
-#: src/components/clubs/EditClubPage.tsx:1278
+#: src/components/clubs/EditClubPage.tsx:1280
 msgid "Saving..."
 msgstr "Сохранение..."
 
@@ -7216,7 +7385,7 @@ msgstr "Поиск"
 msgid "Search and review all board game reservations."
 msgstr "Ищите и проверяйте бронирования настольных игр."
 
-#: src/components/maps/MapsPageTabs.tsx:37
+#: src/components/maps/MapsPageTabs.tsx:39
 msgid "Search any place"
 msgstr "Найти место"
 
@@ -7334,7 +7503,7 @@ msgstr "Выберите предмет и компонент"
 msgid "Select a course and component."
 msgstr "Выберите предмет и компонент."
 
-#: src/components/clubs/EditClubPage.tsx:707
+#: src/components/clubs/EditClubPage.tsx:709
 msgid "Select a file to preview"
 msgstr "Выберите файл для предпросмотра"
 
@@ -7361,7 +7530,7 @@ msgstr "Выберите серию, затем кликните по пусто
 msgid "Select a specific date and time in the future. The timer will count down until that moment."
 msgstr "Выберите дату и время в будущем. Таймер будет отсчитывать время до этого момента."
 
-#: src/components/admin/useImpersonation.ts:70
+#: src/components/admin/useImpersonation.ts:73
 msgid "Select a user to impersonate."
 msgstr "Выберите пользователя для имперсонации."
 
@@ -7470,6 +7639,10 @@ msgstr "Шаблон серии"
 msgid "Service for board games reservation."
 msgstr "Сервис бронирования настольных игр."
 
+#: src/components/debug/BrowserDiagnostics.tsx:36
+msgid "Service workers are not supported in this browser."
+msgstr "Этот браузер не поддерживает Service Worker."
+
 #: src/app/routes/_with_menu/menu.tsx:16
 msgid "Services list for navigation."
 msgstr "Список сервисов для навигации."
@@ -7482,7 +7655,7 @@ msgstr "Укажите время начала раньше времени ок�
 msgid "Set guests role to {newRole, select, writer {Writer} other {Reader}}"
 msgstr "Назначить гостям права {newRole, select, writer {редактора} other {читателя}}"
 
-#: src/components/clubs/EditClubPage.tsx:1023
+#: src/components/clubs/EditClubPage.tsx:1025
 msgid "Set New Leader (Innopolis Email)"
 msgstr "Назначить нового лидера (email Иннополис)"
 
@@ -7543,6 +7716,10 @@ msgstr "Поделитесь ссылкой для доступа"
 msgid "Share this room"
 msgstr "Поделиться комнатой"
 
+#: src/components/debug/WorkerDiagnostics.tsx:273
+msgid "Shared offline storage state"
+msgstr "Состояние общего офлайн-хранилища"
+
 #: src/components/guard/FileDetails.tsx:137
 msgid "Sheets"
 msgstr "Таблицы"
@@ -7551,7 +7728,7 @@ msgstr "Таблицы"
 msgid "Short description"
 msgstr "Краткое описание"
 
-#: src/components/clubs/EditClubPage.tsx:878
+#: src/components/clubs/EditClubPage.tsx:880
 msgid "Short Description"
 msgstr "Краткое описание"
 
@@ -7576,7 +7753,7 @@ msgstr "Показать 319 на карте"
 msgid "Show all"
 msgstr "Показать всех"
 
-#: src/components/dashboard/links/Links.tsx:230
+#: src/components/dashboard/links/Links.tsx:232
 msgid "Show all ({resourceCount})"
 msgstr "Показать все ({resourceCount})"
 
@@ -7634,7 +7811,7 @@ msgstr "Показать преподавателя в панели детале
 msgid "Show location in the details panel"
 msgstr "Показать локацию в панели деталей"
 
-#: src/components/maps/viewer/MapView.tsx:282
+#: src/components/maps/viewer/MapView.tsx:284
 msgid "Show my location"
 msgstr "Показать моё местоположение"
 
@@ -7719,7 +7896,7 @@ msgstr "Пропустить"
 msgid "Slot"
 msgstr "Слот"
 
-#: src/components/clubs/EditClubPage.tsx:830
+#: src/components/clubs/EditClubPage.tsx:832
 msgid "Slug"
 msgstr "Идентификатор в URL"
 
@@ -7761,6 +7938,10 @@ msgstr "Извините, что-то пошло не так."
 #: src/components/search/IframePreviewCard.tsx:104
 msgid "Sorry, this site does not support preview. Please, open it directly."
 msgstr "Извините, этот сайт не поддерживает предпросмотр. Откройте его напрямую."
+
+#: src/components/debug/DiagnosticData.tsx:19
+msgid "Source:"
+msgstr "Источник:"
 
 #: src/components/search/SelectSourcesFilterButton.tsx:21
 msgid "Sources"
@@ -7851,11 +8032,11 @@ msgid "Sport hours: <0>{earned} out of {required, plural, one {# hour} other {# 
 msgstr "Спортивные часы: <0>{earned} из {required, plural, one {# часа} few {# часов} many {# часов} other {# часа}}</0>"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:291
-#: src/components/clubs/EditClubPage.tsx:1099
+#: src/components/clubs/EditClubPage.tsx:1101
 msgid "Sport ID"
 msgstr "Sport ID"
 
-#: src/components/clubs/EditClubPage.tsx:1065
+#: src/components/clubs/EditClubPage.tsx:1067
 msgid "Sport Information"
 msgstr "Спортивная информация"
 
@@ -7875,7 +8056,7 @@ msgstr "Не удалось загрузить прогресс по спорт�
 msgid "Sport trainer"
 msgstr "Спорт: тренер"
 
-#: src/components/clubs/EditClubPage.tsx:1111
+#: src/components/clubs/EditClubPage.tsx:1113
 msgid "Sport type ID from InnoSport system"
 msgstr "ID типа спорта из системы InnoSport"
 
@@ -7916,7 +8097,7 @@ msgstr "Турнирная таблица"
 
 #: src/components/room-booking/timeline/BookingModal.tsx:572
 #: src/components/tabletennis/ValidationMatches.tsx:815
-#: src/components/timer/TimerPage.tsx:272
+#: src/components/timer/TimerPage.tsx:285
 msgid "Start"
 msgstr "Старт"
 
@@ -8021,7 +8202,7 @@ msgstr "Шаг 4: Подготовьте материалы клуба"
 msgid "Step 5: Fill Registration Form"
 msgstr "Шаг 5: Заполните регистрационную форму"
 
-#: src/components/timer/TimerPage.tsx:302
+#: src/components/timer/TimerPage.tsx:315
 msgid "Stop"
 msgstr "Стоп"
 
@@ -8033,6 +8214,18 @@ msgstr "Остановить таймер"
 #: src/components/room-booking/timeline/BookingModal.tsx:759
 msgid "Stopping booking..."
 msgstr "Остановка бронирования..."
+
+#: src/components/debug/WorkerDiagnostics.tsx:238
+msgid "Stored manifest metadata differs from this App's BUILD_INFO."
+msgstr "Метаданные сохранённого манифеста отличаются от BUILD_INFO этой App."
+
+#: src/components/debug/WorkerDiagnostics.tsx:232
+msgid "Stored manifest metadata matches this App's BUILD_INFO."
+msgstr "Метаданные сохранённого манифеста совпадают с BUILD_INFO этой App."
+
+#: src/components/debug/WorkerDiagnostics.tsx:66
+msgid "Stored pin only"
+msgstr "Только сохранённая привязка"
 
 #: src/components/editor/menus/EditorMenuItems.tsx:62
 msgid "Strikethrough"
@@ -8103,15 +8296,15 @@ msgstr "Отправить на проверку"
 msgid "Submitted"
 msgstr "Отправлено"
 
-#: src/components/clubs/EditClubPage.tsx:409
+#: src/components/clubs/EditClubPage.tsx:411
 msgid "Submitted for review"
 msgstr "Отправлено на проверку"
 
-#: src/components/clubs/EditClubPage.tsx:668
+#: src/components/clubs/EditClubPage.tsx:670
 msgid "Submitted logo"
 msgstr "Отправленный логотип"
 
-#: src/components/clubs/EditClubPage.tsx:698
+#: src/components/clubs/EditClubPage.tsx:700
 msgid "Submitted, waiting for review"
 msgstr "Отправлено, ожидает проверки"
 
@@ -8123,8 +8316,8 @@ msgid "Submitted: <0>{0}</0>"
 msgstr "Отправлено: <0>{0}</0>"
 
 #: src/components/admin/AdminRoomsPage.tsx:73
-#: src/components/admin/useImpersonation.ts:102
-#: src/components/admin/useImpersonation.ts:123
+#: src/components/admin/useImpersonation.ts:111
+#: src/components/admin/useImpersonation.ts:137
 #: src/components/admin/usePredefinedDataEditor.ts:33
 #: src/components/toast/ToastProvider.test.ts:66
 #: src/components/toast/ToastProvider.test.ts:108
@@ -8228,6 +8421,10 @@ msgstr "Клуб настольного тенниса"
 msgid "Table tennis site"
 msgstr "Сайт настольного тенниса"
 
+#: src/components/debug/WorkerDiagnostics.tsx:30
+msgid "Tabs known to this worker"
+msgstr "Вкладки, известные этому воркеру"
+
 #: src/components/schedule/EventGroupPage.tsx:83
 msgid "Tags"
 msgstr "Теги"
@@ -8324,7 +8521,7 @@ msgstr "Telegram-бот"
 msgid "Telegram channel"
 msgstr "Канал Telegram"
 
-#: src/components/clubs/EditClubPage.tsx:1197
+#: src/components/clubs/EditClubPage.tsx:1199
 msgid "Telegram Channel"
 msgstr "Telegram-канал"
 
@@ -8332,7 +8529,7 @@ msgstr "Telegram-канал"
 msgid "Telegram chat"
 msgstr "Чат Telegram"
 
-#: src/components/clubs/EditClubPage.tsx:1200
+#: src/components/clubs/EditClubPage.tsx:1202
 msgid "Telegram Chat"
 msgstr "Telegram-чат"
 
@@ -8351,7 +8548,7 @@ msgstr "ID Telegram: {0}"
 msgid "Telegram not provided"
 msgstr "Telegram не указан"
 
-#: src/components/clubs/EditClubPage.tsx:1203
+#: src/components/clubs/EditClubPage.tsx:1205
 msgid "Telegram User"
 msgstr "Пользователь Telegram"
 
@@ -8388,11 +8585,11 @@ msgstr "Менеджер клубов заранее собирает заказ
 msgid "The file contains no student emails."
 msgstr "В файле нет email студентов."
 
-#: src/components/clubs/EditClubPage.tsx:610
+#: src/components/clubs/EditClubPage.tsx:612
 msgid "The form below shows the leader's submitted changes. Saving will apply your edits directly to the club."
 msgstr "Ниже показаны изменения, отправленные лидером. Сохранение применит ваши правки сразу к клубу."
 
-#: src/components/clubs/EditClubPage.tsx:611
+#: src/components/clubs/EditClubPage.tsx:613
 msgid "The form below shows what you submitted, not what is published yet. Keep editing and save again to update the request."
 msgstr "Ниже показано то, что вы отправили, а не опубликованная версия. Продолжайте редактировать и сохраните снова, чтобы обновить заявку."
 
@@ -8438,6 +8635,11 @@ msgstr "Порядок был изменён вручную."
 msgid "The organiser is forming the groups."
 msgstr "Организатор формирует группы."
 
+#: src/components/debug/AppDiagnostics.tsx:79
+#: src/components/debug/WorkerDiagnostics.tsx:204
+msgid "The page sends a build ID, not a manifest. The worker downloads manifests from the server independently."
+msgstr "Страница отправляет идентификатор сборки, а не манифест. Воркер самостоятельно загружает манифесты с сервера."
+
 #: src/components/tabletennis/MergeGuestModal.tsx:131
 msgid "The person has to register in table tennis first."
 msgstr "Сначала нужно зарегистрироваться в настольном теннисе."
@@ -8479,7 +8681,7 @@ msgstr "Период серии не пересекается с учебным 
 #~ msgid "The series window does not overlap the selected groups' teaching period."
 #~ msgstr "Период серии не пересекается с учебным периодом выбранных групп."
 
-#: src/app/routes/forms.submit.tsx:131
+#: src/app/routes/forms.submit.tsx:135
 msgid "The slug parameter is missing or invalid."
 msgstr "Параметр slug отсутствует или некорректен."
 
@@ -8508,7 +8710,7 @@ msgstr "Таймер остановлен"
 msgid "The website is an ecosystem that brings together all <0/> team services and useful Innopolis resources for students in one place."
 msgstr "Это экосистема, объединяющая все сервисы команды <0/> и полезные ресурсы Иннополиса для студентов в одном месте."
 
-#: src/app/AppUpdatePrompt.tsx:43
+#: src/app/AppUpdatePrompt.tsx:45
 msgid "The website is updated."
 msgstr "Сайт обновлён."
 
@@ -8536,15 +8738,27 @@ msgstr "Нет файла для печати!"
 msgid "Think about your <0>aims and goals</0> to keep your club going purposefully. Consider writing mission and vision statements to clarify your club's purpose."
 msgstr "Продумайте <0>цели и задачи</0>, чтобы клуб развивался осмысленно. Зафиксируйте миссию и видение."
 
+#: src/components/debug/AppDiagnostics.tsx:116
+msgid "This App has not received a worker notification yet."
+msgstr "Эта App ещё не получала уведомлений воркера."
+
+#: src/components/debug/AppDiagnostics.tsx:75
+msgid "This App has not sent CLIENT_HELLO yet."
+msgstr "Эта App ещё не отправляла CLIENT_HELLO."
+
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:381
 msgid "This class is cancelled in the configuration."
 msgstr "Это занятие отменено в конфигурации."
+
+#: src/components/debug/DebugPage.tsx:167
+msgid "This clears ALL Cache Storage caches for this origin, unregisters all service workers, and reloads the page. All cached builds will be removed."
+msgstr "Будут очищены ВСЕ кеши Cache Storage этого origin, удалены регистрации всех Service Worker и перезагружена страница. Все кешированные сборки будут удалены."
 
 #: src/components/clubs/ClubPage.tsx:92
 msgid "This club has changes waiting for admin review."
 msgstr "У этого клуба есть изменения, ожидающие проверки администратором."
 
-#: src/components/clubs/EditClubPage.tsx:605
+#: src/components/clubs/EditClubPage.tsx:607
 msgid "This club has changes waiting for review"
 msgstr "У этого клуба есть изменения, ожидающие проверки"
 
@@ -8568,13 +8782,18 @@ msgstr "Этой игры больше нет в каталоге. Обнови�
 msgid "This game is no longer in the catalogue."
 msgstr "Этой игры больше нет в каталоге."
 
-#: src/app/routes/forms.submit.tsx:177
+#: src/app/routes/forms.submit.tsx:181
 msgid "This link may be invalid, expired, or you may not have access."
 msgstr "Ссылка может быть недействительной, устаревшей, или у вас нет доступа."
 
-#: src/components/clubs/EditClubPage.tsx:684
+#: src/components/clubs/EditClubPage.tsx:686
 msgid "This logo change will be cancelled when you save."
 msgstr "Это изменение логотипа будет отменено при сохранении."
+
+#: src/components/debug/WorkerDiagnostics.tsx:61
+#: src/components/debug/WorkerDiagnostics.tsx:349
+msgid "This page"
+msgstr "Эта страница"
 
 #: src/components/admin/RequireInnohassleAdmin.tsx:23
 msgid "This page is available only for InNoHassle admins."
@@ -8614,7 +8833,7 @@ msgstr "Эта тренировка только для студентов ко�
 msgid "This training is for university students only."
 msgstr "Эта тренировка только для студентов университета."
 
-#: src/components/clubs/EditClubPage.tsx:739
+#: src/components/clubs/EditClubPage.tsx:741
 msgid "This will be uploaded when you save changes below."
 msgstr "Это будет загружено при сохранении изменений ниже."
 
@@ -8625,6 +8844,14 @@ msgstr "Будет создана ссылка, которая автомати�
 #: src/components/web-print/ScanPage.tsx:741
 msgid "This will permanently remove the last scanned page from the document. Are you sure?"
 msgstr "Последняя отсканированная страница будет безвозвратно удалена из документа. Продолжить?"
+
+#: src/components/debug/WorkerDiagnostics.tsx:160
+msgid "This worker did not answer GET_DIAGNOSTICS. No data from another worker is substituted."
+msgstr "Этот воркер не ответил на GET_DIAGNOSTICS. Данные другого воркера не подставляются."
+
+#: src/components/debug/WorkerDiagnostics.tsx:259
+msgid "This worker has no stored manifest for this page's pin. This does not mean that the page is running the latest ready build."
+msgstr "В хранилище нет манифеста для привязки этой страницы. Это не означает, что страница работает на последней готовой сборке."
 
 #: src/components/schedule-assistant/settings/weekdays.ts:47
 msgid "Thu"
@@ -8683,7 +8910,7 @@ msgstr "Таймер уже на максимуме (99:59:59)"
 msgid "Timer set to maximum (99:59:59)"
 msgstr "Таймер установлен на максимум (99:59:59)"
 
-#: src/components/timer/TimerPage.tsx:189
+#: src/components/timer/TimerPage.tsx:202
 msgid "Timer title..."
 msgstr "Название таймера..."
 
@@ -8710,7 +8937,7 @@ msgstr "TIP"
 #: src/components/board-games/BoardGamesAdminPage.tsx:735
 #: src/components/board-games/BoardGamesAdminPage.tsx:929
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:260
-#: src/components/clubs/EditClubPage.tsx:814
+#: src/components/clubs/EditClubPage.tsx:816
 #: src/components/guard/CreateSheetPage.tsx:101
 #: src/components/room-booking/tv/RoomTvPage.tsx:194
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:354
@@ -8861,11 +9088,11 @@ msgstr "Тренировки"
 msgid "Trainings in progress or finished less than 3 days ago. Click a training to manage student attendance."
 msgstr "Тренировки идущие сейчас или завершённые менее 3 дней назад. Нажмите на тренировку, чтобы управлять посещаемостью студентов."
 
-#: src/app/routes/forms.submit.tsx:188
+#: src/app/routes/forms.submit.tsx:192
 msgid "Try again"
 msgstr "Попробовать снова"
 
-#: src/components/layout/Offline.tsx:61
+#: src/components/layout/Offline.tsx:65
 msgid "Try to disable VPN and connect to University WiFi, then reload the page."
 msgstr "Отключите VPN и подключитесь к Wi‑Fi университета, затем обновите страницу."
 
@@ -8897,8 +9124,8 @@ msgid "Two printers are available on campus right now:"
 msgstr "Сейчас в кампусе доступны два принтера:"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:276
-#: src/components/clubs/EditClubPage.tsx:852
-#: src/components/clubs/EditClubPage.tsx:1182
+#: src/components/clubs/EditClubPage.tsx:854
+#: src/components/clubs/EditClubPage.tsx:1184
 msgid "Type"
 msgstr "Тип"
 
@@ -9018,7 +9245,7 @@ msgstr "Неразмещённые"
 msgid "Unspent points from last semester expire"
 msgstr "Непотраченные баллы прошлого семестра сгорают"
 
-#: src/components/timer/TimerPage.tsx:209
+#: src/components/timer/TimerPage.tsx:222
 msgid "Until exact time"
 msgstr "До точного времени"
 
@@ -9053,7 +9280,7 @@ msgstr "Обновить ссылку"
 #~ msgid "Update status"
 #~ msgstr "Обновить статус"
 
-#: src/components/clubs/EditClubPage.tsx:591
+#: src/components/clubs/EditClubPage.tsx:593
 msgid "Update the club information below"
 msgstr "Обновите информацию о клубе ниже"
 
@@ -9078,7 +9305,7 @@ msgstr "Загрузите файл, выберите принтер, отпра
 msgid "Upload config.yaml in the “Settings” tab."
 msgstr "Загрузите config.yaml во вкладке «Настройки»."
 
-#: src/components/clubs/EditClubPage.tsx:652
+#: src/components/clubs/EditClubPage.tsx:654
 msgid "Upload new logo"
 msgstr "Загрузить новый логотип"
 
@@ -9086,7 +9313,7 @@ msgstr "Загрузить новый логотип"
 msgid "Uploading image..."
 msgstr "Загрузка изображения..."
 
-#: src/components/clubs/EditClubPage.tsx:1280
+#: src/components/clubs/EditClubPage.tsx:1282
 msgid "Uploading logo..."
 msgstr "Загрузка логотипа..."
 
@@ -9099,7 +9326,7 @@ msgstr "URL"
 msgid "URL (optional)"
 msgstr "URL (необязательно)"
 
-#: src/components/clubs/EditClubPage.tsx:1214
+#: src/components/clubs/EditClubPage.tsx:1216
 msgid "URL <0>*</0>"
 msgstr "Ссылка <0>*</0>"
 
@@ -9111,7 +9338,7 @@ msgstr "Нужно указать URL."
 msgid "URL-friendly identifier (e.g., \"robotics-club\")"
 msgstr "Идентификатор для URL (например, «robotics-club»)"
 
-#: src/components/clubs/EditClubPage.tsx:844
+#: src/components/clubs/EditClubPage.tsx:846
 msgid "URL-friendly identifier for the club"
 msgstr "URL-идентификатор клуба"
 
@@ -9145,7 +9372,7 @@ msgstr "Войдите через аккаунт Иннополиса,<0/>что
 msgid "User email"
 msgstr "Email пользователя"
 
-#: src/components/admin/useImpersonation.ts:75
+#: src/components/admin/useImpersonation.ts:78
 msgid "User email is required for impersonation."
 msgstr "Для имперсонации нужен email пользователя."
 
@@ -9368,7 +9595,7 @@ msgstr "Мы рады всем, кто хочет работать в нашей
 msgid "we write code and maintain products"
 msgstr "мы пишем код и поддерживаем продукты"
 
-#: src/components/maps/viewer/MapView.tsx:122
+#: src/components/maps/viewer/MapView.tsx:124
 msgid "Weak GPS signal (±{accuracyM}m)"
 msgstr "Слабый сигнал GPS (±{accuracyM} м)"
 
@@ -9448,6 +9675,26 @@ msgstr "Что могут покупать клубы"
 msgid "What is it?"
 msgstr "Что это?"
 
+#: src/components/debug/WorkerDiagnostics.tsx:150
+msgid "What the browser knows about this worker"
+msgstr "Что браузер знает об этом воркере"
+
+#: src/components/debug/AppDiagnostics.tsx:19
+msgid "What this App knows about itself"
+msgstr "Что эта App знает о себе"
+
+#: src/components/debug/AppDiagnostics.tsx:43
+msgid "What this App sent to its controller"
+msgstr "Что эта App отправила своему контроллеру"
+
+#: src/components/debug/WorkerDiagnostics.tsx:172
+msgid "What this worker knows about itself"
+msgstr "Что этот воркер знает о себе"
+
+#: src/components/debug/WorkerDiagnostics.tsx:186
+msgid "What this worker knows about this page's report"
+msgstr "Что этот воркер знает о сообщении этой страницы"
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:351
 #: src/components/board-games/UserReservationDetailsModal.tsx:112
 #: src/components/board-games/UserReservationDetailsModal.tsx:376
@@ -9518,6 +9765,14 @@ msgstr "Сейчас нельзя изменить победителя"
 msgid "Wins"
 msgstr "Победы"
 
+#: src/components/debug/BrowserDiagnostics.tsx:80
+msgid "Worker currently being installed."
+msgstr "Воркер, который сейчас устанавливается."
+
+#: src/components/debug/BrowserDiagnostics.tsx:84
+msgid "worker-N is a local reference within this snapshot, not a persistent browser ID. Equal script URLs alone do not identify the same worker instance."
+msgstr "worker-N — локальное обозначение в этом снимке, а не постоянный идентификатор браузера. Одинаковый URL скрипта не означает, что это один экземпляр воркера."
+
 #: src/components/board-games/reservation-presentation.ts:42
 msgid "With the borrower"
 msgstr "У получателя"
@@ -9542,7 +9797,7 @@ msgstr "Редактор"
 msgid "Wrong? Reconnect"
 msgstr "Неверно? Переподключить"
 
-#: src/app/routes/forms.submit.tsx:208
+#: src/app/routes/forms.submit.tsx:212
 msgid "Yandex Form"
 msgstr "Яндекс Форма"
 
@@ -9590,11 +9845,11 @@ msgstr "Вы не участвуете ни в одной активной вс�
 msgid "You are not registered as a sport trainer."
 msgstr "Вы не зарегистрированы как спортивный тренер."
 
-#: src/components/layout/Offline.tsx:48
+#: src/components/layout/Offline.tsx:50
 msgid "You are offline"
 msgstr "Вы офлайн"
 
-#: src/components/maps/viewer/MapView.tsx:126
+#: src/components/maps/viewer/MapView.tsx:128
 msgid "You are outside this map"
 msgstr "Вы вне этой карты"
 
@@ -9657,7 +9912,7 @@ msgstr "У вас нет бронирований."
 msgid "You don't have permission to access this page."
 msgstr "У вас нет доступа к этой странице."
 
-#: src/components/clubs/EditClubPage.tsx:606
+#: src/components/clubs/EditClubPage.tsx:608
 msgid "You have changes waiting for review"
 msgstr "У вас есть изменения на проверке"
 
@@ -9681,7 +9936,7 @@ msgstr "У вас нет бронирований"
 msgid "You have no reservations yet."
 msgstr "У вас пока нет бронирований."
 
-#: src/components/clubs/EditClubPage.tsx:241
+#: src/components/clubs/EditClubPage.tsx:243
 msgid "You have unsaved changes. Are you sure you want to leave?"
 msgstr "Есть несохранённые изменения. Точно уйти?"
 

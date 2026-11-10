@@ -15,6 +15,8 @@ import type {
   BuildManifest,
   BuildResource,
   CachedBuild,
+  ClientHelloReply,
+  WorkerBuildInfo,
   WorkerCommand,
 } from "../protocol.ts";
 import {
@@ -28,6 +30,7 @@ import {
 import { readWorkerState, withWorkerState } from "../storage.ts";
 
 declare const self: ServiceWorkerGlobalScope;
+declare const BUILD_INFO: WorkerBuildInfo;
 
 /** Deduplicate concurrent CHECK_MANIFEST / navigate-triggered downloads. */
 let checkPromise: Promise<BuildInfo | null> | null = null;
@@ -346,6 +349,7 @@ async function pinNavigation(event: FetchEvent, buildId: string) {
     state.clients.push({
       clientId: event.resultingClientId,
       buildId,
+      navigationSource: "network",
       pathname: "__navigation__",
       reservedAt: Date.now(),
       interval: 0,
@@ -404,6 +408,7 @@ async function handleNavigation(event: FetchEvent) {
         state.clients.push({
           clientId: event.resultingClientId,
           buildId: build.manifest.buildInfo.buildId,
+          navigationSource: "cache",
           pathname: "__navigation__",
           reservedAt: Date.now(),
           interval: 0,
@@ -494,6 +499,9 @@ export async function handleSiteUpdateMessage(
     case "CLIENT_HELLO": {
       if (!source?.id) throw new Error("Missing client");
       const state = await withWorkerState(async (current) => {
+        const navigationSource = current.clients.find(
+          (pin) => pin.clientId === source.id,
+        )?.navigationSource;
         current.clients = current.clients.filter(
           (pin) => pin.clientId !== source.id,
         );
@@ -502,9 +510,18 @@ export async function handleSiteUpdateMessage(
           // The page reports the build it actually booted with (from BUILD_INFO),
           // which pins asset serving for that tab.
           buildId: command.buildId,
+          navigationSource,
           pathname: command.pathname,
           interval: command.interval,
           nextCheckAt: command.nextCheckAt,
+          lastHello: {
+            message: command,
+            receivedAt: new Date().toISOString(),
+            receivedBy: {
+              scriptURL: self.location.href,
+              serviceWorkerHash: BUILD_INFO.serviceWorkerHash,
+            },
+          },
         });
         return current;
       });
@@ -522,7 +539,12 @@ export async function handleSiteUpdateMessage(
           generation: state.generation,
         });
       await collectUnusedBuilds();
-      return { generation: state.generation };
+      return {
+        generation: state.generation,
+        navigationSource:
+          state.clients.find((pin) => pin.clientId === source.id)
+            ?.navigationSource ?? null,
+      } satisfies ClientHelloReply;
     }
     default:
       return undefined;

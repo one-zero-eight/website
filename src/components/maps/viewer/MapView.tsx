@@ -11,6 +11,7 @@ import { useUserLocation } from "@/components/maps/viewer/useUserLocation.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { FloatingOverlay, FloatingPortal } from "@floating-ui/react";
+import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
 import {
   PropsWithChildren,
   useCallback,
@@ -34,6 +35,7 @@ export function MapView({
   const { showError } = useToast();
   const [fullscreen, setFullscreen] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  useAutoUpdateBlocker(isExportingPdf);
   const switchFullscreen = useCallback(() => setFullscreen((v) => !v), []);
   const mapViewerRef = useRef<MapViewerHandle>(null);
   const [bearing, setBearing] = useState(0);

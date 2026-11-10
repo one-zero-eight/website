@@ -18,6 +18,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"],
-  "exclude": ["src/service-worker"]
+  "include": ["src", "tests/service-worker/**/*.test.ts"],
+  "exclude": ["src/service-worker", "tests/service-worker/build-labels.test.ts"]
 }

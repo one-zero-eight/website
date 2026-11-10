@@ -73,5 +73,13 @@
         <span class="loading loading-spinner loading-xl"></span>
       </div>
     </div>
+
+    <!-- Static build marker outside the React root; CSS anchors it to Debug. -->
+    <span
+      id="debug-html-build"
+      class="bg-base-200 text-base-content/60 fixed [top:anchor(center)] [left:anchor(right)] ml-2 hidden -translate-y-1/2 rounded-md px-2 py-1 font-mono text-xs whitespace-nowrap [position-anchor:--debug-title] [position-visibility:anchors-visible] in-[body:has(#debug-title)]:block"
+      title="__HTML_BUILD_AT__"
+      >HTML · __HTML_BUILD_LABEL__</span
+    >
   </body>
 </html>

@@ -3,7 +3,7 @@ export type BuildInfo = {
   /** Opaque per-deploy id; used for cache names and HTML data-build-id pinning. */
   buildId: string;
   /** Digest of the app resource list (not of sw.js). */
-  buildHash: string;
+  resourcesBuildHash: string;
   commitHash: string;
   builtAt: string;
 };
@@ -13,14 +13,17 @@ export type BuildInfo = {
  * not appear here — otherwise every site deploy would change sw.js bytes and
  * force a service-worker update in the browser.
  */
-export type WorkerBuildInfo = { buildHash: string };
+export type WorkerBuildInfo = {
+  /** SHA-256 of compiled sw.js code, excluding the metadata bootstrap line. */
+  serviceWorkerHash: string;
+};
 
 export type BuildResource = { url: string; integrity: string; size: number };
 
 /**
  * External app snapshot, fetched at runtime (not baked into sw.js).
  *
- * buildHash = SHA-256(JSON.stringify(resources sorted by URL)), excluding
+ * resourcesBuildHash = SHA-256(JSON.stringify(resources sorted by URL)), excluding
  * runtime build-info.js, sw.js, this manifest and source maps. Resource
  * integrity is SHA-384 of final bytes; build-info.js is still verified and
  * stored in the complete snapshot, but cannot hash its own digest.
@@ -32,6 +35,21 @@ export type BuildManifest = {
   resources: BuildResource[];
 };
 
+/** The page reports its build ID, not a manifest. The SW fetches manifests itself. */
+export type ClientHelloCommand = {
+  type: "CLIENT_HELLO";
+  buildId: string;
+  pathname: string;
+  interval: number;
+  nextCheckAt: string | null;
+};
+
+export type ClientHelloReply = {
+  generation: number;
+  /** Actual source of this document, or null for a page not pinned during navigation. */
+  navigationSource: "network" | "cache" | null;
+};
+
 /** Which cached build a tab (or in-flight navigation) is allowed to read. */
 export type ClientPin = {
   clientId: string;
@@ -39,8 +57,15 @@ export type ClientPin = {
   pathname: string;
   interval: number;
   nextCheckAt: string | null;
+  navigationSource?: "network" | "cache";
   /** Temporary pin created during navigate before CLIENT_HELLO arrives. */
   reservedAt?: number;
+  /** Actual last page report; absent for navigation-only or previously stored pins. */
+  lastHello?: {
+    message: ClientHelloCommand;
+    receivedAt: string;
+    receivedBy: { scriptURL: string; serviceWorkerHash: string };
+  };
 };
 
 export type CachedBuild = {
@@ -89,16 +114,32 @@ export type WorkerStatus = WorkerState & {
   caches: { name: string; entries: number; bytes: number }[];
 };
 
+/** Each source stays separate; storage is shared, worker identity and clients are not. */
+export type WorkerDiagnosticsSnapshot = {
+  worker: {
+    buildInfo: WorkerBuildInfo;
+    scriptURL: string;
+    scope: string;
+  };
+  storage: WorkerState;
+  runtimeClients: {
+    requestingClientId: string | null;
+    windows: {
+      id: string;
+      url: string;
+      focused: boolean;
+      visibilityState: "hidden" | "visible";
+      controlled: boolean;
+    }[];
+  };
+  cacheStorage: WorkerStatus["caches"];
+};
+
 export type WorkerCommand =
-  | {
-      type: "CLIENT_HELLO";
-      buildId: string;
-      pathname: string;
-      interval: number;
-      nextCheckAt: string | null;
-    }
+  | ClientHelloCommand
   | { type: "CHECK_MANIFEST" }
   | { type: "GET_STATUS" }
+  | { type: "GET_DIAGNOSTICS" }
   | { type: "GET_STATE" }
   | { type: "GET_BUILD_INFO" }
   | { type: "RESET" };

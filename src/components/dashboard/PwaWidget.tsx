@@ -1,10 +1,23 @@
 import { usePwaPrompt } from "@/app/pwa-prompt.tsx";
 import { Trans } from "@lingui/react/macro";
+import { useAutoUpdateBlocker } from "@/app/use-auto-update-blocker.ts";
+import { useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 export function PwaWidget() {
   const deferredPrompt = usePwaPrompt();
   const [widgetShown, setWidgetShown] = useLocalStorage("widget-pwa", true);
+  const [isInstalling, setIsInstalling] = useState(false);
+  useAutoUpdateBlocker(isInstalling);
+
+  async function handleInstall() {
+    setIsInstalling(true);
+    try {
+      await deferredPrompt?.prompt();
+    } finally {
+      setIsInstalling(false);
+    }
+  }
 
   // Don't show the widget if the browser does not support the PWA prompt
   if (!deferredPrompt) return null;
@@ -26,7 +39,7 @@ export function PwaWidget() {
         </div>
         <button
           type="button"
-          onClick={() => deferredPrompt?.prompt()}
+          onClick={handleInstall}
           className="text-base-content/75 flex w-fit items-center hover:underline"
         >
           <span className="icon-[material-symbols--arrow-forward] text-primary mr-1" />

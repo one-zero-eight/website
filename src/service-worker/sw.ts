@@ -16,6 +16,7 @@ import {
 import type {
   WorkerBuildInfo,
   WorkerCommand,
+  WorkerDiagnosticsSnapshot,
   WorkerStatus,
 } from "./protocol.ts";
 import { abortBackground, broadcast, errorMessage } from "./shared.ts";
@@ -29,7 +30,7 @@ import {
 declare const self: ServiceWorkerGlobalScope;
 declare const BUILD_INFO: WorkerBuildInfo;
 
-console.info("[Service Worker] Build info:", BUILD_INFO);
+console.info("[Service Worker] Build Info:", BUILD_INFO);
 
 async function getStatus(): Promise<WorkerStatus> {
   return withWorkerState(async (state) => {
@@ -53,6 +54,38 @@ async function getStatus(): Promise<WorkerStatus> {
   });
 }
 
+async function getDiagnostics(
+  requestingClientId: string | null,
+): Promise<WorkerDiagnosticsSnapshot> {
+  const [
+    { buildInfo, scope, caches: cacheStorage, ...storage },
+    controlledClients,
+    allClients,
+  ] = await Promise.all([
+    getStatus(),
+    self.clients.matchAll({ type: "window" }),
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }),
+  ]);
+  const controlledIds = new Set(controlledClients.map((client) => client.id));
+  return {
+    worker: { buildInfo, scriptURL: self.location.href, scope },
+    storage,
+    runtimeClients: {
+      requestingClientId,
+      windows: allClients
+        .filter((client) => client.url.startsWith(scope))
+        .map((client) => ({
+          id: client.id,
+          url: client.url,
+          focused: client.focused,
+          visibilityState: client.visibilityState,
+          controlled: controlledIds.has(client.id),
+        })),
+    },
+    cacheStorage,
+  };
+}
+
 async function handleMessage(event: ExtendableMessageEvent) {
   const command = event.data as WorkerCommand;
   switch (command.type) {
@@ -60,6 +93,10 @@ async function handleMessage(event: ExtendableMessageEvent) {
       return BUILD_INFO;
     case "GET_STATUS":
       return getStatus();
+    case "GET_DIAGNOSTICS": {
+      const source = event.source;
+      return getDiagnostics(source && "id" in source ? source.id : null);
+    }
     case "GET_STATE":
       return readWorkerState();
     case "RESET": {
