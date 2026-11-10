@@ -60,7 +60,11 @@ export function useRoomTvAuth() {
     string | null
   >(DEVICE_FLOW_SECRET_KEY, null);
 
-  const { data: newDeviceFlow, isPending: isStartingFlow } = $accounts.useQuery(
+  const {
+    data: newDeviceFlow,
+    isPending: isStartingFlow,
+    refetch: restartDeviceFlow,
+  } = $accounts.useQuery(
     "post",
     "/rooms/start-device-flow",
     {},
@@ -77,9 +81,6 @@ export function useRoomTvAuth() {
     setDeviceFlowSecret(newDeviceFlow.secret_string);
   }, [newDeviceFlow, setDeviceFlowCode, setDeviceFlowSecret]);
 
-  const code = deviceFlowCode ?? newDeviceFlow?.code ?? null;
-  const secret = deviceFlowSecret ?? newDeviceFlow?.secret_string ?? null;
-
   const {
     data: deviceFlowResult,
     error: pollError,
@@ -90,14 +91,14 @@ export function useRoomTvAuth() {
     {
       params: {
         query: {
-          code: code ?? "",
-          secret_string: secret ?? "",
+          code: deviceFlowCode ?? "",
+          secret_string: deviceFlowSecret ?? "",
         },
       },
     },
     {
-      enabled: !accessToken && !!code && !!secret,
-      refetchInterval: !accessToken && !!code ? 3 * T.Sec : false,
+      enabled: !accessToken && !!deviceFlowCode && !!deviceFlowSecret,
+      refetchInterval: !accessToken && !!deviceFlowCode ? 3 * T.Sec : false,
       retry: false,
     },
   );
@@ -122,26 +123,28 @@ export function useRoomTvAuth() {
 
   useEffect(() => {
     if (
-      !pollError ||
-      !isApiHttpError(pollError) ||
-      (pollError.httpCode !== 403 && pollError.httpCode !== 404)
+      pollError &&
+      isApiHttpError(pollError) &&
+      (pollError.httpCode === 403 || pollError.httpCode === 404)
     ) {
-      return;
+      // 404 (device code has expired) or 403 (secret string is incorrect)
+      // Reset the flow and start again
+      setDeviceFlowCode(null);
+      setDeviceFlowSecret(null);
+      void restartDeviceFlow();
     }
-
-    setDeviceFlowCode(null);
-    setDeviceFlowSecret(null);
-  }, [pollError, setDeviceFlowCode, setDeviceFlowSecret]);
+  }, [pollError, restartDeviceFlow, setDeviceFlowCode, setDeviceFlowSecret]);
 
   const isAuthenticated = !!accessToken && !!roomId;
 
   return {
     isAuthenticated,
     roomId: roomId ?? undefined,
-    code: code ?? undefined,
+    code: deviceFlowCode ?? undefined,
     isPending:
       !isAuthenticated &&
-      (isStartingFlow || (!!code && isPolling && !deviceFlowResult?.token)),
+      (isStartingFlow ||
+        (!!deviceFlowCode && isPolling && !deviceFlowResult?.token)),
     error: pollError ? formatApiErrorMessage(pollError) : undefined,
   };
 }
