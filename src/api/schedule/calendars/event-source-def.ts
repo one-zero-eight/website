@@ -1,11 +1,17 @@
 // Based on https://github.com/fullcalendar/fullcalendar/blob/v7.1.3/packages/icalendar/src/event-source-def.ts
 
 import type { CalendarSource } from "@/api/schedule/calendars/personal-calendar-urls.ts";
+import type { IcalExpander } from "./IcalExpander.ts";
 import type { EventInput } from "@fullcalendar/core";
-import { addDays } from "@fullcalendar/core/internal";
-import ICAL from "ical.js";
+import type ICAL from "ical.js";
 import { colorForSubject } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
-import { IcalExpander } from "./IcalExpander.ts";
+
+/** Same as FullCalendar's `addDays`: shifts the date by whole days. */
+export function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
 
 export function expandICalEvents(
   iCalExpander: IcalExpander,

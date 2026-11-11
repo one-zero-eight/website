@@ -2,7 +2,7 @@ import { createApiQueryError } from "@/api/helpers/create-query-client.ts";
 import { customFetch } from "@/api/helpers/custom-fetch.ts";
 import { $schedule, scheduleTypes } from "@/api/schedule";
 import { expandICalEvents } from "@/api/schedule/calendars/event-source-def.ts";
-import { IcalExpander } from "@/api/schedule/calendars/IcalExpander.ts";
+import { loadIcalExpander } from "@/api/schedule/calendars/loadIcalExpander.ts";
 import {
   getICSLink,
   getImportedLink,
@@ -22,7 +22,7 @@ import {
   trainingScheduleToCalendarEvent,
 } from "@/components/sport/sport-calendar-events.ts";
 import { toScheduleApiDateTime } from "@/components/sport/sport-week-utils.ts";
-import { EventInput } from "@fullcalendar/core";
+import type { EventInput } from "@fullcalendar/core";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -154,10 +154,7 @@ function queryCalendar(source: CalendarSource) {
       try {
         return {
           fetchUrl,
-          expander: new IcalExpander({
-            ics: data as string,
-            skipInvalidDates: true,
-          }),
+          expander: await loadIcalExpander(data as string),
         };
       } catch (e) {
         throw new Error(

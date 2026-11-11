@@ -1,9 +1,9 @@
 import { useRoomTvAuth } from "@/api/helpers/room-tv-auth.ts";
 import { RoomTvPage } from "@/components/room-booking/tv/RoomTvPage.tsx";
 import { TvStartupPage } from "@/components/room-booking/tv/TvStartupPage.tsx";
-import { createFileRoute } from "@tanstack/react-router";
+import { createLazyFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/tv")({
+export const Route = createLazyFileRoute("/tv")({
   component: RouteComponent,
 });
 

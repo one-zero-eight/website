@@ -1,4 +1,3 @@
-import ExtensionScreenshotPNG from "/extension-screenshot.png";
 import { Trans, useLingui } from "@lingui/react/macro";
 
 export function ExtensionPage() {
@@ -113,7 +112,7 @@ export function ExtensionPage() {
       </div>
       <div className="bg-base-200 rounded-box flex w-full flex-row items-center justify-center p-4">
         <img
-          src={ExtensionScreenshotPNG}
+          src={`${import.meta.env.VITE_MINIO_URL}/extension/extension-screenshot.png`}
           alt={t`Extension screenshot`}
           className="rounded-box w-full"
         />

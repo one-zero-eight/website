@@ -1,8 +1,9 @@
-import { SettingsWorkspace } from "@/components/schedule-assistant/settings/SettingsWorkspace.tsx";
 import type { SettingsSubTab } from "@/components/schedule-assistant/settings/useSelection.tsx";
-import { isChecksReturnFrom } from "@/components/schedule-assistant/checks/ReturnToChecksLink.tsx";
-import { CHECKS_RETURN_FROM } from "@/components/schedule-assistant/checks/checksNavigation.ts";
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import {
+  CHECKS_RETURN_FROM,
+  isChecksReturnFrom,
+} from "@/components/schedule-assistant/checks/checksNavigation.ts";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 const SETTINGS_SUB_TABS = new Set<SettingsSubTab>([
   "courses",
@@ -40,28 +41,4 @@ export const Route = createFileRoute(
       });
     }
   },
-  component: RouteComponent,
 });
-
-function RouteComponent() {
-  const { settingsTab } = Route.useParams();
-  const { instructor, from } = Route.useSearch();
-  const navigate = useNavigate({ from: Route.fullPath });
-  const returnFromChecks = from === CHECKS_RETURN_FROM;
-
-  return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-auto pb-28">
-      <SettingsWorkspace
-        settingsTab={settingsTab as SettingsSubTab}
-        focusInstructorId={instructor}
-        returnFromChecks={returnFromChecks}
-        onFocusInstructorHandled={() =>
-          navigate({
-            search: returnFromChecks ? { from: CHECKS_RETURN_FROM } : {},
-            replace: true,
-          })
-        }
-      />
-    </div>
-  );
-}

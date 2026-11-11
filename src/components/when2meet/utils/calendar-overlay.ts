@@ -1,6 +1,6 @@
-import { addDays } from "@fullcalendar/core/internal";
-import { IcalExpander } from "@/api/schedule/calendars/IcalExpander.ts";
-import ICAL from "ical.js";
+import { addDays } from "@/api/schedule/calendars/event-source-def.ts";
+import { loadIcalExpander } from "@/api/schedule/calendars/loadIcalExpander.ts";
+import type ICAL from "ical.js";
 import { getTimeSlotDurationMinutes, slotKeyToDateRange } from "./api-slots.ts";
 import { getSlotKey } from "./slots.ts";
 
@@ -143,10 +143,7 @@ async function fetchEventsFromIcsUrl(
   }
 
   const icsText = await response.text();
-  const expander = new IcalExpander({
-    ics: icsText,
-    skipInvalidDates: true,
-  });
+  const expander = await loadIcalExpander(icsText);
 
   const expandedRangeStart = addDays(rangeStart, -1);
   const expandedRangeEnd = addDays(rangeEnd, 1);

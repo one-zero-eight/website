@@ -1,4 +1,3 @@
-import { CHECKS_RETURN_FROM } from "@/components/schedule-assistant/checks/checksNavigation.ts";
 import { Link } from "@tanstack/react-router";
 
 export function ReturnToChecksLink() {
@@ -11,10 +10,4 @@ export function ReturnToChecksLink() {
       Проверка
     </Link>
   );
-}
-
-export function isChecksReturnFrom(
-  value: string | undefined,
-): value is typeof CHECKS_RETURN_FROM {
-  return value === CHECKS_RETURN_FROM;
 }

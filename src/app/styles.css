@@ -1,6 +1,5 @@
 @import "@fontsource-variable/rubik" layer(base);
-@import "@fontsource/fuzzy-bubbles" layer(base);
-@import "@fontsource/roboto" layer(base);
+@import "@fontsource/fuzzy-bubbles/latin-400.css" layer(base);
 
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";

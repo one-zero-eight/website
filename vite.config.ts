@@ -115,6 +115,34 @@ export default defineConfig({
     sri(),
   ],
 
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              // Keep everything reachable from the app entry in the entry
+              // chunk. Groups capture their dependencies recursively, so
+              // without this the group below would drag React, the router and
+              // other entry modules into the lazy chunk, turning it into a
+              // static import of the entry (loaded on every page).
+              name: "initial",
+              tags: ["$initial"],
+              priority: 10,
+            },
+            {
+              // The schedule assistant is one heavy, self-contained section:
+              // merge its lazily loaded routes (and the modules only they use)
+              // into a single chunk instead of one chunk per route file.
+              name: "schedule-assistant",
+              test: /[\\/]src[\\/](app[\\/]routes|components|api)[\\/]schedule-assistant[\\/]/,
+            },
+          ],
+        },
+      },
+    },
+  },
+
   server: {
     hmr: {
       host: "local.innohassle.ru",

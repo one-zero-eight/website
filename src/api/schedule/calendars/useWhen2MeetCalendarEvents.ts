@@ -1,6 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $when2meet } from "@/api/when2meet";
-import { EventInput } from "@fullcalendar/core";
+import type { EventInput } from "@fullcalendar/core";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { when2MeetEventsToCalendarEvents } from "./when2meet-events.ts";

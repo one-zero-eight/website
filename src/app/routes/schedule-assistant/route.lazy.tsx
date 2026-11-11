@@ -7,13 +7,13 @@ import { ChecksSessionProvider } from "@/components/schedule-assistant/checks/ch
 import { MainFloatingMenu } from "@/components/schedule-assistant/MainFloatingMenu.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import {
-  createFileRoute,
+  createLazyFileRoute,
   Outlet,
   useRouterState,
 } from "@tanstack/react-router";
 import type { PropsWithChildren } from "react";
 
-export const Route = createFileRoute("/schedule-assistant")({
+export const Route = createLazyFileRoute("/schedule-assistant")({
   component: RouteComponent,
 });
 

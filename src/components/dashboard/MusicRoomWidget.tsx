@@ -2,10 +2,10 @@ import { useMyMusicRoom } from "@/api/schedule/event-group.ts";
 import { i18n } from "@lingui/core";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
-import { IcalExpander } from "@/api/schedule/calendars/IcalExpander.js";
+import { loadIcalExpander } from "@/api/schedule/calendars/loadIcalExpander.ts";
 import { useNowMS } from "@/lib/utils/use-now.ts";
-import ICAL from "ical.js";
-import { useEffect, useMemo } from "react";
+import type ICAL from "ical.js";
+import { useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 type MusicRoomBooking = {
@@ -21,16 +21,23 @@ export function MusicRoomWidget() {
   );
   const { data: musicRoomSchedule, isPending } = useMyMusicRoom();
   const nowMs = useNowMS(!isPending, 30 * 1000);
-  const bookings = useMemo(
-    () => getUpcomingMusicRoomBookings(musicRoomSchedule, nowMs),
-    [musicRoomSchedule, nowMs],
-  );
+  const [bookings, setBookings] = useState<MusicRoomBooking[]>();
+
+  useEffect(() => {
+    let cancelled = false;
+    void getUpcomingMusicRoomBookings(musicRoomSchedule, nowMs).then((next) => {
+      if (!cancelled) setBookings(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [musicRoomSchedule, nowMs]);
 
   useEffect(() => {
     setWidgetShown((value) => (value && isPending) || !!musicRoomSchedule);
   }, [setWidgetShown, isPending, musicRoomSchedule]);
 
-  if (isPending) {
+  if (isPending || bookings === undefined) {
     if (!widgetShown) return null;
     return (
       <div className="group skeleton flex min-h-32 flex-row gap-4 px-4 py-6" />
@@ -75,10 +82,10 @@ export function MusicRoomWidget() {
   );
 }
 
-function getUpcomingMusicRoomBookings(
+async function getUpcomingMusicRoomBookings(
   musicRoomSchedule: string | undefined,
   nowMs: number,
-): MusicRoomBooking[] {
+): Promise<MusicRoomBooking[]> {
   if (!musicRoomSchedule) return [];
 
   try {
@@ -86,10 +93,7 @@ function getUpcomingMusicRoomBookings(
     const rangeEnd = new Date(now);
     rangeEnd.setFullYear(rangeEnd.getFullYear() + 1);
 
-    const expander = new IcalExpander({
-      ics: musicRoomSchedule,
-      skipInvalidDates: true,
-    });
+    const expander = await loadIcalExpander(musicRoomSchedule);
     const expandedBookings = expander.between(now, rangeEnd);
     const bookings = [
       ...expandedBookings.events.map((event: ICAL.Event) => ({

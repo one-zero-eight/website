@@ -1,7 +1,7 @@
 import { BookingWorkspace } from "@/components/schedule-assistant/bookings/BookingWorkspace.tsx";
-import { createFileRoute } from "@tanstack/react-router";
+import { createLazyFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/schedule-assistant/bookings")({
+export const Route = createLazyFileRoute("/schedule-assistant/bookings")({
   component: RouteComponent,
 });
 

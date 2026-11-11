@@ -3,7 +3,7 @@ import { cn } from "@/lib/ui/cn";
 import { useMutationState } from "@tanstack/react-query";
 import { useState } from "react";
 
-const boardGamePlaceholderImage = "/board-games/placeholder.png";
+const boardGamePlaceholderImage = `${import.meta.env.VITE_MINIO_URL}/board-games/placeholder.png`;
 
 export function BoardGameImage({
   boardGameId,

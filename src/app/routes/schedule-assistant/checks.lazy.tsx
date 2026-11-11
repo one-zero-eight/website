@@ -1,7 +1,7 @@
 import { ChecksWorkspace } from "@/components/schedule-assistant/checks/ChecksWorkspace.tsx";
-import { createFileRoute } from "@tanstack/react-router";
+import { createLazyFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/schedule-assistant/checks")({
+export const Route = createLazyFileRoute("/schedule-assistant/checks")({
   component: RouteComponent,
 });
 
