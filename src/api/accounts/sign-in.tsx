@@ -1,5 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { isRoomTvPage } from "@/api/helpers/room-tv-auth.ts";
+import { clearMirrorSession } from "@/app/mirror-session.ts";
 
 export function AutoSignIn() {
   const { me } = useMe();
@@ -70,6 +71,12 @@ export function navigateToSignOut(redirectTo?: string) {
   // Record the login time (to prevent immediate automatic re-login)
   localStorage.setItem("lastLogin", Date.now().toString());
 
-  // Navigate to the sign-out endpoint
-  window.location.assign(signOutURL.toString());
+  // The mirror host keeps its own session cookie, and the page can only clear
+  // it before leaving. Don't keep the user waiting when it does not answer.
+  const cleared = clearMirrorSession().catch(() => undefined);
+  const patience = new Promise((resolve) => setTimeout(resolve, 1500));
+  void Promise.race([cleared, patience]).finally(() => {
+    // Navigate to the sign-out endpoint
+    window.location.assign(signOutURL.toString());
+  });
 }

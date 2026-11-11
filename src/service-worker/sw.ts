@@ -11,6 +11,7 @@
  * build-manifest.json while sw.js stays identical until worker logic changes.
  */
 import { handleApiCacheFetch } from "./api-cache.ts";
+import { mirrorUrl, networkFetch } from "./proxy-fallback.ts";
 import {
   mapsCacheName,
   userDataCacheName,
@@ -144,7 +145,10 @@ self.addEventListener("message", (event) => {
   );
 });
 self.addEventListener("fetch", (event) => {
-  if (new URL(event.request.url).origin === self.location.origin)
-    handleSiteUpdateFetch(event);
-  else handleApiCacheFetch(event);
+  const url = new URL(event.request.url);
+  if (url.origin === self.location.origin) return handleSiteUpdateFetch(event);
+  // A cached API GET answers on its own; any other request to a host with a
+  // mirror still needs the retry that the mirror gives.
+  if (handleApiCacheFetch(event)) return;
+  if (mirrorUrl(url)) event.respondWith(networkFetch(event.request));
 });

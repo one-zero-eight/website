@@ -9,6 +9,7 @@ import {
   invalidateMySportAccessToken,
   useMySportAccessToken,
 } from "@/api/helpers/sport-access-token.ts";
+import { ensureMirrorSession } from "@/app/mirror-session.ts";
 import { userDataCacheName } from "@/service-worker/protocol.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { PropsWithChildren, useEffect, useState } from "react";
@@ -58,6 +59,11 @@ export function AuthManager({ children }: PropsWithChildren) {
       }
     }
   }, [me, isPending, isNetworkError, setStoredMe]);
+
+  useEffect(() => {
+    // Keep the mirror of the API working for this user (see mirror-session.ts).
+    if (me) void ensureMirrorSession();
+  }, [me]);
 
   useEffect(() => {
     // Invalidate token if it's expired

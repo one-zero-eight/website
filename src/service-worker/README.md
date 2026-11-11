@@ -5,6 +5,7 @@ The service worker gives the website three things:
 - **Offline mode.** The last complete version of the site opens without a network.
 - **Updates without stale tabs.** A new tab gets the newest version right away, and open tabs reload by themselves once a new version is fully downloaded.
 - **Cached API data.** Calendars, maps and account data are available offline.
+- **A second route to the API.** When the network cannot reach the API host at all, requests go through its mirror.
 
 It is a hand-written worker (no Workbox). It exists only in production builds: `pnpm build` or `pnpm preview`.
 
@@ -18,6 +19,7 @@ It is a hand-written worker (no Workbox). It exists only in production builds: `
 - [Offline](#offline)
 - [Automatic reloads](#automatic-reloads)
 - [API cache](#api-cache)
+- [Mirror of an unreachable API host](#mirror-of-an-unreachable-api-host)
 - [Storage](#storage)
 - [Reset](#reset)
 - [Messages between pages and the worker](#messages-between-pages-and-the-worker)
@@ -42,6 +44,8 @@ It is a hand-written worker (no Workbox). It exists only in production builds: `
 | [`src/service-worker/sw.ts`](sw.ts)                                                                    | Worker entry: startup cleanup, install/activate, routing of requests and commands. |
 | [`src/service-worker/site-update.ts`](site-update.ts)                                                  | Downloading builds, offline navigation, serving files, deleting old builds.        |
 | [`src/service-worker/api-cache.ts`](api-cache.ts)                                                      | Caching selected API responses.                                                    |
+| [`src/service-worker/proxy-fallback.ts`](proxy-fallback.ts)                                            | Retrying a request on the mirror of its host when the host is unreachable.         |
+| [`src/app/mirror-session.ts`](../app/mirror-session.ts)                                                | Page side: the session the API knows on the mirror host.                           |
 | [`src/service-worker/storage.ts`](storage.ts)                                                          | The worker's state in IndexedDB, the storage lock, purge.                          |
 | [`src/service-worker/protocol.ts`](protocol.ts)                                                        | Shared types and constants for the worker and the pages.                           |
 | [`src/app/register-sw.ts`](../app/register-sw.ts)                                                      | Page side: registers the worker, reports the tab, schedules update checks.         |
@@ -228,6 +232,18 @@ Only `GET` responses with status 200 are stored. URLs are matched against the `V
 - `api-user-data` is deleted on logout ([`AuthManager`](../api/helpers/AuthManager.tsx)). It contains the user's calendar URLs, including access keys of linked calendars.
 - Access tokens are never cached.
 
+## Mirror of an unreachable API host
+
+Some networks block the API host by IP, and every request to it fails with a reset connection instead of a status. A mirror host is another domain that proxies the same API, and the worker retries such a failed request on it:
+
+- The host pairs come from `VITE_PROXY_HOSTS` (`original=mirror`, comma-separated) and are built into `sw.js`. Empty means no fallback.
+- Only a rejected `fetch` is retried: a status is the answer of a reachable host, so it is passed through. The method, the body, the headers, the credentials and the path stay the same, so the mirror answers exactly what the original host would have.
+- The fallback is used on every route: cached API `GET`s, other `GET`s and the requests with a body. A cached `GET` stores the mirror's answer in the cache as usual, under the URL of the host, so offline it is still there.
+- A request whose signal was aborted is not retried.
+- A `401` from the mirror means only that the mirror has no session of this user, not that the user signed out. The page would take it for a sign-out and delete the tokens and the cached user data, so the request fails as it would without the mirror: offline, with the cached copy.
+
+The mirror is another site, so it cannot use the session cookie of the main host: the browser never sends that one there. Accounts keeps a separate session on the mirror, a `SameSite=None; Partitioned` cookie (CHIPS), and gives it out for a 1-minute transfer token from the main host. [`mirror-session.ts`](../app/mirror-session.ts) does that exchange once per page load while the main host still answers, and clears the mirror session on sign out. Without it the mirror would only answer as a signed-out user: the fallback is for a host that stops answering, not for one that never answered, because the session has to be copied before that.
+
 ## Storage
 
 **IndexedDB** — database `innohassle-service-worker`, store `state`, key `current`:
@@ -320,4 +336,7 @@ pnpm exec playwright install chromium   # once, if Chromium is missing
 - **Unsaved input can be lost.** Automatic reloads happen on every page that has no `useAutoUpdateBlocker`, including forms with drafts.
 - **Changed bytes in Cache Storage are not detected.** Files are verified only when stored; the browser itself never changes them, but a manual edit (for example, in DevTools) would go unnoticed. The main scripts and styles still have SRI in `index.html`, and the Debug reset repairs everything.
 - **Old tabs.** Tabs opened before this worker was deployed do not reload automatically until they are reloaded once.
+- **A host that drops packets is only retried late.** The fallback needs `fetch` to fail, and a connection that is silently dropped fails only when the browser gives up on it. A cached `GET` is served from the cache meanwhile; other requests wait. Asking the mirror in parallel after a second was rejected: it sends every `GET` to the mirror twice whenever the host is merely slow, and a 401 from the mirror would then sign the user out locally.
+- **Safari blocks cross-site cookies.** The mirror session is exactly that, so on Safari the fallback only helps with requests that need no session; the others fail as without the mirror. Chrome, Edge and Firefox keep it.
+- **The mirror needs a recent session.** The exchange happens once per page load, while the main host answers. If the mirror session expires (14 days) or was never copied, requests that fall back are answered as a signed-out user until a page load with a reachable main host.
 - **Browser support.** Requires Web Locks, `BroadcastChannel` and `Array.prototype.findLast`, so Safari / iOS 15.4 or newer.

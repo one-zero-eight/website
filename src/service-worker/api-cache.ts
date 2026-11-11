@@ -9,6 +9,7 @@
  *   in the background for the next visit.
  */
 import { mapsCacheName, userDataCacheName } from "./protocol.ts";
+import { networkFetch } from "./proxy-fallback.ts";
 import { inspectWorkerState } from "./storage.ts";
 
 /** Per cache; the least recently saved entries are evicted first. */
@@ -65,9 +66,9 @@ async function store(request: Request, response: Response, cacheName: string) {
   });
 }
 
-/** Fetch, and store successful responses once the request completes. */
+/** Fetch (through the mirror of the host, if any), and store successful responses. */
 function fetchAndStore(event: FetchEvent, cacheName: string) {
-  const network = fetch(event.request);
+  const network = networkFetch(event.request);
   // This reaction runs first, so the clone is taken before the page reads the body.
   const stored = network.then((response) =>
     response.status === 200
@@ -93,11 +94,17 @@ async function staleWhileRevalidate(event: FetchEvent, cacheName: string) {
   return (await readCached(event.request, cacheName)) ?? network;
 }
 
+/** Cache a GET, if it belongs to a cache. Returns whether the request was answered. */
 export function handleApiCacheFetch(event: FetchEvent) {
-  if (event.request.method !== "GET") return;
+  if (event.request.method !== "GET") return false;
   const cacheName = selectCache(new URL(event.request.url));
-  if (cacheName === userDataCacheName)
+  if (cacheName === userDataCacheName) {
     event.respondWith(networkFirst(event, cacheName));
-  else if (cacheName === mapsCacheName)
+    return true;
+  }
+  if (cacheName === mapsCacheName) {
     event.respondWith(staleWhileRevalidate(event, cacheName));
+    return true;
+  }
+  return false;
 }

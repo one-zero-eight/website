@@ -33,6 +33,7 @@ type ServerState = {
   cacheableHtml?: boolean;
   runtimeVersion?: Version;
   delayApi?: boolean;
+  apiConnectionError?: boolean;
   delayResource?: boolean;
   resourceStatus?: number;
   corruptResource?: boolean;
@@ -51,6 +52,7 @@ type ServerSnapshot = ServerState & {
 const normalInterval = 30 * 60_000;
 const tvInterval = 60_000;
 const apiOrigin = "http://127.0.0.1:5202";
+const mirrorOrigin = "http://127.0.0.1:5203";
 
 /** The mock API accepts this cookie as a signed-in account. */
 function signIn(context: BrowserContext, account: "sw-test" | "sw-staff") {
@@ -1934,4 +1936,110 @@ test("offline navigation skips a ready build that lost a file and serves the pre
     error: "Cached snapshot is missing files",
   });
   await context.setOffline(false);
+});
+
+async function mirrorRequests(request: APIRequestContext) {
+  return (await serverSnapshot(request)).requests
+    .filter((item) => item.url.startsWith(mirrorOrigin))
+    .map((item) => new URL(item.url).pathname);
+}
+
+test("the app copies its session to the mirror host of the API", async ({
+  context,
+  request,
+}) => {
+  await signIn(context, "sw-test");
+  const page = await openControlledPage(context, request);
+  await expect
+    .poll(async () => (await context.cookies(mirrorOrigin)).map((c) => c.name))
+    .toContain("sw-e2e-mirror");
+  expect(await page.evaluate(() => localStorage.getItem("user"))).toContain(
+    "sw-test",
+  );
+});
+
+test("a mirror that does not know the user leaves the user signed in", async ({
+  context,
+  request,
+}) => {
+  await signIn(context, "sw-test");
+  const page = await openControlledPage(context, request);
+  expect(await fetchApi(page, "/accounts/users/me")).toMatch(/^200 /);
+  await expect
+    .poll(() => cachedApiUrls(page, "api-user-data"))
+    .toEqual(expect.arrayContaining(["/accounts/users/me"]));
+  // Like Safari, which never keeps the cookie of the mirror.
+  await expect
+    .poll(async () => (await context.cookies(mirrorOrigin)).length)
+    .toBeGreaterThan(0);
+  await context.clearCookies({ name: "sw-e2e-mirror" });
+  await setServerState(request, { version: "a", apiConnectionError: true });
+  try {
+    await page.reload();
+    await expect
+      .poll(() => mirrorRequests(request))
+      .toContain("/accounts/users/me");
+    // The mirror's 401 says nothing about the session on the main host: the
+    // app works offline as before, instead of signing the user out.
+    await page.waitForTimeout(500);
+    expect(await cachedApiUrls(page, "api-user-data")).toContain(
+      "/accounts/users/me",
+    );
+    expect(await page.evaluate(() => localStorage.getItem("user"))).toContain(
+      "sw-test",
+    );
+  } finally {
+    await setServerState(request, { version: "a" });
+  }
+});
+
+test("requests to an unreachable API host are retried through its mirror", async ({
+  context,
+  request,
+}) => {
+  await signIn(context, "sw-test");
+  const page = await openControlledPage(context, request);
+  await expect
+    .poll(() => mirrorRequests(request))
+    .toContain("/accounts/session/mirror");
+  // The host no longer answers: connections to it are reset.
+  await setServerState(request, { version: "a", apiConnectionError: true });
+  try {
+    expect(await fetchApi(page, "/accounts/users/me")).toMatch(/^200 /);
+    expect(await fetchApi(page, "/schedule/users/me")).toContain(
+      "Service Worker Test",
+    );
+    expect(await fetchApi(page, "/schedule/feed.ics")).toContain(
+      "Offline algorithms a",
+    );
+    // The request keeps its method and body on the way to the mirror.
+    const echo = await page.evaluate(
+      async ({ origin }) => {
+        const response = await fetch(`${origin}/echo`, {
+          method: "POST",
+          body: "mirror please",
+        });
+        return `${response.status} ${await response.text()}`;
+      },
+      { origin: apiOrigin },
+    );
+    expect(echo).toBe('200 {"body":"mirror please"}');
+    // The mirror's answer is the host's answer: it is cached as usual, under
+    // the URL of the host, so it is there when there is no network at all.
+    await expect
+      .poll(() => cachedApiUrls(page, "api-user-data"))
+      .toEqual(expect.arrayContaining(["/schedule/feed.ics"]));
+    await context.setOffline(true);
+    expect(await fetchApi(page, "/schedule/feed.ics")).toContain(
+      "Offline algorithms a",
+    );
+    await context.setOffline(false);
+  } finally {
+    await setServerState(request, { version: "a" });
+  }
+  // The main host answers again, so nothing goes through the mirror.
+  const mirrored = (await mirrorRequests(request)).length;
+  expect(await fetchApi(page, "/accounts/users/me")).toMatch(/^200 /);
+  await page.waitForTimeout(500);
+  expect(await mirrorRequests(request)).toHaveLength(mirrored);
 });

@@ -7,6 +7,8 @@ import { build } from "vite";
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const outputRoot = resolve(root, "node_modules/.cache/service-worker-e2e");
 const apiOrigin = "http://127.0.0.1:5202";
+// The same API on another host: the mirror the worker falls back to.
+const mirrorOrigin = "http://127.0.0.1:5203";
 const mimeTypes = {
   ".html": "text/html",
   ".js": "text/javascript",
@@ -30,6 +32,7 @@ for (const [name, path] of Object.entries({
   process.env[`VITE_${name}_API_URL`] = `${apiOrigin}/${path}`;
 }
 process.env.VITE_CALENDAR_EXPORT_HOST = "127.0.0.1:5202";
+process.env.VITE_PROXY_HOSTS = `${new URL(apiOrigin).host}=${new URL(mirrorOrigin).host}`;
 
 // Fixture builds have an isolated counter and must not consume local preview labels.
 await mkdir(outputRoot, { recursive: true });
@@ -135,6 +138,7 @@ const defaults = {
   resourceStatus: 200,
   corruptResource: false,
   delayApi: false,
+  apiConnectionError: false,
   runtimeVersion: "a",
   // Like a server without Cache-Control: browsers may then reuse HTML for a while.
   cacheableHtml: false,
@@ -233,15 +237,32 @@ const fixtureUser = {
   moodle_calendar_authtoken: "sw-test-moodle-token",
 };
 
-const apiServer = createServer(async (request, response) => {
-  const url = new URL(request.url, apiOrigin);
+/**
+ * The account behind the session cookie of a host, if any. Both hosts are
+ * 127.0.0.1, so the browser sends them the same cookies; each host only reads
+ * its own, as two real domains would only get their own.
+ */
+function accountOf(request, isMirror) {
+  const name = isMirror ? "sw-e2e-mirror" : "sw-e2e-user";
+  return request.headers.cookie?.match(
+    new RegExp(`(?:^|;\\s*)${name}=(sw-test|sw-staff)(?:;|$)`),
+  )?.[1];
+}
+
+/** Serves the API on its own host and, with `origin` of the mirror, on the mirror. */
+async function handleApiRequest(request, response, origin) {
+  const isMirror = origin === mirrorOrigin;
+  const url = new URL(request.url, origin);
   response.setHeader(
     "Access-Control-Allow-Origin",
     request.headers.origin ?? "http://127.0.0.1:5201",
   );
   response.setHeader("Vary", "Origin");
   response.setHeader("Access-Control-Allow-Credentials", "true");
-  response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  response.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+  );
   response.setHeader(
     "Access-Control-Allow-Headers",
     "Authorization, Content-Type",
@@ -254,15 +275,60 @@ const apiServer = createServer(async (request, response) => {
   requests.push({
     url: url.href,
     authorization: request.headers.authorization ?? null,
+    cookie: request.headers.cookie ?? null,
     version: state.runtimeVersion,
   });
+  // Like a network that cannot reach this host at all, but still reaches its mirror.
+  if (state.apiConnectionError && !isMirror) {
+    request.socket.destroy();
+    return;
+  }
+  if (url.pathname === "/accounts/session/mirror/transfer-token") {
+    const account = accountOf(request, isMirror);
+    if (!account) {
+      json(response, { detail: "Not authenticated" }, 401);
+      return;
+    }
+    json(response, { transfer_token: `transfer-${account}` });
+    return;
+  }
+  if (url.pathname === "/accounts/session/mirror") {
+    if (!isMirror) {
+      json(response, { detail: "Not the mirror host" }, 400);
+      return;
+    }
+    if (request.method === "DELETE") {
+      response.setHeader("Set-Cookie", "sw-e2e-mirror=; Path=/; Max-Age=0");
+      response.writeHead(204);
+      response.end();
+      return;
+    }
+    let body = "";
+    for await (const chunk of request) body += chunk;
+    const account = body.match(/transfer-(sw-test|sw-staff)/)?.[1];
+    if (!account) {
+      json(response, { detail: "Invalid transfer token" }, 401);
+      return;
+    }
+    response.setHeader(
+      "Set-Cookie",
+      `sw-e2e-mirror=${account}; Path=/; Max-Age=600`,
+    );
+    response.writeHead(204);
+    response.end();
+    return;
+  }
+  if (url.pathname === "/echo" && request.method === "POST") {
+    let body = "";
+    for await (const chunk of request) body += chunk;
+    json(response, { body });
+    return;
+  }
   if (state.delayApi && url.pathname.endsWith(".ics"))
     await new Promise((resume) => apiWaiters.add(resume));
   const revision = state.runtimeVersion;
   if (url.pathname === "/accounts/users/me") {
-    const accountId = request.headers.cookie?.match(
-      /(?:^|;\s*)sw-e2e-user=(sw-test|sw-staff)(?:;|$)/,
-    )?.[1];
+    const accountId = accountOf(request, isMirror);
     if (!accountId) {
       json(response, { detail: "Not authenticated" }, 401);
       return;
@@ -369,7 +435,14 @@ const apiServer = createServer(async (request, response) => {
     return;
   }
   json(response, { detail: `Unmocked API: ${url.pathname}` }, 404);
-});
+}
+
+const apiServer = createServer((request, response) =>
+  handleApiRequest(request, response, apiOrigin),
+);
+const mirrorServer = createServer((request, response) =>
+  handleApiRequest(request, response, mirrorOrigin),
+);
 
 const appServer = createServer(async (request, response) => {
   try {
@@ -450,9 +523,10 @@ const appServer = createServer(async (request, response) => {
 });
 
 await new Promise((ready) => apiServer.listen(5202, "127.0.0.1", ready));
+await new Promise((ready) => mirrorServer.listen(5203, "127.0.0.1", ready));
 await new Promise((ready) => appServer.listen(5201, "127.0.0.1", ready));
 console.info(
-  "Service worker E2E: three production deployments ready on 5201; API fixtures on 5202",
+  "Service worker E2E: three production deployments ready on 5201; API fixtures on 5202 and their mirror on 5203",
 );
 
 function handleShutdown() {
@@ -460,8 +534,10 @@ function handleShutdown() {
   release(apiWaiters);
   appServer.close();
   apiServer.close();
+  mirrorServer.close();
   appServer.closeAllConnections();
   apiServer.closeAllConnections();
+  mirrorServer.closeAllConnections();
 }
 process.on("SIGTERM", handleShutdown);
 process.on("SIGINT", handleShutdown);
