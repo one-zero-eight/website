@@ -19,6 +19,10 @@ function isWebUrl(url?: string | null): url is string {
   return !!url && /^https?:\/\//i.test(url);
 }
 
+function isPdfUrl(url?: string | null): url is string {
+  return isWebUrl(url) && /\.pdf$/i.test(new URL(url).pathname);
+}
+
 // A cited document as a result of the search: its preview card shows both
 function asDocument(
   title: string,
@@ -43,8 +47,8 @@ function previewOf(
   if (source.kind === "chat")
     return source.text ? { message: source } : undefined;
   // An archive is opened by its member (the button below); a page of the web search is not in the knowledge base,
-  // and the search API gives only what is
-  if (source.archive_document || source.kind === "web" || !isWebUrl(source.url))
+  // and the search API gives only what is. Only PDFs are previewed: a web page opens on its own site
+  if (source.archive_document || source.kind === "web" || !isPdfUrl(source.url))
     return undefined;
   return { document: asDocument(source.title, source.url) };
 }
@@ -187,7 +191,7 @@ export function AskResult({
                               title={link.title}
                               url={url}
                               onPreview={
-                                isWebUrl(url)
+                                isPdfUrl(url)
                                   ? () =>
                                       setPreview({
                                         document: asDocument(link.title, url),

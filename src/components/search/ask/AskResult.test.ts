@@ -189,11 +189,9 @@ describe("AskResult approval context", () => {
     expect(cards[0].textContent).toContain("Sections: Retakes");
     expect(cards[0].textContent).toContain("Based on: University policy");
     expect(
-      Array.from(cards[0].querySelectorAll("button")).map(
-        (button) => button.textContent,
-      ),
-    ).toEqual(["Exam rules", "University policy"]);
-    expect(cards[0].querySelector("a")).toBeNull();
+      Array.from(cards[0].querySelectorAll("a")).map((a) => a.href),
+    ).toEqual(["https://example.org/rules", "https://example.org/policy"]);
+    expect(cards[0].querySelector("button")).toBeNull();
     // A chat message the answer carries no text of stays a link
     expect(cards[1].querySelector("a")?.href).toBe("https://example.org/rules");
     expect(cards[1].querySelector("button")).toBeNull();

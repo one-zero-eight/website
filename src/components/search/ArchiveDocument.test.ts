@@ -18,11 +18,6 @@ vi.mock("@/api/helpers/custom-fetch", () => ({
   customFetch: { GET: vi.fn() },
 }));
 vi.mock("@/api/search", () => ({ $search: { useQuery: useSearchQuery } }));
-vi.mock("./innohassleRoutes", () => ({
-  componentByPath: {},
-  resolvePageByUrl: vi.fn(),
-}));
-vi.mock("@/components/maps/MapsPage", () => ({ MapsPage: () => null }));
 vi.mock("./ask/AskApproval", () => ({ AskApproval: () => null }));
 vi.mock("./ask/AskCalendarEvents", () => ({ AskCalendarEvents: () => null }));
 vi.mock("./ask/AskFeedback", () => ({ AskFeedback: () => null }));
@@ -336,40 +331,7 @@ describe("cited archive documents", () => {
     expect(container.querySelector("a")?.textContent).toBe("Go to website ->");
   });
 
-  it("shows an ordinary page from the search API in a sandboxed frame", async () => {
-    const url = "https://innopolis.university/team-rector/";
-    vi.mocked(customFetch.GET).mockResolvedValue({
-      data: new Blob(["<html></html>"]),
-      response: new Response(),
-    });
-    await render(
-      createElement(IframePreviewCard, {
-        source: { ...source, url, archive_document: null },
-        onClose: vi.fn(),
-      }),
-    );
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    });
-    expect(customFetch.GET).toHaveBeenCalledWith(
-      `${SEARCH_API_URL}/search/html?url=${encodeURIComponent(url)}`,
-      expect.any(Object),
-    );
-    const frame = container.querySelector("iframe");
-    expect(frame?.getAttribute("src")).toBe("blob:archive-pdf");
-    expect(frame?.getAttribute("sandbox")).toBe(
-      "allow-popups allow-popups-to-escape-sandbox",
-    );
-    const body = vi.mocked(URL.createObjectURL).mock.calls[0][0] as Blob;
-    expect(body.type).toBe("text/html;charset=utf-8");
-  });
-
-  it("says the site cannot be previewed when the API could not read the page", async () => {
-    vi.mocked(customFetch.GET).mockResolvedValue({
-      data: undefined,
-      error: {},
-      response: new Response(null, { status: 502 }),
-    });
+  it("does not preview an ordinary web page, it only links to it", async () => {
     await render(
       createElement(IframePreviewCard, {
         source: {
@@ -380,12 +342,13 @@ describe("cited archive documents", () => {
         onClose: vi.fn(),
       }),
     );
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    });
+    expect(customFetch.GET).not.toHaveBeenCalled();
     expect(container.querySelector("iframe")).toBeNull();
     expect(container.textContent).toContain(
       "Sorry, this site does not support preview",
+    );
+    expect(container.querySelector("a")?.getAttribute("href")).toBe(
+      "https://innopolis.university/team-rector/",
     );
   });
 
@@ -515,37 +478,21 @@ describe("cited archive documents", () => {
       Array.from(container.querySelectorAll("ol button")).map(
         (button) => button.textContent,
       ),
-    ).toEqual(["Rector", "Policy"]);
-    expect(container.querySelector("ol a")).toBeNull();
+    ).toEqual(["Policy"]);
+    expect(
+      container.querySelector(`ol a[href="${url}"]`)?.getAttribute("target"),
+    ).toBe("_blank");
     expect(customFetch.GET).not.toHaveBeenCalled();
     expect(document.querySelector('[role="dialog"]')).toBeNull();
-    const [rector, policyButton] = Array.from(
-      container.querySelectorAll<HTMLButtonElement>("ol button"),
-    );
-    await act(async () => rector.click());
-    await settle();
-    expect(customFetch.GET).toHaveBeenCalledWith(
-      `${SEARCH_API_URL}/search/html?url=${encodeURIComponent(url)}`,
-      expect.any(Object),
-    );
-    let dialog = document.querySelector('[role="dialog"]') as HTMLElement;
-    const frame = dialog.querySelector("iframe");
-    expect(frame?.getAttribute("src")).toBe("blob:archive-pdf");
-    expect(frame?.getAttribute("sandbox")).toBe(
-      "allow-popups allow-popups-to-escape-sandbox",
-    );
-    expect(dialog.querySelector(`a[href="${url}"]`)?.textContent).toBe(
-      "Go to website ->",
-    );
-    await act(async () => dialog.querySelector("button")?.click());
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    const policyButton =
+      container.querySelector<HTMLButtonElement>("ol button")!;
     await act(async () => policyButton.click());
     await settle();
     expect(customFetch.GET).toHaveBeenLastCalledWith(
       `${SEARCH_API_URL}/search/pdf?url=${encodeURIComponent(policy)}`,
       expect.any(Object),
     );
-    dialog = document.querySelector('[role="dialog"]') as HTMLElement;
+    const dialog = document.querySelector('[role="dialog"]') as HTMLElement;
     expect(dialog.querySelector("iframe")?.hasAttribute("sandbox")).toBe(false);
   });
 
