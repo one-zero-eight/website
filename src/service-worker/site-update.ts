@@ -8,7 +8,7 @@
  * - Offline / connection errors / 5xx navigations fall back to the latest
  *   *complete* ready snapshot — never to a partial download.
  * - Old ready caches stay while a live tab is pinned to them; otherwise they
- *   are collected after a newer build is ready.
+ *   are collected once another build is the latest ready one.
  */
 import type {
   BuildInfo,
@@ -463,8 +463,8 @@ async function handleNavigation(event: FetchEvent) {
       response.ok &&
       response.headers.get("content-type")?.includes("text/html")
     ) {
-      // Pin the new document to the HTML it actually received, which may be a
-      // newer build than latestReadyBuildId while that build is still warming.
+      // Pin the new document to the HTML it actually received, which may be
+      // a different build from latestReadyBuildId while it is still warming.
       const html = await response.clone().text();
       const buildId = html.match(/data-build-id=["']([^"']+)["']/)?.[1];
       if (buildId)
@@ -561,7 +561,7 @@ export async function handleClientHello(
     return { state: current, navigationSource };
   });
   // Re-announce so a tab that opened after the download still learns about
-  // a newer complete build.
+  // the latest complete build.
   const ready = findBuild(state, state.latestReadyBuildId);
   if (ready?.state === "ready" && !state.blocked)
     source.postMessage({

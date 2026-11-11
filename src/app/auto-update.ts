@@ -7,7 +7,7 @@ import { checkManifest } from "./sw-client.ts";
 export const autoReloadTargetStorageKey = "innohassle-auto-reload-target";
 export const blockersChangedEvent = "app-auto-update-blockers-changed";
 
-export type AutoUpdateBlockReason =
+type AutoUpdateBlockReason =
   | "offline"
   | "navigation"
   | "mutation"

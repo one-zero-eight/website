@@ -87,7 +87,7 @@ export type CachedBuild = {
   error: string | null;
 };
 
-export type ManifestCheck = {
+type ManifestCheck = {
   startedAt: string;
   completedAt: string | null;
   succeeded: boolean;

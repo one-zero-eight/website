@@ -2,9 +2,9 @@ import { getPageWorkerCommunication } from "@/app/register-sw.ts";
 import { requestWorker } from "@/app/sw-client.ts";
 import type { WorkerDiagnosticsSnapshot } from "@/service-worker/protocol.ts";
 
-export type WorkerRole = "controlling" | "active" | "waiting" | "installing";
+type WorkerRole = "controlling" | "active" | "waiting" | "installing";
 
-export type BrowserWorker = {
+type BrowserWorker = {
   /** Local reference within this snapshot, not a browser-provided worker ID. */
   id: string;
   roles: WorkerRole[];

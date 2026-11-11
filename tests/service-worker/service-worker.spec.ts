@@ -50,6 +50,14 @@ type ServerSnapshot = ServerState & {
 };
 const normalInterval = 30 * 60_000;
 const tvInterval = 60_000;
+const apiOrigin = "http://127.0.0.1:5202";
+
+/** The mock API accepts this cookie as a signed-in account. */
+function signIn(context: BrowserContext, account: "sw-test" | "sw-staff") {
+  return context.addCookies([
+    { name: "sw-e2e-user", value: account, url: apiOrigin },
+  ]);
+}
 
 async function setServerState(request: APIRequestContext, state: ServerState) {
   const response = await request.post("/__test/state", { data: state });
@@ -1046,9 +1054,7 @@ for (const pathname of ["/forms", "/timer"] as const) {
     context,
     request,
   }) => {
-    await context.addCookies([
-      { name: "sw-e2e-user", value: "sw-staff", url: "http://127.0.0.1:5202" },
-    ]);
+    await signIn(context, "sw-staff");
     const page = await openControlledPage(context, request);
     await page.locator(`aside a[href="${pathname}"]`).click();
     await expect(page).toHaveURL(new RegExp(`${pathname}$`));
@@ -1200,9 +1206,7 @@ test("a form draft stays on A without dialogs; leaving it for a safe route appli
   request,
 }) => {
   const builds = await getBuilds(request);
-  await context.addCookies([
-    { name: "sw-e2e-user", value: "sw-staff", url: "http://127.0.0.1:5202" },
-  ]);
+  await signIn(context, "sw-staff");
   const page = await openControlledPage(context, request);
   await page.locator('aside a[href="/forms"]').click();
   const formUrl = page.getByLabel("Form URL", { exact: true });
@@ -1692,8 +1696,6 @@ test("navigations revalidate HTML even when the server allows caching it", async
   expect(await loadCount(page)).toBe(loads + 1);
 });
 
-const apiOrigin = "http://127.0.0.1:5202";
-
 async function fetchApi(page: Page, path: string) {
   return page.evaluate(async (url) => {
     try {
@@ -1718,9 +1720,7 @@ test("calendar, account and maps API responses are cached for offline use", asyn
   request,
 }) => {
   // Signed in, so the app does not treat the visitor as logged out and clear the cache.
-  await context.addCookies([
-    { name: "sw-e2e-user", value: "sw-test", url: apiOrigin },
-  ]);
+  await signIn(context, "sw-test");
   const page = await openControlledPage(context, request);
   expect(await fetchApi(page, "/accounts/tokens/generate-my-token")).toMatch(
     /^200 /,
@@ -1792,9 +1792,7 @@ test("logging out deletes the user's cached API responses but keeps maps", async
   context,
   request,
 }) => {
-  await context.addCookies([
-    { name: "sw-e2e-user", value: "sw-test", url: apiOrigin },
-  ]);
+  await signIn(context, "sw-test");
   const page = await openControlledPage(context, request);
   await fetchApi(page, "/schedule/users/me");
   await fetchApi(page, "/maps/scenes/");
@@ -1856,9 +1854,7 @@ test("API caches keep the 128 most recently saved responses", async ({
   context,
   request,
 }) => {
-  await context.addCookies([
-    { name: "sw-e2e-user", value: "sw-test", url: apiOrigin },
-  ]);
+  await signIn(context, "sw-test");
   const page = await openControlledPage(context, request);
   const feeds = (from: number, to: number) =>
     Array.from(

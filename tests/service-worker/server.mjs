@@ -134,9 +134,6 @@ const defaults = {
   delayResource: false,
   resourceStatus: 200,
   corruptResource: false,
-  apiStatus: 200,
-  accountStatus: 200,
-  accountConnectionError: false,
   delayApi: false,
   runtimeVersion: "a",
   // Like a server without Cache-Control: browsers may then reuse HTML for a while.
@@ -223,7 +220,7 @@ const fixtureUser = {
       id: 1,
       user_id: 108,
       alias: "imported",
-      url: "https://calendar.invalid/private?access_key=never-persist-this",
+      url: "https://calendar.invalid/private?access_key=sw-test-access-key",
       name: "Imported calendar",
       is_active: true,
     },
@@ -233,7 +230,7 @@ const fixtureUser = {
   moodle_hidden: false,
   events_hidden: false,
   room_bookings_hidden: false,
-  moodle_calendar_authtoken: "never-persist-moodle-token",
+  moodle_calendar_authtoken: "sw-test-moodle-token",
 };
 
 const apiServer = createServer(async (request, response) => {
@@ -261,31 +258,10 @@ const apiServer = createServer(async (request, response) => {
   });
   if (state.delayApi && url.pathname.endsWith(".ics"))
     await new Promise((resume) => apiWaiters.add(resume));
-  // Calendar delays/failures never block the independent account confirmation.
-  if (
-    state.apiStatus !== 200 &&
-    (url.pathname.startsWith("/schedule/") ||
-      url.pathname.startsWith("/events/"))
-  ) {
-    json(response, { detail: "Test schedule API failure" }, state.apiStatus);
-    return;
-  }
   const revision = state.runtimeVersion;
   if (url.pathname === "/accounts/users/me") {
-    if (state.accountConnectionError) {
-      request.socket.destroy();
-      return;
-    }
-    if (state.accountStatus !== 200) {
-      json(
-        response,
-        { detail: "Test account confirmation failure" },
-        state.accountStatus,
-      );
-      return;
-    }
     const accountId = request.headers.cookie?.match(
-      /(?:^|;\s*)sw-e2e-user=(sw-test|sw-other|sw-staff)(?:;|$)/,
+      /(?:^|;\s*)sw-e2e-user=(sw-test|sw-staff)(?:;|$)/,
     )?.[1];
     if (!accountId) {
       json(response, { detail: "Not authenticated" }, 401);
@@ -307,7 +283,7 @@ const apiServer = createServer(async (request, response) => {
     return;
   }
   if (url.pathname === "/accounts/tokens/generate-my-token") {
-    json(response, { access_token: "never-persist-access-token" });
+    json(response, { access_token: "sw-test-access-token" });
     return;
   }
   if (url.pathname === "/maps/scenes/") {
