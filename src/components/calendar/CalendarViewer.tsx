@@ -96,6 +96,38 @@ function getEventOccurrenceKey(event: EventInput): string {
   const source = event.extendedProps?.calendarURLs?.[0] ?? "";
   return `${event.id ?? ""}|${start ?? ""}|${end ?? ""}|${source}`;
 }
+
+/** Scroll the list view to today. Returns false if the cell is not rendered yet. */
+function scrollToToday(): boolean {
+  const date = new Date();
+  const dateStr = [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-");
+  const dayEl = document.querySelector(`[data-date="${dateStr}"]`);
+
+  if (!dayEl) {
+    return false;
+  }
+  dayEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  return true;
+}
+
+/**
+ * Scroll to today once the calendar has rendered its cell. The view and its
+ * events are rendered asynchronously, so the scroll is retried during the next
+ * frames.
+ */
+function scrollToTodayWhenRendered(attemptsLeft = 10) {
+  requestAnimationFrame(() => {
+    if (scrollToToday() || attemptsLeft <= 0) {
+      return;
+    }
+    scrollToTodayWhenRendered(attemptsLeft - 1);
+  });
+}
+
 const DEFAULT_VIEWS_IDS = defaultViews.map(({ id }) => id);
 const DEFAULT_CUSTOM_VIEWS: CalendarCustomView[] = [];
 
@@ -137,6 +169,7 @@ export function CalendarViewer({
     start: range.start ?? undefined,
     end: range.end ?? undefined,
   });
+  const rangeStart = range.start;
 
   function getViewDisplayName(view: CalendarView) {
     const descriptor = VIEW_LABELS[view.id];
@@ -209,27 +242,9 @@ export function CalendarViewer({
   );
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const scrollToday = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-
-    const paddedMonth = String(month).padStart(2, "0");
-    const paddedDay = String(day).padStart(2, "0");
-    const dateStr = `${year}-${paddedMonth}-${paddedDay}`;
-    const dayEl = document.querySelector(`[data-date="${dateStr}"]`);
-
-    if (dayEl) {
-      dayEl.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  useEffect(() => {
-    if (!isLoading) {
-      scrollToday();
-    }
-  }, [isLoading]);
+  // Scroll to today only after the calendar rendered the events of the current
+  // view: otherwise the scroll position is reset by the next render.
+  const pendingScrollToToday = useRef(true);
 
   useEffect(() => {
     if (!availableViewIds.includes(calendarView)) {
@@ -237,7 +252,8 @@ export function CalendarViewer({
       return;
     }
     setStoredCalendarView(calendarView);
-    scrollToday();
+    // Scroll to today after the events of the new view are synced below.
+    pendingScrollToToday.current = true;
   }, [
     availableViewIds,
     calendarView,
@@ -283,7 +299,13 @@ export function CalendarViewer({
 
   const handlePrevious = () => calendarRef.current?.getApi().prev();
   const handleNext = () => calendarRef.current?.getApi().next();
-  const handleToday = () => calendarRef.current?.getApi().today();
+  const handleToday = () => {
+    calendarRef.current?.getApi().today();
+    // Scroll right away (the date range may not change, so no events are synced
+    // below) and once again after the events are rendered.
+    pendingScrollToToday.current = true;
+    scrollToTodayWhenRendered();
+  };
 
   const calendarComponent = useMemo(
     () => (
@@ -578,8 +600,14 @@ export function CalendarViewer({
           });
         }
       });
+
+      // If requested, scroll to today after events are added
+      if (pendingScrollToToday.current && rangeStart !== null) {
+        pendingScrollToToday.current = false;
+        scrollToTodayWhenRendered();
+      }
     });
-  }, [events, isFullPage]);
+  }, [events, isFullPage, rangeStart]);
 
   const customViewIds = useMemo(
     () => new Set(customViews.map(({ id }) => id)),
