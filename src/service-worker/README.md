@@ -124,13 +124,13 @@ Checks running at the same time are merged into one.
 
 1. The worker downloads `build-manifest.json` without the HTTP cache. It records the build as `downloading` in the cache `app-build-<generation>-<buildId>`.
 2. For each file (4 at a time):
-   - if the build's cache already has it with the right hash, it is skipped;
+   - if the build's cache already has it, it is skipped;
    - if an older **ready** build has the same file (same URL and hash), it is copied from there;
    - otherwise it is downloaded with `cache: "no-store"` and the expected integrity.
 
-   A hash or size mismatch fails the download. So does HTML returned for a `.js`/`.css` file.
+   **Every file is verified (SHA-384 and size) once, before it is stored.** A mismatch fails the download, and so does HTML returned for a `.js`/`.css` file. Files already in the cache are not hashed again, so a check without changes costs one manifest request.
 
-3. The worker downloads the manifest again. If the server now has another build, this one is not promoted.
+3. If anything was stored, the worker downloads the manifest again. If the server now has another build, this one is not promoted.
 4. The build becomes **ready** and the latest ready build. Every tab receives `BUILD_READY`.
 5. Old builds that nobody needs are deleted (see below).
 
@@ -164,7 +164,7 @@ Navigation always goes to the network first and revalidates the HTML (`cache: "n
 - there is no network or the connection fails, or
 - the server answers 5xx.
 
-It serves the latest **ready** build. Before that, it verifies every file of that build. A broken build is demoted, and the next ready build is tried. A build that is still downloading is never used.
+It serves the latest **ready** build. Before that, it checks that every file of that build is still in the cache. A build with missing files is demoted, and the next ready build is tried. A build that is still downloading is never used.
 
 The page learns from the `CLIENT_HELLO` reply that it was served from the cache. It then shows the "You are offline" banner, even if the browser reports being online (for example, the site's server is down). The banner disappears after the next successful manifest check.
 
@@ -318,6 +318,6 @@ pnpm exec playwright install chromium   # once, if Chromium is missing
 ## Known limitations
 
 - **Unsaved input can be lost.** Automatic reloads happen on every page that has no `useAutoUpdateBlocker`, including forms with drafts.
-- **Every check re-verifies all cached files.** That is SHA-384 of the whole build, about 13 MB (71 files) at the moment. On TV this happens every minute.
+- **Changed bytes in Cache Storage are not detected.** Files are verified only when stored; the browser itself never changes them, but a manual edit (for example, in DevTools) would go unnoticed. The main scripts and styles still have SRI in `index.html`, and the Debug reset repairs everything.
 - **Old tabs.** Tabs opened before this worker was deployed do not reload automatically until they are reloaded once.
 - **Browser support.** Requires Web Locks, `BroadcastChannel` and `Array.prototype.findLast`, so Safari / iOS 15.4 or newer.

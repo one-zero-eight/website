@@ -54,6 +54,8 @@ const startupCleanup = (async () => {
 async function summarizeCaches(): Promise<CacheSummary[]> {
   const summaries = [];
   for (const name of await caches.keys()) {
+    // A cache deleted meanwhile (logout, reset) would be recreated by open().
+    if (!(await caches.has(name))) continue;
     const cache = await caches.open(name);
     const keys = await cache.keys();
     let bytes = 0;

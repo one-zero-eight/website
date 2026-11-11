@@ -1097,37 +1097,25 @@ test("an idle viewing page auto-updates once only after B is completely ready", 
   expect(dialogs).toBe(0);
 });
 
-test("resuming an existing frozen viewing tab applies B without a Reload button", async ({
+test("a tab that missed the announcement checks for a deployment as soon as it is back online", async ({
   context,
   request,
 }) => {
   const builds = await getBuilds(request);
   const page = await openControlledPage(context, request);
   await page.locator('aside a[href="/about"]').click();
-  const other = await openControlledPage(context, request);
-  const session = await context.newCDPSession(page);
-  // Playwright forces visible/focused tabs. Use the actual browser page lifecycle,
-  // rather than replacing document.visibilityState or application state in the test.
-  await session.send("Page.setWebLifecycleState", { state: "frozen" });
-  try {
-    await setServerState(request, { version: "b" });
-    await rpc(other, { type: "CHECK_MANIFEST" });
-    await expectReady(other, builds.b.manifest.buildInfo);
-    expect(
-      (await workerState(other)).clients.some(
-        (pin) =>
-          pin.pathname === "/about" &&
-          pin.buildId === builds.a.manifest.buildInfo.buildId,
-      ),
-    ).toBe(true);
-    await session.send("Page.setWebLifecycleState", { state: "active" });
-    await page.bringToFront();
-    await expectVersion(page, "b");
-    expect(await loadCount(page)).toBe(2);
-  } finally {
-    await session.send("Page.setWebLifecycleState", { state: "active" });
-    await session.detach();
-  }
+  await expect(page).toHaveURL(/\/about$/);
+  // B is deployed while this, the only tab, is offline: nothing checks the
+  // server, and the 30-minute poll does not run during the test.
+  await context.setOffline(true);
+  await setServerState(request, { version: "b" });
+  await page.waitForTimeout(500);
+  await expectVersion(page, "a");
+  // A real "online" event, like returning to a tab, starts a check at once.
+  await context.setOffline(false);
+  await expectVersion(page, "b");
+  await expectReady(page, builds.b.manifest.buildInfo);
+  expect(await loadCount(page)).toBe(2);
 });
 
 test("a standalone navigation guard does not implicitly register an auto-update blocker", async ({
@@ -1805,9 +1793,7 @@ test("logging out deletes the user's cached API responses but keeps maps", async
   await context.clearCookies();
   await page.reload();
   await expectVersion(page, "a");
-  await expect
-    .poll(() => page.evaluate(() => caches.has("api-user-data")))
-    .toBe(false);
+  await expect.poll(() => cachedApiUrls(page, "api-user-data")).toEqual([]);
   expect(await cachedApiUrls(page, "api-maps")).toEqual(["/maps/scenes/"]);
 });
 
@@ -1913,4 +1899,39 @@ test("tabs also switch automatically when the server rolls back to an older buil
     await expectVersion(page, version);
   }
   expect(await loadCount(page)).toBe(3);
+});
+
+test("offline navigation skips a ready build that lost a file and serves the previous complete one", async ({
+  context,
+  request,
+}) => {
+  const builds = await getBuilds(request);
+  // This paused tab keeps build A pinned, so it stays as a complete fallback.
+  const page = await openControlledPage(context, request);
+  await setServerState(request, { version: "b" });
+  await rpc(page, { type: "CHECK_MANIFEST" });
+  await expectReady(page, builds.b.manifest.buildInfo);
+  const findB = (state: WorkerState) =>
+    state.builds.find(
+      (build) =>
+        build.manifest.buildInfo.buildId ===
+        builds.b.manifest.buildInfo.buildId,
+    );
+  const { cacheName } = findB(await workerState(page))!;
+  expect(
+    await page.evaluate(
+      async ({ cacheName, url }) =>
+        (await caches.open(cacheName)).delete(new URL(url, location.href).href),
+      { cacheName, url: builds.b.lazyResource },
+    ),
+  ).toBe(true);
+  await context.setOffline(true);
+  const offline = await context.newPage();
+  await offline.goto("/debug");
+  await expectOfflineBuild(offline, "a", builds.a);
+  expect(findB(await workerState(offline))).toMatchObject({
+    state: "downloading",
+    error: "Cached snapshot is missing files",
+  });
+  await context.setOffline(false);
 });

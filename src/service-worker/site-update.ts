@@ -133,13 +133,19 @@ async function matchBuildCache(
   });
 }
 
+/** URLs stored in a build cache. Every file was verified when it was stored. */
+async function storedUrls(cacheName: string) {
+  // caches.open would recreate a cache that a reset or eviction removed.
+  if (!(await caches.has(cacheName))) return new Set<string>();
+  const keys = await (await caches.open(cacheName)).keys();
+  return new Set(keys.map((request) => request.url));
+}
+
 async function snapshotIsComplete(build: CachedBuild) {
-  const cache = await caches.open(build.cacheName);
-  for (const resource of build.manifest.resources) {
-    const response = await cache.match(absoluteUrl(resource.url));
-    if (!response || !(await digestMatches(response, resource))) return false;
-  }
-  return true;
+  const stored = await storedUrls(build.cacheName);
+  return build.manifest.resources.every((resource) =>
+    stored.has(absoluteUrl(resource.url)),
+  );
 }
 
 async function fetchBuildResource(
@@ -215,21 +221,13 @@ async function registerBuild(manifest: BuildManifest, generation: number) {
   });
 }
 
-/**
- * Returns null when the build cache already holds a valid copy. Otherwise copies
- * an identical file from another ready build, or downloads it.
- */
-async function loadMissingResource(
-  cache: Cache,
+/** Copy an identical file from another ready build (verified again), or download it. */
+async function loadResource(
   resource: BuildResource,
   generation: number,
   signal: AbortSignal,
 ) {
   const url = absoluteUrl(resource.url);
-  // Always re-check digests: Cache Storage can be evicted while IndexedDB
-  // metadata still claims the build is present.
-  const stored = await cache.match(url);
-  if (stored && (await digestMatches(stored, resource))) return null;
   for (const other of (await readWorkerState()).builds) {
     if (
       other.state !== "ready" ||
@@ -245,6 +243,10 @@ async function loadMissingResource(
   return fetchBuildResource(resource, signal);
 }
 
+/**
+ * Store the files the build's cache does not have yet. Stored files were
+ * verified on write, so they are not hashed again. Returns how many were stored.
+ */
 async function downloadBuild(
   build: CachedBuild,
   generation: number,
@@ -254,17 +256,15 @@ async function downloadBuild(
     assertGeneration(state, generation);
     return caches.open(build.cacheName);
   });
-  const queue = [...build.manifest.resources];
+  const present = new Set((await cache.keys()).map((request) => request.url));
+  const queue = build.manifest.resources.filter(
+    (resource) => !present.has(absoluteUrl(resource.url)),
+  );
+  const missing = queue.length;
   await Promise.all(
     Array.from({ length: downloadConcurrency }, async () => {
       for (let resource = queue.shift(); resource; resource = queue.shift()) {
-        const response = await loadMissingResource(
-          cache,
-          resource,
-          generation,
-          signal,
-        );
-        if (!response) continue;
+        const response = await loadResource(resource, generation, signal);
         await withWorkerState(async (state) => {
           assertGeneration(state, generation);
           const stored = state.builds.find(
@@ -278,6 +278,7 @@ async function downloadBuild(
       }
     }),
   );
+  return missing;
 }
 
 async function promoteBuild(
@@ -358,11 +359,18 @@ async function prepareLatestBuild(): Promise<BuildInfo | null> {
   try {
     const manifest = await fetchManifest(controller.signal);
     build = await registerBuild(manifest, generation);
-    await downloadBuild(build, generation, controller.signal);
+    const downloaded = await downloadBuild(
+      build,
+      generation,
+      controller.signal,
+    );
     // Another deploy may have landed while we downloaded; refuse to promote a
     // snapshot that is no longer the server's current manifest.
-    const latest = await fetchManifest(controller.signal);
-    if (latest.buildInfo.buildId !== manifest.buildInfo.buildId)
+    if (
+      downloaded > 0 &&
+      (await fetchManifest(controller.signal)).buildInfo.buildId !==
+        manifest.buildInfo.buildId
+    )
       throw new Error("Deployment changed during build download");
     await promoteBuild(build, generation, startedAt);
     await broadcast({ type: "BUILD_READY", buildInfo: manifest.buildInfo });
@@ -435,7 +443,7 @@ async function serveCachedNavigation(state: WorkerState, event: FetchEvent) {
     if (!build) continue;
     if (!(await snapshotIsComplete(build))) {
       build.state = "downloading";
-      build.error = "Cached snapshot is incomplete or corrupted";
+      build.error = "Cached snapshot is missing files";
       continue;
     }
     const response = await (
