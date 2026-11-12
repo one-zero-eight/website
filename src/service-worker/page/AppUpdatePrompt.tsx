@@ -1,7 +1,7 @@
 import {
   appUpdateAvailableEvent,
   getIsAppUpdatePending,
-} from "@/app/register-sw.ts";
+} from "@/service-worker/page/register-sw.ts";
 import { Trans } from "@lingui/react/macro";
 import { cn } from "@/lib/ui/cn";
 import { useEffect, useState } from "react";

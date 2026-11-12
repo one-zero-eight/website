@@ -1,5 +1,5 @@
-import { getPageWorkerCommunication } from "@/app/register-sw.ts";
-import { requestWorker } from "@/app/sw-client.ts";
+import { getPageWorkerCommunication } from "@/service-worker/page/register-sw.ts";
+import { requestWorker } from "@/service-worker/page/sw-client.ts";
 import type {
   BuildInfo,
   WorkerDiagnosticsSnapshot,
@@ -8,10 +8,12 @@ import { emptyWorkerState } from "@/service-worker/storage.ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { collectDebugSnapshot } from "@/components/debug/collect-debug-snapshot.ts";
 
-vi.mock("@/app/register-sw.ts", () => ({
+vi.mock("@/service-worker/page/register-sw.ts", () => ({
   getPageWorkerCommunication: vi.fn(),
 }));
-vi.mock("@/app/sw-client.ts", () => ({ requestWorker: vi.fn() }));
+vi.mock("@/service-worker/page/sw-client.ts", () => ({
+  requestWorker: vi.fn(),
+}));
 
 const appBuildInfo: BuildInfo = {
   version: "1.7.0",

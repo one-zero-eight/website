@@ -1,6 +1,6 @@
 import "@/locales/lib";
 import { useMe } from "@/api/accounts/user.ts";
-import { AppUpdatePrompt } from "@/app/AppUpdatePrompt.tsx";
+import { AppUpdatePrompt } from "@/service-worker/page/AppUpdatePrompt.tsx";
 import { AuthManager } from "@/api/helpers/AuthManager.tsx";
 import { PwaPromptProvider } from "@/app/pwa-prompt.tsx";
 import { queryClient } from "@/app/query-client.ts";

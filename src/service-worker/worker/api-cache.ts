@@ -8,9 +8,9 @@
  * - Maps: rarely change, so the cached copy is served at once and refreshed
  *   in the background for the next visit.
  */
-import { mapsCacheName, userDataCacheName } from "./protocol.ts";
-import { networkFetch } from "./proxy-fallback.ts";
-import { inspectWorkerState } from "./storage.ts";
+import { mapsCacheName, userDataCacheName } from "@/service-worker/protocol.ts";
+import { networkFetch } from "@/service-worker/proxy-fallback.ts";
+import { inspectWorkerState } from "@/service-worker/storage.ts";
 
 /** Per cache; the least recently saved entries are evicted first. */
 const maxEntries = 128;

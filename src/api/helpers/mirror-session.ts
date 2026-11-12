@@ -1,5 +1,5 @@
 /**
- * The mirror host (see ../service-worker/proxy-fallback.ts) lives on another
+ * The mirror host (see src/service-worker/proxy-fallback.ts) lives on another
  * site, so it can't use the session cookie of the main API host: the browser
  * never sends that one to it. Accounts keeps a session of its own there, a
  * cross-site partitioned cookie, and hands it out for a short-lived transfer

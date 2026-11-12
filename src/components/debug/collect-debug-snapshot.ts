@@ -1,5 +1,5 @@
-import { getPageWorkerCommunication } from "@/app/register-sw.ts";
-import { requestWorker } from "@/app/sw-client.ts";
+import { getPageWorkerCommunication } from "@/service-worker/page/register-sw.ts";
+import { requestWorker } from "@/service-worker/page/sw-client.ts";
 import type { WorkerDiagnosticsSnapshot } from "@/service-worker/protocol.ts";
 
 type WorkerRole = "controlling" | "active" | "waiting" | "installing";

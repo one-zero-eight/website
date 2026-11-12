@@ -1,6 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { isRoomTvPage } from "@/api/helpers/room-tv-auth.ts";
-import { clearMirrorSession } from "@/app/mirror-session.ts";
+import { clearMirrorSession } from "@/api/helpers/mirror-session.ts";
 
 export function AutoSignIn() {
   const { me } = useMe();

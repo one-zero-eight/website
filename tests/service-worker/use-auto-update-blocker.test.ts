@@ -2,7 +2,7 @@ import {
   blockersChangedEvent,
   hasAutoUpdateBlocker,
   useAutoUpdateBlocker,
-} from "@/app/auto-update.ts";
+} from "@/service-worker/page/auto-update.ts";
 import { act, createElement, Fragment, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

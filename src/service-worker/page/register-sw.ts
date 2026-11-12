@@ -12,8 +12,8 @@ import {
   createAutoUpdateController,
   type AutoUpdateStatus,
 } from "./auto-update.ts";
-import { queryClient } from "./query-client.ts";
-import type { getRouter } from "./router.ts";
+import { queryClient } from "@/app/query-client.ts";
+import type { getRouter } from "@/app/router.ts";
 import { setSiteUnavailable } from "./site-availability.ts";
 import {
   checkManifest,

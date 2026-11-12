@@ -1,5 +1,5 @@
 import { useAccountsApiAvailability } from "@/api/accounts/api-availability.ts";
-import { useSiteUnavailable } from "@/app/site-availability.ts";
+import { useSiteUnavailable } from "@/service-worker/page/site-availability.ts";
 import { cn } from "@/lib/ui/cn";
 import { useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo, useState } from "react";

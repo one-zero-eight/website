@@ -3,13 +3,15 @@ import {
   createAutoUpdateController,
   registerAutoUpdateBlocker,
   type AutoUpdateStatus,
-} from "@/app/auto-update.ts";
+} from "@/service-worker/page/auto-update.ts";
 import { queryClient } from "@/app/query-client.ts";
-import { checkManifest } from "@/app/sw-client.ts";
+import { checkManifest } from "@/service-worker/page/sw-client.ts";
 import type { BuildInfo } from "@/service-worker/protocol.ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/app/sw-client.ts", () => ({ checkManifest: vi.fn() }));
+vi.mock("@/service-worker/page/sw-client.ts", () => ({
+  checkManifest: vi.fn(),
+}));
 vi.mock("@/app/query-client.ts", () => ({
   queryClient: {
     isMutating: vi.fn(() => 0),

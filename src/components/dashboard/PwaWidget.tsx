@@ -1,6 +1,6 @@
 import { usePwaPrompt } from "@/app/pwa-prompt.tsx";
 import { Trans } from "@lingui/react/macro";
-import { useAutoUpdateBlocker } from "@/app/auto-update.ts";
+import { useAutoUpdateBlocker } from "@/service-worker/page/auto-update.ts";
 import { useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 

@@ -67,7 +67,7 @@ async function compileWorker(config: ResolvedConfig) {
       sourcemap: false,
       minify: true,
       lib: {
-        entry: resolve(config.root, "src/service-worker/sw.ts"),
+        entry: resolve(config.root, "src/service-worker/worker/sw.ts"),
         name: "InNoHassleServiceWorker",
         formats: ["iife"],
         fileName: () => "sw.js",

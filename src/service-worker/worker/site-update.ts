@@ -21,12 +21,12 @@ import type {
   ClientPin,
   WorkerBuildInfo,
   WorkerState,
-} from "./protocol.ts";
+} from "@/service-worker/protocol.ts";
 import {
   inspectWorkerState,
   readWorkerState,
   withWorkerState,
-} from "./storage.ts";
+} from "@/service-worker/storage.ts";
 
 declare const self: ServiceWorkerGlobalScope;
 declare const BUILD_INFO: WorkerBuildInfo;

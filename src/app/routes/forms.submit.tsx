@@ -4,7 +4,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
-import { useAutoUpdateBlocker } from "@/app/auto-update.ts";
+import { useAutoUpdateBlocker } from "@/service-worker/page/auto-update.ts";
 import { useEffect } from "react";
 
 export type FormSubmitParams = {

@@ -7,7 +7,7 @@ import {
 } from "@/components/timer/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useEventListener } from "usehooks-ts";
-import { useAutoUpdateBlocker } from "@/app/auto-update.ts";
+import { useAutoUpdateBlocker } from "@/service-worker/page/auto-update.ts";
 import { cn } from "@/lib/ui/cn";
 import { useTimer } from "./lib/useTimer";
 import { useTimerRestore } from "./lib/useTimerRestore";

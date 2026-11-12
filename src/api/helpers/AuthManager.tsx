@@ -9,7 +9,7 @@ import {
   invalidateMySportAccessToken,
   useMySportAccessToken,
 } from "@/api/helpers/sport-access-token.ts";
-import { ensureMirrorSession } from "@/app/mirror-session.ts";
+import { ensureMirrorSession } from "@/api/helpers/mirror-session.ts";
 import { userDataCacheName } from "@/service-worker/protocol.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { PropsWithChildren, useEffect, useState } from "react";

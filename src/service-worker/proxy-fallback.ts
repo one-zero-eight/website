@@ -6,7 +6,7 @@
  * original host would have given.
  *
  * The mirror lives on another site, so it has its own session cookie (see
- * ../app/mirror-session.ts); everything else about a request stays the same.
+ * ./page/mirror-session.ts); everything else about a request stays the same.
  */
 
 /** "original host=mirror host" pairs, comma-separated. */

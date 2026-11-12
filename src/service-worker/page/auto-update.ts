@@ -1,6 +1,6 @@
 import type { BuildReadyNotification } from "@/service-worker/protocol.ts";
 import { useEffect } from "react";
-import { queryClient } from "./query-client.ts";
+import { queryClient } from "@/app/query-client.ts";
 import { checkManifest } from "./sw-client.ts";
 
 /** Remembers the target across the reload, so a failed update cannot loop. */

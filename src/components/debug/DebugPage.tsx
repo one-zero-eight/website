@@ -1,8 +1,11 @@
-import { manifestCheckedEvent, resetServiceWorker } from "@/app/sw-client.ts";
+import {
+  manifestCheckedEvent,
+  resetServiceWorker,
+} from "@/service-worker/page/sw-client.ts";
 import { cn } from "@/lib/ui/cn";
 import { Trans } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
-import { useAutoUpdateBlocker } from "@/app/auto-update.ts";
+import { useAutoUpdateBlocker } from "@/service-worker/page/auto-update.ts";
 import { useEffect, useState } from "react";
 import { AppDiagnostics } from "./AppDiagnostics.tsx";
 import { BrowserDiagnostics } from "./BrowserDiagnostics.tsx";

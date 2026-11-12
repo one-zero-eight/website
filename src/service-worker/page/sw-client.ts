@@ -3,7 +3,7 @@ import {
   purgeWorkerCaches,
   withWorkerState,
 } from "@/service-worker/storage.ts";
-import { queryClient } from "./query-client.ts";
+import { queryClient } from "@/app/query-client.ts";
 import { setSiteUnavailable } from "./site-availability.ts";
 
 /** Dispatched on window after every completed manifest check. */

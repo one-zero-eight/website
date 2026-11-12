@@ -4,7 +4,7 @@ import { initializeI18n } from "@/locales/lib";
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "@dr.pogodin/react-helmet";
 import { App } from "./app.tsx";
-import { registerServiceWorker } from "./register-sw.ts";
+import { registerServiceWorker } from "@/service-worker/page/register-sw.ts";
 import { getRouter } from "./router.ts";
 import "./styles.css";
 import SnowfallComponent from "@/components/snow/Snowfall.tsx";

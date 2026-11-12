@@ -41,18 +41,18 @@ It is a hand-written worker (no Workbox). It exists only in production builds: `
 
 | File                                                                                                   | What it does                                                                       |
 | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| [`src/service-worker/sw.ts`](sw.ts)                                                                    | Worker entry: startup cleanup, install/activate, routing of requests and commands. |
-| [`src/service-worker/site-update.ts`](site-update.ts)                                                  | Downloading builds, offline navigation, serving files, deleting old builds.        |
-| [`src/service-worker/api-cache.ts`](api-cache.ts)                                                      | Caching selected API responses.                                                    |
+| [`src/service-worker/worker/sw.ts`](worker/sw.ts)                                                      | Worker entry: startup cleanup, install/activate, routing of requests and commands. |
+| [`src/service-worker/worker/site-update.ts`](worker/site-update.ts)                                    | Downloading builds, offline navigation, serving files, deleting old builds.        |
+| [`src/service-worker/worker/api-cache.ts`](worker/api-cache.ts)                                        | Caching selected API responses.                                                    |
 | [`src/service-worker/proxy-fallback.ts`](proxy-fallback.ts)                                            | Retrying a request on the mirror of its host when the host is unreachable.         |
-| [`src/app/mirror-session.ts`](../app/mirror-session.ts)                                                | Page side: the session the API knows on the mirror host.                           |
 | [`src/service-worker/storage.ts`](storage.ts)                                                          | The worker's state in IndexedDB, the storage lock, purge.                          |
 | [`src/service-worker/protocol.ts`](protocol.ts)                                                        | Shared types and constants for the worker and the pages.                           |
-| [`src/app/register-sw.ts`](../app/register-sw.ts)                                                      | Page side: registers the worker, reports the tab, schedules update checks.         |
-| [`src/app/sw-client.ts`](../app/sw-client.ts)                                                          | Page side: sending commands to the worker, manifest check, reset.                  |
-| [`src/app/auto-update.ts`](../app/auto-update.ts)                                                      | Page side: automatic reloads and `useAutoUpdateBlocker`.                           |
-| [`src/app/site-availability.ts`](../app/site-availability.ts)                                          | Whether this page was opened from the offline copy (drives the offline banner).    |
-| [`src/app/AppUpdatePrompt.tsx`](../app/AppUpdatePrompt.tsx)                                            | "Reload" prompt, used only on TV pages.                                            |
+| [`../api/helpers/mirror-session.ts`](../api/helpers/mirror-session.ts)                                 | Page side: the session the API knows on the mirror host.                           |
+| [`src/service-worker/page/register-sw.ts`](page/register-sw.ts)                                        | Page side: registers the worker, reports the tab, schedules update checks.         |
+| [`src/service-worker/page/sw-client.ts`](page/sw-client.ts)                                            | Page side: sending commands to the worker, manifest check, reset.                  |
+| [`src/service-worker/page/auto-update.ts`](page/auto-update.ts)                                        | Page side: automatic reloads and `useAutoUpdateBlocker`.                           |
+| [`src/service-worker/page/site-availability.ts`](page/site-availability.ts)                            | Whether this page was opened from the offline copy (drives the offline banner).    |
+| [`src/service-worker/page/AppUpdatePrompt.tsx`](page/AppUpdatePrompt.tsx)                              | "Reload" prompt, used only on TV pages.                                            |
 | [`src/components/debug/`](../components/debug/)                                                        | The `/debug` page.                                                                 |
 | [`scripts/build-service-worker.ts`](../../scripts/build-service-worker.ts)                             | Vite plugin that creates `sw.js`, the manifest and the build-info file.            |
 | [`scripts/build-labels.ts`](../../scripts/build-labels.ts), [`preview.mjs`](../../scripts/preview.mjs) | Local build number for the Debug page; `pnpm preview`.                             |
@@ -197,7 +197,7 @@ On TV pages (`/tv`) a "Reload" prompt also appears, in case a `beforeunload` han
 ### Pausing reloads in a component
 
 ```tsx
-import { useAutoUpdateBlocker } from "@/app/auto-update.ts";
+import { useAutoUpdateBlocker } from "@/service-worker/page/auto-update.ts";
 
 // Wait while the user has a draft.
 useAutoUpdateBlocker(draft.length > 0);
@@ -242,7 +242,7 @@ Some networks block the API host by IP, and every request to it fails with a res
 - A request whose signal was aborted is not retried.
 - A `401` from the mirror means only that the mirror has no session of this user, not that the user signed out. The page would take it for a sign-out and delete the tokens and the cached user data, so the request fails as it would without the mirror: offline, with the cached copy.
 
-The mirror is another site, so it cannot use the session cookie of the main host: the browser never sends that one there. Accounts keeps a separate session on the mirror, a `SameSite=None; Partitioned` cookie (CHIPS), and gives it out for a 1-minute transfer token from the main host. [`mirror-session.ts`](../app/mirror-session.ts) does that exchange once per page load while the main host still answers, and clears the mirror session on sign out. Without it the mirror would only answer as a signed-out user: the fallback is for a host that stops answering, not for one that never answered, because the session has to be copied before that.
+The mirror is another site, so it cannot use the session cookie of the main host: the browser never sends that one there. Accounts keeps a separate session on the mirror, a `SameSite=None; Partitioned` cookie (CHIPS), and gives it out for a 1-minute transfer token from the main host. [`mirror-session.ts`](../api/helpers/mirror-session.ts) does that exchange once per page load while the main host still answers, and clears the mirror session on sign out. Without it the mirror would only answer as a signed-out user: the fallback is for a host that stops answering, not for one that never answered, because the session has to be copied before that.
 
 ## Storage
 
@@ -278,7 +278,7 @@ If a purge is interrupted (for example, the browser stops the worker), `resetPen
 
 ## Messages between pages and the worker
 
-Commands go over a `MessageChannel` (`requestWorker` in [`sw-client.ts`](../app/sw-client.ts)). The timeout is 15 seconds, or 2 minutes for `CHECK_MANIFEST`.
+Commands go over a `MessageChannel` (`requestWorker` in [`sw-client.ts`](page/sw-client.ts)). The timeout is 15 seconds, or 2 minutes for `CHECK_MANIFEST`.
 
 | Command           | Reply                                                                             |
 | ----------------- | --------------------------------------------------------------------------------- |

@@ -1,5 +1,5 @@
 import { useAppLocale } from "@/locales/lib";
-import { useAutoUpdateBlocker } from "@/app/auto-update.ts";
+import { useAutoUpdateBlocker } from "@/service-worker/page/auto-update.ts";
 import InstructionsEn from "./instructions.mdx";
 import InstructionsRu from "./instructions.ru.mdx";
 

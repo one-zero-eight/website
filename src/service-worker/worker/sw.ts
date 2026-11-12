@@ -11,7 +11,7 @@
  * build-manifest.json while sw.js stays identical until worker logic changes.
  */
 import { handleApiCacheFetch } from "./api-cache.ts";
-import { mirrorUrl, networkFetch } from "./proxy-fallback.ts";
+import { mirrorUrl, networkFetch } from "@/service-worker/proxy-fallback.ts";
 import {
   mapsCacheName,
   userDataCacheName,
@@ -19,7 +19,7 @@ import {
   type WorkerBuildInfo,
   type WorkerCommand,
   type WorkerDiagnosticsSnapshot,
-} from "./protocol.ts";
+} from "@/service-worker/protocol.ts";
 import {
   abortDownloads,
   checkManifest,
@@ -32,7 +32,7 @@ import {
   purgeWorkerCaches,
   readWorkerState,
   recoverPendingPurge,
-} from "./storage.ts";
+} from "@/service-worker/storage.ts";
 
 declare const self: ServiceWorkerGlobalScope;
 declare const BUILD_INFO: WorkerBuildInfo;

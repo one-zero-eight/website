@@ -15,5 +15,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/service-worker"]
+  "include": ["src/service-worker"],
+  "exclude": ["src/service-worker/page"]
 }
