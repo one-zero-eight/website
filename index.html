@@ -44,8 +44,8 @@
     <script type="text/javascript">
       <!-- Run before loading any resources -->
       const dark =
-        localStorage.getItem("theme") === '"dark"' ||
-        (localStorage.getItem("theme") === null &&
+        localStorage.getItem("theme-v2") === '"dark"' ||
+        (localStorage.getItem("theme-v2") === null &&
           window.matchMedia("(prefers-color-scheme: dark)").matches);
       document.documentElement.dataset.theme = dark ? "dark" : "light";
     </script>
