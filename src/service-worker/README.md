@@ -52,7 +52,7 @@ It is a hand-written worker (no Workbox). It exists only in production builds: `
 | [`src/service-worker/page/sw-client.ts`](page/sw-client.ts)                                            | Page side: sending commands to the worker, manifest check, reset.                  |
 | [`src/service-worker/page/auto-update.ts`](page/auto-update.ts)                                        | Page side: automatic reloads and `useAutoUpdateBlocker`.                           |
 | [`src/service-worker/page/site-availability.ts`](page/site-availability.ts)                            | Whether this page was opened from the offline copy (drives the offline banner).    |
-| [`src/service-worker/page/AppUpdatePrompt.tsx`](page/AppUpdatePrompt.tsx)                              | "Reload" prompt, used only on TV pages.                                            |
+| [`src/service-worker/page/AppUpdatePrompt.tsx`](page/AppUpdatePrompt.tsx)                              | "Reload" prompt for a page whose automatic reload was cancelled.                   |
 | [`src/components/debug/`](../components/debug/)                                                        | The `/debug` page.                                                                 |
 | [`scripts/build-service-worker.ts`](../../scripts/build-service-worker.ts)                             | Vite plugin that creates `sw.js`, the manifest and the build-info file.            |
 | [`scripts/build-labels.ts`](../../scripts/build-labels.ts), [`preview.mjs`](../../scripts/preview.mjs) | Local build number for the Debug page; `pnpm preview`.                             |
@@ -192,7 +192,7 @@ Builds are not ordered by time. So rolling the server back to an older build swi
 
 This applies to every page, including hidden tabs. The current status is shown on the Debug page.
 
-On TV pages (`/tv`) a "Reload" prompt also appears, in case a `beforeunload` handler cancels the reload.
+A `beforeunload` handler can cancel the reload (the user answers "Stay"). The tab does not try again for the same build, so if the page is still open 1 second after the reload started, it shows a "Reload" prompt instead. A reload that goes through removes the page first, so normally the prompt never appears. On a slow network the old page can stay longer than that while the new HTML loads, and the prompt may briefly show before the new page replaces it. Leaving the route hides the prompt.
 
 ### Pausing reloads in a component
 
@@ -335,8 +335,8 @@ pnpm exec playwright install chromium   # once, if Chromium is missing
 
 - **Unsaved input can be lost.** Automatic reloads happen on every page that has no `useAutoUpdateBlocker`, including forms with drafts.
 - **Changed bytes in Cache Storage are not detected.** Files are verified only when stored; the browser itself never changes them, but a manual edit (for example, in DevTools) would go unnoticed. The main scripts and styles still have SRI in `index.html`, and the Debug reset repairs everything.
-- **Old tabs.** Tabs opened before this worker was deployed do not reload automatically until they are reloaded once.
+- **Pages of the former Workbox worker are reloaded at once.** When this worker activates, it reloads every window the previous worker controlled that never sent it `CLIENT_HELLO`. Their precache is deleted, so their lazy chunks would 404. Unsaved input in such a tab is lost. A first visit is not reloaded: its page was not controlled before activation.
 - **A host that drops packets is only retried late.** The fallback needs `fetch` to fail, and a connection that is silently dropped fails only when the browser gives up on it. A cached `GET` is served from the cache meanwhile; other requests wait. Asking the mirror in parallel after a second was rejected: it sends every `GET` to the mirror twice whenever the host is merely slow, and a 401 from the mirror would then sign the user out locally.
 - **Safari blocks cross-site cookies.** The mirror session is exactly that, so on Safari the fallback only helps with requests that need no session; the others fail as without the mirror. Chrome, Edge and Firefox keep it.
 - **The mirror needs a recent session.** The exchange happens once per page load, while the main host answers. If the mirror session expires (14 days) or was never copied, requests that fall back are answered as a signed-out user until a page load with a reachable main host.
-- **Browser support.** Requires Web Locks, `BroadcastChannel` and `Array.prototype.findLast`, so Safari / iOS 15.4 or newer.
+- **Browser support.** Requires Web Locks, `BroadcastChannel` and `Array.prototype.findLast`, so Safari / iOS 15.4 or newer. Without Web Locks the worker intercepts no requests: the site works online, without offline mode.

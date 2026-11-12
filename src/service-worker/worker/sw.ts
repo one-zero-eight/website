@@ -123,12 +123,35 @@ async function handleMessage(event: ExtendableMessageEvent) {
   }
 }
 
+/**
+ * Reload the windows the previous worker controlled that never reported to
+ * this worker: pages of the former Workbox worker. Their precache is gone, so
+ * their lazy chunks would 404; the reload gives them the current app, which
+ * also starts the download of the offline copy.
+ */
+async function reloadUnknownWindows(windows: readonly WindowClient[]) {
+  const { clients: pins } = await readWorkerState();
+  for (const client of windows) {
+    if (pins.some((pin) => pin.clientId === client.id)) continue;
+    await client.navigate(client.url).catch(() => undefined);
+  }
+}
+
 self.addEventListener("install", (event) =>
   // Take control on the next navigation without waiting for old tabs to close.
   event.waitUntil(self.skipWaiting()),
 );
 self.addEventListener("activate", (event) => {
-  event.waitUntil(startupCleanup.then(() => self.clients.claim()));
+  event.waitUntil(
+    (async () => {
+      await startupCleanup;
+      // Before claim(): only the windows the previous worker controlled, so a
+      // first visit's page (not controlled yet) is not reloaded.
+      const previousWindows = await self.clients.matchAll({ type: "window" });
+      await self.clients.claim();
+      await reloadUnknownWindows(previousWindows);
+    })(),
+  );
 });
 self.addEventListener("message", (event) => {
   event.waitUntil(
@@ -145,6 +168,8 @@ self.addEventListener("message", (event) => {
   );
 });
 self.addEventListener("fetch", (event) => {
+  // Without Web Locks the state cannot be used: leave every request to the network.
+  if (!navigator.locks) return;
   const url = new URL(event.request.url);
   if (url.origin === self.location.origin) return handleSiteUpdateFetch(event);
   // A cached API GET answers on its own; any other request to a host with a

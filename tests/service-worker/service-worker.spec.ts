@@ -1299,17 +1299,18 @@ test("TV polls after one minute and reloads once, only after every resource is r
   expect(await loadCount(page)).toBe(2);
 });
 
-test("a blocked TV reload preserves drafts and exposes a working Reload button", async ({
+test("a reload cancelled by beforeunload preserves drafts and exposes a working Reload button", async ({
   context,
   request,
 }) => {
   const builds = await getBuilds(request);
   const page = await openControlledPage(context, request, {
-    tv: true,
-    clock: true,
+    pauseUpdates: false,
   });
   // Chromium only honors beforeunload after a real user gesture.
-  await page.getByRole("heading", { name: "sw-room", exact: true }).click();
+  await page
+    .getByRole("heading", { name: "App and offline diagnostics" })
+    .click();
   await page.evaluate(() => {
     sessionStorage.setItem("unsaved-test-data", "draft");
     window.addEventListener("beforeunload", (event) => {
@@ -1323,7 +1324,7 @@ test("a blocked TV reload preserves drafts and exposes a working Reload button",
     await dialog.dismiss();
   });
   await setServerState(request, { version: "b" });
-  await advanceToPoll(page, tvInterval);
+  await rpc(page, { type: "CHECK_MANIFEST" });
   await expectReady(page, builds.b.manifest.buildInfo);
   await expect.poll(() => blockedReloads).toBe(1);
   await expectVersion(page, "a");
@@ -1335,8 +1336,9 @@ test("a blocked TV reload preserves drafts and exposes a working Reload button",
   expect(
     await page.evaluate(() => sessionStorage.getItem("unsaved-test-data")),
   ).toBe("draft");
+  // The same build is not attempted again.
   await rpc(page, { type: "CHECK_MANIFEST" });
-  await page.clock.fastForward(5_000);
+  await page.waitForTimeout(2_000);
   expect(blockedReloads).toBe(1);
   page.removeAllListeners("dialog");
   page.on("dialog", (dialog) => void dialog.accept());

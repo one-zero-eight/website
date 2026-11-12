@@ -1,5 +1,4 @@
 import {
-  isTvPath,
   manifestPollInterval,
   resetChannelName,
   type BuildReadyNotification,
@@ -51,7 +50,7 @@ export function getPageWorkerCommunication() {
   return structuredClone(pageWorkerCommunication);
 }
 
-/** TV only: a manual prompt in case a beforeunload handler cancels the automatic reload. */
+/** A manual prompt in case a beforeunload handler cancels the automatic reload. */
 export const appUpdateAvailableEvent = "app-update-available";
 let isAppUpdatePending = false;
 
@@ -90,8 +89,9 @@ export function registerServiceWorker(router: ReturnType<typeof getRouter>) {
       pageWorkerCommunication.autoUpdate = status;
     },
     reload: () => {
-      if (isTvPath(window.location.pathname)) setAppUpdatePending(true);
       window.location.reload();
+      // If the window couldn't reload, show update prompt
+      setTimeout(() => setAppUpdatePending(true), 3_000); // 3s
     },
   });
 
