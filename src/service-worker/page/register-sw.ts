@@ -72,6 +72,19 @@ function setAppUpdatePending(value: boolean) {
  */
 export function registerServiceWorker(router: ReturnType<typeof getRouter>) {
   if (!("serviceWorker" in navigator)) return;
+  // Unregister service worker in DEV mode
+  if (import.meta.env.DEV) {
+    void navigator.serviceWorker
+      .getRegistrations()
+      .then(async (registrations) => {
+        for (const registration of registrations)
+          await registration.unregister();
+      })
+      .catch((error) =>
+        console.warn("[Service Worker] Unregistration failed:", error),
+      );
+    return;
+  }
   let timer: ReturnType<typeof setTimeout> | undefined;
   let stopped = false;
   let checking = false;
