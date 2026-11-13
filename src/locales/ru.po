@@ -67,7 +67,7 @@ msgstr "Встреча «{trimmedName}» готова к участию."
 msgid "\"{trimmedName}\" was saved."
 msgstr "Встреча «{trimmedName}» сохранена."
 
-#: src/components/sport/SportOverviewSection.tsx:138
+#: src/components/sport/SportOverviewSection.tsx:139
 msgid "({daysLeft, plural, one {# day left} other {# days left}})"
 msgstr "({daysLeft, plural, one {остался # день} few {осталось # дня} many {осталось # дней} other {осталось # дней}})"
 
@@ -100,6 +100,13 @@ msgstr "{0, plural, one {# клуб ожидает проверки измене
 #: src/components/schedule/SchedulePage.tsx:171
 msgid "{0, plural, one {# group} other {# groups}}"
 msgstr "{0, plural, one {# группа} few {# группы} many {# групп} other {# группы}}"
+
+#. placeholder {0}: reference.hours
+#. placeholder {0}: report.hours
+#: src/components/sport/SportProfilePage.tsx:387
+#: src/components/sport/SportProfilePage.tsx:426
+msgid "{0, plural, one {# hour} other {# hours}}"
+msgstr "{0, plural, one {# час} few {# часа} many {# часов} other {# часа}}"
 
 #. placeholder {0}: results.length
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:318
@@ -710,7 +717,7 @@ msgstr "Активные турниры"
 msgid "Active worker of a registration; not necessarily this page's controller."
 msgstr "Активный воркер регистрации; не обязательно контролирует эту страницу."
 
-#: src/components/sport/SportOverviewSection.tsx:365
+#: src/components/sport/SportOverviewSection.tsx:407
 msgid "Activity link"
 msgstr "Ссылка на активность"
 
@@ -861,6 +868,12 @@ msgstr "админ"
 msgid "Admin"
 msgstr "Админка"
 
+#: src/components/sport/SportProfilePage.tsx:357
+#: src/components/sport/SportProfilePage.tsx:399
+#: src/components/sport/SportProfilePage.tsx:449
+msgid "Admin comment:"
+msgstr "Комментарий администратора:"
+
 #: src/app/routes/_with_menu/admin/rooms.tsx:25
 msgid "Admin rooms"
 msgstr "Админка: аудитории"
@@ -958,11 +971,11 @@ msgstr "Аналитика"
 msgid "Anchor active week"
 msgstr "Опорная активная неделя"
 
-#: src/components/debug/DebugPage.tsx:81
+#: src/components/debug/DebugPage.tsx:84
 msgid "App and offline diagnostics"
 msgstr "Диагностика приложения и офлайн-хранилища"
 
-#: src/components/debug/DebugPage.tsx:84
+#: src/components/debug/DebugPage.tsx:87
 msgid "App observations, browser roles, and worker replies are separate sources. Each worker is queried directly; the same instance can have several roles."
 msgstr "Наблюдения App, роли в браузере и ответы воркеров — отдельные источники. Каждый воркер опрашивается напрямую; один экземпляр может иметь несколько ролей."
 
@@ -1003,6 +1016,7 @@ msgstr "Одобрить заявку"
 
 #: src/components/events/shared/EventSummaryCard.tsx:56
 #: src/components/events/submissions/SubmissionsPage.tsx:28
+#: src/components/sport/SportProfilePage.tsx:474
 msgid "Approved"
 msgstr "Одобрено"
 
@@ -1076,7 +1090,7 @@ msgstr "Спросить"
 msgid "Ask questions or find answers at Innopolis University."
 msgstr "Задавайте вопросы или ищите ответы в Университете Иннополис."
 
-#: src/components/web-print/FileDropzone.tsx:329
+#: src/components/web-print/FileDropzone.tsx:349
 msgid "Attach file"
 msgstr "Прикрепить файл"
 
@@ -1101,7 +1115,7 @@ msgstr "Посещаемость обновлена"
 msgid "August - December"
 msgstr "Август — декабрь"
 
-#: src/components/extension/ExtensionPage.tsx:31
+#: src/components/extension/ExtensionPage.tsx:30
 msgid "Autologin to Moodle without entering credentials"
 msgstr "Автоматический вход в Moodle без ввода данных"
 
@@ -1141,7 +1155,7 @@ msgstr "Доступно копий"
 msgid "Available in storage"
 msgstr "На складе"
 
-#: src/components/sport/SportOverviewSection.tsx:501
+#: src/components/sport/SportOverviewSection.tsx:547
 msgid "Available medical groups"
 msgstr "Доступные медицинские группы"
 
@@ -1261,7 +1275,7 @@ msgstr "Забронировать"
 msgid "Book auditoriums and meeting rooms in Innopolis University."
 msgstr "Бронируйте аудитории и переговорные в Университете Иннополис."
 
-#: src/components/dashboard/MusicRoomWidget.tsx:68
+#: src/components/dashboard/MusicRoomWidget.tsx:75
 msgid "Book more in <0>Music Room bot</0>"
 msgstr "Забронировать в <0>Music Room bot</0>"
 
@@ -1288,7 +1302,7 @@ msgstr "Забронированная комната"
 msgid "Booking"
 msgstr "Бронь"
 
-#: src/components/music-room/MusicRoomPage.tsx:98
+#: src/components/music-room/MusicRoomPage.tsx:101
 msgid "Booking calendar"
 msgstr "Календарь бронирований"
 
@@ -1622,7 +1636,7 @@ msgstr "Caution"
 msgid "CAUTION"
 msgstr "CAUTION"
 
-#: src/components/sport/SportOverviewSection.tsx:219
+#: src/components/sport/SportOverviewSection.tsx:235
 msgid "Change"
 msgstr "Изменить"
 
@@ -1634,7 +1648,12 @@ msgstr "Изменить тип выноски"
 msgid "Change Leader"
 msgstr "Сменить лидера"
 
-#: src/components/sport/SportOverviewSection.tsx:488
+#: src/components/sport/SportProfilePage.tsx:241
+#~ msgid "Change medical group"
+#~ msgstr "Изменить мед группу"
+
+#: src/components/sport/SportOverviewSection.tsx:534
+#: src/components/sport/SportProfilePage.tsx:243
 msgid "Change Medical Group"
 msgstr "Изменить медицинскую группу"
 
@@ -1660,7 +1679,7 @@ msgstr "Канал"
 msgid "Chat"
 msgstr "Чат"
 
-#: src/components/sport/SportStudentTrainingModal.tsx:467
+#: src/components/sport/SportStudentTrainingModal.tsx:497
 #: src/components/sport/SportTrainingsCalendarList.tsx:270
 msgid "Check in"
 msgstr "Записаться"
@@ -1669,15 +1688,15 @@ msgstr "Записаться"
 msgid "Check in for sports in the <0>Sport bot</0>"
 msgstr "Записаться на спорт в <0>Sport bot</0>"
 
-#: src/components/sport/SportStudentTrainingModal.tsx:406
-#: src/components/sport/SportStudentTrainingModal.tsx:418
-#: src/components/sport/SportStudentTrainingModal.tsx:455
+#: src/components/sport/SportStudentTrainingModal.tsx:436
+#: src/components/sport/SportStudentTrainingModal.tsx:448
+#: src/components/sport/SportStudentTrainingModal.tsx:485
 #: src/components/sport/SportTrainingsCalendarList.tsx:256
 #: src/components/sport/SportTrainingsCalendarList.tsx:268
 msgid "Check out"
 msgstr "Отменить запись"
 
-#: src/components/extension/ExtensionPage.tsx:106
+#: src/components/extension/ExtensionPage.tsx:105
 msgid "Check out the source code, report issues and contribute to the project on GitHub."
 msgstr "Исходный код, сообщения о багах и вклад в проект — на GitHub."
 
@@ -1728,7 +1747,7 @@ msgstr "Запись отменена"
 msgid "Checking rules..."
 msgstr "Проверка правил..."
 
-#: src/components/sport/SportOverviewSection.tsx:334
+#: src/components/sport/SportOverviewSection.tsx:376
 msgid "Checking your workouts <0>can take up to 2 weeks.</0>"
 msgstr "Проверка ваших тренировок <0>может занять до 2 недель.</0>"
 
@@ -1770,7 +1789,7 @@ msgid "Choose color"
 msgstr "Выберите цвет"
 
 #: src/components/clubs/EditClubPage.tsx:733
-#: src/components/web-print/FileDropzone.tsx:267
+#: src/components/web-print/FileDropzone.tsx:285
 msgid "Choose file"
 msgstr "Выберите файл"
 
@@ -1778,7 +1797,7 @@ msgstr "Выберите файл"
 msgid "Choose meeting time"
 msgstr "Выбрать время встречи"
 
-#: src/components/extension/ExtensionPage.tsx:60
+#: src/components/extension/ExtensionPage.tsx:59
 msgid "Chrome extension"
 msgstr "Расширение для Chrome"
 
@@ -1804,7 +1823,7 @@ msgstr "Занятия за семестр"
 msgid "Clear all"
 msgstr "Очистить всё"
 
-#: src/components/debug/DebugPage.tsx:188
+#: src/components/debug/DebugPage.tsx:191
 msgid "Clear ALL caches, unregister, and reload"
 msgstr "Очистить ВСЕ кеши, удалить регистрации и перезагрузить"
 
@@ -1834,8 +1853,8 @@ msgid "Click to upload or paste an image"
 msgstr "Нажмите, чтобы загрузить, или вставьте изображение"
 
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
-#: src/components/sport/SportOverviewSection.tsx:669
-#: src/components/sport/SportStudentTrainingModal.tsx:362
+#: src/components/sport/SportOverviewSection.tsx:719
+#: src/components/sport/SportStudentTrainingModal.tsx:392
 #: src/components/sport/SportTrainerAttendanceModal.tsx:148
 #: src/components/sport/SportTrainerTrainingModal.tsx:91
 #: src/components/when2meet/MeetingRoomModal.tsx:359
@@ -1907,7 +1926,7 @@ msgid "Club Logo"
 msgstr "Логотип клуба"
 
 #: src/components/sport/SportHistoryPage.tsx:105
-#: src/components/sport/SportSchedulePage.tsx:323
+#: src/components/sport/SportSchedulePage.tsx:320
 msgid "Club logos could not be loaded."
 msgstr "Не удалось загрузить логотипы клубов."
 
@@ -1989,7 +2008,7 @@ msgstr "Свернуть"
 #: src/components/admin/utils.ts:35
 #: src/components/admin/utils.ts:50
 #: src/components/dashboard/AccountWidget.tsx:14
-#: src/components/sport/SportProfilePage.tsx:18
+#: src/components/sport/SportProfilePage.tsx:25
 msgid "College"
 msgstr "Колледжист"
 
@@ -2040,8 +2059,8 @@ msgstr "Завершённые турниры"
 msgid "Component {componentNumber}"
 msgstr "Компонент {componentNumber}"
 
-#: src/components/calendar/CalendarViewer.tsx:629
-#: src/components/calendar/CalendarViewer.tsx:772
+#: src/components/calendar/CalendarViewer.tsx:682
+#: src/components/calendar/CalendarViewer.tsx:825
 #: src/components/calendar/ConfigCalendarDialog.tsx:43
 #: src/components/layout/UserMenu.tsx:138
 msgid "Config & Export"
@@ -2051,7 +2070,7 @@ msgstr "Настройки и экспорт"
 msgid "config.yaml does not look like a schedule config (no term)."
 msgstr "config.yaml не похож на конфиг расписания (нет term)."
 
-#: src/components/web-print/FileDropzone.tsx:231
+#: src/components/web-print/FileDropzone.tsx:249
 msgid "Configure settings and start scanning — preview will appear here"
 msgstr "Настройте параметры и запустите сканирование — превью появится здесь"
 
@@ -2334,6 +2353,7 @@ msgid "Course not found in the configuration."
 msgstr "Курс не найден в конфигурации."
 
 #: src/components/scholarship/ScholarshipCalculator.tsx:228
+#: src/components/sport/SportOverviewSection.tsx:241
 msgid "Course:"
 msgstr "Курс:"
 
@@ -2448,9 +2468,17 @@ msgstr "Создание..."
 msgid "Criteria from the official table"
 msgstr "Критерии из официальной таблицы"
 
+#: src/components/sport/SportOverviewSection.tsx:247
+msgid "Curator:"
+msgstr "Куратор:"
+
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:45
 msgid "Current"
 msgstr "Текущий"
+
+#: src/components/sport/SportProfilePage.tsx:252
+#~ msgid "Current group"
+#~ msgstr "Текущая группа"
 
 #: src/components/clubs/ClubLeaguePage.tsx:303
 msgid "Current League Points"
@@ -2479,11 +2507,11 @@ msgstr "Текущий счёт"
 msgid "Current semester could not be loaded."
 msgstr "Не удалось загрузить текущий семестр."
 
-#: src/components/sport/SportOverviewSection.tsx:83
+#: src/components/sport/SportOverviewSection.tsx:84
 msgid "Current sport hours: {earned} out of {required, plural, one {# hour} other {# hours}}"
 msgstr "Спортивные часы: {earned} из {required, plural, one {# часа} few {# часов} many {# часов} other {# часа}}"
 
-#: src/components/sport/SportOverviewSection.tsx:82
+#: src/components/sport/SportOverviewSection.tsx:83
 msgid "Current sport hours: {earned} out of {required} + {debt} (debt) {totalRequired, plural, one {hour} other {hours}}"
 msgstr "Спортивные часы: {earned} из {required} + {debt} (долг) {totalRequired, plural, one {часа} few {часов} many {часов} other {часа}}"
 
@@ -2560,7 +2588,7 @@ msgstr "День / время"
 msgid "dd.mm.yyyy"
 msgstr "дд.мм.гггг"
 
-#: src/components/sport/SportOverviewSection.tsx:130
+#: src/components/sport/SportOverviewSection.tsx:131
 msgid "Deadline:"
 msgstr "Дедлайн:"
 
@@ -2568,11 +2596,11 @@ msgstr "Дедлайн:"
 msgid "Dear student!"
 msgstr "Уважаемый студент!"
 
-#: src/components/sport/SportOverviewSection.tsx:88
+#: src/components/sport/SportOverviewSection.tsx:89
 msgid "Debt ({debt}h)"
 msgstr "Долг ({debt}ч)"
 
-#: src/components/sport/SportOverviewSection.tsx:112
+#: src/components/sport/SportOverviewSection.tsx:113
 msgid "Debt: {debt}h"
 msgstr "Долг: {debt}ч"
 
@@ -2766,14 +2794,14 @@ msgstr "Вернуться к своему аккаунту"
 #: src/components/board-games/BoardGamesPage.tsx:465
 #: src/components/calendar/import/ImportModal.tsx:185
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:351
-#: src/components/sport/SportStudentTrainingModal.tsx:328
-#: src/components/sport/SportStudentTrainingModal.tsx:335
-#: src/components/sport/SportStudentTrainingModal.tsx:344
+#: src/components/sport/SportStudentTrainingModal.tsx:358
+#: src/components/sport/SportStudentTrainingModal.tsx:365
+#: src/components/sport/SportStudentTrainingModal.tsx:374
 #: src/components/when2meet/CreationPage.tsx:397
 msgid "Description"
 msgstr "Описание"
 
-#: src/components/sport/SportStudentTrainingModal.tsx:338
+#: src/components/sport/SportStudentTrainingModal.tsx:368
 msgid "Description could not be loaded."
 msgstr "Не удалось загрузить описание."
 
@@ -2885,7 +2913,7 @@ msgstr "Скачать и завершить"
 msgid "Download original"
 msgstr "Скачать оригинал"
 
-#: src/components/web-print/FileDropzone.tsx:341
+#: src/components/web-print/FileDropzone.tsx:361
 msgid "Download result"
 msgstr "Скачать результат"
 
@@ -2913,7 +2941,7 @@ msgstr "Черновик снят с публикации"
 msgid "Draft submitted on review"
 msgstr "Черновик отправлен на проверку"
 
-#: src/components/web-print/FileDropzone.tsx:106
+#: src/components/web-print/FileDropzone.tsx:122
 msgid "Drag & drop a file here"
 msgstr "Перетащите файл сюда"
 
@@ -2933,7 +2961,7 @@ msgstr "Перетащите сюда"
 msgid "Drop here to remove from groups"
 msgstr "Отпустите здесь, чтобы убрать из групп"
 
-#: src/components/web-print/FileDropzone.tsx:259
+#: src/components/web-print/FileDropzone.tsx:277
 msgid "Drop your file here"
 msgstr "Перетащите файл сюда"
 
@@ -3066,7 +3094,7 @@ msgstr "Конец"
 #~ msgid "End (inclusive)"
 #~ msgstr "Окончание (включительно)"
 
-#: src/components/sport/SportOverviewSection.tsx:645
+#: src/components/sport/SportOverviewSection.tsx:695
 msgid "End date"
 msgstr "Дата окончания"
 
@@ -3096,8 +3124,8 @@ msgid "Enroll"
 msgstr "Записаться"
 
 #: src/components/sport/SportSchedulePage.tsx:321
-msgid "Enrolled trainings could not be loaded."
-msgstr "Не удалось загрузить записанные тренировки."
+#~ msgid "Enrolled trainings could not be loaded."
+#~ msgstr "Не удалось загрузить записанные тренировки."
 
 #: src/components/events/shared/EnrollmentFields.tsx:82
 #: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:666
@@ -3244,9 +3272,9 @@ msgstr "Оборудование"
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:443
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:455
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:499
-#: src/components/sport/SportOverviewSection.tsx:266
-#: src/components/sport/SportOverviewSection.tsx:463
-#: src/components/sport/SportOverviewSection.tsx:576
+#: src/components/sport/SportOverviewSection.tsx:308
+#: src/components/sport/SportOverviewSection.tsx:509
+#: src/components/sport/SportOverviewSection.tsx:626
 #: src/components/tabletennis/ArchivedTournament.tsx:57
 #: src/components/tabletennis/CreateTournamentForm.tsx:59
 #: src/components/tabletennis/LiveTournament.tsx:100
@@ -3524,7 +3552,7 @@ msgstr "Экспорт в календарь"
 msgid "Export XLSX"
 msgstr "Экспорт XLSX"
 
-#: src/components/music-room/MusicRoomPage.tsx:101
+#: src/components/music-room/MusicRoomPage.tsx:104
 msgid "Export your personal calendar"
 msgstr "Экспорт личного календаря"
 
@@ -3533,7 +3561,7 @@ msgstr "Экспорт личного календаря"
 msgid "Export your schedule"
 msgstr "Экспортировать расписание"
 
-#: src/components/extension/ExtensionPage.tsx:117
+#: src/components/extension/ExtensionPage.tsx:116
 msgid "Extension screenshot"
 msgstr "Скриншот расширения"
 
@@ -3608,15 +3636,15 @@ msgstr "Не удалось загрузить TV-страницу"
 msgid "Failed to load your groups: {errorMessage}"
 msgstr "Не удалось загрузить ваши группы: {errorMessage}"
 
-#: src/components/sport/SportOverviewSection.tsx:464
+#: src/components/sport/SportOverviewSection.tsx:510
 msgid "Failed to submit medical group change request."
 msgstr "Не удалось отправить запрос на смену медицинской группы."
 
-#: src/components/sport/SportOverviewSection.tsx:576
-msgid "Failed to submit medical leave reference."
-msgstr "Не удалось отправить медицинскую справку."
+#: src/components/sport/SportOverviewSection.tsx:584
+#~ msgid "Failed to submit medical leave reference."
+#~ msgstr "Не удалось отправить медицинскую справку."
 
-#: src/components/sport/SportOverviewSection.tsx:266
+#: src/components/sport/SportOverviewSection.tsx:308
 msgid "Failed to submit self-sport report."
 msgstr "Не удалось отправить отчёт о селф-спорте."
 
@@ -3631,15 +3659,15 @@ msgid "Failed: {failed}"
 msgstr "Не удалось: {failed}"
 
 #: src/components/sport/SportTabs.tsx:29
-msgid "FAQ"
-msgstr "FAQ"
+#~ msgid "FAQ"
+#~ msgstr "FAQ"
 
 #: src/components/sport/SportFaqPage.tsx:19
-msgid "FAQ could not be loaded."
-msgstr "Не удалось загрузить FAQ."
+#~ msgid "FAQ could not be loaded."
+#~ msgstr "Не удалось загрузить FAQ."
 
 #: src/components/dorms/DormsPage.tsx:21
-#: src/components/extension/ExtensionPage.tsx:26
+#: src/components/extension/ExtensionPage.tsx:25
 msgid "Features:"
 msgstr "Возможности:"
 
@@ -3659,7 +3687,7 @@ msgstr "Меньше групп"
 msgid "File has not yet been uploaded"
 msgstr "Файл ещё не загружен"
 
-#: src/components/web-print/FileDropzone.tsx:47
+#: src/components/web-print/FileDropzone.tsx:63
 msgid "File is too large!"
 msgstr "Файл слишком большой!"
 
@@ -3720,7 +3748,7 @@ msgstr "Завершённые бронирования:"
 msgid "Finished trainings from the last 8 weeks. Click a training to view or update attendance."
 msgstr "Завершённые тренировки за последние 8 недель. Нажмите на тренировку, чтобы посмотреть или обновить посещаемость."
 
-#: src/components/extension/ExtensionPage.tsx:81
+#: src/components/extension/ExtensionPage.tsx:80
 msgid "Firefox extension"
 msgstr "Расширение для Firefox"
 
@@ -3781,9 +3809,9 @@ msgstr "Формы"
 msgid "Frequency"
 msgstr "Очерёдность"
 
-#: src/app/routes/_with_menu/sport/faq.tsx:22
-msgid "Frequently asked questions about sport at Innopolis University."
-msgstr "Часто задаваемые вопросы о спорте в Университете Иннополис."
+#: src/app/routes/_with_menu/sport/faq.tsx:20
+#~ msgid "Frequently asked questions about sport at Innopolis University."
+#~ msgstr "Часто задаваемые вопросы о спорте в Университете Иннополис."
 
 #: src/components/schedule-assistant/settings/weekdays.ts:49
 msgid "Fri"
@@ -3998,7 +4026,7 @@ msgstr "Перейти на сайт →"
 msgid "Go to your dashboard"
 msgstr "Перейти в личный кабинет"
 
-#: src/components/calendar/CalendarViewer.tsx:738
+#: src/components/calendar/CalendarViewer.tsx:791
 msgid "Go today"
 msgstr "Сегодня"
 
@@ -4310,6 +4338,10 @@ msgstr "В сложных ситуациях решение принимаетс
 msgid "In favorites"
 msgstr "В избранном"
 
+#: src/components/sport/SportProfilePage.tsx:468
+msgid "In review"
+msgstr "На проверке"
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:601
 #~ msgid "In storage"
 #~ msgstr "На складе"
@@ -4349,6 +4381,7 @@ msgid "Increased State Social Scholarship for bachelor's and master's students �
 msgstr "Повышенная государственная социальная стипендия для бакалавров и магистров — <0>15 500₽</0>."
 
 #: src/components/guard/GuardTabs.tsx:8
+#: src/components/sport/SportTabs.tsx:29
 #: src/components/web-print/WebPrintTabs.tsx:8
 msgid "Info"
 msgstr "Инфо"
@@ -4382,7 +4415,7 @@ msgstr "Бот InNoHassle Dorms — инструмент для управлен
 msgid "InNoHassle logo"
 msgstr "Логотип InNoHassle"
 
-#: src/components/extension/ExtensionPage.tsx:19
+#: src/components/extension/ExtensionPage.tsx:18
 msgid "InNoHassle Tools is a browser extension that provides convenient tools for Moodle, InNoHassle and other services at Innopolis University."
 msgstr "InNoHassle Tools — браузерное расширение с удобными инструментами для Moodle, InNoHassle и других сервисов Университета Иннополис."
 
@@ -4426,11 +4459,11 @@ msgstr "Установить как PWA"
 msgid "Install the browser extension to sync Moodle calendar"
 msgstr "Установите расширение браузера для синхронизации календаря Moodle"
 
-#: src/components/extension/ExtensionPage.tsx:64
+#: src/components/extension/ExtensionPage.tsx:63
 msgid "Install the extension for Chromium-based browsers (Chrome, Edge, Yandex Browser, Arc) from the Chrome Web Store."
 msgstr "Установите расширение для браузеров на Chromium (Chrome, Edge, Яндекс Браузер, Arc) из Chrome Web Store."
 
-#: src/components/extension/ExtensionPage.tsx:85
+#: src/components/extension/ExtensionPage.tsx:84
 msgid "Install the extension for Firefox-based browsers from our servers (supports automatic updates)."
 msgstr "Установите расширение для браузеров на Firefox с наших серверов (поддерживает автообновления)."
 
@@ -4467,7 +4500,7 @@ msgstr "Преподаватели"
 msgid "Insufficient capacity"
 msgstr "Недостаточная вместимость"
 
-#: src/components/extension/ExtensionPage.tsx:43
+#: src/components/extension/ExtensionPage.tsx:42
 msgid "Integrated AI search engine for all Moodle materials"
 msgstr "Интегрированный ИИ-поиск по всем материалам Moodle"
 
@@ -4625,7 +4658,6 @@ msgstr "Последняя готовая"
 msgid "Latest ready is the offline fallback, not necessarily the build loaded by this page. A snapshot refresh does not fetch the server's current manifest."
 msgstr "Последняя готовая сборка используется для офлайна и не обязательно совпадает со сборкой этой страницы. Обновление снимка не загружает текущий манифест с сервера."
 
-#: src/components/about/TeamMembers.tsx:106
 #: src/components/clubs/ClubAdminCard.tsx:99
 #: src/components/clubs/ClubCard.tsx:50
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:299
@@ -4661,9 +4693,9 @@ msgstr "Учитесь понимать разных людей и развив�
 msgid "Learn More About Yourself"
 msgstr "Узнайте больше о себе"
 
-#: src/components/sport/SportOverviewSection.tsx:402
-#: src/components/sport/SportOverviewSection.tsx:524
-#: src/components/sport/SportOverviewSection.tsx:658
+#: src/components/sport/SportOverviewSection.tsx:444
+#: src/components/sport/SportOverviewSection.tsx:570
+#: src/components/sport/SportOverviewSection.tsx:708
 msgid "Leave comments here (optional)"
 msgstr "Оставьте комментарии здесь (необязательно)"
 
@@ -4689,6 +4721,7 @@ msgstr "ссылка"
 
 #: src/components/clubs/constants.ts:91
 #: src/components/editor/menus/LinkButton.tsx:34
+#: src/components/sport/SportProfilePage.tsx:430
 #: src/components/tabletennis/MergeGuestModal.tsx:149
 msgid "Link"
 msgstr "Ссылка"
@@ -4727,7 +4760,7 @@ msgstr "Привязать аккаунт"
 msgid "Link TV to room"
 msgstr "Привязать ТВ к комнате"
 
-#: src/components/admin/AdminPage.tsx:40
+#: src/components/admin/AdminPage.tsx:41
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:308
 #: src/components/events/drafts/DraftLinksSection.tsx:173
 #: src/components/events/event/EventPage.tsx:357
@@ -4956,7 +4989,7 @@ msgstr "Матч"
 msgid "Max"
 msgstr "Макс."
 
-#: src/components/web-print/FileDropzone.tsx:50
+#: src/components/web-print/FileDropzone.tsx:66
 msgid "Max file size is <0>20MB</0>"
 msgstr "Максимальный размер файла — <0>20 МБ</0>"
 
@@ -4964,23 +4997,48 @@ msgstr "Максимальный размер файла — <0>20 МБ</0>"
 msgid "Max participants"
 msgstr "Макс. участников"
 
-#: src/components/sport/SportOverviewSection.tsx:455
+#: src/components/sport/SportProfilePage.tsx:349
+msgid "Medical group change request · In review"
+msgstr "Запрос на смену медицинской группы · На проверке"
+
+#: src/components/sport/SportOverviewSection.tsx:497
 msgid "Medical group change request was submitted."
 msgstr "Запрос на смену медицинской группы отправлен."
 
-#: src/components/sport/SportOverviewSection.tsx:207
+#: src/components/sport/SportProfilePage.tsx:98
+#~ msgid "Medical group history"
+#~ msgstr "История медицинских групп"
+
+#: src/components/sport/SportProfilePage.tsx:262
+msgid "Medical group history could not be loaded."
+msgstr "Не удалось загрузить историю медицинских групп."
+
+#: src/components/sport/SportOverviewSection.tsx:223
 msgid "Medical group: <0>{medicalGroup}</0>"
 msgstr "Медицинская группа: <0>{medicalGroup}</0>"
 
-#: src/components/sport/SportOverviewSection.tsx:153
-msgid "Medical leave"
-msgstr "Больничный"
+#: src/components/sport/SportProfilePage.tsx:236
+msgid "Medical groups"
+msgstr "Медицинские группы"
 
-#: src/components/sport/SportOverviewSection.tsx:567
+#: src/components/sport/SportOverviewSection.tsx:154
+#: src/components/sport/SportProfilePage.tsx:189
+msgid "Medical leave"
+msgstr "Больничные"
+
+#: src/components/sport/SportProfilePage.tsx:138
+#~ msgid "Medical leave history"
+#~ msgstr "История больничных"
+
+#: src/components/sport/SportProfilePage.tsx:201
+msgid "Medical leave history could not be loaded."
+msgstr "Не удалось загрузить историю больничных."
+
+#: src/components/sport/SportOverviewSection.tsx:613
 msgid "Medical leave reference was submitted."
 msgstr "Медицинская справка отправлена."
 
-#: src/components/sport/SportOverviewSection.tsx:599
+#: src/components/sport/SportOverviewSection.tsx:649
 msgid "Medical Reference Submission"
 msgstr "Подача медицинской справки"
 
@@ -5159,7 +5217,7 @@ msgstr "Переместить вверх"
 msgid "Music room"
 msgstr "Музкомната"
 
-#: src/components/dashboard/MusicRoomWidget.tsx:47
+#: src/components/dashboard/MusicRoomWidget.tsx:54
 msgid "Music Room Bookings"
 msgstr "Бронирования музкомнаты"
 
@@ -5219,7 +5277,7 @@ msgstr "Имя (необязательно)"
 msgid "Name for your calendar..."
 msgstr "Название календаря..."
 
-#: src/components/admin/AdminPage.tsx:29
+#: src/components/admin/AdminPage.tsx:30
 #: src/components/admin/ImpersonateCard.tsx:46
 #: src/components/admin/UserSearch.tsx:65
 msgid "Name or email..."
@@ -5483,7 +5541,7 @@ msgstr "Документ не указан"
 msgid "No drafts yet."
 msgstr "Пока нет черновиков."
 
-#: src/components/calendar/CalendarViewer.tsx:503
+#: src/components/calendar/CalendarViewer.tsx:545
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:1031
 msgid "No events this month"
 msgstr "В этом месяце нет событий"
@@ -5497,8 +5555,8 @@ msgid "No events yet."
 msgstr "Пока нет событий."
 
 #: src/components/sport/SportFaqPage.tsx:29
-msgid "No FAQ entries."
-msgstr "Нет записей FAQ."
+#~ msgid "No FAQ entries."
+#~ msgstr "Нет записей FAQ."
 
 #: src/components/events/submissions/SubmissionPage.tsx:407
 msgid "No feedback."
@@ -5617,6 +5675,14 @@ msgstr "Пока нет матчей."
 msgid "No matches."
 msgstr "Совпадений нет."
 
+#: src/components/sport/SportProfilePage.tsx:271
+msgid "No medical group changes yet."
+msgstr "Изменений медицинской группы пока нет."
+
+#: src/components/sport/SportProfilePage.tsx:210
+msgid "No medical leave references yet."
+msgstr "Справок о больничном пока нет."
+
 #: src/components/when2meet/MeetingsLandingPage.tsx:131
 #: src/components/when2meet/MeetingsLandingPage.tsx:168
 msgid "No meetings match your search."
@@ -5710,9 +5776,13 @@ msgstr "Нет доступных комнат"
 msgid "No rooms found."
 msgstr "Комнаты не найдены."
 
-#: src/components/web-print/FileDropzone.tsx:228
+#: src/components/web-print/FileDropzone.tsx:246
 msgid "No scan yet"
 msgstr "Сканирования ещё не было"
+
+#: src/components/sport/SportProfilePage.tsx:314
+msgid "No self-sport reports yet."
+msgstr "Заявок на селф-спорт пока нет."
 
 #: src/components/when2meet/MeetingPage.tsx:1777
 msgid "No slot selected"
@@ -5872,6 +5942,10 @@ msgstr "Нечего импортировать"
 msgid "Now impersonating {0}"
 msgstr "Теперь вы действуете от имени {0}"
 
+#: src/components/sport/SportOverviewSection.tsx:436
+msgid "Number of sport hours"
+msgstr "Количество спорт-часов"
+
 #: src/components/editor/menus/BlockTypeDropdown.tsx:83
 msgid "Numbered list"
 msgstr "Нумерованный список"
@@ -5880,7 +5954,7 @@ msgstr "Нумерованный список"
 msgid "Official sources:"
 msgstr "Официальные источники:"
 
-#: src/components/debug/DebugPage.tsx:116
+#: src/components/debug/DebugPage.tsx:119
 #: src/components/web-print/PrintPage.tsx:570
 #: src/components/web-print/ScanPage.tsx:528
 msgid "Offline"
@@ -5960,7 +6034,7 @@ msgstr "Разовые изменения неактивных недель ({ig
 msgid "one-zero-eight team is the community of students of Innopolis University passionate about technology"
 msgstr "one-zero-eight — сообщество студентов Университета Иннополис, увлечённых технологиями"
 
-#: src/components/debug/DebugPage.tsx:116
+#: src/components/debug/DebugPage.tsx:119
 #: src/components/web-print/PrintPage.tsx:570
 #: src/components/web-print/ScanPage.tsx:528
 msgid "Online"
@@ -6049,7 +6123,7 @@ msgstr "Дополнительные детали встречи"
 msgid "Options"
 msgstr "Параметры"
 
-#: src/components/web-print/FileDropzone.tsx:262
+#: src/components/web-print/FileDropzone.tsx:280
 msgid "or click to browse"
 msgstr "или нажмите, чтобы выбрать"
 
@@ -6175,7 +6249,7 @@ msgstr "Бумага {0}%"
 msgid "Paper unknown"
 msgstr "Бумага неизвестна"
 
-#: src/components/sport/SportOverviewSection.tsx:393
+#: src/components/sport/SportOverviewSection.tsx:435
 msgid "Parsing activity link"
 msgstr "Разбор ссылки на активность"
 
@@ -6236,7 +6310,7 @@ msgstr "Вставьте ссылку сюда..."
 msgid "Pause"
 msgstr "Пауза"
 
-#: src/components/debug/DebugPage.tsx:106
+#: src/components/debug/DebugPage.tsx:109
 msgid "Pause automatic updates on this page"
 msgstr "Приостановить автоматические обновления этой страницы"
 
@@ -6244,7 +6318,7 @@ msgstr "Приостановить автоматические обновлен
 msgid "PDF file is missing"
 msgstr "PDF-файл отсутствует"
 
-#: src/components/web-print/FileDropzone.tsx:271
+#: src/components/web-print/FileDropzone.tsx:289
 msgid "PDF, Word, Excel, images, and more — max 20 MB"
 msgstr "PDF, Word, Excel, изображения и другое — макс. 20 МБ"
 
@@ -6366,19 +6440,19 @@ msgstr "Введите корректный URL"
 msgid "Please select an image file"
 msgstr "Выберите файл изображения"
 
-#: src/components/sport/SportOverviewSection.tsx:309
+#: src/components/sport/SportOverviewSection.tsx:351
 msgid "Please submit <0>a link</0> to your <1>Strava</1> or <2>TrainingPeaks</2> activity."
 msgstr "Пожалуйста, отправьте <0>ссылку</0> на вашу активность в <1>Strava</1> или <2>TrainingPeaks</2>."
 
-#: src/components/sport/SportOverviewSection.tsx:603
+#: src/components/sport/SportOverviewSection.tsx:653
 msgid "Please submit an image of the medical reference. Specify the range of dates (illness period) and leave comments if necessary."
 msgstr "Пожалуйста, загрузите изображение медицинской справки. Укажите период болезни и при необходимости оставьте комментарий."
 
-#: src/components/sport/SportOverviewSection.tsx:492
+#: src/components/sport/SportOverviewSection.tsx:538
 msgid "Please submit an image of the reference document (e.g. a medical certificate) that supports your request to change medical group."
 msgstr "Пожалуйста, загрузите изображение подтверждающего документа (например, медицинской справки) для запроса на смену медицинской группы."
 
-#: src/app/AppUpdatePrompt.tsx:46
+#: src/service-worker/page/AppUpdatePrompt.tsx:46
 msgid "Please, reload the page."
 msgstr "Пожалуйста, перезагрузите страницу."
 
@@ -6434,7 +6508,7 @@ msgstr "Предпросмотр доступен только для PDF"
 msgid "Preview unavailable"
 msgstr "Предпросмотр недоступен"
 
-#: src/components/web-print/FileDropzone.tsx:320
+#: src/components/web-print/FileDropzone.tsx:340
 msgid "Preview will appear here"
 msgstr "Превью появится здесь"
 
@@ -6524,7 +6598,7 @@ msgstr "Приоритет при принятии решений о зачёт�
 msgid "Probably, the printer is busy — try to reboot it."
 msgstr "Возможно, принтер занят — попробуйте перезагрузить его."
 
-#: src/components/web-print/FileDropzone.tsx:107
+#: src/components/web-print/FileDropzone.tsx:123
 #: src/components/web-print/ScanPage.tsx:416
 msgid "Processing…"
 msgstr "Обработка…"
@@ -6570,7 +6644,7 @@ msgstr "Очки"
 msgid "Public"
 msgstr "Опубликованная версия"
 
-#: src/app/routes/timetable.tsx:29
+#: src/app/routes/timetable.lazy.tsx:23
 msgid "Public class timetable of Innopolis University: groups, instructors and rooms."
 msgstr "Публичное расписание занятий Университета Иннополис: группы, преподаватели и аудитории."
 
@@ -6625,7 +6699,7 @@ msgstr "Посев квалификации"
 msgid "Quality · {quality} dpi"
 msgstr "Качество · {quality} dpi"
 
-#: src/components/extension/ExtensionPage.tsx:37
+#: src/components/extension/ExtensionPage.tsx:36
 msgid "Quick links to your courses and IU resources"
 msgstr "Быстрые ссылки на ваши курсы и ресурсы УИ"
 
@@ -6729,11 +6803,11 @@ msgstr "Перераспределить игроков"
 msgid "Redo"
 msgstr "Повторить"
 
-#: src/components/debug/DebugPage.tsx:134
+#: src/components/debug/DebugPage.tsx:137
 msgid "Refresh snapshot"
 msgstr "Обновить снимок"
 
-#: src/components/debug/DebugPage.tsx:91
+#: src/components/debug/DebugPage.tsx:94
 msgid "Refreshes every 5 seconds while visible. Reading a snapshot does not check for a deployment or download a build. Sources are sampled at different times."
 msgstr "Обновляется каждые 5 секунд, пока страница видима. Чтение снимка не проверяет обновления сайта и не скачивает сборку. Источники опрашиваются в разное время."
 
@@ -6762,12 +6836,12 @@ msgid "Regular Schedule & Resources"
 msgstr "Регулярное расписание и ресурсы"
 
 #. placeholder {0}: hours.hours_from_groups
-#: src/components/sport/SportOverviewSection.tsx:91
+#: src/components/sport/SportOverviewSection.tsx:92
 msgid "Regular sport ({0}h)"
 msgstr "Обычный спорт ({0}ч)"
 
 #. placeholder {0}: hours.hours_from_groups
-#: src/components/sport/SportOverviewSection.tsx:106
+#: src/components/sport/SportOverviewSection.tsx:107
 msgid "Regular sport: {0}h"
 msgstr "Обычный спорт: {0}ч"
 
@@ -6780,7 +6854,11 @@ msgstr "Отклонить"
 msgid "Reject changes"
 msgstr "Отклонить изменения"
 
-#: src/app/AppUpdatePrompt.tsx:62
+#: src/components/sport/SportProfilePage.tsx:479
+msgid "Rejected"
+msgstr "Отклонено"
+
+#: src/service-worker/page/AppUpdatePrompt.tsx:62
 msgid "Reload"
 msgstr "Перезагрузить"
 
@@ -6964,7 +7042,7 @@ msgstr "Сбросить изменения"
 msgid "Reset north"
 msgstr "Сбросить на север"
 
-#: src/components/debug/DebugPage.tsx:164
+#: src/components/debug/DebugPage.tsx:167
 msgid "Reset offline storage"
 msgstr "Сброс офлайн-хранилища"
 
@@ -6972,7 +7050,7 @@ msgstr "Сброс офлайн-хранилища"
 msgid "Reset to results"
 msgstr "Сбросить к результатам"
 
-#: src/components/debug/DebugPage.tsx:186
+#: src/components/debug/DebugPage.tsx:189
 msgid "Resetting…"
 msgstr "Сброс…"
 
@@ -7032,8 +7110,8 @@ msgstr "Пересдача"
 #: src/components/schedule-assistant/timetable/PublicTimetablePage.tsx:115
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
-#: src/components/sport/SportStudentTrainingModal.tsx:413
-#: src/components/sport/SportStudentTrainingModal.tsx:462
+#: src/components/sport/SportStudentTrainingModal.tsx:443
+#: src/components/sport/SportStudentTrainingModal.tsx:492
 #: src/components/sport/SportTrainingsCalendarList.tsx:263
 #: src/components/tabletennis/ValidationMatches.tsx:555
 #: src/components/when2meet/MeetingRoomModal.tsx:289
@@ -7452,7 +7530,7 @@ msgstr "Поиск людей"
 msgid "Search services..."
 msgstr "Поиск сервисов..."
 
-#: src/components/admin/AdminPage.tsx:23
+#: src/components/admin/AdminPage.tsx:24
 msgid "Search users"
 msgstr "Поиск пользователей"
 
@@ -7550,7 +7628,7 @@ msgstr "Выберите интервалы, доступные участник
 msgid "Select this and all following"
 msgstr "Выбрать это и все последующие"
 
-#: src/components/sport/SportOverviewSection.tsx:348
+#: src/components/sport/SportOverviewSection.tsx:390
 msgid "Select your training type"
 msgstr "Выберите тип тренировки"
 
@@ -7588,25 +7666,34 @@ msgstr "Выбрано: {pendingMeetingTimeLabel}"
 msgid "Selected: {selectedCount}"
 msgstr "Выбрано: {selectedCount}"
 
-#: src/components/sport/SportOverviewSection.tsx:306
+#: src/components/sport/SportOverviewSection.tsx:348
 msgid "Self Sport Upload"
 msgstr "Загрузка селф-спорта"
 
+#: src/components/sport/SportProfilePage.tsx:293
+#: src/components/sport/SportProfilePage.tsx:421
+msgid "Self-sport"
+msgstr "Селф-спорт"
+
 #. placeholder {0}: hours.self_sport_hours
-#: src/components/sport/SportOverviewSection.tsx:94
+#: src/components/sport/SportOverviewSection.tsx:95
 msgid "Self-sport ({0}h)"
 msgstr "Селф-спорт ({0}ч)"
 
-#: src/components/sport/SportOverviewSection.tsx:251
+#: src/components/sport/SportOverviewSection.tsx:293
 msgid "Self-sport report was submitted."
 msgstr "Отчёт о селф-спорте отправлен."
 
-#: src/components/sport/SportOverviewSection.tsx:150
-msgid "Self-sport upload"
-msgstr "Загрузка селф-спорта"
+#: src/components/sport/SportProfilePage.tsx:305
+msgid "Self-sport reports could not be loaded."
+msgstr "Не удалось загрузить заявки на селф-спорт."
+
+#: src/components/sport/SportOverviewSection.tsx:151
+#~ msgid "Self-sport upload"
+#~ msgstr "Загрузка селф-спорта"
 
 #. placeholder {0}: hours.self_sport_hours
-#: src/components/sport/SportOverviewSection.tsx:101
+#: src/components/sport/SportOverviewSection.tsx:102
 msgid "Self-sport: {0}h"
 msgstr "Селф-спорт: {0}ч"
 
@@ -7987,10 +8074,10 @@ msgstr "Делите обязанности в комнате общежития
 msgid "Split players into groups"
 msgstr "Разделить игроков на группы"
 
-#: src/app/routes/_with_menu/sport/faq.tsx:26
 #: src/app/routes/_with_menu/sport/history.tsx:26
 #: src/app/routes/_with_menu/sport/index.tsx:19
 #: src/app/routes/_with_menu/sport/index.tsx:26
+#: src/app/routes/_with_menu/sport/info.tsx:24
 #: src/app/routes/_with_menu/sport/profile.tsx:26
 #: src/app/routes/_with_menu/sport/trainer.tsx:26
 #: src/components/calendar/ConfigCalendarDialog.tsx:72
@@ -8011,9 +8098,9 @@ msgstr "Админ спорта"
 #~ msgid "Sport bot"
 #~ msgstr "Спортивный бот"
 
-#: src/app/routes/_with_menu/sport/faq.tsx:19
-msgid "Sport FAQ"
-msgstr "FAQ по спорту"
+#: src/app/routes/_with_menu/sport/faq.tsx:17
+#~ msgid "Sport FAQ"
+#~ msgstr "FAQ по спорту"
 
 #: src/app/routes/_with_menu/sport/history.tsx:19
 msgid "Sport history"
@@ -8036,15 +8123,23 @@ msgstr "Спортивные часы: <0>{earned} из {required, plural, one {
 msgid "Sport ID"
 msgstr "Sport ID"
 
+#: src/app/routes/_with_menu/sport/info.tsx:17
+msgid "Sport info"
+msgstr "Информация о спорте"
+
 #: src/components/clubs/EditClubPage.tsx:1069
 msgid "Sport Information"
 msgstr "Спортивная информация"
+
+#: src/app/routes/_with_menu/sport/info.tsx:20
+msgid "Sport information at Innopolis University."
+msgstr "Информация о спорте в Университете Иннополис."
 
 #: src/app/routes/_with_menu/sport/profile.tsx:19
 msgid "Sport profile"
 msgstr "Спортивный профиль"
 
-#: src/components/sport/SportPageShell.tsx:27
+#: src/components/sport/SportPageShell.tsx:37
 msgid "Sport profile unavailable"
 msgstr "Спортивный профиль недоступен"
 
@@ -8111,7 +8206,7 @@ msgstr "Старт"
 msgid "Start {0} vs {1}"
 msgstr "Начать матч: {0} против {1}"
 
-#: src/components/sport/SportOverviewSection.tsx:634
+#: src/components/sport/SportOverviewSection.tsx:684
 msgid "Start date"
 msgstr "Дата начала"
 
@@ -8178,7 +8273,7 @@ msgid "Status updated"
 msgstr "Статус обновлён"
 
 #. placeholder {0}: roleLabels.join(", ")
-#: src/components/sport/SportOverviewSection.tsx:186
+#: src/components/sport/SportOverviewSection.tsx:204
 msgid "Status: <0>{0}</0>"
 msgstr "Статус: <0>{0}</0>"
 
@@ -8235,7 +8330,7 @@ msgstr "Зачёркнутый"
 #: src/components/admin/utils.ts:34
 #: src/components/admin/utils.ts:49
 #: src/components/dashboard/AccountWidget.tsx:13
-#: src/components/sport/SportProfilePage.tsx:18
+#: src/components/sport/SportProfilePage.tsx:25
 msgid "Student"
 msgstr "Студент"
 
@@ -8254,9 +8349,13 @@ msgstr "Студенческие клубы"
 msgid "Student name"
 msgstr "Имя студента"
 
-#: src/components/sport/SportOverviewSection.tsx:196
-msgid "Student status: <0>{enrollmentStatus}</0>"
-msgstr "Статус студента: <0>{enrollmentStatus}</0>"
+#: src/components/sport/SportOverviewSection.tsx:214
+msgid "Student status:"
+msgstr "Статус студента:"
+
+#: src/components/sport/SportOverviewSection.tsx:193
+#~ msgid "Student status: <0>{enrollmentStatus}</0>"
+#~ msgstr "Статус студента: <0>{enrollmentStatus}</0>"
 
 #: src/components/room-booking/room-page/RoomPage.tsx:114
 #: src/components/room-booking/rooms-list/RoomsList.tsx:86
@@ -8276,23 +8375,27 @@ msgid "Submissions"
 msgstr "Заявки"
 
 #: src/components/calendar/import/ImportModal.tsx:241
-#: src/components/sport/SportOverviewSection.tsx:423
-#: src/components/sport/SportOverviewSection.tsx:539
-#: src/components/sport/SportOverviewSection.tsx:680
+#: src/components/sport/SportOverviewSection.tsx:465
+#: src/components/sport/SportOverviewSection.tsx:585
+#: src/components/sport/SportOverviewSection.tsx:730
 msgid "Submit"
 msgstr "Отправить"
 
-#: src/components/sport/SportProfilePage.tsx:44
-msgid "Submit medical leave reference"
-msgstr "Подать медицинскую справку"
+#: src/components/sport/SportProfilePage.tsx:196
+msgid "Submit medical leave"
+msgstr "Отправить больничный"
+
+#: src/components/sport/SportProfilePage.tsx:46
+#~ msgid "Submit medical leave reference"
+#~ msgstr "Подать медицинскую справку"
 
 #: src/components/events/drafts/DraftPage.tsx:886
 msgid "Submit on review"
 msgstr "Отправить на проверку"
 
-#: src/components/sport/SportOverviewSection.tsx:251
-#: src/components/sport/SportOverviewSection.tsx:454
-#: src/components/sport/SportOverviewSection.tsx:566
+#: src/components/sport/SportOverviewSection.tsx:293
+#: src/components/sport/SportOverviewSection.tsx:496
+#: src/components/sport/SportOverviewSection.tsx:612
 msgid "Submitted"
 msgstr "Отправлено"
 
@@ -8303,6 +8406,14 @@ msgstr "Отправлено на проверку"
 #: src/components/clubs/EditClubPage.tsx:672
 msgid "Submitted logo"
 msgstr "Отправленный логотип"
+
+#: src/components/sport/SportProfilePage.tsx:352
+msgid "Submitted on {uploadedAt}"
+msgstr "Отправлено {uploadedAt}"
+
+#: src/components/sport/SportProfilePage.tsx:256
+#~ msgid "Submitted on {uploadedAt} for {semesterName}"
+#~ msgstr "Отправлено {uploadedAt} · {semesterName}"
 
 #: src/components/clubs/EditClubPage.tsx:702
 msgid "Submitted, waiting for review"
@@ -8330,7 +8441,7 @@ msgstr "Успех"
 msgid "Success!"
 msgstr "Успех!"
 
-#: src/components/web-print/FileDropzone.tsx:62
+#: src/components/web-print/FileDropzone.tsx:78
 msgid "Such file is not supported!"
 msgstr "Такой файл не поддерживается!"
 
@@ -8384,7 +8495,7 @@ msgstr "Успешная синхронизация"
 msgid "Sync updated at"
 msgstr "Синхронизация обновлена"
 
-#: src/components/sport/SportOverviewSection.tsx:376
+#: src/components/sport/SportOverviewSection.tsx:418
 msgid "System <0>automatically set the number of hours</0> you have accumulated during the training. <1>Change it if something went wrong.</1>"
 msgstr "Система <0>автоматически указала количество часов</0>, которые вы набрали за тренировку. <1>Измените, если что-то пошло не так.</1>"
 
@@ -8561,7 +8672,7 @@ msgstr "Предварительно"
 msgid "Text"
 msgstr "Текст"
 
-#: src/components/sport/SportOverviewSection.tsx:611
+#: src/components/sport/SportOverviewSection.tsx:661
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "<0>Пропущенная из‑за болезни неделя</0> <1>компенсируется двумя спортивными часами.</1>"
 
@@ -8710,7 +8821,7 @@ msgstr "Таймер остановлен"
 msgid "The website is an ecosystem that brings together all <0/> team services and useful Innopolis resources for students in one place."
 msgstr "Это экосистема, объединяющая все сервисы команды <0/> и полезные ресурсы Иннополиса для студентов в одном месте."
 
-#: src/app/AppUpdatePrompt.tsx:43
+#: src/service-worker/page/AppUpdatePrompt.tsx:43
 msgid "The website is updated."
 msgstr "Сайт обновлён."
 
@@ -8750,7 +8861,7 @@ msgstr "Эта App ещё не отправляла CLIENT_HELLO."
 msgid "This class is cancelled in the configuration."
 msgstr "Это занятие отменено в конфигурации."
 
-#: src/components/debug/DebugPage.tsx:167
+#: src/components/debug/DebugPage.tsx:170
 msgid "This clears ALL Cache Storage caches for this origin, unregisters all service workers, and reloads the page. All cached builds will be removed."
 msgstr "Будут очищены ВСЕ кеши Cache Storage этого origin, удалены регистрации всех Service Worker и перезагружена страница. Все кешированные сборки будут удалены."
 
@@ -8918,7 +9029,7 @@ msgstr "Название таймера..."
 msgid "Timeslots saved"
 msgstr "Временные слоты сохранены"
 
-#: src/app/routes/timetable.tsx:26
+#: src/app/routes/timetable.lazy.tsx:20
 msgid "Timetable"
 msgstr "Расписание"
 
@@ -8960,7 +9071,7 @@ msgstr "Укажите название и идентификатор в URL"
 msgid "Title is required"
 msgstr "Укажите название"
 
-#: src/components/sport/SportStudentTrainingModal.tsx:370
+#: src/components/sport/SportStudentTrainingModal.tsx:400
 msgid "To attendance"
 msgstr "К посещаемости"
 
@@ -8972,7 +9083,7 @@ msgstr "Определять самые активные, инициативны
 msgid "To integrate competition element into student clubs' life in order to stimulate such clubs to grow and set targets"
 msgstr "Внедрить элемент соревнования в жизнь студенческих клубов, чтобы мотивировать клубы ставить цели и развиваться"
 
-#: src/components/sport/SportOverviewSection.tsx:119
+#: src/components/sport/SportOverviewSection.tsx:120
 msgid "To pass the sport course you must get <0>{remaining, plural, one {# hour} other {# hours}}</0> more and pass fitness test."
 msgstr "Чтобы получить зачёт по физкультуре, нужно набрать ещё <0>{remaining, plural, one {# час} few {# часа} many {# часов} other {# часа}}</0> и сдать фитнесс-тест."
 
@@ -8994,7 +9105,7 @@ msgstr "К источнику"
 msgid "To teach student club leaders to run reports"
 msgstr "Учить лидеров студенческих клубов вести отчётность"
 
-#: src/components/calendar/CalendarViewer.tsx:603
+#: src/components/calendar/CalendarViewer.tsx:656
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:297
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:647
 #: src/components/sport/SportSchedulePage.tsx:237
@@ -9045,7 +9156,7 @@ msgstr "Турниры"
 msgid "Track"
 msgstr "Трек"
 
-#: src/components/sport/SportProfilePage.tsx:19
+#: src/components/sport/SportProfilePage.tsx:26
 #: src/components/sport/SportTabs.tsx:25
 #: src/components/sport/SportTrainingsCalendarList.tsx:214
 msgid "Trainer"
@@ -9058,6 +9169,11 @@ msgstr "Не удалось загрузить расписание тренер
 #: src/app/routes/_with_menu/sport/trainer.tsx:22
 msgid "Trainer tools for sport groups at Innopolis University."
 msgstr "Инструменты тренера для спортивных групп Университета Иннополис."
+
+#: src/components/sport/SportStudentTrainingModal.tsx:328
+#: src/components/sport/SportStudentTrainingModal.tsx:335
+msgid "Trainers"
+msgstr "Тренеры"
 
 #: src/components/sport/sport-training-label.ts:25
 #: src/components/sport/SportHistoryPage.tsx:132
@@ -9076,7 +9192,7 @@ msgstr "Длительность тренировки недоступна."
 msgid "Training eligibility could not be fully loaded."
 msgstr "Не удалось полностью загрузить право на запись."
 
-#: src/components/sport/SportOverviewSection.tsx:358
+#: src/components/sport/SportOverviewSection.tsx:400
 msgid "Training types could not be loaded."
 msgstr "Не удалось загрузить типы тренировок."
 
@@ -9309,6 +9425,15 @@ msgstr "Загрузите config.yaml во вкладке «Настройки�
 msgid "Upload new logo"
 msgstr "Загрузить новый логотип"
 
+#: src/components/sport/SportOverviewSection.tsx:151
+#: src/components/sport/SportProfilePage.tsx:300
+msgid "Upload self-sport"
+msgstr "Загрузить селф-спорт"
+
+#: src/components/sport/SportProfilePage.tsx:389
+msgid "uploaded {uploadedAt}"
+msgstr "загружено {uploadedAt}"
+
 #: src/components/editor/extensions/image/ImageUploadPlaceholderNodeView.tsx:83
 msgid "Uploading image..."
 msgstr "Загрузка изображения..."
@@ -9516,14 +9641,14 @@ msgstr "Ожидает получения"
 msgid "Waiting for review"
 msgstr "Ожидает проверки"
 
-#: src/components/sport/SportOverviewSection.tsx:394
-msgid "Waiting for the activity link"
-msgstr "Ожидание ссылки на активность"
+#: src/components/sport/SportOverviewSection.tsx:412
+#~ msgid "Waiting for the activity link"
+#~ msgstr "Ожидание ссылки на активность"
 
 #: src/components/toast/ToastProvider.test.ts:72
 #: src/components/toast/ToastProvider.test.ts:127
-#: src/components/web-print/FileDropzone.tsx:289
-#: src/components/web-print/FileDropzone.tsx:348
+#: src/components/web-print/FileDropzone.tsx:307
+#: src/components/web-print/FileDropzone.tsx:368
 #: src/components/web-print/PrintPage.tsx:677
 #: src/components/web-print/PrintPage.tsx:685
 #: src/components/web-print/ScanPage.tsx:725
@@ -9628,8 +9753,8 @@ msgstr "Среда"
 msgid "Week"
 msgstr "Неделя"
 
-#: src/components/calendar/CalendarViewer.tsx:426
-#: src/components/calendar/CalendarViewer.tsx:481
+#: src/components/calendar/CalendarViewer.tsx:468
+#: src/components/calendar/CalendarViewer.tsx:523
 #: src/components/sport/SportTrainingsCalendarList.tsx:368
 msgid "Week {week}"
 msgstr "Неделя {week}"
@@ -9671,7 +9796,7 @@ msgid "What Clubs Can Purchase"
 msgstr "Что могут покупать клубы"
 
 #: src/components/dorms/DormsPage.tsx:15
-#: src/components/extension/ExtensionPage.tsx:16
+#: src/components/extension/ExtensionPage.tsx:15
 msgid "What is it?"
 msgstr "Что это?"
 
@@ -9765,6 +9890,10 @@ msgstr "Сейчас нельзя изменить победителя"
 msgid "Wins"
 msgstr "Победы"
 
+#: src/components/board-games/reservation-presentation.ts:42
+msgid "With the borrower"
+msgstr "У получателя"
+
 #: src/components/debug/BrowserDiagnostics.tsx:80
 msgid "Worker currently being installed."
 msgstr "Воркер, который сейчас устанавливается."
@@ -9772,10 +9901,6 @@ msgstr "Воркер, который сейчас устанавливается
 #: src/components/debug/BrowserDiagnostics.tsx:84
 msgid "worker-N is a local reference within this snapshot, not a persistent browser ID. Equal script URLs alone do not identify the same worker instance."
 msgstr "worker-N — локальное обозначение в этом снимке, а не постоянный идентификатор браузера. Одинаковый URL скрипта не означает, что это один экземпляр воркера."
-
-#: src/components/board-games/reservation-presentation.ts:42
-msgid "With the borrower"
-msgstr "У получателя"
 
 #: src/components/clubs/ClubLeaguePage.tsx:186
 msgid "Workshops, lectures and other related services"
@@ -9833,7 +9958,7 @@ msgstr "У вас уже есть активное бронирование эт
 msgid "You are all set"
 msgstr "Всё готово"
 
-#: src/components/sport/SportOverviewSection.tsx:71
+#: src/components/sport/SportOverviewSection.tsx:72
 msgid "You are better than <0>{betterThan}%</0> of the students!"
 msgstr "Вы лучше, чем <0>{betterThan}%</0> студентов!"
 
@@ -9904,7 +10029,7 @@ msgstr "Нельзя бронировать в прошлом."
 msgid "You do not have access to board games admin."
 msgstr "У вас нет доступа к админке настольных игр."
 
-#: src/components/dashboard/MusicRoomWidget.tsx:61
+#: src/components/dashboard/MusicRoomWidget.tsx:68
 msgid "You don't have any bookings now."
 msgstr "У вас нет бронирований."
 
@@ -9940,7 +10065,7 @@ msgstr "У вас пока нет бронирований."
 msgid "You have unsaved changes. Are you sure you want to leave?"
 msgstr "Есть несохранённые изменения. Точно уйти?"
 
-#: src/components/sport/SportPageShell.tsx:37
+#: src/components/sport/SportPageShell.tsx:47
 msgid "You may not be registered in the sport system yet."
 msgstr "Возможно, вы ещё не зарегистрированы на сайте спорта."
 
