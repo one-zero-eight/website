@@ -14,7 +14,7 @@ export function AutoSignIn() {
   }
 
   console.log("AutoSignIn enabled");
-  const signInURL = buildSignInURL("", "none");
+  const signInURL = buildSignInURL("/", "none");
   return <iframe src={signInURL.toString()} style={{ display: "none" }} />;
 }
 
