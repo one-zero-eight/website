@@ -58,8 +58,8 @@ import { Route as With_menuStudentAffairsSignOutRouteImport } from "./routes/_wi
 import { Route as With_menuStudentAffairsSignInRouteImport } from "./routes/_with_menu/student-affairs/sign-in";
 import { Route as With_menuSportTrainerRouteImport } from "./routes/_with_menu/sport/trainer";
 import { Route as With_menuSportProfileRouteImport } from "./routes/_with_menu/sport/profile";
+import { Route as With_menuSportInfoRouteImport } from "./routes/_with_menu/sport/info";
 import { Route as With_menuSportHistoryRouteImport } from "./routes/_with_menu/sport/history";
-import { Route as With_menuSportFaqRouteImport } from "./routes/_with_menu/sport/faq";
 import { Route as With_menuSearchAskRouteImport } from "./routes/_with_menu/search/ask";
 import { Route as With_menuSearchActRouteImport } from "./routes/_with_menu/search/act";
 import { Route as With_menuScheduleCategoryRouteImport } from "./routes/_with_menu/schedule/$category";
@@ -410,14 +410,14 @@ const With_menuSportProfileRoute = With_menuSportProfileRouteImport.update({
   path: "/sport/profile",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
+const With_menuSportInfoRoute = With_menuSportInfoRouteImport.update({
+  id: "/sport/info",
+  path: "/sport/info",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuSportHistoryRoute = With_menuSportHistoryRouteImport.update({
   id: "/sport/history",
   path: "/sport/history",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
-const With_menuSportFaqRoute = With_menuSportFaqRouteImport.update({
-  id: "/sport/faq",
-  path: "/sport/faq",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const With_menuSearchAskRoute = With_menuSearchAskRouteImport.update({
@@ -684,8 +684,8 @@ export interface FileRoutesByFullPath {
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/search/act": typeof With_menuSearchActRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
-  "/sport/faq": typeof With_menuSportFaqRoute;
   "/sport/history": typeof With_menuSportHistoryRoute;
+  "/sport/info": typeof With_menuSportInfoRoute;
   "/sport/profile": typeof With_menuSportProfileRoute;
   "/sport/trainer": typeof With_menuSportTrainerRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
@@ -775,8 +775,8 @@ export interface FileRoutesByTo {
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/search/act": typeof With_menuSearchActRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
-  "/sport/faq": typeof With_menuSportFaqRoute;
   "/sport/history": typeof With_menuSportHistoryRoute;
+  "/sport/info": typeof With_menuSportInfoRoute;
   "/sport/profile": typeof With_menuSportProfileRoute;
   "/sport/trainer": typeof With_menuSportTrainerRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
@@ -871,8 +871,8 @@ export interface FileRoutesById {
   "/_with_menu/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/_with_menu/search/act": typeof With_menuSearchActRoute;
   "/_with_menu/search/ask": typeof With_menuSearchAskRoute;
-  "/_with_menu/sport/faq": typeof With_menuSportFaqRoute;
   "/_with_menu/sport/history": typeof With_menuSportHistoryRoute;
+  "/_with_menu/sport/info": typeof With_menuSportInfoRoute;
   "/_with_menu/sport/profile": typeof With_menuSportProfileRoute;
   "/_with_menu/sport/trainer": typeof With_menuSportTrainerRoute;
   "/_with_menu/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
@@ -967,8 +967,8 @@ export interface FileRouteTypes {
     | "/schedule/$category"
     | "/search/act"
     | "/search/ask"
-    | "/sport/faq"
     | "/sport/history"
+    | "/sport/info"
     | "/sport/profile"
     | "/sport/trainer"
     | "/student-affairs/sign-in"
@@ -1058,8 +1058,8 @@ export interface FileRouteTypes {
     | "/schedule/$category"
     | "/search/act"
     | "/search/ask"
-    | "/sport/faq"
     | "/sport/history"
+    | "/sport/info"
     | "/sport/profile"
     | "/sport/trainer"
     | "/student-affairs/sign-in"
@@ -1153,8 +1153,8 @@ export interface FileRouteTypes {
     | "/_with_menu/schedule/$category"
     | "/_with_menu/search/act"
     | "/_with_menu/search/ask"
-    | "/_with_menu/sport/faq"
     | "/_with_menu/sport/history"
+    | "/_with_menu/sport/info"
     | "/_with_menu/sport/profile"
     | "/_with_menu/sport/trainer"
     | "/_with_menu/student-affairs/sign-in"
@@ -1579,18 +1579,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuSportProfileRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/sport/info": {
+      id: "/_with_menu/sport/info";
+      path: "/sport/info";
+      fullPath: "/sport/info";
+      preLoaderRoute: typeof With_menuSportInfoRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/sport/history": {
       id: "/_with_menu/sport/history";
       path: "/sport/history";
       fullPath: "/sport/history";
       preLoaderRoute: typeof With_menuSportHistoryRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
-    "/_with_menu/sport/faq": {
-      id: "/_with_menu/sport/faq";
-      path: "/sport/faq";
-      fullPath: "/sport/faq";
-      preLoaderRoute: typeof With_menuSportFaqRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/search/ask": {
@@ -1921,8 +1921,8 @@ interface With_menuRouteRouteChildren {
   With_menuScheduleCategoryRoute: typeof With_menuScheduleCategoryRoute;
   With_menuSearchActRoute: typeof With_menuSearchActRoute;
   With_menuSearchAskRoute: typeof With_menuSearchAskRoute;
-  With_menuSportFaqRoute: typeof With_menuSportFaqRoute;
   With_menuSportHistoryRoute: typeof With_menuSportHistoryRoute;
+  With_menuSportInfoRoute: typeof With_menuSportInfoRoute;
   With_menuSportProfileRoute: typeof With_menuSportProfileRoute;
   With_menuSportTrainerRoute: typeof With_menuSportTrainerRoute;
   With_menuStudentAffairsSignInRoute: typeof With_menuStudentAffairsSignInRoute;
@@ -1999,8 +1999,8 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuScheduleCategoryRoute: With_menuScheduleCategoryRoute,
   With_menuSearchActRoute: With_menuSearchActRoute,
   With_menuSearchAskRoute: With_menuSearchAskRoute,
-  With_menuSportFaqRoute: With_menuSportFaqRoute,
   With_menuSportHistoryRoute: With_menuSportHistoryRoute,
+  With_menuSportInfoRoute: With_menuSportInfoRoute,
   With_menuSportProfileRoute: With_menuSportProfileRoute,
   With_menuSportTrainerRoute: With_menuSportTrainerRoute,
   With_menuStudentAffairsSignInRoute: With_menuStudentAffairsSignInRoute,
