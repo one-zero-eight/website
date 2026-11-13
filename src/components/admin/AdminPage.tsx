@@ -5,6 +5,7 @@ import { useNavigate } from "@tanstack/react-router";
 const adminLinks = [
   "https://dev.innohassle.ru/grafana/",
   "https://api.innohassle.ru",
+  "https://innohassle.ru/debug",
   "https://innohassle.ru/account/token",
   "https://innohassle.ru/account/connect-telegram?reconnect=true",
   "https://storage.innohassle.ru/minio/ui",
