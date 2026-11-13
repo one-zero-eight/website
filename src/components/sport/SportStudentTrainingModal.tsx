@@ -322,6 +322,36 @@ export function SportStudentTrainingModal({
               <Trans>Club could not be loaded.</Trans>
             </div>
           ) : null}
+          {groupPending ? (
+            <div>
+              <dt className="text-base-content/60 font-semibold">
+                <Trans>Trainers</Trans>
+              </dt>
+              <dd className="skeleton h-6 w-full" />
+            </div>
+          ) : group?.trainers.length ? (
+            <div>
+              <dt className="text-base-content/60 font-semibold">
+                <Trans>Trainers</Trans>
+              </dt>
+              <dd className="flex flex-col gap-1">
+                {group.trainers.map((trainer) => (
+                  <span
+                    key={trainer.id}
+                    className="flex flex-wrap items-baseline gap-x-2"
+                  >
+                    <span className="font-medium">{trainer.full_name}</span>
+                    <a
+                      href={`mailto:${trainer.email}`}
+                      className="link link-primary text-sm"
+                    >
+                      {trainer.email}
+                    </a>
+                  </span>
+                ))}
+              </dd>
+            </div>
+          ) : null}
           {groupPending && !description ? (
             <div>
               <dt className="text-base-content/60 font-semibold">

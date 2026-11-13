@@ -308,77 +308,68 @@ function EnrolledTrainings({
     [clubs],
   );
 
-  if (!isPending && !isError && rows.length === 0) return null;
+  if (isPending || isError || rows.length === 0) return null;
 
   return (
     <section className="mb-6 flex flex-col gap-3">
       <h2 className="text-2xl font-medium">
         <Trans>My upcoming trainings</Trans>
       </h2>
-      {isError || clubsError ? (
+      {clubsError ? (
         <div className="alert alert-error">
-          {isError ? (
-            <Trans>Enrolled trainings could not be loaded.</Trans>
-          ) : (
-            <Trans>Club logos could not be loaded.</Trans>
-          )}
+          <Trans>Club logos could not be loaded.</Trans>
         </div>
       ) : null}
-      {isPending ? (
-        <div className="skeleton h-24 w-full" />
-      ) : rows.length > 0 ? (
-        <div className="grid gap-2 @lg/content:grid-cols-2">
-          {rows.map((row) => {
-            const training = row.training;
-            const club =
-              training.sport_id == null
-                ? undefined
-                : clubsBySportId.get(String(training.sport_id));
-            const date = new Date(training.start).toLocaleDateString(
-              i18n.locale,
-              {
-                day: "numeric",
-                month: "short",
-                weekday: "short",
-                timeZone: "Europe/Moscow",
-              },
-            );
+      <div className="grid gap-2 @lg/content:grid-cols-2">
+        {rows.map((row) => {
+          const training = row.training;
+          const club =
+            training.sport_id == null
+              ? undefined
+              : clubsBySportId.get(String(training.sport_id));
+          const date = new Date(training.start).toLocaleDateString(
+            i18n.locale,
+            {
+              day: "numeric",
+              month: "short",
+              weekday: "short",
+              timeZone: "Europe/Moscow",
+            },
+          );
 
-            return (
-              <button
-                key={training.id}
-                type="button"
-                className="border-base-300 hover:border-success hover:bg-success/5 flex min-w-0 items-center gap-3 rounded-xl border p-3 text-left transition-colors"
-                onClick={() => onSelect(row)}
-              >
-                {club?.id ? (
-                  <ClubLogo
-                    clubId={club.id}
-                    logoFileId={club.logo_file_id}
-                    className="size-12 bg-transparent [&>img]:bg-transparent"
-                  />
-                ) : (
-                  <span className="size-12 shrink-0" />
-                )}
-                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="text-success font-semibold">
-                    {sportTrainingTitle(row)}
-                  </span>
-                  <span className="text-base-content/70 text-xs">
-                    {date} ·{" "}
-                    {formatTimeRangeMoscow(training.start, training.end)}
-                  </span>
-                  {training.training_location ? (
-                    <span className="text-base-content/60 truncate text-xs">
-                      {training.training_location.name}
-                    </span>
-                  ) : null}
+          return (
+            <button
+              key={training.id}
+              type="button"
+              className="border-base-300 hover:border-success hover:bg-success/5 flex min-w-0 items-center gap-3 rounded-xl border p-3 text-left transition-colors"
+              onClick={() => onSelect(row)}
+            >
+              {club?.id ? (
+                <ClubLogo
+                  clubId={club.id}
+                  logoFileId={club.logo_file_id}
+                  className="size-12 bg-transparent [&>img]:bg-transparent"
+                />
+              ) : (
+                <span className="size-12 shrink-0" />
+              )}
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="text-success font-semibold">
+                  {sportTrainingTitle(row)}
                 </span>
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
+                <span className="text-base-content/70 text-xs">
+                  {date} · {formatTimeRangeMoscow(training.start, training.end)}
+                </span>
+                {training.training_location ? (
+                  <span className="text-base-content/60 truncate text-xs">
+                    {training.training_location.name}
+                  </span>
+                ) : null}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </section>
   );
 }

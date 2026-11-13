@@ -26,7 +26,7 @@ function RouteComponent() {
       <Topbar title={<Trans>Sport</Trans>} hideOnMobile />
       <SportTabs />
       <RequireAuth>
-        <SportPageShell>
+        <SportPageShell centered>
           <SportProfilePage />
         </SportPageShell>
       </RequireAuth>

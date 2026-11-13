@@ -1,4 +1,5 @@
 import { useSportProfile } from "@/components/sport/sport-profile.ts";
+import { cn } from "@/lib/ui/cn";
 import { Trans } from "@lingui/react/macro";
 import type { ReactNode } from "react";
 
@@ -6,12 +7,21 @@ import type { ReactNode } from "react";
  * Handles profile loading and error states shared by every sport page,
  * then renders children inside the page's width-constrained container.
  */
-export function SportPageShell({ children }: { children: ReactNode }) {
+export function SportPageShell({
+  children,
+  centered = false,
+}: {
+  children: ReactNode;
+  centered?: boolean;
+}) {
   const sport = useSportProfile();
+  const layoutClassName = centered
+    ? "mx-auto w-full max-w-[1200px] px-4 py-6"
+    : "px-4 py-4";
 
   if (sport.profilePending) {
     return (
-      <div className="flex flex-col gap-4 px-4 py-4">
+      <div className={cn("flex flex-col gap-4", layoutClassName)}>
         <div className="bg-base-200 rounded-box h-40 animate-pulse" />
         <div className="bg-base-200 rounded-box h-64 animate-pulse" />
       </div>
@@ -20,7 +30,7 @@ export function SportPageShell({ children }: { children: ReactNode }) {
 
   if (sport.profileError || !sport.profile) {
     return (
-      <div className="px-4 py-4">
+      <div className={layoutClassName}>
         <div className="card card-border border-error bg-base-100">
           <div className="card-body">
             <h2 className="card-title text-error">
@@ -45,5 +55,9 @@ export function SportPageShell({ children }: { children: ReactNode }) {
     );
   }
 
-  return <div className="flex w-full flex-col gap-6 px-4 py-4">{children}</div>;
+  return (
+    <div className={cn("flex w-full flex-col gap-6", layoutClassName)}>
+      {children}
+    </div>
+  );
 }
