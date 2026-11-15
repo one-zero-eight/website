@@ -851,7 +851,9 @@ function renderEventTimeGridWeek({
       : borderColor !== "undefined"
         ? borderColor
         : "#9A2EFF";
-  return (
+  return event.id === "today" ? (
+    <div id="today"></div>
+  ) : (
     <div
       className="h-full border-l-4 p-1 text-left backdrop-blur-xs"
       style={{
