@@ -171,7 +171,7 @@ function ReservationsSection({
         </div>
       )}
 
-      <BorrowerNameModal
+      <AdminCommentModal
         reservation={reservationToTake}
         onOpenChange={(open) => !open && setReservationToTake(null)}
       />
@@ -260,10 +260,10 @@ function ReservationCard({
             </span>
           )}
         </div>
-        {!isReserved && reservation.borrower_name && (
-          <div className="flex items-center gap-2">
-            <span className="icon-[material-symbols--person-outline] text-xl" />
-            <span>{reservation.borrower_name}</span>
+        {reservation.admin_comment && (
+          <div className="flex items-start gap-2">
+            <span className="icon-[material-symbols--comment-outline] text-xl" />
+            <span className="wrap-break-word">{reservation.admin_comment}</span>
           </div>
         )}
       </div>
@@ -282,7 +282,7 @@ function ReservationCard({
             updateStatus(
               reservation.id,
               ReservationStatus.returned,
-              reservation.borrower_name,
+              reservation.admin_comment,
             );
           }}
         >
@@ -362,8 +362,11 @@ function ReservationInformationModal({
             {reservation.comments}
           </GameInformationField>
         )}
-        <GameInformationField label={t`Borrower name`}>
-          {reservation.borrower_name || t`Not provided`}
+        <GameInformationField
+          label={t`Comment`}
+          className="@sm/modal:col-span-2"
+        >
+          {reservation.admin_comment || t`Not provided`}
         </GameInformationField>
         <GameInformationField label={t`Created at`}>
           {new Date(reservation.created_at).toLocaleString(i18n.locale)}
@@ -379,7 +382,7 @@ function ReservationInformationModal({
   );
 }
 
-function BorrowerNameModal({
+function AdminCommentModal({
   reservation,
   onOpenChange,
 }: {
@@ -387,37 +390,40 @@ function BorrowerNameModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const { t } = useLingui();
-  const [borrowerName, setBorrowerName] = useState("");
+  const [adminComment, setAdminComment] = useState("");
   const { updateStatus, isPending } = useReservationStatusMutation(() => {
-    setBorrowerName("");
+    setAdminComment("");
     onOpenChange(false);
   });
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!reservation || !borrowerName.trim()) return;
-    updateStatus(reservation.id, ReservationStatus.taken, borrowerName.trim());
+    if (!reservation) return;
+    updateStatus(
+      reservation.id,
+      ReservationStatus.taken,
+      adminComment.trim() || null,
+    );
   }
 
   return (
     <Modal
       open={reservation !== null}
       onOpenChange={onOpenChange}
-      title={t`Confirm borrower`}
+      title={t`Mark as taken`}
       closeOnOutsidePress={!isPending}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <label className="fieldset">
           <span className="fieldset-legend">
-            <Trans>Borrower name</Trans>
+            <Trans>Comment</Trans>
           </span>
           <input
             className="input w-full"
-            value={borrowerName}
-            onChange={(event) => setBorrowerName(event.target.value)}
-            placeholder={t`Full name`}
+            value={adminComment}
+            onChange={(event) => setAdminComment(event.target.value)}
+            placeholder={t`Optional comment`}
             autoFocus
-            required
           />
         </label>
         <div className="flex justify-end gap-2">
@@ -432,7 +438,7 @@ function BorrowerNameModal({
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={isPending || !borrowerName.trim()}
+            disabled={isPending}
           >
             {isPending && (
               <span className="loading loading-spinner loading-sm" />
@@ -479,11 +485,11 @@ function useReservationStatusMutation(onSuccess?: () => void) {
   function updateStatus(
     reservationId: string,
     status: ReservationStatus,
-    borrowerName: string | null,
+    adminComment: string | null,
   ) {
     mutation.mutate({
       params: { path: { id: reservationId } },
-      body: { status, borrower_name: borrowerName },
+      body: { status, admin_comment: adminComment },
     });
   }
 

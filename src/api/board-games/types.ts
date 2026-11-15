@@ -331,8 +331,8 @@ export interface components {
       when_available: string | null;
       /** Comments */
       comments: string | null;
-      /** Borrower Name */
-      borrower_name: string | null;
+      /** Admin Comment */
+      admin_comment: string | null;
       /**
        * Created At
        * Format: date-time
@@ -367,8 +367,8 @@ export interface components {
     /** UpdateReservationAdmin */
     UpdateReservationAdmin: {
       status?: components["schemas"]["ReservationStatus"] | null;
-      /** Borrower Name */
-      borrower_name?: string | null;
+      /** Admin Comment */
+      admin_comment?: string | null;
       /** Return Date */
       return_date?: string | null;
     };

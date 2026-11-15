@@ -292,11 +292,12 @@ function ReservationResult({
             <Trans>Borrower</Trans>
           </p>
           <p className="font-medium wrap-break-word">
-            {reservation.borrower_name || reservation.user_email}
+            {reservation.user_email}
           </p>
-          {reservation.borrower_name && (
-            <p className="text-base-content/60 wrap-break-word">
-              {reservation.user_email}
+          {reservation.admin_comment && (
+            <p className="text-base-content/60 flex items-start gap-1.5 wrap-break-word">
+              <span className="icon-[material-symbols--comment-outline] shrink-0 text-base" />
+              <span>{reservation.admin_comment}</span>
             </p>
           )}
           {reservation.tg_alias ? (

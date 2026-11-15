@@ -29,25 +29,21 @@ export function ReservationDetailsModal({
   const { showConfirm, showError, showSuccess } = useToast();
   const [selectedStatus, setSelectedStatus] = useState(reservation.status);
   const [returnDate, setReturnDate] = useState(reservation.return_date ?? "");
-  const [borrowerName, setBorrowerName] = useState(
-    reservation.borrower_name ?? "",
+  const [adminComment, setAdminComment] = useState(
+    reservation.admin_comment ?? "",
   );
   const createdAt = new Date(reservation.created_at).toLocaleString(
     i18n.locale,
   );
   const isStatusChanged = selectedStatus !== reservation.status;
   const isReturnDateChanged = returnDate !== (reservation.return_date ?? "");
-  const needsBorrowerName = selectedStatus === ReservationStatus.taken;
-  const isBorrowerNameChanged =
-    needsBorrowerName &&
-    borrowerName.trim() !== (reservation.borrower_name ?? "");
+  const needsAdminComment = selectedStatus === ReservationStatus.taken;
+  const isAdminCommentChanged =
+    needsAdminComment &&
+    adminComment.trim() !== (reservation.admin_comment ?? "");
   const hasChanges =
-    isStatusChanged || isReturnDateChanged || isBorrowerNameChanged;
-  const isBorrowerNameRequired =
-    needsBorrowerName && (isStatusChanged || isBorrowerNameChanged);
-  const isValid =
-    (!isReturnDateChanged || Boolean(returnDate)) &&
-    (!isBorrowerNameRequired || Boolean(borrowerName.trim()));
+    isStatusChanged || isReturnDateChanged || isAdminCommentChanged;
+  const isValid = !isReturnDateChanged || Boolean(returnDate);
 
   function invalidateReservationQueries() {
     for (const path of [
@@ -104,10 +100,10 @@ export function ReservationDetailsModal({
       body: {
         ...(isStatusChanged && { status: selectedStatus }),
         ...(isReturnDateChanged && { return_date: returnDate }),
-        ...(needsBorrowerName &&
-          (isStatusChanged || isBorrowerNameChanged) && {
+        ...(needsAdminComment &&
+          (isStatusChanged || isAdminCommentChanged) && {
             status: selectedStatus,
-            borrower_name: borrowerName.trim(),
+            admin_comment: adminComment.trim() || null,
           }),
       },
     });
@@ -154,13 +150,8 @@ export function ReservationDetailsModal({
         </div>
         <div className="flex flex-col gap-1 text-sm">
           <p className="font-medium wrap-break-word">
-            {reservation.borrower_name || reservation.user_email}
+            {reservation.user_email}
           </p>
-          {reservation.borrower_name && (
-            <p className="text-base-content/60 wrap-break-word">
-              {reservation.user_email}
-            </p>
-          )}
           {reservation.tg_alias && (
             <a
               className="link link-hover text-primary w-fit"
@@ -237,23 +228,21 @@ export function ReservationDetailsModal({
               </span>
             )}
           </label>
-          {needsBorrowerName && (
+          {needsAdminComment && (
             <label className="flex min-w-0 flex-col gap-2">
               <span className="text-sm font-semibold">
-                <Trans>
-                  Borrower name <span className="text-error">*</span>
-                </Trans>
+                <Trans>Comment</Trans>
               </span>
               <input
                 type="text"
                 className="input w-full"
-                value={borrowerName}
-                onChange={(event) => setBorrowerName(event.target.value)}
-                placeholder={t`Full name`}
+                value={adminComment}
+                onChange={(event) => setAdminComment(event.target.value)}
+                placeholder={t`Optional comment`}
                 disabled={isPending}
               />
               <span className="text-base-content/50 text-xs">
-                <Trans>Who picked up the game.</Trans>
+                <Trans>Optional note about this reservation.</Trans>
               </span>
             </label>
           )}

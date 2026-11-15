@@ -289,12 +289,12 @@ msgstr "Сыграно игр: {finishedCount} из {totalGames} · остало
 msgid "{from}–{to} of {total}"
 msgstr "{from}–{to} из {total}"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:571
+#: src/components/board-games/BoardGamesAdminPage.tsx:577
 #: src/components/board-games/BoardGamesPage.tsx:275
 msgid "{gameCount} titles"
 msgstr "Игр: {gameCount}"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:548
+#: src/components/board-games/BoardGamesAdminPage.tsx:554
 msgid "{gameTitle} has been removed."
 msgstr "Игра «{gameTitle}» удалена."
 
@@ -405,11 +405,11 @@ msgstr "Всего: {reservationCount}"
 msgid "{responsesCount, plural, one {# response} other {# responses}}"
 msgstr "{responsesCount, plural, one {# ответ} few {# ответа} many {# ответов} other {# ответов}}"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:833
+#: src/components/board-games/BoardGamesAdminPage.tsx:839
 msgid "{savedTitle} has been updated."
 msgstr "Данные игры «{savedTitle}» обновлены."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:834
+#: src/components/board-games/BoardGamesAdminPage.tsx:840
 msgid "{savedTitle} is now in the inventory."
 msgstr "Игра «{savedTitle}» добавлена в каталог."
 
@@ -434,7 +434,7 @@ msgstr "{totalScore}/{maxScore} {totalScore, plural, one {балл} few {бал�
 msgid "{trainingTitle} (Trainer)"
 msgstr "{trainingTitle} (тренер)"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:567
+#: src/components/board-games/BoardGamesAdminPage.tsx:573
 #: src/components/board-games/BoardGamesPage.tsx:271
 msgid "{visibleGameCount} of {gameCount} titles"
 msgstr "Игр: {visibleGameCount} из {gameCount}"
@@ -487,7 +487,7 @@ msgstr "<0/> — средняя оценка студента за прошлы�
 msgid "<0/> is about friendship, support, and passion for what you do. We used to share our passions with each other, whether it's programming, hiking, or archery."
 msgstr "<0/> — это про дружбу, поддержку и увлечённость своим делом. Мы делимся друг с другом своими увлечениями, будь то программирование, походы или стрельба из лука."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:648
+#: src/components/board-games/BoardGamesAdminPage.tsx:654
 #: src/components/board-games/BoardGamesPage.tsx:368
 msgid "<0>{availableCopies}</0><1> of {totalCopies} available</1>"
 msgstr "<0>{availableCopies}</0><1> из {totalCopies} доступно</1>"
@@ -743,7 +743,7 @@ msgstr "Добавьте хотя бы одну дату."
 msgid "Add at least one slot."
 msgstr "Добавьте хотя бы один слот."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:923
+#: src/components/board-games/BoardGamesAdminPage.tsx:929
 msgid "Add board game"
 msgstr "Добавить игру"
 
@@ -784,8 +784,8 @@ msgstr "Добавить внешнего организатора"
 msgid "Add favorite calendars using star button or <0>import your own calendars</0> to InNoHassle."
 msgstr "Добавляйте избранные календари, нажимая на звездочку, или <0>импортируйте свои календари</0> в InNoHassle."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:582
-#: src/components/board-games/BoardGamesAdminPage.tsx:1023
+#: src/components/board-games/BoardGamesAdminPage.tsx:588
+#: src/components/board-games/BoardGamesAdminPage.tsx:1029
 msgid "Add game"
 msgstr "Добавить игру"
 
@@ -1146,12 +1146,12 @@ msgstr "Общие таймслоты"
 #~ msgid "Available"
 #~ msgstr "Доступно"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:749
+#: src/components/board-games/BoardGamesAdminPage.tsx:755
 #: src/components/board-games/BoardGamesPage.tsx:481
 msgid "Available copies"
 msgstr "Доступно копий"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:752
+#: src/components/board-games/BoardGamesAdminPage.tsx:758
 msgid "Available in storage"
 msgstr "На складе"
 
@@ -1236,7 +1236,7 @@ msgstr "Новички"
 msgid "Blue"
 msgstr "Синий"
 
-#: src/components/board-games/ReservationDetailsModal.tsx:144
+#: src/components/board-games/ReservationDetailsModal.tsx:140
 msgid "Board game"
 msgstr "Настольная игра"
 
@@ -1321,12 +1321,12 @@ msgstr "Получатель"
 #: src/components/board-games/BoardGamesAdminPage.tsx:365
 #: src/components/board-games/BoardGamesAdminPage.tsx:412
 #: src/components/board-games/UserReservationDetailsModal.tsx:128
-msgid "Borrower name"
-msgstr "Имя взявшего"
+#~ msgid "Borrower name"
+#~ msgstr "Имя взявшего"
 
 #: src/components/board-games/ReservationDetailsModal.tsx:243
-msgid "Borrower name <0>*</0>"
-msgstr "Имя взявшего <0>*</0>"
+#~ msgid "Borrower name <0>*</0>"
+#~ msgstr "Имя взявшего <0>*</0>"
 
 #: src/components/sport/SportTabs.tsx:34
 msgid "Bot"
@@ -1461,10 +1461,10 @@ msgstr "Выноска"
 msgid "Can be played now"
 msgstr "Можно играть сейчас"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:430
-#: src/components/board-games/BoardGamesAdminPage.tsx:1013
+#: src/components/board-games/BoardGamesAdminPage.tsx:436
+#: src/components/board-games/BoardGamesAdminPage.tsx:1019
 #: src/components/board-games/BoardGamesPage.tsx:621
-#: src/components/board-games/ReservationDetailsModal.tsx:315
+#: src/components/board-games/ReservationDetailsModal.tsx:304
 #: src/components/board-games/UserReservationDetailsModal.tsx:308
 #: src/components/calendar/import/ImportModal.tsx:109
 #: src/components/clubs/AddClubDialog.tsx:160
@@ -1624,7 +1624,7 @@ msgstr "Оставьте вместимость пустой или укажит
 msgid "Cards"
 msgstr "Карточки"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:936
+#: src/components/board-games/BoardGamesAdminPage.tsx:942
 msgid "Catan"
 msgstr "Catan"
 
@@ -1763,7 +1763,7 @@ msgstr "Выберите время начала встречи в будуще�
 msgid "Choose a meeting time on the grid first."
 msgstr "Сначала выберите время встречи на сетке."
 
-#: src/components/board-games/ReservationDetailsModal.tsx:236
+#: src/components/board-games/ReservationDetailsModal.tsx:227
 msgid "Choose a return date."
 msgstr "Выберите дату возврата."
 
@@ -2016,8 +2016,15 @@ msgstr "Колледжист"
 msgid "College only"
 msgstr "Только колледж"
 
+#: src/components/board-games/BoardGamesAdminPage.tsx:366
+#: src/components/board-games/BoardGamesAdminPage.tsx:419
+#: src/components/board-games/ReservationDetailsModal.tsx:234
+#: src/components/board-games/UserReservationDetailsModal.tsx:128
+msgid "Comment"
+msgstr "Комментарий"
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:359
-#: src/components/board-games/ReservationDetailsModal.tsx:278
+#: src/components/board-games/ReservationDetailsModal.tsx:267
 #: src/components/board-games/UserReservationDetailsModal.tsx:120
 #: src/components/board-games/UserReservationDetailsModal.tsx:389
 msgid "Comments"
@@ -2087,8 +2094,8 @@ msgid "Confirm"
 msgstr "Подтвердить"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:406
-msgid "Confirm borrower"
-msgstr "Подтвердить получателя"
+#~ msgid "Confirm borrower"
+#~ msgstr "Подтвердить получателя"
 
 #: src/components/tabletennis/PlayerActionMenu.tsx:208
 msgid "Confirm status change"
@@ -2228,7 +2235,7 @@ msgstr "Исправить счёт · {label}"
 msgid "Correct this score"
 msgstr "Исправить этот счёт"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:842
+#: src/components/board-games/BoardGamesAdminPage.tsx:848
 msgid "Could not add game"
 msgstr "Не удалось добавить игру"
 
@@ -2244,11 +2251,11 @@ msgstr "Не удалось скопировать ссылку"
 msgid "Could not copy link to clipboard."
 msgstr "Не удалось скопировать ссылку в буфер обмена."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:551
+#: src/components/board-games/BoardGamesAdminPage.tsx:557
 msgid "Could not delete game"
 msgstr "Не удалось удалить игру"
 
-#: src/components/board-games/ReservationDetailsModal.tsx:93
+#: src/components/board-games/ReservationDetailsModal.tsx:89
 #: src/components/board-games/UserReservationDetailsModal.tsx:58
 msgid "Could not delete reservation"
 msgstr "Не удалось удалить бронирование"
@@ -2270,7 +2277,7 @@ msgstr "Не удалось загрузить форму"
 msgid "Could not load game names"
 msgstr "Не удалось загрузить названия игр"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:606
+#: src/components/board-games/BoardGamesAdminPage.tsx:612
 #: src/components/board-games/BoardGamesPage.tsx:301
 msgid "Could not load games"
 msgstr "Не удалось загрузить игры"
@@ -2315,11 +2322,11 @@ msgstr "Не удалось забронировать игру"
 msgid "Could not update attendance"
 msgstr "Не удалось обновить посещаемость"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:842
+#: src/components/board-games/BoardGamesAdminPage.tsx:848
 msgid "Could not update game"
 msgstr "Не удалось обновить игру"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:472
+#: src/components/board-games/BoardGamesAdminPage.tsx:478
 #: src/components/board-games/UserReservationDetailsModal.tsx:217
 msgid "Could not update reservation"
 msgstr "Не удалось обновить бронирование"
@@ -2438,11 +2445,11 @@ msgstr "Создайте своё сообщество"
 msgid "Create your room in the bot and invite your roommates to join."
 msgstr "Создайте комнату в боте и пригласите соседей."
 
-#: src/components/board-games/ReservationDetailsModal.tsx:176
+#: src/components/board-games/ReservationDetailsModal.tsx:167
 msgid "Created {createdAt}"
 msgstr "Создано {createdAt}"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:368
+#: src/components/board-games/BoardGamesAdminPage.tsx:371
 #: src/components/board-games/UserReservationDetailsModal.tsx:107
 msgid "Created at"
 msgstr "Создано"
@@ -2638,7 +2645,7 @@ msgstr "Уменьшить счёт игрока {name}"
 msgid "Define rules for your room"
 msgstr "Задайте правила для своей комнаты"
 
-#: src/components/board-games/ReservationDetailsModal.tsx:306
+#: src/components/board-games/ReservationDetailsModal.tsx:295
 #: src/components/board-games/UserReservationDetailsModal.tsx:149
 #: src/components/calendar/import/ImportModal.tsx:108
 #: src/components/calendar/import/ImportModal.tsx:227
@@ -2668,15 +2675,15 @@ msgstr "Удалить «{sheetTitle}»? Ссылка для подключен�
 msgid "Delete {0}? No game has been played yet, so no rating changes. This cannot be undone."
 msgstr "Удалить турнир «{0}»? Ни одна игра ещё не сыграна, поэтому рейтинг не изменится. Это действие нельзя отменить."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:678
+#: src/components/board-games/BoardGamesAdminPage.tsx:684
 msgid "Delete {gameTitle}"
 msgstr "Удалить «{gameTitle}»"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:529
+#: src/components/board-games/BoardGamesAdminPage.tsx:535
 msgid "Delete {gameTitle} from the inventory? This action cannot be undone."
 msgstr "Удалить игру «{gameTitle}» из каталога? Это действие нельзя отменить."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:528
+#: src/components/board-games/BoardGamesAdminPage.tsx:534
 msgid "Delete board game"
 msgstr "Удалить настольную игру"
 
@@ -2702,7 +2709,7 @@ msgstr "Удалить черновик"
 msgid "Delete event"
 msgstr "Удалить событие"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:530
+#: src/components/board-games/BoardGamesAdminPage.tsx:536
 msgid "Delete game"
 msgstr "Удалить игру"
 
@@ -2724,8 +2731,8 @@ msgstr "Удалить язык <0>{0}</0>?"
 msgid "Delete meeting"
 msgstr "Удалить встречу"
 
+#: src/components/board-games/ReservationDetailsModal.tsx:115
 #: src/components/board-games/ReservationDetailsModal.tsx:119
-#: src/components/board-games/ReservationDetailsModal.tsx:123
 #: src/components/board-games/UserReservationDetailsModal.tsx:67
 #: src/components/board-games/UserReservationDetailsModal.tsx:71
 msgid "Delete reservation"
@@ -2749,7 +2756,7 @@ msgstr "Удалить слот"
 msgid "Delete the match {0} vs {1}? No rating changes."
 msgstr "Удалить матч {0} против {1}? Рейтинг не изменится."
 
-#: src/components/board-games/ReservationDetailsModal.tsx:121
+#: src/components/board-games/ReservationDetailsModal.tsx:117
 msgid "Delete the reservation for {gameTitle}? This action cannot be undone."
 msgstr "Удалить бронирование игры «{gameTitle}»? Это действие нельзя отменить."
 
@@ -2757,7 +2764,7 @@ msgstr "Удалить бронирование игры «{gameTitle}»? Это
 msgid "Delete this draft permanently? This cannot be undone."
 msgstr "Удалить этот черновик навсегда? Это нельзя отменить."
 
-#: src/components/board-games/ReservationDetailsModal.tsx:122
+#: src/components/board-games/ReservationDetailsModal.tsx:118
 #: src/components/board-games/UserReservationDetailsModal.tsx:70
 msgid "Delete this reservation? This action cannot be undone."
 msgstr "Удалить это бронирование? Это действие нельзя отменить."
@@ -2789,8 +2796,8 @@ msgstr "Удаление бронирования..."
 msgid "Depersonate"
 msgstr "Вернуться к своему аккаунту"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:741
-#: src/components/board-games/BoardGamesAdminPage.tsx:945
+#: src/components/board-games/BoardGamesAdminPage.tsx:747
+#: src/components/board-games/BoardGamesAdminPage.tsx:951
 #: src/components/board-games/BoardGamesPage.tsx:465
 #: src/components/calendar/import/ImportModal.tsx:185
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:351
@@ -2992,7 +2999,7 @@ msgstr "Редактировать"
 msgid "Edit {0}"
 msgstr "Редактировать «{0}»"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:666
+#: src/components/board-games/BoardGamesAdminPage.tsx:672
 msgid "Edit {gameTitle}"
 msgstr "Редактировать «{gameTitle}»"
 
@@ -3000,7 +3007,7 @@ msgstr "Редактировать «{gameTitle}»"
 msgid "Edit an event draft."
 msgstr "Редактирование черновика мероприятия."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:923
+#: src/components/board-games/BoardGamesAdminPage.tsx:929
 msgid "Edit board game"
 msgstr "Редактировать игру"
 
@@ -3054,7 +3061,7 @@ msgstr "Изменить название встречи"
 msgid "Edit meeting name, dates, times, and availability setup."
 msgstr "Измените название встречи, даты, время и настройки доступности."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:375
+#: src/components/board-games/BoardGamesAdminPage.tsx:378
 #: src/components/board-games/UserReservationDetailsModal.tsx:264
 msgid "Edit reservation"
 msgstr "Редактировать бронирование"
@@ -3839,8 +3846,8 @@ msgstr "Полный ответ GET_DIAGNOSTICS этого воркера"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:418
 #: src/components/board-games/ReservationDetailsModal.tsx:252
-msgid "Full name"
-msgstr "Полное имя"
+#~ msgid "Full name"
+#~ msgstr "Полное имя"
 
 #: src/components/debug/WorkerDiagnostics.tsx:256
 #: src/components/debug/WorkerDiagnostics.tsx:376
@@ -3867,11 +3874,11 @@ msgstr "Получите практический опыт"
 msgid "Game"
 msgstr "Игра"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:831
+#: src/components/board-games/BoardGamesAdminPage.tsx:837
 msgid "Game added"
 msgstr "Игра добавлена"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:548
+#: src/components/board-games/BoardGamesAdminPage.tsx:554
 msgid "Game deleted"
 msgstr "Игра удалена"
 
@@ -3879,7 +3886,7 @@ msgstr "Игра удалена"
 msgid "Game filter:"
 msgstr "Фильтр игр:"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:725
+#: src/components/board-games/BoardGamesAdminPage.tsx:731
 #: src/components/board-games/BoardGamesPage.tsx:452
 msgid "Game information"
 msgstr "Информация об игре"
@@ -3888,7 +3895,7 @@ msgstr "Информация об игре"
 msgid "Game reserved"
 msgstr "Игра забронирована"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:831
+#: src/components/board-games/BoardGamesAdminPage.tsx:837
 msgid "Game updated"
 msgstr "Игра обновлена"
 
@@ -3896,7 +3903,7 @@ msgstr "Игра обновлена"
 msgid "Games"
 msgstr "Игры"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:562
+#: src/components/board-games/BoardGamesAdminPage.tsx:568
 msgid "Games in storage"
 msgstr "Игры на складе"
 
@@ -4896,7 +4903,7 @@ msgstr "Сделать защищённую копию существующей 
 msgid "Make a time deadline for any task with this timer."
 msgstr "Установите дедлайн для любой задачи с этим таймером."
 
-#: src/components/board-games/ReservationsAdminPage.tsx:340
+#: src/components/board-games/ReservationsAdminPage.tsx:341
 #: src/components/events/drafts/DraftPage.tsx:661
 #: src/components/events/event/EventPage.tsx:385
 msgid "Manage"
@@ -4930,7 +4937,7 @@ msgstr "Управление"
 msgid "Manage joins, roles, and bans from one place"
 msgstr "Управляйте присоединениями, ролями и блокировками из одного места"
 
-#: src/components/board-games/ReservationDetailsModal.tsx:133
+#: src/components/board-games/ReservationDetailsModal.tsx:129
 msgid "Manage reservation"
 msgstr "Управление бронированием"
 
@@ -4973,7 +4980,8 @@ msgid "Mark as returned"
 msgstr "Отметить как возвращённую"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:291
-#: src/components/board-games/BoardGamesAdminPage.tsx:440
+#: src/components/board-games/BoardGamesAdminPage.tsx:413
+#: src/components/board-games/BoardGamesAdminPage.tsx:446
 msgid "Mark as taken"
 msgstr "Отметить как выданную"
 
@@ -5579,11 +5587,11 @@ msgstr "По запросу файлы не найдены."
 msgid "No games are available yet."
 msgstr "Игр пока нет."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:610
+#: src/components/board-games/BoardGamesAdminPage.tsx:616
 msgid "No games have been added yet."
 msgstr "Игры ещё не добавлены."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:618
+#: src/components/board-games/BoardGamesAdminPage.tsx:624
 #: src/components/board-games/BoardGamesPage.tsx:325
 msgid "No games match \"{trimmedSearchQuery}\"."
 msgstr "По запросу «{trimmedSearchQuery}» игры не найдены."
@@ -5873,8 +5881,8 @@ msgstr "Нет в расписании"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:343
 #: src/components/board-games/BoardGamesAdminPage.tsx:347
-#: src/components/board-games/BoardGamesAdminPage.tsx:366
-#: src/components/board-games/BoardGamesAdminPage.tsx:744
+#: src/components/board-games/BoardGamesAdminPage.tsx:369
+#: src/components/board-games/BoardGamesAdminPage.tsx:750
 #: src/components/board-games/UserReservationDetailsModal.tsx:102
 #: src/components/board-games/UserReservationDetailsModal.tsx:105
 msgid "Not provided"
@@ -5896,7 +5904,7 @@ msgstr "не расставлено"
 msgid "Not selected"
 msgstr "Не выбрано"
 
-#: src/components/board-games/ReservationsAdminPage.tsx:331
+#: src/components/board-games/ReservationsAdminPage.tsx:332
 msgid "Not set"
 msgstr "Не задано"
 
@@ -6115,9 +6123,18 @@ msgstr "Открыть манифест этой вкладки"
 msgid "Open your calendar settings to add a calendar by URL."
 msgstr "Откройте настройки календаря, чтобы добавить календарь по URL."
 
+#: src/components/board-games/BoardGamesAdminPage.tsx:425
+#: src/components/board-games/ReservationDetailsModal.tsx:241
+msgid "Optional comment"
+msgstr "Комментарий (необязательно)"
+
 #: src/components/when2meet/CreationPage.tsx:401
 msgid "Optional meeting details"
 msgstr "Дополнительные детали встречи"
+
+#: src/components/board-games/ReservationDetailsModal.tsx:245
+msgid "Optional note about this reservation."
+msgstr "Необязательная заметка к бронированию."
 
 #: src/components/when2meet/MeetingPage.tsx:1480
 msgid "Options"
@@ -6346,7 +6363,7 @@ msgstr "Период"
 msgid "Personal calendar"
 msgstr "Личный календарь"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:959
+#: src/components/board-games/BoardGamesAdminPage.tsx:965
 msgid "Photo"
 msgstr "Фото"
 
@@ -6368,7 +6385,7 @@ msgstr "Выберите слоты на следующем шаге"
 msgid "Pick two players for the next match"
 msgstr "Выберите двух игроков для следующего матча"
 
-#: src/components/board-games/ReservationDetailsModal.tsx:268
+#: src/components/board-games/ReservationDetailsModal.tsx:257
 msgid "Pickup availability"
 msgstr "Когда можно забрать"
 
@@ -6955,7 +6972,7 @@ msgstr "Возобновить турнир"
 msgid "Replace image"
 msgstr "Заменить изображение"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:959
+#: src/components/board-games/BoardGamesAdminPage.tsx:965
 msgid "Replace photo"
 msgstr "Заменить фото"
 
@@ -6983,7 +7000,7 @@ msgstr "Запрашивайте аудитории, проекторы, спо�
 msgid "Required"
 msgstr "Обязательно"
 
-#: src/components/board-games/ReservationDetailsModal.tsx:86
+#: src/components/board-games/ReservationDetailsModal.tsx:82
 #: src/components/board-games/UserReservationDetailsModal.tsx:51
 msgid "Reservation deleted"
 msgstr "Бронирование удалено"
@@ -6993,12 +7010,12 @@ msgstr "Бронирование удалено"
 msgid "Reservation information"
 msgstr "Информация о бронировании"
 
-#: src/components/board-games/ReservationDetailsModal.tsx:183
+#: src/components/board-games/ReservationDetailsModal.tsx:174
 msgid "Reservation status"
 msgstr "Статус бронирования"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:465
-#: src/components/board-games/ReservationDetailsModal.tsx:72
+#: src/components/board-games/BoardGamesAdminPage.tsx:471
+#: src/components/board-games/ReservationDetailsModal.tsx:68
 #: src/components/board-games/UserReservationDetailsModal.tsx:210
 msgid "Reservation updated"
 msgstr "Бронирование обновлено"
@@ -7121,7 +7138,7 @@ msgstr "Пересдача"
 msgid "Retry"
 msgstr "Повторить"
 
-#: src/components/board-games/ReservationsAdminPage.tsx:327
+#: src/components/board-games/ReservationsAdminPage.tsx:328
 msgid "Return by"
 msgstr "Вернуть до"
 
@@ -7135,7 +7152,7 @@ msgstr "Вернуть до {returnDate}"
 #~ msgstr "Вернуть до <0>{returnDate}</0>"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:346
-#: src/components/board-games/ReservationDetailsModal.tsx:222
+#: src/components/board-games/ReservationDetailsModal.tsx:213
 #: src/components/board-games/UserReservationDetailsModal.tsx:104
 msgid "Return date"
 msgstr "Дата возврата"
@@ -7323,8 +7340,8 @@ msgstr "Суббота"
 msgid "Save"
 msgstr "Сохранить"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:1023
-#: src/components/board-games/ReservationDetailsModal.tsx:326
+#: src/components/board-games/BoardGamesAdminPage.tsx:1029
+#: src/components/board-games/ReservationDetailsModal.tsx:315
 #: src/components/board-games/UserReservationDetailsModal.tsx:323
 msgid "Save changes"
 msgstr "Сохранить изменения"
@@ -7505,7 +7522,7 @@ msgstr "Поиск событий…"
 msgid "Search for a group, program, section or @selector…"
 msgstr "Поиск группы, программы, секции или @селектора…"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:593
+#: src/components/board-games/BoardGamesAdminPage.tsx:599
 #: src/components/board-games/BoardGamesPage.tsx:288
 msgid "Search games by name"
 msgstr "Поиск игр по названию"
@@ -7819,7 +7836,7 @@ msgstr "Краткое описание"
 msgid "Short Description"
 msgstr "Краткое описание"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:951
+#: src/components/board-games/BoardGamesAdminPage.tsx:957
 msgid "Short game description"
 msgstr "Краткое описание игры"
 
@@ -8655,7 +8672,7 @@ msgstr "ID Telegram: {0}"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:259
 #: src/components/board-games/BoardGamesPage.tsx:210
-#: src/components/board-games/ReservationsAdminPage.tsx:316
+#: src/components/board-games/ReservationsAdminPage.tsx:317
 msgid "Telegram not provided"
 msgstr "Telegram не указан"
 
@@ -8725,7 +8742,7 @@ msgstr "Главная цель участников <0/> — развивать
 msgid "The maximum countdown duration is 99:99:99"
 msgstr "Максимальная длительность — 99:99:99"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:466
+#: src/components/board-games/BoardGamesAdminPage.tsx:472
 msgid "The new status has been saved."
 msgstr "Новый статус сохранён."
 
@@ -8763,7 +8780,7 @@ msgstr "Фаза на весь учебный период: каждые 14 дн
 msgid "The rating must be a whole number from 0."
 msgstr "Рейтинг должен быть целым числом от 0."
 
-#: src/components/board-games/ReservationDetailsModal.tsx:87
+#: src/components/board-games/ReservationDetailsModal.tsx:83
 msgid "The reservation was removed."
 msgstr "Бронирование удалено."
 
@@ -9045,8 +9062,8 @@ msgstr "Tip"
 msgid "TIP"
 msgstr "TIP"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:735
-#: src/components/board-games/BoardGamesAdminPage.tsx:929
+#: src/components/board-games/BoardGamesAdminPage.tsx:741
+#: src/components/board-games/BoardGamesAdminPage.tsx:935
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:260
 #: src/components/clubs/EditClubPage.tsx:818
 #: src/components/guard/CreateSheetPage.tsx:101
@@ -9128,8 +9145,8 @@ msgstr "Топ-20 клубов получают баллы за повышенн
 #~ msgid "Total"
 #~ msgstr "Всего"
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:746
-#: src/components/board-games/BoardGamesAdminPage.tsx:974
+#: src/components/board-games/BoardGamesAdminPage.tsx:752
+#: src/components/board-games/BoardGamesAdminPage.tsx:980
 #: src/components/board-games/BoardGamesPage.tsx:473
 msgid "Total copies"
 msgstr "Всего копий"
@@ -9310,7 +9327,7 @@ msgstr "Неизвестная ошибка"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:227
 #: src/components/board-games/BoardGamesPage.tsx:193
-#: src/components/board-games/ReservationDetailsModal.tsx:147
+#: src/components/board-games/ReservationDetailsModal.tsx:143
 #: src/components/board-games/ReservationsAdminPage.tsx:74
 #: src/components/board-games/ReservationsAdminPage.tsx:277
 msgid "Unknown game"
@@ -9580,7 +9597,7 @@ msgstr "Показать на карте"
 msgid "View plans of Innopolis University."
 msgstr "Смотрите планы Университета Иннополис."
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:762
+#: src/components/board-games/BoardGamesAdminPage.tsx:768
 msgid "View reservations"
 msgstr "Смотреть бронирования"
 
@@ -9838,7 +9855,7 @@ msgstr "При открытии:"
 msgid "When registering your club, you'll need to choose one of the following categories. Each type has specific criteria in the Club League."
 msgstr "При регистрации клуба нужно выбрать одну из категорий. У каждого типа свои критерии в Club League."
 
-#: src/components/board-games/ReservationDetailsModal.tsx:232
+#: src/components/board-games/ReservationDetailsModal.tsx:223
 msgid "When the game should be back."
 msgstr "К какому сроку игра должна вернуться."
 
@@ -9851,8 +9868,8 @@ msgid "Who is it?"
 msgstr "Кто это?"
 
 #: src/components/board-games/ReservationDetailsModal.tsx:256
-msgid "Who picked up the game."
-msgstr "Кто забрал игру."
+#~ msgid "Who picked up the game."
+#~ msgstr "Кто забрал игру."
 
 #: src/components/about/AboutPage.tsx:32
 msgid "Who we are"
@@ -10086,7 +10103,7 @@ msgstr "Ваши таймслоты"
 msgid "Your avatar"
 msgstr "Ваш аватар"
 
-#: src/components/board-games/ReservationDetailsModal.tsx:73
+#: src/components/board-games/ReservationDetailsModal.tsx:69
 #: src/components/board-games/UserReservationDetailsModal.tsx:211
 msgid "Your changes have been saved."
 msgstr "Изменения сохранены."

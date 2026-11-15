@@ -123,12 +123,12 @@ export function UserReservationDetailsModal({
               {reservation.comments}
             </InformationField>
           )}
-          {reservation.borrower_name && (
+          {reservation.admin_comment && (
             <InformationField
-              label={t`Borrower name`}
+              label={t`Comment`}
               className="@sm/modal:col-span-2"
             >
-              {reservation.borrower_name}
+              {reservation.admin_comment}
             </InformationField>
           )}
         </div>
