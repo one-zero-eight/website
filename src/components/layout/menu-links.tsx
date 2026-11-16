@@ -187,28 +187,19 @@ export const items: ItemType[] = [
     type: "local",
     title: "When2meet",
     to: "/when2meet",
+    icon: <span className="icon-[mdi--calendar-outline]" />,
+  },
+  {
+    type: "local",
+    title: "Board games",
+    to: "/board-games",
     badge: (
       <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
         NEW
       </span>
     ),
-    icon: <span className="icon-[mdi--calendar-outline]" />,
+    icon: <span className="icon-[mdi--cards-playing-heart-multiple-outline]" />,
   },
-  ...((import.meta.env.VITE_PRODUCTION && []) || [
-    {
-      type: "local",
-      title: "Board games",
-      to: "/board-games",
-      badge: (
-        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
-          DEV
-        </span>
-      ),
-      icon: (
-        <span className="icon-[mdi--cards-playing-heart-multiple-outline]" />
-      ),
-    },
-  ]),
   {
     type: "local",
     title: "Timer",
