@@ -1,8 +1,6 @@
-import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { ReservationsAdminPage } from "@/components/board-games/ReservationsAdminPage.tsx";
-import { Topbar } from "@/components/layout/Topbar.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { Trans, useLingui } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react/macro";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute(
@@ -27,10 +25,7 @@ function RouteComponent() {
           content={t`Search and review all board game reservations.`}
         />
       </Helmet>
-      <Topbar title={<Trans>Board Game Reservations</Trans>} />
-      <RequireAuth>
-        <ReservationsAdminPage gameId={gameId} />
-      </RequireAuth>
+      <ReservationsAdminPage gameId={gameId} />
     </>
   );
 }

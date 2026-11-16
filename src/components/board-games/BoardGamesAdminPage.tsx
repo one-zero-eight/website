@@ -109,7 +109,7 @@ function ReservationsSection({
             to="/board-games/admin/reservations"
             className="btn btn-ghost btn-sm"
           >
-            <Trans>View all</Trans>
+            <Trans context="reservations">View all</Trans>
             <span className="icon-[material-symbols--arrow-forward] text-lg" />
           </Link>
           <button

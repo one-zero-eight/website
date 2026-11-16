@@ -6,7 +6,7 @@ import { ReservationDetailsModal } from "@/components/board-games/ReservationDet
 import { ReservationStatusBadge } from "./ReservationStatusBadge";
 import { formatReservationDate } from "./reservation-presentation";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
@@ -96,27 +96,21 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
 
   return (
     <main className="@container/content mx-auto flex w-full max-w-6xl flex-col gap-5 p-4 @md/content:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">
-            <Trans>All reservations</Trans>
-          </h1>
-          {!reservationsQuery.isPending && !reservationsQuery.error && (
-            <p className="text-base-content/60 text-sm">
-              {hasFilters ? (
-                <Trans>
-                  {visibleReservationCount} of {reservationCount} reservations
-                </Trans>
-              ) : (
-                <Trans>{reservationCount} reservations</Trans>
-              )}
-            </p>
-          )}
-        </div>
-        <Link to="/board-games/admin" className="btn btn-ghost btn-sm">
-          <span className="icon-[material-symbols--arrow-back] text-lg" />
-          <Trans>Board games admin</Trans>
-        </Link>
+      <div>
+        <h1 className="text-2xl font-semibold">
+          <Trans>All reservations</Trans>
+        </h1>
+        {!reservationsQuery.isPending && !reservationsQuery.error && (
+          <p className="text-base-content/60 text-sm">
+            {hasFilters ? (
+              <Trans>
+                {visibleReservationCount} of {reservationCount} reservations
+              </Trans>
+            ) : (
+              <Trans>{reservationCount} reservations</Trans>
+            )}
+          </p>
+        )}
       </div>
 
       <section className="border-base-300 bg-base-100 rounded-box flex flex-col gap-4 border p-4">

@@ -11,9 +11,14 @@ export function BoardGamesTabs() {
         <Trans>Games</Trans>
       </TabLink>
       {user?.role === "admin" && (
-        <TabLink to="/board-games/admin">
-          <Trans>Admin</Trans>
-        </TabLink>
+        <>
+          <TabLink to="/board-games/admin">
+            <Trans>Admin</Trans>
+          </TabLink>
+          <TabLink to="/board-games/admin/reservations">
+            <Trans>Reservations</Trans>
+          </TabLink>
+        </>
       )}
     </div>
   );
@@ -23,7 +28,7 @@ function TabLink(props: ValidateLinkOptions) {
   return (
     <Link
       className="px-2 py-1"
-      activeOptions={{ exact: true, includeSearch: true }}
+      activeOptions={{ exact: true, includeSearch: false }}
       activeProps={{ className: "border-primary border-b-2" }}
       {...props}
     />

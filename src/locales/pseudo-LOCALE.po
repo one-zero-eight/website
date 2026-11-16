@@ -393,7 +393,7 @@ msgstr ""
 msgid "{reservationCount} active"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:111
+#: src/components/board-games/ReservationsAdminPage.tsx:110
 msgid "{reservationCount} reservations"
 msgstr ""
 
@@ -439,7 +439,7 @@ msgstr ""
 msgid "{visibleGameCount} of {gameCount} titles"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:107
+#: src/components/board-games/ReservationsAdminPage.tsx:106
 msgid "{visibleReservationCount} of {reservationCount} reservations"
 msgstr ""
 
@@ -862,7 +862,7 @@ msgstr ""
 #: src/app/routes/_with_menu/admin/rooms.tsx:29
 #: src/app/routes/_with_menu/admin/users.$id.tsx:24
 #: src/app/routes/_with_menu/admin/users.index.tsx:29
-#: src/components/board-games/BoardGamesTabs.tsx:15
+#: src/components/board-games/BoardGamesTabs.tsx:16
 #: src/components/clubs/ClubsTabs.tsx:22
 #: src/components/sport/SportTabs.tsx:39
 msgid "Admin"
@@ -927,7 +927,7 @@ msgstr ""
 msgid "All meetings"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:102
+#: src/components/board-games/ReservationsAdminPage.tsx:101
 msgid "All reservations"
 msgstr ""
 
@@ -1240,23 +1240,23 @@ msgstr ""
 msgid "Board game"
 msgstr ""
 
-#: src/app/routes/_with_menu/board-games/admin/reservations.tsx:24
+#: src/app/routes/_with_menu/board-games/admin/reservations.tsx:22
 msgid "Board game reservations"
 msgstr ""
 
 #: src/app/routes/_with_menu/board-games/admin/reservations.tsx:30
-msgid "Board Game Reservations"
-msgstr ""
+#~ msgid "Board Game Reservations"
+#~ msgstr ""
 
-#: src/app/routes/_with_menu/board-games/admin/index.tsx:24
+#: src/app/routes/_with_menu/board-games/admin.tsx:17
 #: src/app/routes/_with_menu/board-games/index.tsx:25
 #: src/app/routes/_with_menu/board-games/index.tsx:32
 msgid "Board Games"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:118
-msgid "Board games admin"
-msgstr ""
+#: src/app/routes/_with_menu/board-games/admin.tsx:17
+#~ msgid "Board games admin"
+#~ msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:142
 msgid "Board Games, Languages, Debate, Movies"
@@ -1314,7 +1314,7 @@ msgstr ""
 msgid "Booking time differs from the selected meeting time."
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:292
+#: src/components/board-games/ReservationsAdminPage.tsx:286
 msgid "Borrower"
 msgstr ""
 
@@ -1827,11 +1827,11 @@ msgstr ""
 msgid "Clear ALL caches, unregister, and reload"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:197
+#: src/components/board-games/ReservationsAdminPage.tsx:191
 msgid "Clear filters"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:134
+#: src/components/board-games/ReservationsAdminPage.tsx:128
 msgid "Clear game filter"
 msgstr ""
 
@@ -2239,7 +2239,7 @@ msgstr ""
 msgid "Could not add game"
 msgstr ""
 
-#: src/app/routes/_with_menu/board-games/admin.tsx:44
+#: src/app/routes/_with_menu/board-games/admin.tsx:50
 msgid "Could not check access"
 msgstr ""
 
@@ -2273,7 +2273,7 @@ msgstr ""
 msgid "Could not load form"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:212
+#: src/components/board-games/ReservationsAdminPage.tsx:206
 msgid "Could not load game names"
 msgstr ""
 
@@ -2292,7 +2292,7 @@ msgstr ""
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:148
 #: src/components/board-games/BoardGamesPage.tsx:137
-#: src/components/board-games/ReservationsAdminPage.tsx:206
+#: src/components/board-games/ReservationsAdminPage.tsx:200
 msgid "Could not load reservations"
 msgstr ""
 
@@ -2454,11 +2454,11 @@ msgstr ""
 msgid "Created at"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:168
+#: src/components/board-games/ReservationsAdminPage.tsx:162
 msgid "Created from"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:180
+#: src/components/board-games/ReservationsAdminPage.tsx:174
 msgid "Created to"
 msgstr ""
 
@@ -3882,7 +3882,7 @@ msgstr ""
 msgid "Game deleted"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:126
+#: src/components/board-games/ReservationsAdminPage.tsx:120
 msgid "Game filter:"
 msgstr ""
 
@@ -4903,7 +4903,7 @@ msgstr ""
 msgid "Make a time deadline for any task with this timer."
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:341
+#: src/components/board-games/ReservationsAdminPage.tsx:335
 #: src/components/events/drafts/DraftPage.tsx:661
 #: src/components/events/event/EventPage.tsx:385
 msgid "Manage"
@@ -4913,11 +4913,11 @@ msgstr ""
 msgid "Manage a list of student clubs."
 msgstr ""
 
-#: src/app/routes/_with_menu/board-games/admin/index.tsx:21
+#: src/app/routes/_with_menu/board-games/admin/index.tsx:18
 msgid "Manage board game reservations and storage availability."
 msgstr ""
 
-#: src/app/routes/_with_menu/board-games/admin/index.tsx:18
+#: src/app/routes/_with_menu/board-games/admin/index.tsx:15
 msgid "Manage board games"
 msgstr ""
 
@@ -5760,7 +5760,7 @@ msgstr ""
 msgid "No registrations for this origin."
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:226
+#: src/components/board-games/ReservationsAdminPage.tsx:220
 msgid "No reservations match these filters."
 msgstr ""
 
@@ -5904,7 +5904,7 @@ msgstr ""
 msgid "Not selected"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:332
+#: src/components/board-games/ReservationsAdminPage.tsx:326
 msgid "Not set"
 msgstr ""
 
@@ -7020,6 +7020,10 @@ msgstr ""
 msgid "Reservation updated"
 msgstr ""
 
+#: src/components/board-games/BoardGamesTabs.tsx:19
+msgid "Reservations"
+msgstr ""
+
 #: src/components/board-games/BoardGamesPage.tsx:97
 #: src/components/board-games/ReservationsAdminPage.tsx:114
 #~ msgid "Reservations: {reservationCount}"
@@ -7046,7 +7050,7 @@ msgstr ""
 msgid "Reserved"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:280
+#: src/components/board-games/ReservationsAdminPage.tsx:274
 msgid "Reserved {createdAt}"
 msgstr ""
 
@@ -7138,7 +7142,7 @@ msgstr ""
 msgid "Retry"
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:328
+#: src/components/board-games/ReservationsAdminPage.tsx:322
 msgid "Return by"
 msgstr ""
 
@@ -7476,7 +7480,7 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
-#: src/app/routes/_with_menu/board-games/admin/reservations.tsx:27
+#: src/app/routes/_with_menu/board-games/admin/reservations.tsx:25
 msgid "Search and review all board game reservations."
 msgstr ""
 
@@ -7488,7 +7492,7 @@ msgstr ""
 msgid "Search anything at Innopolis University."
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:149
+#: src/components/board-games/ReservationsAdminPage.tsx:143
 msgid "Search by game name"
 msgstr ""
 
@@ -7496,7 +7500,7 @@ msgstr ""
 msgid "Search by name or id..."
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:160
+#: src/components/board-games/ReservationsAdminPage.tsx:154
 msgid "Search by Telegram alias"
 msgstr ""
 
@@ -8672,7 +8676,7 @@ msgstr ""
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:259
 #: src/components/board-games/BoardGamesPage.tsx:210
-#: src/components/board-games/ReservationsAdminPage.tsx:317
+#: src/components/board-games/ReservationsAdminPage.tsx:311
 msgid "Telegram not provided"
 msgstr ""
 
@@ -8854,7 +8858,7 @@ msgstr ""
 msgid "There are no components without slots in this section."
 msgstr ""
 
-#: src/components/board-games/ReservationsAdminPage.tsx:220
+#: src/components/board-games/ReservationsAdminPage.tsx:214
 msgid "There are no reservations yet."
 msgstr ""
 
@@ -9329,7 +9333,7 @@ msgstr ""
 #: src/components/board-games/BoardGamesPage.tsx:193
 #: src/components/board-games/ReservationDetailsModal.tsx:143
 #: src/components/board-games/ReservationsAdminPage.tsx:74
-#: src/components/board-games/ReservationsAdminPage.tsx:277
+#: src/components/board-games/ReservationsAdminPage.tsx:271
 msgid "Unknown game"
 msgstr ""
 
@@ -9555,8 +9559,12 @@ msgstr ""
 msgid "View"
 msgstr ""
 
-#: src/components/board-games/BoardGamesAdminPage.tsx:112
 #: src/components/when2meet/MeetingPage.tsx:1746
+msgid "View all"
+msgstr ""
+
+#: src/components/board-games/BoardGamesAdminPage.tsx:112
+msgctxt "reservations"
 msgid "View all"
 msgstr ""
 
@@ -10042,7 +10050,7 @@ msgstr ""
 msgid "You cannot book in the past."
 msgstr ""
 
-#: src/app/routes/_with_menu/board-games/admin.tsx:54
+#: src/app/routes/_with_menu/board-games/admin.tsx:60
 msgid "You do not have access to board games admin."
 msgstr ""
 

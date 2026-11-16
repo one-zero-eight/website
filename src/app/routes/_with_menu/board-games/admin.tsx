@@ -1,6 +1,8 @@
 import { $boardGames } from "@/api/board-games";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { BoardGamesTabs } from "@/components/board-games/BoardGamesTabs.tsx";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
+import { Topbar } from "@/components/layout/Topbar.tsx";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import type { ReactNode } from "react";
@@ -11,11 +13,15 @@ export const Route = createFileRoute("/_with_menu/board-games/admin")({
 
 function RouteComponent() {
   return (
-    <RequireAuth>
-      <RequireBoardGamesAdmin>
-        <Outlet />
-      </RequireBoardGamesAdmin>
-    </RequireAuth>
+    <>
+      <Topbar title={<Trans>Board Games</Trans>} />
+      <RequireAuth>
+        <RequireBoardGamesAdmin>
+          <BoardGamesTabs />
+          <Outlet />
+        </RequireBoardGamesAdmin>
+      </RequireAuth>
+    </>
   );
 }
 
