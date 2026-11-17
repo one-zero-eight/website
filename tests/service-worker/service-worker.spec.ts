@@ -1954,7 +1954,7 @@ async function mirrorRequests(request: APIRequestContext) {
 
 test(
   "the app copies its session to the mirror host of the API",
-  { tag: "@firefox" },
+  { tag: "@cross-browser" },
   async ({ context, request }) => {
     await signIn(context, "sw-test");
     const page = await openControlledPage(context, request);
@@ -1971,7 +1971,7 @@ test(
 
 test(
   "a mirror that does not know the user leaves the user signed in",
-  { tag: "@firefox" },
+  { tag: "@cross-browser" },
   async ({ context, request }) => {
     await signIn(context, "sw-test");
     const page = await openControlledPage(context, request);
@@ -2007,8 +2007,12 @@ test(
 
 test(
   "requests to an unreachable API host are retried through its mirror",
-  { tag: "@firefox" },
-  async ({ context, request }) => {
+  { tag: "@cross-browser" },
+  async ({ context, request, browserName }) => {
+    test.skip(
+      browserName === "webkit",
+      "WebKit offline emulation fails cached service worker requests; this test uses context.setOffline().",
+    );
     await signIn(context, "sw-test");
     const page = await openControlledPage(context, request);
     await expect
@@ -2068,7 +2072,7 @@ test(
 
 test(
   "an API host that never answers is answered by its mirror",
-  { tag: "@firefox" },
+  { tag: "@cross-browser" },
   async ({ context, request }) => {
     await signIn(context, "sw-test");
     const page = await openControlledPage(context, request);
@@ -2113,7 +2117,7 @@ test(
 
 test(
   "a site that never answers opens the offline snapshot within seconds",
-  { tag: "@firefox" },
+  { tag: "@cross-browser" },
   async ({ context, request }) => {
     const builds = await getBuilds(request);
     await openControlledPage(context, request);
@@ -2143,7 +2147,7 @@ test(
 
 test(
   "an account API that can't be reached does not sign the user out",
-  { tag: "@firefox" },
+  { tag: "@cross-browser" },
   async ({ context, request }) => {
     await signIn(context, "sw-test");
     const page = await openControlledPage(context, request);
@@ -2173,7 +2177,7 @@ test(
 
 test(
   "a busy API host is waited for, not asked twice through its mirror",
-  { tag: "@firefox" },
+  { tag: "@cross-browser" },
   async ({ context, request }) => {
     await signIn(context, "sw-test");
     const page = await openControlledPage(context, request);

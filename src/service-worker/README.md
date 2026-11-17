@@ -331,12 +331,13 @@ Also keep the old `/assets/*` files for a while after a deploy. This helps tabs 
 
 ```bash
 pnpm run test:sw            # unit tests + Playwright tests in Chromium and Firefox
+pnpm run test:sw:webkit     # optional cross-browser scenarios in WebKit
 pnpm run test:sw:preview    # visible demo with real `pnpm preview` builds
 pnpm run test:sw:preview --pause-ms 1000 --final-pause-ms 10000 --port 3001
 pnpm exec playwright install chromium firefox   # once, if a browser is missing
 ```
 
-- The Playwright tests build three real versions of the site (A, B, C) and serve them on port 5201, with a mock API on 5202 and its mirror on 5203. They also rebuild A from two commits to check that the files are identical. Tests tagged `@firefox` also run in Firefox: the mirror and the fallbacks for a silent server, because Firefox cancels a worker's response sooner than Chromium. They cover:
+- The Playwright tests build three real versions of the site (A, B, C) and serve them on port 5201, with a mock API on 5202 and its mirror on 5203. They also rebuild A from two commits to check that the files are identical. Tests tagged `@cross-browser` also run in Firefox and in the optional WebKit project: the mirror and the fallbacks for a silent server, because Firefox cancels a worker's response sooner than Chromium. They cover:
   - identical rebuilds, partial and interrupted downloads, and downloading only changed files;
   - offline, connection-error, 5xx and silent-server navigation;
   - the mirror of the API: refused, silent and busy hosts, network changes, its session, a mirror that does not know the user;
@@ -344,6 +345,33 @@ pnpm exec playwright install chromium firefox   # once, if a browser is missing
   - automatic reloads, rollbacks and blockers;
   - TV, reset, worker restarts, the API cache and removal of old caches.
 - The demo opens a visible Chromium window and walks through the main scenarios step by step. It uses its own ports in 3000–3099 and a temporary directory. It never stops other servers.
+
+### WebKit (Safari engine)
+
+WebKit is optional: `pnpm run test:sw` still runs only Chromium and Firefox. On a system supported by Playwright, install WebKit and run its project from the repository root:
+
+```bash
+pnpm exec playwright install --with-deps webkit
+pnpm run test:sw:webkit
+# Equivalent command:
+pnpm exec playwright test --config playwright.sw.config.ts --project webkit
+```
+
+On Linux, installing system dependencies may require administrator privileges. Fedora/Nobara is not supported by Playwright's WebKit binaries. Use the official Ubuntu-based Docker image instead of installing libraries from another distribution on the host. With the project's dependencies already installed on Linux, run from the repository root:
+
+```bash
+PLAYWRIGHT_VERSION=$(node -p 'require("@playwright/test/package.json").version')
+docker run --rm --init --ipc=host \
+  --user "$(id -u):$(id -g)" \
+  -v "$PWD:/work" -w /work \
+  "mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble" \
+  node node_modules/@playwright/test/cli.js test \
+  --config playwright.sw.config.ts --project webkit
+```
+
+The image version must match the installed `@playwright/test` version; the command reads it automatically. The image supplies WebKit and its system libraries, while the bind mount supplies the existing Linux `node_modules`. No dependency installation runs in the container. It builds the fixture and starts its API and mirror inside the container on ports 5201–5203; no ports need to be published. Build files and test reports are written into the checkout as the current user, not root. Do not run another service-worker suite against the same checkout at the same time: they share fixture output and report paths.
+
+The WebKit project currently skips the combined connection-reset/offline test because `context.setOffline()` makes cached worker requests fail in the tested Playwright WebKit build. The skip is explicit in the test and report; it is not proof that offline mode works in Safari. The silent-server fallback is still tested without offline emulation. Playwright WebKit is not Safari itself: these tests do not verify macOS/iOS cookie restrictions, partitioned mirror sessions across real sites, or iOS storage eviction. Check those in real Safari separately.
 
 ## Known limitations
 

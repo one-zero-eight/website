@@ -18,7 +18,12 @@ export default defineConfig({
     // for a silent server: the fallbacks for such a server are checked there.
     // Not devices["Desktop Firefox"]: its user agent override makes Firefox
     // send a CORS preflight for every request the worker repeats.
-    { name: "firefox", use: { browserName: "firefox" }, grep: /@firefox/ },
+    {
+      name: "firefox",
+      use: { browserName: "firefox" },
+      grep: /@cross-browser/,
+    },
+    { name: "webkit", use: { browserName: "webkit" }, grep: /@cross-browser/ },
   ],
   webServer: {
     command: "node tests/service-worker/server.mjs",
