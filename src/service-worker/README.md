@@ -174,7 +174,7 @@ It serves the latest **ready** build. Before that, it checks that every file of 
 
 The page learns from the `CLIENT_HELLO` reply that it was served from the cache. It then shows the "You are offline" banner, even if the browser reports being online (for example, the site's server is down). The banner disappears after the next successful manifest check.
 
-The very first visit cannot work offline: the worker is not installed yet.
+The very first visit cannot work offline: the worker is not installed yet. API queries may also start before the new worker claims the page, so those initial requests bypass its mirror routing and caches. On `controllerchange`, the page cancels and restarts active queries without data, including pending and failed ones, so they use the worker without a page reload. Queries that already have data and mutations are left alone.
 
 ## Automatic reloads
 
@@ -340,7 +340,7 @@ pnpm exec playwright install chromium firefox   # once, if a browser is missing
 - The Playwright tests build three real versions of the site (A, B, C) and serve them on port 5201, with a mock API on 5202 and its mirror on 5203. They also rebuild A from two commits to check that the files are identical. Tests tagged `@cross-browser` also run in Firefox and in the optional WebKit project: the mirror and the fallbacks for a silent server, because Firefox cancels a worker's response sooner than Chromium. They cover:
   - identical rebuilds, partial and interrupted downloads, and downloading only changed files;
   - offline, connection-error, 5xx and silent-server navigation;
-  - the mirror of the API: refused, silent and busy hosts, network changes, its session, a mirror that does not know the user;
+  - the mirror of the API: refused, silent and busy hosts, network changes, its session, a mirror that does not know the user, and a first maps visit whose initial request started before the worker took control;
   - pins and deleting old builds;
   - automatic reloads, rollbacks and blockers;
   - TV, reset, worker restarts, the API cache and removal of old caches.

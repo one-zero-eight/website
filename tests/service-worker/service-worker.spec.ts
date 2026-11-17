@@ -2175,6 +2175,71 @@ test(
   },
 );
 
+for (const failure of ["silent", "connection"] as const) {
+  test(
+    `the first maps visit restarts its initial request when the worker takes control (${failure})`,
+    { tag: "@cross-browser" },
+    async ({ context, request }) => {
+      await setServerState(request, {
+        version: "a",
+        apiSilent: failure === "silent",
+        apiConnectionError: failure === "connection",
+      });
+      const page = await context.newPage();
+      await page.addInitScript(() => {
+        if (window !== window.top) return;
+        // Avoid the unrelated silent sign-in iframe on this signed-out page.
+        localStorage.setItem("lastLogin", String(Date.now()));
+        const key = "sw-test-loads";
+        sessionStorage.setItem(
+          key,
+          String(Number(sessionStorage.getItem(key)) + 1),
+        );
+      });
+      let releaseWorker!: () => void;
+      const workerAllowed = new Promise<void>((resolve) => {
+        releaseWorker = resolve;
+      });
+      await page.route("**/sw.js", async (route) => {
+        await workerAllowed;
+        await route.continue();
+      });
+      try {
+        const initialRequest = page.waitForRequest(
+          (item) => item.url() === `${apiOrigin}/maps/scenes/`,
+        );
+        const initialFailure =
+          failure === "connection"
+            ? page.waitForEvent("requestfailed", {
+                predicate: (item) => item.url() === `${apiOrigin}/maps/scenes/`,
+              })
+            : null;
+        await page.goto("/maps", { waitUntil: "domcontentloaded" });
+        await initialRequest;
+        await initialFailure;
+        expect(
+          await page.evaluate(() => !!navigator.serviceWorker.controller),
+        ).toBe(false);
+        releaseWorker();
+        await expect
+          .poll(() => page.evaluate(() => !!navigator.serviceWorker.controller))
+          .toBe(true);
+        // The original request either hangs or fails before the worker claims
+        // the page. Restart it through the mirror, without a reload or user interaction.
+        await expect(
+          page.getByRole("link", { name: "University a", exact: true }),
+        ).toBeVisible();
+        await expect(page.locator("svg title")).toHaveText("University a");
+        expect(await mirrorRequests(request)).toContain("/maps/scenes/");
+        expect(await loadCount(page)).toBe(1);
+      } finally {
+        releaseWorker();
+        await setServerState(request, { version: "a" });
+      }
+    },
+  );
+}
+
 test(
   "a busy API host is waited for, not asked twice through its mirror",
   { tag: "@cross-browser" },

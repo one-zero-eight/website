@@ -233,6 +233,16 @@ export function registerServiceWorker(router: ReturnType<typeof getRouter>) {
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     scheduleCheck();
     void checkForUpdate();
+    if (stopped || !navigator.serviceWorker.controller) return;
+    // Requests started before the first claim bypassed the worker and may
+    // still be stuck on the unreachable API host. Cancel and restart active
+    // queries without data so they use the mirror/cache now. Keep successful
+    // data and mutations untouched; invalidation alone leaves pending queries running.
+    void queryClient.resetQueries({
+      type: "active",
+      predicate: (query) =>
+        query.state.data === undefined && query.state.status !== "success",
+    });
   });
   window.addEventListener("online", () => void checkForUpdate());
   // Another network may reach the API hosts directly, or only through their
