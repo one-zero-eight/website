@@ -235,6 +235,14 @@ export function registerServiceWorker(router: ReturnType<typeof getRouter>) {
     void checkForUpdate();
   });
   window.addEventListener("online", () => void checkForUpdate());
+  // Another network may reach the API hosts directly, or only through their
+  // mirrors. Not every browser reports a change (Firefox has no connection).
+  const reportNetworkChange = () =>
+    void requestWorker({ type: "NETWORK_CHANGED" }).catch(() => undefined);
+  window.addEventListener("online", reportNetworkChange);
+  (
+    navigator as Navigator & { connection?: EventTarget }
+  ).connection?.addEventListener("change", reportNetworkChange);
   window.addEventListener("pageshow", handlePageReturn);
   window.addEventListener("focus", handlePageReturn);
   document.addEventListener("visibilitychange", () => {

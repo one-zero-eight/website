@@ -971,6 +971,10 @@ msgstr "Аналитика"
 msgid "Anchor active week"
 msgstr "Опорная активная неделя"
 
+#: src/components/debug/WorkerDiagnostics.tsx:319
+msgid "API routes"
+msgstr "Маршруты API"
+
 #: src/components/debug/DebugPage.tsx:84
 msgid "App and offline diagnostics"
 msgstr "Диагностика приложения и офлайн-хранилища"
@@ -3840,7 +3844,7 @@ msgstr "Мест нет"
 msgid "Full and short official names"
 msgstr "Полное и краткое официальные названия"
 
-#: src/components/debug/WorkerDiagnostics.tsx:384
+#: src/components/debug/WorkerDiagnostics.tsx:409
 msgid "Full GET_DIAGNOSTICS response from this worker"
 msgstr "Полный ответ GET_DIAGNOSTICS этого воркера"
 
@@ -3850,7 +3854,7 @@ msgstr "Полный ответ GET_DIAGNOSTICS этого воркера"
 #~ msgstr "Полное имя"
 
 #: src/components/debug/WorkerDiagnostics.tsx:256
-#: src/components/debug/WorkerDiagnostics.tsx:376
+#: src/components/debug/WorkerDiagnostics.tsx:401
 msgid "Full stored manifest"
 msgstr "Полный сохранённый манифест"
 
@@ -4657,11 +4661,11 @@ msgstr "Фамилия"
 msgid "Last worker notification observed by this App"
 msgstr "Последнее уведомление воркера, полученное этой App"
 
-#: src/components/debug/WorkerDiagnostics.tsx:347
+#: src/components/debug/WorkerDiagnostics.tsx:372
 msgid "Latest ready"
 msgstr "Последняя готовая"
 
-#: src/components/debug/WorkerDiagnostics.tsx:323
+#: src/components/debug/WorkerDiagnostics.tsx:348
 msgid "Latest ready is the offline fallback, not necessarily the build loaded by this page. A snapshot refresh does not fetch the server's current manifest."
 msgstr "Последняя готовая сборка используется для офлайна и не обязательно совпадает со сборкой этой страницы. Обновление снимка не загружает текущий манифест с сервера."
 
@@ -4961,7 +4965,7 @@ msgstr "Управление"
 msgid "Manifest selected for this page"
 msgstr "Манифест, выбранный для этой страницы"
 
-#: src/components/debug/WorkerDiagnostics.tsx:319
+#: src/components/debug/WorkerDiagnostics.tsx:344
 msgid "Manifests stored by the worker"
 msgstr "Манифесты в хранилище воркера"
 
@@ -5415,6 +5419,10 @@ msgstr "Нет активных турниров. Создайте турнир,
 #~ msgid "No additional restriction; using groups' teaching periods."
 #~ msgstr "Без дополнительного ограничения; используются учебные периоды групп."
 
+#: src/components/debug/WorkerDiagnostics.tsx:330
+msgid "No API host probed yet."
+msgstr "Ни один хост API ещё не проверялся."
+
 #: src/components/events/submissions/SubmissionsPage.tsx:29
 msgid "No approved submissions."
 msgstr "Нет одобренных заявок."
@@ -5800,7 +5808,7 @@ msgstr "Слот не выбран"
 msgid "No sport hours history yet."
 msgstr "Истории спортивных часов пока нет."
 
-#: src/components/debug/WorkerDiagnostics.tsx:331
+#: src/components/debug/WorkerDiagnostics.tsx:356
 msgid "No stored manifests."
 msgstr "Сохранённых манифестов нет."
 
@@ -6995,6 +7003,10 @@ msgstr "Форма отчёта публикуется каждый месяц �
 #: src/components/clubs/HowToCreateClubPage.tsx:82
 msgid "Request rooms, projectors, sports halls, and other resources for your club's meetings."
 msgstr "Запрашивайте аудитории, проекторы, спортзалы и другие ресурсы для встреч клуба."
+
+#: src/components/debug/WorkerDiagnostics.tsx:323
+msgid "Requests to an API host with a mirror go either to the host or to its mirror, as the last probe of the host found."
+msgstr "Запросы к хосту API с зеркалом идут либо на сам хост, либо на его зеркало — как показала последняя проверка хоста."
 
 #: src/components/web-print/PrintPage.tsx:452
 msgid "Required"
@@ -8923,7 +8935,7 @@ msgid "This logo change will be cancelled when you save."
 msgstr "Это изменение логотипа будет отменено при сохранении."
 
 #: src/components/debug/WorkerDiagnostics.tsx:61
-#: src/components/debug/WorkerDiagnostics.tsx:352
+#: src/components/debug/WorkerDiagnostics.tsx:377
 msgid "This page"
 msgstr "Эта страница"
 

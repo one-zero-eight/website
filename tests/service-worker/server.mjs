@@ -139,6 +139,10 @@ const defaults = {
   corruptResource: false,
   delayApi: false,
   apiConnectionError: false,
+  // Like a blocked server that drops packets: requests are never answered,
+  // until the flag is cleared.
+  silent: false,
+  apiSilent: false,
   runtimeVersion: "a",
   // Like a server without Cache-Control: browsers may then reuse HTML for a while.
   cacheableHtml: false,
@@ -147,6 +151,8 @@ let state = { ...defaults };
 let requests = [];
 const resourceWaiters = new Set();
 const apiWaiters = new Set();
+const silentSiteWaiters = new Set();
+const silentApiWaiters = new Set();
 
 function release(waiters) {
   for (const resume of waiters) resume();
@@ -182,6 +188,8 @@ async function control(request, response, pathname) {
     state = { ...defaults, ...next };
     if (!state.delayResource) release(resourceWaiters);
     if (!state.delayApi) release(apiWaiters);
+    if (!state.silent) release(silentSiteWaiters);
+    if (!state.apiSilent) release(silentApiWaiters);
     if (next.clearRequests) requests = [];
     response.writeHead(204);
     response.end();
@@ -274,10 +282,15 @@ async function handleApiRequest(request, response, origin) {
   }
   requests.push({
     url: url.href,
+    method: request.method,
     authorization: request.headers.authorization ?? null,
     cookie: request.headers.cookie ?? null,
     version: state.runtimeVersion,
   });
+  if (state.apiSilent && !isMirror) {
+    await new Promise((resume) => silentApiWaiters.add(resume));
+    if (response.destroyed) return;
+  }
   // Like a network that cannot reach this host at all, but still reaches its mirror.
   if (state.apiConnectionError && !isMirror) {
     request.socket.destroy();
@@ -461,6 +474,10 @@ const appServer = createServer(async (request, response) => {
     response.once("finish", () => {
       resourceRequest.status = response.statusCode;
     });
+    if (state.silent) {
+      await new Promise((resume) => silentSiteWaiters.add(resume));
+      if (response.destroyed) return;
+    }
     if (state.connectionError) {
       request.socket.destroy();
       return;
@@ -532,6 +549,8 @@ console.info(
 function handleShutdown() {
   release(resourceWaiters);
   release(apiWaiters);
+  release(silentSiteWaiters);
+  release(silentApiWaiters);
   appServer.close();
   apiServer.close();
   mirrorServer.close();

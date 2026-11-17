@@ -9,8 +9,8 @@
  *   in the background for the next visit.
  */
 import { mapsCacheName, userDataCacheName } from "@/service-worker/protocol.ts";
-import { networkFetch } from "@/service-worker/proxy-fallback.ts";
 import { inspectWorkerState } from "@/service-worker/storage.ts";
+import { networkFetch } from "./api-route.ts";
 
 /** Per cache; the least recently saved entries are evicted first. */
 const maxEntries = 128;
@@ -66,7 +66,7 @@ async function store(request: Request, response: Response, cacheName: string) {
   });
 }
 
-/** Fetch (through the mirror of the host, if any), and store successful responses. */
+/** Fetch (from the mirror of the host, if it must), and store successful responses. */
 function fetchAndStore(event: FetchEvent, cacheName: string) {
   const network = networkFetch(event.request);
   // This reaction runs first, so the clone is taken before the page reads the body.

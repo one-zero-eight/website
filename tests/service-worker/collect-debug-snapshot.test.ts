@@ -32,6 +32,7 @@ function workerReply(serviceWorkerHash: string): WorkerDiagnosticsSnapshot {
       scope: "https://example.com/",
     },
     storage: emptyWorkerState(),
+    apiRoutes: {},
     runtimeClients: { requestingClientId: "current-page", windows: [] },
     cacheStorage: [],
   };

@@ -971,6 +971,10 @@ msgstr "Analytics"
 msgid "Anchor active week"
 msgstr "Anchor active week"
 
+#: src/components/debug/WorkerDiagnostics.tsx:319
+msgid "API routes"
+msgstr "API routes"
+
 #: src/components/debug/DebugPage.tsx:84
 msgid "App and offline diagnostics"
 msgstr "App and offline diagnostics"
@@ -3840,7 +3844,7 @@ msgstr "Full"
 msgid "Full and short official names"
 msgstr "Full and short official names"
 
-#: src/components/debug/WorkerDiagnostics.tsx:384
+#: src/components/debug/WorkerDiagnostics.tsx:409
 msgid "Full GET_DIAGNOSTICS response from this worker"
 msgstr "Full GET_DIAGNOSTICS response from this worker"
 
@@ -3850,7 +3854,7 @@ msgstr "Full GET_DIAGNOSTICS response from this worker"
 #~ msgstr "Full name"
 
 #: src/components/debug/WorkerDiagnostics.tsx:256
-#: src/components/debug/WorkerDiagnostics.tsx:376
+#: src/components/debug/WorkerDiagnostics.tsx:401
 msgid "Full stored manifest"
 msgstr "Full stored manifest"
 
@@ -4657,11 +4661,11 @@ msgstr "Last name"
 msgid "Last worker notification observed by this App"
 msgstr "Last worker notification observed by this App"
 
-#: src/components/debug/WorkerDiagnostics.tsx:347
+#: src/components/debug/WorkerDiagnostics.tsx:372
 msgid "Latest ready"
 msgstr "Latest ready"
 
-#: src/components/debug/WorkerDiagnostics.tsx:323
+#: src/components/debug/WorkerDiagnostics.tsx:348
 msgid "Latest ready is the offline fallback, not necessarily the build loaded by this page. A snapshot refresh does not fetch the server's current manifest."
 msgstr "Latest ready is the offline fallback, not necessarily the build loaded by this page. A snapshot refresh does not fetch the server's current manifest."
 
@@ -4961,7 +4965,7 @@ msgstr "Management"
 msgid "Manifest selected for this page"
 msgstr "Manifest selected for this page"
 
-#: src/components/debug/WorkerDiagnostics.tsx:319
+#: src/components/debug/WorkerDiagnostics.tsx:344
 msgid "Manifests stored by the worker"
 msgstr "Manifests stored by the worker"
 
@@ -5415,6 +5419,10 @@ msgstr "No active tournaments. Create one to start managing groups and the quali
 #~ msgid "No additional restriction; using groups' teaching periods."
 #~ msgstr "No additional restriction; using groups' teaching periods."
 
+#: src/components/debug/WorkerDiagnostics.tsx:330
+msgid "No API host probed yet."
+msgstr "No API host probed yet."
+
 #: src/components/events/submissions/SubmissionsPage.tsx:29
 msgid "No approved submissions."
 msgstr "No approved submissions."
@@ -5800,7 +5808,7 @@ msgstr "No slot selected"
 msgid "No sport hours history yet."
 msgstr "No sport hours history yet."
 
-#: src/components/debug/WorkerDiagnostics.tsx:331
+#: src/components/debug/WorkerDiagnostics.tsx:356
 msgid "No stored manifests."
 msgstr "No stored manifests."
 
@@ -6995,6 +7003,10 @@ msgstr "Report form will be published to Club Leaders telegram group every month
 #: src/components/clubs/HowToCreateClubPage.tsx:82
 msgid "Request rooms, projectors, sports halls, and other resources for your club's meetings."
 msgstr "Request rooms, projectors, sports halls, and other resources for your club's meetings."
+
+#: src/components/debug/WorkerDiagnostics.tsx:323
+msgid "Requests to an API host with a mirror go either to the host or to its mirror, as the last probe of the host found."
+msgstr "Requests to an API host with a mirror go either to the host or to its mirror, as the last probe of the host found."
 
 #: src/components/web-print/PrintPage.tsx:452
 msgid "Required"
@@ -8923,7 +8935,7 @@ msgid "This logo change will be cancelled when you save."
 msgstr "This logo change will be cancelled when you save."
 
 #: src/components/debug/WorkerDiagnostics.tsx:61
-#: src/components/debug/WorkerDiagnostics.tsx:352
+#: src/components/debug/WorkerDiagnostics.tsx:377
 msgid "This page"
 msgstr "This page"
 

@@ -125,6 +125,7 @@ export type WorkerDiagnosticsSnapshot = {
     scope: string;
   };
   storage: WorkerState;
+  apiRoutes: ApiRoutes;
   runtimeClients: {
     requestingClientId: string | null;
     windows: {
@@ -143,7 +144,14 @@ export type WorkerCommand =
   | { type: "CHECK_MANIFEST" }
   | { type: "GET_STATE" }
   | { type: "GET_DIAGNOSTICS" }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  /** The page may be on another network: probe the API hosts again. */
+  | { type: "NETWORK_CHANGED" };
+
+/** Where requests to an API host with a mirror go, as last probed. */
+export type ApiRoute = { via: "host" | "mirror"; checkedAt: string };
+/** By origin of the API host. */
+export type ApiRoutes = Record<string, ApiRoute>;
 
 /** Sent by the worker to each window when a complete build becomes ready. */
 export type BuildReadyNotification = {

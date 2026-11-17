@@ -37,6 +37,13 @@ const manifestUrl = new URL("build-manifest.json", scopeUrl).href;
 const downloadConcurrency = 4;
 /** How long a navigation pin protects its build before the page reports itself. */
 const navigationPinLifetime = 60_000;
+/**
+ * How long a navigation waits for a silent server before a complete offline
+ * snapshot answers. A blocked server may drop packets: then fetch fails only
+ * when the browser gives up (90 s in Firefox), and Firefox cancels a worker's
+ * response after about 60 s, so waiting for the failure would never serve it.
+ */
+const navigationTimeout = 5_000;
 
 /** Deduplicate concurrent CHECK_MANIFEST / navigate-triggered downloads. */
 let checkPromise: Promise<BuildInfo | null> | null = null;
@@ -457,37 +464,55 @@ async function serveCachedNavigation(state: WorkerState, event: FetchEvent) {
   return undefined;
 }
 
+/** Pin the new document to the HTML it actually received. */
+async function pinNetworkNavigation(event: FetchEvent, response: Response) {
+  if (
+    !event.resultingClientId ||
+    !response.ok ||
+    !response.headers.get("content-type")?.includes("text/html")
+  )
+    return;
+  // It may be a different build from latestReadyBuildId while that is still warming.
+  const html = await response.clone().text();
+  const buildId = html.match(/data-build-id=["']([^"']+)["']/)?.[1];
+  if (buildId)
+    await withWorkerState(async (state) =>
+      pinNavigation(state, event, buildId, "network"),
+    );
+}
+
 async function handleNavigation(event: FetchEvent) {
-  try {
-    // Always revalidate the HTML: a stale copy from the HTTP cache (e.g. when
-    // the server sends no Cache-Control) would keep the tab on an old build.
-    const response = await fetch(
-      new Request(event.request, { cache: "no-cache" }),
-    );
-    // Treat gateway/app failures like offline so a known-good snapshot can win.
-    if (response.status >= 500) throw new Error("Navigation server error");
-    if (
-      event.resultingClientId &&
-      response.ok &&
-      response.headers.get("content-type")?.includes("text/html")
-    ) {
-      // Pin the new document to the HTML it actually received, which may be
-      // a different build from latestReadyBuildId while it is still warming.
-      const html = await response.clone().text();
-      const buildId = html.match(/data-build-id=["']([^"']+)["']/)?.[1];
-      if (buildId)
-        await withWorkerState(async (state) =>
-          pinNavigation(state, event, buildId, "network"),
-        );
-    }
-    return response;
-  } catch (error) {
-    const cached = await withWorkerState((state) =>
-      serveCachedNavigation(state, event),
-    );
-    if (!cached) throw error;
+  // Always revalidate the HTML: a stale copy from the HTTP cache (e.g. when
+  // the server sends no Cache-Control) would keep the tab on an old build.
+  const network = fetch(new Request(event.request, { cache: "no-cache" })).then(
+    (response) => {
+      // Treat gateway/app failures like offline so a known-good snapshot can win.
+      if (response.status >= 500) throw new Error("Navigation server error");
+      return response;
+    },
+  );
+  const silence = new Promise<"silent">((resolve) =>
+    setTimeout(() => resolve("silent"), navigationTimeout),
+  );
+  const answer = await Promise.race([network, silence]).catch(
+    () => "failed" as const,
+  );
+  if (answer instanceof Response) {
+    await pinNetworkNavigation(event, answer);
+    return answer;
+  }
+  const cached = await withWorkerState((state) =>
+    serveCachedNavigation(state, event),
+  );
+  if (cached) {
+    // A late answer is not used: the tab is pinned to the snapshot it got.
+    network.catch(() => undefined);
     return cached;
   }
+  // Nothing to serve instead: wait for the network, as without the worker.
+  const response = await network;
+  await pinNetworkNavigation(event, response);
+  return response;
 }
 
 async function handleAsset(event: FetchEvent) {

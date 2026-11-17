@@ -11,7 +11,12 @@
  * build-manifest.json while sw.js stays identical until worker logic changes.
  */
 import { handleApiCacheFetch } from "./api-cache.ts";
-import { mirrorUrl, networkFetch } from "@/service-worker/proxy-fallback.ts";
+import {
+  currentApiRoutes,
+  networkFetch,
+  recheckApiRoutes,
+} from "./api-route.ts";
+import { mirrorUrl } from "@/service-worker/proxy-fallback.ts";
 import {
   mapsCacheName,
   userDataCacheName,
@@ -73,9 +78,10 @@ async function getDiagnostics(
   requestingClientId: string | null,
 ): Promise<WorkerDiagnosticsSnapshot> {
   const scope = self.registration.scope;
-  const [storage, cacheStorage, controlledClients, allClients] =
+  const [storage, apiRoutes, cacheStorage, controlledClients, allClients] =
     await Promise.all([
       readWorkerState(),
+      currentApiRoutes(),
       summarizeCaches(),
       self.clients.matchAll({ type: "window" }),
       self.clients.matchAll({ type: "window", includeUncontrolled: true }),
@@ -84,6 +90,7 @@ async function getDiagnostics(
   return {
     worker: { buildInfo: BUILD_INFO, scriptURL: self.location.href, scope },
     storage,
+    apiRoutes,
     runtimeClients: {
       requestingClientId,
       windows: allClients
@@ -116,6 +123,8 @@ async function handleMessage(event: ExtendableMessageEvent) {
     case "RESET":
       abortDownloads();
       return purgeWorkerCaches();
+    case "NETWORK_CHANGED":
+      return recheckApiRoutes();
     default:
       throw new Error(
         `Unknown service worker command: ${(command as { type: string }).type}`,

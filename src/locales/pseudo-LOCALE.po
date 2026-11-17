@@ -971,6 +971,10 @@ msgstr ""
 msgid "Anchor active week"
 msgstr ""
 
+#: src/components/debug/WorkerDiagnostics.tsx:319
+msgid "API routes"
+msgstr ""
+
 #: src/components/debug/DebugPage.tsx:84
 msgid "App and offline diagnostics"
 msgstr ""
@@ -3840,7 +3844,7 @@ msgstr ""
 msgid "Full and short official names"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:384
+#: src/components/debug/WorkerDiagnostics.tsx:409
 msgid "Full GET_DIAGNOSTICS response from this worker"
 msgstr ""
 
@@ -3850,7 +3854,7 @@ msgstr ""
 #~ msgstr ""
 
 #: src/components/debug/WorkerDiagnostics.tsx:256
-#: src/components/debug/WorkerDiagnostics.tsx:376
+#: src/components/debug/WorkerDiagnostics.tsx:401
 msgid "Full stored manifest"
 msgstr ""
 
@@ -4657,11 +4661,11 @@ msgstr ""
 msgid "Last worker notification observed by this App"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:347
+#: src/components/debug/WorkerDiagnostics.tsx:372
 msgid "Latest ready"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:323
+#: src/components/debug/WorkerDiagnostics.tsx:348
 msgid "Latest ready is the offline fallback, not necessarily the build loaded by this page. A snapshot refresh does not fetch the server's current manifest."
 msgstr ""
 
@@ -4961,7 +4965,7 @@ msgstr ""
 msgid "Manifest selected for this page"
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:319
+#: src/components/debug/WorkerDiagnostics.tsx:344
 msgid "Manifests stored by the worker"
 msgstr ""
 
@@ -5415,6 +5419,10 @@ msgstr ""
 #~ msgid "No additional restriction; using groups' teaching periods."
 #~ msgstr ""
 
+#: src/components/debug/WorkerDiagnostics.tsx:330
+msgid "No API host probed yet."
+msgstr ""
+
 #: src/components/events/submissions/SubmissionsPage.tsx:29
 msgid "No approved submissions."
 msgstr ""
@@ -5800,7 +5808,7 @@ msgstr ""
 msgid "No sport hours history yet."
 msgstr ""
 
-#: src/components/debug/WorkerDiagnostics.tsx:331
+#: src/components/debug/WorkerDiagnostics.tsx:356
 msgid "No stored manifests."
 msgstr ""
 
@@ -6994,6 +7002,10 @@ msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:82
 msgid "Request rooms, projectors, sports halls, and other resources for your club's meetings."
+msgstr ""
+
+#: src/components/debug/WorkerDiagnostics.tsx:323
+msgid "Requests to an API host with a mirror go either to the host or to its mirror, as the last probe of the host found."
 msgstr ""
 
 #: src/components/web-print/PrintPage.tsx:452
@@ -8923,7 +8935,7 @@ msgid "This logo change will be cancelled when you save."
 msgstr ""
 
 #: src/components/debug/WorkerDiagnostics.tsx:61
-#: src/components/debug/WorkerDiagnostics.tsx:352
+#: src/components/debug/WorkerDiagnostics.tsx:377
 msgid "This page"
 msgstr ""
 

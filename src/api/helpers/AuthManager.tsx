@@ -26,8 +26,8 @@ export function AuthManager({ children }: PropsWithChildren) {
     { enabled: false },
   );
   const { data: me, isPending, error } = $accounts.useQuery("get", "/users/me");
-  const isNetworkError =
-    error instanceof TypeError && error.message === "Failed to fetch";
+  // fetch rejects with a TypeError whose message differs by browser.
+  const isNetworkError = error instanceof TypeError;
 
   const [_, setStoredMe] = useLocalStorage<accountsTypes.SchemaViewUser | null>(
     "user",

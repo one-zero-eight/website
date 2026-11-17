@@ -1,5 +1,6 @@
 import {
   resetChannelName,
+  type ApiRoutes,
   type ResetNotification,
   type WorkerState,
 } from "./protocol.ts";
@@ -37,26 +38,23 @@ function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
-export async function readWorkerState(): Promise<WorkerState> {
+async function readRecord<T>(key: string): Promise<T | undefined> {
   const database = await openDatabase();
   return new Promise((resolve, reject) => {
     const transaction = database.transaction("state", "readonly");
-    const request = transaction.objectStore("state").get("current");
-    request.onsuccess = () =>
-      resolve(
-        (request.result as WorkerState | undefined) ?? emptyWorkerState(),
-      );
+    const request = transaction.objectStore("state").get(key);
+    request.onsuccess = () => resolve(request.result as T | undefined);
     request.onerror = () => reject(request.error);
     transaction.oncomplete = () => database.close();
     transaction.onabort = () => database.close();
   });
 }
 
-async function writeWorkerState(state: WorkerState) {
+async function writeRecord(key: string, value: unknown) {
   const database = await openDatabase();
   return new Promise<void>((resolve, reject) => {
     const transaction = database.transaction("state", "readwrite");
-    transaction.objectStore("state").put(state, "current");
+    transaction.objectStore("state").put(value, key);
     transaction.oncomplete = () => {
       database.close();
       resolve();
@@ -66,6 +64,26 @@ async function writeWorkerState(state: WorkerState) {
       reject(transaction.error);
     };
   });
+}
+
+export async function readWorkerState(): Promise<WorkerState> {
+  return (await readRecord<WorkerState>("current")) ?? emptyWorkerState();
+}
+
+function writeWorkerState(state: WorkerState) {
+  return writeRecord("current", state);
+}
+
+/**
+ * Where API requests go (see worker/api-route.ts). Knowledge of the network,
+ * not offline data: kept apart from the state, so a reset does not drop it.
+ */
+export async function readApiRoutes(): Promise<ApiRoutes> {
+  return (await readRecord<ApiRoutes>("apiRoutes")) ?? {};
+}
+
+export function writeApiRoutes(routes: ApiRoutes) {
+  return writeRecord("apiRoutes", routes);
 }
 
 /** Read under the lock (e.g. so a cache cannot be deleted meanwhile), without writing back. */

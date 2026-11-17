@@ -316,6 +316,31 @@ export function WorkerDiagnostics({
             </DiagnosticSection>
           </div>
           <DiagnosticSection
+            title={<Trans>API routes</Trans>}
+            source={`${browser.id}.GET_DIAGNOSTICS.apiRoutes → IndexedDB (last probe of each API host)`}
+          >
+            <p className="text-base-content/70 text-sm">
+              <Trans>
+                Requests to an API host with a mirror go either to the host or
+                to its mirror, as the last probe of the host found.
+              </Trans>
+            </p>
+            {Object.keys(reply.apiRoutes).length === 0 ? (
+              <p className="text-sm">
+                <Trans>No API host probed yet.</Trans>
+              </p>
+            ) : (
+              <DiagnosticFields
+                values={Object.fromEntries(
+                  Object.entries(reply.apiRoutes).map(([origin, route]) => [
+                    origin,
+                    `${route.via} · ${route.checkedAt}`,
+                  ]),
+                )}
+              />
+            )}
+          </DiagnosticSection>
+          <DiagnosticSection
             title={<Trans>Manifests stored by the worker</Trans>}
             source={`${browser.id}.GET_DIAGNOSTICS.storage.builds → IndexedDB (original server manifests)`}
           >

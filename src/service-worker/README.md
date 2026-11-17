@@ -44,7 +44,8 @@ It is a hand-written worker (no Workbox). It exists only in production builds: `
 | [`src/service-worker/worker/sw.ts`](worker/sw.ts)                                                      | Worker entry: startup cleanup, install/activate, routing of requests and commands. |
 | [`src/service-worker/worker/site-update.ts`](worker/site-update.ts)                                    | Downloading builds, offline navigation, serving files, deleting old builds.        |
 | [`src/service-worker/worker/api-cache.ts`](worker/api-cache.ts)                                        | Caching selected API responses.                                                    |
-| [`src/service-worker/proxy-fallback.ts`](proxy-fallback.ts)                                            | Retrying a request on the mirror of its host when the host is unreachable.         |
+| [`src/service-worker/worker/api-route.ts`](worker/api-route.ts)                                        | Probing API hosts and sending each request to its host or to the mirror.           |
+| [`src/service-worker/proxy-fallback.ts`](proxy-fallback.ts)                                            | The mirror of each API host, from `VITE_PROXY_HOSTS`.                              |
 | [`src/service-worker/storage.ts`](storage.ts)                                                          | The worker's state in IndexedDB, the storage lock, purge.                          |
 | [`src/service-worker/protocol.ts`](protocol.ts)                                                        | Shared types and constants for the worker and the pages.                           |
 | [`../api/helpers/mirror-session.ts`](../api/helpers/mirror-session.ts)                                 | Page side: the session the API knows on the mirror host.                           |
@@ -165,8 +166,9 @@ So an old tab keeps working, including lazy-loaded pages, even after the server 
 
 Navigation always goes to the network first and revalidates the HTML (`cache: "no-cache"`). The worker falls back to the offline copy when:
 
-- there is no network or the connection fails, or
-- the server answers 5xx.
+- there is no network or the connection fails,
+- the server answers 5xx, or
+- the server stays silent for **5 seconds**. A blocked server may drop packets instead of refusing the connection: then `fetch` fails only when the browser gives up, after 90 s in Firefox, and Firefox cancels a worker's response after about 60 s, so the offline copy would never be served. A late answer is not used: the tab stays pinned to the snapshot it got. Without a ready snapshot the worker keeps waiting, as the browser would.
 
 It serves the latest **ready** build. Before that, it checks that every file of that build is still in the cache. A build with missing files is demoted, and the next ready build is tried. A build that is still downloading is never used.
 
@@ -234,13 +236,22 @@ Only `GET` responses with status 200 are stored. URLs are matched against the `V
 
 ## Mirror of an unreachable API host
 
-Some networks block the API host by IP, and every request to it fails with a reset connection instead of a status. A mirror host is another domain that proxies the same API, and the worker retries such a failed request on it:
+Some networks block the API host by IP. Requests to it then either fail at once with a refused connection, or get no answer at all because the packets are dropped. A mirror host is another domain that proxies the same API, and the worker sends such requests there ([`api-route.ts`](worker/api-route.ts)):
 
-- The host pairs come from `VITE_PROXY_HOSTS` (`original=mirror`, comma-separated) and are built into `sw.js`. Empty means no fallback.
-- Only a rejected `fetch` is retried: a status is the answer of a reachable host, so it is passed through. The method, the body, the headers, the credentials and the path stay the same, so the mirror answers exactly what the original host would have.
-- The fallback is used on every route: cached API `GET`s, other `GET`s and the requests with a body. A cached `GET` stores the mirror's answer in the cache as usual, under the URL of the host, so offline it is still there.
-- A request whose signal was aborted is not retried.
-- A `401` from the mirror means only that the mirror has no session of this user, not that the user signed out. The page would take it for a sign-out and delete the tokens and the cached user data, so the request fails as it would without the mirror: offline, with the cached copy.
+- The host pairs come from `VITE_PROXY_HOSTS` (`original=mirror`, comma-separated) and are built into `sw.js`. Empty means no mirror.
+- **A probe decides the route** of each API host: the host itself, or its mirror. It asks the root of the host for anything (`mode: "no-cors"`); any answer, even an error status, means the host is reachable. The reverse proxy answers it even while the API behind it is busy computing. A probe gives up after **2 seconds**.
+- **Requests follow the route without trying the other way first.** A host known to be unreachable is not asked at all; a reachable one gets every request, however long it takes to answer.
+- **The probe runs:**
+  - the first time a host is used;
+  - when a page reports a network change (`online`, or `change` of `navigator.connection` where the browser has it);
+  - when a request to the host fails, or gets no answer for **1 second**;
+  - in the background, at most once a minute, while the host is routed to its mirror, to find the way back.
+- **A request that waits** is not duplicated. If its host stays silent for a second and the probe finds it reachable, the request keeps waiting: the host is only busy, and must not compute it twice. If the probe finds it unreachable, the request is cancelled and sent to the mirror. The host never got it, so even a request with a body is executed once.
+- Waiting for a failure would not do: `fetch` to a host that drops packets fails only when the browser gives up (90 s in Firefox), and Firefox cancels a worker's response after about 60 s.
+- The routes are kept in IndexedDB (key `apiRoutes`), so a restarted worker knows them at once. The Debug page shows them.
+- The method, the body, the headers, the credentials and the path stay the same, so the mirror answers exactly what the host would have. Cached API `GET`s store the mirror's answer as usual, under the URL of the host, so offline it is still there.
+- A request whose signal was aborted is not resent.
+- A `401` from the mirror means only that the mirror has no session of this user, not that the user signed out. The page would take it for a sign-out and delete the tokens and the cached user data, so the request fails as if the host were unreachable: offline, with the cached copy. A network error never signs the user out: [`AuthManager`](../api/helpers/AuthManager.tsx) takes any `TypeError`, whose message differs by browser, for one.
 
 The mirror is another site, so it cannot use the session cookie of the main host: the browser never sends that one there. Accounts keeps a separate session on the mirror, a `SameSite=None; Partitioned` cookie (CHIPS), and gives it out for a 1-minute transfer token from the main host. [`mirror-session.ts`](../api/helpers/mirror-session.ts) does that exchange once per page load while the main host still answers, and clears the mirror session on sign out. Without it the mirror would only answer as a signed-out user: the fallback is for a host that stops answering, not for one that never answered, because the session has to be copied before that.
 
@@ -258,7 +269,9 @@ The mirror is another site, so it cannot use the session cookie of the main host
 | `resetPending`                           | A purge started but has not finished.                                                   |
 | `manifestCheck`, `lastSuccessfulCheckAt` | Result of the last check (for diagnostics).                                             |
 
-All writers go through the Web Lock `innohassle-sw-storage`. This includes several worker versions and pages that reset without a worker.
+Key `apiRoutes` keeps the route of each API host with a mirror (see [Mirror of an unreachable API host](#mirror-of-an-unreachable-api-host)). It is knowledge of the network, not offline data, so a reset keeps it and it needs no lock.
+
+All writers of `current` go through the Web Lock `innohassle-sw-storage`. This includes several worker versions and pages that reset without a worker.
 
 **Cache Storage** — `app-build-*` (builds), `api-user-data` and `api-maps`. On every start, the worker deletes any other cache, and the `workbox-expiration` database. This also removes the caches of the former Workbox worker.
 
@@ -317,15 +330,16 @@ Also keep the old `/assets/*` files for a while after a deploy. This helps tabs 
 ## Tests
 
 ```bash
-pnpm run test:sw            # unit tests + Playwright tests in Chromium
+pnpm run test:sw            # unit tests + Playwright tests in Chromium and Firefox
 pnpm run test:sw:preview    # visible demo with real `pnpm preview` builds
 pnpm run test:sw:preview --pause-ms 1000 --final-pause-ms 10000 --port 3001
-pnpm exec playwright install chromium   # once, if Chromium is missing
+pnpm exec playwright install chromium firefox   # once, if a browser is missing
 ```
 
-- The Playwright tests build three real versions of the site (A, B, C) and serve them on port 5201, with a mock API on 5202. They also rebuild A from two commits to check that the files are identical. They cover:
+- The Playwright tests build three real versions of the site (A, B, C) and serve them on port 5201, with a mock API on 5202 and its mirror on 5203. They also rebuild A from two commits to check that the files are identical. Tests tagged `@firefox` also run in Firefox: the mirror and the fallbacks for a silent server, because Firefox cancels a worker's response sooner than Chromium. They cover:
   - identical rebuilds, partial and interrupted downloads, and downloading only changed files;
-  - offline, connection-error and 5xx navigation;
+  - offline, connection-error, 5xx and silent-server navigation;
+  - the mirror of the API: refused, silent and busy hosts, network changes, its session, a mirror that does not know the user;
   - pins and deleting old builds;
   - automatic reloads, rollbacks and blockers;
   - TV, reset, worker restarts, the API cache and removal of old caches.
@@ -336,7 +350,10 @@ pnpm exec playwright install chromium   # once, if Chromium is missing
 - **Unsaved input can be lost.** Automatic reloads happen on every page that has no `useAutoUpdateBlocker`, including forms with drafts.
 - **Changed bytes in Cache Storage are not detected.** Files are verified only when stored; the browser itself never changes them, but a manual edit (for example, in DevTools) would go unnoticed. The main scripts and styles still have SRI in `index.html`, and the Debug reset repairs everything.
 - **Pages of the former Workbox worker are reloaded at once.** When this worker activates, it reloads every window the previous worker controlled that never sent it `CLIENT_HELLO`. Their precache is deleted, so their lazy chunks would 404. Unsaved input in such a tab is lost. A first visit is not reloaded: its page was not controlled before activation.
-- **A host that drops packets is only retried late.** The fallback needs `fetch` to fail, and a connection that is silently dropped fails only when the browser gives up on it. A cached `GET` is served from the cache meanwhile; other requests wait. Asking the mirror in parallel after a second was rejected: it sends every `GET` to the mirror twice whenever the host is merely slow, and a 401 from the mirror would then sign the user out locally.
+- **A network change is noticed late in Firefox.** It has no `navigator.connection` and fires `online` only after being offline, so switching a VPN on is noticed by the first request that gets no answer: a second, plus up to 2 seconds of probing. Switching it off is noticed within a minute; until then requests take the detour through the mirror.
+- **A request already sent before the block began may run twice.** If the host received it and the network was blocked before the answer, the probe fails and the request goes to the mirror again.
+- **API requests longer than about 60 seconds fail in Firefox.** The worker answers every request to an API host with a mirror, and Firefox cancels a worker's response after about 60 s even when the host is computing.
+- **A silent site opens after 5 seconds.** Each navigation waits that long for the server before the offline copy. A slow network that needs more than 5 seconds for the HTML gets the offline copy and the "You are offline" banner too.
 - **Safari blocks cross-site cookies.** The mirror session is exactly that, so on Safari the fallback only helps with requests that need no session; the others fail as without the mirror. Chrome, Edge and Firefox keep it.
 - **The mirror needs a recent session.** The exchange happens once per page load, while the main host answers. If the mirror session expires (14 days) or was never copied, requests that fall back are answered as a signed-out user until a page load with a reachable main host.
 - **Browser support.** Requires Web Locks, `BroadcastChannel` and `Array.prototype.findLast`, so Safari / iOS 15.4 or newer. Without Web Locks the worker intercepts no requests: the site works online, without offline mode.
