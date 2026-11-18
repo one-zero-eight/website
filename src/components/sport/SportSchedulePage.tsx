@@ -27,12 +27,13 @@ const SportTrainingsCalendarList = lazy(() =>
 );
 
 export function SportSchedulePage() {
-  const { studentId, trainerGroupIds, studentStatus } = useSportProfile();
+  const { studentId, trainerGroupIds, studentStatus, isStudent } =
+    useSportProfile();
   const { data: hours, isError: hoursError } = $sport.useQuery(
     "get",
     "/students/{student_id}/hours-summary",
     { params: { path: { student_id: Number(studentId) } } },
-    { enabled: studentId != null },
+    { enabled: isStudent && studentId != null },
   );
 
   const { data: currentSemester, isError: semesterError } = $sport.useQuery(
@@ -42,12 +43,13 @@ export function SportSchedulePage() {
 
   return (
     <>
-      {hoursError || semesterError ? (
+      {isStudent && (hoursError || semesterError) ? (
         <div className="alert alert-error mb-6">
           <Trans>Sport progress could not be loaded.</Trans>
         </div>
       ) : null}
-      {studentStatus?.trim().toLowerCase() === "normal" &&
+      {isStudent &&
+      studentStatus?.trim().toLowerCase() === "normal" &&
       hours &&
       hours.hours_from_groups + hours.self_sport_hours < hours.debt ? (
         <div className="alert alert-error mx-auto mb-6 flex w-full max-w-xl flex-col items-start gap-2">
@@ -65,11 +67,13 @@ export function SportSchedulePage() {
           </p>
         </div>
       ) : null}
-      <SportProgressSection
-        hours={hours}
-        currentSemester={currentSemester}
-        studentId={studentId}
-      />
+      {isStudent ? (
+        <SportProgressSection
+          hours={hours}
+          currentSemester={currentSemester}
+          studentId={studentId}
+        />
+      ) : null}
       {studentId != null ? (
         <SportCalendar
           studentId={studentId}

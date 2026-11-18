@@ -13,6 +13,7 @@ import {
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { useMyAcademicCalendar } from "@/components/dashboard/academic-calendar.tsx";
 import { trainingRowToListEvent } from "@/components/sport/sport-calendar-events.ts";
+import { useSportProfile } from "@/components/sport/sport-profile.ts";
 import {
   canShowCheckInButton,
   invalidateSportCheckinQueries,
@@ -44,6 +45,7 @@ export function SportTrainingsCalendarList({
 }) {
   const { i18n, t } = useLingui();
   const { academicCalendar } = useMyAcademicCalendar();
+  const { isStudent } = useSportProfile();
   const { data: clubs, isError: clubsError } = $clubs.useQuery(
     "get",
     "/clubs/",
@@ -57,9 +59,9 @@ export function SportTrainingsCalendarList({
     "/students/{student_id}/semester-history",
     { params: { path: { student_id: studentId } } },
     {
-      enabled: rows.some(
-        (row) => new Date(row.training.end).getTime() <= Date.now(),
-      ),
+      enabled:
+        isStudent &&
+        rows.some((row) => new Date(row.training.end).getTime() <= Date.now()),
     },
   );
   const earnedHoursByTrainingId = useMemo(
@@ -73,6 +75,8 @@ export function SportTrainingsCalendarList({
       ),
     [semesters],
   );
+  /** Only students have sport hours, so non-students never see hour errors. */
+  const showEarnedHoursError = isStudent && historyError;
   const groupsById = useMemo(
     () =>
       new Map(
@@ -310,7 +314,7 @@ export function SportTrainingsCalendarList({
           </Trans>
         </div>
       ) : null}
-      {historyError ? (
+      {showEarnedHoursError ? (
         <div className="alert alert-error mb-2">
           <Trans>Earned sport hours could not be loaded.</Trans>
         </div>

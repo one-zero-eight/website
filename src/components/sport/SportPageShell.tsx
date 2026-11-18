@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 /**
  * Handles profile loading and error states shared by every sport page,
+ * gates the pages available only to students and trainers,
  * then renders children inside the page's width-constrained container.
  */
 export function SportPageShell({
@@ -48,6 +49,24 @@ export function SportPageShell({
                   You may not be registered in the sport system yet.
                 </Trans>
               )}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!sport.hasSportAccess) {
+    return (
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 py-6">
+        <div className="card card-border bg-base-100 mx-auto w-full max-w-xl">
+          <div className="card-body items-center gap-3 text-center">
+            <span className="icon-[material-symbols--info-outline-rounded] text-warning text-5xl" />
+            <h2 className="card-title">
+              <Trans>You are not a student</Trans>
+            </h2>
+            <p className="text-base-content/80 text-sm">
+              <Trans>You will get access after the semester start.</Trans>
             </p>
           </div>
         </div>

@@ -75,7 +75,7 @@ msgstr ""
 msgid "(current semester)"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:218
+#: src/components/sport/SportStudentTrainingModal.tsx:220
 msgid "(no places left)"
 msgstr ""
 
@@ -267,8 +267,8 @@ msgstr ""
 msgid "{doneCount} of {realCount} matches played · {0} players"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:295
-#: src/components/sport/SportTrainingsCalendarList.tsx:219
+#: src/components/sport/SportStudentTrainingModal.tsx:297
+#: src/components/sport/SportTrainingsCalendarList.tsx:221
 msgid "{earnedHours}h"
 msgstr ""
 
@@ -373,7 +373,7 @@ msgid "{placed, plural, one {# class scheduled} other {# classes scheduled}}"
 msgstr ""
 
 #. placeholder {0}: training.max_checkins
-#: src/components/sport/SportStudentTrainingModal.tsx:212
+#: src/components/sport/SportStudentTrainingModal.tsx:214
 msgid "{placesFree} / {0} free"
 msgstr ""
 
@@ -536,7 +536,7 @@ msgstr ""
 msgid "<0>Teaching</0><1> · </1>classes where you are the instructor"
 msgstr ""
 
-#: src/components/sport/SportSchedulePage.tsx:58
+#: src/components/sport/SportSchedulePage.tsx:60
 msgid "<0>To remove</0> the DEBTOR status you should clear the debt bar, attending <1>on trainings</1>.<2/>Closing the debt is <3>required to pass the sport course</3>."
 msgstr ""
 
@@ -1575,11 +1575,11 @@ msgstr ""
 msgid "Cancelled"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:261
+#: src/components/sport/SportStudentTrainingModal.tsx:263
 msgid "Cannot check in"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:246
+#: src/components/sport/SportStudentTrainingModal.tsx:248
 msgid "Cannot check out"
 msgstr ""
 
@@ -1679,8 +1679,8 @@ msgstr ""
 msgid "Chat"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:497
-#: src/components/sport/SportTrainingsCalendarList.tsx:270
+#: src/components/sport/SportStudentTrainingModal.tsx:499
+#: src/components/sport/SportTrainingsCalendarList.tsx:272
 msgid "Check in"
 msgstr ""
 
@@ -1688,11 +1688,11 @@ msgstr ""
 msgid "Check in for sports in the <0>Sport bot</0>"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:436
-#: src/components/sport/SportStudentTrainingModal.tsx:448
-#: src/components/sport/SportStudentTrainingModal.tsx:485
-#: src/components/sport/SportTrainingsCalendarList.tsx:256
-#: src/components/sport/SportTrainingsCalendarList.tsx:268
+#: src/components/sport/SportStudentTrainingModal.tsx:438
+#: src/components/sport/SportStudentTrainingModal.tsx:450
+#: src/components/sport/SportStudentTrainingModal.tsx:487
+#: src/components/sport/SportTrainingsCalendarList.tsx:258
+#: src/components/sport/SportTrainingsCalendarList.tsx:270
 msgid "Check out"
 msgstr ""
 
@@ -1714,7 +1714,7 @@ msgid "Check the players ({0}): pick the right one, fix the email, add as a gues
 msgstr ""
 
 #: src/components/sport/SportStudentTrainingModal.tsx:79
-#: src/components/sport/SportTrainingsCalendarList.tsx:129
+#: src/components/sport/SportTrainingsCalendarList.tsx:131
 msgid "Check-in failed · Retry"
 msgstr ""
 
@@ -1727,11 +1727,11 @@ msgid "Check-in opens 7 days before the training."
 msgstr ""
 
 #: src/components/sport/SportStudentTrainingModal.tsx:80
-#: src/components/sport/SportTrainingsCalendarList.tsx:130
+#: src/components/sport/SportTrainingsCalendarList.tsx:132
 msgid "Check-out failed · Retry"
 msgstr ""
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:118
+#: src/components/sport/SportTrainingsCalendarList.tsx:120
 msgid "Checked in"
 msgstr ""
 
@@ -1739,7 +1739,7 @@ msgstr ""
 msgid "Checked in successfully!"
 msgstr ""
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:119
+#: src/components/sport/SportTrainingsCalendarList.tsx:121
 msgid "Checked out"
 msgstr ""
 
@@ -1854,7 +1854,7 @@ msgstr ""
 
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
 #: src/components/sport/SportOverviewSection.tsx:719
-#: src/components/sport/SportStudentTrainingModal.tsx:392
+#: src/components/sport/SportStudentTrainingModal.tsx:394
 #: src/components/sport/SportTrainerAttendanceModal.tsx:148
 #: src/components/sport/SportTrainerTrainingModal.tsx:91
 #: src/components/when2meet/MeetingRoomModal.tsx:359
@@ -1867,12 +1867,12 @@ msgstr ""
 
 #: src/components/board-games/BoardGamesTabs.tsx:30
 #: src/components/events/utils/host.ts:34
-#: src/components/sport/SportStudentTrainingModal.tsx:303
+#: src/components/sport/SportStudentTrainingModal.tsx:305
 #: src/components/tabletennis/TabletennisTabs.tsx:26
 msgid "Club"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:322
+#: src/components/sport/SportStudentTrainingModal.tsx:324
 msgid "Club could not be loaded."
 msgstr ""
 
@@ -1928,11 +1928,11 @@ msgid "Club Logo"
 msgstr ""
 
 #: src/components/sport/SportHistoryPage.tsx:105
-#: src/components/sport/SportSchedulePage.tsx:320
+#: src/components/sport/SportSchedulePage.tsx:324
 msgid "Club logos could not be loaded."
 msgstr ""
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:308
+#: src/components/sport/SportTrainingsCalendarList.tsx:310
 msgid "Club logos or training restrictions could not be loaded."
 msgstr ""
 
@@ -2014,7 +2014,7 @@ msgstr ""
 msgid "College"
 msgstr ""
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:209
+#: src/components/sport/SportTrainingsCalendarList.tsx:211
 msgid "College only"
 msgstr ""
 
@@ -2601,7 +2601,7 @@ msgstr ""
 msgid "Deadline:"
 msgstr ""
 
-#: src/components/sport/SportSchedulePage.tsx:55
+#: src/components/sport/SportSchedulePage.tsx:57
 msgid "Dear student!"
 msgstr ""
 
@@ -2803,14 +2803,14 @@ msgstr ""
 #: src/components/board-games/BoardGamesPage.tsx:465
 #: src/components/calendar/import/ImportModal.tsx:185
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:351
-#: src/components/sport/SportStudentTrainingModal.tsx:358
-#: src/components/sport/SportStudentTrainingModal.tsx:365
-#: src/components/sport/SportStudentTrainingModal.tsx:374
+#: src/components/sport/SportStudentTrainingModal.tsx:360
+#: src/components/sport/SportStudentTrainingModal.tsx:367
+#: src/components/sport/SportStudentTrainingModal.tsx:376
 #: src/components/when2meet/CreationPage.tsx:397
 msgid "Description"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:368
+#: src/components/sport/SportStudentTrainingModal.tsx:370
 msgid "Description could not be loaded."
 msgstr ""
 
@@ -2982,8 +2982,8 @@ msgstr ""
 msgid "e.g., CSE electives"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:286
-#: src/components/sport/SportTrainingsCalendarList.tsx:315
+#: src/components/sport/SportStudentTrainingModal.tsx:288
+#: src/components/sport/SportTrainingsCalendarList.tsx:317
 msgid "Earned sport hours could not be loaded."
 msgstr ""
 
@@ -4848,7 +4848,7 @@ msgstr ""
 #: src/components/events/shared/LocationField.tsx:73
 #: src/components/schedule-assistant/timetable/MeetingInstanceMetadata.tsx:128
 #: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:938
-#: src/components/sport/SportStudentTrainingModal.tsx:269
+#: src/components/sport/SportStudentTrainingModal.tsx:271
 msgid "Location"
 msgstr ""
 
@@ -5265,7 +5265,7 @@ msgstr ""
 msgid "My meetings"
 msgstr ""
 
-#: src/components/sport/SportSchedulePage.tsx:316
+#: src/components/sport/SportSchedulePage.tsx:320
 msgid "My upcoming trainings"
 msgstr ""
 
@@ -5831,7 +5831,7 @@ msgstr ""
 msgid "No Telegram alias"
 msgstr ""
 
-#: src/components/sport/SportSchedulePage.tsx:266
+#: src/components/sport/SportSchedulePage.tsx:270
 msgid "No trainings match the selected filters."
 msgstr ""
 
@@ -6255,7 +6255,7 @@ msgstr ""
 #~ msgid "Pages update automatically by default. An active useBlocker in a component pauses updates until it is disabled or unmounted."
 #~ msgstr ""
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:204
+#: src/components/sport/SportTrainingsCalendarList.tsx:206
 msgid "Paid"
 msgstr ""
 
@@ -6408,7 +6408,7 @@ msgstr ""
 msgid "Place {0}"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:209
+#: src/components/sport/SportStudentTrainingModal.tsx:211
 msgid "Places"
 msgstr ""
 
@@ -7133,9 +7133,9 @@ msgstr ""
 #: src/components/schedule-assistant/timetable/PublicTimetablePage.tsx:115
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
-#: src/components/sport/SportStudentTrainingModal.tsx:443
-#: src/components/sport/SportStudentTrainingModal.tsx:492
-#: src/components/sport/SportTrainingsCalendarList.tsx:263
+#: src/components/sport/SportStudentTrainingModal.tsx:445
+#: src/components/sport/SportStudentTrainingModal.tsx:494
+#: src/components/sport/SportTrainingsCalendarList.tsx:265
 #: src/components/tabletennis/ValidationMatches.tsx:555
 #: src/components/when2meet/MeetingRoomModal.tsx:289
 #: src/components/when2meet/MeetingRoomModal.tsx:306
@@ -7442,7 +7442,7 @@ msgstr ""
 msgid "Schedule"
 msgstr ""
 
-#: src/components/sport/SportSchedulePage.tsx:260
+#: src/components/sport/SportSchedulePage.tsx:264
 msgid "Schedule could not be loaded."
 msgstr ""
 
@@ -8129,7 +8129,7 @@ msgstr ""
 msgid "Sport history"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:291
+#: src/components/sport/SportStudentTrainingModal.tsx:293
 msgid "Sport hours earned"
 msgstr ""
 
@@ -8162,11 +8162,11 @@ msgstr ""
 msgid "Sport profile"
 msgstr ""
 
-#: src/components/sport/SportPageShell.tsx:37
+#: src/components/sport/SportPageShell.tsx:38
 msgid "Sport profile unavailable"
 msgstr ""
 
-#: src/components/sport/SportSchedulePage.tsx:47
+#: src/components/sport/SportSchedulePage.tsx:48
 msgid "Sport progress could not be loaded."
 msgstr ""
 
@@ -8951,11 +8951,11 @@ msgid "This tournament already has games in the old bracket format."
 msgstr ""
 
 #: src/components/sport/sport-checkin-utils.ts:77
-#: src/components/sport/SportStudentTrainingModal.tsx:250
+#: src/components/sport/SportStudentTrainingModal.tsx:252
 msgid "This training has already ended."
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:251
+#: src/components/sport/SportStudentTrainingModal.tsx:253
 msgid "This training has already started."
 msgstr ""
 
@@ -9004,7 +9004,7 @@ msgstr ""
 msgid "Time"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:201
+#: src/components/sport/SportStudentTrainingModal.tsx:203
 msgid "Time & date"
 msgstr ""
 
@@ -9094,7 +9094,7 @@ msgstr ""
 msgid "Title is required"
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:400
+#: src/components/sport/SportStudentTrainingModal.tsx:402
 msgid "To attendance"
 msgstr ""
 
@@ -9131,7 +9131,7 @@ msgstr ""
 #: src/components/calendar/CalendarViewer.tsx:656
 #: src/components/room-booking/room-page/RoomCalendarViewer.tsx:297
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:647
-#: src/components/sport/SportSchedulePage.tsx:237
+#: src/components/sport/SportSchedulePage.tsx:241
 msgid "Today"
 msgstr ""
 
@@ -9181,7 +9181,7 @@ msgstr ""
 
 #: src/components/sport/SportProfilePage.tsx:26
 #: src/components/sport/SportTabs.tsx:25
-#: src/components/sport/SportTrainingsCalendarList.tsx:214
+#: src/components/sport/SportTrainingsCalendarList.tsx:216
 msgid "Trainer"
 msgstr ""
 
@@ -9193,8 +9193,8 @@ msgstr ""
 msgid "Trainer tools for sport groups at Innopolis University."
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:328
-#: src/components/sport/SportStudentTrainingModal.tsx:335
+#: src/components/sport/SportStudentTrainingModal.tsx:330
+#: src/components/sport/SportStudentTrainingModal.tsx:337
 msgid "Trainers"
 msgstr ""
 
@@ -9211,7 +9211,7 @@ msgstr ""
 msgid "Training duration is unavailable."
 msgstr ""
 
-#: src/components/sport/SportStudentTrainingModal.tsx:240
+#: src/components/sport/SportStudentTrainingModal.tsx:242
 msgid "Training eligibility could not be fully loaded."
 msgstr ""
 
@@ -9219,7 +9219,7 @@ msgstr ""
 msgid "Training types could not be loaded."
 msgstr ""
 
-#: src/components/sport/SportSchedulePage.tsx:229
+#: src/components/sport/SportSchedulePage.tsx:233
 msgid "Trainings"
 msgstr ""
 
@@ -9782,7 +9782,7 @@ msgstr ""
 
 #: src/components/calendar/CalendarViewer.tsx:468
 #: src/components/calendar/CalendarViewer.tsx:523
-#: src/components/sport/SportTrainingsCalendarList.tsx:368
+#: src/components/sport/SportTrainingsCalendarList.tsx:370
 msgid "Week {week}"
 msgstr ""
 
@@ -9989,6 +9989,10 @@ msgstr ""
 msgid "You are better than <0>{betterThan}%</0> of the students!"
 msgstr ""
 
+#: src/components/sport/SportPageShell.tsx:66
+msgid "You are not a student"
+msgstr ""
+
 #: src/components/when2meet/MeetingsLandingPage.tsx:171
 msgid "You are not participating in any active meetings."
 msgstr ""
@@ -10092,12 +10096,16 @@ msgstr ""
 msgid "You have unsaved changes. Are you sure you want to leave?"
 msgstr ""
 
-#: src/components/sport/SportPageShell.tsx:47
+#: src/components/sport/SportPageShell.tsx:48
 msgid "You may not be registered in the sport system yet."
 msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:164
 msgid "You need <0>at least two responsible clubmates</0> to set up a club. Think about positions like communications officer, marketing assistant, treasurer, etc."
+msgstr ""
+
+#: src/components/sport/SportPageShell.tsx:69
+msgid "You will get access after the semester start."
 msgstr ""
 
 #: src/components/onboarding/OnboardingSteps.tsx:242
