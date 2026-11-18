@@ -20,6 +20,16 @@ export function BoardGamesTabs() {
           </TabLink>
         </>
       )}
+      <Link
+        to="/clubs/$slug"
+        params={{ slug: "umars-mafia-board-games" }}
+        className="px-2 py-1"
+      >
+        <span className="inline-flex items-center gap-1">
+          <span className="icon-[mdi--account-group-outline] text-base" />
+          <Trans>Club</Trans>
+        </span>
+      </Link>
     </div>
   );
 }

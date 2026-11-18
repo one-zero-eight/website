@@ -1865,8 +1865,10 @@ msgstr "Close"
 msgid "Close notification"
 msgstr "Close notification"
 
+#: src/components/board-games/BoardGamesTabs.tsx:30
 #: src/components/events/utils/host.ts:34
 #: src/components/sport/SportStudentTrainingModal.tsx:303
+#: src/components/tabletennis/TabletennisTabs.tsx:26
 msgid "Club"
 msgstr "Club"
 
