@@ -15,6 +15,10 @@ import {
 } from "@/api/search/types";
 import { queryClient } from "@/app/query-client";
 import { validBookingReceipt } from "./ask-booking";
+import {
+  AssistantUnavailableError,
+  searchWithoutAssistant,
+} from "./ask-search-fallback";
 import { useSyncExternalStore } from "react";
 
 export type DraftAttachment = {
@@ -67,7 +71,7 @@ type AskStreamEvent =
   | { name: "status"; data: { text: string } }
   | { name: "answer"; data: { text: string } }
   | { name: "done"; data: searchTypes.SchemaAskResponses }
-  | { name: "error"; data: { detail: string } };
+  | { name: "error"; data: { detail: string; code?: "llm_unavailable" } };
 
 // The conversation with the assistant lives outside the page: going to another page and back keeps the questions and the
 // answers, and an answer being written goes on meanwhile. The questions and the answers are kept in this tab
@@ -285,7 +289,9 @@ async function readAnswer(
       } else if (event?.name === "answer") {
         update({ answerText: event.data.text });
       } else if (event?.name === "error") {
-        throw new Error(event.data.detail);
+        throw event.data.code === "llm_unavailable"
+          ? new AssistantUnavailableError(event.data.detail)
+          : new Error(event.data.detail);
       } else if (event?.name === "done") {
         return event.data;
       }
@@ -332,7 +338,10 @@ export async function askQuestion(
       session.chatId,
       attachments,
       controller.signal,
-    );
+    ).catch((e) => {
+      if (!(e instanceof AssistantUnavailableError)) throw e;
+      return searchWithoutAssistant(query, session.chatId, controller.signal);
+    });
     if (!controller.signal.aborted && !response) {
       cancelQuestion();
       return;
