@@ -68,7 +68,7 @@ export function NewsWidget() {
                   type="button"
                   onClick={() => setOpenedItem(item)}
                   className={cn(
-                    "group hover:bg-base-200-hover/50 rounded-box flex w-full shrink-0 cursor-pointer snap-center flex-row items-center gap-4 pt-4 pr-16 pl-4 text-left",
+                    "group hover:bg-base-300 rounded-box flex w-full shrink-0 cursor-pointer snap-center flex-row items-center gap-4 pt-4 pr-16 pl-4 text-left transition-colors",
                     items.length > 1 ? "pb-1" : "pb-4",
                   )}
                 >
@@ -91,7 +91,7 @@ export function NewsWidget() {
 
           <button
             type="button"
-            className="text-base-content/50 hover:bg-base-200-hover/50 hover:text-base-content/75 rounded-box absolute top-0 right-0 flex h-12 w-12 items-center justify-center"
+            className="text-base-content/50 hover:bg-base-300 hover:text-base-content/75 rounded-box absolute top-0 right-0 flex h-12 w-12 items-center justify-center"
             onClick={() =>
               setDismissedIds((ids) => [...ids, items[activeIndex].id])
             }
@@ -115,7 +115,9 @@ export function NewsWidget() {
                   type="button"
                   className={cn(
                     "h-2 w-2 rounded-full",
-                    index === activeIndex ? "bg-primary" : "bg-base-content/25",
+                    index === activeIndex
+                      ? "bg-primary"
+                      : "bg-base-content/25 hover:bg-base-content/50",
                   )}
                   onClick={() => scrollToSlide(index)}
                 />
