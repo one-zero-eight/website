@@ -35,6 +35,10 @@ export function NewsWidget() {
   const contentLocale = locale === "ru" ? "ru" : "en";
   const OpenedBody = openedItem?.content[contentLocale].Body;
 
+  function dismissItem(id: string) {
+    setDismissedIds((ids) => (ids.includes(id) ? ids : [...ids, id]));
+  }
+
   function handleScroll() {
     const slider = sliderRef.current;
     if (!slider) return;
@@ -133,7 +137,11 @@ export function NewsWidget() {
 
       <Modal
         open={openedItem !== null}
-        onOpenChange={(open) => !open && setOpenedItem(null)}
+        onOpenChange={(open) => {
+          if (open || !openedItem) return;
+          dismissItem(openedItem.id);
+          setOpenedItem(null);
+        }}
         title={openedItem?.content[contentLocale].title}
       >
         <div className="prose prose-quoteless dark:prose-invert prose-img:rounded-box max-w-none">
