@@ -4698,7 +4698,7 @@ msgstr "Развивайте навыки общения, командной р�
 msgid "Learn how different people respond to situations and develop your skills in presenting and implementing ideas."
 msgstr "Учитесь понимать разных людей и развивайте навыки презентации и реализации идей."
 
-#: src/components/dashboard/news/NewsWidget.tsx:44
+#: src/components/dashboard/news/NewsWidget.tsx:80
 msgid "Learn more"
 msgstr "Подробнее"
 

@@ -4698,7 +4698,7 @@ msgstr "Learn and improve essential people skills like communication, teamwork, 
 msgid "Learn how different people respond to situations and develop your skills in presenting and implementing ideas."
 msgstr "Learn how different people respond to situations and develop your skills in presenting and implementing ideas."
 
-#: src/components/dashboard/news/NewsWidget.tsx:44
+#: src/components/dashboard/news/NewsWidget.tsx:80
 msgid "Learn more"
 msgstr "Learn more"
 
