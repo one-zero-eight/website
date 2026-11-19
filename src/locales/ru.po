@@ -268,7 +268,7 @@ msgid "{doneCount} of {realCount} matches played · {0} players"
 msgstr "Сыграно матчей: {doneCount} из {realCount} · игроков: {0}"
 
 #: src/components/sport/SportStudentTrainingModal.tsx:297
-#: src/components/sport/SportTrainingsCalendarList.tsx:221
+#: src/components/sport/SportTrainingsCalendarList.tsx:223
 msgid "{earnedHours}h"
 msgstr "{earnedHours} ч"
 
@@ -1680,7 +1680,7 @@ msgid "Chat"
 msgstr "Чат"
 
 #: src/components/sport/SportStudentTrainingModal.tsx:499
-#: src/components/sport/SportTrainingsCalendarList.tsx:272
+#: src/components/sport/SportTrainingsCalendarList.tsx:274
 msgid "Check in"
 msgstr "Записаться"
 
@@ -1691,8 +1691,8 @@ msgstr "Записаться на спорт в <0>Sport bot</0>"
 #: src/components/sport/SportStudentTrainingModal.tsx:438
 #: src/components/sport/SportStudentTrainingModal.tsx:450
 #: src/components/sport/SportStudentTrainingModal.tsx:487
-#: src/components/sport/SportTrainingsCalendarList.tsx:258
-#: src/components/sport/SportTrainingsCalendarList.tsx:270
+#: src/components/sport/SportTrainingsCalendarList.tsx:260
+#: src/components/sport/SportTrainingsCalendarList.tsx:272
 msgid "Check out"
 msgstr "Отменить запись"
 
@@ -1714,7 +1714,7 @@ msgid "Check the players ({0}): pick the right one, fix the email, add as a gues
 msgstr "Проверьте игроков ({0}): выберите нужного, исправьте email, добавьте как гостя или удалите."
 
 #: src/components/sport/SportStudentTrainingModal.tsx:79
-#: src/components/sport/SportTrainingsCalendarList.tsx:131
+#: src/components/sport/SportTrainingsCalendarList.tsx:133
 msgid "Check-in failed · Retry"
 msgstr "Не удалось записаться · Повторить"
 
@@ -1727,11 +1727,11 @@ msgid "Check-in opens 7 days before the training."
 msgstr "Запись открывается за 7 дней до тренировки."
 
 #: src/components/sport/SportStudentTrainingModal.tsx:80
-#: src/components/sport/SportTrainingsCalendarList.tsx:132
+#: src/components/sport/SportTrainingsCalendarList.tsx:134
 msgid "Check-out failed · Retry"
 msgstr "Не удалось отменить запись · Повторить"
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:120
+#: src/components/sport/SportTrainingsCalendarList.tsx:122
 msgid "Checked in"
 msgstr "Отмечено"
 
@@ -1739,7 +1739,7 @@ msgstr "Отмечено"
 msgid "Checked in successfully!"
 msgstr "Запись выполнена!"
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:121
+#: src/components/sport/SportTrainingsCalendarList.tsx:123
 msgid "Checked out"
 msgstr "Запись отменена"
 
@@ -1932,7 +1932,7 @@ msgstr "Логотип клуба"
 msgid "Club logos could not be loaded."
 msgstr "Не удалось загрузить логотипы клубов."
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:310
+#: src/components/sport/SportTrainingsCalendarList.tsx:312
 msgid "Club logos or training restrictions could not be loaded."
 msgstr "Не удалось загрузить логотипы клубов или ограничения тренировок."
 
@@ -2014,7 +2014,7 @@ msgstr "Свернуть"
 msgid "College"
 msgstr "Колледжист"
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:211
+#: src/components/sport/SportTrainingsCalendarList.tsx:213
 msgid "College only"
 msgstr "Только колледж"
 
@@ -2983,7 +2983,7 @@ msgid "e.g., CSE electives"
 msgstr "напр. элективы CSE"
 
 #: src/components/sport/SportStudentTrainingModal.tsx:288
-#: src/components/sport/SportTrainingsCalendarList.tsx:317
+#: src/components/sport/SportTrainingsCalendarList.tsx:319
 msgid "Earned sport hours could not be loaded."
 msgstr "Не удалось загрузить заработанные спортивные часы."
 
@@ -3994,7 +3994,7 @@ msgstr "Перейти"
 msgid "Go to {navigationTarget}"
 msgstr "Перейти к {navigationTarget}"
 
-#: src/components/dashboard/DashboardPage.tsx:48
+#: src/components/dashboard/DashboardPage.tsx:50
 msgid "Go to calendar"
 msgstr "В календарь"
 
@@ -4697,6 +4697,10 @@ msgstr "Развивайте навыки общения, командной р�
 #: src/components/clubs/HowToCreateClubPage.tsx:48
 msgid "Learn how different people respond to situations and develop your skills in presenting and implementing ideas."
 msgstr "Учитесь понимать разных людей и развивайте навыки презентации и реализации идей."
+
+#: src/components/dashboard/news/NewsWidget.tsx:44
+msgid "Learn more"
+msgstr "Подробнее"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:27
 msgid "Learn More About Yourself"
@@ -6255,7 +6259,7 @@ msgstr "По умолчанию страницы обновляются авто
 #~ msgid "Pages update automatically by default. An active useBlocker in a component pauses updates until it is disabled or unmounted."
 #~ msgstr "По умолчанию страницы обновляются автоматически. Активный useBlocker в компоненте приостанавливает обновления до его отключения или размонтирования компонента."
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:206
+#: src/components/sport/SportTrainingsCalendarList.tsx:208
 msgid "Paid"
 msgstr "Платно"
 
@@ -7135,7 +7139,7 @@ msgstr "Пересдача"
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/sport/SportStudentTrainingModal.tsx:445
 #: src/components/sport/SportStudentTrainingModal.tsx:494
-#: src/components/sport/SportTrainingsCalendarList.tsx:265
+#: src/components/sport/SportTrainingsCalendarList.tsx:267
 #: src/components/tabletennis/ValidationMatches.tsx:555
 #: src/components/when2meet/MeetingRoomModal.tsx:289
 #: src/components/when2meet/MeetingRoomModal.tsx:306
@@ -9181,7 +9185,7 @@ msgstr "Трек"
 
 #: src/components/sport/SportProfilePage.tsx:26
 #: src/components/sport/SportTabs.tsx:25
-#: src/components/sport/SportTrainingsCalendarList.tsx:216
+#: src/components/sport/SportTrainingsCalendarList.tsx:218
 msgid "Trainer"
 msgstr "Тренер"
 
@@ -9782,7 +9786,7 @@ msgstr "Неделя"
 
 #: src/components/calendar/CalendarViewer.tsx:468
 #: src/components/calendar/CalendarViewer.tsx:523
-#: src/components/sport/SportTrainingsCalendarList.tsx:370
+#: src/components/sport/SportTrainingsCalendarList.tsx:372
 msgid "Week {week}"
 msgstr "Неделя {week}"
 

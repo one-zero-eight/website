@@ -268,7 +268,7 @@ msgid "{doneCount} of {realCount} matches played · {0} players"
 msgstr ""
 
 #: src/components/sport/SportStudentTrainingModal.tsx:297
-#: src/components/sport/SportTrainingsCalendarList.tsx:221
+#: src/components/sport/SportTrainingsCalendarList.tsx:223
 msgid "{earnedHours}h"
 msgstr ""
 
@@ -1680,7 +1680,7 @@ msgid "Chat"
 msgstr ""
 
 #: src/components/sport/SportStudentTrainingModal.tsx:499
-#: src/components/sport/SportTrainingsCalendarList.tsx:272
+#: src/components/sport/SportTrainingsCalendarList.tsx:274
 msgid "Check in"
 msgstr ""
 
@@ -1691,8 +1691,8 @@ msgstr ""
 #: src/components/sport/SportStudentTrainingModal.tsx:438
 #: src/components/sport/SportStudentTrainingModal.tsx:450
 #: src/components/sport/SportStudentTrainingModal.tsx:487
-#: src/components/sport/SportTrainingsCalendarList.tsx:258
-#: src/components/sport/SportTrainingsCalendarList.tsx:270
+#: src/components/sport/SportTrainingsCalendarList.tsx:260
+#: src/components/sport/SportTrainingsCalendarList.tsx:272
 msgid "Check out"
 msgstr ""
 
@@ -1714,7 +1714,7 @@ msgid "Check the players ({0}): pick the right one, fix the email, add as a gues
 msgstr ""
 
 #: src/components/sport/SportStudentTrainingModal.tsx:79
-#: src/components/sport/SportTrainingsCalendarList.tsx:131
+#: src/components/sport/SportTrainingsCalendarList.tsx:133
 msgid "Check-in failed · Retry"
 msgstr ""
 
@@ -1727,11 +1727,11 @@ msgid "Check-in opens 7 days before the training."
 msgstr ""
 
 #: src/components/sport/SportStudentTrainingModal.tsx:80
-#: src/components/sport/SportTrainingsCalendarList.tsx:132
+#: src/components/sport/SportTrainingsCalendarList.tsx:134
 msgid "Check-out failed · Retry"
 msgstr ""
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:120
+#: src/components/sport/SportTrainingsCalendarList.tsx:122
 msgid "Checked in"
 msgstr ""
 
@@ -1739,7 +1739,7 @@ msgstr ""
 msgid "Checked in successfully!"
 msgstr ""
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:121
+#: src/components/sport/SportTrainingsCalendarList.tsx:123
 msgid "Checked out"
 msgstr ""
 
@@ -1932,7 +1932,7 @@ msgstr ""
 msgid "Club logos could not be loaded."
 msgstr ""
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:310
+#: src/components/sport/SportTrainingsCalendarList.tsx:312
 msgid "Club logos or training restrictions could not be loaded."
 msgstr ""
 
@@ -2014,7 +2014,7 @@ msgstr ""
 msgid "College"
 msgstr ""
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:211
+#: src/components/sport/SportTrainingsCalendarList.tsx:213
 msgid "College only"
 msgstr ""
 
@@ -2983,7 +2983,7 @@ msgid "e.g., CSE electives"
 msgstr ""
 
 #: src/components/sport/SportStudentTrainingModal.tsx:288
-#: src/components/sport/SportTrainingsCalendarList.tsx:317
+#: src/components/sport/SportTrainingsCalendarList.tsx:319
 msgid "Earned sport hours could not be loaded."
 msgstr ""
 
@@ -3994,7 +3994,7 @@ msgstr ""
 msgid "Go to {navigationTarget}"
 msgstr ""
 
-#: src/components/dashboard/DashboardPage.tsx:48
+#: src/components/dashboard/DashboardPage.tsx:50
 msgid "Go to calendar"
 msgstr ""
 
@@ -4696,6 +4696,10 @@ msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:48
 msgid "Learn how different people respond to situations and develop your skills in presenting and implementing ideas."
+msgstr ""
+
+#: src/components/dashboard/news/NewsWidget.tsx:44
+msgid "Learn more"
 msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:27
@@ -6255,7 +6259,7 @@ msgstr ""
 #~ msgid "Pages update automatically by default. An active useBlocker in a component pauses updates until it is disabled or unmounted."
 #~ msgstr ""
 
-#: src/components/sport/SportTrainingsCalendarList.tsx:206
+#: src/components/sport/SportTrainingsCalendarList.tsx:208
 msgid "Paid"
 msgstr ""
 
@@ -7135,7 +7139,7 @@ msgstr ""
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/sport/SportStudentTrainingModal.tsx:445
 #: src/components/sport/SportStudentTrainingModal.tsx:494
-#: src/components/sport/SportTrainingsCalendarList.tsx:265
+#: src/components/sport/SportTrainingsCalendarList.tsx:267
 #: src/components/tabletennis/ValidationMatches.tsx:555
 #: src/components/when2meet/MeetingRoomModal.tsx:289
 #: src/components/when2meet/MeetingRoomModal.tsx:306
@@ -9181,7 +9185,7 @@ msgstr ""
 
 #: src/components/sport/SportProfilePage.tsx:26
 #: src/components/sport/SportTabs.tsx:25
-#: src/components/sport/SportTrainingsCalendarList.tsx:216
+#: src/components/sport/SportTrainingsCalendarList.tsx:218
 msgid "Trainer"
 msgstr ""
 
@@ -9782,7 +9786,7 @@ msgstr ""
 
 #: src/components/calendar/CalendarViewer.tsx:468
 #: src/components/calendar/CalendarViewer.tsx:523
-#: src/components/sport/SportTrainingsCalendarList.tsx:370
+#: src/components/sport/SportTrainingsCalendarList.tsx:372
 msgid "Week {week}"
 msgstr ""
 
