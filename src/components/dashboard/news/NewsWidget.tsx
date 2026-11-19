@@ -6,6 +6,7 @@ import { Trans } from "@lingui/react/macro";
 import { useRef, useState } from "react";
 
 const NEWS_TTL_DAYS = 30;
+const NEWS_MAX_ITEMS = 5;
 const MS_IN_DAY = 24 * 60 * 60 * 1000;
 
 function isFresh(item: NewsItem) {
@@ -21,7 +22,9 @@ export function NewsWidget() {
   const [activeIndex, setActiveIndex] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
 
-  const items = NEWS.filter(isFresh);
+  const items = NEWS.filter(isFresh)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, NEWS_MAX_ITEMS);
   if (dismissed || items.length === 0) return null;
 
   const contentLocale = locale === "ru" ? "ru" : "en";

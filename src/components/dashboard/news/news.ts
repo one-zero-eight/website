@@ -14,7 +14,7 @@ export type NewsItem = {
   >;
 };
 
-/** The first item is shown in the dashboard banner: add new items to the top. */
+/** Dashboard slider shows up to 5 newest fresh items, sorted by date. */
 export const NEWS: NewsItem[] = [
   {
     id: "2026-11-board-games",
