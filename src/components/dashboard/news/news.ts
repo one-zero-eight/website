@@ -3,7 +3,7 @@ import BoardGamesEn from "./items/board-games.mdx";
 import BoardGamesRu from "./items/board-games.ru.mdx";
 
 export type NewsItem = {
-  /** Unique and stable: used to remember that the user dismissed the item. */
+  /** Unique and stable. */
   id: string;
   /** ISO date (YYYY-MM-DD). */
   date: string;
