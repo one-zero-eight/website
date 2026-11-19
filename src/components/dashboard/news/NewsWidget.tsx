@@ -3,22 +3,18 @@ import { NEWS } from "@/components/dashboard/news/news.ts";
 import { useAppLocale } from "@/locales/lib";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "react";
-import { useLocalStorage } from "usehooks-ts";
 
 const NEWS_TTL_DAYS = 30;
 const MS_IN_DAY = 24 * 60 * 60 * 1000;
 
 export function NewsWidget() {
   const [locale] = useAppLocale();
-  const [dismissedId, setDismissedId] = useLocalStorage<string | null>(
-    "widget-news-dismissed",
-    null,
-  );
+  const [dismissed, setDismissed] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
   const latest = NEWS[0];
   if (!latest) return null;
-  if (latest.id === dismissedId) return null;
+  if (dismissed) return null;
   if (Date.now() - new Date(latest.date).getTime() > NEWS_TTL_DAYS * MS_IN_DAY)
     return null;
 
@@ -47,7 +43,7 @@ export function NewsWidget() {
         <button
           type="button"
           className="text-base-content/50 hover:bg-base-200-hover/50 hover:text-base-content/75 rounded-box flex h-12 w-12 shrink-0 items-center justify-center self-start"
-          onClick={() => setDismissedId(latest.id)}
+          onClick={() => setDismissed(true)}
         >
           <span className="icon-[material-symbols--close] text-xl" />
         </button>
