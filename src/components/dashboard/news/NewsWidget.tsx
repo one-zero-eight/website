@@ -63,10 +63,12 @@ export function NewsWidget() {
             {items.map((item) => {
               const { title, summary } = item.content[contentLocale];
               return (
-                <div
+                <button
                   key={item.id}
+                  type="button"
+                  onClick={() => setOpenedItem(item)}
                   className={cn(
-                    "flex w-full shrink-0 snap-center flex-row items-center gap-4 pt-4 pr-16 pl-4",
+                    "group hover:bg-base-200-hover/50 rounded-box flex w-full shrink-0 cursor-pointer snap-center flex-row items-center gap-4 pt-4 pr-16 pl-4 text-left",
                     items.length > 1 ? "pb-1" : "pb-4",
                   )}
                 >
@@ -77,16 +79,12 @@ export function NewsWidget() {
                       <span>{title}</span>
                     </div>
                     <div className="text-base-content/75">{summary}</div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenedItem(item)}
-                      className="text-primary flex w-fit items-center hover:underline"
-                    >
+                    <span className="text-primary flex w-fit items-center group-hover:underline">
                       <span className="icon-[material-symbols--arrow-forward] mr-1" />
                       <Trans>Learn more</Trans>
-                    </button>
+                    </span>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
