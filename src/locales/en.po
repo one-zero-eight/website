@@ -529,8 +529,12 @@ msgid "<0>reimbursement</0> — if you participate in events, you can apply for 
 msgstr "<0>reimbursement</0> — if you participate in events, you can apply for travel and accommodation cost reimbursement."
 
 #: src/components/scholarship/ScholarshipPage.tsx:118
-msgid "<0>support</0> — if you require financial assistance due to personal or unexpected reasons, you can <1>submit a financial support application</1> to 319."
-msgstr "<0>support</0> — if you require financial assistance due to personal or unexpected reasons, you can <1>submit a financial support application</1> to 319."
+#~ msgid "<0>support</0> — if you require financial assistance due to personal or unexpected reasons, you can <1>submit a financial support application</1> to 319."
+#~ msgstr "<0>support</0> — if you require financial assistance due to personal or unexpected reasons, you can <1>submit a financial support application</1> to 319."
+
+#: src/components/scholarship/ScholarshipPage.tsx:118
+msgid "<0>support</0> — if you require financial assistance due to personal or unexpected reasons, you can <1>submit a financial support application</1> to Department of Documentary support for Students (319)."
+msgstr "<0>support</0> — if you require financial assistance due to personal or unexpected reasons, you can <1>submit a financial support application</1> to Department of Documentary support for Students (319)."
 
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:822
 msgid "<0>Teaching</0><1> · </1>classes where you are the instructor"
@@ -4698,7 +4702,7 @@ msgstr "Learn and improve essential people skills like communication, teamwork, 
 msgid "Learn how different people respond to situations and develop your skills in presenting and implementing ideas."
 msgstr "Learn how different people respond to situations and develop your skills in presenting and implementing ideas."
 
-#: src/components/dashboard/news/NewsWidget.tsx:80
+#: src/components/dashboard/news/NewsWidget.tsx:84
 msgid "Learn more"
 msgstr "Learn more"
 

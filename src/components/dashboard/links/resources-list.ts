@@ -646,8 +646,9 @@ export const resourcesList: ResourceType[] = [
     resourceRu: "Бот Student Affairs",
     title: null,
     titleRu: null,
-    description: "Bot for communication with 319 and DoE.",
-    descriptionRu: "Бот для связи с 319 и DoE.",
+    description: "Bot for communication with Student Affairs and DoE.",
+    descriptionRu:
+      "Бот для связи с Центром поддержки и развития студентов и DoE.",
     icon: "icon-[material-symbols--chat-outline]",
     category: "Support",
     frequency: 8,

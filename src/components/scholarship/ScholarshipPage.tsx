@@ -121,7 +121,7 @@ export function ScholarshipPage() {
             <Link to="/student-affairs" className="italic underline">
               submit a financial support application
             </Link>{" "}
-            to 319.
+            to Department of Documentary support for Students (319).
           </Trans>
         </p>
 
