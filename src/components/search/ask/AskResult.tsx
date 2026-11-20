@@ -19,7 +19,7 @@ function isWebUrl(url?: string | null): url is string {
   return !!url && /^https?:\/\//i.test(url);
 }
 
-function isPdfUrl(url?: string | null): url is string {
+export function isPdfUrl(url?: string | null): url is string {
   return isWebUrl(url) && /\.pdf$/i.test(new URL(url).pathname);
 }
 

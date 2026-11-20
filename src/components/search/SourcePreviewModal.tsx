@@ -9,7 +9,7 @@ export function SourcePreviewModal({
   source,
   onClose,
 }: {
-  source: searchTypes.SchemaEduwikiSource;
+  source: searchTypes.SchemaSearchResponse["source"];
   onClose: () => void;
 }) {
   return (

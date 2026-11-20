@@ -17,8 +17,9 @@ import { queryClient } from "@/app/query-client";
 import { validBookingReceipt } from "./ask-booking";
 import {
   AssistantUnavailableError,
-  searchWithoutAssistant,
-} from "./ask-search-fallback";
+  parseSearchCommand,
+  searchKnowledgeBase,
+} from "./ask-search";
 import { useSyncExternalStore } from "react";
 
 export type DraftAttachment = {
@@ -33,7 +34,13 @@ export type AskMessage =
       content: string;
       attachments?: searchTypes.SchemaAttachmentInfo[];
     }
-  | { role: "assistant"; response: searchTypes.SchemaAskResponses };
+  | { role: "assistant"; response: searchTypes.SchemaAskResponses }
+  // The results of the search API, for the search command and for a question the assistant could not take
+  | {
+      role: "search";
+      query: string;
+      results: searchTypes.SchemaSearchResponse[];
+    };
 
 export const askAnswerReadyEvent = "catix-answer-ready";
 export type AskAnswerReady = { chatId: string | null; needsApproval: boolean };
@@ -60,6 +67,8 @@ type AskSession = {
   status: string;
   isPending: boolean;
   error: Error | null;
+  // The language model did not answer the last question: the page says so until it does
+  assistantUnavailable: boolean;
   // A chat being opened from the list of the user's chats, and why it could not be
   isOpening: boolean;
   openingError: unknown;
@@ -108,6 +117,7 @@ let session: AskSession = {
   status: "",
   isPending: false,
   error: null,
+  assistantUnavailable: false,
   isOpening: false,
   openingError: null,
 };
@@ -317,15 +327,24 @@ export async function askQuestion(
     session.messages.at(-1)?.role === "user"
       ? session.messages.slice(0, -1)
       : session.messages;
+  // The search command goes to the search API: the files are not sent with it and stay in the box
+  const searchQuery = parseSearchCommand(query);
+  const sent = searchQuery === null ? attachments : [];
   update({
-    messages: [...answered, { role: "user", content: query, attachments }],
+    messages: [
+      ...answered,
+      { role: "user", content: query, attachments: sent },
+    ],
     draftQuery: "",
-    draftAttachments: attachments.map((info) => ({
-      info,
-      bound: session.draftAttachments.some(
-        (draft) => draft.info.id === info.id && draft.bound,
-      ),
-    })),
+    draftAttachments:
+      searchQuery === null
+        ? attachments.map((info) => ({
+            info,
+            bound: session.draftAttachments.some(
+              (draft) => draft.info.id === info.id && draft.bound,
+            ),
+          }))
+        : session.draftAttachments,
     answerText: "",
     status: "",
     error: null,
@@ -333,15 +352,41 @@ export async function askQuestion(
   });
 
   try {
-    const response = await streamAnswer(
-      query,
-      session.chatId,
-      attachments,
-      controller.signal,
-    ).catch((e) => {
+    if (searchQuery !== null) {
+      if (!searchQuery) {
+        throw new Error(i18n._(msg`Write what to search for after /search.`));
+      }
+      const results = await searchKnowledgeBase(searchQuery, controller.signal);
+      if (!controller.signal.aborted) {
+        update({
+          messages: [
+            ...session.messages,
+            { role: "search", query: searchQuery, results },
+          ],
+        });
+      }
+      return;
+    }
+    let response: searchTypes.SchemaAskResponses | undefined;
+    try {
+      response = await streamAnswer(
+        query,
+        session.chatId,
+        attachments,
+        controller.signal,
+      );
+    } catch (e) {
       if (!(e instanceof AssistantUnavailableError)) throw e;
-      return searchWithoutAssistant(query, session.chatId, controller.signal);
-    });
+      // The question is answered as a plain search of the knowledge base
+      const results = await searchKnowledgeBase(query, controller.signal);
+      if (!controller.signal.aborted) {
+        update({
+          assistantUnavailable: true,
+          messages: [...session.messages, { role: "search", query, results }],
+        });
+      }
+      return;
+    }
     if (!controller.signal.aborted && !response) {
       cancelQuestion();
       return;
@@ -351,6 +396,7 @@ export async function askQuestion(
         messages: [...session.messages, { role: "assistant", response }],
         chatId: response.chat_id ?? null,
         draftAttachments: [],
+        assistantUnavailable: false,
       });
       announceAnswer(response);
       queryClient.invalidateQueries({

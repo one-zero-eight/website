@@ -1689,7 +1689,7 @@ msgstr "Заявка на подключение чата"
 msgid "Chat source requests"
 msgstr "Заявки на подключение чатов"
 
-#: src/components/search/ask/AskPage.tsx:117
+#: src/components/search/ask/AskPage.tsx:148
 msgid "Chats"
 msgstr "Чаты"
 
@@ -1915,6 +1915,8 @@ msgid "Click to upload or paste an image"
 msgstr "Нажмите, чтобы загрузить, или вставьте изображение"
 
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
+#: src/components/search/ask/AskPage.tsx:128
+#: src/components/search/ask/AskPage.tsx:129
 #: src/components/search/IframePreviewCard.tsx:111
 #: src/components/sport/SportOverviewSection.tsx:669
 #: src/components/sport/SportStudentTrainingModal.tsx:362
@@ -2319,7 +2321,7 @@ msgstr "Не удалось забронировать"
 msgid "Could not check access"
 msgstr "Не удалось проверить доступ"
 
-#: src/components/search/ask/AskPage.tsx:250
+#: src/components/search/ask/AskPage.tsx:293
 msgid "Could not complete the request."
 msgstr "Не удалось завершить запрос."
 
@@ -2388,7 +2390,7 @@ msgstr "Не удалось загрузить ваши заявки. Обнов
 msgid "Could not mark attendance"
 msgstr "Не удалось отметить посещаемость"
 
-#: src/components/search/ask/AskPage.tsx:202
+#: src/components/search/ask/AskPage.tsx:239
 msgid "Could not open the chat"
 msgstr "Не удалось открыть чат"
 
@@ -3883,7 +3885,7 @@ msgstr "Итоговое время"
 msgid "Financial support:"
 msgstr "Финансовая поддержка:"
 
-#: src/components/search/ask/AskPage.tsx:161
+#: src/components/search/ask/AskPage.tsx:192
 msgid "Find a room available tomorrow from 15:00 to 16:00."
 msgstr "Найди свободную аудиторию завтра с 15:00 до 16:00."
 
@@ -4412,7 +4414,7 @@ msgstr "Как пройти в музкомнату?"
 msgid "How to Register Your Club"
 msgstr "Как зарегистрировать клуб"
 
-#: src/components/search/ask/AskPage.tsx:150
+#: src/components/search/ask/AskPage.tsx:181
 msgid "I can help with your schedule, university rules, announcements and available rooms."
 msgstr "Помогу с расписанием, правилами университета, объявлениями и свободными аудиториями."
 
@@ -6038,6 +6040,10 @@ msgstr "Заметка: {notes}"
 msgid "Nothing found"
 msgstr "Ничего не найдено"
 
+#: src/components/search/ask/SearchResults.tsx:44
+msgid "Nothing found: {query}"
+msgstr "Ничего не найдено: {query}"
+
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:2422
 msgid "Nothing selected"
 msgstr "Ничего не выбрано"
@@ -6898,7 +6904,7 @@ msgstr "Читатель"
 msgid "Receive a monthly stipend from IU alumni"
 msgstr "Ежемесячная стипендия от выпускников IU"
 
-#: src/components/search/ask/AskPage.tsx:241
+#: src/components/search/ask/AskPage.tsx:284
 msgid "Receiving answer"
 msgstr "Получаю ответ"
 
@@ -7266,7 +7272,7 @@ msgstr "Пересдача"
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/search/ask/AskChatList.tsx:47
-#: src/components/search/ask/AskPage.tsx:212
+#: src/components/search/ask/AskPage.tsx:249
 #: src/components/search/ask/AskSources.tsx:78
 #: src/components/sport/SportStudentTrainingModal.tsx:413
 #: src/components/sport/SportStudentTrainingModal.tsx:462
@@ -7678,6 +7684,10 @@ msgstr "Поиск людей"
 msgid "Search reservations"
 msgstr "Поиск бронирований"
 
+#: src/components/search/ask/SearchResults.tsx:42
+msgid "Search results: {query}"
+msgstr "Результаты поиска: {query}"
+
 #: src/components/dashboard/links/SearchInput.tsx:31
 msgid "Search services..."
 msgstr "Поиск сервисов..."
@@ -7861,7 +7871,7 @@ msgstr "Бюджет на семестр"
 msgid "Send"
 msgstr "Отправить"
 
-#: src/components/search/ask/AskPage.tsx:241
+#: src/components/search/ask/AskPage.tsx:284
 msgid "Sending request"
 msgstr "Отправляю запрос"
 
@@ -8849,21 +8859,25 @@ msgstr "Спасибо!"
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "<0>Пропущенная из‑за болезни неделя</0> <1>компенсируется двумя спортивными часами.</1>"
 
-#: src/components/search/ask/AskPage.tsx:265
+#: src/components/search/ask/AskPage.tsx:308
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr "Результат действия не подтверждён. Проверьте его в сервисе перед повторной попыткой."
 
-#: src/components/search/ask/AskPage.tsx:184
+#: src/components/search/ask/AskPage.tsx:221
 msgid "The assistant asks for confirmation before changing data in services."
 msgstr "Перед изменениями в сервисах ассистент запросит подтверждение."
 
+#: src/components/search/ask/AskPage.tsx:121
+msgid "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
+msgstr "Ассистент временно недоступен. На вопросы отвечает поиск; можно также начать сообщение с /search или /поиск."
+
 #: src/components/search/ask/ask-search-fallback.ts:55
-msgid "The assistant is unavailable now, and the search found nothing for this question."
-msgstr "Ассистент сейчас недоступен, а обычный поиск ничего не нашёл по этому вопросу."
+#~ msgid "The assistant is unavailable now, and the search found nothing for this question."
+#~ msgstr "Ассистент сейчас недоступен, а обычный поиск ничего не нашёл по этому вопросу."
 
 #: src/components/search/ask/ask-search-fallback.ts:52
-msgid "The assistant is unavailable now, so this is a plain search. Results:"
-msgstr "Ассистент сейчас недоступен, поэтому это обычный поиск. Результаты:"
+#~ msgid "The assistant is unavailable now, so this is a plain search. Results:"
+#~ msgstr "Ассистент сейчас недоступен, поэтому это обычный поиск. Результаты:"
 
 #: src/components/search/ask/AskApproval.tsx:19
 msgid "The assistant needs your approval to do this:"
@@ -8893,7 +8907,7 @@ msgstr "Лидеру клуба нужно подключить свой акк�
 msgid "The club manager collects orders from the club leaders in advance, and later makes a purchase in the form of an official order"
 msgstr "Менеджер клубов заранее собирает заказы у лидеров и затем оформляет покупку официальным заказом"
 
-#: src/components/search/ask/ask-session.ts:301
+#: src/components/search/ask/ask-session.ts:311
 msgid "The connection ended before the response was complete."
 msgstr "Соединение прервалось до завершения ответа."
 
@@ -8993,8 +9007,8 @@ msgstr "Период серии не пересекается с учебным 
 #~ msgid "The series window does not overlap the selected groups' teaching period."
 #~ msgstr "Период серии не пересекается с учебным периодом выбранных групп."
 
-#: src/components/search/ask/ask-session.ts:217
-#: src/components/search/ask/ask-session.ts:249
+#: src/components/search/ask/ask-session.ts:227
+#: src/components/search/ask/ask-session.ts:259
 msgid "The server returned no answer stream."
 msgstr "Сервер не вернул поток ответа."
 
@@ -9298,6 +9312,10 @@ msgstr "Продвигать Университет Иннополис, разв
 #: src/components/clubs/ClubLeaguePage.tsx:38
 msgid "To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
 msgstr "Повышать престиж студенческих клубов и продвигать их внутри и вне университета, а также подчёркивать стратегическую важность внеучебного развития в Университете Иннополис"
+
+#: src/components/search/ask/AskPage.tsx:215
+msgid "To search without the assistant, start a message with /search or /поиск."
+msgstr "Чтобы искать без ассистента, начните сообщение с /search или /поиск."
 
 #: src/components/search/MoodleUnknownPreview.tsx:18
 #: src/components/search/MoodleUrlPreview.tsx:41
@@ -9999,7 +10017,7 @@ msgstr "Добро пожаловать в сообщество <0/><1>one-zero-
 msgid "Welcome to InNoHassle"
 msgstr "Добро пожаловать в InNoHassle"
 
-#: src/components/search/ask/AskPage.tsx:160
+#: src/components/search/ask/AskPage.tsx:191
 msgid "What are the university exam retake rules?"
 msgstr "Какие в университете правила пересдач?"
 
@@ -10020,11 +10038,11 @@ msgstr "Что в прикреплённом файле?"
 msgid "What is it?"
 msgstr "Что это?"
 
-#: src/components/search/ask/AskPage.tsx:159
+#: src/components/search/ask/AskPage.tsx:190
 msgid "What is on my schedule tomorrow?"
 msgstr "Что у меня завтра по расписанию?"
 
-#: src/components/search/ask/AskPage.tsx:162
+#: src/components/search/ask/AskPage.tsx:193
 msgid "What was announced in my available chats this week?"
 msgstr "Что объявляли в доступных мне чатах на этой неделе?"
 
@@ -10117,6 +10135,10 @@ msgstr "Добавьте подпись…"
 #: src/components/editor/_TiptapDescriptionEditor.tsx:129
 msgid "Write something…"
 msgstr "Напишите что-нибудь…"
+
+#: src/components/search/ask/ask-session.ts:357
+msgid "Write what to search for after /search."
+msgstr "Напишите, что искать, после /search."
 
 #: src/components/guard/JoinsList.tsx:139
 msgid "Writer"
@@ -10211,7 +10233,7 @@ msgstr "Вы можете добавить свой календарь в InNoHa
 msgid "You can attach up to 3 files."
 msgstr "Можно прикрепить до 3 файлов."
 
-#: src/components/search/ask/AskPage.tsx:178
+#: src/components/search/ask/AskPage.tsx:209
 msgid "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
 msgstr "Можно прикрепить до 3 файлов PDF, TXT или изображений, до 10 МиБ каждый."
 
@@ -10322,7 +10344,7 @@ msgstr "Ваш клуб приглашён как организатор это�
 msgid "Your document was sent to the printer"
 msgstr "Документ отправлен на принтер"
 
-#: src/components/search/ask/AskPage.tsx:257
+#: src/components/search/ask/AskPage.tsx:300
 msgid "Your draft is below. You can edit it and send it again."
 msgstr "Черновик ниже. Его можно изменить и отправить снова."
 

@@ -10,6 +10,7 @@ import { AskInput } from "./AskInput";
 import { AskNotificationButton } from "./AskNotificationButton";
 import { AskResult } from "./AskResult";
 import { AskAnswerBody } from "./AskAnswerBody";
+import { SearchResults } from "./SearchResults";
 import {
   askQuestion,
   openChat,
@@ -35,6 +36,7 @@ export function AskPage({
   const { t } = useLingui();
 
   const [isChatListOpen, setIsChatListOpen] = useState(false);
+  const [isNoticeDismissed, setIsNoticeDismissed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const isFollowing = useRef(true);
@@ -47,12 +49,18 @@ export function AskPage({
     status,
     isPending,
     error,
+    assistantUnavailable,
     isOpening,
     openingError,
     draftQuery,
     draftAttachments,
     composerId,
   } = useAskSession();
+
+  // A dismissed notice comes back with the next outage
+  useEffect(() => {
+    if (!assistantUnavailable) setIsNoticeDismissed(false);
+  }, [assistantUnavailable]);
 
   useEffect(() => {
     if (askQuery) setDraftQuery(askQuery);
@@ -103,6 +111,29 @@ export function AskPage({
       </aside>
 
       <div className="flex min-h-0 min-w-0 grow flex-col">
+        {assistantUnavailable && !isNoticeDismissed && (
+          <div
+            role="alert"
+            className="alert alert-warning justify-center rounded-none py-2 text-center"
+          >
+            <span className="icon-[material-symbols--warning-outline-rounded] text-xl" />
+            <span>
+              <Trans>
+                The assistant is temporarily unavailable. Questions are answered
+                by search: you can also start a message with /search or /поиск.
+              </Trans>
+            </span>
+            <button
+              type="button"
+              title={t`Close`}
+              aria-label={t`Close`}
+              className="btn btn-circle btn-ghost btn-sm"
+              onClick={() => setIsNoticeDismissed(true)}
+            >
+              ✕
+            </button>
+          </div>
+        )}
         <div className="border-base-300 hidden justify-end border-b px-4 py-2 @4xl/content:flex">
           <AskSources />
         </div>
@@ -182,6 +213,12 @@ export function AskPage({
                     </p>
                     <p className="text-base-content/60 max-w-2xl text-sm">
                       <Trans>
+                        To search without the assistant, start a message with
+                        /search or /поиск.
+                      </Trans>
+                    </p>
+                    <p className="text-base-content/60 max-w-2xl text-sm">
+                      <Trans>
                         The assistant asks for confirmation before changing data
                         in services.
                       </Trans>
@@ -221,6 +258,12 @@ export function AskPage({
                   key={`${chatId}:${i}`}
                   text={message.content}
                   attachments={message.attachments}
+                />
+              ) : message.role === "search" ? (
+                <SearchResults
+                  key={`${chatId}:${i}`}
+                  query={message.query}
+                  results={message.results}
                 />
               ) : (
                 <AskResult
