@@ -18,12 +18,52 @@ type MarkdownNode = {
   children?: MarkdownNode[];
 };
 
+type HastNode = {
+  type: string;
+  tagName?: string;
+  properties?: { className?: string[]; ariaHidden?: string };
+  value?: string;
+  children?: HastNode[];
+};
+
+// Puts a small cat at the end of the text, inside its last line, so it moves with the text as it is written
+function appendCat() {
+  return (tree: HastNode) => {
+    let node = tree;
+    for (;;) {
+      const last = node.children?.findLast(
+        (child) => child.type !== "text" || child.value?.trim(),
+      );
+      const className = last?.properties?.className ?? [];
+      if (
+        last?.type !== "element" ||
+        last.tagName === "pre" ||
+        className.some((name) => name.includes("math"))
+      )
+        break;
+      node = last;
+    }
+    node.children?.push({
+      type: "element",
+      tagName: "span",
+      properties: {
+        ariaHidden: "true",
+        className: ["ml-1", "inline-block", "animate-pulse", "text-[0.85em]"],
+      },
+      children: [{ type: "text", value: "🐱" }],
+    });
+  };
+}
+
 export function AskAnswerBody({
   text,
   citationTargets,
+  writing,
 }: {
   text: string;
   citationTargets?: ReadonlyMap<number, string>;
+  // The answer is still being written: a cat follows its end
+  writing?: boolean;
 }) {
   function linkCitations() {
     return (tree: MarkdownNode) => {
@@ -74,7 +114,7 @@ export function AskAnswerBody({
           ? [remarkGfm, remarkMath, linkCitations]
           : [remarkGfm, remarkMath]
       }
-      rehypePlugins={[rehypeKatex]}
+      rehypePlugins={writing ? [appendCat, rehypeKatex] : [rehypeKatex]}
       components={{
         a: ({ href, children }) =>
           href ? (

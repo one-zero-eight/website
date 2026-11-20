@@ -452,7 +452,7 @@ describe("AskPage attachment history", () => {
       expect(container.querySelector("strong")?.textContent).toBe("Rules");
       expect(
         Array.from(container.querySelectorAll("li"), (li) => li.textContent),
-      ).toEqual(["Original document", longText]);
+      ).toEqual(["Original document", `${longText}🐱`]);
       const link = container.querySelector<HTMLAnchorElement>(
         'a[href="https://example.org/rules"]',
       )!;

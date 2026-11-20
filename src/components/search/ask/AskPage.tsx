@@ -311,7 +311,7 @@ export function AskPage({
 
             {isPending && (
               <div className="border-base-300 bg-base-200 text-base-content rounded-field flex max-w-full min-w-0 flex-col gap-2 self-start border! px-4 py-2 wrap-anywhere">
-                {answerText && <AskAnswerBody text={answerText} />}
+                {answerText && <AskAnswerBody text={answerText} writing />}
                 <div className="text-base-content/70 flex text-sm">
                   <span>
                     {status ||
