@@ -1,6 +1,7 @@
 import { useLingui } from "@lingui/react/macro";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { AskPage } from "@/components/search/ask/AskPage";
+import { AskNotificationButton } from "@/components/search/ask/AskNotificationButton";
 import { AskSources } from "@/components/search/ask/AskSources";
 import { CatixTitle } from "@/components/search/ask/CatixTitle";
 import { Topbar } from "@/components/layout/Topbar";
@@ -37,7 +38,15 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title={<CatixTitle />} titleAction={<AskSources />} />
+      <Topbar
+        title={<CatixTitle />}
+        titleAction={
+          <>
+            <AskSources />
+            <AskNotificationButton />
+          </>
+        }
+      />
       <RequireAuth>
         <AskPage
           askQuery={q ?? ""}

@@ -8,7 +8,6 @@ import { AskAttachment } from "./AskAttachment";
 import { AskInput } from "./AskInput";
 import { AskQuoteMenu } from "./AskQuoteMenu";
 import { asQuote, splitQuote } from "./ask-quote";
-import { AskNotificationButton } from "./AskNotificationButton";
 import { AskResult } from "./AskResult";
 import { AskAnswerBody } from "./AskAnswerBody";
 import { SearchResults } from "./SearchResults";
@@ -370,9 +369,6 @@ export function AskPage({
             onStop={handleStop}
             isPending={isPending}
           />
-          <div className="flex flex-wrap items-center justify-end gap-1">
-            <AskNotificationButton />
-          </div>
         </div>
       </div>
     </div>

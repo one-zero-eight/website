@@ -97,7 +97,7 @@ describe("Sources shared-client and modal lifecycle", () => {
 
   it("fetches only on open with shared auth and never reveals cached sources on reopen", async () => {
     expect(transport).not.toHaveBeenCalled();
-    act(() => button("Sources").click());
+    act(() => button("Chat sources").click());
     await settle();
     expect(document.body.textContent).toContain("Private group chat");
     const request = transport.mock.calls[0][0] as Request;
@@ -115,7 +115,7 @@ describe("Sources shared-client and modal lifecycle", () => {
           finish = resolve;
         }),
     );
-    act(() => button("Sources").click());
+    act(() => button("Chat sources").click());
     await settle();
     expect(document.body.textContent).toContain("Loading sources");
     expect(document.body.textContent).not.toContain("Private group chat");
@@ -129,7 +129,7 @@ describe("Sources shared-client and modal lifecycle", () => {
   });
 
   it("opens the real proposal form and closes only the nested modal", async () => {
-    act(() => button("Sources").click());
+    act(() => button("Chat sources").click());
     await settle();
     act(() => button("Propose a chat").click());
     await settle();

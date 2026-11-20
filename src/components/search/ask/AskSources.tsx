@@ -22,13 +22,13 @@ export function AskSources() {
         className="btn btn-ghost btn-sm"
         onClick={() => setOpen(true)}
       >
-        <span className="icon-[material-symbols--source] text-lg" />
-        <Trans>Sources</Trans>
+        <span className="icon-[material-symbols--chat-outline] text-lg" />
+        <Trans>Chat sources</Trans>
       </button>
       <Modal
         open={open}
         onOpenChange={setOpen}
-        title={<Trans>Sources</Trans>}
+        title={<Trans>Chat sources</Trans>}
         containerClassName="max-h-[85dvh] overflow-y-auto"
       >
         {open && (
