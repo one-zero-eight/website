@@ -1061,10 +1061,10 @@ msgid "Art & Culture"
 msgstr ""
 
 #: src/app/routes/_with_menu/search/ask.tsx:33
-msgid "Ask"
-msgstr ""
+#~ msgid "Ask"
+#~ msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:239
+#: src/components/search/ask/AskInput.tsx:268
 msgid "Ask a question..."
 msgstr ""
 
@@ -1080,7 +1080,7 @@ msgstr ""
 msgid "Attach file"
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:227
+#: src/components/search/ask/AskInput.tsx:246
 msgid "Attach files"
 msgstr ""
 
@@ -1566,8 +1566,8 @@ msgstr ""
 msgid "Cancel this match"
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:178
-#: src/components/search/ask/AskInput.tsx:186
+#: src/components/search/ask/AskInput.tsx:197
+#: src/components/search/ask/AskInput.tsx:205
 msgid "Cancel upload"
 msgstr ""
 
@@ -1693,7 +1693,7 @@ msgstr ""
 msgid "Chat source requests"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:148
+#: src/components/search/ask/AskPage.tsx:180
 msgid "Chats"
 msgstr ""
 
@@ -1847,7 +1847,7 @@ msgstr ""
 msgid "Choose one of your verified study groups."
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:76
+#: src/components/search/ask/AskInput.tsx:83
 msgid "Choose PDF, TXT, PNG, JPEG or WebP files."
 msgstr ""
 
@@ -1919,8 +1919,8 @@ msgid "Click to upload or paste an image"
 msgstr ""
 
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
-#: src/components/search/ask/AskPage.tsx:128
-#: src/components/search/ask/AskPage.tsx:129
+#: src/components/search/ask/AskPage.tsx:160
+#: src/components/search/ask/AskPage.tsx:161
 #: src/components/search/IframePreviewCard.tsx:111
 #: src/components/sport/SportOverviewSection.tsx:669
 #: src/components/sport/SportStudentTrainingModal.tsx:362
@@ -2261,6 +2261,7 @@ msgstr ""
 #: src/components/account/MyTokenPage.tsx:88
 #: src/components/forms/GeneratedLink.tsx:38
 #: src/components/schedule/ScheduleLinkCopy.tsx:54
+#: src/components/search/ask/AskQuoteMenu.tsx:103
 msgid "Copy"
 msgstr ""
 
@@ -2325,7 +2326,7 @@ msgstr ""
 msgid "Could not check access"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:293
+#: src/components/search/ask/AskPage.tsx:322
 msgid "Could not complete the request."
 msgstr ""
 
@@ -2394,7 +2395,7 @@ msgstr ""
 msgid "Could not mark attendance"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:239
+#: src/components/search/ask/AskPage.tsx:268
 msgid "Could not open the chat"
 msgstr ""
 
@@ -3109,7 +3110,7 @@ msgstr ""
 msgid "e.g., CSE electives"
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:80
+#: src/components/search/ask/AskInput.tsx:87
 msgid "Each file must be no larger than 10 MiB."
 msgstr ""
 
@@ -3889,7 +3890,7 @@ msgstr ""
 msgid "Financial support:"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:192
+#: src/components/search/ask/ask-suggestions.ts:10
 msgid "Find a room available tomorrow from 15:00 to 16:00."
 msgstr ""
 
@@ -4418,7 +4419,7 @@ msgstr ""
 msgid "How to Register Your Club"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:181
+#: src/components/search/ask/AskPage.tsx:213
 msgid "I can help with your schedule, university rules, announcements and available rooms."
 msgstr ""
 
@@ -6056,7 +6057,7 @@ msgstr ""
 msgid "Nothing found"
 msgstr ""
 
-#: src/components/search/ask/SearchResults.tsx:44
+#: src/components/search/ask/SearchResults.tsx:61
 msgid "Nothing found: {query}"
 msgstr ""
 
@@ -6888,6 +6889,7 @@ msgid "Quick Presets:"
 msgstr ""
 
 #: src/components/editor/menus/BlockTypeDropdown.tsx:62
+#: src/components/search/ask/AskQuoteMenu.tsx:89
 msgid "Quote"
 msgstr ""
 
@@ -6924,7 +6926,7 @@ msgstr ""
 msgid "Receive a monthly stipend from IU alumni"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:284
+#: src/components/search/ask/AskPage.tsx:313
 msgid "Receiving answer"
 msgstr ""
 
@@ -7065,7 +7067,7 @@ msgstr ""
 msgid "Remove {participantName} from the meeting?"
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:205
+#: src/components/search/ask/AskInput.tsx:224
 msgid "Remove attachment"
 msgstr ""
 
@@ -7292,7 +7294,7 @@ msgstr ""
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/search/ask/AskChatList.tsx:47
-#: src/components/search/ask/AskPage.tsx:249
+#: src/components/search/ask/AskPage.tsx:278
 #: src/components/search/ask/AskSources.tsx:78
 #: src/components/sport/SportStudentTrainingModal.tsx:413
 #: src/components/sport/SportStudentTrainingModal.tsx:462
@@ -7704,7 +7706,7 @@ msgstr ""
 msgid "Search reservations"
 msgstr ""
 
-#: src/components/search/ask/SearchResults.tsx:42
+#: src/components/search/ask/SearchResults.tsx:59
 msgid "Search results: {query}"
 msgstr ""
 
@@ -7807,6 +7809,7 @@ msgid "Select a verified study group"
 msgstr ""
 
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:83
+#: src/components/search/ask/AskQuoteMenu.tsx:118
 msgid "Select all"
 msgstr ""
 
@@ -7887,11 +7890,11 @@ msgid "Semestral Budget"
 msgstr ""
 
 #: src/components/search/ask/AskFeedback.tsx:116
-#: src/components/search/ask/AskInput.tsx:262
+#: src/components/search/ask/AskInput.tsx:319
 msgid "Send"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:284
+#: src/components/search/ask/AskPage.tsx:313
 msgid "Sending request"
 msgstr ""
 
@@ -8487,7 +8490,7 @@ msgstr ""
 msgid "Step 5: Fill Registration Form"
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:253
+#: src/components/search/ask/AskInput.tsx:310
 #: src/components/timer/TimerPage.tsx:302
 msgid "Stop"
 msgstr ""
@@ -8903,15 +8906,15 @@ msgstr ""
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:308
+#: src/components/search/ask/AskPage.tsx:337
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:221
+#: src/components/search/ask/AskPage.tsx:250
 msgid "The assistant asks for confirmation before changing data in services."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:121
+#: src/components/search/ask/AskPage.tsx:153
 msgid "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 msgstr ""
 
@@ -8951,7 +8954,7 @@ msgstr ""
 msgid "The club manager collects orders from the club leaders in advance, and later makes a purchase in the form of an official order"
 msgstr ""
 
-#: src/components/search/ask/ask-session.ts:311
+#: src/components/search/ask/ask-session.ts:320
 msgid "The connection ended before the response was complete."
 msgstr ""
 
@@ -9051,8 +9054,8 @@ msgstr ""
 #~ msgid "The series window does not overlap the selected groups' teaching period."
 #~ msgstr ""
 
-#: src/components/search/ask/ask-session.ts:227
-#: src/components/search/ask/ask-session.ts:259
+#: src/components/search/ask/ask-session.ts:236
+#: src/components/search/ask/ask-session.ts:268
 msgid "The server returned no answer stream."
 msgstr ""
 
@@ -9365,7 +9368,7 @@ msgstr ""
 msgid "To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:215
+#: src/components/search/ask/AskPage.tsx:244
 msgid "To search without the assistant, start a message with /search or /поиск."
 msgstr ""
 
@@ -10077,7 +10080,7 @@ msgstr ""
 msgid "Welcome to InNoHassle"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:191
+#: src/components/search/ask/ask-suggestions.ts:9
 msgid "What are the university exam retake rules?"
 msgstr ""
 
@@ -10089,7 +10092,7 @@ msgstr ""
 msgid "What did you like?"
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:147
+#: src/components/search/ask/AskInput.tsx:154
 msgid "What is in the attached file?"
 msgstr ""
 
@@ -10098,11 +10101,11 @@ msgstr ""
 msgid "What is it?"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:190
+#: src/components/search/ask/ask-suggestions.ts:8
 msgid "What is on my schedule tomorrow?"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:193
+#: src/components/search/ask/ask-suggestions.ts:11
 msgid "What was announced in my available chats this week?"
 msgstr ""
 
@@ -10196,7 +10199,7 @@ msgstr ""
 msgid "Write something…"
 msgstr ""
 
-#: src/components/search/ask/ask-session.ts:357
+#: src/components/search/ask/ask-session.ts:380
 msgid "Write what to search for after /search."
 msgstr ""
 
@@ -10289,11 +10292,11 @@ msgstr ""
 msgid "You can add your schedule to InNoHassle and it will be updated on schedule changes."
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:72
+#: src/components/search/ask/AskInput.tsx:79
 msgid "You can attach up to 3 files."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:209
+#: src/components/search/ask/AskPage.tsx:238
 msgid "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
 msgstr ""
 
@@ -10404,7 +10407,7 @@ msgstr ""
 msgid "Your document was sent to the printer"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:300
+#: src/components/search/ask/AskPage.tsx:329
 msgid "Your draft is below. You can edit it and send it again."
 msgstr ""
 

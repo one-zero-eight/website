@@ -1,12 +1,13 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import type { searchTypes } from "@/api/search";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AnimatedDots from "@/components/search/AnimatedDots";
 import { AskSources } from "./AskSources";
 import { AskChatList } from "./AskChatList";
 import { AskAttachment } from "./AskAttachment";
 import { AskInput } from "./AskInput";
+import { AskQuoteMenu } from "./AskQuoteMenu";
 import { AskNotificationButton } from "./AskNotificationButton";
 import { AskResult } from "./AskResult";
 import { AskAnswerBody } from "./AskAnswerBody";
@@ -19,6 +20,12 @@ import {
   setDraftAttachments,
   useAskSession,
 } from "./ask-session";
+import {
+  SEARCH_COMMANDS,
+  conversationQuestions,
+  conversationTexts,
+  exampleQuestions,
+} from "./ask-suggestions";
 
 // How close to the end the chat must be scrolled to follow a new answer as it is written
 const FOLLOW_DISTANCE_PX = 80;
@@ -33,7 +40,7 @@ export function AskPage({
   askChat?: string;
   onChatLinkHandled?: () => void;
 }) {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
 
   const [isChatListOpen, setIsChatListOpen] = useState(false);
   const [isNoticeDismissed, setIsNoticeDismissed] = useState(false);
@@ -56,6 +63,20 @@ export function AskPage({
     draftAttachments,
     composerId,
   } = useAskSession();
+
+  // Hints for the message box: this chat first, then examples and commands
+  const suggestions = useMemo(
+    () => [
+      ...conversationQuestions(messages),
+      ...exampleQuestions.map((m) => i18n._(m)),
+      ...SEARCH_COMMANDS,
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [messages, i18n.locale],
+  );
+
+  // Words of the answers and sources in this chat, which the user's words are finished from
+  const context = useMemo(() => conversationTexts(messages), [messages]);
 
   // A dismissed notice comes back with the next outage
   useEffect(() => {
@@ -92,6 +113,17 @@ export function AskPage({
   // A stopped question comes back to the box, unless the user is already writing another one
   const handleStop = () => {
     cancelQuestion();
+  };
+
+  // The quote goes to the end of the draft, with the caret after it for the question
+  const handleQuote = (quote: string) => {
+    const draft = draftQuery.trimEnd();
+    setDraftQuery(`${draft ? `${draft}\n\n` : ""}${quote}\n\n`);
+    setTimeout(() => {
+      const input = inputRef.current;
+      input?.focus();
+      input?.setSelectionRange(input.value.length, input.value.length);
+    }, 0);
   };
 
   const handleSend = (query: string) => {
@@ -186,24 +218,21 @@ export function AskPage({
                 {!draftQuery.trim() && draftAttachments.length === 0 && (
                   <>
                     <div className="mt-2 grid w-full max-w-2xl grid-cols-1 gap-2 @2xl/content:grid-cols-2">
-                      {[
-                        t`What is on my schedule tomorrow?`,
-                        t`What are the university exam retake rules?`,
-                        t`Find a room available tomorrow from 15:00 to 16:00.`,
-                        t`What was announced in my available chats this week?`,
-                      ].map((query) => (
-                        <button
-                          key={query}
-                          type="button"
-                          className="btn btn-outline h-auto justify-start py-3 text-left font-normal whitespace-normal"
-                          onClick={() => {
-                            setDraftQuery(query);
-                            inputRef.current?.focus();
-                          }}
-                        >
-                          {query}
-                        </button>
-                      ))}
+                      {exampleQuestions
+                        .map((m) => i18n._(m))
+                        .map((query) => (
+                          <button
+                            key={query}
+                            type="button"
+                            className="btn btn-outline h-auto justify-start py-3 text-left font-normal whitespace-normal"
+                            onClick={() => {
+                              setDraftQuery(query);
+                              inputRef.current?.focus();
+                            }}
+                          >
+                            {query}
+                          </button>
+                        ))}
                     </div>
                     <p className="text-base-content/60 mt-2 max-w-2xl text-sm">
                       <Trans>
@@ -316,12 +345,16 @@ export function AskPage({
           </div>
         </div>
 
+        <AskQuoteMenu containerRef={scrollRef} onQuote={handleQuote} />
+
         <div className="mx-auto w-full max-w-4xl px-4 pt-2 pb-4">
           <AskInput
             key={composerId}
             inputRef={inputRef}
             text={draftQuery}
             setText={setDraftQuery}
+            suggestions={suggestions}
+            context={context}
             attachments={isPending ? [] : draftAttachments}
             onAttachmentsChange={(attachments) =>
               setDraftAttachments(attachments, composerId)

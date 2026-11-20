@@ -7,6 +7,7 @@ import { useLingui } from "@lingui/react/macro";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import type { DraftAttachment } from "./ask-session";
 import { AttachmentLabel } from "./AskAttachment";
+import { completionFor, nextWord } from "./ask-suggestions";
 
 // Enter sends; Shift+Enter starts a new line. Uploads are private drafts until sent.
 export function AskInput({
@@ -18,6 +19,8 @@ export function AskInput({
   attachments,
   onAttachmentsChange,
   inputRef,
+  suggestions = [],
+  context = [],
 }: {
   text: string;
   setText: (text: string) => void;
@@ -27,6 +30,8 @@ export function AskInput({
   attachments: DraftAttachment[];
   onAttachmentsChange: (attachments: DraftAttachment[]) => void;
   inputRef?: RefObject<HTMLTextAreaElement | null>;
+  suggestions?: string[];
+  context?: string[];
 }) {
   const { t } = useLingui();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -36,6 +41,8 @@ export function AskInput({
   const [removing, setRemoving] = useState(false);
   const [uploading, setUploading] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+  const [caretAtEnd, setCaretAtEnd] = useState(true);
   const previews = useRef(new Map<string, string>());
   useEffect(() => {
     const urls = previews.current;
@@ -146,6 +153,18 @@ export function AskInput({
       return;
     onSend(text.trim() || t`What is in the attached file?`);
   };
+  // The overlay cannot follow a scrolled textarea, so the ghost needs the caret at the end and no scroll
+  const syncCaret = (el: HTMLTextAreaElement) => {
+    setCaretAtEnd(
+      el.selectionStart === el.value.length &&
+        el.selectionEnd === el.value.length &&
+        el.scrollHeight <= el.clientHeight,
+    );
+  };
+  const ghost =
+    !isPending && !dismissed && caretAtEnd
+      ? completionFor(text, suggestions, context)
+      : "";
   return (
     <div
       className="border-base-300 bg-base-100 rounded-field focus-within:border-primary flex flex-col gap-2 border-2 p-2"
@@ -231,21 +250,59 @@ export function AskInput({
         >
           <span className="icon-[material-symbols--attach-file-rounded] text-lg" />
         </button>
-        <textarea
-          ref={inputRef}
-          className="field-sizing-content max-h-48 min-h-8 min-w-0 grow resize-none bg-transparent px-2 py-1 text-base outline-hidden"
-          rows={1}
-          autoFocus
-          placeholder={t`Ask a question...`}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key !== "Enter" || e.shiftKey || e.nativeEvent.isComposing)
-              return;
-            e.preventDefault();
-            handleSend();
-          }}
-        />
+        <div className="relative grid min-w-0 grow grid-cols-1">
+          {ghost && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none max-h-48 overflow-hidden px-2 py-1 text-base break-words whitespace-pre-wrap [grid-area:1/1]"
+            >
+              <span className="invisible">{text}</span>
+              <span className="text-base-content/40">{ghost}</span>
+            </div>
+          )}
+          <textarea
+            ref={inputRef}
+            className="relative field-sizing-content max-h-48 min-h-8 resize-none bg-transparent px-2 py-1 text-base outline-hidden [grid-area:1/1]"
+            rows={1}
+            autoFocus
+            placeholder={t`Ask a question...`}
+            value={text}
+            onChange={(e) => {
+              setDismissed(false);
+              syncCaret(e.currentTarget);
+              setText(e.target.value);
+            }}
+            onSelect={(e) => syncCaret(e.currentTarget)}
+            onKeyDown={(e) => {
+              const composing = e.nativeEvent.isComposing;
+              if (ghost && !composing) {
+                if (e.key === "Tab" && !e.shiftKey) {
+                  e.preventDefault();
+                  setText(text + ghost);
+                  return;
+                }
+                if (
+                  e.key === "ArrowRight" &&
+                  !e.shiftKey &&
+                  !e.ctrlKey &&
+                  !e.altKey &&
+                  !e.metaKey
+                ) {
+                  e.preventDefault();
+                  setText(text + nextWord(ghost));
+                  return;
+                }
+                if (e.key === "Escape") {
+                  setDismissed(true);
+                  return;
+                }
+              }
+              if (e.key !== "Enter" || e.shiftKey || composing) return;
+              e.preventDefault();
+              handleSend();
+            }}
+          />
+        </div>
         {isPending ? (
           <button
             type="button"

@@ -291,3 +291,77 @@ describe("AskInput attachments", () => {
     expect(container.textContent).not.toContain("notes.txt");
   });
 });
+
+describe("AskInput completion", () => {
+  let root: Root;
+  let container: HTMLDivElement;
+  const setText = vi.fn();
+  function render(props: { isPending?: boolean } = {}) {
+    const i18n = setupI18n({ locale: "en", messages: { en: {} } });
+    act(() =>
+      root.render(
+        createElement(
+          I18nProvider,
+          { i18n },
+          createElement(AskInput, {
+            text: "What are",
+            setText,
+            onSend: vi.fn(),
+            onStop: vi.fn(),
+            isPending: props.isPending ?? false,
+            attachments: [],
+            onAttachmentsChange: vi.fn(),
+            suggestions: ["What are the rules?"],
+          }),
+        ),
+      ),
+    );
+  }
+  const ghost = () => container.querySelector('[aria-hidden="true"]');
+  function press(key: string) {
+    const event = new KeyboardEvent("keydown", {
+      key,
+      bubbles: true,
+      cancelable: true,
+    });
+    act(() => container.querySelector("textarea")!.dispatchEvent(event));
+    return event;
+  }
+  beforeEach(() => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    setText.mockReset();
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+  });
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    vi.unstubAllGlobals();
+  });
+  it("shows the rest of the phrase after the typed text", () => {
+    render();
+    expect(ghost()?.textContent).toBe("What are the rules?");
+    expect(ghost()?.querySelector(".invisible")?.textContent).toBe("What are");
+  });
+  it("accepts the whole completion with Tab", () => {
+    render();
+    expect(press("Tab").defaultPrevented).toBe(true);
+    expect(setText).toHaveBeenCalledWith("What are the rules?");
+  });
+  it("accepts one word with ArrowRight", () => {
+    render();
+    press("ArrowRight");
+    expect(setText).toHaveBeenCalledWith("What are the");
+  });
+  it("hides the completion on Escape without clearing the text", () => {
+    render();
+    press("Escape");
+    expect(ghost()).toBeNull();
+    expect(setText).not.toHaveBeenCalled();
+  });
+  it("shows nothing while an answer is pending", () => {
+    render({ isPending: true });
+    expect(ghost()).toBeNull();
+  });
+});

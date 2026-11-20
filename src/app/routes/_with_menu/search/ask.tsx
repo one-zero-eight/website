@@ -30,7 +30,7 @@ function RouteComponent() {
   return (
     <Suspense>
       <Helmet>
-        <title>{t`Ask`}</title>
+        <title>🐱 catix</title>
         <meta
           name="description"
           content={t`Ask questions or find answers at Innopolis University.`}
