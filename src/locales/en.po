@@ -1689,7 +1689,7 @@ msgstr "Chat request"
 msgid "Chat source requests"
 msgstr "Chat source requests"
 
-#: src/components/search/ask/AskPage.tsx:185
+#: src/components/search/ask/AskPage.tsx:181
 msgid "Chats"
 msgstr "Chats"
 
@@ -1917,8 +1917,8 @@ msgstr "Click to upload or paste an image"
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
 #: src/components/search/ask/AskInput.tsx:200
 #: src/components/search/ask/AskInput.tsx:201
+#: src/components/search/ask/AskPage.tsx:164
 #: src/components/search/ask/AskPage.tsx:165
-#: src/components/search/ask/AskPage.tsx:166
 #: src/components/search/IframePreviewCard.tsx:111
 #: src/components/sport/SportOverviewSection.tsx:669
 #: src/components/sport/SportStudentTrainingModal.tsx:362
@@ -2324,7 +2324,7 @@ msgstr "Could not book"
 msgid "Could not check access"
 msgstr "Could not check access"
 
-#: src/components/search/ask/AskPage.tsx:327
+#: src/components/search/ask/AskPage.tsx:322
 msgid "Could not complete the request."
 msgstr "Could not complete the request."
 
@@ -2393,7 +2393,7 @@ msgstr "Could not load your requests. Refresh to try again."
 msgid "Could not mark attendance"
 msgstr "Could not mark attendance"
 
-#: src/components/search/ask/AskPage.tsx:273
+#: src/components/search/ask/AskPage.tsx:268
 msgid "Could not open the chat"
 msgstr "Could not open the chat"
 
@@ -4413,7 +4413,7 @@ msgstr "How to get to the Innopolis Music room?"
 msgid "How to Register Your Club"
 msgstr "How to Register Your Club"
 
-#: src/components/search/ask/AskPage.tsx:218
+#: src/components/search/ask/AskPage.tsx:213
 msgid "I can help with your schedule, university rules, announcements and available rooms."
 msgstr "I can help with your schedule, university rules, announcements and available rooms."
 
@@ -5443,8 +5443,8 @@ msgid "New booking"
 msgstr "New booking"
 
 #: src/components/search/ask/NewChatButton.tsx:16
-msgid "New chat"
-msgstr "New chat"
+#~ msgid "New chat"
+#~ msgstr "New chat"
 
 #: src/components/guard/SetupResult.tsx:35
 msgid "New file was created under <0/> ownership. You were added with editor role."
@@ -6904,7 +6904,7 @@ msgstr "Reader"
 msgid "Receive a monthly stipend from IU alumni"
 msgstr "Receive a monthly stipend from IU alumni"
 
-#: src/components/search/ask/AskPage.tsx:318
+#: src/components/search/ask/AskPage.tsx:313
 msgid "Receiving answer"
 msgstr "Receiving answer"
 
@@ -7272,7 +7272,7 @@ msgstr "Retake"
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/search/ask/AskChatList.tsx:47
-#: src/components/search/ask/AskPage.tsx:283
+#: src/components/search/ask/AskPage.tsx:278
 #: src/components/search/ask/AskSources.tsx:78
 #: src/components/sport/SportStudentTrainingModal.tsx:413
 #: src/components/sport/SportStudentTrainingModal.tsx:462
@@ -7872,7 +7872,7 @@ msgstr "Semestral Budget"
 msgid "Send"
 msgstr "Send"
 
-#: src/components/search/ask/AskPage.tsx:318
+#: src/components/search/ask/AskPage.tsx:313
 msgid "Sending request"
 msgstr "Sending request"
 
@@ -8864,15 +8864,15 @@ msgstr "Thank you!"
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 
-#: src/components/search/ask/AskPage.tsx:342
+#: src/components/search/ask/AskPage.tsx:337
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr "The action result could not be confirmed. Check the service before trying again."
 
-#: src/components/search/ask/AskPage.tsx:255
+#: src/components/search/ask/AskPage.tsx:250
 msgid "The assistant asks for confirmation before changing data in services."
 msgstr "The assistant asks for confirmation before changing data in services."
 
-#: src/components/search/ask/AskPage.tsx:158
+#: src/components/search/ask/AskPage.tsx:157
 msgid "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 msgstr "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 
@@ -9318,7 +9318,7 @@ msgstr "To promote the IU by contributing to the development of the educational 
 msgid "To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
 msgstr "To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
 
-#: src/components/search/ask/AskPage.tsx:249
+#: src/components/search/ask/AskPage.tsx:244
 msgid "To search without the assistant, start a message with /search or /поиск."
 msgstr "To search without the assistant, start a message with /search or /поиск."
 
@@ -10238,7 +10238,7 @@ msgstr "You can add your schedule to InNoHassle and it will be updated on schedu
 msgid "You can attach up to 3 files."
 msgstr "You can attach up to 3 files."
 
-#: src/components/search/ask/AskPage.tsx:243
+#: src/components/search/ask/AskPage.tsx:238
 msgid "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
 msgstr "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
 
@@ -10349,7 +10349,7 @@ msgstr "Your club was invited as a host for this draft."
 msgid "Your document was sent to the printer"
 msgstr "Your document was sent to the printer"
 
-#: src/components/search/ask/AskPage.tsx:334
+#: src/components/search/ask/AskPage.tsx:329
 msgid "Your draft is below. You can edit it and send it again."
 msgstr "Your draft is below. You can edit it and send it again."
 

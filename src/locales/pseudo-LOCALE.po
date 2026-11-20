@@ -1693,7 +1693,7 @@ msgstr ""
 msgid "Chat source requests"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:185
+#: src/components/search/ask/AskPage.tsx:181
 msgid "Chats"
 msgstr ""
 
@@ -1921,8 +1921,8 @@ msgstr ""
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
 #: src/components/search/ask/AskInput.tsx:200
 #: src/components/search/ask/AskInput.tsx:201
+#: src/components/search/ask/AskPage.tsx:164
 #: src/components/search/ask/AskPage.tsx:165
-#: src/components/search/ask/AskPage.tsx:166
 #: src/components/search/IframePreviewCard.tsx:111
 #: src/components/sport/SportOverviewSection.tsx:669
 #: src/components/sport/SportStudentTrainingModal.tsx:362
@@ -2328,7 +2328,7 @@ msgstr ""
 msgid "Could not check access"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:327
+#: src/components/search/ask/AskPage.tsx:322
 msgid "Could not complete the request."
 msgstr ""
 
@@ -2397,7 +2397,7 @@ msgstr ""
 msgid "Could not mark attendance"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:273
+#: src/components/search/ask/AskPage.tsx:268
 msgid "Could not open the chat"
 msgstr ""
 
@@ -4421,7 +4421,7 @@ msgstr ""
 msgid "How to Register Your Club"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:218
+#: src/components/search/ask/AskPage.tsx:213
 msgid "I can help with your schedule, university rules, announcements and available rooms."
 msgstr ""
 
@@ -5463,8 +5463,8 @@ msgid "New booking"
 msgstr ""
 
 #: src/components/search/ask/NewChatButton.tsx:16
-msgid "New chat"
-msgstr ""
+#~ msgid "New chat"
+#~ msgstr ""
 
 #: src/components/guard/SetupResult.tsx:35
 msgid "New file was created under <0/> ownership. You were added with editor role."
@@ -6928,7 +6928,7 @@ msgstr ""
 msgid "Receive a monthly stipend from IU alumni"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:318
+#: src/components/search/ask/AskPage.tsx:313
 msgid "Receiving answer"
 msgstr ""
 
@@ -7296,7 +7296,7 @@ msgstr ""
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/search/ask/AskChatList.tsx:47
-#: src/components/search/ask/AskPage.tsx:283
+#: src/components/search/ask/AskPage.tsx:278
 #: src/components/search/ask/AskSources.tsx:78
 #: src/components/sport/SportStudentTrainingModal.tsx:413
 #: src/components/sport/SportStudentTrainingModal.tsx:462
@@ -7896,7 +7896,7 @@ msgstr ""
 msgid "Send"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:318
+#: src/components/search/ask/AskPage.tsx:313
 msgid "Sending request"
 msgstr ""
 
@@ -8908,15 +8908,15 @@ msgstr ""
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:342
+#: src/components/search/ask/AskPage.tsx:337
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:255
+#: src/components/search/ask/AskPage.tsx:250
 msgid "The assistant asks for confirmation before changing data in services."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:158
+#: src/components/search/ask/AskPage.tsx:157
 msgid "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 msgstr ""
 
@@ -9370,7 +9370,7 @@ msgstr ""
 msgid "To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:249
+#: src/components/search/ask/AskPage.tsx:244
 msgid "To search without the assistant, start a message with /search or /поиск."
 msgstr ""
 
@@ -10298,7 +10298,7 @@ msgstr ""
 msgid "You can attach up to 3 files."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:243
+#: src/components/search/ask/AskPage.tsx:238
 msgid "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
 msgstr ""
 
@@ -10409,7 +10409,7 @@ msgstr ""
 msgid "Your document was sent to the printer"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:334
+#: src/components/search/ask/AskPage.tsx:329
 msgid "Your draft is below. You can edit it and send it again."
 msgstr ""
 

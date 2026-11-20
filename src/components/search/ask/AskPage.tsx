@@ -3,7 +3,6 @@ import type { searchTypes } from "@/api/search";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo, useRef, useState } from "react";
 import AnimatedDots from "@/components/search/AnimatedDots";
-import { AskSources } from "./AskSources";
 import { AskChatList } from "./AskChatList";
 import { AskAttachment } from "./AskAttachment";
 import { AskInput } from "./AskInput";
@@ -171,9 +170,6 @@ export function AskPage({
             </button>
           </div>
         )}
-        <div className="border-base-300 hidden justify-end border-b px-4 py-2 @4xl/content:flex">
-          <AskSources />
-        </div>
         <div className="border-base-300 flex flex-col gap-2 border-b px-4 py-2 @4xl/content:hidden">
           <div className="flex items-center justify-between gap-2">
             <button
@@ -191,7 +187,6 @@ export function AskPage({
                 }
               />
             </button>
-            <AskSources />
           </div>
           {isChatListOpen && (
             <div className="max-h-64 overflow-y-auto pt-2">
