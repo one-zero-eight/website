@@ -305,14 +305,19 @@ export function AskPage({
             )}
 
             {isPending && (
-              <div className="border-base-300 bg-base-200 text-base-content rounded-field flex max-w-full min-w-0 flex-col gap-2 self-start border! px-4 py-2 wrap-anywhere">
-                {answerText && <AskAnswerBody text={answerText} writing />}
-                <div className="text-base-content/70 flex text-sm">
-                  <span>
-                    {status ||
-                      (answerText ? t`Receiving answer` : t`Sending request`)}
-                  </span>
-                  <AnimatedDots />
+              <div className="flex max-w-full min-w-0 items-end gap-2 self-start">
+                <span aria-hidden="true" className="shrink-0 text-2xl">
+                  🐱
+                </span>
+                <div className="border-base-300 bg-base-200 text-base-content rounded-field flex min-w-0 flex-col gap-2 border! px-4 py-2 wrap-anywhere">
+                  {answerText && <AskAnswerBody text={answerText} />}
+                  <div className="text-base-content/70 flex text-sm">
+                    <span>
+                      {status ||
+                        (answerText ? t`Receiving answer` : t`Sending request`)}
+                    </span>
+                    <AnimatedDots />
+                  </div>
                 </div>
               </div>
             )}
