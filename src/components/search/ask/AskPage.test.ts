@@ -23,9 +23,6 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock("./AskChatList", () => ({ AskChatList: () => null }));
 vi.mock("./AskResult", () => ({ AskResult: () => null }));
-vi.mock("@/components/search/SourceRequests", () => ({
-  SourceRequests: () => "Propose a chat",
-}));
 vi.mock("./AskSources", () => ({
   AskSources: () => createElement("button", { type: "button" }, "Sources"),
 }));

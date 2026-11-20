@@ -1064,7 +1064,7 @@ msgstr "Искусство и культура"
 msgid "Ask a question..."
 msgstr "Задайте вопрос..."
 
-#: src/app/routes/_with_menu/search/ask.tsx:37
+#: src/app/routes/_with_menu/search/ask.tsx:38
 msgid "Ask questions or find answers at Innopolis University."
 msgstr "Задавайте вопросы или ищите ответы в Университете Иннополис."
 
@@ -1136,7 +1136,7 @@ msgstr "Доступно"
 msgid "Available medical groups"
 msgstr "Доступные медицинские группы"
 
-#: src/components/search/ask/AskSources.tsx:106
+#: src/components/search/ask/AskSources.tsx:102
 msgid "Available sources"
 msgstr "Доступные источники"
 
@@ -1689,8 +1689,8 @@ msgstr "Заявка на подключение чата"
 msgid "Chat source requests"
 msgstr "Заявки на подключение чатов"
 
-#: src/components/search/ask/AskSources.tsx:26
-#: src/components/search/ask/AskSources.tsx:31
+#: src/components/search/ask/AskSources.tsx:25
+#: src/components/search/ask/AskSources.tsx:30
 msgid "Chat sources"
 msgstr "Источники чатов"
 
@@ -2102,7 +2102,7 @@ msgstr "Комментарий должен содержать не более 2
 msgid "Comments"
 msgstr "Комментарии"
 
-#: src/components/search/ask/AskSources.tsx:136
+#: src/components/search/ask/AskSources.tsx:132
 msgid "Common source"
 msgstr "Общий источник"
 
@@ -2386,7 +2386,7 @@ msgstr "Не удалось загрузить предпросмотр"
 msgid "Could not load reservations"
 msgstr "Не удалось загрузить бронирования"
 
-#: src/components/search/ask/AskSources.tsx:71
+#: src/components/search/ask/AskSources.tsx:67
 msgid "Could not load sources."
 msgstr "Не удалось загрузить источники."
 
@@ -2980,7 +2980,7 @@ msgstr "Device flow подтверждён без id комнаты."
 msgid "Did you mean"
 msgstr "Возможно, вы имели в виду"
 
-#: src/components/search/ask/AskSources.tsx:13
+#: src/components/search/ask/AskSources.tsx:12
 msgid "Disabled"
 msgstr "Отключено"
 
@@ -4970,7 +4970,7 @@ msgstr "Загрузка заявок…"
 #~ msgid "Loading search results..."
 #~ msgstr "Загрузка результатов поиска..."
 
-#: src/components/search/ask/AskSources.tsx:63
+#: src/components/search/ask/AskSources.tsx:59
 msgid "Loading sources"
 msgstr "Загрузка источников"
 
@@ -5564,7 +5564,7 @@ msgstr "Пока нет участников."
 msgid "No audience to schedule"
 msgstr "Нет аудитории для размещения"
 
-#: src/components/search/ask/AskSources.tsx:178
+#: src/components/search/ask/AskSources.tsx:174
 msgid "No available sources."
 msgstr "Нет доступных источников."
 
@@ -6064,12 +6064,12 @@ msgstr "Нечего импортировать"
 msgid "Notifications are blocked. Allow them in your browser settings."
 msgstr "Уведомления заблокированы. Разрешите их в настройках браузера."
 
-#: src/components/search/ask/AskNotificationButton.tsx:103
+#: src/components/search/ask/AskNotificationButton.tsx:105
 msgid "Notifications on"
 msgstr "Уведомления включены"
 
 #: src/components/search/ask/AskNotificationButton.tsx:97
-#: src/components/search/ask/AskNotificationButton.tsx:105
+#: src/components/search/ask/AskNotificationButton.tsx:107
 msgid "Notify me when cAtIx replies"
 msgstr "Уведомлять об ответах cAtIx"
 
@@ -6307,7 +6307,7 @@ msgstr "Организатор"
 msgid "Other"
 msgstr "Другой"
 
-#: src/components/search/ask/AskSources.tsx:145
+#: src/components/search/ask/AskSources.tsx:141
 msgid "Other and new topics"
 msgstr "Остальные и новые темы"
 
@@ -7282,7 +7282,7 @@ msgstr "Пересдача"
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/search/ask/AskChatList.tsx:47
 #: src/components/search/ask/AskPage.tsx:277
-#: src/components/search/ask/AskSources.tsx:78
+#: src/components/search/ask/AskSources.tsx:74
 #: src/components/sport/SportStudentTrainingModal.tsx:413
 #: src/components/sport/SportStudentTrainingModal.tsx:462
 #: src/components/sport/SportTrainingsCalendarList.tsx:263
@@ -7511,7 +7511,7 @@ msgstr "Сохранить время встречи"
 msgid "Save timeslots"
 msgstr "Сохранить слоты"
 
-#: src/components/search/ask/AskSources.tsx:168
+#: src/components/search/ask/AskSources.tsx:164
 msgid "Saved message history remains searchable even when collection is disabled."
 msgstr "Сохранённая история сообщений остаётся доступной для поиска, даже если сбор отключён."
 
@@ -7519,7 +7519,7 @@ msgstr "Сохранённая история сообщений остаётс�
 msgid "Saved, other admins see these groups"
 msgstr "Сохранено, другие админы видят эти группы"
 
-#: src/components/search/ask/AskSources.tsx:11
+#: src/components/search/ask/AskSources.tsx:10
 msgid "Saving messages"
 msgstr "Сохранение сообщений"
 
@@ -7714,7 +7714,7 @@ msgstr "Искать..."
 msgid "Search…"
 msgstr "Поиск…"
 
-#: src/components/search/ask/AskSources.tsx:12
+#: src/components/search/ask/AskSources.tsx:11
 msgid "Searching on request"
 msgstr "Поиск по запросу"
 
@@ -8541,7 +8541,7 @@ msgstr "Подтверждённая учебная группа не подтв
 #~ msgid "Study group verification is not proof of Telegram chat membership. Indexed messages will be available to verified students of the target study group, including those who are not in the Telegram chat."
 #~ msgstr "Подтверждённая учебная группа не подтверждает участие в Telegram-чате. Проиндексированные сообщения будут доступны проверенным студентам указанной учебной группы, в том числе тем, кто не состоит в Telegram-чате."
 
-#: src/components/search/ask/AskSources.tsx:97
+#: src/components/search/ask/AskSources.tsx:93
 msgid "Study group verification is unavailable. Common sources are still available."
 msgstr "Подтверждение учебной группы недоступно. Общие источники по-прежнему доступны."
 
@@ -9081,7 +9081,7 @@ msgstr "Бронирований пока нет."
 msgid "There is no file to be printed!"
 msgstr "Нет файла для печати!"
 
-#: src/components/search/ask/AskSources.tsx:183
+#: src/components/search/ask/AskSources.tsx:179
 msgid "These are configured capabilities, not a guarantee that a source is currently online."
 msgstr "Это настроенные возможности, а не гарантия, что источник сейчас в сети."
 
@@ -9756,7 +9756,7 @@ msgstr "Проверка URL..."
 msgid "Validation"
 msgstr "Групповой этап"
 
-#: src/components/search/ask/AskSources.tsx:85
+#: src/components/search/ask/AskSources.tsx:81
 msgid "Verified study groups"
 msgstr "Подтверждённые учебные группы"
 
@@ -10096,7 +10096,7 @@ msgstr "Кто сможет видеть проиндексированные с
 msgid "Who we are"
 msgstr "Кто мы"
 
-#: src/components/search/ask/AskSources.tsx:147
+#: src/components/search/ask/AskSources.tsx:143
 msgid "Whole chat"
 msgstr "Весь чат"
 

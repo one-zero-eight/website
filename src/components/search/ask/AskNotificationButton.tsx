@@ -98,7 +98,9 @@ export function AskNotificationButton() {
         }
         onClick={handleClick}
       >
-        <span className="icon-[material-symbols--notifications-outline] shrink-0 text-base" />
+        <span aria-hidden="true" className="shrink-0 text-base">
+          {enabled ? "🔔" : "🔕"}
+        </span>
         {enabled ? (
           <Trans>Notifications on</Trans>
         ) : (

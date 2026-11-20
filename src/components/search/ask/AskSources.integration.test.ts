@@ -1,9 +1,10 @@
 import { setupI18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, createElement, type ReactNode } from "react";
+import { act, createElement, Fragment, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SourceRequests } from "../SourceRequests";
 import { AskSources } from "./AskSources";
 
 const transport = vi.hoisted(() => {
@@ -82,7 +83,12 @@ describe("Sources shared-client and modal lifecycle", () => {
           createElement(
             I18nProvider,
             { i18n: setupI18n({ locale: "en", messages: { en: {} } }) },
-            createElement(AskSources),
+            createElement(
+              Fragment,
+              null,
+              createElement(AskSources),
+              createElement(SourceRequests),
+            ),
           ),
         ),
       ),
@@ -128,23 +134,16 @@ describe("Sources shared-client and modal lifecycle", () => {
     expect(transport).toHaveBeenCalledTimes(2);
   });
 
-  it("opens the real proposal form and closes only the nested modal", async () => {
-    act(() => button("Chat sources").click());
-    await settle();
+  it("opens the real proposal form on its own, apart from the sources", async () => {
     act(() => button("Propose a chat").click());
     await settle();
-    expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(2);
+    expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(1);
     expect(
       document.body.querySelector('input[name="invite_link"]'),
     ).not.toBeNull();
-    expect((transport.mock.calls[1][0] as Request).url).toBe(
+    expect((transport.mock.calls[0][0] as Request).url).toBe(
       "http://localhost/search/sources/requests",
     );
-    closeTopDialog();
-    await settle();
-    expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(1);
-    expect(document.body.querySelector('input[name="invite_link"]')).toBeNull();
-    expect(document.body.textContent).toContain("Private group chat");
     closeTopDialog();
     await settle();
     expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(0);

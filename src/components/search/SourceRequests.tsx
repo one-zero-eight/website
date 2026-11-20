@@ -43,7 +43,7 @@ export function SourceRequests() {
     <>
       <button
         type="button"
-        className="btn btn-ghost btn-sm mt-1"
+        className="btn btn-ghost btn-sm"
         onClick={() => setOpen(true)}
       >
         <span className="icon-[material-symbols--add-circle-outline] text-lg" />

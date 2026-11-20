@@ -1068,7 +1068,7 @@ msgstr ""
 msgid "Ask a question..."
 msgstr ""
 
-#: src/app/routes/_with_menu/search/ask.tsx:37
+#: src/app/routes/_with_menu/search/ask.tsx:38
 msgid "Ask questions or find answers at Innopolis University."
 msgstr ""
 
@@ -1140,7 +1140,7 @@ msgstr ""
 msgid "Available medical groups"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:106
+#: src/components/search/ask/AskSources.tsx:102
 msgid "Available sources"
 msgstr ""
 
@@ -1693,8 +1693,8 @@ msgstr ""
 msgid "Chat source requests"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:26
-#: src/components/search/ask/AskSources.tsx:31
+#: src/components/search/ask/AskSources.tsx:25
+#: src/components/search/ask/AskSources.tsx:30
 msgid "Chat sources"
 msgstr ""
 
@@ -2106,7 +2106,7 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:136
+#: src/components/search/ask/AskSources.tsx:132
 msgid "Common source"
 msgstr ""
 
@@ -2390,7 +2390,7 @@ msgstr ""
 msgid "Could not load reservations"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:71
+#: src/components/search/ask/AskSources.tsx:67
 msgid "Could not load sources."
 msgstr ""
 
@@ -2984,7 +2984,7 @@ msgstr ""
 msgid "Did you mean"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:13
+#: src/components/search/ask/AskSources.tsx:12
 msgid "Disabled"
 msgstr ""
 
@@ -4982,7 +4982,7 @@ msgstr ""
 #~ msgid "Loading search results..."
 #~ msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:63
+#: src/components/search/ask/AskSources.tsx:59
 msgid "Loading sources"
 msgstr ""
 
@@ -5580,7 +5580,7 @@ msgstr ""
 msgid "No audience to schedule"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:178
+#: src/components/search/ask/AskSources.tsx:174
 msgid "No available sources."
 msgstr ""
 
@@ -6080,12 +6080,12 @@ msgstr ""
 msgid "Notifications are blocked. Allow them in your browser settings."
 msgstr ""
 
-#: src/components/search/ask/AskNotificationButton.tsx:103
+#: src/components/search/ask/AskNotificationButton.tsx:105
 msgid "Notifications on"
 msgstr ""
 
 #: src/components/search/ask/AskNotificationButton.tsx:97
-#: src/components/search/ask/AskNotificationButton.tsx:105
+#: src/components/search/ask/AskNotificationButton.tsx:107
 msgid "Notify me when cAtIx replies"
 msgstr ""
 
@@ -6323,7 +6323,7 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:145
+#: src/components/search/ask/AskSources.tsx:141
 msgid "Other and new topics"
 msgstr ""
 
@@ -7302,7 +7302,7 @@ msgstr ""
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/search/ask/AskChatList.tsx:47
 #: src/components/search/ask/AskPage.tsx:277
-#: src/components/search/ask/AskSources.tsx:78
+#: src/components/search/ask/AskSources.tsx:74
 #: src/components/sport/SportStudentTrainingModal.tsx:413
 #: src/components/sport/SportStudentTrainingModal.tsx:462
 #: src/components/sport/SportTrainingsCalendarList.tsx:263
@@ -7531,7 +7531,7 @@ msgstr ""
 msgid "Save timeslots"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:168
+#: src/components/search/ask/AskSources.tsx:164
 msgid "Saved message history remains searchable even when collection is disabled."
 msgstr ""
 
@@ -7539,7 +7539,7 @@ msgstr ""
 msgid "Saved, other admins see these groups"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:11
+#: src/components/search/ask/AskSources.tsx:10
 msgid "Saving messages"
 msgstr ""
 
@@ -7734,7 +7734,7 @@ msgstr ""
 msgid "Search…"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:12
+#: src/components/search/ask/AskSources.tsx:11
 msgid "Searching on request"
 msgstr ""
 
@@ -8565,7 +8565,7 @@ msgstr ""
 #~ msgid "Study group verification is not proof of Telegram chat membership. Indexed messages will be available to verified students of the target study group, including those who are not in the Telegram chat."
 #~ msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:97
+#: src/components/search/ask/AskSources.tsx:93
 msgid "Study group verification is unavailable. Common sources are still available."
 msgstr ""
 
@@ -9133,7 +9133,7 @@ msgstr ""
 msgid "There is no file to be printed!"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:183
+#: src/components/search/ask/AskSources.tsx:179
 msgid "These are configured capabilities, not a guarantee that a source is currently online."
 msgstr ""
 
@@ -9812,7 +9812,7 @@ msgstr ""
 msgid "Validation"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:85
+#: src/components/search/ask/AskSources.tsx:81
 msgid "Verified study groups"
 msgstr ""
 
@@ -10156,7 +10156,7 @@ msgstr ""
 msgid "Who we are"
 msgstr ""
 
-#: src/components/search/ask/AskSources.tsx:147
+#: src/components/search/ask/AskSources.tsx:143
 msgid "Whole chat"
 msgstr ""
 
