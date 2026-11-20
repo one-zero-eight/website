@@ -86,7 +86,7 @@ export const items: ItemType[] = [
   ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
-      title: "Ask the assistant",
+      title: "catix",
       to: "/search/ask",
       activeOptions: { exact: true, includeSearch: false },
       badge: (
@@ -94,7 +94,11 @@ export const items: ItemType[] = [
           DEV
         </span>
       ),
-      icon: <span className="icon-[material-symbols--auto-awesome-outline]" />,
+      icon: (
+        <span className="inline-flex size-6 items-center justify-center text-base leading-none">
+          🐱
+        </span>
+      ),
     },
     { type: "separator" },
   ]),
