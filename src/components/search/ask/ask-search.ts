@@ -1,5 +1,5 @@
 import { searchFetch, searchTypes } from "@/api/search";
-import { PathsSearchSearchGetParametersQueryResponse_types } from "@/api/search/types";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 
 // The assistant cannot reach its language model: the question is answered as a plain search of the knowledge base
 export class AssistantUnavailableError extends Error {}
@@ -13,21 +13,26 @@ export function parseSearchCommand(text: string): string | null {
   return match ? (match[1] ?? "").trim() : null;
 }
 
-export async function searchKnowledgeBase(
+// A plain search of the knowledge base kept in the chat as one of its turns: `query` is the message as the user wrote it,
+// `searchedFor` what is searched for. Without a chat a new one starts; the response's chat_id is the chat
+export async function searchInChat(
   query: string,
+  searchedFor: string,
+  chatId: string | null,
   signal: AbortSignal,
-): Promise<searchTypes.SchemaSearchResponse[]> {
-  const { data, error } = await searchFetch.GET("/search/search", {
-    params: {
-      query: {
-        query,
-        response_types: [
-          PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
-        ],
-      },
-    },
+): Promise<searchTypes.SchemaAskResponses> {
+  const { data, error, response } = await searchFetch.POST("/ask/search", {
+    body: { query, searched_for: searchedFor, chat_id: chatId },
     signal,
   });
-  if (!data) throw new Error(JSON.stringify(error));
-  return data.responses;
+  if (!data) {
+    throw new Error(
+      formatApiErrorMessage({
+        body: error,
+        httpCode: response.status,
+        response,
+      }),
+    );
+  }
+  return data;
 }

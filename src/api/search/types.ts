@@ -148,6 +148,29 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/ask/search": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Search In Chat
+     * @description A plain search of the knowledge base (as GET /search/search, no assistant) kept in the chat as one of its turns: the
+     *     site's search command (`query` is the message as the user wrote it, `searched_for` what follows the command) and the
+     *     search a question falls back to when the assistant is unavailable. Without `chat_id`, or with an unknown one, a new chat
+     *     starts, named by `searched_for`. The chat's next question shows these searches to the assistant.
+     */
+    post: operations["ask_search_in_chat"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/ask/stream": {
     parameters: {
       query?: never;
@@ -695,6 +718,7 @@ export interface components {
       /** Feedback Comment */
       feedback_comment?: string | null;
       approval?: components["schemas"]["AskApproval"] | null;
+      search?: components["schemas"]["SearchResponses"] | null;
     };
     /** AttachmentInfo */
     AttachmentInfo: {
@@ -747,6 +771,15 @@ export interface components {
     Body_ask_rename_chat: {
       /** Title */
       title: string;
+    };
+    /** Body_ask_search_in_chat */
+    Body_ask_search_in_chat: {
+      /** Query */
+      query: string;
+      /** Searched For */
+      searched_for: string;
+      /** Chat Id */
+      chat_id?: string | null;
     };
     /** CalendarEventOffer */
     CalendarEventOffer: {
@@ -1373,6 +1406,8 @@ export type SchemaBodyAskAskByQueryStream =
   components["schemas"]["Body_ask_ask_by_query_stream"];
 export type SchemaBodyAskRenameChat =
   components["schemas"]["Body_ask_rename_chat"];
+export type SchemaBodyAskSearchInChat =
+  components["schemas"]["Body_ask_search_in_chat"];
 export type SchemaCalendarEventOffer =
   components["schemas"]["CalendarEventOffer"];
 export type SchemaCalendarExportKeyCreated =
@@ -1772,6 +1807,46 @@ export interface operations {
     responses: {
       /** @description Server-sent events: `status`, `answer`, then `done` (AskResponses) or `error` */
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_search_in_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Body_ask_search_in_chat"];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskResponses"];
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
         headers: {
           [name: string]: unknown;
         };

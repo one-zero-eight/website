@@ -18,7 +18,7 @@ import { validBookingReceipt } from "./ask-booking";
 import {
   AssistantUnavailableError,
   parseSearchCommand,
-  searchKnowledgeBase,
+  searchInChat,
 } from "./ask-search";
 import { useSyncExternalStore } from "react";
 
@@ -41,6 +41,15 @@ export type AskMessage =
       query: string;
       results: searchTypes.SchemaSearchResponse[];
     };
+
+// A search kept in the chat as the cards of the search API
+function searchMessage(response: searchTypes.SchemaAskResponses): AskMessage {
+  return {
+    role: "search",
+    query: response.search!.searched_for,
+    results: response.search!.responses,
+  };
+}
 
 export const askAnswerReadyEvent = "catix-answer-ready";
 export type AskAnswerReady = { chatId: string | null; needsApproval: boolean };
@@ -312,6 +321,20 @@ async function readAnswer(
   );
 }
 
+function keepSearch(
+  response: searchTypes.SchemaAskResponses,
+  patch: Partial<AskSession> = {},
+) {
+  update({
+    ...patch,
+    messages: [...session.messages, searchMessage(response)],
+    chatId: response.chat_id ?? null,
+  });
+  queryClient.invalidateQueries({
+    queryKey: $search.queryOptions("get", "/ask/chats").queryKey,
+  });
+}
+
 export async function askQuestion(
   query: string,
   attachments: searchTypes.SchemaAttachmentInfo[] = session.draftAttachments.map(
@@ -356,15 +379,13 @@ export async function askQuestion(
       if (!searchQuery) {
         throw new Error(i18n._(msg`Write what to search for after /search.`));
       }
-      const results = await searchKnowledgeBase(searchQuery, controller.signal);
-      if (!controller.signal.aborted) {
-        update({
-          messages: [
-            ...session.messages,
-            { role: "search", query: searchQuery, results },
-          ],
-        });
-      }
+      const response = await searchInChat(
+        query,
+        searchQuery,
+        session.chatId,
+        controller.signal,
+      );
+      if (!controller.signal.aborted) keepSearch(response);
       return;
     }
     let response: searchTypes.SchemaAskResponses | undefined;
@@ -378,12 +399,14 @@ export async function askQuestion(
     } catch (e) {
       if (!(e instanceof AssistantUnavailableError)) throw e;
       // The question is answered as a plain search of the knowledge base
-      const results = await searchKnowledgeBase(query, controller.signal);
+      const response = await searchInChat(
+        query,
+        query,
+        session.chatId,
+        controller.signal,
+      );
       if (!controller.signal.aborted) {
-        update({
-          assistantUnavailable: true,
-          messages: [...session.messages, { role: "search", query, results }],
-        });
+        keepSearch(response, { assistantUnavailable: true });
       }
       return;
     }
@@ -548,10 +571,12 @@ export async function openChat(chatId: string) {
           content: response.query,
           attachments: response.attachments ?? [],
         },
-        {
-          role: "assistant",
-          response: restoreSignupReceipts(chatId, response),
-        },
+        response.search
+          ? searchMessage(response)
+          : {
+              role: "assistant",
+              response: restoreSignupReceipts(chatId, response),
+            },
       ]),
     });
   } catch (e) {

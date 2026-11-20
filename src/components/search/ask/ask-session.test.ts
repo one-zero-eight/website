@@ -434,6 +434,51 @@ describe("ask session attachments", () => {
     );
   });
 
+  it("restores a search kept in the chat as its cards", async () => {
+    api.history.mockResolvedValueOnce({
+      answers: [
+        {
+          ...answer,
+          query: "/search бот",
+          answer: "",
+          attachments: [],
+          search: { searched_for: "бот", responses: [] },
+        },
+      ],
+    });
+    await act(async () => session.openChat("chat-1"));
+    expect(snapshot.messages).toEqual([
+      { role: "user", content: "/search бот", attachments: [] },
+      { role: "search", query: "бот", results: [] },
+    ]);
+  });
+
+  it("keeps a search command in the chat through POST /ask/search", async () => {
+    api.post.mockResolvedValueOnce({
+      data: {
+        ...answer,
+        chat_id: "chat-9",
+        query: "/search бот",
+        answer: "",
+        search: { searched_for: "бот", responses: [] },
+      },
+      response: { ok: true, status: 200 },
+    });
+    await act(async () => session.askQuestion("/search бот", []));
+    expect(api.post.mock.calls[0][0]).toBe("/ask/search");
+    expect(api.post.mock.calls[0][1].body).toEqual({
+      query: "/search бот",
+      searched_for: "бот",
+      chat_id: null,
+    });
+    expect(snapshot.chatId).toBe("chat-9");
+    expect(snapshot.messages.at(-1)).toEqual({
+      role: "search",
+      query: "бот",
+      results: [],
+    });
+  });
+
   it.each(["rooms", "music"])(
     "restores the exact %s booking selection across stale history and reload",
     async (service) => {
