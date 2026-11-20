@@ -4289,7 +4289,7 @@ msgstr "Роль гостей"
 
 #: src/components/search/ask/AskResult.tsx:352
 msgid "Guide"
-msgstr "Сводка"
+msgstr "Справка"
 
 #: src/app/routes/_with_menu/clubs/new.tsx:20
 #: src/components/clubs/HowToCreateClubPage.tsx:12
