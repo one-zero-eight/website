@@ -1,5 +1,7 @@
 import { msg } from "@lingui/core/macro";
 
+export const MAX_SECONDS = 99 * 3600 + 59 * 60 + 59;
+
 // Preset time configurations
 export const PRESET_TIME_OPTIONS = [
   { hours: 0, minutes: 30, label: msg`30 mins` },
