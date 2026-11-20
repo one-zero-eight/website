@@ -1,29 +1,13 @@
 import { useLingui } from "@lingui/react/macro";
 import { useEffect, useState, type RefObject } from "react";
 
-const QUOTE_MAX_LENGTH = 2000;
-
-// The selected text as a markdown quote that the message can start with, so the assistant sees what it refers to
-export function asQuote(selected: string): string {
-  const text = selected.replace(/\n{3,}/g, "\n\n").trim();
-  if (!text) return "";
-  const shown =
-    text.length > QUOTE_MAX_LENGTH
-      ? `${text.slice(0, QUOTE_MAX_LENGTH)}…`
-      : text;
-  return shown
-    .split("\n")
-    .map((line) => (line ? `> ${line}` : ">"))
-    .join("\n");
-}
-
-// A right click on selected text in the chat offers to quote it in the message box
+// A right click on selected text in the chat offers to quote it, copy it or select the chat
 export function AskQuoteMenu({
   containerRef,
   onQuote,
 }: {
   containerRef: RefObject<HTMLElement | null>;
-  onQuote: (quote: string) => void;
+  onQuote: (text: string) => void;
 }) {
   const { t } = useLingui();
   const [menu, setMenu] = useState<{
@@ -40,7 +24,7 @@ export function AskQuoteMenu({
       const text = selection?.toString() ?? "";
       const inside =
         selection?.anchorNode && container.contains(selection.anchorNode);
-      if (!asQuote(text) || !inside) return setMenu(null);
+      if (!text.trim() || !inside) return setMenu(null);
       event.preventDefault();
       setMenu({ x: event.clientX, y: event.clientY, text });
     };
@@ -81,7 +65,7 @@ export function AskQuoteMenu({
           // Keeps the selection while the button is pressed
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => {
-            onQuote(asQuote(menu.text));
+            onQuote(menu.text.trim());
             setMenu(null);
           }}
         >

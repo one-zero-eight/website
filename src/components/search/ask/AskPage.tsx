@@ -8,6 +8,7 @@ import { AskChatList } from "./AskChatList";
 import { AskAttachment } from "./AskAttachment";
 import { AskInput } from "./AskInput";
 import { AskQuoteMenu } from "./AskQuoteMenu";
+import { asQuote, splitQuote } from "./ask-quote";
 import { AskNotificationButton } from "./AskNotificationButton";
 import { AskResult } from "./AskResult";
 import { AskAnswerBody } from "./AskAnswerBody";
@@ -43,6 +44,7 @@ export function AskPage({
   const { t, i18n } = useLingui();
 
   const [isChatListOpen, setIsChatListOpen] = useState(false);
+  const [quote, setQuote] = useState("");
   const [isNoticeDismissed, setIsNoticeDismissed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -78,6 +80,9 @@ export function AskPage({
   // Words of the answers and sources in this chat, which the user's words are finished from
   const context = useMemo(() => conversationTexts(messages), [messages]);
 
+  // A quote belongs to the chat it was taken from
+  useEffect(() => setQuote(""), [composerId]);
+
   // A dismissed notice comes back with the next outage
   useEffect(() => {
     if (!assistantUnavailable) setIsNoticeDismissed(false);
@@ -112,24 +117,24 @@ export function AskPage({
 
   // A stopped question comes back to the box, unless the user is already writing another one
   const handleStop = () => {
-    cancelQuestion();
+    const parts = splitQuote(cancelQuestion());
+    if (parts.quote && !draftQuery.trim()) {
+      setQuote(parts.quote);
+      setDraftQuery(parts.rest);
+    }
   };
 
-  // The quote goes to the end of the draft, with the caret after it for the question
-  const handleQuote = (quote: string) => {
-    const draft = draftQuery.trimEnd();
-    setDraftQuery(`${draft ? `${draft}\n\n` : ""}${quote}\n\n`);
-    setTimeout(() => {
-      const input = inputRef.current;
-      input?.focus();
-      input?.setSelectionRange(input.value.length, input.value.length);
-    }, 0);
+  // The quote stays above the box, apart from the text the user edits, and goes before the question
+  const handleQuote = (text: string) => {
+    setQuote((quote) => (quote ? `${quote}\n\n${text}` : text));
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   const handleSend = (query: string) => {
     isFollowing.current = true;
 
-    askQuestion(query);
+    askQuestion(quote ? `${asQuote(quote)}\n\n${query}` : query);
+    setQuote("");
   };
 
   const isEmpty =
@@ -355,6 +360,8 @@ export function AskPage({
             setText={setDraftQuery}
             suggestions={suggestions}
             context={context}
+            quote={quote}
+            onQuoteRemove={() => setQuote("")}
             attachments={isPending ? [] : draftAttachments}
             onAttachmentsChange={(attachments) =>
               setDraftAttachments(attachments, composerId)
@@ -379,9 +386,15 @@ function UserMessage({
   text: string;
   attachments?: searchTypes.SchemaAttachmentInfo[];
 }) {
+  const { quote, rest } = splitQuote(text);
   return (
     <div className="bg-primary text-primary-content rounded-field max-w-[80%] min-w-0 self-end rounded-br-none px-4 py-2 wrap-anywhere whitespace-pre-wrap">
-      {text}
+      {quote && (
+        <div className="border-primary-content/40 text-primary-content/70 mb-2 border-l-2 pl-2 text-sm">
+          {quote}
+        </div>
+      )}
+      {rest}
       {attachments && attachments.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
           {attachments.map((attachment) => (

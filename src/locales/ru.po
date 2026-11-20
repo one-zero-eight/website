@@ -1060,7 +1060,7 @@ msgstr "Искусство и культура"
 #~ msgid "Ask"
 #~ msgstr "Спросить"
 
-#: src/components/search/ask/AskInput.tsx:268
+#: src/components/search/ask/AskInput.tsx:290
 msgid "Ask a question..."
 msgstr "Задайте вопрос..."
 
@@ -1076,7 +1076,7 @@ msgstr "Спросить ИИ-ассистента"
 msgid "Attach file"
 msgstr "Прикрепить файл"
 
-#: src/components/search/ask/AskInput.tsx:246
+#: src/components/search/ask/AskInput.tsx:268
 msgid "Attach files"
 msgstr "Прикрепить файлы"
 
@@ -1562,8 +1562,8 @@ msgstr "Отменить бронирование комнаты для этой
 msgid "Cancel this match"
 msgstr "Отменить этот матч"
 
-#: src/components/search/ask/AskInput.tsx:197
-#: src/components/search/ask/AskInput.tsx:205
+#: src/components/search/ask/AskInput.tsx:219
+#: src/components/search/ask/AskInput.tsx:227
 msgid "Cancel upload"
 msgstr "Отменить загрузку"
 
@@ -1689,7 +1689,7 @@ msgstr "Заявка на подключение чата"
 msgid "Chat source requests"
 msgstr "Заявки на подключение чатов"
 
-#: src/components/search/ask/AskPage.tsx:180
+#: src/components/search/ask/AskPage.tsx:185
 msgid "Chats"
 msgstr "Чаты"
 
@@ -1843,7 +1843,7 @@ msgstr "Выбрать лучшее время"
 msgid "Choose one of your verified study groups."
 msgstr "Выберите одну из подтверждённых для вас учебных групп."
 
-#: src/components/search/ask/AskInput.tsx:83
+#: src/components/search/ask/AskInput.tsx:88
 msgid "Choose PDF, TXT, PNG, JPEG or WebP files."
 msgstr "Выберите файлы PDF, TXT, PNG, JPEG или WebP."
 
@@ -1915,8 +1915,10 @@ msgid "Click to upload or paste an image"
 msgstr "Нажмите, чтобы загрузить, или вставьте изображение"
 
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
-#: src/components/search/ask/AskPage.tsx:160
-#: src/components/search/ask/AskPage.tsx:161
+#: src/components/search/ask/AskInput.tsx:200
+#: src/components/search/ask/AskInput.tsx:201
+#: src/components/search/ask/AskPage.tsx:165
+#: src/components/search/ask/AskPage.tsx:166
 #: src/components/search/IframePreviewCard.tsx:111
 #: src/components/sport/SportOverviewSection.tsx:669
 #: src/components/sport/SportStudentTrainingModal.tsx:362
@@ -2257,7 +2259,7 @@ msgstr "Копии"
 #: src/components/account/MyTokenPage.tsx:88
 #: src/components/forms/GeneratedLink.tsx:38
 #: src/components/schedule/ScheduleLinkCopy.tsx:54
-#: src/components/search/ask/AskQuoteMenu.tsx:103
+#: src/components/search/ask/AskQuoteMenu.tsx:87
 msgid "Copy"
 msgstr "Копировать"
 
@@ -2322,7 +2324,7 @@ msgstr "Не удалось забронировать"
 msgid "Could not check access"
 msgstr "Не удалось проверить доступ"
 
-#: src/components/search/ask/AskPage.tsx:322
+#: src/components/search/ask/AskPage.tsx:327
 msgid "Could not complete the request."
 msgstr "Не удалось завершить запрос."
 
@@ -2391,7 +2393,7 @@ msgstr "Не удалось загрузить ваши заявки. Обнов
 msgid "Could not mark attendance"
 msgstr "Не удалось отметить посещаемость"
 
-#: src/components/search/ask/AskPage.tsx:268
+#: src/components/search/ask/AskPage.tsx:273
 msgid "Could not open the chat"
 msgstr "Не удалось открыть чат"
 
@@ -3106,7 +3108,7 @@ msgstr "напр. 1-5,8,16-20 (пусто = все)"
 msgid "e.g., CSE electives"
 msgstr "напр. элективы CSE"
 
-#: src/components/search/ask/AskInput.tsx:87
+#: src/components/search/ask/AskInput.tsx:92
 msgid "Each file must be no larger than 10 MiB."
 msgstr "Размер каждого файла не должен превышать 10 МиБ."
 
@@ -4415,7 +4417,7 @@ msgstr "Как пройти в музкомнату?"
 msgid "How to Register Your Club"
 msgstr "Как зарегистрировать клуб"
 
-#: src/components/search/ask/AskPage.tsx:213
+#: src/components/search/ask/AskPage.tsx:218
 msgid "I can help with your schedule, university rules, announcements and available rooms."
 msgstr "Помогу с расписанием, правилами университета, объявлениями и свободными аудиториями."
 
@@ -6869,7 +6871,7 @@ msgid "Quick Presets:"
 msgstr "Быстрые пресеты:"
 
 #: src/components/editor/menus/BlockTypeDropdown.tsx:62
-#: src/components/search/ask/AskQuoteMenu.tsx:89
+#: src/components/search/ask/AskQuoteMenu.tsx:73
 msgid "Quote"
 msgstr "Цитата"
 
@@ -6906,7 +6908,7 @@ msgstr "Читатель"
 msgid "Receive a monthly stipend from IU alumni"
 msgstr "Ежемесячная стипендия от выпускников IU"
 
-#: src/components/search/ask/AskPage.tsx:313
+#: src/components/search/ask/AskPage.tsx:318
 msgid "Receiving answer"
 msgstr "Получаю ответ"
 
@@ -7047,7 +7049,7 @@ msgstr "Удалить игрока {0} из турнира?"
 msgid "Remove {participantName} from the meeting?"
 msgstr "Удалить участника {participantName} из встречи?"
 
-#: src/components/search/ask/AskInput.tsx:224
+#: src/components/search/ask/AskInput.tsx:246
 msgid "Remove attachment"
 msgstr "Удалить вложение"
 
@@ -7274,7 +7276,7 @@ msgstr "Пересдача"
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/search/ask/AskChatList.tsx:47
-#: src/components/search/ask/AskPage.tsx:278
+#: src/components/search/ask/AskPage.tsx:283
 #: src/components/search/ask/AskSources.tsx:78
 #: src/components/sport/SportStudentTrainingModal.tsx:413
 #: src/components/sport/SportStudentTrainingModal.tsx:462
@@ -7789,7 +7791,7 @@ msgid "Select a verified study group"
 msgstr "Выберите подтверждённую учебную группу"
 
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:83
-#: src/components/search/ask/AskQuoteMenu.tsx:118
+#: src/components/search/ask/AskQuoteMenu.tsx:102
 msgid "Select all"
 msgstr "Выбрать все"
 
@@ -7870,11 +7872,11 @@ msgid "Semestral Budget"
 msgstr "Бюджет на семестр"
 
 #: src/components/search/ask/AskFeedback.tsx:116
-#: src/components/search/ask/AskInput.tsx:319
+#: src/components/search/ask/AskInput.tsx:341
 msgid "Send"
 msgstr "Отправить"
 
-#: src/components/search/ask/AskPage.tsx:313
+#: src/components/search/ask/AskPage.tsx:318
 msgid "Sending request"
 msgstr "Отправляю запрос"
 
@@ -8470,7 +8472,7 @@ msgstr "Шаг 4: Подготовьте материалы клуба"
 msgid "Step 5: Fill Registration Form"
 msgstr "Шаг 5: Заполните регистрационную форму"
 
-#: src/components/search/ask/AskInput.tsx:310
+#: src/components/search/ask/AskInput.tsx:332
 #: src/components/timer/TimerPage.tsx:302
 msgid "Stop"
 msgstr "Стоп"
@@ -8862,15 +8864,15 @@ msgstr "Спасибо!"
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "<0>Пропущенная из‑за болезни неделя</0> <1>компенсируется двумя спортивными часами.</1>"
 
-#: src/components/search/ask/AskPage.tsx:337
+#: src/components/search/ask/AskPage.tsx:342
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr "Результат действия не подтверждён. Проверьте его в сервисе перед повторной попыткой."
 
-#: src/components/search/ask/AskPage.tsx:250
+#: src/components/search/ask/AskPage.tsx:255
 msgid "The assistant asks for confirmation before changing data in services."
 msgstr "Перед изменениями в сервисах ассистент запросит подтверждение."
 
-#: src/components/search/ask/AskPage.tsx:153
+#: src/components/search/ask/AskPage.tsx:158
 msgid "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 msgstr "Ассистент временно недоступен. На вопросы отвечает поиск; можно также начать сообщение с /search или /поиск."
 
@@ -9316,7 +9318,7 @@ msgstr "Продвигать Университет Иннополис, разв
 msgid "To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
 msgstr "Повышать престиж студенческих клубов и продвигать их внутри и вне университета, а также подчёркивать стратегическую важность внеучебного развития в Университете Иннополис"
 
-#: src/components/search/ask/AskPage.tsx:244
+#: src/components/search/ask/AskPage.tsx:249
 msgid "To search without the assistant, start a message with /search or /поиск."
 msgstr "Чтобы искать без ассистента, начните сообщение с /search или /поиск."
 
@@ -10032,7 +10034,7 @@ msgstr "Что могут покупать клубы"
 msgid "What did you like?"
 msgstr "Что понравилось?"
 
-#: src/components/search/ask/AskInput.tsx:154
+#: src/components/search/ask/AskInput.tsx:159
 msgid "What is in the attached file?"
 msgstr "Что в прикреплённом файле?"
 
@@ -10232,11 +10234,11 @@ msgstr "Вы можете добавить бронирования аудито
 msgid "You can add your schedule to InNoHassle and it will be updated on schedule changes."
 msgstr "Вы можете добавить свой календарь в InNoHassle — он будет обновляться при изменениях."
 
-#: src/components/search/ask/AskInput.tsx:79
+#: src/components/search/ask/AskInput.tsx:84
 msgid "You can attach up to 3 files."
 msgstr "Можно прикрепить до 3 файлов."
 
-#: src/components/search/ask/AskPage.tsx:238
+#: src/components/search/ask/AskPage.tsx:243
 msgid "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
 msgstr "Можно прикрепить до 3 файлов PDF, TXT или изображений, до 10 МиБ каждый."
 
@@ -10347,7 +10349,7 @@ msgstr "Ваш клуб приглашён как организатор это�
 msgid "Your document was sent to the printer"
 msgstr "Документ отправлен на принтер"
 
-#: src/components/search/ask/AskPage.tsx:329
+#: src/components/search/ask/AskPage.tsx:334
 msgid "Your draft is below. You can edit it and send it again."
 msgstr "Черновик ниже. Его можно изменить и отправить снова."
 

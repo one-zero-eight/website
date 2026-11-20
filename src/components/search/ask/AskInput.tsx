@@ -21,6 +21,8 @@ export function AskInput({
   inputRef,
   suggestions = [],
   context = [],
+  quote = "",
+  onQuoteRemove,
 }: {
   text: string;
   setText: (text: string) => void;
@@ -32,6 +34,9 @@ export function AskInput({
   inputRef?: RefObject<HTMLTextAreaElement | null>;
   suggestions?: string[];
   context?: string[];
+  // Text the question refers to: shown above the box, not editable, sent before the question
+  quote?: string;
+  onQuoteRemove?: () => void;
 }) {
   const { t } = useLingui();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -184,6 +189,23 @@ export function AskInput({
         void handleFiles(images);
       }}
     >
+      {quote && (
+        <div className="bg-base-200 text-base-content/60 rounded-field flex items-start gap-2 px-3 py-2 text-sm">
+          <span className="icon-[material-symbols--format-quote-rounded] mt-0.5 shrink-0 text-lg" />
+          <p className="max-h-24 min-w-0 grow overflow-y-auto wrap-anywhere whitespace-pre-wrap">
+            {quote}
+          </p>
+          <button
+            type="button"
+            title={t`Close`}
+            aria-label={t`Close`}
+            className="btn btn-ghost btn-circle btn-xs"
+            onClick={onQuoteRemove}
+          >
+            ✕
+          </button>
+        </div>
+      )}
       {error && <p className="text-error text-sm">{error}</p>}
       {uploading.map((name, index) => (
         <div key={index} className="flex items-center gap-2 text-sm">
