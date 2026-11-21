@@ -10,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/ui/cn";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Link, useBlocker, useNavigate } from "@tanstack/react-router";
+import { useAutoUpdateBlocker } from "@/service-worker/page/auto-update.ts";
 import { getClubTypeLabel } from "./constants.ts";
 import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor";
 import { DescriptionEditor } from "@/components/editor/DescriptionEditor.tsx";
@@ -234,7 +235,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     cancelPendingLogo,
   ]);
 
+  useAutoUpdateBlocker();
+
   useBlocker({
+    enableBeforeUnload: true,
     shouldBlockFn: () => {
       if (hasUnsavedChanges()) {
         return !confirm(

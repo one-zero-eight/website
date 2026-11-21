@@ -1,4 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { isRoomTvPage } from "@/api/helpers/room-tv-auth.ts";
+import { clearMirrorSession } from "@/api/helpers/mirror-session.ts";
 
 export function AutoSignIn() {
   const { me } = useMe();
@@ -12,7 +14,7 @@ export function AutoSignIn() {
   }
 
   console.log("AutoSignIn enabled");
-  const signInURL = buildSignInURL("", "none");
+  const signInURL = buildSignInURL("/", "none");
   return <iframe src={signInURL.toString()} style={{ display: "none" }} />;
 }
 
@@ -50,7 +52,7 @@ export function buildSignInURL(
 export function shouldAutoSignIn() {
   // Try to log in without interaction
   const lastLogin = localStorage.getItem("lastLogin");
-  const isOnTvPage = window.location.pathname.startsWith("/tv");
+  const isOnTvPage = isRoomTvPage();
   return (
     (lastLogin === null || Date.now() - Number(lastLogin) > 30 * 60 * 1000) && // 30 minutes
     !isOnTvPage
@@ -69,6 +71,12 @@ export function navigateToSignOut(redirectTo?: string) {
   // Record the login time (to prevent immediate automatic re-login)
   localStorage.setItem("lastLogin", Date.now().toString());
 
-  // Navigate to the sign-out endpoint
-  window.location.assign(signOutURL.toString());
+  // The mirror host keeps its own session cookie, and the page can only clear
+  // it before leaving. Don't keep the user waiting when it does not answer.
+  const cleared = clearMirrorSession().catch(() => undefined);
+  const patience = new Promise((resolve) => setTimeout(resolve, 1500));
+  void Promise.race([cleared, patience]).finally(() => {
+    // Navigate to the sign-out endpoint
+    window.location.assign(signOutURL.toString());
+  });
 }

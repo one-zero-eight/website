@@ -1,6 +1,6 @@
-import { useLingui } from "@lingui/react/macro";
 import { BoardGamesAdminPage } from "@/components/board-games/BoardGamesAdminPage.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { useLingui } from "@lingui/react/macro";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_with_menu/board-games/admin/")({

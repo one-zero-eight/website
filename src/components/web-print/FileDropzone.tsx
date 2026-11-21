@@ -1,14 +1,30 @@
 import { Modal } from "@/components/common/Modal.tsx";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { PdfDocumentPreview } from "@/components/web-print/PdfDocumentPreview.tsx";
 import { cn } from "@/lib/ui/cn";
 import {
+  lazy,
+  Suspense,
   useCallback,
   useRef,
   useState,
   type ReactNode,
   type RefObject,
 } from "react";
+
+// pdf.js is heavy, so the preview (and pdf.js itself) is loaded on demand.
+const PdfDocumentPreview = lazy(() =>
+  import("@/components/web-print/PdfDocumentPreview.tsx").then((module) => ({
+    default: module.PdfDocumentPreview,
+  })),
+);
+
+function PdfDocumentPreviewFallback() {
+  return (
+    <div className="flex min-h-48 w-full items-center justify-center p-4">
+      <span className="loading loading-spinner loading-lg text-primary" />
+    </div>
+  );
+}
 
 const ALLOWED_EXTENSIONS = [
   ".pdf",
@@ -206,12 +222,14 @@ export function FileDropzone({
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
-              <PdfDocumentPreview
-                url={blobPreviewURL}
-                pages={previewPages}
-                toolbarHost={previewToolbarHost}
-                openOnLastPage={isScan}
-              />
+              <Suspense fallback={<PdfDocumentPreviewFallback />}>
+                <PdfDocumentPreview
+                  url={blobPreviewURL}
+                  pages={previewPages}
+                  toolbarHost={previewToolbarHost}
+                  openOnLastPage={isScan}
+                />
+              </Suspense>
               {processingOverlay}
             </div>
           ) : (
@@ -309,7 +327,9 @@ export function FileDropzone({
         {isFileProcessing ? (
           <span className="loading loading-spinner loading-lg text-primary m-auto" />
         ) : blobPreviewURL ? (
-          <PdfDocumentPreview url={blobPreviewURL} pages={previewPages} />
+          <Suspense fallback={<PdfDocumentPreviewFallback />}>
+            <PdfDocumentPreview url={blobPreviewURL} pages={previewPages} />
+          </Suspense>
         ) : (
           <>
             <span className="icon-[material-symbols--docs-rounded] text-base-content/30 mb-3 text-5xl" />

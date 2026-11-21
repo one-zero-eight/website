@@ -8,16 +8,20 @@ const leaderRowOrder = [
   "Artem Bulgakov",
   "Ruslan Bel'kov",
   "Alexandr Zolotarev",
+  "Nikita Lisitskii",
+  "Pavel Nasevich",
 ];
 
 const leaderRoles: Record<string, string> = {
   "Artem Bulgakov": "Founder",
   "Ruslan Bel'kov": "Founder",
-  "Alexandr Zolotarev": "leader",
+  "Alexandr Zolotarev": "Leader",
+  "Nikita Lisitskii": "Project Manager",
+  "Pavel Nasevich": "Tech Lead",
 };
 
 const mainLeaderName = Object.entries(leaderRoles).find(
-  ([, role]) => role === "leader",
+  ([, role]) => role === "Leader",
 )?.[0];
 
 const otherLeaderRowOrder = leaderRowOrder.filter(
@@ -57,7 +61,7 @@ function TeamMemberCard({
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }) {
-  const isMainLeader = leaderRoles[member.fullName] === "leader";
+  const isMainLeader = leaderRoles[member.fullName] === "Leader";
 
   return (
     <div
@@ -103,7 +107,7 @@ function TeamMemberCard({
             </h3>
             {leaderRoles[member.fullName] && (
               <span className="text-primary animate-in fade-in zoom-in slide-in-from-top-1 block text-[10px] font-semibold tracking-wider uppercase duration-300">
-                {isMainLeader ? <Trans>Leader</Trans> : <Trans>Founder</Trans>}
+                {leaderRoles[member.fullName]}
               </span>
             )}
           </div>

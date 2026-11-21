@@ -1,4 +1,5 @@
 import { $sport } from "@/api/sport";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { Plural, Trans, useLingui } from "@lingui/react/macro";
 import { msg, plural } from "@lingui/core/macro";
 import type {
@@ -147,7 +148,7 @@ export function SportProgressSection({
               className="btn btn-outline btn-sm"
               onClick={() => setSelfSportModalOpen(true)}
             >
-              <Trans>Self-sport upload</Trans>
+              <Trans>Upload self-sport</Trans>
             </button>
             <Link to="/sport/profile" className="btn btn-outline btn-sm">
               <Trans>Medical leave</Trans>
@@ -166,18 +167,35 @@ export function SportProgressSection({
 
 export function SportIdentityInfo({
   roleLabels,
-  enrollmentStatus,
+  course,
+  studentStatus,
   medicalGroup,
   onChangeMedicalGroup,
+  curatorName,
+  curatorTelegram,
 }: {
   roleLabels: string[];
-  enrollmentStatus?: string | null;
+  course?: number | null;
+  studentStatus?: string | null;
   medicalGroup?: string | null;
   onChangeMedicalGroup: () => void;
+  curatorName?: string | null;
+  curatorTelegram?: string | null;
 }) {
-  if (roleLabels.length === 0 && !enrollmentStatus && !medicalGroup) {
+  if (
+    roleLabels.length === 0 &&
+    course == null &&
+    !studentStatus &&
+    !medicalGroup &&
+    !curatorName &&
+    !curatorTelegram
+  ) {
     return null;
   }
+
+  const telegramHandle = curatorTelegram
+    ? `@${curatorTelegram.replace(/^@/, "")}`
+    : null;
 
   return (
     <div className="flex flex-col gap-2">
@@ -191,14 +209,12 @@ export function SportIdentityInfo({
           </Trans>
         </p>
       ) : null}
-      {enrollmentStatus ? (
+      {studentStatus ? (
         <p className="text-base-content/75 text-sm">
-          <Trans>
-            Student status:{" "}
-            <span className="text-base-content font-semibold">
-              {enrollmentStatus}
-            </span>
-          </Trans>
+          <Trans>Student status:</Trans>{" "}
+          <span className="text-base-content font-semibold">
+            {studentStatus}
+          </span>
         </p>
       ) : null}
       {medicalGroup ? (
@@ -220,11 +236,37 @@ export function SportIdentityInfo({
           </button>
         </p>
       ) : null}
+      {course != null ? (
+        <p className="text-base-content/75 text-sm">
+          <Trans>Course:</Trans>{" "}
+          <span className="text-base-content font-semibold">{course}</span>
+        </p>
+      ) : null}
+      {curatorName || telegramHandle ? (
+        <p className="text-base-content/75 flex flex-wrap items-center gap-x-1 text-sm">
+          <Trans>Curator:</Trans>
+          {curatorName ? (
+            <span className="text-base-content font-semibold">
+              {curatorName}
+            </span>
+          ) : null}
+          {telegramHandle ? (
+            <a
+              href={`https://t.me/${telegramHandle.slice(1)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="link link-primary"
+            >
+              {telegramHandle}
+            </a>
+          ) : null}
+        </p>
+      ) : null}
     </div>
   );
 }
 
-function SelfSportUploadModal({
+export function SelfSportUploadModal({
   open,
   onOpenChange,
 }: {
@@ -391,7 +433,7 @@ function SelfSportUploadModal({
           placeholder={
             parseActivityFetching
               ? t`Parsing activity link`
-              : t`Waiting for the activity link`
+              : t`Number of sport hours`
           }
           value={hours}
           onChange={(event) => setHours(event.target.value)}
@@ -454,6 +496,10 @@ export function MedicalGroupUploadModal({
           msg`Submitted`,
           msg`Medical group change request was submitted.`,
         );
+        queryClient.invalidateQueries({
+          queryKey: $sport.queryOptions("get", "/references/medical-group")
+            .queryKey,
+        });
         setFiles([]);
         setComment("");
         onOpenChange(false);
@@ -566,14 +612,18 @@ export function MedicalReferenceUploadModal({
           msg`Submitted`,
           msg`Medical leave reference was submitted.`,
         );
+        queryClient.invalidateQueries({
+          queryKey: $sport.queryOptions("get", "/references/medical-leave")
+            .queryKey,
+        });
         setFile(null);
         setStartDate("");
         setEndDate("");
         setComment("");
         onOpenChange(false);
       },
-      onError: () => {
-        showError(msg`Error`, msg`Failed to submit medical leave reference.`);
+      onError: (error) => {
+        showError(msg`Error`, formatApiErrorMessage(error));
       },
     },
   );

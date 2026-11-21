@@ -45,7 +45,7 @@ function RouteComponent() {
 
             <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-black/10">
               <img
-                src="/tenor2.gif"
+                src={`${import.meta.env.VITE_MINIO_URL}/42/tenor2.gif`}
                 alt={t`Ryan Gosling winks`}
                 className="block h-auto w-full"
                 loading="lazy"

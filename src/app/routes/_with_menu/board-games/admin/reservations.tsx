@@ -1,6 +1,6 @@
-import { useLingui } from "@lingui/react/macro";
 import { ReservationsAdminPage } from "@/components/board-games/ReservationsAdminPage.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { useLingui } from "@lingui/react/macro";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute(

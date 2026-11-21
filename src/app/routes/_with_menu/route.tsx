@@ -11,7 +11,10 @@ function RouteComponent() {
     <div className="flex h-full flex-col">
       <div className="flex grow overflow-y-hidden">
         <Sidebar />
-        <div className="@container/content flex min-h-full grow flex-col overflow-y-auto">
+        <div
+          data-scroll-restoration-id="content"
+          className="@container/content flex min-h-full grow flex-col overflow-y-auto"
+        >
           <Outlet />
         </div>
       </div>

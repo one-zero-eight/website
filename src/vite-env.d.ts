@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
-/// <reference types="vite-plugin-pwa/vanillajs" />
-/// <reference types="vite-plugin-pwa/react" />
 /// <reference types="mdx" />
+
+declare const BUILD_INFO: import("./service-worker/protocol").BuildInfo;
+
 declare module "qrcode";
 declare module "moment/locale/ru.js";

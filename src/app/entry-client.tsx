@@ -4,7 +4,7 @@ import { initializeI18n } from "@/locales/lib";
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "@dr.pogodin/react-helmet";
 import { App } from "./app.tsx";
-import { registerServiceWorker } from "./register-sw.ts";
+import { registerServiceWorker } from "@/service-worker/page/register-sw.ts";
 import { getRouter } from "./router.ts";
 import "./styles.css";
 import SnowfallComponent from "@/components/snow/Snowfall.tsx";
@@ -12,12 +12,11 @@ import { SnowVisibilityProvider } from "@/components/snow/SnowContext.tsx";
 
 // Init internationalization
 initializeI18n();
+console.info("[App] Build info:", BUILD_INFO);
 
-// Init service worker
-registerServiceWorker();
-
-// Create the router instance
+// Automatic updates wait for navigation to finish, so the worker client needs the router.
 const router = getRouter();
+registerServiceWorker(router);
 
 // Render the app
 const container = document.getElementById("app") as HTMLDivElement;

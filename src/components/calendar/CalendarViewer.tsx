@@ -1,11 +1,11 @@
-import { scheduleTypes } from "@/api/schedule";
-import type { MessageDescriptor } from "@lingui/core";
-import { msg } from "@lingui/core/macro";
-import { Trans, useLingui } from "@lingui/react/macro";
 import {
+  CalendarConfig,
+  useCalendarEvents,
+} from "@/api/schedule/calendars/personal-calendar-urls.ts";
+import {
+  calculateAcademicWeek,
   CALENDAR_LIST_EVENT_CLASS_NAMES,
   CALENDAR_LIST_EVENT_TIME_FORMAT,
-  calculateAcademicWeek,
   renderCalendarListEventContent,
 } from "@/components/calendar/calendar-list-view.tsx";
 import CalendarEventPopover, {
@@ -13,6 +13,19 @@ import CalendarEventPopover, {
 } from "@/components/calendar/CalendarEventPopover.tsx";
 import { ConfigCalendarDialog } from "@/components/calendar/ConfigCalendarDialog.tsx";
 import { useMyAcademicCalendar } from "@/components/dashboard/academic-calendar.tsx";
+import { cn } from "@/lib/ui/cn";
+import {
+  autoUpdate,
+  flip,
+  FloatingPortal,
+  offset,
+  shift,
+  useClick,
+  useDismiss,
+  useFloating,
+  useInteractions,
+  useTransitionStyles,
+} from "@floating-ui/react";
 import {
   DayHeaderContentArg,
   EventApi,
@@ -27,20 +40,9 @@ import listPlugin from "@fullcalendar/list";
 import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { isSportCalendarEventId } from "@/components/sport/sport-calendar-events.ts";
-import { cn } from "@/lib/ui/cn";
-import {
-  autoUpdate,
-  flip,
-  FloatingPortal,
-  offset,
-  shift,
-  useClick,
-  useDismiss,
-  useFloating,
-  useInteractions,
-  useTransitionStyles,
-} from "@floating-ui/react";
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import moment from "moment/moment";
 import {
   ComponentType,
@@ -51,8 +53,6 @@ import {
   useState,
 } from "react";
 import { useLocalStorage, useMediaQuery } from "usehooks-ts";
-import iCalendarPlugin from "./iCalendarPlugin";
-import { WHEN2MEET_EVENT_ID_PREFIX } from "./when2meet-events.ts";
 import "./styles-calendar.css";
 import { CalendarEventTime, hasUnknownEnd } from "./CalendarEventTime";
 
@@ -80,28 +80,60 @@ const VIEW_LABELS: Record<string, MessageDescriptor> = {
   eventsCards: msg`Cards`,
 };
 
-export type URLType =
-  | string
-  | {
-      url: string;
-      color?: string;
-      sourceLink?: string;
-      updatedAt?: string;
-      eventGroup?: scheduleTypes.SchemaViewEventGroup;
-      excludeEnglish?: boolean;
-    };
-
 function toCalendarSpace(date: Date): Date {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
 }
 
+/**
+ * Key of an event occurrence. 'id' is not enough, because all occurrences of a
+ * recurring event share it. The calendar source is a part of the key, so events
+ * from different calendars are still deduplicated by FullCalendar (it merges
+ * their 'calendarURLs' in 'eventsSet').
+ */
+function getEventOccurrenceKey(event: EventInput): string {
+  const start =
+    event.start instanceof Date ? event.start.getTime() : event.start;
+  const end = event.end instanceof Date ? event.end.getTime() : event.end;
+  const source = event.extendedProps?.calendarURLs?.[0] ?? "";
+  return `${event.id ?? ""}|${start ?? ""}|${end ?? ""}|${source}`;
+}
+
+/** Scroll the list view to today. Returns false if the cell is not rendered yet. */
+function scrollToToday(): boolean {
+  const date = new Date();
+  const dateStr = [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-");
+  const dayEl = document.querySelector(`[data-date="${dateStr}"]`);
+
+  if (!dayEl) {
+    return false;
+  }
+  dayEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  return true;
+}
+
+/**
+ * Scroll to today once the calendar has rendered its cell. The view and its
+ * events are rendered asynchronously, so the scroll is retried during the next
+ * frames.
+ */
+function scrollToTodayWhenRendered(attemptsLeft = 10) {
+  requestAnimationFrame(() => {
+    if (scrollToToday() || attemptsLeft <= 0) {
+      return;
+    }
+    scrollToTodayWhenRendered(attemptsLeft - 1);
+  });
+}
+
 const DEFAULT_VIEWS_IDS = defaultViews.map(({ id }) => id);
 const DEFAULT_CUSTOM_VIEWS: CalendarCustomView[] = [];
-const DEFAULT_EXTRA_EVENTS: EventInput[] = [];
 
 export function CalendarViewer({
-  urls,
-  extraEvents = DEFAULT_EXTRA_EVENTS,
+  config,
   initialView = "listMonth",
   viewStorageId = "",
   isFullPage = false,
@@ -110,11 +142,8 @@ export function CalendarViewer({
   customViews = DEFAULT_CUSTOM_VIEWS,
   onEventSourceSuccess,
   isHidden,
-  sportEvents = [],
-  onVisibleRangeChange,
 }: {
-  urls: URLType[];
-  extraEvents?: EventInput[];
+  config: CalendarConfig;
   initialView?: string;
   viewStorageId?: string;
   isFullPage?: boolean;
@@ -126,12 +155,22 @@ export function CalendarViewer({
     response?: Response,
   ) => void;
   isHidden?: boolean;
-  sportEvents?: EventInput[];
-  onVisibleRangeChange?: (range: { start: Date; end: Date }) => void;
 }) {
   const { t, i18n } = useLingui();
   const { academicCalendar } = useMyAcademicCalendar();
   const isMobile = useMediaQuery("(max-width: 767px)");
+
+  const [range, setRange] = useState<{ start: Date | null; end: Date | null }>({
+    start: null,
+    end: null,
+  });
+
+  const events = useCalendarEvents({
+    ...config,
+    start: range.start ?? undefined,
+    end: range.end ?? undefined,
+  });
+  const rangeStart = range.start;
 
   function getViewDisplayName(view: CalendarView) {
     const descriptor = VIEW_LABELS[view.id];
@@ -204,27 +243,9 @@ export function CalendarViewer({
   );
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const scrollToday = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-
-    const paddedMonth = String(month).padStart(2, "0");
-    const paddedDay = String(day).padStart(2, "0");
-    const dateStr = `${year}-${paddedMonth}-${paddedDay}`;
-    const dayEl = document.querySelector(`[data-date="${dateStr}"]`);
-
-    if (dayEl) {
-      dayEl.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  useEffect(() => {
-    if (!isLoading) {
-      scrollToday();
-    }
-  }, [isLoading]);
+  // Scroll to today only after the calendar rendered the events of the current
+  // view: otherwise the scroll position is reset by the next render.
+  const pendingScrollToToday = useRef(true);
 
   useEffect(() => {
     if (!availableViewIds.includes(calendarView)) {
@@ -232,7 +253,8 @@ export function CalendarViewer({
       return;
     }
     setStoredCalendarView(calendarView);
-    scrollToday();
+    // Scroll to today after the events of the new view are synced below.
+    pendingScrollToToday.current = true;
   }, [
     availableViewIds,
     calendarView,
@@ -241,10 +263,18 @@ export function CalendarViewer({
   ]);
 
   const calendarRef = useRef<FullCalendar>(null);
-  const visibleRangeKeyRef = useRef<string | null>(null);
 
   const handleDatesSet = useCallback(
     ({ view, start, end }: { view: ViewApi; start: Date; end: Date }) => {
+      // Bail out when the range didn't change: 'datesSet' can fire repeatedly
+      // with the same range, while every change refetches the events.
+      setRange((prev) =>
+        prev.start?.getTime() === start.getTime() &&
+        prev.end?.getTime() === end.getTime()
+          ? prev
+          : { start, end },
+      );
+
       // Bail out when the range didn't change: 'view.currentStart' is a fresh
       // Date on every call, so without this comparison the component would
       // re-render on each 'datesSet' (new props -> resetOptions -> datesSet).
@@ -253,20 +283,8 @@ export function CalendarViewer({
           ? prev
           : view.currentStart,
       );
-
-      if (!onVisibleRangeChange) {
-        return;
-      }
-
-      const key = `${start.getTime()}-${end.getTime()}`;
-      if (visibleRangeKeyRef.current === key) {
-        return;
-      }
-
-      visibleRangeKeyRef.current = key;
-      onVisibleRangeChange({ start, end });
     },
-    [onVisibleRangeChange],
+    [],
   );
 
   const handleChangeView = (viewId: string) => {
@@ -282,7 +300,13 @@ export function CalendarViewer({
 
   const handlePrevious = () => calendarRef.current?.getApi().prev();
   const handleNext = () => calendarRef.current?.getApi().next();
-  const handleToday = () => calendarRef.current?.getApi().today();
+  const handleToday = () => {
+    calendarRef.current?.getApi().today();
+    // Scroll right away (the date range may not change, so no events are synced
+    // below) and once again after the events are rendered.
+    pendingScrollToToday.current = true;
+    scrollToTodayWhenRendered();
+  };
 
   const calendarComponent = useMemo(
     () => (
@@ -296,7 +320,7 @@ export function CalendarViewer({
           // Accumulate 'extendedProps.calendarURLs' to use it later.
           const unique: Record<string, EventApi> = {};
           for (const event of events) {
-            console.log("event ", event.start, event.title);
+            // console.log("event ", event.start, event.title);
             // Using 'id' instead of 'title' is a fix for Music room
             const uniqueId =
               (event.id || event.title) + event.startStr + event.endStr;
@@ -402,7 +426,6 @@ export function CalendarViewer({
           timeGridPlugin,
           listPlugin,
           interactionPlugin,
-          iCalendarPlugin,
         ]}
         initialView={builtInInitialView} // Default view
         eventTimeFormat={CALENDAR_LIST_EVENT_TIME_FORMAT}
@@ -537,119 +560,55 @@ export function CalendarViewer({
     ],
   );
 
-  useEffect(() => {
-    const calendarApi = calendarRef.current?.getApi();
-    if (!calendarApi) return;
-
-    const timeout = setTimeout(() => {
-      for (const event of calendarApi.getEvents()) {
-        if (isSportCalendarEventId(String(event.id))) {
-          event.remove();
-        }
-      }
-
-      for (const event of sportEvents) {
-        calendarApi.addEvent(event);
-      }
-    }, 0);
-
-    return () => clearTimeout(timeout);
-  }, [sportEvents]);
-
+  // Sync events
   useEffect(() => {
     const calendarApi = calendarRef.current?.getApi();
     if (!calendarApi) return;
 
     // Run in the next tick
     setTimeout(() => {
-      const eventSourcesPrev = calendarApi.getEventSources();
-      const eventSourcesToGet = urls.map((url) =>
-        typeof url === "string"
-          ? {
-              url: url,
-              format: "ics",
-            }
-          : {
-              url: url.url,
-              format: "ics",
-              color: url.color,
-              extraParams: {
-                sourceLink: url.sourceLink,
-                updatedAt: url.updatedAt,
-                eventGroup: url.eventGroup,
-                excludeEnglish: url.excludeEnglish,
-              },
-            },
-      );
-
-      // Remove old sources that are not in the list
-      for (const eventSource of eventSourcesPrev) {
-        // Check if the source is in the list of sources to get
-        const found = eventSourcesToGet.find(
-          (source) =>
-            source.url === eventSource.url &&
-            // @ts-expect-error internalEventSource is presented in eventSource
-            (source.color === eventSource.internalEventSource.meta.color ||
-              // @ts-expect-error internalEventSource is presented in eventSource
-              eventSource.internalEventSource.meta.color === "undefined"),
-        );
-        if (!found) {
-          eventSource.remove();
+      // Events that are already on calendar
+      const existingEvents = new Map<string, EventApi>();
+      for (const event of calendarApi.getEvents()) {
+        const occurrenceKey = event.extendedProps.occurrenceKey;
+        if (typeof occurrenceKey === "string") {
+          existingEvents.set(occurrenceKey, event);
         }
       }
+      const nextOccurrenceKeys = new Set(events.map(getEventOccurrenceKey));
 
-      // Add new sources
-      for (const eventSource of eventSourcesToGet) {
-        // Check if the source is already in the calendar
-        const found = eventSourcesPrev.find(
-          (source) =>
-            source.url === eventSource.url &&
-            // @ts-expect-error internalEventSource is presented in eventSource
-            (source.internalEventSource.meta.color === eventSource.color ||
-              // @ts-expect-error internalEventSource is presented in eventSource
-              source.internalEventSource.meta.color === "undefined"),
-        );
-        if (!found) {
-          calendarApi.addEventSource(eventSource);
+      // Batch the mutations to optimize re-renders (uses FullCalendar internal API)
+      const batchApi = calendarApi as unknown as {
+        batchRendering: (callback: () => void) => void;
+      };
+      batchApi.batchRendering(() => {
+        // Remove events that are not required anymore
+        for (const [occurrenceKey, event] of existingEvents) {
+          if (!nextOccurrenceKeys.has(occurrenceKey)) {
+            event.remove();
+          }
         }
+
+        // Add new events
+        for (const event of events) {
+          const occurrenceKey = getEventOccurrenceKey(event);
+          if (existingEvents.has(occurrenceKey)) {
+            continue;
+          }
+          calendarApi.addEvent({
+            ...event,
+            extendedProps: { ...event.extendedProps, occurrenceKey },
+          });
+        }
+      });
+
+      // If requested, scroll to today after events are added
+      if (pendingScrollToToday.current && rangeStart !== null) {
+        pendingScrollToToday.current = false;
+        scrollToTodayWhenRendered();
       }
     });
-  }, [urls, isFullPage]);
-
-  useEffect(() => {
-    const calendarApi = calendarRef.current?.getApi();
-    if (!calendarApi) {
-      return;
-    }
-
-    setTimeout(() => {
-      const prevEvents = calendarApi.getEvents();
-      const nextEventIds = new Set(
-        extraEvents.map((event) => event.id).filter(Boolean) as string[],
-      );
-
-      for (const event of prevEvents) {
-        if (
-          event.id?.startsWith(WHEN2MEET_EVENT_ID_PREFIX) &&
-          !nextEventIds.has(event.id)
-        ) {
-          event.remove();
-        }
-      }
-
-      for (const eventInput of extraEvents) {
-        const existingEvent = eventInput.id
-          ? calendarApi.getEventById(eventInput.id)
-          : null;
-
-        if (existingEvent) {
-          existingEvent.remove();
-        }
-
-        calendarApi.addEvent(eventInput);
-      }
-    });
-  }, [extraEvents, isFullPage]);
+  }, [events, isFullPage, rangeStart]);
 
   const customViewIds = useMemo(
     () => new Set(customViews.map(({ id }) => id)),
@@ -893,7 +852,9 @@ function renderEventTimeGridWeek({
       : borderColor !== "undefined"
         ? borderColor
         : "#9A2EFF";
-  return (
+  return event.id === "today" ? (
+    <div id="today"></div>
+  ) : (
     <div
       className="h-full border-l-4 p-1 text-left backdrop-blur-xs"
       style={{

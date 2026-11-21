@@ -1,7 +1,10 @@
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { Trans, useLingui } from "@lingui/react/macro";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
-import { getMusicRoomLink, getMyMusicRoomLink } from "@/api/schedule/links.ts";
+import {
+  getMusicRoomLink,
+  getMyMusicRoomLink,
+} from "@/api/schedule/calendars/links.ts";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ExportModal } from "@/components/calendar/ExportModal.tsx";
@@ -104,19 +107,21 @@ export function MusicRoomPage() {
         </div>
       </div>
       <Calendar
-        urls={[
-          {
-            url: getMusicRoomLink(),
-            sourceLink: "https://telegram.me/InnoMusicRoomBot",
-            updatedAt: new Date().toISOString(),
-          },
-          {
-            url: getMyMusicRoomLink(),
-            color: "seagreen",
-            sourceLink: "https://telegram.me/InnoMusicRoomBot",
-            updatedAt: new Date().toISOString(),
-          },
-        ]}
+        config={{
+          urls: [
+            {
+              url: getMusicRoomLink(),
+              sourceLink: "https://telegram.me/InnoMusicRoomBot",
+              updatedAt: new Date().toISOString(),
+            },
+            {
+              url: getMyMusicRoomLink(),
+              color: "seagreen",
+              sourceLink: "https://telegram.me/InnoMusicRoomBot",
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        }}
         initialView="timeGridWeek"
         viewStorageId="music-room"
       />

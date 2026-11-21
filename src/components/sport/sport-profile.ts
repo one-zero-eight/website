@@ -21,6 +21,10 @@ export function useSportProfile() {
   );
 
   const studentId = profile?.user_id;
+  const isStudent = profile?.student_info != null;
+  const hasTrainerInfo = profile?.trainer_info != null;
+  /** Sport pages are only available to students and trainers. */
+  const hasSportAccess = isStudent || hasTrainerInfo;
   const isTrainer = (profile?.trainer_info?.groups.length ?? 0) > 0;
   const isCollege = profile?.student_info?.is_college ?? false;
   const isAdmin = profile?.is_admin ?? false;
@@ -36,6 +40,8 @@ export function useSportProfile() {
     profileError,
     profileErr,
     studentId,
+    isStudent,
+    hasSportAccess,
     isTrainer,
     isCollege,
     isAdmin,

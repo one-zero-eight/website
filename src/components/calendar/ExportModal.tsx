@@ -12,7 +12,7 @@ import { Modal } from "@/components/common/Modal.tsx";
 import ScheduleLinkCopy from "@/components/schedule/ScheduleLinkCopy.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { getICSLink, getPersonalLink } from "@/api/schedule/links.ts";
+import { getICSLink, getPersonalLink } from "@/api/schedule/calendars/links.ts";
 import { TargetForExport } from "@/api/schedule/types.ts";
 
 export type ExportTarget =
@@ -133,11 +133,11 @@ export function ExportModal({
           </ul>
           <div className="-m-4">
             <Calendar
-              urls={
-                calendarURL
+              config={{
+                urls: calendarURL
                   ? [{ url: calendarURL, eventGroup: eventGroup }]
-                  : []
-              }
+                  : [],
+              }}
               viewStorageId="popup"
             />
           </div>
@@ -336,7 +336,7 @@ function AiCalendarExport({ open }: { open: boolean }) {
       </div>
       <div className="-m-4">
         <Calendar
-          urls={[{ url: getMyAssistantCalendarLink() }]}
+          config={{ urls: [{ url: getMyAssistantCalendarLink() }] }}
           viewStorageId="popup"
         />
       </div>

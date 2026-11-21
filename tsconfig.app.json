@@ -18,5 +18,9 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "tests/service-worker/**/*.test.ts"],
+  "exclude": [
+    "src/service-worker/worker",
+    "tests/service-worker/build-labels.test.ts"
+  ]
 }

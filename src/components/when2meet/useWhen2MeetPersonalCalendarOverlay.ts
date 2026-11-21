@@ -2,7 +2,7 @@ import { $schedule } from "@/api/schedule";
 import { useLingui } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { getPersonalCalendarIcsUrls } from "./utils/personal-calendar-urls.ts";
+import { getPersonalCalendarIcsUrls } from "../../api/schedule/calendars/personal-calendar-urls.ts";
 import {
   buildCalendarAllDayOverlay,
   buildCalendarSlotOverlay,

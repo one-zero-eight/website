@@ -8,16 +8,14 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from "@tanstack/react-router";
+
 import { Route as rootRouteImport } from "./routes/__root";
-import { Route as TvRouteImport } from "./routes/tv";
 import { Route as TimetableRouteImport } from "./routes/timetable";
-import { Route as ScheduleAssistantRouteRouteImport } from "./routes/schedule-assistant/route";
 import { Route as With_menuRouteRouteImport } from "./routes/_with_menu/route";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as ScheduleAssistantIndexRouteImport } from "./routes/schedule-assistant/index";
 import { Route as ScheduleAssistantTimetableRouteImport } from "./routes/schedule-assistant/timetable";
-import { Route as ScheduleAssistantChecksRouteImport } from "./routes/schedule-assistant/checks";
-import { Route as ScheduleAssistantBookingsRouteImport } from "./routes/schedule-assistant/bookings";
 import { Route as RoomsRoomRouteImport } from "./routes/rooms.$room";
 import { Route as FormsSubmitRouteImport } from "./routes/forms.submit";
 import { Route as With_menuWorkshopsRouteImport } from "./routes/_with_menu/workshops";
@@ -29,11 +27,11 @@ import { Route as With_menuMapsRouteImport } from "./routes/_with_menu/maps";
 import { Route as With_menuFormsRouteImport } from "./routes/_with_menu/forms";
 import { Route as With_menuExtensionRouteImport } from "./routes/_with_menu/extension";
 import { Route as With_menuDormsRouteImport } from "./routes/_with_menu/dorms";
+import { Route as With_menuDebugRouteImport } from "./routes/_with_menu/debug";
 import { Route as With_menuDashboardRouteImport } from "./routes/_with_menu/dashboard";
 import { Route as With_menuCalendarRouteImport } from "./routes/_with_menu/calendar";
 import { Route as With_menuAboutRouteImport } from "./routes/_with_menu/about";
 import { Route as With_menu42RouteImport } from "./routes/_with_menu/42";
-import { Route as ScheduleAssistantForInstructorsRouteRouteImport } from "./routes/schedule-assistant/for-instructors/route";
 import { Route as ScheduleAssistantSettingsIndexRouteImport } from "./routes/schedule-assistant/settings/index";
 import { Route as ScheduleAssistantForInstructorsIndexRouteImport } from "./routes/schedule-assistant/for-instructors/index";
 import { Route as With_menuWhen2meetIndexRouteImport } from "./routes/_with_menu/when2meet/index";
@@ -60,8 +58,8 @@ import { Route as With_menuStudentAffairsSignOutRouteImport } from "./routes/_wi
 import { Route as With_menuStudentAffairsSignInRouteImport } from "./routes/_with_menu/student-affairs/sign-in";
 import { Route as With_menuSportTrainerRouteImport } from "./routes/_with_menu/sport/trainer";
 import { Route as With_menuSportProfileRouteImport } from "./routes/_with_menu/sport/profile";
+import { Route as With_menuSportInfoRouteImport } from "./routes/_with_menu/sport/info";
 import { Route as With_menuSportHistoryRouteImport } from "./routes/_with_menu/sport/history";
-import { Route as With_menuSportFaqRouteImport } from "./routes/_with_menu/sport/faq";
 import { Route as With_menuSearchAskRouteImport } from "./routes/_with_menu/search/ask";
 import { Route as With_menuScheduleCategoryRouteImport } from "./routes/_with_menu/schedule/$category";
 import { Route as With_menuRoomBookingRulesRouteImport } from "./routes/_with_menu/room-booking/rules";
@@ -101,21 +99,38 @@ import { Route as With_menuBoardGamesAdminReservationsRouteImport } from "./rout
 import { Route as With_menuAdminUsersIdRouteImport } from "./routes/_with_menu/admin/users.$id";
 import { Route as GuardGoogleFilesSlugJoinRouteImport } from "./routes/guard.google.files.$slug.join";
 
-const TvRoute = TvRouteImport.update({
+const TvLazyRouteImport = createFileRoute("/tv")();
+const ScheduleAssistantRouteLazyRouteImport = createFileRoute(
+  "/schedule-assistant",
+)();
+const ScheduleAssistantChecksLazyRouteImport = createFileRoute(
+  "/schedule-assistant/checks",
+)();
+const ScheduleAssistantBookingsLazyRouteImport = createFileRoute(
+  "/schedule-assistant/bookings",
+)();
+const ScheduleAssistantForInstructorsRouteLazyRouteImport = createFileRoute(
+  "/schedule-assistant/for-instructors",
+)();
+
+const TvLazyRoute = TvLazyRouteImport.update({
   id: "/tv",
   path: "/tv",
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any).lazy(() => import("./routes/tv.lazy").then((d) => d.Route));
+const ScheduleAssistantRouteLazyRoute =
+  ScheduleAssistantRouteLazyRouteImport.update({
+    id: "/schedule-assistant",
+    path: "/schedule-assistant",
+    getParentRoute: () => rootRouteImport,
+  } as any).lazy(() =>
+    import("./routes/schedule-assistant/route.lazy").then((d) => d.Route),
+  );
 const TimetableRoute = TimetableRouteImport.update({
   id: "/timetable",
   path: "/timetable",
   getParentRoute: () => rootRouteImport,
-} as any);
-const ScheduleAssistantRouteRoute = ScheduleAssistantRouteRouteImport.update({
-  id: "/schedule-assistant",
-  path: "/schedule-assistant",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any).lazy(() => import("./routes/timetable.lazy").then((d) => d.Route));
 const With_menuRouteRoute = With_menuRouteRouteImport.update({
   id: "/_with_menu",
   getParentRoute: () => rootRouteImport,
@@ -128,25 +143,42 @@ const IndexRoute = IndexRouteImport.update({
 const ScheduleAssistantIndexRoute = ScheduleAssistantIndexRouteImport.update({
   id: "/",
   path: "/",
-  getParentRoute: () => ScheduleAssistantRouteRoute,
+  getParentRoute: () => ScheduleAssistantRouteLazyRoute,
 } as any);
+const ScheduleAssistantChecksLazyRoute =
+  ScheduleAssistantChecksLazyRouteImport.update({
+    id: "/checks",
+    path: "/checks",
+    getParentRoute: () => ScheduleAssistantRouteLazyRoute,
+  } as any).lazy(() =>
+    import("./routes/schedule-assistant/checks.lazy").then((d) => d.Route),
+  );
+const ScheduleAssistantBookingsLazyRoute =
+  ScheduleAssistantBookingsLazyRouteImport.update({
+    id: "/bookings",
+    path: "/bookings",
+    getParentRoute: () => ScheduleAssistantRouteLazyRoute,
+  } as any).lazy(() =>
+    import("./routes/schedule-assistant/bookings.lazy").then((d) => d.Route),
+  );
+const ScheduleAssistantForInstructorsRouteLazyRoute =
+  ScheduleAssistantForInstructorsRouteLazyRouteImport.update({
+    id: "/for-instructors",
+    path: "/for-instructors",
+    getParentRoute: () => ScheduleAssistantRouteLazyRoute,
+  } as any).lazy(() =>
+    import("./routes/schedule-assistant/for-instructors/route.lazy").then(
+      (d) => d.Route,
+    ),
+  );
 const ScheduleAssistantTimetableRoute =
   ScheduleAssistantTimetableRouteImport.update({
     id: "/timetable",
     path: "/timetable",
-    getParentRoute: () => ScheduleAssistantRouteRoute,
-  } as any);
-const ScheduleAssistantChecksRoute = ScheduleAssistantChecksRouteImport.update({
-  id: "/checks",
-  path: "/checks",
-  getParentRoute: () => ScheduleAssistantRouteRoute,
-} as any);
-const ScheduleAssistantBookingsRoute =
-  ScheduleAssistantBookingsRouteImport.update({
-    id: "/bookings",
-    path: "/bookings",
-    getParentRoute: () => ScheduleAssistantRouteRoute,
-  } as any);
+    getParentRoute: () => ScheduleAssistantRouteLazyRoute,
+  } as any).lazy(() =>
+    import("./routes/schedule-assistant/timetable.lazy").then((d) => d.Route),
+  );
 const RoomsRoomRoute = RoomsRoomRouteImport.update({
   id: "/rooms/$room",
   path: "/rooms/$room",
@@ -202,6 +234,11 @@ const With_menuDormsRoute = With_menuDormsRouteImport.update({
   path: "/dorms",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
+const With_menuDebugRoute = With_menuDebugRouteImport.update({
+  id: "/debug",
+  path: "/debug",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuDashboardRoute = With_menuDashboardRouteImport.update({
   id: "/dashboard",
   path: "/dashboard",
@@ -222,24 +259,22 @@ const With_menu42Route = With_menu42RouteImport.update({
   path: "/42",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
-const ScheduleAssistantForInstructorsRouteRoute =
-  ScheduleAssistantForInstructorsRouteRouteImport.update({
-    id: "/for-instructors",
-    path: "/for-instructors",
-    getParentRoute: () => ScheduleAssistantRouteRoute,
-  } as any);
 const ScheduleAssistantSettingsIndexRoute =
   ScheduleAssistantSettingsIndexRouteImport.update({
     id: "/settings/",
     path: "/settings/",
-    getParentRoute: () => ScheduleAssistantRouteRoute,
+    getParentRoute: () => ScheduleAssistantRouteLazyRoute,
   } as any);
 const ScheduleAssistantForInstructorsIndexRoute =
   ScheduleAssistantForInstructorsIndexRouteImport.update({
     id: "/",
     path: "/",
-    getParentRoute: () => ScheduleAssistantForInstructorsRouteRoute,
-  } as any);
+    getParentRoute: () => ScheduleAssistantForInstructorsRouteLazyRoute,
+  } as any).lazy(() =>
+    import("./routes/schedule-assistant/for-instructors/index.lazy").then(
+      (d) => d.Route,
+    ),
+  );
 const With_menuWhen2meetIndexRoute = With_menuWhen2meetIndexRouteImport.update({
   id: "/when2meet/",
   path: "/when2meet/",
@@ -323,8 +358,12 @@ const ScheduleAssistantSettingsSettingsTabRoute =
   ScheduleAssistantSettingsSettingsTabRouteImport.update({
     id: "/settings/$settingsTab",
     path: "/settings/$settingsTab",
-    getParentRoute: () => ScheduleAssistantRouteRoute,
-  } as any);
+    getParentRoute: () => ScheduleAssistantRouteLazyRoute,
+  } as any).lazy(() =>
+    import("./routes/schedule-assistant/settings/$settingsTab.lazy").then(
+      (d) => d.Route,
+    ),
+  );
 const With_menuWhen2meetNewRoute = With_menuWhen2meetNewRouteImport.update({
   id: "/when2meet/new",
   path: "/when2meet/new",
@@ -370,14 +409,14 @@ const With_menuSportProfileRoute = With_menuSportProfileRouteImport.update({
   path: "/sport/profile",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
+const With_menuSportInfoRoute = With_menuSportInfoRouteImport.update({
+  id: "/sport/info",
+  path: "/sport/info",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuSportHistoryRoute = With_menuSportHistoryRouteImport.update({
   id: "/sport/history",
   path: "/sport/history",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
-const With_menuSportFaqRoute = With_menuSportFaqRouteImport.update({
-  id: "/sport/faq",
-  path: "/sport/faq",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const With_menuSearchAskRoute = With_menuSearchAskRouteImport.update({
@@ -595,14 +634,14 @@ const GuardGoogleFilesSlugJoinRoute =
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
-  "/schedule-assistant": typeof ScheduleAssistantRouteRouteWithChildren;
   "/timetable": typeof TimetableRoute;
-  "/tv": typeof TvRoute;
-  "/schedule-assistant/for-instructors": typeof ScheduleAssistantForInstructorsRouteRouteWithChildren;
+  "/schedule-assistant": typeof ScheduleAssistantRouteLazyRouteWithChildren;
+  "/tv": typeof TvLazyRoute;
   "/42": typeof With_menu42Route;
   "/about": typeof With_menuAboutRoute;
   "/calendar": typeof With_menuCalendarRoute;
   "/dashboard": typeof With_menuDashboardRoute;
+  "/debug": typeof With_menuDebugRoute;
   "/dorms": typeof With_menuDormsRoute;
   "/extension": typeof With_menuExtensionRoute;
   "/forms": typeof With_menuFormsRoute;
@@ -614,9 +653,10 @@ export interface FileRoutesByFullPath {
   "/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
   "/rooms/$room": typeof RoomsRoomRoute;
-  "/schedule-assistant/bookings": typeof ScheduleAssistantBookingsRoute;
-  "/schedule-assistant/checks": typeof ScheduleAssistantChecksRoute;
   "/schedule-assistant/timetable": typeof ScheduleAssistantTimetableRoute;
+  "/schedule-assistant/for-instructors": typeof ScheduleAssistantForInstructorsRouteLazyRouteWithChildren;
+  "/schedule-assistant/bookings": typeof ScheduleAssistantBookingsLazyRoute;
+  "/schedule-assistant/checks": typeof ScheduleAssistantChecksLazyRoute;
   "/schedule-assistant/": typeof ScheduleAssistantIndexRoute;
   "/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/account/token": typeof With_menuAccountTokenRoute;
@@ -637,8 +677,8 @@ export interface FileRoutesByFullPath {
   "/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
-  "/sport/faq": typeof With_menuSportFaqRoute;
   "/sport/history": typeof With_menuSportHistoryRoute;
+  "/sport/info": typeof With_menuSportInfoRoute;
   "/sport/profile": typeof With_menuSportProfileRoute;
   "/sport/trainer": typeof With_menuSportTrainerRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
@@ -688,11 +728,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/timetable": typeof TimetableRoute;
-  "/tv": typeof TvRoute;
+  "/tv": typeof TvLazyRoute;
   "/42": typeof With_menu42Route;
   "/about": typeof With_menuAboutRoute;
   "/calendar": typeof With_menuCalendarRoute;
   "/dashboard": typeof With_menuDashboardRoute;
+  "/debug": typeof With_menuDebugRoute;
   "/dorms": typeof With_menuDormsRoute;
   "/extension": typeof With_menuExtensionRoute;
   "/forms": typeof With_menuFormsRoute;
@@ -704,9 +745,9 @@ export interface FileRoutesByTo {
   "/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
   "/rooms/$room": typeof RoomsRoomRoute;
-  "/schedule-assistant/bookings": typeof ScheduleAssistantBookingsRoute;
-  "/schedule-assistant/checks": typeof ScheduleAssistantChecksRoute;
   "/schedule-assistant/timetable": typeof ScheduleAssistantTimetableRoute;
+  "/schedule-assistant/bookings": typeof ScheduleAssistantBookingsLazyRoute;
+  "/schedule-assistant/checks": typeof ScheduleAssistantChecksLazyRoute;
   "/schedule-assistant": typeof ScheduleAssistantIndexRoute;
   "/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/account/token": typeof With_menuAccountTokenRoute;
@@ -726,8 +767,8 @@ export interface FileRoutesByTo {
   "/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
-  "/sport/faq": typeof With_menuSportFaqRoute;
   "/sport/history": typeof With_menuSportHistoryRoute;
+  "/sport/info": typeof With_menuSportInfoRoute;
   "/sport/profile": typeof With_menuSportProfileRoute;
   "/sport/trainer": typeof With_menuSportTrainerRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
@@ -778,14 +819,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/_with_menu": typeof With_menuRouteRouteWithChildren;
-  "/schedule-assistant": typeof ScheduleAssistantRouteRouteWithChildren;
   "/timetable": typeof TimetableRoute;
-  "/tv": typeof TvRoute;
-  "/schedule-assistant/for-instructors": typeof ScheduleAssistantForInstructorsRouteRouteWithChildren;
+  "/schedule-assistant": typeof ScheduleAssistantRouteLazyRouteWithChildren;
+  "/tv": typeof TvLazyRoute;
   "/_with_menu/42": typeof With_menu42Route;
   "/_with_menu/about": typeof With_menuAboutRoute;
   "/_with_menu/calendar": typeof With_menuCalendarRoute;
   "/_with_menu/dashboard": typeof With_menuDashboardRoute;
+  "/_with_menu/debug": typeof With_menuDebugRoute;
   "/_with_menu/dorms": typeof With_menuDormsRoute;
   "/_with_menu/extension": typeof With_menuExtensionRoute;
   "/_with_menu/forms": typeof With_menuFormsRoute;
@@ -797,9 +838,10 @@ export interface FileRoutesById {
   "/_with_menu/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
   "/rooms/$room": typeof RoomsRoomRoute;
-  "/schedule-assistant/bookings": typeof ScheduleAssistantBookingsRoute;
-  "/schedule-assistant/checks": typeof ScheduleAssistantChecksRoute;
   "/schedule-assistant/timetable": typeof ScheduleAssistantTimetableRoute;
+  "/schedule-assistant/for-instructors": typeof ScheduleAssistantForInstructorsRouteLazyRouteWithChildren;
+  "/schedule-assistant/bookings": typeof ScheduleAssistantBookingsLazyRoute;
+  "/schedule-assistant/checks": typeof ScheduleAssistantChecksLazyRoute;
   "/schedule-assistant/": typeof ScheduleAssistantIndexRoute;
   "/_with_menu/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/_with_menu/account/token": typeof With_menuAccountTokenRoute;
@@ -820,8 +862,8 @@ export interface FileRoutesById {
   "/_with_menu/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/_with_menu/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/_with_menu/search/ask": typeof With_menuSearchAskRoute;
-  "/_with_menu/sport/faq": typeof With_menuSportFaqRoute;
   "/_with_menu/sport/history": typeof With_menuSportHistoryRoute;
+  "/_with_menu/sport/info": typeof With_menuSportInfoRoute;
   "/_with_menu/sport/profile": typeof With_menuSportProfileRoute;
   "/_with_menu/sport/trainer": typeof With_menuSportTrainerRoute;
   "/_with_menu/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
@@ -872,14 +914,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
-    | "/schedule-assistant"
     | "/timetable"
+    | "/schedule-assistant"
     | "/tv"
-    | "/schedule-assistant/for-instructors"
     | "/42"
     | "/about"
     | "/calendar"
     | "/dashboard"
+    | "/debug"
     | "/dorms"
     | "/extension"
     | "/forms"
@@ -891,9 +933,10 @@ export interface FileRouteTypes {
     | "/workshops"
     | "/forms/submit"
     | "/rooms/$room"
+    | "/schedule-assistant/timetable"
+    | "/schedule-assistant/for-instructors"
     | "/schedule-assistant/bookings"
     | "/schedule-assistant/checks"
-    | "/schedule-assistant/timetable"
     | "/schedule-assistant/"
     | "/account/connect-telegram"
     | "/account/token"
@@ -914,8 +957,8 @@ export interface FileRouteTypes {
     | "/room-booking/rules"
     | "/schedule/$category"
     | "/search/ask"
-    | "/sport/faq"
     | "/sport/history"
+    | "/sport/info"
     | "/sport/profile"
     | "/sport/trainer"
     | "/student-affairs/sign-in"
@@ -970,6 +1013,7 @@ export interface FileRouteTypes {
     | "/about"
     | "/calendar"
     | "/dashboard"
+    | "/debug"
     | "/dorms"
     | "/extension"
     | "/forms"
@@ -981,9 +1025,9 @@ export interface FileRouteTypes {
     | "/workshops"
     | "/forms/submit"
     | "/rooms/$room"
+    | "/schedule-assistant/timetable"
     | "/schedule-assistant/bookings"
     | "/schedule-assistant/checks"
-    | "/schedule-assistant/timetable"
     | "/schedule-assistant"
     | "/account/connect-telegram"
     | "/account/token"
@@ -1003,8 +1047,8 @@ export interface FileRouteTypes {
     | "/room-booking/rules"
     | "/schedule/$category"
     | "/search/ask"
-    | "/sport/faq"
     | "/sport/history"
+    | "/sport/info"
     | "/sport/profile"
     | "/sport/trainer"
     | "/student-affairs/sign-in"
@@ -1054,14 +1098,14 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/_with_menu"
-    | "/schedule-assistant"
     | "/timetable"
+    | "/schedule-assistant"
     | "/tv"
-    | "/schedule-assistant/for-instructors"
     | "/_with_menu/42"
     | "/_with_menu/about"
     | "/_with_menu/calendar"
     | "/_with_menu/dashboard"
+    | "/_with_menu/debug"
     | "/_with_menu/dorms"
     | "/_with_menu/extension"
     | "/_with_menu/forms"
@@ -1073,9 +1117,10 @@ export interface FileRouteTypes {
     | "/_with_menu/workshops"
     | "/forms/submit"
     | "/rooms/$room"
+    | "/schedule-assistant/timetable"
+    | "/schedule-assistant/for-instructors"
     | "/schedule-assistant/bookings"
     | "/schedule-assistant/checks"
-    | "/schedule-assistant/timetable"
     | "/schedule-assistant/"
     | "/_with_menu/account/connect-telegram"
     | "/_with_menu/account/token"
@@ -1096,8 +1141,8 @@ export interface FileRouteTypes {
     | "/_with_menu/room-booking/rules"
     | "/_with_menu/schedule/$category"
     | "/_with_menu/search/ask"
-    | "/_with_menu/sport/faq"
     | "/_with_menu/sport/history"
+    | "/_with_menu/sport/info"
     | "/_with_menu/sport/profile"
     | "/_with_menu/sport/trainer"
     | "/_with_menu/student-affairs/sign-in"
@@ -1148,9 +1193,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   With_menuRouteRoute: typeof With_menuRouteRouteWithChildren;
-  ScheduleAssistantRouteRoute: typeof ScheduleAssistantRouteRouteWithChildren;
   TimetableRoute: typeof TimetableRoute;
-  TvRoute: typeof TvRoute;
+  ScheduleAssistantRouteLazyRoute: typeof ScheduleAssistantRouteLazyRouteWithChildren;
+  TvLazyRoute: typeof TvLazyRoute;
   FormsSubmitRoute: typeof FormsSubmitRoute;
   RoomsRoomRoute: typeof RoomsRoomRoute;
   GuardGoogleFilesSlugJoinRoute: typeof GuardGoogleFilesSlugJoinRoute;
@@ -1162,7 +1207,14 @@ declare module "@tanstack/react-router" {
       id: "/tv";
       path: "/tv";
       fullPath: "/tv";
-      preLoaderRoute: typeof TvRouteImport;
+      preLoaderRoute: typeof TvLazyRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/schedule-assistant": {
+      id: "/schedule-assistant";
+      path: "/schedule-assistant";
+      fullPath: "/schedule-assistant";
+      preLoaderRoute: typeof ScheduleAssistantRouteLazyRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/timetable": {
@@ -1170,13 +1222,6 @@ declare module "@tanstack/react-router" {
       path: "/timetable";
       fullPath: "/timetable";
       preLoaderRoute: typeof TimetableRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/schedule-assistant": {
-      id: "/schedule-assistant";
-      path: "/schedule-assistant";
-      fullPath: "/schedule-assistant";
-      preLoaderRoute: typeof ScheduleAssistantRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/_with_menu": {
@@ -1198,28 +1243,35 @@ declare module "@tanstack/react-router" {
       path: "/";
       fullPath: "/schedule-assistant/";
       preLoaderRoute: typeof ScheduleAssistantIndexRouteImport;
-      parentRoute: typeof ScheduleAssistantRouteRoute;
+      parentRoute: typeof ScheduleAssistantRouteLazyRoute;
+    };
+    "/schedule-assistant/checks": {
+      id: "/schedule-assistant/checks";
+      path: "/checks";
+      fullPath: "/schedule-assistant/checks";
+      preLoaderRoute: typeof ScheduleAssistantChecksLazyRouteImport;
+      parentRoute: typeof ScheduleAssistantRouteLazyRoute;
+    };
+    "/schedule-assistant/bookings": {
+      id: "/schedule-assistant/bookings";
+      path: "/bookings";
+      fullPath: "/schedule-assistant/bookings";
+      preLoaderRoute: typeof ScheduleAssistantBookingsLazyRouteImport;
+      parentRoute: typeof ScheduleAssistantRouteLazyRoute;
+    };
+    "/schedule-assistant/for-instructors": {
+      id: "/schedule-assistant/for-instructors";
+      path: "/for-instructors";
+      fullPath: "/schedule-assistant/for-instructors";
+      preLoaderRoute: typeof ScheduleAssistantForInstructorsRouteLazyRouteImport;
+      parentRoute: typeof ScheduleAssistantRouteLazyRoute;
     };
     "/schedule-assistant/timetable": {
       id: "/schedule-assistant/timetable";
       path: "/timetable";
       fullPath: "/schedule-assistant/timetable";
       preLoaderRoute: typeof ScheduleAssistantTimetableRouteImport;
-      parentRoute: typeof ScheduleAssistantRouteRoute;
-    };
-    "/schedule-assistant/checks": {
-      id: "/schedule-assistant/checks";
-      path: "/checks";
-      fullPath: "/schedule-assistant/checks";
-      preLoaderRoute: typeof ScheduleAssistantChecksRouteImport;
-      parentRoute: typeof ScheduleAssistantRouteRoute;
-    };
-    "/schedule-assistant/bookings": {
-      id: "/schedule-assistant/bookings";
-      path: "/bookings";
-      fullPath: "/schedule-assistant/bookings";
-      preLoaderRoute: typeof ScheduleAssistantBookingsRouteImport;
-      parentRoute: typeof ScheduleAssistantRouteRoute;
+      parentRoute: typeof ScheduleAssistantRouteLazyRoute;
     };
     "/rooms/$room": {
       id: "/rooms/$room";
@@ -1298,6 +1350,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuDormsRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/debug": {
+      id: "/_with_menu/debug";
+      path: "/debug";
+      fullPath: "/debug";
+      preLoaderRoute: typeof With_menuDebugRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/dashboard": {
       id: "/_with_menu/dashboard";
       path: "/dashboard";
@@ -1326,26 +1385,19 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menu42RouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/schedule-assistant/for-instructors": {
-      id: "/schedule-assistant/for-instructors";
-      path: "/for-instructors";
-      fullPath: "/schedule-assistant/for-instructors";
-      preLoaderRoute: typeof ScheduleAssistantForInstructorsRouteRouteImport;
-      parentRoute: typeof ScheduleAssistantRouteRoute;
-    };
     "/schedule-assistant/settings/": {
       id: "/schedule-assistant/settings/";
       path: "/settings";
       fullPath: "/schedule-assistant/settings/";
       preLoaderRoute: typeof ScheduleAssistantSettingsIndexRouteImport;
-      parentRoute: typeof ScheduleAssistantRouteRoute;
+      parentRoute: typeof ScheduleAssistantRouteLazyRoute;
     };
     "/schedule-assistant/for-instructors/": {
       id: "/schedule-assistant/for-instructors/";
       path: "/";
       fullPath: "/schedule-assistant/for-instructors/";
       preLoaderRoute: typeof ScheduleAssistantForInstructorsIndexRouteImport;
-      parentRoute: typeof ScheduleAssistantForInstructorsRouteRoute;
+      parentRoute: typeof ScheduleAssistantForInstructorsRouteLazyRoute;
     };
     "/_with_menu/when2meet/": {
       id: "/_with_menu/when2meet/";
@@ -1457,7 +1509,7 @@ declare module "@tanstack/react-router" {
       path: "/settings/$settingsTab";
       fullPath: "/schedule-assistant/settings/$settingsTab";
       preLoaderRoute: typeof ScheduleAssistantSettingsSettingsTabRouteImport;
-      parentRoute: typeof ScheduleAssistantRouteRoute;
+      parentRoute: typeof ScheduleAssistantRouteLazyRoute;
     };
     "/_with_menu/when2meet/new": {
       id: "/_with_menu/when2meet/new";
@@ -1515,18 +1567,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuSportProfileRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/sport/info": {
+      id: "/_with_menu/sport/info";
+      path: "/sport/info";
+      fullPath: "/sport/info";
+      preLoaderRoute: typeof With_menuSportInfoRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/sport/history": {
       id: "/_with_menu/sport/history";
       path: "/sport/history";
       fullPath: "/sport/history";
       preLoaderRoute: typeof With_menuSportHistoryRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
-    "/_with_menu/sport/faq": {
-      id: "/_with_menu/sport/faq";
-      path: "/sport/faq";
-      fullPath: "/sport/faq";
-      preLoaderRoute: typeof With_menuSportFaqRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/search/ask": {
@@ -1820,6 +1872,7 @@ interface With_menuRouteRouteChildren {
   With_menuAboutRoute: typeof With_menuAboutRoute;
   With_menuCalendarRoute: typeof With_menuCalendarRoute;
   With_menuDashboardRoute: typeof With_menuDashboardRoute;
+  With_menuDebugRoute: typeof With_menuDebugRoute;
   With_menuDormsRoute: typeof With_menuDormsRoute;
   With_menuExtensionRoute: typeof With_menuExtensionRoute;
   With_menuFormsRoute: typeof With_menuFormsRoute;
@@ -1848,8 +1901,8 @@ interface With_menuRouteRouteChildren {
   With_menuRoomBookingRulesRoute: typeof With_menuRoomBookingRulesRoute;
   With_menuScheduleCategoryRoute: typeof With_menuScheduleCategoryRoute;
   With_menuSearchAskRoute: typeof With_menuSearchAskRoute;
-  With_menuSportFaqRoute: typeof With_menuSportFaqRoute;
   With_menuSportHistoryRoute: typeof With_menuSportHistoryRoute;
+  With_menuSportInfoRoute: typeof With_menuSportInfoRoute;
   With_menuSportProfileRoute: typeof With_menuSportProfileRoute;
   With_menuSportTrainerRoute: typeof With_menuSportTrainerRoute;
   With_menuStudentAffairsSignInRoute: typeof With_menuStudentAffairsSignInRoute;
@@ -1896,6 +1949,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuAboutRoute: With_menuAboutRoute,
   With_menuCalendarRoute: With_menuCalendarRoute,
   With_menuDashboardRoute: With_menuDashboardRoute,
+  With_menuDebugRoute: With_menuDebugRoute,
   With_menuDormsRoute: With_menuDormsRoute,
   With_menuExtensionRoute: With_menuExtensionRoute,
   With_menuFormsRoute: With_menuFormsRoute,
@@ -1924,8 +1978,8 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuRoomBookingRulesRoute: With_menuRoomBookingRulesRoute,
   With_menuScheduleCategoryRoute: With_menuScheduleCategoryRoute,
   With_menuSearchAskRoute: With_menuSearchAskRoute,
-  With_menuSportFaqRoute: With_menuSportFaqRoute,
   With_menuSportHistoryRoute: With_menuSportHistoryRoute,
+  With_menuSportInfoRoute: With_menuSportInfoRoute,
   With_menuSportProfileRoute: With_menuSportProfileRoute,
   With_menuSportTrainerRoute: With_menuSportTrainerRoute,
   With_menuStudentAffairsSignInRoute: With_menuStudentAffairsSignInRoute,
@@ -1972,55 +2026,55 @@ const With_menuRouteRouteWithChildren = With_menuRouteRoute._addFileChildren(
   With_menuRouteRouteChildren,
 );
 
-interface ScheduleAssistantForInstructorsRouteRouteChildren {
+interface ScheduleAssistantForInstructorsRouteLazyRouteChildren {
   ScheduleAssistantForInstructorsIndexRoute: typeof ScheduleAssistantForInstructorsIndexRoute;
 }
 
-const ScheduleAssistantForInstructorsRouteRouteChildren: ScheduleAssistantForInstructorsRouteRouteChildren =
+const ScheduleAssistantForInstructorsRouteLazyRouteChildren: ScheduleAssistantForInstructorsRouteLazyRouteChildren =
   {
     ScheduleAssistantForInstructorsIndexRoute:
       ScheduleAssistantForInstructorsIndexRoute,
   };
 
-const ScheduleAssistantForInstructorsRouteRouteWithChildren =
-  ScheduleAssistantForInstructorsRouteRoute._addFileChildren(
-    ScheduleAssistantForInstructorsRouteRouteChildren,
+const ScheduleAssistantForInstructorsRouteLazyRouteWithChildren =
+  ScheduleAssistantForInstructorsRouteLazyRoute._addFileChildren(
+    ScheduleAssistantForInstructorsRouteLazyRouteChildren,
   );
 
-interface ScheduleAssistantRouteRouteChildren {
-  ScheduleAssistantForInstructorsRouteRoute: typeof ScheduleAssistantForInstructorsRouteRouteWithChildren;
-  ScheduleAssistantBookingsRoute: typeof ScheduleAssistantBookingsRoute;
-  ScheduleAssistantChecksRoute: typeof ScheduleAssistantChecksRoute;
+interface ScheduleAssistantRouteLazyRouteChildren {
   ScheduleAssistantTimetableRoute: typeof ScheduleAssistantTimetableRoute;
+  ScheduleAssistantForInstructorsRouteLazyRoute: typeof ScheduleAssistantForInstructorsRouteLazyRouteWithChildren;
+  ScheduleAssistantBookingsLazyRoute: typeof ScheduleAssistantBookingsLazyRoute;
+  ScheduleAssistantChecksLazyRoute: typeof ScheduleAssistantChecksLazyRoute;
   ScheduleAssistantIndexRoute: typeof ScheduleAssistantIndexRoute;
   ScheduleAssistantSettingsSettingsTabRoute: typeof ScheduleAssistantSettingsSettingsTabRoute;
   ScheduleAssistantSettingsIndexRoute: typeof ScheduleAssistantSettingsIndexRoute;
 }
 
-const ScheduleAssistantRouteRouteChildren: ScheduleAssistantRouteRouteChildren =
+const ScheduleAssistantRouteLazyRouteChildren: ScheduleAssistantRouteLazyRouteChildren =
   {
-    ScheduleAssistantForInstructorsRouteRoute:
-      ScheduleAssistantForInstructorsRouteRouteWithChildren,
-    ScheduleAssistantBookingsRoute: ScheduleAssistantBookingsRoute,
-    ScheduleAssistantChecksRoute: ScheduleAssistantChecksRoute,
     ScheduleAssistantTimetableRoute: ScheduleAssistantTimetableRoute,
+    ScheduleAssistantForInstructorsRouteLazyRoute:
+      ScheduleAssistantForInstructorsRouteLazyRouteWithChildren,
+    ScheduleAssistantBookingsLazyRoute: ScheduleAssistantBookingsLazyRoute,
+    ScheduleAssistantChecksLazyRoute: ScheduleAssistantChecksLazyRoute,
     ScheduleAssistantIndexRoute: ScheduleAssistantIndexRoute,
     ScheduleAssistantSettingsSettingsTabRoute:
       ScheduleAssistantSettingsSettingsTabRoute,
     ScheduleAssistantSettingsIndexRoute: ScheduleAssistantSettingsIndexRoute,
   };
 
-const ScheduleAssistantRouteRouteWithChildren =
-  ScheduleAssistantRouteRoute._addFileChildren(
-    ScheduleAssistantRouteRouteChildren,
+const ScheduleAssistantRouteLazyRouteWithChildren =
+  ScheduleAssistantRouteLazyRoute._addFileChildren(
+    ScheduleAssistantRouteLazyRouteChildren,
   );
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   With_menuRouteRoute: With_menuRouteRouteWithChildren,
-  ScheduleAssistantRouteRoute: ScheduleAssistantRouteRouteWithChildren,
   TimetableRoute: TimetableRoute,
-  TvRoute: TvRoute,
+  ScheduleAssistantRouteLazyRoute: ScheduleAssistantRouteLazyRouteWithChildren,
+  TvLazyRoute: TvLazyRoute,
   FormsSubmitRoute: FormsSubmitRoute,
   RoomsRoomRoute: RoomsRoomRoute,
   GuardGoogleFilesSlugJoinRoute: GuardGoogleFilesSlugJoinRoute,

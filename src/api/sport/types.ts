@@ -503,7 +503,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Get Medical Leave References
+     * @description Retrieve the current student's medical leave references.
+     */
+    get: operations["references_get_medical_leave_references"];
     put?: never;
     /**
      * Reference Upload
@@ -523,13 +527,37 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Get Medical Group References
+     * @description Retrieve the current student's medical group references.
+     */
+    get: operations["references_get_medical_group_references"];
     put?: never;
     /**
      * Medical Group Upload
      * @description Upload medical group reference with multiple images.
      */
     post: operations["references_medical_group_upload"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/medical-group-history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Medical Group History
+     * @description Retrieve the current student's medical group history.
+     */
+    get: operations["references_get_medical_group_history"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -636,7 +664,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/faq": {
+  "/info/curators": {
     parameters: {
       query?: never;
       header?: never;
@@ -644,17 +672,10 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Faq
-     * @description Returns FAQ as:
-     *     {
-     *       "Category name": {
-     *           "Question 1": "Answer 1",
-     *           "Question 2": "Answer 2"
-     *       },
-     *       ...
-     *     }
+     * List Course Curators
+     * @description Retrieve course curators with their Telegram usernames.
      */
-    get: operations["info_get_faq"];
+    get: operations["info_list_course_curators"];
     put?: never;
     post?: never;
     delete?: never;
@@ -779,6 +800,15 @@ export interface components {
       /** Student Comment */
       student_comment?: string | null;
     };
+    /** CourseCuratorSchema */
+    CourseCuratorSchema: {
+      /** Course */
+      course: number;
+      /** Curator Name */
+      curator_name: string | null;
+      /** Curator Telegram */
+      curator_telegram: string | null;
+    };
     /** DetailedSportSchema */
     DetailedSportSchema: {
       /** Id */
@@ -789,11 +819,6 @@ export interface components {
       description: string;
       /** Groups */
       groups: components["schemas"]["ShortSportGroupSchema"][];
-    };
-    FAQResponse: {
-      [key: string]: {
-        [key: string]: string;
-      };
     };
     /** FitnessTestExerciseResultSchema */
     FitnessTestExerciseResultSchema: {
@@ -923,6 +948,43 @@ export interface components {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
+    /** MedicalGroupHistorySchema */
+    MedicalGroupHistorySchema: {
+      /** Id */
+      id: number;
+      /** Medical Group Id */
+      medical_group_id: number;
+      /** Medical Group Name */
+      medical_group_name: string;
+      /**
+       * Changed
+       * Format: date-time
+       */
+      changed: string;
+    };
+    /** MedicalGroupReferenceSchema */
+    MedicalGroupReferenceSchema: {
+      /** Id */
+      id: number;
+      /** Semester Id */
+      semester_id: number;
+      /** Semester Name */
+      semester_name: string;
+      /**
+       * Uploaded
+       * Format: date-time
+       */
+      uploaded: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: MedicalGroupReferenceSchemaStatus;
+      /** Comment */
+      comment: string | null;
+      /** Student Comment */
+      student_comment: string | null;
+    };
     /** MedicalGroupReferenceUploadResponseSchema */
     MedicalGroupReferenceUploadResponseSchema: {
       /** Id */
@@ -942,6 +1004,41 @@ export interface components {
       name: string;
       /** Description */
       description: string;
+    };
+    /** MedicalLeaveReferenceSchema */
+    MedicalLeaveReferenceSchema: {
+      /** Id */
+      id: number;
+      /** Semester Id */
+      semester_id: number;
+      /** Semester Name */
+      semester_name: string;
+      /**
+       * Start
+       * Format: date
+       */
+      start: string;
+      /**
+       * End
+       * Format: date
+       */
+      end: string;
+      /** Hours */
+      hours: number;
+      /**
+       * Uploaded
+       * Format: date-time
+       */
+      uploaded: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: MedicalLeaveReferenceSchemaStatus;
+      /** Comment */
+      comment: string | null;
+      /** Student Comment */
+      student_comment: string | null;
     };
     /** ParsedStravaSchema */
     ParsedStravaSchema: {
@@ -1037,6 +1134,14 @@ export interface components {
       debt: boolean;
       /** Semester Id */
       semester_id: number;
+      /** Semester Name */
+      semester_name: string;
+      /** Link */
+      link: string | null;
+      /** Comment */
+      comment: string | null;
+      /** Student Comment */
+      student_comment: string | null;
     };
     /** SelfSportTypeSchema */
     SelfSportTypeSchema: {
@@ -1135,6 +1240,8 @@ export interface components {
       medical_group: string;
       /** Is College */
       is_college: boolean;
+      /** Course */
+      course: number | null;
     };
     /** StudentStatusSchema */
     StudentStatusSchema: {
@@ -1347,9 +1454,10 @@ export type SchemaBodyReferencesMedicalGroupUpload =
   components["schemas"]["Body_references_medical_group_upload"];
 export type SchemaBodyReferencesReferenceUpload =
   components["schemas"]["Body_references_reference_upload"];
+export type SchemaCourseCuratorSchema =
+  components["schemas"]["CourseCuratorSchema"];
 export type SchemaDetailedSportSchema =
   components["schemas"]["DetailedSportSchema"];
-export type SchemaFaqResponse = components["schemas"]["FAQResponse"];
 export type SchemaFitnessTestExerciseResultSchema =
   components["schemas"]["FitnessTestExerciseResultSchema"];
 export type SchemaFitnessTestExerciseSchema =
@@ -1373,10 +1481,16 @@ export type SchemaFitnessTestUploadSchema =
 export type SchemaGradeSetSchema = components["schemas"]["GradeSetSchema"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaMedicalGroupHistorySchema =
+  components["schemas"]["MedicalGroupHistorySchema"];
+export type SchemaMedicalGroupReferenceSchema =
+  components["schemas"]["MedicalGroupReferenceSchema"];
 export type SchemaMedicalGroupReferenceUploadResponseSchema =
   components["schemas"]["MedicalGroupReferenceUploadResponseSchema"];
 export type SchemaMedicalGroupSchema =
   components["schemas"]["MedicalGroupSchema"];
+export type SchemaMedicalLeaveReferenceSchema =
+  components["schemas"]["MedicalLeaveReferenceSchema"];
 export type SchemaParsedStravaSchema =
   components["schemas"]["ParsedStravaSchema"];
 export type SchemaPostStudentExerciseResultSchema =
@@ -2784,6 +2898,40 @@ export interface operations {
       };
     };
   };
+  references_get_medical_leave_references: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get medical leave references */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MedicalLeaveReferenceSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   references_reference_upload: {
     parameters: {
       query?: never;
@@ -2838,6 +2986,40 @@ export interface operations {
       };
     };
   };
+  references_get_medical_group_references: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get medical group references */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MedicalGroupReferenceSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   references_medical_group_upload: {
     parameters: {
       query?: never;
@@ -2889,6 +3071,40 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+    };
+  };
+  references_get_medical_group_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get medical group history */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MedicalGroupHistorySchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -3087,7 +3303,7 @@ export interface operations {
       };
     };
   };
-  info_get_faq: {
+  info_list_course_curators: {
     parameters: {
       query?: never;
       header?: never;
@@ -3096,20 +3312,13 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description FAQ grouped by category */
+      /** @description Get course curators */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          /**
-           * @example {
-           *       "General": {
-           *         "What is this?": "This is an FAQ."
-           *       }
-           *     }
-           */
-          "application/json": components["schemas"]["FAQResponse"];
+          "application/json": components["schemas"]["CourseCuratorSchema"][];
         };
       };
       /** @description Invalid token */
@@ -3169,4 +3378,14 @@ export interface operations {
       };
     };
   };
+}
+export enum MedicalGroupReferenceSchemaStatus {
+  in_review = "in_review",
+  approved = "approved",
+  rejected = "rejected",
+}
+export enum MedicalLeaveReferenceSchemaStatus {
+  in_review = "in_review",
+  approved = "approved",
+  rejected = "rejected",
 }

@@ -16,6 +16,16 @@ export function TabletennisTabs() {
       <TabLink to="/tabletennis/tournaments">
         <Trans>Tournaments</Trans>
       </TabLink>
+      <Link
+        to="/clubs/$slug"
+        params={{ slug: "inno-table-tennis" }}
+        className="px-3 py-2.5"
+      >
+        <span className="inline-flex items-center gap-1">
+          <span className="icon-[mdi--account-group-outline] text-base" />
+          <Trans>Club</Trans>
+        </span>
+      </Link>
     </div>
   );
 }

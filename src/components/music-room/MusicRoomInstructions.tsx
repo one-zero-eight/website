@@ -1,8 +1,11 @@
 import { useAppLocale } from "@/locales/lib";
+import { useAutoUpdateBlocker } from "@/service-worker/page/auto-update.ts";
 import InstructionsEn from "./instructions.mdx";
 import InstructionsRu from "./instructions.ru.mdx";
 
 export function MusicRoomInstructions() {
+  // The embedded cross-origin video does not expose its playback state to this page.
+  useAutoUpdateBlocker();
   const [locale] = useAppLocale();
   const Instructions = locale === "ru" ? InstructionsRu : InstructionsEn;
 

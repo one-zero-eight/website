@@ -9,7 +9,8 @@ import {
   invalidateMySportAccessToken,
   useMySportAccessToken,
 } from "@/api/helpers/sport-access-token.ts";
-import { CALENDAR_FEEDS_CACHE } from "@/app/sw-runtime-caches.ts";
+import { ensureMirrorSession } from "@/api/helpers/mirror-session.ts";
+import { userDataCacheName } from "@/service-worker/protocol.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
@@ -51,14 +52,18 @@ export function AuthManager({ children }: PropsWithChildren) {
         console.log("[auth] User logged out, removing tokens");
         invalidateMyAccessToken();
         invalidateMySportAccessToken();
-        // Cached calendar feeds hold this user's schedule; don't leave them
-        // for the next person on the device.
-        if (typeof caches !== "undefined") {
-          void caches.delete(CALENDAR_FEEDS_CACHE);
-        }
+        // Cached calendar feeds and account data belong to this user; don't
+        // leave them for the next person on the device.
+        if (typeof caches !== "undefined")
+          void caches.delete(userDataCacheName);
       }
     }
   }, [me, isPending, isNetworkError, setStoredMe]);
+
+  useEffect(() => {
+    // Keep the mirror of the API working for this user (see mirror-session.ts).
+    if (me) void ensureMirrorSession();
+  }, [me]);
 
   useEffect(() => {
     // Invalidate token if it's expired

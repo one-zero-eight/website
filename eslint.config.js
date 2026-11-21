@@ -9,7 +9,7 @@ export default tseslint.config(
   { ignores: ["dist/**", "build/**", "coverage/**"] },
   {
     ...pluginLingui.configs["flat/recommended"],
-    files: ["src/**/*.{js,jsx,ts,tsx}"],
+    files: ["src/**/*.{js,jsx,ts,tsx}", "tests/service-worker/**/*.test.ts"],
   },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
@@ -22,7 +22,7 @@ export default tseslint.config(
       "react-refresh": reactRefresh,
     },
     ignores: ["__generated__"],
-    files: ["src/**/*.ts", "src/**/*.tsx"],
+    files: ["src/**/*.ts", "src/**/*.tsx", "tests/service-worker/**/*.test.ts"],
     rules: {
       ...reactHooks.configs.recommended.rules,
       "@typescript-eslint/no-explicit-any": "off",

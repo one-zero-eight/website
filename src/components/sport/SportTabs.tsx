@@ -10,7 +10,7 @@ export function SportTabs() {
   const { isTrainer, isAdmin } = useSportProfile();
 
   return (
-    <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
+    <div className="border-base-300 flex shrink-0 flex-row gap-2 overflow-x-auto border-b px-1 whitespace-nowrap">
       <TabLink to="/sport">
         <Trans>Calendar</Trans>
       </TabLink>
@@ -25,8 +25,8 @@ export function SportTabs() {
           <Trans>Trainer</Trans>
         </TabLink>
       ) : null}
-      <TabLink to="/sport/faq">
-        <Trans>FAQ</Trans>
+      <TabLink to="/sport/info">
+        <Trans>Info</Trans>
       </TabLink>
       <ExternalTabLink href={SPORT_BOT_URL}>
         <span className="inline-flex items-center gap-1">
@@ -46,7 +46,7 @@ export function SportTabs() {
 function TabLink(props: ValidateLinkOptions) {
   return (
     <Link
-      className="px-2 py-1"
+      className="px-3 py-2.5"
       activeOptions={{ exact: true, includeSearch: true }}
       activeProps={{ className: "border-b-2 border-b-primary" }}
       {...props}
@@ -62,7 +62,7 @@ function ExternalTabLink({
   children: ReactNode;
 }) {
   return (
-    <a href={href} className="px-2 py-1" target="_blank" rel="noreferrer">
+    <a href={href} className="px-3 py-2.5" target="_blank" rel="noreferrer">
       {children}
     </a>
   );

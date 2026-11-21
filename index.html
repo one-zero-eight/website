@@ -1,5 +1,10 @@
 <!doctype html>
-<html lang="en" class="h-full [scrollbar-width:none]" data-theme="dark">
+<html
+  lang="en"
+  class="h-full [scrollbar-width:none]"
+  data-theme="dark"
+  data-build-id="__BUILD_ID__"
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -31,7 +36,10 @@
     <!-- App Open Graph preview -->
     <meta property="og:title" content="InNoHassle" />
     <meta property="og:description" content="Student ecosystem of IU sevices" />
-    <meta property="og:image" content="https://innohassle.ru/preview.png" />
+    <meta
+      property="og:image"
+      content="https://storage.innohassle.ru/website-static/preview.png"
+    />
     <meta property="og:url" content="https://innohassle.ru/" />
     <meta property="og:type" content="website" />
 
@@ -39,8 +47,8 @@
     <script type="text/javascript">
       <!-- Run before loading any resources -->
       const dark =
-        localStorage.getItem("theme") === '"dark"' ||
-        (localStorage.getItem("theme") === null &&
+        localStorage.getItem("theme-v2") === '"dark"' ||
+        (localStorage.getItem("theme-v2") === null &&
           window.matchMedia("(prefers-color-scheme: dark)").matches);
       document.documentElement.dataset.theme = dark ? "dark" : "light";
     </script>
@@ -68,5 +76,14 @@
         <span class="loading loading-spinner loading-xl"></span>
       </div>
     </div>
+
+    <!-- Static build marker outside the React root; CSS anchors it to Debug. -->
+    <span
+      id="debug-html-build"
+      style="display: none"
+      class="bg-base-200 text-base-content/60 fixed [top:anchor(center)] [left:anchor(right)] ml-2 -translate-y-1/2 rounded-md px-2 py-1 font-mono text-xs whitespace-nowrap [position-anchor:--debug-title] [position-visibility:anchors-visible] in-[body:has(#debug-title)]:block!"
+      title="__HTML_BUILD_AT__"
+      >HTML · __HTML_BUILD_LABEL__</span
+    >
   </body>
 </html>

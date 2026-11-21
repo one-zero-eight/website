@@ -5,7 +5,7 @@ import { ExportModal } from "@/components/calendar/ExportModal.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton.tsx";
-import { getICSLink } from "@/api/schedule/links.ts";
+import { getICSLink } from "@/api/schedule/calendars/links.ts";
 import { useState } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { useWindowSize } from "usehooks-ts";
@@ -100,12 +100,14 @@ export function EventGroupPage({ alias }: { alias: string }) {
         </div>
       </div>
       <Calendar
-        urls={[
-          {
-            url: getICSLink(group.alias, scheduleUser?.id),
-            eventGroup: group,
-          },
-        ]}
+        config={{
+          urls: [
+            {
+              url: getICSLink(group.alias, scheduleUser?.id),
+              eventGroup: group,
+            },
+          ],
+        }}
         initialView={
           width
             ? width >= 1280

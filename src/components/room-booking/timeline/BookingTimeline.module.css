@@ -60,6 +60,7 @@
   left: 0;
   width: 100%;
   min-height: calc(var(--header-height) + var(--body-height));
+  padding-bottom: 30px;
 }
 
 .spacer {
@@ -209,7 +210,7 @@
   top: var(--header-height);
   left: var(--sidebar-width);
   width: calc(100% - var(--sidebar-width));
-  height: var(--body-height);
+  height: calc(var(--body-height) + 30px);
   pointer-events: none;
   z-index: 0;
 }
@@ -271,7 +272,7 @@
 .nowRuler {
   z-index: 1;
   position: absolute;
-  height: calc(var(--header-height) + var(--body-height));
+  height: calc(var(--header-height) + var(--body-height) + 30px);
   width: 1px;
   left: calc(var(--sidebar-width) + var(--now-x));
   top: 0;
@@ -294,7 +295,7 @@
   left: calc(var(--sidebar-width) + var(--left));
   top: calc(var(--row-index) * var(--row-height));
   width: var(--width);
-  height: var(--row-height);
+  height: calc(var(--row-height));
 }
 
 .bookingInner {
@@ -458,7 +459,7 @@
   position: absolute;
   top: 0;
   z-index: 1;
-  height: calc(var(--header-height) + var(--body-height));
+  height: calc(var(--header-height) + var(--body-height) + 30px);
   width: 1px;
   background: var(--color-primary);
 }

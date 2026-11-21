@@ -62,7 +62,7 @@ export function isApiHttpError<
   );
 }
 
-function createApiQueryError(body: unknown, response: Response) {
+export function createApiQueryError(body: unknown, response: Response) {
   return {
     body,
     httpCode: response.status,

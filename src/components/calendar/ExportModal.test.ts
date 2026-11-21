@@ -112,10 +112,10 @@ vi.mock("@/components/common/Modal.tsx", () => ({
     open ? createElement("div", { role: "dialog" }, children) : null,
 }));
 vi.mock("@/components/calendar/Calendar.tsx", () => ({
-  Calendar: ({ urls }: { urls: Array<{ url: string }> }) =>
+  Calendar: ({ config }: { config: { urls: Array<{ url: string }> } }) =>
     createElement("div", {
       className: "calendar-preview",
-      "data-urls": urls.map(({ url }) => url).join("|"),
+      "data-urls": config.urls.map(({ url }) => url).join("|"),
     }),
 }));
 vi.mock("@/api/search/links.ts", () => ({

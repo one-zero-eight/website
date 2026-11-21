@@ -4,6 +4,7 @@ import { setupI18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { CalendarViewer } from "./CalendarViewer";
 import { Calendar } from "@fullcalendar/core";
@@ -20,6 +21,32 @@ vi.mock("@/api/events", () => ({ $events: { useQuery: () => ({}) } }));
 vi.mock("@/api/helpers/access-token.ts", () => ({
   getMyAccessToken: () => null,
 }));
+const feedText = vi.hoisted(() => ({ current: "" }));
+vi.mock("@/api/helpers/custom-fetch.ts", () => ({
+  customFetch: {
+    GET: async () => ({ data: feedText.current, response: new Response() }),
+  },
+}));
+const expandedEvents = vi.hoisted(() => [] as Array<Array<any>>);
+vi.mock(
+  "@/api/schedule/calendars/event-source-def.ts",
+  async (importOriginal) => {
+    const original =
+      await importOriginal<
+        typeof import("@/api/schedule/calendars/event-source-def.ts")
+      >();
+    return {
+      ...original,
+      expandICalEvents: (
+        ...args: Parameters<typeof original.expandICalEvents>
+      ) => {
+        const events = original.expandICalEvents(...args);
+        expandedEvents.push(structuredClone(events));
+        return events;
+      },
+    };
+  },
+);
 vi.mock("@/api/search/links.ts", () => ({
   SEARCH_API_URL: "https://api.innohassle.ru/search",
   getMyAssistantCalendarLink: () =>
@@ -81,34 +108,36 @@ async function renderCalendar(
   locale = "en",
   feedUrl = url,
 ) {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async () => new Response(feed)),
-  );
+  feedText.current = feed;
   const i18n = setupI18n({
     locale,
     messages: { en: enMessages, ru: ruMessages },
   });
-  const received = vi.fn();
+  expandedEvents.length = 0;
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   await act(async () => {
     root.render(
       createElement(
-        I18nProvider,
-        { i18n },
-        createElement(CalendarViewer, {
-          urls: [feedUrl],
-          initialView,
-          onEventSourceSuccess: (events, response) => {
-            received(structuredClone(events), response);
-          },
-        }),
+        QueryClientProvider,
+        { client: queryClient },
+        createElement(
+          I18nProvider,
+          { i18n },
+          createElement(CalendarViewer, {
+            config: { urls: [{ url: feedUrl }] },
+            initialView,
+          }),
+        ),
       ),
     );
   });
+  await vi.waitFor(() => expect(expandedEvents.length).toBeGreaterThan(0));
   await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
   });
-  return received;
+  return expandedEvents;
 }
 
 it("retains source uncertainty even when FullCalendar synthesizes a layout end", async () => {
@@ -117,7 +146,7 @@ it("retains source uncertainty even when FullCalendar synthesizes a layout end",
     plugins: [dayGridPlugin],
     forceEventDuration: true,
   });
-  const event = calendar.addEvent(received.mock.calls[0][0][0])!;
+  const event = calendar.addEvent(received[0][0])!;
   expect(event.end).not.toBeNull();
   const i18n = setupI18n({ locale: "en", messages: { en: enMessages } });
   await act(async () =>
@@ -153,18 +182,18 @@ it("preserves explicit durations and recurring missing-end semantics", async () 
       ["UID:date-only", "SUMMARY:Date only", "DTSTART;VALUE=DATE:20260703"],
     ),
   );
-  const events = received.mock.calls[0][0];
+  const events = received.flat();
   expect(
     events.filter((event: { id: string }) => event.id === "unknown"),
   ).toEqual([
     expect.objectContaining({
       start: "2026-07-03T09:00:00",
-      end: null,
+      end: undefined,
       extendedProps: expect.objectContaining({ endUnknown: true }),
     }),
     expect.objectContaining({
       start: "2026-07-04T09:00:00",
-      end: null,
+      end: undefined,
       extendedProps: expect.objectContaining({ endUnknown: true }),
     }),
   ]);
@@ -316,11 +345,9 @@ it("renders the real ICS missing-end event honestly in the list", async () => {
   expect(row!.textContent).toContain("09:00");
   expect(row!.textContent).not.toMatch(/10:00|10:30|Invalid date/);
   expect(
-    received.mock.calls[0][0].find(
-      (event: { id: string }) => event.id === "unknown",
-    ),
+    received.flat().find((event: { id: string }) => event.id === "unknown"),
   ).toMatchObject({
-    end: null,
+    end: undefined,
     extendedProps: { endUnknown: true },
   });
   const knownRow = [...container.querySelectorAll(".fc-list-event")].find(

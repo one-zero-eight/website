@@ -1,7 +1,8 @@
-import { isChecksReturnFrom } from "@/components/schedule-assistant/checks/ReturnToChecksLink.tsx";
-import { CHECKS_RETURN_FROM } from "@/components/schedule-assistant/checks/checksNavigation.ts";
-import { TimetableWorkspace } from "@/components/schedule-assistant/timetable/TimetableWorkspace.tsx";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  CHECKS_RETURN_FROM,
+  isChecksReturnFrom,
+} from "@/components/schedule-assistant/checks/checksNavigation.ts";
+import { createFileRoute } from "@tanstack/react-router";
 
 type SearchParams = {
   meeting?: string | undefined;
@@ -20,26 +21,4 @@ export const Route = createFileRoute("/schedule-assistant/timetable")({
       ? CHECKS_RETURN_FROM
       : undefined,
   }),
-  component: RouteComponent,
 });
-
-function RouteComponent() {
-  const { meeting, from } = Route.useSearch();
-  const navigate = useNavigate({ from: Route.fullPath });
-  const returnFromChecks = from === CHECKS_RETURN_FROM;
-
-  return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <TimetableWorkspace
-        focusMeetingId={meeting}
-        returnFromChecks={returnFromChecks}
-        onFocusMeetingHandled={() =>
-          navigate({
-            search: returnFromChecks ? { from: CHECKS_RETURN_FROM } : {},
-            replace: true,
-          })
-        }
-      />
-    </div>
-  );
-}

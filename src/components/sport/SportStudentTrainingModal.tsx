@@ -114,6 +114,8 @@ export function SportStudentTrainingModal({
   const dailyStart = new Date(`${trainingDay}T00:00:00+03:00`);
   const dailyEnd = new Date(dailyStart.getTime() + 24 * 60 * 60 * 1000);
   const hasEnded = new Date(training.end).getTime() <= Date.now();
+  const isStudent = profile?.student_info != null;
+  const showEarnedHours = hasEnded && isStudent;
   const needsDailySchedule =
     !readOnly && !row.checked_in && !row.can_check_in && !hasEnded;
   const {
@@ -141,7 +143,7 @@ export function SportStudentTrainingModal({
     "get",
     "/students/{student_id}/semester-history",
     { params: { path: { student_id: studentId } } },
-    { enabled: hasEnded },
+    { enabled: showEarnedHours },
   );
   const earnedHours = semesters
     ?.flatMap((semester) => semester.trainings)
@@ -279,9 +281,9 @@ export function SportStudentTrainingModal({
               </dd>
             </div>
           ) : null}
-          {hasEnded && historyPending ? (
+          {showEarnedHours && historyPending ? (
             <div className="skeleton h-10 w-full" />
-          ) : hasEnded && historyError ? (
+          ) : showEarnedHours && historyError ? (
             <div className="text-error">
               <Trans>Earned sport hours could not be loaded.</Trans>
             </div>
@@ -320,6 +322,36 @@ export function SportStudentTrainingModal({
           ) : clubsError ? (
             <div className="text-error">
               <Trans>Club could not be loaded.</Trans>
+            </div>
+          ) : null}
+          {groupPending ? (
+            <div>
+              <dt className="text-base-content/60 font-semibold">
+                <Trans>Trainers</Trans>
+              </dt>
+              <dd className="skeleton h-6 w-full" />
+            </div>
+          ) : group?.trainers.length ? (
+            <div>
+              <dt className="text-base-content/60 font-semibold">
+                <Trans>Trainers</Trans>
+              </dt>
+              <dd className="flex flex-col gap-1">
+                {group.trainers.map((trainer) => (
+                  <span
+                    key={trainer.id}
+                    className="flex flex-wrap items-baseline gap-x-2"
+                  >
+                    <span className="font-medium">{trainer.full_name}</span>
+                    <a
+                      href={`mailto:${trainer.email}`}
+                      className="link link-primary text-sm"
+                    >
+                      {trainer.email}
+                    </a>
+                  </span>
+                ))}
+              </dd>
             </div>
           ) : null}
           {groupPending && !description ? (

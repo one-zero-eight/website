@@ -8,12 +8,14 @@ export function EventsCalendarPage() {
   const { t } = useLingui();
   return (
     <Calendar
-      urls={[
-        {
-          url: getEventsIcsUrl(),
-          sourceLink: "/events",
-        },
-      ]}
+      config={{
+        urls: [
+          {
+            url: getEventsIcsUrl(),
+            sourceLink: "/events",
+          },
+        ],
+      }}
       initialView="eventsCards"
       views={["dayGridMonth", "timeGridWeek"]}
       customViews={[

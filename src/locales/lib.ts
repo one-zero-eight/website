@@ -4,7 +4,6 @@ import "moment/locale/ru.js";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { messages as enMessages } from "./en.po";
-import { messages as pseudoLocaleMessages } from "./pseudo-LOCALE.po";
 import { messages as ruMessages } from "./ru.po";
 
 export const LOCALE_STORAGE_KEY = "locale";
@@ -36,7 +35,6 @@ let isI18nLoaded = false;
 const catalogs: Record<string, Messages> = {
   en: enMessages,
   ru: ruMessages,
-  "pseudo-LOCALE": pseudoLocaleMessages,
 };
 
 const getBrowserLocale = (): Locale => {
@@ -104,6 +102,18 @@ export const initializeI18n = (): Locale => {
 // Activate during module evaluation so ESM imports that call `i18n._` at
 // module scope (before entry-client body runs) already have a locale.
 initializeI18n();
+
+// Pseudo-LOCALE is a development aid for spotting untranslated strings, so its
+// catalog is loaded only in development and is not part of the production build.
+if (import.meta.env.DEV) {
+  void import("./pseudo-LOCALE.po").then(({ messages }) => {
+    catalogs["pseudo-LOCALE"] = messages;
+    loadCatalogs();
+    if (i18n.locale === "pseudo-LOCALE") {
+      activateLocale("pseudo-LOCALE");
+    }
+  });
+}
 
 if (import.meta.hot) {
   import.meta.hot.accept(

@@ -11,7 +11,7 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "tests/service-worker/**/*.test.ts"],
     setupFiles: ["src/test/setupI18n.ts"],
     exclude: ["src/components/dashboard/links/searchUtils.test.ts"],
   },

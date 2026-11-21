@@ -8,10 +8,17 @@ import { Trans, useLingui } from "@lingui/react/macro";
 
 export const Route = createFileRoute("/_with_menu/board-games/")({
   component: RouteComponent,
+  validateSearch: (search: Record<string, unknown>): { gameId?: string } => ({
+    gameId:
+      typeof search.gameId === "string" && search.gameId
+        ? search.gameId
+        : undefined,
+  }),
 });
 
 function RouteComponent() {
   const { t } = useLingui();
+  const { gameId } = Route.useSearch();
   return (
     <>
       <Helmet>
@@ -25,7 +32,7 @@ function RouteComponent() {
       <Topbar title={<Trans>Board Games</Trans>} />
       <BoardGamesTabs />
       <RequireAuth>
-        <BoardGamesPage />
+        <BoardGamesPage gameId={gameId} />
       </RequireAuth>
     </>
   );
