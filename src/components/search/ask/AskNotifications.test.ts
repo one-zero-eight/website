@@ -130,6 +130,7 @@ describe("reply notifications", () => {
         "cAtIx replied",
         expect.objectContaining({
           body: "Open the chat to read the reply.",
+          icon: "/catix-cat-192.png",
           tag: "catix-answer-chat-1",
           data: { kind: "catix-answer", chatId: "chat-1" },
         }),

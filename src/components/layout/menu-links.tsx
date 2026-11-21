@@ -26,6 +26,7 @@
  *   ]),
  */
 import { accountsTypes } from "@/api/accounts";
+import { CatIcon } from "@/components/icons/CatIcon";
 import { ValidateLinkOptions } from "@tanstack/react-router";
 
 export type LocalLink = {
@@ -94,11 +95,7 @@ export const items: ItemType[] = [
           DEV
         </span>
       ),
-      icon: (
-        <span className="inline-flex size-6 items-center justify-center text-base leading-none">
-          🐱
-        </span>
-      ),
+      icon: <CatIcon />,
     },
     { type: "separator" },
   ]),

@@ -19,6 +19,7 @@ import {
   setDraftAttachments,
   useAskSession,
 } from "./ask-session";
+import { CatIcon } from "@/components/icons/CatIcon";
 import {
   SEARCH_COMMANDS,
   conversationQuestions,
@@ -202,12 +203,10 @@ export function AskPage({
           <div className="mx-auto flex w-full max-w-4xl grow flex-col gap-4 p-4">
             {isEmpty && (
               <div className="flex grow flex-col items-center justify-center gap-2 text-center">
-                <span
+                <CatIcon
                   title="cAtIx"
-                  className="text-5xl [filter:grayscale(1)_sepia(1)_saturate(4)]"
-                >
-                  🐱
-                </span>
+                  className="size-12 [filter:grayscale(1)_sepia(1)_saturate(4)]"
+                />
                 <span className="text-base-content/70">
                   <Trans>
                     I can help with your schedule, university rules,
@@ -305,9 +304,7 @@ export function AskPage({
 
             {isPending && (
               <div className="flex max-w-full min-w-0 items-end gap-2 self-start">
-                <span aria-hidden="true" className="shrink-0 text-2xl">
-                  🐱
-                </span>
+                <CatIcon />
                 <div className="border-base-300 bg-base-200 text-base-content rounded-field flex min-w-0 flex-col gap-2 border! px-4 py-2 wrap-anywhere">
                   {answerText && <AskAnswerBody text={answerText} />}
                   <div className="text-base-content/70 flex text-sm">
