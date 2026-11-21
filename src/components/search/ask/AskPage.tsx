@@ -384,7 +384,8 @@ function UserMessage({
 }) {
   const { quote, rest } = splitQuote(text);
   return (
-    <div className="bg-primary text-primary-content rounded-field max-w-[80%] min-w-0 self-end rounded-br-none px-4 py-2 wrap-anywhere whitespace-pre-wrap">
+    // The global selection colour is the primary one, invisible on this primary background
+    <div className="bg-primary text-primary-content selection:bg-primary-content/30 rounded-field max-w-[80%] min-w-0 self-end rounded-br-none px-4 py-2 wrap-anywhere whitespace-pre-wrap">
       {quote && (
         <div className="border-primary-content/40 text-primary-content/70 mb-2 border-l-2 pl-2 text-sm">
           {quote}
