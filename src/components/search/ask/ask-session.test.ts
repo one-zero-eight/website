@@ -1,7 +1,15 @@
 import type { searchTypes } from "@/api/search";
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  onTestFinished,
+  vi,
+} from "vitest";
 
 const api = vi.hoisted(() => ({
   post: vi.fn(),
@@ -271,7 +279,7 @@ describe("ask session attachments", () => {
           await act(async () => {
             pending = session.askQuestion("Read it");
           });
-          act(() => session.startNewChat());
+          act(() => session.cancelQuestion());
           await act(async () => {
             finish({
               data: stream([["done", answer]]),
@@ -364,7 +372,7 @@ describe("ask session attachments", () => {
     expect(api.post.mock.calls[1][1].body.chat_id).toBe("chat-1");
     expect(api.post.mock.calls[1][1].body.attachment_ids).toEqual([info.id]);
   });
-  it("ignores old stream events after switching to a new chat", async () => {
+  it("lets an answer finish in the background after switching to a new chat, without touching the new chat", async () => {
     let controller!: ReadableStreamDefaultController<Uint8Array>;
     api.post.mockResolvedValueOnce({
       response: new Response(),
@@ -374,6 +382,11 @@ describe("ask session attachments", () => {
         },
       }),
     });
+    const completed = vi.fn();
+    window.addEventListener("catix-answer-ready", completed);
+    onTestFinished(() =>
+      window.removeEventListener("catix-answer-ready", completed),
+    );
     let request!: Promise<void>;
     await act(async () => {
       request = session.askQuestion("Read it", [info]);
@@ -392,7 +405,9 @@ describe("ask session attachments", () => {
     expect(snapshot.messages).toEqual([]);
     expect(snapshot.draftAttachments).toEqual([]);
     expect(snapshot.draftQuery).toBe("");
-    expect(api.invalidate).not.toHaveBeenCalled();
+    expect(snapshot.isPending).toBe(false);
+    expect(completed).toHaveBeenCalledOnce();
+    expect(completed.mock.calls[0][0].detail.chatId).toBe("chat-1");
   });
   it("retains the server chat and draft attachments after a streamed failure for retry", async () => {
     api.post.mockResolvedValueOnce({

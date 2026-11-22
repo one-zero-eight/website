@@ -58,7 +58,7 @@ function announceAnswer(response: searchTypes.SchemaAskResponses) {
   window.dispatchEvent(
     new CustomEvent<AskAnswerReady>(askAnswerReadyEvent, {
       detail: {
-        chatId: session.chatId,
+        chatId: response.chat_id ?? null,
         needsApproval: !!response.approval,
       },
     }),
@@ -134,12 +134,19 @@ let session: AskSession = {
   openingError: null,
 };
 let abortController: AbortController | null = null;
+// The answers of the chats the user left meanwhile: they are written on the server (the chat list shows them), the page
+// does not follow them any more
+const detached = new WeakSet<AbortSignal>();
 const listeners = new Set<() => void>();
 
 function update(patch: Partial<AskSession>) {
   session = { ...session, ...patch };
   persist();
   listeners.forEach((listener) => listener());
+}
+
+function updateIfShown(signal: AbortSignal, patch: Partial<AskSession>) {
+  if (!detached.has(signal)) update(patch);
 }
 
 function persist() {
@@ -307,7 +314,7 @@ async function readAnswer(
     for (const block of blocks) {
       const event = parseEvent(block);
       if (event?.name === "chat") {
-        update({
+        updateIfShown(signal, {
           chatId: event.data.chat_id,
           draftAttachments:
             session.messages.at(-1)?.role === "user"
@@ -324,9 +331,9 @@ async function readAnswer(
       } else if (event?.name === "cancelled") {
         return undefined;
       } else if (event?.name === "status") {
-        update({ status: event.data.text });
+        updateIfShown(signal, { status: event.data.text });
       } else if (event?.name === "answer") {
-        update({ answerText: event.data.text });
+        updateIfShown(signal, { answerText: event.data.text });
       } else if (event?.name === "error") {
         throw event.data.code === "llm_unavailable"
           ? new AssistantUnavailableError(event.data.detail)
@@ -405,7 +412,9 @@ export async function askQuestion(
         session.chatId,
         controller.signal,
       );
-      if (!controller.signal.aborted) keepSearch(response);
+      if (!controller.signal.aborted && !detached.has(controller.signal)) {
+        keepSearch(response);
+      }
       return;
     }
     let response: searchTypes.SchemaAskResponses | undefined;
@@ -425,17 +434,17 @@ export async function askQuestion(
         session.chatId,
         controller.signal,
       );
-      if (!controller.signal.aborted) {
+      if (!controller.signal.aborted && !detached.has(controller.signal)) {
         keepSearch(response, { assistantUnavailable: true });
       }
       return;
     }
     if (!controller.signal.aborted && !response) {
-      cancelQuestion();
+      if (!detached.has(controller.signal)) cancelQuestion();
       return;
     }
     if (response && !controller.signal.aborted) {
-      update({
+      updateIfShown(controller.signal, {
         messages: [...session.messages, { role: "assistant", response }],
         chatId: response.chat_id ?? null,
         draftAttachments: [],
@@ -448,7 +457,9 @@ export async function askQuestion(
     }
   } catch (e) {
     if (!controller.signal.aborted) {
-      update({ error: e instanceof Error ? e : new Error(String(e)) });
+      updateIfShown(controller.signal, {
+        error: e instanceof Error ? e : new Error(String(e)),
+      });
     }
   } finally {
     if (abortController === controller) {
@@ -484,13 +495,15 @@ export async function decideApproval(decision: "approve" | "reject") {
       },
       controller.signal,
     );
-    if (response && !controller.signal.aborted && session.chatId === chatId) {
-      update({
-        messages: [
-          ...session.messages.slice(0, -1),
-          { role: "assistant", response },
-        ],
-      });
+    if (response && !controller.signal.aborted) {
+      if (!detached.has(controller.signal) && session.chatId === chatId) {
+        update({
+          messages: [
+            ...session.messages.slice(0, -1),
+            { role: "assistant", response },
+          ],
+        });
+      }
       announceAnswer(response);
       queryClient.invalidateQueries({
         queryKey: $search.queryOptions("get", "/ask/chats").queryKey,
@@ -498,7 +511,9 @@ export async function decideApproval(decision: "approve" | "reject") {
     }
   } catch (e) {
     if (!controller.signal.aborted) {
-      update({ error: e instanceof Error ? e : new Error(String(e)) });
+      updateIfShown(controller.signal, {
+        error: e instanceof Error ? e : new Error(String(e)),
+      });
     }
   } finally {
     if (abortController === controller) {
@@ -525,9 +540,22 @@ export function cancelQuestion(): string {
   return question;
 }
 
+// Leaving the chat does not stop the answer: it is finished on the server and announced, the page shows another chat
+function leaveChat() {
+  if (!abortController) return;
+  detached.add(abortController.signal);
+  abortController = null;
+  update({
+    isPending: false,
+    answerText: "",
+    status: "",
+    error: null,
+  });
+}
+
 // A new conversation: the assistant does not see the earlier questions any more
 export function startNewChat() {
-  cancelQuestion();
+  leaveChat();
   update({
     messages: [],
     chatId: null,
@@ -560,7 +588,7 @@ export async function openChat(chatId: string) {
   ) {
     return;
   }
-  if (!sameChat || session.isPending) cancelQuestion();
+  leaveChat();
   update({
     messages: [],
     chatId,
