@@ -5,7 +5,6 @@ import { I18nProvider } from "@lingui/react";
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AskAnswerBody } from "./AskAnswerBody";
 import { AskResult } from "./AskResult";
 import { decideApproval } from "./ask-session";
 
@@ -305,13 +304,12 @@ describe("AskResult approval context", () => {
     expect(container.querySelector("button")).toBeNull();
   });
 
-  it("shows answer pictures without referrer and a source's pictures as thumbnails", () => {
+  it("shows a source's pictures as thumbnails without referrer", () => {
     render({
       response: {
         ...response,
         approval: null,
-        answer:
-          "Журнал [1].\n\n![Log](https://innohassle.ru/music-room-log.webp)",
+        answer: "Журнал [1].",
         sources: [
           {
             number: 1,
@@ -334,29 +332,16 @@ describe("AskResult approval context", () => {
     });
     const images = Array.from(container.querySelectorAll("img"));
     expect(images.map((img) => img.getAttribute("src"))).toEqual([
-      "https://innohassle.ru/music-room-log.webp",
       "https://innohassle.ru/music-room-intro.webp",
     ]);
     for (const img of images) {
       expect(img.getAttribute("referrerpolicy")).toBe("no-referrer");
       expect(img.getAttribute("loading")).toBe("lazy");
     }
-    expect(container.querySelector("ol li img")).toBe(images[1]);
+    expect(container.querySelector("ol li img")).toBe(images[0]);
     act(() => {
       images[0].dispatchEvent(new Event("error"));
     });
-    expect(container.querySelectorAll("img")).toHaveLength(1);
-  });
-
-  it("shows no pictures of an answer that is still streaming", () => {
-    act(() => {
-      root.render(
-        createElement(AskAnswerBody, {
-          text: "![Log](https://innohassle.ru/music-room-log.webp)",
-          showImages: false,
-        }),
-      );
-    });
-    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelectorAll("img")).toHaveLength(0);
   });
 });

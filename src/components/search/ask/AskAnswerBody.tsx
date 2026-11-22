@@ -3,7 +3,6 @@ import Markdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
-import { AskImage } from "./AskImage";
 
 /** Models often write math as \(...\) and \[...\]; remark-math understands only $...$ and $$...$$. */
 function normalizeMathDelimiters(text: string) {
@@ -22,10 +21,8 @@ type MarkdownNode = {
 export function AskAnswerBody({
   text,
   citationTargets,
-  showImages = true,
 }: {
   text: string;
-  showImages?: boolean;
   citationTargets?: ReadonlyMap<number, string>;
 }) {
   function linkCitations() {
@@ -92,10 +89,7 @@ export function AskAnswerBody({
           ) : (
             <>{children}</>
           ),
-        img: ({ src, alt }) =>
-          showImages && typeof src === "string" ? (
-            <AskImage src={src} alt={alt ?? ""} />
-          ) : null,
+        img: () => null, // (an answer has no pictures: the sources do)
         p: ({ children }) => <p className="whitespace-pre-wrap">{children}</p>,
         pre: ({ children }) => (
           <pre className="max-w-full overflow-x-auto">{children}</pre>
