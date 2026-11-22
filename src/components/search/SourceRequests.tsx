@@ -46,7 +46,7 @@ export function SourceRequests() {
         className="btn btn-ghost btn-sm"
         onClick={() => setOpen(true)}
       >
-        <span className="icon-[material-symbols--add-circle-outline] text-lg" />
+        <span className="icon-[material-symbols--chat-add-on-outline] text-lg" />
         <Trans>Propose a chat</Trans>
       </button>
       <Modal

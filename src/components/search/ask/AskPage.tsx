@@ -20,6 +20,7 @@ import {
   enqueueQuestion,
   setDraftQuery,
   setDraftAttachments,
+  startNewChat,
   useAskSession,
 } from "./ask-session";
 import { CatIcon } from "@/components/icons/CatIcon";
@@ -148,7 +149,8 @@ export function AskPage({
 
   return (
     <div className="flex min-h-0 grow">
-      <aside className="border-base-300 hidden w-64 shrink-0 flex-col overflow-y-auto border-r p-2 @4xl/content:flex">
+      <aside className="border-base-300 hidden w-64 shrink-0 flex-col gap-1 overflow-y-auto border-r p-2 @4xl/content:flex">
+        <NewChatButton className="w-full justify-start" />
         <AskChatList />
       </aside>
 
@@ -193,6 +195,7 @@ export function AskPage({
                 }
               />
             </button>
+            <NewChatButton />
           </div>
           {isChatListOpen && (
             <div className="max-h-64 overflow-y-auto pt-2">
@@ -382,6 +385,20 @@ export function AskPage({
         </div>
       </div>
     </div>
+  );
+}
+
+// Starts a conversation in which the assistant does not see the earlier questions
+function NewChatButton({ className }: { className?: string }) {
+  return (
+    <button
+      type="button"
+      className={cn("btn btn-ghost btn-sm", className)}
+      onClick={startNewChat}
+    >
+      <span className="icon-[material-symbols--add-rounded] text-lg" />
+      <Trans>New</Trans>
+    </button>
   );
 }
 
