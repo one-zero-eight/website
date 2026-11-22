@@ -93,6 +93,11 @@ export function AskAnswerBody({
         pre: ({ children }) => (
           <pre className="max-w-full overflow-x-auto">{children}</pre>
         ),
+        table: ({ children }) => (
+          <div className="max-w-full overflow-x-auto">
+            <table className="table-sm table w-auto">{children}</table>
+          </div>
+        ),
         li: ({ children }) => <li className="ml-5 list-disc">{children}</li>,
       }}
     >
