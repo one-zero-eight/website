@@ -1,3 +1,5 @@
+import { $search } from "@/api/search";
+import { useAskSession } from "@/components/search/ask/ask-session";
 import { useLingui } from "@lingui/react/macro";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { AskPage } from "@/components/search/ask/AskPage";
@@ -29,10 +31,13 @@ function RouteComponent() {
   const { t } = useLingui();
   const { q, chat } = Route.useSearch();
   const navigate = Route.useNavigate();
+  const { chatId } = useAskSession();
+  const { data: chats } = $search.useQuery("get", "/ask/chats");
+  const chatTitle = chats?.find((chat) => chat.chat_id === chatId)?.title;
   return (
     <Suspense>
       <Helmet>
-        <title>🐱 catix</title>
+        <title>{chatTitle ?? "catix"}</title>
         <meta
           name="description"
           content={t`Ask questions or find answers at Innopolis University.`}
