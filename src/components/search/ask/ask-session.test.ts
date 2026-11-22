@@ -163,6 +163,44 @@ describe("ask session attachments", () => {
       window.removeEventListener("catix-answer-ready", completed);
     }
   });
+  it("asks the queued questions one after another once the answer is ready, skipping the removed one", async () => {
+    let finishFirst!: () => void;
+    api.post.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishFirst = () =>
+            resolve({
+              response: new Response(),
+              data: stream([["done", answer]]),
+            });
+        }),
+    );
+    let first!: Promise<void>;
+    act(() => {
+      first = session.askQuestion("First");
+    });
+    await vi.waitFor(() => expect(api.post).toHaveBeenCalledTimes(1));
+    act(() => {
+      session.enqueueQuestion("Removed");
+      session.enqueueQuestion("Second");
+      session.enqueueQuestion("Third");
+    });
+    act(() => session.dequeueQuestion(0));
+    expect(snapshot.queue).toEqual(["Second", "Third"]);
+    api.post.mockImplementation(async () => ({
+      response: new Response(),
+      data: stream([["done", answer]]),
+    }));
+    await act(async () => {
+      finishFirst();
+      await first;
+    });
+    await vi.waitFor(() => expect(api.post).toHaveBeenCalledTimes(3));
+    expect(
+      api.post.mock.calls.map(([, options]) => options.body.query),
+    ).toEqual(["First", "Second", "Third"]);
+    expect(snapshot.queue).toEqual([]);
+  });
   it("does not bind an unsent draft when an approval stream identifies its chat", async () => {
     const waiting = { ...answer, approval: { id: "approval-1", actions: [] } };
     api.history.mockResolvedValueOnce({ answers: [], waiting });

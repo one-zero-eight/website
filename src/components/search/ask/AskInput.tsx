@@ -149,12 +149,7 @@ export function AskInput({
     }
   };
   const handleSend = () => {
-    if (
-      isPending ||
-      busy.current ||
-      removing ||
-      (!text.trim() && !attachments.length)
-    )
+    if (busy.current || removing || (!text.trim() && !attachments.length))
       return;
     onSend(text.trim() || t`What is in the attached file?`);
   };
@@ -325,7 +320,7 @@ export function AskInput({
             }}
           />
         </div>
-        {isPending ? (
+        {isPending && !text.trim() ? (
           <button
             type="button"
             className="btn btn-circle btn-sm btn-neutral"
@@ -338,7 +333,7 @@ export function AskInput({
           <button
             type="button"
             className="btn btn-circle btn-sm btn-primary"
-            title={t`Send`}
+            title={isPending ? t`Send after the answer` : t`Send`}
             disabled={
               (!text.trim() && !attachments.length) ||
               uploading.length > 0 ||

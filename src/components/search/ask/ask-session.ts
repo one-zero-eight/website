@@ -71,6 +71,8 @@ type AskSession = {
   draftQuery: string;
   draftAttachments: DraftAttachment[];
   composerId: number;
+  // Questions written while an answer is being written: each is asked when the answer before it is ready
+  queue: string[];
   // The answer being written and what the assistant is doing meanwhile
   answerText: string;
   status: string;
@@ -122,6 +124,7 @@ let session: AskSession = {
   draftQuery: saved.draftQuery ?? "",
   draftAttachments: saved.draftAttachments ?? [],
   composerId: 0,
+  queue: [],
   answerText: "",
   status: "",
   isPending: false,
@@ -170,6 +173,23 @@ export function useAskSession() {
 
 export function setDraftQuery(draftQuery: string) {
   update({ draftQuery });
+}
+
+// The question waits for the answer in progress; the draft box is free for the next one
+export function enqueueQuestion(query: string) {
+  update({ queue: [...session.queue, query], draftQuery: "" });
+}
+
+export function dequeueQuestion(index: number) {
+  update({ queue: session.queue.filter((_, i) => i !== index) });
+}
+
+// Asks the first of the waiting questions, after an answer that went well
+function askNextQueued() {
+  const [next, ...rest] = session.queue;
+  if (next === undefined || session.error) return;
+  update({ queue: rest });
+  void askQuestion(next);
 }
 
 export function setDraftAttachments(
@@ -439,6 +459,7 @@ export async function askQuestion(
           ? session.draftQuery || query
           : session.draftQuery,
       });
+      askNextQueued();
     }
   }
 }
@@ -483,6 +504,7 @@ export async function decideApproval(decision: "approve" | "reject") {
     if (abortController === controller) {
       abortController = null;
       update({ isPending: false });
+      askNextQueued();
     }
   }
 }
@@ -509,6 +531,7 @@ export function startNewChat() {
   update({
     messages: [],
     chatId: null,
+    queue: [],
     composerId: session.composerId + 1,
     draftQuery: "",
     draftAttachments: [],
@@ -542,6 +565,7 @@ export async function openChat(chatId: string) {
   update({
     messages: [],
     chatId,
+    queue: sameChat ? session.queue : [],
     composerId: sameChat ? session.composerId : session.composerId + 1,
     draftQuery: sameChat ? session.draftQuery : "",
     draftAttachments: sameChat ? session.draftAttachments : [],

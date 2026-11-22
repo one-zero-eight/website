@@ -1,5 +1,6 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import type { searchTypes } from "@/api/search";
+import { cn } from "@/lib/ui/cn";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo, useRef, useState } from "react";
 import AnimatedDots from "@/components/search/AnimatedDots";
@@ -15,6 +16,8 @@ import {
   askQuestion,
   openChat,
   cancelQuestion,
+  dequeueQuestion,
+  enqueueQuestion,
   setDraftQuery,
   setDraftAttachments,
   useAskSession,
@@ -53,6 +56,7 @@ export function AskPage({
   const {
     messages,
     chatId,
+    queue,
     answerText,
     status,
     isPending,
@@ -132,7 +136,9 @@ export function AskPage({
   const handleSend = (query: string) => {
     isFollowing.current = true;
 
-    askQuestion(quote ? `${asQuote(quote)}\n\n${query}` : query);
+    const fullQuery = quote ? `${asQuote(quote)}\n\n${query}` : query;
+    if (isPending) enqueueQuestion(fullQuery);
+    else askQuestion(fullQuery);
     setQuote("");
   };
 
@@ -317,6 +323,13 @@ export function AskPage({
                 </div>
               </div>
             )}
+            {queue.map((question, i) => (
+              <UserMessage
+                key={`${chatId}:queue:${i}`}
+                text={question}
+                onRemove={() => dequeueQuestion(i)}
+              />
+            ))}
             {!isPending && error && (
               <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">
                 <span>
@@ -375,26 +388,47 @@ export function AskPage({
 function UserMessage({
   text,
   attachments,
+  onRemove,
 }: {
   text: string;
   attachments?: searchTypes.SchemaAttachmentInfo[];
+  // A question waiting in the queue can be taken out of it
+  onRemove?: () => void;
 }) {
+  const { t } = useLingui();
   const { quote, rest } = splitQuote(text);
   return (
     // The global selection colour is the primary one, invisible on this primary background
-    <div className="bg-primary text-primary-content selection:bg-primary-content/30 rounded-field max-w-[80%] min-w-0 self-end rounded-br-none px-4 py-2 wrap-anywhere whitespace-pre-wrap">
-      {quote && (
-        <div className="border-primary-content/40 text-primary-content/70 mb-2 border-l-2 pl-2 text-sm">
-          {quote}
-        </div>
+    <div
+      className={cn(
+        "bg-primary text-primary-content selection:bg-primary-content/30 rounded-field max-w-[80%] min-w-0 self-end rounded-br-none px-4 py-2 wrap-anywhere whitespace-pre-wrap",
+        onRemove && "flex items-start gap-2 opacity-60",
       )}
-      {rest}
-      {attachments && attachments.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-2">
-          {attachments.map((attachment) => (
-            <AskAttachment key={attachment.id} attachment={attachment} />
-          ))}
-        </div>
+    >
+      <div className="min-w-0 grow">
+        {quote && (
+          <div className="border-primary-content/40 text-primary-content/70 mb-2 border-l-2 pl-2 text-sm">
+            {quote}
+          </div>
+        )}
+        {rest}
+        {attachments && attachments.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {attachments.map((attachment) => (
+              <AskAttachment key={attachment.id} attachment={attachment} />
+            ))}
+          </div>
+        )}
+      </div>
+      {onRemove && (
+        <button
+          type="button"
+          className="btn btn-ghost btn-circle btn-xs"
+          title={t`Remove from the queue`}
+          onClick={onRemove}
+        >
+          <span className="icon-[material-symbols--close-rounded]" />
+        </button>
       )}
     </div>
   );

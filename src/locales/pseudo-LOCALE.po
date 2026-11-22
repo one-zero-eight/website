@@ -959,7 +959,7 @@ msgid "All cAtIx users"
 msgstr ""
 
 #: src/components/calendar/CalendarEventPopover.tsx:162
-#: src/components/calendar/CalendarViewer.tsx:488
+#: src/components/calendar/CalendarViewer.tsx:451
 #: src/components/search/ask/AskSignupOffers.tsx:233
 msgid "All day"
 msgstr ""
@@ -1136,11 +1136,11 @@ msgstr ""
 #~ msgid "Ask"
 #~ msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:290
+#: src/components/search/ask/AskInput.tsx:285
 msgid "Ask a question..."
 msgstr ""
 
-#: src/app/routes/_with_menu/search/ask.tsx:38
+#: src/app/routes/_with_menu/search/ask.tsx:43
 msgid "Ask questions or find answers at Innopolis University."
 msgstr ""
 
@@ -1152,7 +1152,7 @@ msgstr ""
 msgid "Attach file"
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:268
+#: src/components/search/ask/AskInput.tsx:263
 msgid "Attach files"
 msgstr ""
 
@@ -1676,8 +1676,8 @@ msgstr ""
 msgid "Cancel this match"
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:219
-#: src/components/search/ask/AskInput.tsx:227
+#: src/components/search/ask/AskInput.tsx:214
+#: src/components/search/ask/AskInput.tsx:222
 msgid "Cancel upload"
 msgstr ""
 
@@ -1817,7 +1817,7 @@ msgstr ""
 msgid "Chat sources"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:180
+#: src/components/search/ask/AskPage.tsx:187
 msgid "Chats"
 msgstr ""
 
@@ -2047,10 +2047,10 @@ msgid "Click to upload or paste an image"
 msgstr ""
 
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
-#: src/components/search/ask/AskInput.tsx:200
-#: src/components/search/ask/AskInput.tsx:201
-#: src/components/search/ask/AskPage.tsx:163
-#: src/components/search/ask/AskPage.tsx:164
+#: src/components/search/ask/AskInput.tsx:195
+#: src/components/search/ask/AskInput.tsx:196
+#: src/components/search/ask/AskPage.tsx:170
+#: src/components/search/ask/AskPage.tsx:171
 #: src/components/search/IframePreviewCard.tsx:111
 #: src/components/sport/SportOverviewSection.tsx:719
 #: src/components/sport/SportStudentTrainingModal.tsx:394
@@ -2482,7 +2482,7 @@ msgstr ""
 msgid "Could not check access"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:326
+#: src/components/search/ask/AskPage.tsx:336
 msgid "Could not complete the request."
 msgstr ""
 
@@ -2563,7 +2563,7 @@ msgstr ""
 msgid "Could not mark attendance"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:267
+#: src/components/search/ask/AskPage.tsx:272
 msgid "Could not open the chat"
 msgstr ""
 
@@ -4620,7 +4620,7 @@ msgstr ""
 msgid "HTML and App build IDs match."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:212
+#: src/components/search/ask/AskPage.tsx:217
 msgid "I can help with your schedule, university rules, announcements and available rooms."
 msgstr ""
 
@@ -7267,7 +7267,7 @@ msgstr ""
 msgid "Receive a monthly stipend from IU alumni"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:316
+#: src/components/search/ask/AskPage.tsx:319
 msgid "Receiving answer"
 msgstr ""
 
@@ -7424,7 +7424,7 @@ msgstr ""
 msgid "Remove {participantName} from the meeting?"
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:246
+#: src/components/search/ask/AskInput.tsx:241
 msgid "Remove attachment"
 msgstr ""
 
@@ -7438,6 +7438,10 @@ msgstr ""
 
 #: src/components/events/event/EventPage.tsx:312
 msgid "Remove from calendar"
+msgstr ""
+
+#: src/components/search/ask/AskPage.tsx:427
+msgid "Remove from the queue"
 msgstr ""
 
 #: src/components/tabletennis/ValidationMatches.tsx:527
@@ -7667,7 +7671,7 @@ msgstr ""
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/search/ask/AskChatList.tsx:47
-#: src/components/search/ask/AskPage.tsx:277
+#: src/components/search/ask/AskPage.tsx:282
 #: src/components/search/ask/AskSources.tsx:74
 #: src/components/sport/SportStudentTrainingModal.tsx:445
 #: src/components/sport/SportStudentTrainingModal.tsx:494
@@ -8287,11 +8291,15 @@ msgid "Semestral Budget"
 msgstr ""
 
 #: src/components/search/ask/AskFeedback.tsx:116
-#: src/components/search/ask/AskInput.tsx:341
+#: src/components/search/ask/AskInput.tsx:336
 msgid "Send"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:316
+#: src/components/search/ask/AskInput.tsx:336
+msgid "Send after the answer"
+msgstr ""
+
+#: src/components/search/ask/AskPage.tsx:319
 msgid "Sending request"
 msgstr ""
 
@@ -8909,7 +8917,7 @@ msgstr ""
 msgid "Step 5: Fill Registration Form"
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:332
+#: src/components/search/ask/AskInput.tsx:327
 #: src/components/timer/TimerPage.tsx:315
 msgid "Stop"
 msgstr ""
@@ -9329,15 +9337,15 @@ msgstr ""
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:341
+#: src/components/search/ask/AskPage.tsx:351
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:249
+#: src/components/search/ask/AskPage.tsx:254
 msgid "The assistant asks for confirmation before changing data in services."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:156
+#: src/components/search/ask/AskPage.tsx:163
 msgid "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 msgstr ""
 
@@ -9369,7 +9377,7 @@ msgstr ""
 msgid "The club manager collects orders from the club leaders in advance, and later makes a purchase in the form of an official order"
 msgstr ""
 
-#: src/components/search/ask/ask-session.ts:320
+#: src/components/search/ask/ask-session.ts:340
 msgid "The connection ended before the response was complete."
 msgstr ""
 
@@ -9473,8 +9481,8 @@ msgstr ""
 #~ msgid "The series window does not overlap the selected groups' teaching period."
 #~ msgstr ""
 
-#: src/components/search/ask/ask-session.ts:236
-#: src/components/search/ask/ask-session.ts:268
+#: src/components/search/ask/ask-session.ts:256
+#: src/components/search/ask/ask-session.ts:288
 msgid "The server returned no answer stream."
 msgstr ""
 
@@ -9809,7 +9817,7 @@ msgstr ""
 msgid "To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:243
+#: src/components/search/ask/AskPage.tsx:248
 msgid "To search without the assistant, start a message with /search or /поиск."
 msgstr ""
 
@@ -10496,7 +10504,7 @@ msgstr ""
 msgid "Week"
 msgstr ""
 
-#: src/components/calendar/CalendarViewer.tsx:468
+#: src/components/calendar/CalendarViewer.tsx:469
 #: src/components/calendar/CalendarViewer.tsx:524
 #: src/components/sport/SportTrainingsCalendarList.tsx:372
 msgid "Week {week}"
@@ -10546,7 +10554,7 @@ msgstr ""
 msgid "What did you like?"
 msgstr ""
 
-#: src/components/search/ask/AskInput.tsx:159
+#: src/components/search/ask/AskInput.tsx:154
 msgid "What is in the attached file?"
 msgstr ""
 
@@ -10693,7 +10701,7 @@ msgstr ""
 msgid "Write something…"
 msgstr ""
 
-#: src/components/search/ask/ask-session.ts:380
+#: src/components/search/ask/ask-session.ts:400
 msgid "Write what to search for after /search."
 msgstr ""
 
@@ -10798,7 +10806,7 @@ msgstr ""
 msgid "You can attach up to 3 files."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:237
+#: src/components/search/ask/AskPage.tsx:242
 msgid "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
 msgstr ""
 
@@ -10914,7 +10922,7 @@ msgstr ""
 msgid "Your document was sent to the printer"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:333
+#: src/components/search/ask/AskPage.tsx:343
 msgid "Your draft is below. You can edit it and send it again."
 msgstr ""
 
