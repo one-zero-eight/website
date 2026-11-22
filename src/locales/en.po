@@ -40,7 +40,7 @@ msgstr " (capacity: {capacity} people)"
 #~ msgid "- Executing"
 #~ msgstr "- Executing"
 
-#: src/components/search/ask/AskResult.tsx:93
+#: src/components/search/ask/AskResult.tsx:94
 msgid "- Sorry, I can't help you with this question."
 msgstr "- Sorry, I can't help you with this question."
 
@@ -1332,7 +1332,7 @@ msgstr "Banned"
 msgid "banned {bannedAt}"
 msgstr "banned {bannedAt}"
 
-#: src/components/search/ask/AskResult.tsx:184
+#: src/components/search/ask/AskResult.tsx:185
 msgid "Based on:"
 msgstr "Based on:"
 
@@ -1832,11 +1832,11 @@ msgid "Channel"
 msgstr "Channel"
 
 #: src/components/clubs/constants.ts:85
-#: src/components/search/ask/AskResult.tsx:362
+#: src/components/search/ask/AskResult.tsx:375
 msgid "Chat"
 msgstr "Chat"
 
-#: src/components/search/ask/AskChatList.tsx:170
+#: src/components/search/ask/AskChatList.tsx:166
 msgid "Chat name"
 msgstr "Chat name"
 
@@ -2045,7 +2045,7 @@ msgstr "Class dates: {previewDates}."
 msgid "Classes this semester"
 msgstr "Classes this semester"
 
-#: src/components/search/ask/AskResult.tsx:174
+#: src/components/search/ask/AskResult.tsx:175
 msgid "Clauses:"
 msgstr "Clauses:"
 
@@ -2519,7 +2519,7 @@ msgstr "Could not book"
 msgid "Could not check access"
 msgstr "Could not check access"
 
-#: src/components/search/ask/AskPage.tsx:374
+#: src/components/search/ask/AskPage.tsx:376
 msgid "Could not complete the request."
 msgstr "Could not complete the request."
 
@@ -2540,7 +2540,7 @@ msgstr "Could not delete game"
 msgid "Could not delete reservation"
 msgstr "Could not delete reservation"
 
-#: src/components/search/ask/AskChatList.tsx:134
+#: src/components/search/ask/AskChatList.tsx:130
 msgid "Could not delete the chat"
 msgstr "Could not delete the chat"
 
@@ -2608,7 +2608,7 @@ msgstr "Could not open the chat"
 msgid "Could not open this archive document. It may be missing or changed."
 msgstr "Could not open this archive document. It may be missing or changed."
 
-#: src/components/search/ask/AskChatList.tsx:113
+#: src/components/search/ask/AskChatList.tsx:109
 msgid "Could not rename the chat"
 msgstr "Could not rename the chat"
 
@@ -2991,7 +2991,7 @@ msgstr "Define rules for your room"
 #: src/components/guard/FileDetails.tsx:81
 #: src/components/guard/FileDetails.tsx:196
 #: src/components/room-booking/timeline/BookingModal.tsx:777
-#: src/components/search/ask/AskChatList.tsx:220
+#: src/components/search/ask/AskChatList.tsx:216
 #: src/components/tabletennis/LiveTournament.tsx:395
 #: src/components/tabletennis/ValidationMatches.tsx:709
 #: src/components/toast/ToastProvider.test.ts:73
@@ -3089,7 +3089,7 @@ msgstr "Delete sheet"
 msgid "Delete slot"
 msgstr "Delete slot"
 
-#: src/components/search/ask/AskChatList.tsx:145
+#: src/components/search/ask/AskChatList.tsx:141
 msgid "Delete the chat \"{title}\"? Its questions and answers cannot be restored."
 msgstr "Delete the chat \"{title}\"? Its questions and answers cannot be restored."
 
@@ -3436,7 +3436,7 @@ msgstr "Edit this calendar"
 msgid "Edit: {prefix}"
 msgstr "Edit: {prefix}"
 
-#: src/components/search/ask/AskResult.tsx:354
+#: src/components/search/ask/AskResult.tsx:367
 msgid "EduWiki"
 msgstr "EduWiki"
 
@@ -4522,7 +4522,7 @@ msgstr "Guests only"
 msgid "Guests Role"
 msgstr "Guests Role"
 
-#: src/components/search/ask/AskResult.tsx:352
+#: src/components/search/ask/AskResult.tsx:365
 msgid "Guide"
 msgstr "Guide"
 
@@ -4648,6 +4648,10 @@ msgstr "Hours"
 #: src/components/sport/sport-trainer-utils.ts:37
 msgid "Hours have been saved."
 msgstr "Hours have been saved."
+
+#: src/components/search/ask/ask-suggestions.ts:12
+msgid "How do I get to Innopolis University from Kazan?"
+msgstr "How do I get to Innopolis University from Kazan?"
 
 #: src/components/music-room/MusicRoomPage.tsx:87
 msgid "How to get to the Innopolis Music room?"
@@ -5631,7 +5635,7 @@ msgid "Month"
 msgstr "Month"
 
 #: src/components/calendar/ConfigCalendarDialog.tsx:101
-#: src/components/search/ask/AskResult.tsx:360
+#: src/components/search/ask/AskResult.tsx:373
 msgid "Moodle"
 msgstr "Moodle"
 
@@ -5778,7 +5782,7 @@ msgstr "Networking Opportunities"
 msgid "Neutral time"
 msgstr "Neutral time"
 
-#: src/components/search/ask/AskPage.tsx:438
+#: src/components/search/ask/AskPage.tsx:440
 msgid "New"
 msgstr "New"
 
@@ -5929,7 +5933,7 @@ msgstr "No changes to review for this club."
 msgid "No changes to save."
 msgstr "No changes to save."
 
-#: src/components/search/ask/AskChatList.tsx:68
+#: src/components/search/ask/AskChatList.tsx:64
 msgid "No chats yet"
 msgstr "No chats yet"
 
@@ -6460,11 +6464,11 @@ msgstr "Number of sport hours"
 msgid "Numbered list"
 msgstr "Numbered list"
 
-#: src/components/search/ask/AskResult.tsx:141
+#: src/components/search/ask/AskResult.tsx:142
 msgid "Official"
 msgstr "Official"
 
-#: src/components/search/ask/AskResult.tsx:350
+#: src/components/search/ask/AskResult.tsx:363
 msgid "Official document"
 msgstr "Official document"
 
@@ -6614,7 +6618,7 @@ msgstr "Open chat"
 msgid "Open details"
 msgstr "Open details"
 
-#: src/components/search/ask/AskResult.tsx:221
+#: src/components/search/ask/AskResult.tsx:222
 msgid "Open document: {member}"
 msgstr "Open document: {member}"
 
@@ -6623,7 +6627,7 @@ msgstr "Open document: {member}"
 msgid "Open event page"
 msgstr "Open event page"
 
-#: src/components/search/ask/AskResult.tsx:336
+#: src/components/search/ask/AskResult.tsx:349
 msgid "Open in chat ->"
 msgstr "Open in chat ->"
 
@@ -7325,7 +7329,7 @@ msgstr "Reader"
 msgid "Receive a monthly stipend from IU alumni"
 msgstr "Receive a monthly stipend from IU alumni"
 
-#: src/components/search/ask/AskPage.tsx:356
+#: src/components/search/ask/AskPage.tsx:358
 msgid "Receiving answer"
 msgstr "Receiving answer"
 
@@ -7498,7 +7502,7 @@ msgstr "Remove file"
 msgid "Remove from calendar"
 msgstr "Remove from calendar"
 
-#: src/components/search/ask/AskPage.tsx:482
+#: src/components/search/ask/AskPage.tsx:484
 msgid "Remove from the queue"
 msgstr "Remove from the queue"
 
@@ -7543,7 +7547,7 @@ msgstr "Remove this event from the public calendar? This cannot be undone from h
 msgid "Remove this participant from the meeting?"
 msgstr "Remove this participant from the meeting?"
 
-#: src/components/search/ask/AskChatList.tsx:209
+#: src/components/search/ask/AskChatList.tsx:205
 msgid "Rename"
 msgstr "Rename"
 
@@ -7736,7 +7740,7 @@ msgstr "Retake"
 #: src/components/schedule-assistant/timetable/PublicTimetablePage.tsx:115
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
-#: src/components/search/ask/AskChatList.tsx:51
+#: src/components/search/ask/AskChatList.tsx:47
 #: src/components/search/ask/AskPage.tsx:318
 #: src/components/search/ask/AskSources.tsx:74
 #: src/components/sport/SportStudentTrainingModal.tsx:445
@@ -8205,7 +8209,7 @@ msgstr "Seconds"
 msgid "Section"
 msgstr "Section"
 
-#: src/components/search/ask/AskResult.tsx:179
+#: src/components/search/ask/AskResult.tsx:180
 msgid "Sections:"
 msgstr "Sections:"
 
@@ -8373,7 +8377,7 @@ msgstr "Send"
 msgid "Send after the answer"
 msgstr "Send after the answer"
 
-#: src/components/search/ask/AskPage.tsx:357
+#: src/components/search/ask/AskPage.tsx:359
 msgid "Sending request"
 msgstr "Sending request"
 
@@ -8720,7 +8724,7 @@ msgstr "Source enabled; message history may still be loading"
 msgid "Source:"
 msgstr "Source:"
 
-#: src/components/search/ask/AskResult.tsx:116
+#: src/components/search/ask/AskResult.tsx:117
 msgid "Sources"
 msgstr "Sources"
 
@@ -9411,7 +9415,7 @@ msgstr "Thank you!"
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 
-#: src/components/search/ask/AskPage.tsx:389
+#: src/components/search/ask/AskPage.tsx:391
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr "The action result could not be confirmed. Check the service before trying again."
 
@@ -10544,12 +10548,12 @@ msgstr "we write code and maintain products"
 msgid "Weak GPS signal (±{accuracyM}m)"
 msgstr "Weak GPS signal (±{accuracyM}m)"
 
-#: src/components/search/ask/AskResult.tsx:358
+#: src/components/search/ask/AskResult.tsx:371
 msgid "Web search"
 msgstr "Web search"
 
 #: src/components/clubs/constants.ts:89
-#: src/components/search/ask/AskResult.tsx:356
+#: src/components/search/ask/AskResult.tsx:369
 msgid "Website"
 msgstr "Website"
 
@@ -10996,7 +11000,7 @@ msgstr "Your club was invited as a host for this draft."
 msgid "Your document was sent to the printer"
 msgstr "Your document was sent to the printer"
 
-#: src/components/search/ask/AskPage.tsx:381
+#: src/components/search/ask/AskPage.tsx:383
 msgid "Your draft is below. You can edit it and send it again."
 msgstr "Your draft is below. You can edit it and send it again."
 
