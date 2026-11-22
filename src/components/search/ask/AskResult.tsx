@@ -3,6 +3,7 @@ import { EduwikiSourceType } from "@/api/search/types";
 import { cn } from "@/lib/ui/cn";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { AskAnswerBody } from "./AskAnswerBody";
+import { AskImage } from "./AskImage";
 import { AskApproval } from "./AskApproval";
 import { AskCalendarEvents } from "./AskCalendarEvents";
 import { AskSignupOffers } from "./AskSignupOffers";
@@ -220,6 +221,18 @@ export function AskResult({
                     >
                       <Trans>Open document: {member}</Trans>
                     </button>
+                  )}
+                  {!!source.images?.length && (
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      {source.images.map((image) => (
+                        <AskImage
+                          key={image.url}
+                          src={image.url}
+                          alt={image.alt ?? source.title}
+                          className="h-20 w-auto max-w-40 object-cover"
+                        />
+                      ))}
+                    </div>
                   )}
                 </li>
               );

@@ -706,6 +706,8 @@ export interface components {
       author_url?: string | null;
       /** Text */
       text?: string | null;
+      /** Images */
+      images?: components["schemas"]["SourceImage"][];
       /**
        * Official
        * @default false
@@ -1378,6 +1380,13 @@ export interface components {
       /** About */
       about: string;
     };
+    /** SourceImage */
+    SourceImage: {
+      /** Url */
+      url: string;
+      /** Alt */
+      alt?: string | null;
+    };
     /** SourceRequestCreate */
     SourceRequestCreate: {
       /** Invite Link */
@@ -1549,6 +1558,7 @@ export type SchemaSearchResponses = components["schemas"]["SearchResponses"];
 export type SchemaSignupOffer = components["schemas"]["SignupOffer"];
 export type SchemaSignupSelection = components["schemas"]["SignupSelection"];
 export type SchemaSiteChoice = components["schemas"]["SiteChoice"];
+export type SchemaSourceImage = components["schemas"]["SourceImage"];
 export type SchemaSourceRequestCreate =
   components["schemas"]["SourceRequestCreate"];
 export type SchemaSourceRequestView =
