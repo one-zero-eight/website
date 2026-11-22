@@ -29,8 +29,9 @@ export function AiCalendarCard({
         </p>
         <p className="text-base-content/70 text-sm">
           <Trans>
-            The Telegram bot notifies you when events are added to AI Calendar.
-            To receive notifications, open the bot in Telegram and press Start.
+            Reschedules and new events found in your study chats appear in the
+            assistant's Announcements chat, where you can add them to AI
+            Calendar.
           </Trans>
         </p>
       </div>

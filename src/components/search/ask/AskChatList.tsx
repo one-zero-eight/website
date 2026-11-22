@@ -15,7 +15,14 @@ import { forgetChat, openChat, useAskSession } from "./ask-session";
 const TITLE_MAX_LENGTH = 200;
 
 // The user's chats with the assistant, the last answered first: one opens with its questions and answers to go on with it
-export function AskChatList({ onSelect }: { onSelect?: () => void }) {
+export function AskChatList({
+  onSelect,
+  isChatShown = true,
+}: {
+  onSelect?: () => void;
+  // False while another view (the announcements) takes the main column: no chat is shown as open then
+  isChatShown?: boolean;
+}) {
   const { chatId } = useAskSession();
   const [retryError, setRetryError] = useState<unknown>(null);
   const {
@@ -72,7 +79,7 @@ export function AskChatList({ onSelect }: { onSelect?: () => void }) {
         <AskChatItem
           key={chat.chat_id}
           chat={chat}
-          isOpen={chat.chat_id === chatId}
+          isOpen={isChatShown && chat.chat_id === chatId}
           onSelect={onSelect}
         />
       ))}

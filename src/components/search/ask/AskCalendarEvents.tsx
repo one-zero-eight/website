@@ -5,6 +5,7 @@ import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { formatEventInterval } from "./calendar-interval";
 
 // "➕ Add to my calendar" under an answer, as in the Telegram bot: a button for each upcoming event the answer names. The event
 // goes to the user's personal calendar, which the calendar page shows (with the events added in the bot)
@@ -34,22 +35,6 @@ export function AskCalendarEvents({
     },
   );
 
-  const formatInterval = (event: searchTypes.SchemaCalendarEventOffer) => {
-    const format = (value: string) =>
-      new Date(
-        event.all_day ? `${value.slice(0, 10)}T12:00:00` : value,
-      ).toLocaleString(i18n.locale, {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        ...(event.all_day ? {} : { hour: "2-digit", minute: "2-digit" }),
-      });
-    const start = format(event.starts_at);
-    return !event.all_day && event.ends_at
-      ? `${start} – ${format(event.ends_at)}`
-      : start;
-  };
-
   return (
     <div className="flex flex-col items-start gap-1">
       {events.map((event) => {
@@ -65,7 +50,7 @@ export function AskCalendarEvents({
           (event.end_suggested && (!event.ends_at || event.all_day));
         const start = invalid
           ? i18n._(msg`Invalid event interval`)
-          : formatInterval(event);
+          : formatEventInterval(event, i18n.locale);
         return (
           <button
             key={event.id}

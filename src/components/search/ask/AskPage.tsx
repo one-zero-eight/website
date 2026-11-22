@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import AnimatedDots from "@/components/search/AnimatedDots";
 import { AskChatList } from "./AskChatList";
+import { AskAnnouncements, AskAnnouncementsItem } from "./AskAnnouncements";
 import { AskAttachment } from "./AskAttachment";
 import { AskInput } from "./AskInput";
 import { AskQuoteMenu } from "./AskQuoteMenu";
@@ -48,6 +49,8 @@ export function AskPage({
   const { t, i18n } = useLingui();
 
   const [isChatListOpen, setIsChatListOpen] = useState(false);
+  // The read-only chat of the schedule changes found in the user's study chats takes the main column
+  const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(false);
   // The list of chats beside the conversation (wide screens) can be hidden to give it room
   const [isSidebarHidden, setIsSidebarHidden] = useLocalStorage(
     "ask-chats-hidden",
@@ -104,6 +107,7 @@ export function AskPage({
 
   useEffect(() => {
     if (!askChat) return;
+    setIsAnnouncementsOpen(false);
     // A notification for this chat must not cancel a newer answer in progress.
     if (askChat !== chatId) void openChat(askChat);
     // Consume the link so choosing another chat does not reopen this one.
@@ -158,7 +162,12 @@ export function AskPage({
       {!isSidebarHidden && (
         <aside className="border-base-300 hidden w-64 shrink-0 flex-col gap-1 overflow-y-auto border-r p-2 @4xl/content:flex">
           <div className="flex items-center justify-end gap-1">
-            {!isEmpty && <NewChatButton className="grow justify-start" />}
+            {(!isEmpty || isAnnouncementsOpen) && (
+              <NewChatButton
+                className="grow justify-start"
+                onStart={() => setIsAnnouncementsOpen(false)}
+              />
+            )}
             <button
               type="button"
               className="btn btn-ghost btn-sm btn-square"
@@ -168,7 +177,14 @@ export function AskPage({
               <span className="icon-[material-symbols--left-panel-close-outline] text-lg" />
             </button>
           </div>
-          <AskChatList />
+          <AskAnnouncementsItem
+            isOpen={isAnnouncementsOpen}
+            onOpen={() => setIsAnnouncementsOpen(true)}
+          />
+          <AskChatList
+            isChatShown={!isAnnouncementsOpen}
+            onSelect={() => setIsAnnouncementsOpen(false)}
+          />
         </aside>
       )}
 
@@ -206,7 +222,9 @@ export function AskPage({
               <span className="icon-[material-symbols--left-panel-open-outline] text-lg" />
               <Trans>Chats</Trans>
             </button>
-            {!isEmpty && <NewChatButton />}
+            {(!isEmpty || isAnnouncementsOpen) && (
+              <NewChatButton onStart={() => setIsAnnouncementsOpen(false)} />
+            )}
           </div>
         )}
         <div className="border-base-300 flex flex-col gap-2 border-b px-4 py-2 @4xl/content:hidden">
@@ -226,206 +244,239 @@ export function AskPage({
                 }
               />
             </button>
-            {!isEmpty && <NewChatButton />}
+            {(!isEmpty || isAnnouncementsOpen) && (
+              <NewChatButton onStart={() => setIsAnnouncementsOpen(false)} />
+            )}
           </div>
           {isChatListOpen && (
-            <div className="max-h-64 overflow-y-auto pt-2">
-              <AskChatList onSelect={() => setIsChatListOpen(false)} />
+            <div className="flex max-h-64 flex-col gap-1 overflow-y-auto pt-2">
+              <AskAnnouncementsItem
+                isOpen={isAnnouncementsOpen}
+                onOpen={() => {
+                  setIsAnnouncementsOpen(true);
+                  setIsChatListOpen(false);
+                }}
+              />
+              <AskChatList
+                isChatShown={!isAnnouncementsOpen}
+                onSelect={() => {
+                  setIsAnnouncementsOpen(false);
+                  setIsChatListOpen(false);
+                }}
+              />
             </div>
           )}
         </div>
 
-        <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="flex min-h-0 grow flex-col overflow-y-auto"
-        >
-          <div className="mx-auto flex w-full max-w-4xl grow flex-col gap-4 p-4">
-            {isEmpty && (
-              <div className="flex grow flex-col items-center justify-center gap-2 text-center">
-                <CatIcon
-                  title="cAtIx"
-                  className="size-12 [filter:grayscale(1)_sepia(1)_saturate(4)]"
-                />
-                <span className="text-base-content/70">
-                  <Trans>
-                    I can help with your schedule, university rules,
-                    announcements and available rooms.
-                  </Trans>
-                </span>
-                {!draftQuery.trim() && draftAttachments.length === 0 && (
+        {isAnnouncementsOpen ? (
+          <AskAnnouncements />
+        ) : (
+          <>
+            <div
+              ref={scrollRef}
+              onScroll={handleScroll}
+              className="flex min-h-0 grow flex-col overflow-y-auto"
+            >
+              <div className="mx-auto flex w-full max-w-4xl grow flex-col gap-4 p-4">
+                {isEmpty && (
+                  <div className="flex grow flex-col items-center justify-center gap-2 text-center">
+                    <CatIcon
+                      title="cAtIx"
+                      className="size-12 [filter:grayscale(1)_sepia(1)_saturate(4)]"
+                    />
+                    <span className="text-base-content/70">
+                      <Trans>
+                        I can help with your schedule, university rules,
+                        announcements and available rooms.
+                      </Trans>
+                    </span>
+                    {!draftQuery.trim() && draftAttachments.length === 0 && (
+                      <>
+                        <div className="mt-2 grid w-full max-w-2xl grid-cols-1 gap-2 @2xl/content:grid-cols-2">
+                          {exampleQuestions
+                            .map((m) => i18n._(m))
+                            .map((query) => (
+                              <button
+                                key={query}
+                                type="button"
+                                className="btn btn-outline h-auto justify-start py-3 text-left font-normal whitespace-normal"
+                                onClick={() => {
+                                  setDraftQuery(query);
+                                  inputRef.current?.focus();
+                                }}
+                              >
+                                {query}
+                              </button>
+                            ))}
+                        </div>
+                        <p className="text-base-content/60 mt-2 max-w-2xl text-sm">
+                          <Trans>
+                            You can attach up to 3 PDF, TXT or image files, up
+                            to 10 MiB each.
+                          </Trans>
+                        </p>
+                        <p className="text-base-content/60 max-w-2xl text-sm">
+                          <Trans>
+                            To search without the assistant, start a message
+                            with /search or /поиск.
+                          </Trans>
+                        </p>
+                        <p className="text-base-content/60 max-w-2xl text-sm">
+                          <Trans>
+                            The assistant asks for confirmation before changing
+                            data in services.
+                          </Trans>
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {isOpening && (
                   <>
-                    <div className="mt-2 grid w-full max-w-2xl grid-cols-1 gap-2 @2xl/content:grid-cols-2">
-                      {exampleQuestions
-                        .map((m) => i18n._(m))
-                        .map((query) => (
-                          <button
-                            key={query}
-                            type="button"
-                            className="btn btn-outline h-auto justify-start py-3 text-left font-normal whitespace-normal"
-                            onClick={() => {
-                              setDraftQuery(query);
-                              inputRef.current?.focus();
-                            }}
-                          >
-                            {query}
-                          </button>
-                        ))}
-                    </div>
-                    <p className="text-base-content/60 mt-2 max-w-2xl text-sm">
-                      <Trans>
-                        You can attach up to 3 PDF, TXT or image files, up to 10
-                        MiB each.
-                      </Trans>
-                    </p>
-                    <p className="text-base-content/60 max-w-2xl text-sm">
-                      <Trans>
-                        To search without the assistant, start a message with
-                        /search or /поиск.
-                      </Trans>
-                    </p>
-                    <p className="text-base-content/60 max-w-2xl text-sm">
-                      <Trans>
-                        The assistant asks for confirmation before changing data
-                        in services.
-                      </Trans>
-                    </p>
+                    <div className="skeleton h-10 w-1/2 self-end" />
+                    <div className="skeleton h-24 w-3/4" />
                   </>
                 )}
-              </div>
-            )}
-
-            {isOpening && (
-              <>
-                <div className="skeleton h-10 w-1/2 self-end" />
-                <div className="skeleton h-24 w-3/4" />
-              </>
-            )}
-            {openingError !== null && (
-              <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-1 self-start border! px-4 py-2">
-                <Trans>Could not open the chat</Trans>
-                <span className="text-base-content/60 text-sm">
-                  {formatApiErrorMessage(openingError)}
-                </span>
-                {chatId && !isOpening && (
-                  <button
-                    type="button"
-                    className="btn btn-sm self-start"
-                    onClick={() => void openChat(chatId)}
-                  >
-                    <Trans>Retry</Trans>
-                  </button>
-                )}
-              </div>
-            )}
-
-            {messages.map((message, i) =>
-              message.role === "user" ? (
-                <UserMessage
-                  key={`${chatId}:${i}`}
-                  text={message.content}
-                  attachments={message.attachments}
-                />
-              ) : message.role === "search" ? (
-                <SearchResults
-                  key={`${chatId}:${i}`}
-                  query={message.query}
-                  results={message.results}
-                />
-              ) : (
-                <AskResult
-                  key={`${chatId}:${i}`}
-                  response={message.response}
-                  isLast={i === messages.length - 1}
-                  isPending={isPending}
-                />
-              ),
-            )}
-
-            {isPending && (
-              <div className="flex max-w-full min-w-0 items-end gap-2 self-start">
-                <CatIcon />
-                <div className="border-base-300 bg-base-200 text-base-content rounded-field flex min-w-0 flex-col gap-2 border! px-4 py-2 wrap-anywhere">
-                  {answerText && <AskAnswerBody text={answerText} />}
-                  <div className="text-base-content/70 flex text-sm">
-                    <span>
-                      {status ||
-                        (answerText ? t`Receiving answer` : t`Sending request`)}
+                {openingError !== null && (
+                  <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-1 self-start border! px-4 py-2">
+                    <Trans>Could not open the chat</Trans>
+                    <span className="text-base-content/60 text-sm">
+                      {formatApiErrorMessage(openingError)}
                     </span>
-                    <AnimatedDots />
+                    {chatId && !isOpening && (
+                      <button
+                        type="button"
+                        className="btn btn-sm self-start"
+                        onClick={() => void openChat(chatId)}
+                      >
+                        <Trans>Retry</Trans>
+                      </button>
+                    )}
                   </div>
-                </div>
-              </div>
-            )}
-            {queue.map((question, i) => (
-              <UserMessage
-                key={`${chatId}:queue:${i}`}
-                text={question}
-                onRemove={() => dequeueQuestion(i)}
-              />
-            ))}
-            {!isPending && error && (
-              <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">
-                <span>
-                  <Trans>Could not complete the request.</Trans>
-                </span>
-                <span className="text-base-content/60 text-sm">
-                  {formatApiErrorMessage(error)}
-                </span>
-                {lastMessage?.role === "user" && draftQuery.trim() && (
-                  <span className="text-sm">
-                    <Trans>
-                      Your draft is below. You can edit it and send it again.
-                    </Trans>
-                  </span>
                 )}
-                {lastMessage?.role === "assistant" &&
-                  lastMessage.response.approval && (
-                    <span className="text-sm">
-                      <Trans>
-                        The action result could not be confirmed. Check the
-                        service before trying again.
-                      </Trans>
+
+                {messages.map((message, i) =>
+                  message.role === "user" ? (
+                    <UserMessage
+                      key={`${chatId}:${i}`}
+                      text={message.content}
+                      attachments={message.attachments}
+                    />
+                  ) : message.role === "search" ? (
+                    <SearchResults
+                      key={`${chatId}:${i}`}
+                      query={message.query}
+                      results={message.results}
+                    />
+                  ) : (
+                    <AskResult
+                      key={`${chatId}:${i}`}
+                      response={message.response}
+                      isLast={i === messages.length - 1}
+                      isPending={isPending}
+                    />
+                  ),
+                )}
+
+                {isPending && (
+                  <div className="flex max-w-full min-w-0 items-end gap-2 self-start">
+                    <CatIcon />
+                    <div className="border-base-300 bg-base-200 text-base-content rounded-field flex min-w-0 flex-col gap-2 border! px-4 py-2 wrap-anywhere">
+                      {answerText && <AskAnswerBody text={answerText} />}
+                      <div className="text-base-content/70 flex text-sm">
+                        <span>
+                          {status ||
+                            (answerText
+                              ? t`Receiving answer`
+                              : t`Sending request`)}
+                        </span>
+                        <AnimatedDots />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {queue.map((question, i) => (
+                  <UserMessage
+                    key={`${chatId}:queue:${i}`}
+                    text={question}
+                    onRemove={() => dequeueQuestion(i)}
+                  />
+                ))}
+                {!isPending && error && (
+                  <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">
+                    <span>
+                      <Trans>Could not complete the request.</Trans>
                     </span>
-                  )}
+                    <span className="text-base-content/60 text-sm">
+                      {formatApiErrorMessage(error)}
+                    </span>
+                    {lastMessage?.role === "user" && draftQuery.trim() && (
+                      <span className="text-sm">
+                        <Trans>
+                          Your draft is below. You can edit it and send it
+                          again.
+                        </Trans>
+                      </span>
+                    )}
+                    {lastMessage?.role === "assistant" &&
+                      lastMessage.response.approval && (
+                        <span className="text-sm">
+                          <Trans>
+                            The action result could not be confirmed. Check the
+                            service before trying again.
+                          </Trans>
+                        </span>
+                      )}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        <AskQuoteMenu containerRef={scrollRef} onQuote={handleQuote} />
+            <AskQuoteMenu containerRef={scrollRef} onQuote={handleQuote} />
 
-        <div className="mx-auto w-full max-w-4xl px-4 pt-2 pb-4">
-          <AskInput
-            key={composerId}
-            inputRef={inputRef}
-            text={draftQuery}
-            setText={setDraftQuery}
-            suggestions={suggestions}
-            context={context}
-            quote={quote}
-            onQuoteRemove={() => setQuote("")}
-            attachments={isPending ? [] : draftAttachments}
-            onAttachmentsChange={(attachments) =>
-              setDraftAttachments(attachments, composerId)
-            }
-            onSend={handleSend}
-            onStop={handleStop}
-            isPending={isPending}
-          />
-        </div>
+            <div className="mx-auto w-full max-w-4xl px-4 pt-2 pb-4">
+              <AskInput
+                key={composerId}
+                inputRef={inputRef}
+                text={draftQuery}
+                setText={setDraftQuery}
+                suggestions={suggestions}
+                context={context}
+                quote={quote}
+                onQuoteRemove={() => setQuote("")}
+                attachments={isPending ? [] : draftAttachments}
+                onAttachmentsChange={(attachments) =>
+                  setDraftAttachments(attachments, composerId)
+                }
+                onSend={handleSend}
+                onStop={handleStop}
+                isPending={isPending}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
 // Starts a conversation in which the assistant does not see the earlier questions
-function NewChatButton({ className }: { className?: string }) {
+function NewChatButton({
+  className,
+  onStart,
+}: {
+  className?: string;
+  onStart?: () => void;
+}) {
   return (
     <button
       type="button"
       className={cn("btn btn-ghost btn-sm", className)}
-      onClick={startNewChat}
+      onClick={() => {
+        startNewChat();
+        onStart?.();
+      }}
     >
       <span className="icon-[material-symbols--add-rounded] text-lg" />
       <Trans>New</Trans>

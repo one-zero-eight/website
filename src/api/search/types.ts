@@ -4,6 +4,43 @@
  */
 
 export interface paths {
+  "/announcements": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Announcements */
+    get: operations["announcements_list_announcements"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/announcements/{change_id}/calendar": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Apply Announcement
+     * @description Put the change in the user's calendar: a new event, or a move, room change or removal of the one they have. Twice is once.
+     */
+    post: operations["announcements_apply_announcement"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/search/search": {
     parameters: {
       query?: never;
@@ -570,12 +607,76 @@ export interface components {
       /** Messages */
       messages: unknown[];
     };
+    /** AddedAnnouncement */
+    AddedAnnouncement: {
+      /** Change Id */
+      change_id: number;
+      /**
+       * Action
+       * @enum {string}
+       */
+      action: AddedAnnouncementAction;
+      /** Title */
+      title: string;
+    };
     /** AddedCalendarEvent */
     AddedCalendarEvent: {
       /** Proposal Id */
       proposal_id: string;
       /** Title */
       title: string;
+    };
+    /**
+     * Announcement
+     * @description A schedule change found in a chat of the user (worker/changes.py).
+     */
+    Announcement: {
+      /** Id */
+      id: number;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: AnnouncementKind;
+      /** Subject */
+      subject: string | null;
+      /** Summary */
+      summary: string;
+      /**
+       * Starts At
+       * Format: date-time
+       */
+      starts_at: string;
+      /** Ends At */
+      ends_at: string | null;
+      /** End Suggested */
+      end_suggested: boolean;
+      /** All Day */
+      all_day: boolean;
+      /** Room */
+      room: string | null;
+      /**
+       * Found At
+       * Format: date-time
+       */
+      found_at: string;
+      source: components["schemas"]["AnnouncementSource"];
+    };
+    /** AnnouncementSource */
+    AnnouncementSource: {
+      /** Chat Title */
+      chat_title: string;
+      /** Link */
+      link: string | null;
+      /**
+       * Sent At
+       * Format: date-time
+       */
+      sent_at: string;
+      /** Sender Name */
+      sender_name: string | null;
+      /** Text */
+      text: string;
     };
     /** AnswerSource */
     AnswerSource: {
@@ -1391,8 +1492,13 @@ export interface components {
   pathItems: never;
 }
 export type SchemaActResponses = components["schemas"]["ActResponses"];
+export type SchemaAddedAnnouncement =
+  components["schemas"]["AddedAnnouncement"];
 export type SchemaAddedCalendarEvent =
   components["schemas"]["AddedCalendarEvent"];
+export type SchemaAnnouncement = components["schemas"]["Announcement"];
+export type SchemaAnnouncementSource =
+  components["schemas"]["AnnouncementSource"];
 export type SchemaAnswerSource = components["schemas"]["AnswerSource"];
 export type SchemaArchiveDocument = components["schemas"]["ArchiveDocument"];
 export type SchemaAskAction = components["schemas"]["AskAction"];
@@ -1455,6 +1561,64 @@ export type SchemaSourcesView = components["schemas"]["SourcesView"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
+  announcements_list_announcements: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Announcement"][];
+        };
+      };
+    };
+  };
+  announcements_apply_announcement: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        change_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AddedAnnouncement"];
+        };
+      };
+      /** @description No such announcement, or not in the user's chats */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   search_search_by_query: {
     parameters: {
       query: {
@@ -2836,4 +3000,17 @@ export enum SourceViewDefault_mode {
   store = "store",
   search = "search",
   off = "off",
+}
+
+export enum AddedAnnouncementAction {
+  added = "added",
+  moved = "moved",
+  room_changed = "room_changed",
+  removed = "removed",
+}
+export enum AnnouncementKind {
+  reschedule = "reschedule",
+  room_change = "room_change",
+  cancel = "cancel",
+  announcement = "announcement",
 }
