@@ -27,13 +27,6 @@ export function AiCalendarCard({
         <p className="text-base-content/30">
           <Trans>Events you added under the assistant's answers</Trans>
         </p>
-        <p className="text-base-content/70 text-sm">
-          <Trans>
-            Reschedules and new events found in your study chats appear in the
-            assistant's Announcements chat, where you can add them to AI
-            Calendar.
-          </Trans>
-        </p>
       </div>
       <div className="flex flex-row place-items-center select-none">
         <SimpleExportButton onClick={exportButtonOnClick} />

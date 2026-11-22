@@ -564,32 +564,32 @@ msgid "<0>Winter break:</0> {breakDates}"
 msgstr "<0>Winter break:</0> {breakDates}"
 
 #: src/components/search/ask/AskAnnouncements.tsx:200
-msgid "✅ Added to your calendar: {title}"
-msgstr "✅ Added to your calendar: {title}"
+#~ msgid "✅ Added to your calendar: {title}"
+#~ msgstr "✅ Added to your calendar: {title}"
 
 #: src/components/search/ask/AskCalendarEvents.tsx:68
 msgid "✅ Added: {title} · {start}"
 msgstr "✅ Added: {title} · {start}"
 
 #: src/components/search/ask/AskAnnouncements.tsx:203
-msgid "✅ Moved in your calendar: {title}"
-msgstr "✅ Moved in your calendar: {title}"
+#~ msgid "✅ Moved in your calendar: {title}"
+#~ msgstr "✅ Moved in your calendar: {title}"
 
 #: src/components/search/ask/AskAnnouncements.tsx:209
-msgid "✅ Removed from your calendar: {title}"
-msgstr "✅ Removed from your calendar: {title}"
+#~ msgid "✅ Removed from your calendar: {title}"
+#~ msgstr "✅ Removed from your calendar: {title}"
 
 #: src/components/search/ask/AskAnnouncements.tsx:206
-msgid "✅ Room changed in your calendar: {title}"
-msgstr "✅ Room changed in your calendar: {title}"
+#~ msgid "✅ Room changed in your calendar: {title}"
+#~ msgstr "✅ Room changed in your calendar: {title}"
 
 #: src/components/search/ask/AskAnnouncements.tsx:234
-msgid "✏️ Apply to my calendar"
-msgstr "✏️ Apply to my calendar"
+#~ msgid "✏️ Apply to my calendar"
+#~ msgstr "✏️ Apply to my calendar"
 
 #: src/components/search/ask/AskAnnouncements.tsx:232
-msgid "➕ Add to my calendar"
-msgstr "➕ Add to my calendar"
+#~ msgid "➕ Add to my calendar"
+#~ msgstr "➕ Add to my calendar"
 
 #: src/components/search/ask/AskCalendarEvents.tsx:72
 msgid "➕ Add to my calendar: {title} · {start}"
@@ -1042,12 +1042,12 @@ msgid "Anchor active week"
 msgstr "Anchor active week"
 
 #: src/components/search/ask/AskAnnouncements.tsx:26
-msgid "Announcement"
-msgstr "Announcement"
+#~ msgid "Announcement"
+#~ msgstr "Announcement"
 
 #: src/components/search/ask/AskAnnouncements.tsx:55
-msgid "Announcements"
-msgstr "Announcements"
+#~ msgid "Announcements"
+#~ msgstr "Announcements"
 
 #: src/components/debug/DebugPage.tsx:84
 msgid "App and offline diagnostics"
@@ -1176,7 +1176,7 @@ msgstr "Ask a question..."
 msgid "Ask questions or find answers at Innopolis University."
 msgstr "Ask questions or find answers at Innopolis University."
 
-#: src/components/calendar/AiCalendarCard.tsx:53
+#: src/components/calendar/AiCalendarCard.tsx:46
 msgid "Ask the assistant"
 msgstr "Ask the assistant"
 
@@ -1714,8 +1714,8 @@ msgid "Cancel upload"
 msgstr "Cancel upload"
 
 #: src/components/search/ask/AskAnnouncements.tsx:25
-msgid "Cancellation"
-msgstr "Cancellation"
+#~ msgid "Cancellation"
+#~ msgstr "Cancellation"
 
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:363
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:87
@@ -1836,7 +1836,7 @@ msgstr "Channel"
 msgid "Chat"
 msgstr "Chat"
 
-#: src/components/search/ask/AskChatList.tsx:173
+#: src/components/search/ask/AskChatList.tsx:170
 msgid "Chat name"
 msgstr "Chat name"
 
@@ -1853,8 +1853,8 @@ msgstr "Chat source requests"
 msgid "Chat sources"
 msgstr "Chat sources"
 
-#: src/components/search/ask/AskPage.tsx:223
-#: src/components/search/ask/AskPage.tsx:238
+#: src/components/search/ask/AskPage.tsx:208
+#: src/components/search/ask/AskPage.tsx:221
 msgid "Chats"
 msgstr "Chats"
 
@@ -2086,8 +2086,8 @@ msgstr "Click to upload or paste an image"
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
 #: src/components/search/ask/AskInput.tsx:195
 #: src/components/search/ask/AskInput.tsx:196
-#: src/components/search/ask/AskPage.tsx:206
-#: src/components/search/ask/AskPage.tsx:207
+#: src/components/search/ask/AskPage.tsx:191
+#: src/components/search/ask/AskPage.tsx:192
 #: src/components/search/IframePreviewCard.tsx:111
 #: src/components/sport/SportOverviewSection.tsx:719
 #: src/components/sport/SportStudentTrainingModal.tsx:394
@@ -2519,7 +2519,7 @@ msgstr "Could not book"
 msgid "Could not check access"
 msgstr "Could not check access"
 
-#: src/components/search/ask/AskPage.tsx:409
+#: src/components/search/ask/AskPage.tsx:374
 msgid "Could not complete the request."
 msgstr "Could not complete the request."
 
@@ -2540,7 +2540,7 @@ msgstr "Could not delete game"
 msgid "Could not delete reservation"
 msgstr "Could not delete reservation"
 
-#: src/components/search/ask/AskChatList.tsx:137
+#: src/components/search/ask/AskChatList.tsx:134
 msgid "Could not delete the chat"
 msgstr "Could not delete the chat"
 
@@ -2600,7 +2600,7 @@ msgstr "Could not load your Telegram account: {accountErrorMessage}"
 msgid "Could not mark attendance"
 msgstr "Could not mark attendance"
 
-#: src/components/search/ask/AskPage.tsx:343
+#: src/components/search/ask/AskPage.tsx:308
 msgid "Could not open the chat"
 msgstr "Could not open the chat"
 
@@ -2608,7 +2608,7 @@ msgstr "Could not open the chat"
 msgid "Could not open this archive document. It may be missing or changed."
 msgstr "Could not open this archive document. It may be missing or changed."
 
-#: src/components/search/ask/AskChatList.tsx:116
+#: src/components/search/ask/AskChatList.tsx:113
 msgid "Could not rename the chat"
 msgstr "Could not rename the chat"
 
@@ -2656,8 +2656,8 @@ msgid "Could not update reservation"
 msgstr "Could not update reservation"
 
 #: src/components/search/ask/AskAnnouncements.tsx:136
-msgid "Could not update the calendar"
-msgstr "Could not update the calendar"
+#~ msgid "Could not update the calendar"
+#~ msgstr "Could not update the calendar"
 
 #: src/components/layout/Offline.tsx:64
 msgid "Couldn't connect to InNoHassle servers"
@@ -2991,7 +2991,7 @@ msgstr "Define rules for your room"
 #: src/components/guard/FileDetails.tsx:81
 #: src/components/guard/FileDetails.tsx:196
 #: src/components/room-booking/timeline/BookingModal.tsx:777
-#: src/components/search/ask/AskChatList.tsx:223
+#: src/components/search/ask/AskChatList.tsx:220
 #: src/components/tabletennis/LiveTournament.tsx:395
 #: src/components/tabletennis/ValidationMatches.tsx:709
 #: src/components/toast/ToastProvider.test.ts:73
@@ -3089,7 +3089,7 @@ msgstr "Delete sheet"
 msgid "Delete slot"
 msgstr "Delete slot"
 
-#: src/components/search/ask/AskChatList.tsx:148
+#: src/components/search/ask/AskChatList.tsx:145
 msgid "Delete the chat \"{title}\"? Its questions and answers cannot be restored."
 msgstr "Delete the chat \"{title}\"? Its questions and answers cannot be restored."
 
@@ -4588,7 +4588,7 @@ msgstr "Hide best time"
 msgid "Hide calendar events"
 msgstr "Hide calendar events"
 
-#: src/components/search/ask/AskPage.tsx:174
+#: src/components/search/ask/AskPage.tsx:166
 msgid "Hide chats"
 msgstr "Hide chats"
 
@@ -4665,7 +4665,7 @@ msgstr "HTML and App build IDs differ."
 msgid "HTML and App build IDs match."
 msgstr "HTML and App build IDs match."
 
-#: src/components/search/ask/AskPage.tsx:288
+#: src/components/search/ask/AskPage.tsx:253
 msgid "I can help with your schedule, university rules, announcements and available rooms."
 msgstr "I can help with your schedule, university rules, announcements and available rooms."
 
@@ -5580,8 +5580,8 @@ msgid "Merch of the club"
 msgstr "Merch of the club"
 
 #: src/components/search/ask/AskAnnouncements.tsx:192
-msgid "Message"
-msgstr "Message"
+#~ msgid "Message"
+#~ msgstr "Message"
 
 #: src/components/search/SourceRequests.tsx:198
 msgid "Messages will be visible to all cAtIx users, including people who are not members of your study group or chat."
@@ -5778,7 +5778,7 @@ msgstr "Networking Opportunities"
 msgid "Neutral time"
 msgstr "Neutral time"
 
-#: src/components/search/ask/AskPage.tsx:482
+#: src/components/search/ask/AskPage.tsx:438
 msgid "New"
 msgstr "New"
 
@@ -5877,8 +5877,8 @@ msgstr "No active tournaments. Create one to start managing groups and the quali
 #~ msgstr "No additional restriction; using groups' teaching periods."
 
 #: src/components/search/ask/AskAnnouncements.tsx:108
-msgid "No announcements yet. Reschedules, room changes, cancellations and new events found in your study chats will appear here."
-msgstr "No announcements yet. Reschedules, room changes, cancellations and new events found in your study chats will appear here."
+#~ msgid "No announcements yet. Reschedules, room changes, cancellations and new events found in your study chats will appear here."
+#~ msgstr "No announcements yet. Reschedules, room changes, cancellations and new events found in your study chats will appear here."
 
 #: src/components/events/submissions/SubmissionsPage.tsx:29
 msgid "No approved submissions."
@@ -5929,7 +5929,7 @@ msgstr "No changes to review for this club."
 msgid "No changes to save."
 msgstr "No changes to save."
 
-#: src/components/search/ask/AskChatList.tsx:71
+#: src/components/search/ask/AskChatList.tsx:68
 msgid "No chats yet"
 msgstr "No chats yet"
 
@@ -6649,7 +6649,6 @@ msgstr "Open Spreadsheet"
 msgid "Open Telegram bot"
 msgstr "Open Telegram bot"
 
-#: src/components/search/ask/AskAnnouncements.tsx:216
 #: src/components/search/ask/AskCalendarEvents.tsx:91
 msgid "Open the calendar"
 msgstr "Open the calendar"
@@ -7201,7 +7200,6 @@ msgstr "Proposed"
 msgid "Proposed by the club leader, waiting for your review."
 msgstr "Proposed by the club leader, waiting for your review."
 
-#: src/components/search/ask/AskAnnouncements.tsx:163
 #: src/components/search/ask/AskCalendarEvents.tsx:81
 msgid "Proposed duration: 90 minutes (end time not specified)."
 msgstr "Proposed duration: 90 minutes (end time not specified)."
@@ -7327,7 +7325,7 @@ msgstr "Reader"
 msgid "Receive a monthly stipend from IU alumni"
 msgstr "Receive a monthly stipend from IU alumni"
 
-#: src/components/search/ask/AskPage.tsx:391
+#: src/components/search/ask/AskPage.tsx:356
 msgid "Receiving answer"
 msgstr "Receiving answer"
 
@@ -7500,7 +7498,7 @@ msgstr "Remove file"
 msgid "Remove from calendar"
 msgstr "Remove from calendar"
 
-#: src/components/search/ask/AskPage.tsx:526
+#: src/components/search/ask/AskPage.tsx:482
 msgid "Remove from the queue"
 msgstr "Remove from the queue"
 
@@ -7545,7 +7543,7 @@ msgstr "Remove this event from the public calendar? This cannot be undone from h
 msgid "Remove this participant from the meeting?"
 msgstr "Remove this participant from the meeting?"
 
-#: src/components/search/ask/AskChatList.tsx:212
+#: src/components/search/ask/AskChatList.tsx:209
 msgid "Rename"
 msgstr "Rename"
 
@@ -7599,12 +7597,12 @@ msgid "Required"
 msgstr "Required"
 
 #: src/components/search/ask/AskAnnouncements.tsx:23
-msgid "Reschedule"
-msgstr "Reschedule"
+#~ msgid "Reschedule"
+#~ msgstr "Reschedule"
 
 #: src/components/calendar/AiCalendarCard.tsx:31
-msgid "Reschedules and new events found in your study chats appear in the assistant's Announcements chat, where you can add them to AI Calendar."
-msgstr "Reschedules and new events found in your study chats appear in the assistant's Announcements chat, where you can add them to AI Calendar."
+#~ msgid "Reschedules and new events found in your study chats appear in the assistant's Announcements chat, where you can add them to AI Calendar."
+#~ msgstr "Reschedules and new events found in your study chats appear in the assistant's Announcements chat, where you can add them to AI Calendar."
 
 #: src/components/board-games/ReservationDetailsModal.tsx:82
 #: src/components/board-games/UserReservationDetailsModal.tsx:51
@@ -7738,9 +7736,8 @@ msgstr "Retake"
 #: src/components/schedule-assistant/timetable/PublicTimetablePage.tsx:115
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
-#: src/components/search/ask/AskAnnouncements.tsx:102
-#: src/components/search/ask/AskChatList.tsx:54
-#: src/components/search/ask/AskPage.tsx:353
+#: src/components/search/ask/AskChatList.tsx:51
+#: src/components/search/ask/AskPage.tsx:318
 #: src/components/search/ask/AskSources.tsx:74
 #: src/components/sport/SportStudentTrainingModal.tsx:445
 #: src/components/sport/SportStudentTrainingModal.tsx:494
@@ -7877,8 +7874,8 @@ msgid "Room canceled"
 msgstr "Room canceled"
 
 #: src/components/search/ask/AskAnnouncements.tsx:24
-msgid "Room change"
-msgstr "Room change"
+#~ msgid "Room change"
+#~ msgstr "Room change"
 
 #: src/components/when2meet/MeetingRoomModal.tsx:175
 msgid "Room changed"
@@ -7910,8 +7907,8 @@ msgid "Room: {bookedRoomTitle}"
 msgstr "Room: {bookedRoomTitle}"
 
 #: src/components/search/ask/AskAnnouncements.tsx:170
-msgid "Room: {room}"
-msgstr "Room: {room}"
+#~ msgid "Room: {room}"
+#~ msgstr "Room: {room}"
 
 #: src/components/admin/AdminTabs.tsx:17
 #: src/components/room-booking/BookingPageTabs.tsx:17
@@ -8376,7 +8373,7 @@ msgstr "Send"
 msgid "Send after the answer"
 msgstr "Send after the answer"
 
-#: src/components/search/ask/AskPage.tsx:392
+#: src/components/search/ask/AskPage.tsx:357
 msgid "Sending request"
 msgstr "Sending request"
 
@@ -9414,15 +9411,15 @@ msgstr "Thank you!"
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 
-#: src/components/search/ask/AskPage.tsx:425
+#: src/components/search/ask/AskPage.tsx:389
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr "The action result could not be confirmed. Check the service before trying again."
 
-#: src/components/search/ask/AskPage.tsx:325
+#: src/components/search/ask/AskPage.tsx:290
 msgid "The assistant asks for confirmation before changing data in services."
 msgstr "The assistant asks for confirmation before changing data in services."
 
-#: src/components/search/ask/AskPage.tsx:199
+#: src/components/search/ask/AskPage.tsx:184
 msgid "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 msgstr "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 
@@ -9894,7 +9891,7 @@ msgstr "To promote the IU by contributing to the development of the educational 
 msgid "To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
 msgstr "To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
 
-#: src/components/search/ask/AskPage.tsx:319
+#: src/components/search/ask/AskPage.tsx:284
 msgid "To search without the assistant, start a message with /search or /поиск."
 msgstr "To search without the assistant, start a message with /search or /поиск."
 
@@ -10883,7 +10880,7 @@ msgstr "You can add your schedule to InNoHassle and it will be updated on schedu
 msgid "You can attach up to 3 files."
 msgstr "You can attach up to 3 files."
 
-#: src/components/search/ask/AskPage.tsx:313
+#: src/components/search/ask/AskPage.tsx:278
 msgid "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
 msgstr "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
 
@@ -10999,7 +10996,7 @@ msgstr "Your club was invited as a host for this draft."
 msgid "Your document was sent to the printer"
 msgstr "Your document was sent to the printer"
 
-#: src/components/search/ask/AskPage.tsx:416
+#: src/components/search/ask/AskPage.tsx:381
 msgid "Your draft is below. You can edit it and send it again."
 msgstr "Your draft is below. You can edit it and send it again."
 

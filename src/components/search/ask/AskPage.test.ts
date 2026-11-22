@@ -22,10 +22,6 @@ const api = vi.hoisted(() => ({
   post: vi.fn(),
 }));
 vi.mock("./AskChatList", () => ({ AskChatList: () => null }));
-vi.mock("./AskAnnouncements", () => ({
-  AskAnnouncements: () => null,
-  AskAnnouncementsItem: () => null,
-}));
 vi.mock("./AskResult", () => ({ AskResult: () => null }));
 vi.mock("./AskSources", () => ({
   AskSources: () => createElement("button", { type: "button" }, "Sources"),
