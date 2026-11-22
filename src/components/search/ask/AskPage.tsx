@@ -3,6 +3,7 @@ import type { searchTypes } from "@/api/search";
 import { cn } from "@/lib/ui/cn";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocalStorage } from "usehooks-ts";
 import AnimatedDots from "@/components/search/AnimatedDots";
 import { AskChatList } from "./AskChatList";
 import { AskAttachment } from "./AskAttachment";
@@ -47,6 +48,11 @@ export function AskPage({
   const { t, i18n } = useLingui();
 
   const [isChatListOpen, setIsChatListOpen] = useState(false);
+  // The list of chats beside the conversation (wide screens) can be hidden to give it room
+  const [isSidebarHidden, setIsSidebarHidden] = useLocalStorage(
+    "ask-chats-hidden",
+    false,
+  );
   const [quote, setQuote] = useState("");
   const [isNoticeDismissed, setIsNoticeDismissed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -149,10 +155,22 @@ export function AskPage({
 
   return (
     <div className="flex min-h-0 grow">
-      <aside className="border-base-300 hidden w-64 shrink-0 flex-col gap-1 overflow-y-auto border-r p-2 @4xl/content:flex">
-        <NewChatButton className="w-full justify-start" />
-        <AskChatList />
-      </aside>
+      {!isSidebarHidden && (
+        <aside className="border-base-300 hidden w-64 shrink-0 flex-col gap-1 overflow-y-auto border-r p-2 @4xl/content:flex">
+          <div className="flex items-center justify-end gap-1">
+            {!isEmpty && <NewChatButton className="grow justify-start" />}
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm btn-square"
+              title={t`Hide chats`}
+              onClick={() => setIsSidebarHidden(true)}
+            >
+              <span className="icon-[material-symbols--left-panel-close-outline] text-lg" />
+            </button>
+          </div>
+          <AskChatList />
+        </aside>
+      )}
 
       <div className="flex min-h-0 min-w-0 grow flex-col">
         {assistantUnavailable && !isNoticeDismissed && (
@@ -178,6 +196,19 @@ export function AskPage({
             </button>
           </div>
         )}
+        {isSidebarHidden && (
+          <div className="border-base-300 hidden items-center gap-2 border-b px-4 py-2 @4xl/content:flex">
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => setIsSidebarHidden(false)}
+            >
+              <span className="icon-[material-symbols--left-panel-open-outline] text-lg" />
+              <Trans>Chats</Trans>
+            </button>
+            {!isEmpty && <NewChatButton />}
+          </div>
+        )}
         <div className="border-base-300 flex flex-col gap-2 border-b px-4 py-2 @4xl/content:hidden">
           <div className="flex items-center justify-between gap-2">
             <button
@@ -195,7 +226,7 @@ export function AskPage({
                 }
               />
             </button>
-            <NewChatButton />
+            {!isEmpty && <NewChatButton />}
           </div>
           {isChatListOpen && (
             <div className="max-h-64 overflow-y-auto pt-2">
