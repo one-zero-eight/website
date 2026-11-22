@@ -44,6 +44,7 @@ It is a hand-written worker (no Workbox). It exists only in production builds: `
 | [`src/service-worker/worker/sw.ts`](worker/sw.ts)                                                      | Worker entry: startup cleanup, install/activate, routing of requests and commands. |
 | [`src/service-worker/worker/site-update.ts`](worker/site-update.ts)                                    | Downloading builds, offline navigation, serving files, deleting old builds.        |
 | [`src/service-worker/worker/api-cache.ts`](worker/api-cache.ts)                                        | Caching selected API responses.                                                    |
+| [`src/service-worker/worker/ask-notifications.ts`](worker/ask-notifications.ts)                        | Clicks on cAtIx answer notifications: focus a window and open the chat.            |
 | [`src/service-worker/proxy-fallback.ts`](proxy-fallback.ts)                                            | Retrying a request on the mirror of its host when the host is unreachable.         |
 | [`src/service-worker/storage.ts`](storage.ts)                                                          | The worker's state in IndexedDB, the storage lock, purge.                          |
 | [`src/service-worker/protocol.ts`](protocol.ts)                                                        | Shared types and constants for the worker and the pages.                           |

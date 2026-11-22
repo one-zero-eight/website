@@ -1,43 +1,26 @@
-import { describe, expect, it, vi } from "vitest";
-
-const { readFileSync } = await vi.importActual<{
-  readFileSync: (path: string, encoding: "utf8") => string;
-}>("node:fs");
-const { runInNewContext } = await vi.importActual<{
-  runInNewContext: (code: string, context: Record<string, unknown>) => unknown;
-}>("node:vm");
-const serviceWorkerScript = readFileSync(
-  "public/ask-notifications-sw.js",
-  "utf8",
-);
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { handleAskNotificationClick } from "@/service-worker/worker/ask-notifications.ts";
 
 function createServiceWorkerScope(clients: unknown[] = []) {
-  let notificationClick: ((event: unknown) => void) | undefined;
   const openWindow = vi.fn();
   const matchAll = vi.fn().mockResolvedValue(clients);
-  const scope = {
-    URL,
+  vi.stubGlobal("self", {
     location: { origin: "https://example.test" },
     clients: { matchAll, openWindow },
-    addEventListener: vi.fn(
-      (type: string, listener: (event: unknown) => void) => {
-        if (type === "notificationclick") notificationClick = listener;
-      },
-    ),
-  };
-
-  runInNewContext(serviceWorkerScript, { self: scope, URL, URLSearchParams });
+  });
 
   return {
     click(notification: { data: unknown; close: () => void }) {
       const waitUntil = vi.fn();
-      notificationClick?.({ notification, waitUntil });
+      handleAskNotificationClick({ notification, waitUntil } as never);
       return waitUntil.mock.calls[0]?.[0] as Promise<void> | undefined;
     },
     matchAll,
     openWindow,
   };
 }
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("ask notification service worker click handling", () => {
   it("ignores notifications that are not cAtIx answers", async () => {

@@ -5,12 +5,14 @@
  * api-cache.ts keeps selected API responses. This file only:
  * - owns lifecycle (startup cleanup / install / activate / reset),
  * - routes fetch and RPC commands,
+ * - opens the chat when a cAtIx answer notification is clicked,
  * - exposes diagnostics.
  *
  * Site updates are independent of the worker script bytes: app deploys change
  * build-manifest.json while sw.js stays identical until worker logic changes.
  */
 import { handleApiCacheFetch } from "./api-cache.ts";
+import { handleAskNotificationClick } from "./ask-notifications.ts";
 import { mirrorUrl, networkFetch } from "@/service-worker/proxy-fallback.ts";
 import {
   mapsCacheName,
@@ -177,3 +179,4 @@ self.addEventListener("fetch", (event) => {
   if (handleApiCacheFetch(event)) return;
   if (mirrorUrl(url)) event.respondWith(networkFetch(event.request));
 });
+self.addEventListener("notificationclick", handleAskNotificationClick);
