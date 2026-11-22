@@ -116,7 +116,7 @@ export function AskResult({
           <span className="font-medium">
             <Trans>Sources</Trans>
           </span>
-          <ol className="flex list-none flex-col gap-2">
+          <ol className="divide-base-300 flex list-none flex-col divide-y">
             {sources.map((source) => {
               const member = source.archive_document?.member;
               const shown = previewOf(source);
@@ -126,7 +126,7 @@ export function AskResult({
                   id={citationTargets.get(source.number)}
                   tabIndex={-1}
                   value={source.number}
-                  className="min-w-0 wrap-anywhere"
+                  className="min-w-0 py-2 wrap-anywhere first:pt-0 last:pb-0"
                 >
                   <span className="font-medium">[{source.number}] </span>
                   <CitationLink
