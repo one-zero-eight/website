@@ -448,6 +448,7 @@ export function CalendarViewer({
         }}
         views={{
           listMonth: {
+            allDayText: t`All day`,
             eventContent: renderCalendarListEventContent,
             listDayFormat: (arg) => {
               if (arg.date.year === new Date().getFullYear()) {
@@ -484,8 +485,7 @@ export function CalendarViewer({
             eventContent: renderEventDayGridMonth,
           },
         }}
-        allDaySlot={true}
-        allDayText={t`All day`}
+        allDayText="" // Remove text in all day row
         // displayEventEnd={true} // Display end time
         nowIndicator={true} // Display current time as line
         nowIndicatorContent={(arg) => {

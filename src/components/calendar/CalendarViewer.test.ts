@@ -296,7 +296,7 @@ it.each(["listMonth", "timeGridWeek", "dayGridMonth"])(
         [...container.querySelectorAll(".fc-timegrid-axis")]
           .map((el) => el.textContent)
           .join(" "),
-      ).toContain("All day");
+      ).not.toContain("All day");
     }
     await act(async () => events[0].click());
     const dialog = document.querySelector('[role="dialog"]');
