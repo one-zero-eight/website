@@ -531,7 +531,6 @@ export function startNewChat() {
   update({
     messages: [],
     chatId: null,
-    queue: [],
     composerId: session.composerId + 1,
     draftQuery: "",
     draftAttachments: [],
@@ -565,7 +564,6 @@ export async function openChat(chatId: string) {
   update({
     messages: [],
     chatId,
-    queue: sameChat ? session.queue : [],
     composerId: sameChat ? session.composerId : session.composerId + 1,
     draftQuery: sameChat ? session.draftQuery : "",
     draftAttachments: sameChat ? session.draftAttachments : [],
