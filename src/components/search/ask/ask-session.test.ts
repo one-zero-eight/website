@@ -209,6 +209,34 @@ describe("ask session attachments", () => {
     ).toEqual(["First", "Second", "Third"]);
     expect(snapshot.queue).toEqual([]);
   });
+  it("keeps the unsent text with its chat when switching chats and after a reload", async () => {
+    api.history.mockResolvedValue({ answers: [] });
+    await act(async () => session.openChat("chat-1"));
+    act(() => session.setDraftQuery("For the first chat"));
+    await act(async () => session.openChat("chat-2"));
+    expect(snapshot.draftQuery).toBe("");
+    act(() => session.setDraftQuery("For the second chat"));
+    act(() => session.startNewChat());
+    expect(snapshot.draftQuery).toBe("");
+    act(() => session.setDraftQuery("For a new chat"));
+    await act(async () => session.openChat("chat-1"));
+    expect(snapshot.draftQuery).toBe("For the first chat");
+    vi.resetModules();
+    session = await import("./ask-session");
+    act(() =>
+      root.render(
+        createElement(function Reloaded() {
+          snapshot = session.useAskSession();
+          return null;
+        }),
+      ),
+    );
+    expect(snapshot.draftQuery).toBe("For the first chat");
+    await act(async () => session.openChat("chat-2"));
+    expect(snapshot.draftQuery).toBe("For the second chat");
+    act(() => session.startNewChat());
+    expect(snapshot.draftQuery).toBe("For a new chat");
+  });
   it("does not bind an unsent draft when an approval stream identifies its chat", async () => {
     const waiting = { ...answer, approval: { id: "approval-1", actions: [] } };
     api.history.mockResolvedValueOnce({ answers: [], waiting });

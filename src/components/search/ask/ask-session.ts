@@ -113,11 +113,15 @@ type SignupReceipt = Pick<
 const saved: Pick<AskSession, "messages" | "chatId"> &
   Partial<Pick<AskSession, "draftQuery" | "draftAttachments">> & {
     signupReceipts?: SignupReceipt[];
+    drafts?: Record<string, string>;
   } = JSON.parse(
   sessionStorage.getItem(STORAGE_KEY) ??
     JSON.stringify({ messages: [], chatId: null }),
 );
 let signupReceipts = saved.signupReceipts ?? [];
+// The unsent text of the chats the user left, by chat (the new chat has no id yet)
+const NEW_CHAT_DRAFT_KEY = "new";
+let drafts = saved.drafts ?? {};
 
 let session: AskSession = {
   ...saved,
@@ -163,6 +167,7 @@ function persist() {
       draftQuery: session.draftQuery,
       draftAttachments: session.draftAttachments,
       signupReceipts,
+      drafts,
     }),
   );
 }
@@ -553,14 +558,31 @@ function leaveChat() {
   });
 }
 
+// The text in the box stays with its chat: it comes back when the user returns to the chat
+function rememberDraft() {
+  const key = session.chatId ?? NEW_CHAT_DRAFT_KEY;
+  const { [key]: _, ...others } = drafts;
+  drafts = session.draftQuery.trim()
+    ? { ...others, [key]: session.draftQuery }
+    : others;
+}
+
+function takeDraft(chatId: string | null) {
+  const key = chatId ?? NEW_CHAT_DRAFT_KEY;
+  const { [key]: draft = "", ...others } = drafts;
+  drafts = others;
+  return draft;
+}
+
 // A new conversation: the assistant does not see the earlier questions any more
 export function startNewChat() {
   leaveChat();
+  rememberDraft();
   update({
     messages: [],
     chatId: null,
     composerId: session.composerId + 1,
-    draftQuery: "",
+    draftQuery: takeDraft(null),
     draftAttachments: [],
     answerText: "",
     status: "",
@@ -576,7 +598,9 @@ export function forgetChat(chatId: string) {
     (receipt) => receipt.chatId !== chatId,
   );
   if (session.chatId === chatId) startNewChat();
-  else persist();
+  const { [chatId]: _, ...others } = drafts;
+  drafts = others;
+  persist();
 }
 
 // One of the user's chats with its questions and answers, as the server keeps them, to go on with it
@@ -589,11 +613,12 @@ export async function openChat(chatId: string) {
     return;
   }
   leaveChat();
+  if (!sameChat) rememberDraft();
   update({
     messages: [],
     chatId,
     composerId: sameChat ? session.composerId : session.composerId + 1,
-    draftQuery: sameChat ? session.draftQuery : "",
+    draftQuery: sameChat ? session.draftQuery : takeDraft(chatId),
     draftAttachments: sameChat ? session.draftAttachments : [],
     answerText: "",
     status: "",
