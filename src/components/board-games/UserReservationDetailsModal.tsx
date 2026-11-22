@@ -14,7 +14,10 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { FormEvent, useState } from "react";
-import { getReservationStatusLabel } from "./reservation-presentation";
+import {
+  getReservationStatusLabel,
+  getTodayDateInputValue,
+} from "./reservation-presentation";
 
 export function UserReservationDetailsModal({
   reservation,
@@ -364,6 +367,7 @@ export function ReservationFormFields({
           <input
             type="date"
             className="input w-full"
+            min={getTodayDateInputValue()}
             value={returnDate}
             onChange={(event) => onReturnDateChange(event.target.value)}
             disabled={disabled}

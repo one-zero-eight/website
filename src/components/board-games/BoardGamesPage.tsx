@@ -36,9 +36,11 @@ export function BoardGamesPage({ gameId }: { gameId?: string }) {
     { params: { query: { how: "all" } } },
   );
   const gamesQuery = $boardGames.useQuery("get", "/board-games");
-  const games = (gamesQuery.data ?? []).filter((game): game is BoardGame =>
-    Boolean(game.id),
-  );
+  const games = (gamesQuery.data ?? [])
+    .filter((game): game is BoardGame => Boolean(game.id))
+    .sort((firstGame, secondGame) =>
+      firstGame.title.localeCompare(secondGame.title),
+    );
   const gameTitles = new Map(games.map((game) => [game.id, game.title]));
   const reservationsNewestFirst = [...(reservationsQuery.data ?? [])].sort(
     (firstReservation, secondReservation) =>

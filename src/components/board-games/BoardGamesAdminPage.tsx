@@ -38,9 +38,11 @@ export function BoardGamesAdminPage() {
   const reservations = (reservationsQuery.data ?? []).filter(
     (reservation): reservation is Reservation => Boolean(reservation.id),
   );
-  const games = (gamesQuery.data ?? []).filter((game): game is BoardGame =>
-    Boolean(game.id),
-  );
+  const games = (gamesQuery.data ?? [])
+    .filter((game): game is BoardGame => Boolean(game.id))
+    .sort((firstGame, secondGame) =>
+      firstGame.title.localeCompare(secondGame.title),
+    );
   const activeReservations = reservations.filter((reservation) =>
     activeStatuses.includes(reservation.status),
   );
@@ -895,7 +897,7 @@ function BoardGameFormModal({
 
     const body = {
       title: title.trim(),
-      description: description.trim() || null,
+      ...(description.trim() ? { description: description.trim() } : {}),
       total_copies: parsedTotalCopies,
     };
 
