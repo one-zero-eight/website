@@ -2719,6 +2719,7 @@ export enum AnswerSourceKind {
   eduwiki = "eduwiki",
   website = "website",
   web = "web",
+  moodle = "moodle",
   chat = "chat",
 }
 export enum AskDecisionDecision {

@@ -356,6 +356,8 @@ function SourceKind({
       return <Trans>Website</Trans>;
     case "web":
       return <Trans>Web search</Trans>;
+    case "moodle":
+      return <Trans>Moodle</Trans>;
     case "chat":
       return <Trans>Chat</Trans>;
   }
