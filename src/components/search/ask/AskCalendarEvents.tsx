@@ -53,7 +53,7 @@ export function AskCalendarEvents({
   return (
     <div className="flex flex-col items-start gap-1">
       {events.map((event) => {
-        const isAdded = addedIds.includes(event.id);
+        const isAdded = event.added || addedIds.includes(event.id);
         const isAdding =
           addEvent.isPending &&
           addEvent.variables?.params.path.proposal_id === event.id;
@@ -101,7 +101,7 @@ export function AskCalendarEvents({
           </button>
         );
       })}
-      {addedIds.length > 0 && (
+      {(addedIds.length > 0 || events.some((event) => event.added)) && (
         <Link to="/calendar" className="text-primary text-sm hover:underline">
           <Trans>Open the calendar</Trans>
         </Link>

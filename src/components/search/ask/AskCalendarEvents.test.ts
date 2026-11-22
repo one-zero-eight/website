@@ -39,6 +39,7 @@ const offer = {
   ends_at: "2026-11-09T01:00:00Z",
   all_day: false,
   end_suggested: true,
+  added: false,
 } satisfies searchTypes.SchemaCalendarEventOffer;
 
 function render(event: searchTypes.SchemaCalendarEventOffer = offer) {
@@ -109,3 +110,10 @@ it.each(["bad", "", "2026-11-08T22:00:00Z"])(
     expect(container.textContent).toContain("Invalid event interval");
   },
 );
+
+it("shows an event the calendar has already as added, without a button to post", () => {
+  render({ ...offer, added: true });
+  const button = container.querySelector("button")!;
+  expect(button.textContent).toContain("✅ Added: Study");
+  expect(button.disabled).toBe(true);
+});

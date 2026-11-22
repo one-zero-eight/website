@@ -808,6 +808,12 @@ export interface components {
       room?: string | null;
       /** Source Url */
       source_url?: string | null;
+      /**
+       * Added
+       * @description The user's calendar has the event already (in a chat's history; an event removed from the calendar is offered again).
+       * @default false
+       */
+      added: boolean;
     };
     /** CalendarExportKeyCreated */
     CalendarExportKeyCreated: {
