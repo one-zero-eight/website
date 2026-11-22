@@ -76,6 +76,7 @@ describe("ask session attachments", () => {
   beforeEach(async () => {
     vi.resetModules();
     sessionStorage.clear();
+    localStorage.clear();
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
     api.post.mockReset();
     api.history.mockReset();

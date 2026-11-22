@@ -111,21 +111,24 @@ type SignupReceipt = Pick<
 };
 
 const saved: Pick<AskSession, "messages" | "chatId"> &
-  Partial<Pick<AskSession, "draftQuery" | "draftAttachments">> & {
+  Partial<Pick<AskSession, "draftAttachments">> & {
     signupReceipts?: SignupReceipt[];
-    drafts?: Record<string, string>;
   } = JSON.parse(
   sessionStorage.getItem(STORAGE_KEY) ??
     JSON.stringify({ messages: [], chatId: null }),
 );
 let signupReceipts = saved.signupReceipts ?? [];
-// The unsent text of the chats the user left, by chat (the new chat has no id yet)
+// The unsent text of the chats the user left, by chat (the new chat has no id yet). Unlike the conversation it is kept
+// in localStorage: it outlives the tab
+const DRAFTS_STORAGE_KEY = "search-ask-drafts";
 const NEW_CHAT_DRAFT_KEY = "new";
-let drafts = saved.drafts ?? {};
+let drafts: Record<string, string> = JSON.parse(
+  localStorage.getItem(DRAFTS_STORAGE_KEY) ?? "{}",
+);
 
 let session: AskSession = {
   ...saved,
-  draftQuery: saved.draftQuery ?? "",
+  draftQuery: takeDraft(saved.chatId),
   draftAttachments: saved.draftAttachments ?? [],
   composerId: 0,
   queue: [],
@@ -164,12 +167,11 @@ function persist() {
     JSON.stringify({
       messages: session.messages,
       chatId: session.chatId,
-      draftQuery: session.draftQuery,
       draftAttachments: session.draftAttachments,
       signupReceipts,
-      drafts,
     }),
   );
+  localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(draftsWithCurrent()));
 }
 
 function subscribe(listener: () => void) {
@@ -559,12 +561,16 @@ function leaveChat() {
 }
 
 // The text in the box stays with its chat: it comes back when the user returns to the chat
-function rememberDraft() {
+function draftsWithCurrent() {
   const key = session.chatId ?? NEW_CHAT_DRAFT_KEY;
   const { [key]: _, ...others } = drafts;
-  drafts = session.draftQuery.trim()
+  return session.draftQuery.trim()
     ? { ...others, [key]: session.draftQuery }
     : others;
+}
+
+function rememberDraft() {
+  drafts = draftsWithCurrent();
 }
 
 function takeDraft(chatId: string | null) {
