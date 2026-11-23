@@ -10,6 +10,7 @@ export const exampleQuestions = [
   msg`Find a room available tomorrow from 15:00 to 16:00.`,
   msg`What was announced in my available chats this week?`,
   msg`How do I get to Innopolis University from Kazan?`,
+  msg`What is the syllabus of the course?`,
 ];
 
 // The questions asked in the open chat, newest first: they are completed from their start

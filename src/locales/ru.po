@@ -10645,6 +10645,10 @@ msgstr "Что это?"
 msgid "What is on my schedule tomorrow?"
 msgstr "Что у меня завтра по расписанию?"
 
+#: src/components/search/ask/ask-suggestions.ts:13
+msgid "What is the syllabus of the course?"
+msgstr "Какой syllabus у курса?"
+
 #: src/components/debug/WorkerDiagnostics.tsx:150
 msgid "What the browser knows about this worker"
 msgstr "Что браузер знает об этом воркере"
