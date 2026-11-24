@@ -4,6 +4,7 @@ import {
   BookingTaskItemStatus,
   BookingTaskKind,
   BookingTaskStatus,
+  CancelExtraRequestScope,
   type SchemaBookingReview,
   type SchemaBookingTask,
   type SchemaBookingTaskItem,
@@ -313,7 +314,10 @@ export function BookingWorkspace() {
       });
     } else {
       cancelExtras({
-        body: { extra_ids: [...selectedExtraIds] },
+        body: {
+          extra_ids: [...selectedExtraIds],
+          scope: CancelExtraRequestScope.series,
+        },
       });
     }
     setConfirmAction(null);
