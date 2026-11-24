@@ -8753,7 +8753,7 @@ msgstr ""
 
 #: src/components/timer/components/CustomTimeModal.tsx:89
 #: src/components/timer/lib/useTimer.ts:101
-msgid "The maximum countdown duration is 99:99:99"
+msgid "The maximum countdown duration is 99:59:59"
 msgstr ""
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:472

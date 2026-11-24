@@ -20,7 +20,7 @@ const CustomTimeModal = ({
   const [error, setError] = useState<MessageDescriptor | null>(null);
   const [previewTime, setPreviewTime] = useState<string | null>(null);
 
-  const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99;
+  const MAX_SECONDS = 99 * 3600 + 59 * 60 + 59;
 
   const { minDateTime, maxDateTime } = useMemo(() => {
     const minNow = new Date();
@@ -86,7 +86,7 @@ const CustomTimeModal = ({
     }
 
     if (totalSeconds > MAX_SECONDS) {
-      setError(msg`The maximum countdown duration is 99:99:99`);
+      setError(msg`The maximum countdown duration is 99:59:59`);
       return;
     }
 

@@ -8753,8 +8753,8 @@ msgstr "Главная цель участников <0/> — развивать
 
 #: src/components/timer/components/CustomTimeModal.tsx:89
 #: src/components/timer/lib/useTimer.ts:101
-msgid "The maximum countdown duration is 99:99:99"
-msgstr "Максимальная длительность — 99:99:99"
+msgid "The maximum countdown duration is 99:59:59"
+msgstr "Максимальная длительность — 99:59:59"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:472
 msgid "The new status has been saved."

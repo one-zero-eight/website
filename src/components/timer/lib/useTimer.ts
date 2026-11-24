@@ -96,9 +96,9 @@ export const useTimer = ({
       return;
     }
 
-    const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99;
+    const MAX_SECONDS = 99 * 3600 + 59 * 60 + 59;
     if (totalSeconds > MAX_SECONDS) {
-      showError(msg`The maximum countdown duration is 99:99:99`);
+      showError(msg`The maximum countdown duration is 99:59:59`);
       return;
     }
 
@@ -357,7 +357,7 @@ export const useTimer = ({
   const addTimeToRunningTimer = (minutesToAdd: number) => {
     if (!isRunning) return; // Only work when timer is running (including paused state)
 
-    const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99; // 99:99:99 in seconds
+    const MAX_SECONDS = 99 * 3600 + 59 * 60 + 59; // 99:59:59 in seconds
     const secondsToAdd = minutesToAdd * 60;
 
     if (isPaused) {
@@ -365,7 +365,7 @@ export const useTimer = ({
       const newSecondsLeft = Math.min(secondsLeft + secondsToAdd, MAX_SECONDS);
       const actualSecondsAdded = newSecondsLeft - secondsLeft;
 
-      if (actualSecondsAdded === 0) {
+      if (actualSecondsAdded <= 0) {
         showWarning(msg`Timer is already at maximum (99:59:59)`);
         return;
       }
@@ -409,7 +409,7 @@ export const useTimer = ({
       );
       const actualSecondsAdded = newSecondsLeft - currentRemainingSeconds;
 
-      if (actualSecondsAdded === 0) {
+      if (actualSecondsAdded <= 0) {
         showWarning(msg`Timer is already at maximum (99:59:59)`);
         return;
       }
@@ -494,8 +494,8 @@ export const useTimer = ({
         return;
       }
 
-      // Cap at 99:99:99
-      const MAX_SECONDS = 99 * 3600 + 99 * 60 + 99;
+      // Cap at 99:59:59
+      const MAX_SECONDS = 99 * 3600 + 59 * 60 + 59;
       const cappedSeconds = Math.min(totalSeconds, MAX_SECONDS);
 
       const h = Math.floor(cappedSeconds / 3600);
