@@ -227,6 +227,53 @@ describe("AskResult approval", () => {
     ]);
   });
 
+  it("shows the start of an event draft as a date and time input and sends it back as RFC 3339 with its offset", () => {
+    render({
+      response: {
+        ...response,
+        approval: {
+          id: "cp-draft",
+          actions: [
+            {
+              name: "call_api_tool",
+              target: "events_create_draft",
+              args: {
+                name: "Startup Talk",
+                starts_at: "2026-11-25T18:00:00+03:00",
+              },
+              fields: [
+                {
+                  name: "name",
+                  kind: "text",
+                  value: "Startup Talk",
+                  required: true,
+                },
+                {
+                  name: "starts_at",
+                  kind: "text",
+                  value: "2026-11-25T18:00:00+03:00",
+                  required: false,
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+
+    const start = container.querySelector<HTMLInputElement>(
+      'input[aria-label="Start"]',
+    )!;
+    expect(start.type).toBe("datetime-local");
+    expect(start.value).toBe("2026-11-25T18:00");
+    type(start, "2026-11-25T19:30");
+
+    act(() => container.querySelectorAll("button")[0].click());
+    expect(decideApproval).toHaveBeenCalledExactlyOnceWith("approve", [
+      { index: 0, values: { starts_at: "2026-11-25T19:30:00+03:00" } },
+    ]);
+  });
+
   it("does not send an edit that was typed back to the proposed value", () => {
     render({ response: { ...response, approval: calendarApproval } });
 

@@ -98,6 +98,26 @@ export function AskApproval({
   );
 }
 
+// An RFC 3339 time as the wall clock of its own offset for a datetime-local input: 2026-11-25T18:00:00+03:00 → 2026-11-25T18:00
+function toLocalInput(value: string): string {
+  return value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)?.[0] ?? "";
+}
+
+// The time typed in a datetime-local input back as RFC 3339: with the offset the value had, else the browser's
+function fromLocalInput(local: string, previous: string): string {
+  if (!local) return "";
+  const offset =
+    previous.match(/(?:Z|[+-]\d{2}:\d{2})$/)?.[0] ?? browserOffset(local);
+  return `${local}:00${offset}`;
+}
+
+function browserOffset(local: string): string {
+  const minutes = -new Date(local).getTimezoneOffset();
+  const sign = minutes < 0 ? "-" : "+";
+  const hours = String(Math.floor(Math.abs(minutes) / 60)).padStart(2, "0");
+  return `${sign}${hours}:${String(Math.abs(minutes) % 60).padStart(2, "0")}`;
+}
+
 function text(value: unknown): string {
   return value === null || value === undefined ? "" : String(value);
 }
@@ -265,6 +285,14 @@ function ActionField({
           rows={3}
           className="textarea textarea-sm w-full"
           onChange={(e) => onChange(e.target.value)}
+        />
+      ) : field.name === "starts_at" ? (
+        <input
+          {...common}
+          value={toLocalInput(value)}
+          type="datetime-local"
+          className="input input-sm w-full"
+          onChange={(e) => onChange(fromLocalInput(e.target.value, value))}
         />
       ) : (
         <input
