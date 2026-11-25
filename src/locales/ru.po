@@ -90,8 +90,8 @@ msgid "[{group}] Semester {semester}: <0>{range}</0>"
 msgstr "[{group}] Семестр {semester}: <0>{range}</0>"
 
 #: src/components/search/SourceRequests.tsx:146
-msgid "[private invite hidden]"
-msgstr "[приватная ссылка скрыта]"
+#~ msgid "[private invite hidden]"
+#~ msgstr "[приватная ссылка скрыта]"
 
 #. placeholder {0}: clubs.length
 #: src/components/clubs/ClubReviewChangesPage.tsx:42
@@ -979,8 +979,8 @@ msgstr "Все 0 ч"
 
 #: src/components/search/SourceRequests.tsx:185
 #: src/components/search/SourceRequests.tsx:385
-msgid "All cAtIx users"
-msgstr "Все пользователи cAtIx"
+#~ msgid "All cAtIx users"
+#~ msgstr "Все пользователи cAtIx"
 
 #: src/components/calendar/CalendarEventPopover.tsx:162
 #: src/components/calendar/CalendarViewer.tsx:451
@@ -1103,8 +1103,8 @@ msgid "approved at {date}"
 msgstr "одобрено {date}"
 
 #: src/components/search/SourceRequests.tsx:459
-msgid "Approved; queued to connect"
-msgstr "Одобрено; в очереди на подключение"
+#~ msgid "Approved; queued to connect"
+#~ msgstr "Одобрено; в очереди на подключение"
 
 #: src/components/when2meet/ArchiveMeetingButton.test.ts:43
 #: src/components/when2meet/ArchiveMeetingButton.tsx:39
@@ -1172,7 +1172,7 @@ msgstr "Искусство и культура"
 msgid "Ask a question..."
 msgstr "Задайте вопрос..."
 
-#: src/app/routes/_with_menu/search/ask.tsx:43
+#: src/app/routes/_with_menu/search/ask.tsx:42
 msgid "Ask questions or find answers at Innopolis University."
 msgstr "Задавайте вопросы или ищите ответы в Университете Иннополис."
 
@@ -1266,8 +1266,8 @@ msgid "Available window"
 msgstr "Свободное окно"
 
 #: src/components/search/SourceRequests.tsx:457
-msgid "Awaiting cAtIx administrator approval"
-msgstr "Ожидает одобрения администратора cAtIx"
+#~ msgid "Awaiting cAtIx administrator approval"
+#~ msgstr "Ожидает одобрения администратора cAtIx"
 
 #: src/components/scholarship/ScholarshipCalculator.tsx:262
 msgid "B23"
@@ -1841,12 +1841,12 @@ msgid "Chat name"
 msgstr "Название чата"
 
 #: src/components/search/SourceRequests.tsx:381
-msgid "Chat request"
-msgstr "Заявка на подключение чата"
+#~ msgid "Chat request"
+#~ msgstr "Заявка на подключение чата"
 
 #: src/components/search/SourceRequests.tsx:55
-msgid "Chat source requests"
-msgstr "Заявки на подключение чатов"
+#~ msgid "Chat source requests"
+#~ msgstr "Заявки на подключение чатов"
 
 #: src/components/search/ask/AskSources.tsx:25
 #: src/components/search/ask/AskSources.tsx:30
@@ -2005,8 +2005,8 @@ msgid "Choose meeting time"
 msgstr "Выбрать время встречи"
 
 #: src/components/search/SourceRequests.tsx:271
-msgid "Choose one of your verified study groups."
-msgstr "Выберите одну из подтверждённых для вас учебных групп."
+#~ msgid "Choose one of your verified study groups."
+#~ msgstr "Выберите одну из подтверждённых для вас учебных групп."
 
 #: src/components/search/ask/AskInput.tsx:88
 msgid "Choose PDF, TXT, PNG, JPEG or WebP files."
@@ -2262,12 +2262,12 @@ msgid "Comment"
 msgstr "Комментарий"
 
 #: src/components/search/SourceRequests.tsx:277
-msgid "Comment (optional)"
-msgstr "Комментарий (необязательно)"
+#~ msgid "Comment (optional)"
+#~ msgstr "Комментарий (необязательно)"
 
 #: src/components/search/SourceRequests.tsx:289
-msgid "Comment must be 2000 characters or fewer."
-msgstr "Комментарий должен содержать не более 2000 символов."
+#~ msgid "Comment must be 2000 characters or fewer."
+#~ msgstr "Комментарий должен содержать не более 2000 символов."
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:359
 #: src/components/board-games/ReservationDetailsModal.tsx:267
@@ -2353,8 +2353,8 @@ msgid "Confirm status change"
 msgstr "Подтвердить изменение статуса"
 
 #: src/components/search/SourceRequests.tsx:314
-msgid "Confirm the chat administrator's consent for this audience."
-msgstr "Подтвердите согласие администратора чата для выбранной аудитории."
+#~ msgid "Confirm the chat administrator's consent for this audience."
+#~ msgstr "Подтвердите согласие администратора чата для выбранной аудитории."
 
 #: src/app/routes/_with_menu/42.tsx:34
 msgid "Congratulations! You've Unlocked a Special Link!"
@@ -2396,12 +2396,12 @@ msgid "Connect your Telegram"
 msgstr "Подключите Telegram"
 
 #: src/components/search/SourceRequests.tsx:461
-msgid "Connecting chat"
-msgstr "Подключение чата"
+#~ msgid "Connecting chat"
+#~ msgstr "Подключение чата"
 
 #: src/components/search/SourceRequests.tsx:469
-msgid "Connection failed"
-msgstr "Не удалось подключить чат"
+#~ msgid "Connection failed"
+#~ msgstr "Не удалось подключить чат"
 
 #: src/components/clubs/constants.ts:87
 msgid "Contact"
@@ -2585,8 +2585,8 @@ msgid "Could not load sources."
 msgstr "Не удалось загрузить источники."
 
 #: src/components/search/SourceRequests.tsx:358
-msgid "Could not load your requests. Refresh to try again."
-msgstr "Не удалось загрузить ваши заявки. Обновите список, чтобы повторить попытку."
+#~ msgid "Could not load your requests. Refresh to try again."
+#~ msgstr "Не удалось загрузить ваши заявки. Обновите список, чтобы повторить попытку."
 
 #: src/components/board-games/BoardGamesPage.tsx:587
 msgid "Could not load your Telegram account"
@@ -2633,8 +2633,8 @@ msgid "Could not sign up"
 msgstr "Не удалось записаться"
 
 #: src/components/search/SourceRequests.tsx:442
-msgid "Could not submit the request. Check the invite link, study group and consent, then retry. If the connection was interrupted, refresh your requests before trying again."
-msgstr "Не удалось отправить заявку. Проверьте ссылку-приглашение, учебную группу и согласие, затем повторите попытку. Если соединение прервалось, сначала обновите список заявок."
+#~ msgid "Could not submit the request. Check the invite link, study group and consent, then retry. If the connection was interrupted, refresh your requests before trying again."
+#~ msgstr "Не удалось отправить заявку. Проверьте ссылку-приглашение, учебную группу и согласие, затем повторите попытку. Если соединение прервалось, сначала обновите список заявок."
 
 #: src/components/sport/SportTrainerAttendanceModal.tsx:69
 #: src/components/sport/SportTrainerTrainingModal.tsx:204
@@ -3559,8 +3559,8 @@ msgid "Enter a valid email."
 msgstr "Введите корректный email."
 
 #: src/components/search/SourceRequests.tsx:223
-msgid "Enter a valid Telegram or MAX chat, channel or invite link."
-msgstr "Введите корректную ссылку на чат, канал или приглашение Telegram или MAX."
+#~ msgid "Enter a valid Telegram or MAX chat, channel or invite link."
+#~ msgstr "Введите корректную ссылку на чат, канал или приглашение Telegram или MAX."
 
 #: src/components/clubs/AddClubDialog.tsx:97
 msgid "Enter club title"
@@ -4807,8 +4807,8 @@ msgid "Increased State Social Scholarship for bachelor's and master's students �
 msgstr "Повышенная государственная социальная стипендия для бакалавров и магистров — <0>15 500₽</0>."
 
 #: src/components/search/SourceRequests.tsx:191
-msgid "Indexed messages will be visible to students verified for the selected study group, including students who are not chat members."
-msgstr "Проиндексированные сообщения будут доступны студентам, подтверждённым для выбранной учебной группы, в том числе тем, кто не состоит в чате."
+#~ msgid "Indexed messages will be visible to students verified for the selected study group, including students who are not chat members."
+#~ msgstr "Проиндексированные сообщения будут доступны студентам, подтверждённым для выбранной учебной группы, в том числе тем, кто не состоит в чате."
 
 #: src/components/guard/GuardTabs.tsx:8
 #: src/components/sport/SportTabs.tsx:29
@@ -5256,8 +5256,8 @@ msgid "Loading current booking details..."
 msgstr "Загрузка деталей текущего бронирования..."
 
 #: src/components/search/SourceRequests.tsx:353
-msgid "Loading requests…"
-msgstr "Загрузка заявок…"
+#~ msgid "Loading requests…"
+#~ msgstr "Загрузка заявок…"
 
 #: src/components/search/SearchPage.tsx:191
 #~ msgid "Loading search results..."
@@ -5450,8 +5450,8 @@ msgid "Max participants"
 msgstr "Макс. участников"
 
 #: src/components/search/SourceRequests.tsx:285
-msgid "Maximum 2000 characters."
-msgstr "Не более 2000 символов."
+#~ msgid "Maximum 2000 characters."
+#~ msgstr "Не более 2000 символов."
 
 #: src/components/sport/SportProfilePage.tsx:349
 msgid "Medical group change request · In review"
@@ -5588,8 +5588,8 @@ msgstr "Мерч клуба"
 #~ msgstr "Сообщение"
 
 #: src/components/search/SourceRequests.tsx:198
-msgid "Messages will be visible to all cAtIx users, including people who are not members of your study group or chat."
-msgstr "Сообщения будут доступны всем пользователям cAtIx, в том числе тем, кто не состоит ни в вашей учебной группе, ни в чате."
+#~ msgid "Messages will be visible to all cAtIx users, including people who are not members of your study group or chat."
+#~ msgstr "Сообщения будут доступны всем пользователям cAtIx, в том числе тем, кто не состоит ни в вашей учебной группе, ни в чате."
 
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:232
 msgid "Min"
@@ -5725,8 +5725,8 @@ msgid "My upcoming trainings"
 msgstr "Мои ближайшие тренировки"
 
 #: src/components/search/SourceRequests.tsx:182
-msgid "My verified study group"
-msgstr "Моя подтверждённая учебная группа"
+#~ msgid "My verified study group"
+#~ msgstr "Моя подтверждённая учебная группа"
 
 #: src/components/admin/AdminUserDetails.tsx:267
 #: src/components/calendar/import/ImportModal.tsx:163
@@ -6238,8 +6238,8 @@ msgid "No registrations for this origin."
 msgstr "Для этого origin нет регистраций."
 
 #: src/components/search/SourceRequests.tsx:363
-msgid "No requests yet."
-msgstr "У вас пока нет заявок."
+#~ msgid "No requests yet."
+#~ msgstr "У вас пока нет заявок."
 
 #: src/components/board-games/ReservationsAdminPage.tsx:220
 msgid "No reservations match these filters."
@@ -6327,8 +6327,8 @@ msgid "No users in this group."
 msgstr "В этой группе нет пользователей."
 
 #: src/components/search/SourceRequests.tsx:259
-msgid "No verified study groups are available. Choose all cAtIx users or refresh after verification is available."
-msgstr "Нет доступных подтверждённых учебных групп. Выберите всех пользователей cAtIx или обновите список после подтверждения группы."
+#~ msgid "No verified study groups are available. Choose all cAtIx users or refresh after verification is available."
+#~ msgstr "Нет доступных подтверждённых учебных групп. Выберите всех пользователей cAtIx или обновите список после подтверждения группы."
 
 #: src/components/schedule-assistant/timetable/TimetableWorkspace.tsx:1550
 msgid "No weeks"
@@ -6583,8 +6583,8 @@ msgstr "Только администраторы могут создавать 
 #~ msgstr "Автоматически перезагружаются только страницы просмотра, для которых это явно разрешено. Формы, таймеры, редакторы и страницы с незавершённой работой остаются на текущей сборке."
 
 #: src/components/search/SourceRequests.tsx:264
-msgid "Only groups verified for your account can be selected."
-msgstr "Можно выбрать только группы, подтверждённые для вашего аккаунта."
+#~ msgid "Only groups verified for your account can be selected."
+#~ msgstr "Можно выбрать только группы, подтверждённые для вашего аккаунта."
 
 #: src/components/when2meet/CreationPage.tsx:140
 msgid "Only the meeting owner can edit this event."
@@ -7193,8 +7193,8 @@ msgid "Projects"
 msgstr "Проекты"
 
 #: src/components/search/SourceRequests.tsx:50
-msgid "Propose a chat"
-msgstr "Предложить чат"
+#~ msgid "Propose a chat"
+#~ msgstr "Предложить чат"
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:51
 msgid "Proposed"
@@ -7393,8 +7393,8 @@ msgid "Redo"
 msgstr "Повторить"
 
 #: src/components/search/SourceRequests.tsx:372
-msgid "Refresh requests"
-msgstr "Обновить заявки"
+#~ msgid "Refresh requests"
+#~ msgstr "Обновить заявки"
 
 #: src/components/debug/DebugPage.tsx:137
 msgid "Refresh snapshot"
@@ -7585,16 +7585,16 @@ msgid "Report form will be published to Club Leaders telegram group every month,
 msgstr "Форма отчёта публикуется каждый месяц в Telegram-группе лидеров клубов; по ней начисляются баллы."
 
 #: src/components/search/SourceRequests.tsx:471
-msgid "Request rejected"
-msgstr "Заявка отклонена"
+#~ msgid "Request rejected"
+#~ msgstr "Заявка отклонена"
 
 #: src/components/clubs/HowToCreateClubPage.tsx:82
 msgid "Request rooms, projectors, sports halls, and other resources for your club's meetings."
 msgstr "Запрашивайте аудитории, проекторы, спортзалы и другие ресурсы для встреч клуба."
 
 #: src/components/search/SourceRequests.tsx:326
-msgid "Request saved. Current status: <0/>"
-msgstr "Заявка сохранена. Текущий статус: <0/>"
+#~ msgid "Request saved. Current status: <0/>"
+#~ msgstr "Заявка сохранена. Текущий статус: <0/>"
 
 #: src/components/web-print/PrintPage.tsx:452
 msgid "Required"
@@ -8275,8 +8275,8 @@ msgid "Select a user to impersonate."
 msgstr "Выберите пользователя для имперсонации."
 
 #: src/components/search/SourceRequests.tsx:244
-msgid "Select a verified study group"
-msgstr "Выберите подтверждённую учебную группу"
+#~ msgid "Select a verified study group"
+#~ msgstr "Выберите подтверждённую учебную группу"
 
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:83
 #: src/components/search/ask/AskQuoteMenu.tsx:102
@@ -8717,8 +8717,8 @@ msgid "Sorry, this site does not support preview. Please, open it directly."
 msgstr "Извините, этот сайт не поддерживает предпросмотр. Откройте его напрямую."
 
 #: src/components/search/SourceRequests.tsx:466
-msgid "Source enabled; message history may still be loading"
-msgstr "Источник включён; история сообщений может ещё загружаться"
+#~ msgid "Source enabled; message history may still be loading"
+#~ msgstr "Источник включён; история сообщений может ещё загружаться"
 
 #: src/components/debug/DiagnosticData.tsx:19
 msgid "Source:"
@@ -9066,12 +9066,12 @@ msgid "Students not found"
 msgstr "Студенты не найдены"
 
 #: src/components/search/SourceRequests.tsx:231
-msgid "Study group"
-msgstr "Учебная группа"
+#~ msgid "Study group"
+#~ msgstr "Учебная группа"
 
 #: src/components/search/SourceRequests.tsx:169
-msgid "Study group verification is not proof of chat membership."
-msgstr "Подтверждённая учебная группа не подтверждает участие в чате."
+#~ msgid "Study group verification is not proof of chat membership."
+#~ msgstr "Подтверждённая учебная группа не подтверждает участие в чате."
 
 #: src/components/search/ask/AskSources.tsx:93
 msgid "Study group verification is unavailable. Common sources are still available."
@@ -9105,8 +9105,8 @@ msgid "Submit on review"
 msgstr "Отправить на проверку"
 
 #: src/components/search/SourceRequests.tsx:341
-msgid "Submit request"
-msgstr "Отправить заявку"
+#~ msgid "Submit request"
+#~ msgstr "Отправить заявку"
 
 #: src/components/sport/SportOverviewSection.tsx:293
 #: src/components/sport/SportOverviewSection.tsx:496
@@ -9142,12 +9142,12 @@ msgid "Submitted: <0>{0}</0>"
 msgstr "Отправлено: <0>{0}</0>"
 
 #: src/components/search/SourceRequests.tsx:153
-msgid "Submitting a request does not join the chat. A cAtIx administrator must review it first. Approval queues the account worker to join the Telegram or MAX chat automatically. The chat administrator may still need to approve the join request. Indexing and history loading start only after chat access is confirmed."
-msgstr "Отправка заявки не приводит к вступлению в чат. Сначала её должен проверить администратор cAtIx. После одобрения заявка попадает в очередь обработчика пользовательского аккаунта для автоматического вступления в чат Telegram или MAX. Администратору чата может потребоваться одобрить вступление. Индексация и загрузка истории начинаются только после подтверждения доступа к чату."
+#~ msgid "Submitting a request does not join the chat. A cAtIx administrator must review it first. Approval queues the account worker to join the Telegram or MAX chat automatically. The chat administrator may still need to approve the join request. Indexing and history loading start only after chat access is confirmed."
+#~ msgstr "Отправка заявки не приводит к вступлению в чат. Сначала её должен проверить администратор cAtIx. После одобрения заявка попадает в очередь обработчика пользовательского аккаунта для автоматического вступления в чат Telegram или MAX. Администратору чата может потребоваться одобрить вступление. Индексация и загрузка истории начинаются только после подтверждения доступа к чату."
 
 #: src/components/search/SourceRequests.tsx:345
-msgid "Submitting your request…"
-msgstr "Отправляем заявку…"
+#~ msgid "Submitting your request…"
+#~ msgstr "Отправляем заявку…"
 
 #: src/components/admin/AdminRoomsPage.tsx:73
 #: src/components/admin/useImpersonation.ts:111
@@ -9383,8 +9383,8 @@ msgid "Telegram not provided"
 msgstr "Telegram не указан"
 
 #: src/components/search/SourceRequests.tsx:205
-msgid "Telegram or MAX chat or channel link"
-msgstr "Ссылка на чат или канал Telegram или MAX"
+#~ msgid "Telegram or MAX chat or channel link"
+#~ msgstr "Ссылка на чат или канал Telegram или MAX"
 
 #: src/components/clubs/EditClubPage.tsx:1207
 msgid "Telegram User"
@@ -9440,12 +9440,12 @@ msgid "The bracket appears when the organiser starts qualification."
 msgstr "Сетка появляется, когда организатор начинает квалификацию."
 
 #: src/components/search/SourceRequests.tsx:306
-msgid "The chat administrator agreed to indexing this chat and making its messages available to verified students of the selected study group."
-msgstr "Администратор чата согласился на индексацию чата и показ его сообщений студентам, подтверждённым для выбранной учебной группы."
+#~ msgid "The chat administrator agreed to indexing this chat and making its messages available to verified students of the selected study group."
+#~ msgstr "Администратор чата согласился на индексацию чата и показ его сообщений студентам, подтверждённым для выбранной учебной группы."
 
 #: src/components/search/SourceRequests.tsx:301
-msgid "The chat administrator agreed to indexing this chat and making its messages visible to all cAtIx users."
-msgstr "Администратор чата согласился на индексацию чата и показ его сообщений всем пользователям cAtIx."
+#~ msgid "The chat administrator agreed to indexing this chat and making its messages visible to all cAtIx users."
+#~ msgstr "Администратор чата согласился на индексацию чата и показ его сообщений всем пользователям cAtIx."
 
 #: src/components/clubs/ClubPage.tsx:313
 msgid "The club leader should connect their Telegram account to InNoHassle using the <0>link</0>."
@@ -9678,8 +9678,8 @@ msgid "This game is no longer in the catalogue."
 msgstr "Этой игры больше нет в каталоге."
 
 #: src/components/search/SourceRequests.tsx:424
-msgid "This invitation already has a rejected or failed request. Refresh your requests and contact a cAtIx administrator for review, or use a new invitation."
-msgstr "Для этого приглашения уже есть отклонённая или завершившаяся ошибкой заявка. Обновите список заявок и обратитесь к администратору cAtIx для пересмотра или используйте новое приглашение."
+#~ msgid "This invitation already has a rejected or failed request. Refresh your requests and contact a cAtIx administrator for review, or use a new invitation."
+#~ msgstr "Для этого приглашения уже есть отклонённая или завершившаяся ошибкой заявка. Обновите список заявок и обратитесь к администратору cAtIx для пересмотра или используйте новое приглашение."
 
 #: src/app/routes/forms.submit.tsx:181
 msgid "This link may be invalid, expired, or you may not have access."
@@ -10280,8 +10280,8 @@ msgid "Use only for development. Do not send it to untrusted people or applicati
 msgstr "Используйте только для разработки. Не передавайте его людям и приложениям, которым не доверяете!"
 
 #: src/components/search/SourceRequests.tsx:214
-msgid "Use t.me/username or max.ru/username for a public chat or channel, t.me/+HASH or t.me/joinchat/HASH for a private Telegram invitation, or max.ru/join/HASH for a private MAX invitation. Links with https:// are also supported."
-msgstr "Для публичного чата или канала используйте t.me/username или max.ru/username, для приватного приглашения Telegram — t.me/+HASH или t.me/joinchat/HASH, для приватного приглашения MAX — max.ru/join/HASH. Ссылки с https:// тоже поддерживаются."
+#~ msgid "Use t.me/username or max.ru/username for a public chat or channel, t.me/+HASH or t.me/joinchat/HASH for a private Telegram invitation, or max.ru/join/HASH for a private MAX invitation. Links with https:// are also supported."
+#~ msgstr "Для публичного чата или канала используйте t.me/username или max.ru/username, для приватного приглашения Telegram — t.me/+HASH или t.me/joinchat/HASH, для приватного приглашения MAX — max.ru/join/HASH. Ссылки с https:// тоже поддерживаются."
 
 #: src/components/account/SignInModal.tsx:23
 msgid "Use your Innopolis account to access all features of this service."
@@ -10454,8 +10454,8 @@ msgid "Waiting"
 msgstr "Ожидание"
 
 #: src/components/search/SourceRequests.tsx:463
-msgid "Waiting for chat access confirmation"
-msgstr "Ожидает подтверждения доступа к чату"
+#~ msgid "Waiting for chat access confirmation"
+#~ msgstr "Ожидает подтверждения доступа к чату"
 
 #: src/components/board-games/reservation-presentation.ts:35
 msgid "Waiting for pickup"
@@ -10700,8 +10700,8 @@ msgid "When the game should be back."
 msgstr "К какому сроку игра должна вернуться."
 
 #: src/components/search/SourceRequests.tsx:162
-msgid "While waiting for access, the chat administrator may need to approve the join request. If joining times out, the worker checks access without blindly repeating the join."
-msgstr "Пока ожидается доступ, администратору чата может потребоваться одобрить заявку на вступление. При таймауте вступления обработчик проверяет доступ, не повторяя вступление вслепую."
+#~ msgid "While waiting for access, the chat administrator may need to approve the join request. If joining times out, the worker checks access without blindly repeating the join."
+#~ msgstr "Пока ожидается доступ, администратору чата может потребоваться одобрить заявку на вступление. При таймауте вступления обработчик проверяет доступ, не повторяя вступление вслепую."
 
 #: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:671
 msgid "Who can teach"
@@ -10716,8 +10716,8 @@ msgstr "Кто это?"
 #~ msgstr "Кто забрал игру."
 
 #: src/components/search/SourceRequests.tsx:172
-msgid "Who should be able to see indexed messages?"
-msgstr "Кто сможет видеть проиндексированные сообщения?"
+#~ msgid "Who should be able to see indexed messages?"
+#~ msgstr "Кто сможет видеть проиндексированные сообщения?"
 
 #: src/components/about/AboutPage.tsx:32
 msgid "Who we are"
@@ -10951,8 +10951,8 @@ msgid "You have no reservations yet."
 msgstr "У вас пока нет бронирований."
 
 #: src/components/search/SourceRequests.tsx:433
-msgid "You have reached the daily limit for new requests. Wait 24 hours before submitting a new invitation. You can still refresh your existing requests."
-msgstr "Вы достигли суточного лимита новых заявок. Подождите 24 часа перед отправкой нового приглашения. Список существующих заявок можно обновлять."
+#~ msgid "You have reached the daily limit for new requests. Wait 24 hours before submitting a new invitation. You can still refresh your existing requests."
+#~ msgstr "Вы достигли суточного лимита новых заявок. Подождите 24 часа перед отправкой нового приглашения. Список существующих заявок можно обновлять."
 
 #: src/components/clubs/EditClubPage.tsx:245
 msgid "You have unsaved changes. Are you sure you want to leave?"
@@ -11037,8 +11037,8 @@ msgid "Your music room bookings"
 msgstr "Ваши бронирования музкомнаты"
 
 #: src/components/search/SourceRequests.tsx:349
-msgid "Your requests"
-msgstr "Ваши заявки"
+#~ msgid "Your requests"
+#~ msgstr "Ваши заявки"
 
 #: src/components/board-games/UserReservationDetailsModal.tsx:52
 msgid "Your reservation was removed."
@@ -11053,8 +11053,8 @@ msgid "Your room bookings"
 msgstr "Ваши бронирования аудиторий"
 
 #: src/components/search/SourceRequests.tsx:416
-msgid "Your selected study group is no longer verified. Refresh your requests and select a currently verified group before submitting."
-msgstr "Выбранная учебная группа больше не подтверждена. Обновите заявки и перед отправкой выберите группу, подтверждённую сейчас."
+#~ msgid "Your selected study group is no longer verified. Refresh your requests and select a currently verified group before submitting."
+#~ msgstr "Выбранная учебная группа больше не подтверждена. Обновите заявки и перед отправкой выберите группу, подтверждённую сейчас."
 
 #: src/components/board-games/BoardGamesPage.tsx:666
 msgid "Your session has expired. Sign in again and retry the reservation."
@@ -11078,8 +11078,8 @@ msgid "Your sport checkins"
 msgstr "Ваши записи на спорт"
 
 #: src/components/search/SourceRequests.tsx:254
-msgid "Your study groups could not be verified. Refresh to try again, or choose all cAtIx users."
-msgstr "Не удалось проверить ваши учебные группы. Обновите список или выберите всех пользователей cAtIx."
+#~ msgid "Your study groups could not be verified. Refresh to try again, or choose all cAtIx users."
+#~ msgstr "Не удалось проверить ваши учебные группы. Обновите список или выберите всех пользователей cAtIx."
 
 #: src/components/sport/SportCheckinRulesModal.tsx:33
 msgid "Your university pass grants access only to the sessions you have checked in for. In case of misuse of the university pass, you may be subject to sanctions, including a monetary fine from the sports complex and disciplinary action from the university."

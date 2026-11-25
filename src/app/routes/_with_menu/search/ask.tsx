@@ -4,7 +4,6 @@ import { useLingui } from "@lingui/react/macro";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { AskPage } from "@/components/search/ask/AskPage";
 import { AskNotificationButton } from "@/components/search/ask/AskNotificationButton";
-import { SourceRequests } from "@/components/search/SourceRequests";
 import { AskSources } from "@/components/search/ask/AskSources";
 import { CatixTitle } from "@/components/search/ask/CatixTitle";
 import { Topbar } from "@/components/layout/Topbar";
@@ -49,7 +48,6 @@ function RouteComponent() {
         titleAction={
           <>
             <AskSources />
-            <SourceRequests />
             <AskNotificationButton />
           </>
         }

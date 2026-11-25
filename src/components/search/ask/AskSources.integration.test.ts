@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, createElement, Fragment, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SourceRequests } from "../SourceRequests";
 import { AskSources } from "./AskSources";
 
 const transport = vi.hoisted(() => {
@@ -83,12 +82,7 @@ describe("Sources shared-client and modal lifecycle", () => {
           createElement(
             I18nProvider,
             { i18n: setupI18n({ locale: "en", messages: { en: {} } }) },
-            createElement(
-              Fragment,
-              null,
-              createElement(AskSources),
-              createElement(SourceRequests),
-            ),
+            createElement(Fragment, null, createElement(AskSources)),
           ),
         ),
       ),
@@ -132,20 +126,5 @@ describe("Sources shared-client and modal lifecycle", () => {
     expect(document.body.textContent).toContain("Could not load sources.");
     expect(document.body.textContent).not.toContain("Private group chat");
     expect(transport).toHaveBeenCalledTimes(2);
-  });
-
-  it("opens the real proposal form on its own, apart from the sources", async () => {
-    act(() => button("Propose a chat").click());
-    await settle();
-    expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(1);
-    expect(
-      document.body.querySelector('input[name="invite_link"]'),
-    ).not.toBeNull();
-    expect((transport.mock.calls[0][0] as Request).url).toBe(
-      "http://localhost/search/sources/requests",
-    );
-    closeTopDialog();
-    await settle();
-    expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(0);
   });
 });
