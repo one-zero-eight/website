@@ -464,15 +464,19 @@ describe("AskResult approval", () => {
     expect(container.querySelectorAll("img")).toHaveLength(1);
   });
 
-  it("shows no pictures of an answer that is still streaming", () => {
-    act(() => {
-      root.render(
-        createElement(AskAnswerBody, {
-          text: "![Log](https://innohassle.ru/music-room-log.webp)",
-          showImages: false,
-        }),
-      );
-    });
+  it("shows a streamed picture once its link is complete and keeps it while the text goes on", () => {
+    const render = (text: string) =>
+      act(() => {
+        root.render(createElement(AskAnswerBody, { text }));
+      });
+    render("Log: ![Log](https://innohassle.ru/music-ro");
     expect(container.querySelector("img")).toBeNull();
+    render("Log: ![Log](https://innohassle.ru/music-room-log.webp)");
+    const image = container.querySelector("img");
+    expect(image?.getAttribute("src")).toBe(
+      "https://innohassle.ru/music-room-log.webp",
+    );
+    render("Log: ![Log](https://innohassle.ru/music-room-log.webp) and more");
+    expect(container.querySelector("img")).toBe(image);
   });
 });

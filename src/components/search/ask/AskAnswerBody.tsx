@@ -1,5 +1,5 @@
 import "katex/dist/katex.min.css";
-import Markdown from "react-markdown";
+import Markdown, { type Components } from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -19,13 +19,40 @@ type MarkdownNode = {
   children?: MarkdownNode[];
 };
 
+/** Defined outside the component: a new component type on every render would remount the pictures on every streamed chunk. */
+const markdownComponents: Components = {
+  a: ({ href, children }) =>
+    href ? (
+      <a
+        href={href}
+        target={href.startsWith("#") ? undefined : "_blank"}
+        rel={href.startsWith("#") ? undefined : "noopener noreferrer"}
+        className="text-primary hover:underline"
+      >
+        {children}
+      </a>
+    ) : (
+      <>{children}</>
+    ),
+  img: ({ src, alt }) =>
+    typeof src === "string" ? <AskImage src={src} alt={alt ?? ""} /> : null,
+  p: ({ children }) => <p className="whitespace-pre-wrap">{children}</p>,
+  pre: ({ children }) => (
+    <pre className="max-w-full overflow-x-auto">{children}</pre>
+  ),
+  table: ({ children }) => (
+    <div className="max-w-full overflow-x-auto">
+      <table className="table-sm table w-auto">{children}</table>
+    </div>
+  ),
+  li: ({ children }) => <li className="ml-5 list-disc">{children}</li>,
+};
+
 export function AskAnswerBody({
   text,
   citationTargets,
-  showImages = true,
 }: {
   text: string;
-  showImages?: boolean;
   citationTargets?: ReadonlyMap<number, string>;
 }) {
   function linkCitations() {
@@ -78,35 +105,7 @@ export function AskAnswerBody({
           : [remarkGfm, remarkMath]
       }
       rehypePlugins={[rehypeKatex]}
-      components={{
-        a: ({ href, children }) =>
-          href ? (
-            <a
-              href={href}
-              target={href.startsWith("#") ? undefined : "_blank"}
-              rel={href.startsWith("#") ? undefined : "noopener noreferrer"}
-              className="text-primary hover:underline"
-            >
-              {children}
-            </a>
-          ) : (
-            <>{children}</>
-          ),
-        img: ({ src, alt }) =>
-          showImages && typeof src === "string" ? (
-            <AskImage src={src} alt={alt ?? ""} />
-          ) : null,
-        p: ({ children }) => <p className="whitespace-pre-wrap">{children}</p>,
-        pre: ({ children }) => (
-          <pre className="max-w-full overflow-x-auto">{children}</pre>
-        ),
-        table: ({ children }) => (
-          <div className="max-w-full overflow-x-auto">
-            <table className="table-sm table w-auto">{children}</table>
-          </div>
-        ),
-        li: ({ children }) => <li className="ml-5 list-disc">{children}</li>,
-      }}
+      components={markdownComponents}
     >
       {normalizeMathDelimiters(text)}
     </Markdown>
