@@ -69,7 +69,6 @@ export function ExtensionPage() {
         </a>
         <a
           href="https://api.innohassle.ru/extension/latest-firefox.xpi"
-          target="_blank"
           className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
         >
           <div className="w-12">
