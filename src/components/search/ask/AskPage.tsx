@@ -28,6 +28,7 @@ import { CatIcon } from "@/components/icons/CatIcon";
 import {
   SEARCH_COMMANDS,
   conversationQuestions,
+  COMPLETION_WORDS,
   conversationTexts,
   exampleQuestions,
 } from "./ask-suggestions";
@@ -83,6 +84,7 @@ export function AskPage({
       ...conversationQuestions(messages),
       ...exampleQuestions.map((m) => i18n._(m)),
       ...SEARCH_COMMANDS,
+      ...COMPLETION_WORDS,
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [messages, i18n.locale],

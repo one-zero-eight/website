@@ -3,6 +3,9 @@ import type { AskMessage } from "./ask-session";
 
 export const SEARCH_COMMANDS = ["/search ", "/поиск "];
 
+// Words completed while typing even when no question or answer has them
+export const COMPLETION_WORDS = ["Innopolis", "Иннополис"];
+
 // The questions offered on an empty chat and completed while typing
 export const exampleQuestions = [
   msg`What is on my schedule tomorrow?`,

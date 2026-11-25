@@ -1,6 +1,7 @@
 import type { AskMessage } from "./ask-session";
 import { describe, expect, it } from "vitest";
 import {
+  COMPLETION_WORDS,
   SEARCH_COMMANDS,
   conversationTexts,
   completionFor,
@@ -13,6 +14,10 @@ describe("completionFor", () => {
   it("completes case-insensitively keeping the typed casing", () => {
     expect(completionFor("What are", rules)).toBe(" the rules?");
     expect(completionFor("what ARE", rules)).toBe(" the rules?");
+  });
+  it("completes Innopolis in both languages", () => {
+    expect(completionFor("Инно", COMPLETION_WORDS)).toBe("полис");
+    expect(completionFor("innop", COMPLETION_WORDS)).toBe("olis");
   });
   it("needs three characters except for commands", () => {
     expect(completionFor("Wh", rules)).toBe("");
