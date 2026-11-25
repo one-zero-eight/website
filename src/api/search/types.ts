@@ -705,12 +705,46 @@ export interface components {
       /** Member */
       member: string;
     };
+    /** ActionEdit */
+    ActionEdit: {
+      /** Index */
+      index: number;
+      /** Values */
+      values: {
+        [key: string]: string;
+      };
+    };
     /** AskAction */
     AskAction: {
       /** Name */
       name: string;
-      /** Description */
-      description: string;
+      /**
+       * Target
+       * @default
+       */
+      target: string;
+      /** Args */
+      args: {
+        [key: string]: unknown;
+      };
+      /** Fields */
+      fields: components["schemas"]["AskField"][];
+    };
+    /** AskField */
+    AskField: {
+      /** Name */
+      name: string;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "text" | "textarea" | "date" | "time" | "number";
+      /** Value */
+      value: string;
+      /** Required */
+      required: boolean;
+      /** Max Length */
+      max_length?: number | null;
     };
     /** AskApproval */
     AskApproval: {
@@ -763,6 +797,8 @@ export interface components {
        * @enum {string}
        */
       decision: AskDecisionDecision;
+      /** Edits */
+      edits?: components["schemas"]["ActionEdit"][];
       /** Approval Id */
       approval_id?: string | null;
     };
@@ -1445,7 +1481,9 @@ export type SchemaAnnouncementSource =
   components["schemas"]["AnnouncementSource"];
 export type SchemaAnswerSource = components["schemas"]["AnswerSource"];
 export type SchemaArchiveDocument = components["schemas"]["ArchiveDocument"];
+export type SchemaActionEdit = components["schemas"]["ActionEdit"];
 export type SchemaAskAction = components["schemas"]["AskAction"];
+export type SchemaAskField = components["schemas"]["AskField"];
 export type SchemaAskApproval = components["schemas"]["AskApproval"];
 export type SchemaAskChat = components["schemas"]["AskChat"];
 export type SchemaAskChatHistory = components["schemas"]["AskChatHistory"];

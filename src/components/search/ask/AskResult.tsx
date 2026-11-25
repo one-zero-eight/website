@@ -88,7 +88,10 @@ export function AskResult({
       )}
     >
       {!hasError ? (
-        <AskAnswerBody text={answer} citationTargets={citationTargets} />
+        // An action waiting for approval has no text of its own when the assistant wrote none: the card says it all
+        (answer.trim() || !approval) && (
+          <AskAnswerBody text={answer} citationTargets={citationTargets} />
+        )
       ) : (
         <span>
           <Trans>- Sorry, I can't help you with this question.</Trans>

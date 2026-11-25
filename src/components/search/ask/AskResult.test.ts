@@ -28,13 +28,15 @@ const response: searchTypes.SchemaAskResponses = {
     actions: [
       {
         name: "call_api_tool",
-        description: "Записать вас на тренировку #46767.",
+        target: "sport_sport_checkin",
+        args: { training_id: 46767 },
+        fields: [],
       },
     ],
   },
 };
 
-describe("AskResult approval context", () => {
+describe("AskResult approval", () => {
   let root: Root;
   let container: HTMLDivElement;
 
@@ -65,20 +67,46 @@ describe("AskResult approval context", () => {
     });
   }
 
-  it("shows the formatted explanation before the approval buttons", () => {
+  const checkin = "Check you in to training #46767";
+
+  const calendarApproval: searchTypes.SchemaAskApproval = {
+    id: "cp-calendar",
+    actions: [
+      {
+        name: "add_to_ai_calendar",
+        target: "add_to_ai_calendar",
+        args: { title: "Chess club", day: "2026-11-09", all_day: true },
+        fields: [
+          { name: "title", kind: "text", value: "Chess club", required: true },
+          { name: "day", kind: "date", value: "2026-11-09", required: true },
+        ],
+      },
+    ],
+  };
+
+  function type(input: HTMLInputElement, value: string) {
+    const setter = Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      "value",
+    )!.set!;
+    act(() => {
+      setter.call(input, value);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  }
+
+  it("shows the answer, then the site's own text of the action before the buttons", () => {
     render();
 
-    expect(container.textContent).toContain("9 ноября");
     expect(container.querySelector("strong")?.textContent).toBe("9 ноября");
-    expect(container.textContent).toContain(
-      "Воллейбол, 20:00–22:30, [SC] Big Hall (15 мест свободно)",
-    );
-    expect(container.textContent).toContain(
-      "Записать вас на тренировку #46767.",
-    );
+    expect(container.textContent).toContain(checkin);
     expect(container.textContent!.indexOf("Записать вас на неё?")).toBeLessThan(
       container.textContent!.indexOf("The assistant needs your approval"),
     );
+    expect(container.textContent!.indexOf(checkin)).toBeGreaterThan(
+      container.textContent!.indexOf("The assistant needs your approval"),
+    );
+    expect(container.querySelector("input, textarea")).toBeNull();
     const buttons = Array.from(container.querySelectorAll("button"));
     expect(buttons.map((button) => button.textContent)).toEqual([
       "Confirm",
@@ -86,42 +114,130 @@ describe("AskResult approval context", () => {
     ]);
     expect(decideApproval).not.toHaveBeenCalled();
     act(() => buttons[0].click());
-    expect(decideApproval).toHaveBeenCalledExactlyOnceWith("approve");
+    expect(decideApproval).toHaveBeenCalledExactlyOnceWith("approve", []);
   });
 
-  it("keeps the explanation visible while the decision is pending", () => {
+  it("shows the exact arguments the user cannot change", () => {
+    render({
+      response: {
+        ...response,
+        approval: {
+          id: "cp-when2meet",
+          actions: [
+            {
+              name: "call_api_tool",
+              target: "when2meet_create_meeting",
+              args: {
+                timezone: "Europe/Moscow",
+                specific_time: true,
+                slots: ["2026-11-09T10:00", "2026-11-09T11:00"],
+              },
+              fields: [],
+            },
+          ],
+        },
+      },
+    });
+
+    expect(container.textContent).toContain("Create a When2Meet poll");
+    expect(container.textContent).toContain("Time zone:Europe/Moscow");
+    expect(container.textContent).toContain("Mode:times");
+    expect(container.textContent).toContain(
+      "Slots:2026-11-09T10:00, 2026-11-09T11:00",
+    );
+  });
+
+  it("names an unknown operation by its target", () => {
+    render({
+      response: {
+        ...response,
+        approval: {
+          id: "cp-unknown",
+          actions: [
+            { name: "call_api_tool", target: "new_tool", args: {}, fields: [] },
+          ],
+        },
+      },
+    });
+
+    expect(container.textContent).toContain("Run new_tool");
+  });
+
+  it("keeps the action visible while the decision is pending", () => {
     render({ isPending: true });
 
-    expect(container.textContent).toContain("Воллейбол");
+    expect(container.textContent).toContain(checkin);
     expect(container.querySelector(".loading-spinner")).not.toBeNull();
     expect(container.querySelector("button")).toBeNull();
   });
 
-  it("keeps the explanation on an obsolete approval without action buttons", () => {
+  it("keeps the action on an obsolete approval without buttons or editable fields", () => {
     render({ isLast: false });
 
-    expect(container.textContent).toContain("Воллейбол");
+    expect(container.textContent).toContain(checkin);
     expect(container.textContent).toContain(
       "Not done: a newer question was asked.",
     );
     expect(container.querySelector("button")).toBeNull();
   });
 
-  it("can decline without losing the explanation", () => {
+  it("locks the fields of an obsolete approval", () => {
+    render({
+      isLast: false,
+      response: { ...response, approval: calendarApproval },
+    });
+
+    const inputs = Array.from(container.querySelectorAll("input"));
+    expect(inputs).toHaveLength(2);
+    expect(inputs.every((input) => input.disabled)).toBe(true);
+  });
+
+  it("can decline without losing the action", () => {
     render();
 
     act(() => container.querySelectorAll("button")[1].click());
     expect(decideApproval).toHaveBeenCalledExactlyOnceWith("reject");
-    expect(container.textContent).toContain("Воллейбол");
+    expect(container.textContent).toContain(checkin);
   });
 
-  it("renders an approval even when there is no explanation", () => {
+  it("renders an approval even when there is no answer text", () => {
     render({ response: { ...response, answer: "" } });
 
-    expect(container.textContent).toContain(
-      "Записать вас на тренировку #46767.",
-    );
+    expect(container.textContent).toContain(checkin);
     expect(container.querySelectorAll("button")).toHaveLength(2);
+  });
+
+  it("sends only the fields the user changed when confirming", () => {
+    render({ response: { ...response, approval: calendarApproval } });
+
+    const title = container.querySelector<HTMLInputElement>(
+      'input[aria-label="Title"]',
+    )!;
+    expect(title.value).toBe("Chess club");
+    type(title, "Chess tournament");
+    const day = container.querySelector<HTMLInputElement>(
+      'input[aria-label="Date"]',
+    )!;
+    type(day, "2026-11-10");
+    type(day, "2026-11-09");
+
+    act(() => container.querySelectorAll("button")[0].click());
+    expect(decideApproval).toHaveBeenCalledExactlyOnceWith("approve", [
+      { index: 0, values: { title: "Chess tournament" } },
+    ]);
+  });
+
+  it("does not send an edit that was typed back to the proposed value", () => {
+    render({ response: { ...response, approval: calendarApproval } });
+
+    const title = container.querySelector<HTMLInputElement>(
+      'input[aria-label="Title"]',
+    )!;
+    type(title, "Other");
+    type(title, "Chess club");
+
+    act(() => container.querySelectorAll("button")[0].click());
+    expect(decideApproval).toHaveBeenCalledExactlyOnceWith("approve", []);
   });
 
   it("renders ordinary answers without approval controls", () => {

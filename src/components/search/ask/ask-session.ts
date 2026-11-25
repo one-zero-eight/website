@@ -484,7 +484,10 @@ export async function askQuestion(
 
 // The user's decision on what the assistant is about to do for them (the `approval` of the last answer): it is done only
 // when approved. The answer that waited for the decision takes the place of the approval
-export async function decideApproval(decision: "approve" | "reject") {
+export async function decideApproval(
+  decision: "approve" | "reject",
+  edits: searchTypes.SchemaActionEdit[] = [],
+) {
   const last = session.messages.at(-1);
   const chatId = session.chatId;
   if (!chatId || last?.role !== "assistant" || !last.response.approval) return;
@@ -498,6 +501,7 @@ export async function decideApproval(decision: "approve" | "reject") {
       chatId,
       {
         decision: AskDecisionDecision[decision],
+        ...(edits.length ? { edits } : {}),
         approval_id: last.response.approval.id,
       },
       controller.signal,

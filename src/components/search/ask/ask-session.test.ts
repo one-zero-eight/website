@@ -253,6 +253,22 @@ describe("ask session attachments", () => {
     await act(async () => session.decideApproval("approve"));
     expect(snapshot.draftAttachments).toEqual([{ info, bound: false }]);
   });
+  it("sends the user's edits with the decision and leaves them out when there are none", async () => {
+    const waiting = { ...answer, approval: { id: "approval-1", actions: [] } };
+    const edits = [{ index: 0, values: { title: "Chess" } }];
+    for (const sent of [edits, []]) {
+      api.history.mockResolvedValueOnce({ answers: [], waiting });
+      await act(async () => session.openChat("chat-1"));
+      api.post.mockResolvedValueOnce({
+        response: new Response(),
+        data: stream([["done", answer]]),
+      });
+      await act(async () => session.decideApproval("approve", sent));
+    }
+    const bodies = api.post.mock.calls.map(([, options]) => options.body);
+    expect(bodies.at(-2)).toMatchObject({ edits, approval_id: "approval-1" });
+    expect(bodies.at(-1)).not.toHaveProperty("edits");
+  });
   it("announces approval requests and the answer after a decision, but not history", async () => {
     const completed = vi.fn();
     window.addEventListener("catix-answer-ready", completed);
@@ -338,7 +354,7 @@ describe("ask session attachments", () => {
       ...answer,
       approval: {
         id: "approval-1",
-        actions: [{ name: "call_api_tool", description: "Write" }],
+        actions: [{ name: "call_api_tool", target: "t", args: {}, fields: [] }],
       },
     };
     api.history.mockResolvedValueOnce({ answers: [answer], waiting });
