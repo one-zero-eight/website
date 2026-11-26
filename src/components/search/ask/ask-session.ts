@@ -90,7 +90,10 @@ type AskStreamEvent =
   | { name: "chat"; data: { chat_id: string } }
   | { name: "cancelled"; data: { detail: string } }
   | { name: "status"; data: { phase: string } }
-  | { name: "guardrail"; data: { category: string } }
+  | {
+      name: "guardrail";
+      data: { category: string; paused_until?: string | null };
+    }
   | { name: "answer"; data: { text: string } }
   | { name: "done"; data: searchTypes.SchemaAskResponses }
   | { name: "error"; data: { detail: string; code?: "llm_unavailable" } };
@@ -156,6 +159,16 @@ function update(patch: Partial<AskSession>) {
 
 function updateIfShown(signal: AbortSignal, patch: Partial<AskSession>) {
   if (!detached.has(signal)) update(patch);
+}
+
+// The pause belongs to the user, not to the chat the answer was in: the page reads it from the query of GET /ask/pause, and the
+// latest end wins (the history of an old chat must not shorten a newer pause)
+function rememberPause(until: string | null | undefined) {
+  if (!until) return;
+  const { queryKey } = $search.queryOptions("get", "/ask/pause");
+  const known = queryClient.getQueryData(queryKey)?.paused_until;
+  if (known && Date.parse(known) >= Date.parse(until)) return;
+  queryClient.setQueryData(queryKey, { paused_until: until });
 }
 
 function persist() {
@@ -344,6 +357,7 @@ async function readAnswer(
           updateIfShown(signal, { status: event.data.phase });
         }
       } else if (event?.name === "guardrail") {
+        rememberPause(event.data.paused_until);
         if (isAskStatus(event.data.category)) {
           updateIfShown(signal, { status: event.data.category });
         }
@@ -652,6 +666,7 @@ export async function openChat(chatId: string) {
       }),
     );
     if (session.chatId !== chatId) return; // Another chat was opened meanwhile
+    rememberPause(history.answers.at(-1)?.paused_until);
     update({
       isOpening: false,
       // The question that waits for the user's decision comes last, with what it waits for

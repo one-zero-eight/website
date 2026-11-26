@@ -20,6 +20,7 @@ const api = vi.hoisted(() => ({
   upload: vi.fn(),
   remove: vi.fn(),
   post: vi.fn(),
+  pause: vi.fn(),
 }));
 vi.mock("./AskChatList", () => ({ AskChatList: () => null }));
 vi.mock("./AskResult", () => ({ AskResult: () => null }));
@@ -37,14 +38,20 @@ vi.mock("@/api/search", () => ({
     useMutation: (method: string) => ({
       mutateAsync: method === "post" ? api.upload : api.remove,
     }),
-    useQuery: (...args: unknown[]) => {
-      api.query(...args);
+    useQuery: (method: string, path: string, ...args: unknown[]) => {
+      api.query(method, path, ...args);
+      if (path === "/ask/pause") return { data: api.pause() };
       return { refetch: api.download, isFetching: false, error: null };
     },
   },
 }));
 vi.mock("@/app/query-client", () => ({
-  queryClient: { fetchQuery: api.history, invalidateQueries: vi.fn() },
+  queryClient: {
+    fetchQuery: api.history,
+    invalidateQueries: vi.fn(),
+    getQueryData: vi.fn(),
+    setQueryData: vi.fn(),
+  },
 }));
 const info = {
   id: "file-1",
@@ -80,6 +87,7 @@ describe("AskPage attachment history", () => {
     api.download.mockReset();
     api.upload.mockReset();
     api.post.mockReset();
+    api.pause.mockReset();
     startNewChat();
     container = document.createElement("div");
     document.body.append(container);
@@ -504,6 +512,31 @@ describe("AskPage attachment history", () => {
       expect(container.querySelector('button[title="Send"]')).not.toBeNull();
     },
   );
+  it("closes the box with the time to write again while the user is paused, and opens it when the pause is over", async () => {
+    vi.useFakeTimers({ toFake: ["Date", "setInterval", "clearInterval"] });
+    try {
+      const until = new Date(Date.now() + 90_000);
+      api.pause.mockReturnValue({ paused_until: until.toISOString() });
+      act(() => setDraftQuery("Unsent"));
+      const time = new Intl.DateTimeFormat("en", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(until);
+      expect(container.textContent).toContain(
+        "Access to the assistant is paused",
+      );
+      expect(container.textContent).toContain(
+        `You can write again at ${time}, in 1:30`,
+      );
+      expect(container.querySelector("textarea")).toBeNull();
+      await act(async () => {
+        vi.advanceTimersByTime(91_000);
+      });
+      expect(container.querySelector("textarea")).not.toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it("shows private history files with size and pages, downloading only on request", async () => {
     await act(async () => openChat("chat-1"));
     expect(container.textContent).toContain("private.pdf");

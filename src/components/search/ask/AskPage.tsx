@@ -1,5 +1,5 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
-import type { searchTypes } from "@/api/search";
+import { $search, type searchTypes } from "@/api/search";
 import { cn } from "@/lib/ui/cn";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -11,6 +11,7 @@ import { AskInput } from "./AskInput";
 import { AskQuoteMenu } from "./AskQuoteMenu";
 import { asQuote, splitQuote } from "./ask-quote";
 import { ASK_STATUSES, moodOfStatus } from "./ask-mood";
+import { formatClock, formatCountdown, usePauseSecondsLeft } from "./ask-pause";
 import { AskResult } from "./AskResult";
 import { AskAnswerBody } from "./AskAnswerBody";
 import { SearchResults } from "./SearchResults";
@@ -78,6 +79,14 @@ export function AskPage({
     draftAttachments,
     composerId,
   } = useAskSession();
+  // The assistant stopped answering this user for a while: the box stays closed until the pause is over
+  const { data: pause } = $search.useQuery("get", "/ask/pause");
+  const pausedUntil = pause?.paused_until
+    ? Date.parse(pause.paused_until)
+    : null;
+  const pauseSecondsLeft = usePauseSecondsLeft(pausedUntil);
+  const countdown = formatCountdown(pauseSecondsLeft);
+  const resumeTime = pausedUntil ? formatClock(pausedUntil, i18n.locale) : "";
 
   // Hints for the message box: this chat first, then examples and commands
   const suggestions = useMemo(
@@ -405,23 +414,39 @@ export function AskPage({
           <AskQuoteMenu containerRef={scrollRef} onQuote={handleQuote} />
 
           <div className="mx-auto w-full max-w-4xl px-4 pt-2 pb-4">
-            <AskInput
-              key={composerId}
-              inputRef={inputRef}
-              text={draftQuery}
-              setText={setDraftQuery}
-              suggestions={suggestions}
-              context={context}
-              quote={quote}
-              onQuoteRemove={() => setQuote("")}
-              attachments={isPending ? [] : draftAttachments}
-              onAttachmentsChange={(attachments) =>
-                setDraftAttachments(attachments, composerId)
-              }
-              onSend={handleSend}
-              onStop={handleStop}
-              isPending={isPending}
-            />
+            {pauseSecondsLeft > 0 ? (
+              <div className="border-base-300 bg-base-200 rounded-field flex items-center gap-3 border p-3">
+                <CatIcon mood="banned" className="size-10" />
+                <div className="flex flex-col">
+                  <span className="font-medium">
+                    <Trans>Access to the assistant is paused</Trans>
+                  </span>
+                  <span className="text-base-content/70 text-sm">
+                    <Trans>
+                      You can write again at {resumeTime}, in {countdown}
+                    </Trans>
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <AskInput
+                key={composerId}
+                inputRef={inputRef}
+                text={draftQuery}
+                setText={setDraftQuery}
+                suggestions={suggestions}
+                context={context}
+                quote={quote}
+                onQuoteRemove={() => setQuote("")}
+                attachments={isPending ? [] : draftAttachments}
+                onAttachmentsChange={(attachments) =>
+                  setDraftAttachments(attachments, composerId)
+                }
+                onSend={handleSend}
+                onStop={handleStop}
+                isPending={isPending}
+              />
+            )}
           </div>
         </>
       </div>

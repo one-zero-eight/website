@@ -361,6 +361,27 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/ask/pause": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Ask Pause
+     * @description Whether the assistant is closed to the user for repeated violations of the usage rules (agent/guardrail.py, abuse.py),
+     *     and until when. The pause belongs to the user, not to a chat: the site asks it when it opens, to keep the message box closed.
+     */
+    get: operations["ask_ask_pause"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/ask/chats/{chat_id}": {
     parameters: {
       query?: never;
@@ -802,6 +823,14 @@ export interface components {
       /** Approval Id */
       approval_id?: string | null;
     };
+    /** AskPause */
+    AskPause: {
+      /**
+       * Paused Until
+       * Format: date-time
+       */
+      paused_until?: string | null;
+    };
     /** AskResponses */
     AskResponses: {
       /**
@@ -842,6 +871,11 @@ export interface components {
       search?: components["schemas"]["SearchResponses"] | null;
       /** Guardrail */
       guardrail?: AskResponsesGuardrailAnyOf0 | null;
+      /**
+       * Paused Until
+       * Format: date-time
+       */
+      paused_until?: string | null;
     };
     /** AttachmentInfo */
     AttachmentInfo: {
@@ -1490,6 +1524,7 @@ export type SchemaAskApproval = components["schemas"]["AskApproval"];
 export type SchemaAskChat = components["schemas"]["AskChat"];
 export type SchemaAskChatHistory = components["schemas"]["AskChatHistory"];
 export type SchemaAskDecision = components["schemas"]["AskDecision"];
+export type SchemaAskPause = components["schemas"]["AskPause"];
 export type SchemaAskResponses = components["schemas"]["AskResponses"];
 export type SchemaAttachmentInfo = components["schemas"]["AttachmentInfo"];
 export type SchemaBodyAskActByQuery =
@@ -2279,6 +2314,26 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AskChat"][];
+        };
+      };
+    };
+  };
+  ask_ask_pause: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskPause"];
         };
       };
     };
