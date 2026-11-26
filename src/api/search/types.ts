@@ -840,6 +840,8 @@ export interface components {
       feedback_comment?: string | null;
       approval?: components["schemas"]["AskApproval"] | null;
       search?: components["schemas"]["SearchResponses"] | null;
+      /** Guardrail */
+      guardrail?: AskResponsesGuardrailAnyOf0 | null;
     };
     /** AttachmentInfo */
     AttachmentInfo: {
@@ -2823,6 +2825,11 @@ export enum AskDecisionDecision {
 export enum AskResponsesFeedbackAnyOf0 {
   like = "like",
   dislike = "dislike",
+}
+export enum AskResponsesGuardrailAnyOf0 {
+  small_talk = "small_talk",
+  blocked = "blocked",
+  paused = "paused",
 }
 export enum CampusLifeSourceType {
   campuslife = "campuslife",

@@ -40,7 +40,7 @@ msgstr " (capacity: {capacity} people)"
 #~ msgid "- Executing"
 #~ msgstr "- Executing"
 
-#: src/components/search/ask/AskResult.tsx:94
+#: src/components/search/ask/AskResult.tsx:99
 msgid "- Sorry, I can't help you with this question."
 msgstr "- Sorry, I can't help you with this question."
 
@@ -729,6 +729,10 @@ msgstr "Access denied"
 msgid "Access Level"
 msgstr "Access Level"
 
+#: src/components/search/ask/ask-mood.ts:25
+msgid "Access paused"
+msgstr "Access paused"
+
 #: src/components/account/MyTokenPage.tsx:64
 msgid "Access token"
 msgstr "Access token"
@@ -880,7 +884,7 @@ msgstr "Add to favorites"
 msgid "Add to home screen and use it like a native app."
 msgstr "Add to home screen and use it like a native app."
 
-#: src/components/search/ask/AskApproval.tsx:130
+#: src/components/search/ask/AskApproval.tsx:156
 msgid "Add to your AI Calendar"
 msgstr "Add to your AI Calendar"
 
@@ -988,7 +992,7 @@ msgstr "All 0h"
 
 #: src/components/calendar/CalendarEventPopover.tsx:162
 #: src/components/calendar/CalendarViewer.tsx:451
-#: src/components/search/ask/AskApproval.tsx:175
+#: src/components/search/ask/AskApproval.tsx:201
 #: src/components/search/ask/AskSignupOffers.tsx:233
 msgid "All day"
 msgstr "All day"
@@ -1337,7 +1341,7 @@ msgstr "Banned"
 msgid "banned {bannedAt}"
 msgstr "banned {bannedAt}"
 
-#: src/components/search/ask/AskResult.tsx:185
+#: src/components/search/ask/AskResult.tsx:190
 msgid "Based on:"
 msgstr "Based on:"
 
@@ -1405,11 +1409,11 @@ msgid "Book room"
 msgstr "Book room"
 
 #. placeholder {0}: id("room_id")
-#: src/components/search/ask/AskApproval.tsx:106
+#: src/components/search/ask/AskApproval.tsx:132
 msgid "Book room {0}"
 msgstr "Book room {0}"
 
-#: src/components/search/ask/AskApproval.tsx:108
+#: src/components/search/ask/AskApproval.tsx:134
 msgid "Book the music room (sports complex)"
 msgstr "Book the music room (sports complex)"
 
@@ -1727,29 +1731,29 @@ msgstr "Cancel this match"
 msgid "Cancel upload"
 msgstr "Cancel upload"
 
-#: src/components/search/ask/AskAnnouncements.tsx:25
-#~ msgid "Cancellation"
-#~ msgstr "Cancellation"
-
 #. placeholder {0}: id("training_id")
-#: src/components/search/ask/AskApproval.tsx:119
+#: src/components/search/ask/AskApproval.tsx:145
 msgid "Cancel your check-in to training #{0}"
 msgstr "Cancel your check-in to training #{0}"
 
 #. placeholder {0}: id("event_id")
-#: src/components/search/ask/AskApproval.tsx:115
+#: src/components/search/ask/AskApproval.tsx:141
 msgid "Cancel your enrolment in event {0}"
 msgstr "Cancel your enrolment in event {0}"
 
 #. placeholder {0}: id("booking_id")
-#: src/components/search/ask/AskApproval.tsx:111
+#: src/components/search/ask/AskApproval.tsx:137
 msgid "Cancel your music room booking {0}"
 msgstr "Cancel your music room booking {0}"
 
 #. placeholder {0}: id("booking_id")
-#: src/components/search/ask/AskApproval.tsx:112
+#: src/components/search/ask/AskApproval.tsx:138
 msgid "Cancel your room booking {0}"
 msgstr "Cancel your room booking {0}"
+
+#: src/components/search/ask/AskAnnouncements.tsx:25
+#~ msgid "Cancellation"
+#~ msgstr "Cancellation"
 
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:363
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:87
@@ -1866,7 +1870,7 @@ msgid "Channel"
 msgstr "Channel"
 
 #: src/components/clubs/constants.ts:85
-#: src/components/search/ask/AskResult.tsx:375
+#: src/components/search/ask/AskResult.tsx:390
 msgid "Chat"
 msgstr "Chat"
 
@@ -1887,8 +1891,8 @@ msgstr "Chat name"
 msgid "Chat sources"
 msgstr "Chat sources"
 
-#: src/components/search/ask/AskPage.tsx:208
-#: src/components/search/ask/AskPage.tsx:221
+#: src/components/search/ask/AskPage.tsx:211
+#: src/components/search/ask/AskPage.tsx:224
 msgid "Chats"
 msgstr "Chats"
 
@@ -1943,7 +1947,7 @@ msgid "Check the service before trying again. Do not repeat an uncertain registr
 msgstr "Check the service before trying again. Do not repeat an uncertain registration."
 
 #. placeholder {0}: id("training_id")
-#: src/components/search/ask/AskApproval.tsx:120
+#: src/components/search/ask/AskApproval.tsx:146
 msgid "Check you in to training #{0}"
 msgstr "Check you in to training #{0}"
 
@@ -1980,6 +1984,10 @@ msgstr "Checked out"
 #: src/components/room-booking/timeline/BookingModal.tsx:647
 msgid "Checking rules..."
 msgstr "Checking rules..."
+
+#: src/components/search/ask/ask-mood.ts:17
+msgid "Checking the request"
+msgstr "Checking the request"
 
 #: src/components/sport/SportOverviewSection.tsx:376
 msgid "Checking your workouts <0>can take up to 2 weeks.</0>"
@@ -2084,7 +2092,7 @@ msgstr "Class dates: {previewDates}."
 msgid "Classes this semester"
 msgstr "Classes this semester"
 
-#: src/components/search/ask/AskResult.tsx:175
+#: src/components/search/ask/AskResult.tsx:180
 msgid "Clauses:"
 msgstr "Clauses:"
 
@@ -2125,8 +2133,8 @@ msgstr "Click to upload or paste an image"
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
 #: src/components/search/ask/AskInput.tsx:195
 #: src/components/search/ask/AskInput.tsx:196
-#: src/components/search/ask/AskPage.tsx:191
-#: src/components/search/ask/AskPage.tsx:192
+#: src/components/search/ask/AskPage.tsx:194
+#: src/components/search/ask/AskPage.tsx:195
 #: src/components/search/IframePreviewCard.tsx:111
 #: src/components/sport/SportOverviewSection.tsx:719
 #: src/components/sport/SportStudentTrainingModal.tsx:394
@@ -2164,7 +2172,7 @@ msgstr "Club Fest"
 msgid "Club Fest page."
 msgstr "Club Fest page."
 
-#: src/components/search/ask/AskApproval.tsx:158
+#: src/components/search/ask/AskApproval.tsx:184
 msgid "Club host"
 msgstr "Club host"
 
@@ -2380,7 +2388,7 @@ msgstr "Configure settings and start scanning — preview will appear here"
 #: src/components/onboarding/OnboardingSteps.tsx:371
 #: src/components/room-booking/timeline/BookingModal.tsx:712
 #: src/components/room-booking/timeline/BookingModal.tsx:742
-#: src/components/search/ask/AskApproval.tsx:80
+#: src/components/search/ask/AskApproval.tsx:86
 #: src/components/tabletennis/LiveTournament.tsx:366
 #: src/components/tabletennis/PlayerActionMenu.tsx:240
 #: src/components/toast/ConfirmDialog.tsx:22
@@ -2562,7 +2570,7 @@ msgstr "Could not book"
 msgid "Could not check access"
 msgstr "Could not check access"
 
-#: src/components/search/ask/AskPage.tsx:376
+#: src/components/search/ask/AskPage.tsx:377
 msgid "Could not complete the request."
 msgstr "Could not complete the request."
 
@@ -2760,7 +2768,7 @@ msgstr "Create a new protected spreadsheet from scratch"
 msgid "Create a private link to subscribe to AI Calendar events. Creating it does not add anything to your calendar."
 msgstr "Create a private link to subscribe to AI Calendar events. Creating it does not add anything to your calendar."
 
-#: src/components/search/ask/AskApproval.tsx:126
+#: src/components/search/ask/AskApproval.tsx:152
 msgid "Create a When2Meet poll"
 msgstr "Create a When2Meet poll"
 
@@ -2768,7 +2776,7 @@ msgstr "Create a When2Meet poll"
 msgid "Create an <0>avatar or logo</0> for your club."
 msgstr "Create an <0>avatar or logo</0> for your club."
 
-#: src/components/search/ask/AskApproval.tsx:122
+#: src/components/search/ask/AskApproval.tsx:148
 msgid "Create an event draft (not submitted for moderation, not published)"
 msgstr "Create an event draft (not submitted for moderation, not published)"
 
@@ -2945,7 +2953,7 @@ msgid "Dashboard"
 msgstr "Dashboard"
 
 #: src/components/schedule-assistant/timetable/meetingComponentContext.ts:558
-#: src/components/search/ask/AskApproval.tsx:215
+#: src/components/search/ask/AskApproval.tsx:241
 msgid "Date"
 msgstr "Date"
 
@@ -2965,7 +2973,7 @@ msgstr "Date and time"
 msgid "Date is outside the allowed period"
 msgstr "Date is outside the allowed period"
 
-#: src/components/search/ask/AskApproval.tsx:162
+#: src/components/search/ask/AskApproval.tsx:188
 msgid "dates"
 msgstr "dates"
 
@@ -3008,7 +3016,7 @@ msgstr "Debt: {debt}h"
 #: src/components/events/submissions/SubmissionPage.tsx:207
 #: src/components/events/submissions/SubmissionPage.tsx:368
 #: src/components/events/submissions/SubmissionPage.tsx:382
-#: src/components/search/ask/AskApproval.tsx:87
+#: src/components/search/ask/AskApproval.tsx:93
 msgid "Decline"
 msgstr "Decline"
 
@@ -3200,7 +3208,7 @@ msgstr "Depersonate"
 #: src/components/board-games/BoardGamesPage.tsx:465
 #: src/components/calendar/import/ImportModal.tsx:185
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:351
-#: src/components/search/ask/AskApproval.tsx:229
+#: src/components/search/ask/AskApproval.tsx:255
 #: src/components/sport/SportStudentTrainingModal.tsx:360
 #: src/components/sport/SportStudentTrainingModal.tsx:367
 #: src/components/sport/SportStudentTrainingModal.tsx:376
@@ -3383,7 +3391,7 @@ msgstr "Drop your file here"
 msgid "Duration"
 msgstr "Duration"
 
-#: src/components/search/ask/AskApproval.tsx:235
+#: src/components/search/ask/AskApproval.tsx:261
 msgid "Duration, hours"
 msgstr "Duration, hours"
 
@@ -3497,7 +3505,7 @@ msgstr "Edit this calendar"
 msgid "Edit: {prefix}"
 msgstr "Edit: {prefix}"
 
-#: src/components/search/ask/AskResult.tsx:367
+#: src/components/search/ask/AskResult.tsx:382
 msgid "EduWiki"
 msgstr "EduWiki"
 
@@ -3516,7 +3524,7 @@ msgid "Empty group"
 msgstr "Empty group"
 
 #: src/components/room-booking/timeline/BookingModal.tsx:585
-#: src/components/search/ask/AskApproval.tsx:219
+#: src/components/search/ask/AskApproval.tsx:245
 #: src/components/tabletennis/LiveTournament.tsx:222
 msgid "End"
 msgstr "End"
@@ -3529,7 +3537,7 @@ msgstr "End"
 msgid "End date"
 msgstr "End date"
 
-#: src/components/search/ask/AskApproval.tsx:176
+#: src/components/search/ask/AskApproval.tsx:202
 msgid "End day"
 msgstr "End day"
 
@@ -3563,7 +3571,7 @@ msgid "Engage with Diverse Groups"
 msgstr "Engage with Diverse Groups"
 
 #. placeholder {0}: id("event_id")
-#: src/components/search/ask/AskApproval.tsx:116
+#: src/components/search/ask/AskApproval.tsx:142
 msgid "Enrol you in event {0}"
 msgstr "Enrol you in event {0}"
 
@@ -4044,7 +4052,7 @@ msgstr "External enrollment"
 msgid "External host name is required."
 msgstr "External host name is required."
 
-#: src/components/search/ask/AskApproval.tsx:157
+#: src/components/search/ask/AskApproval.tsx:183
 msgid "External registration"
 msgstr "External registration"
 
@@ -4140,7 +4148,7 @@ msgid "Features:"
 msgstr "Features:"
 
 #: src/components/events/submissions/SubmissionPage.tsx:357
-#: src/components/search/ask/AskApproval.tsx:239
+#: src/components/search/ask/AskApproval.tsx:265
 msgid "Feedback"
 msgstr "Feedback"
 
@@ -4187,7 +4195,7 @@ msgstr "Final time"
 msgid "Financial support:"
 msgstr "Financial support:"
 
-#: src/components/search/ask/ask-suggestions.ts:10
+#: src/components/search/ask/ask-suggestions.ts:13
 msgid "Find a room available tomorrow from 15:00 to 16:00."
 msgstr "Find a room available tomorrow from 15:00 to 16:00."
 
@@ -4298,7 +4306,7 @@ msgstr "Fri"
 msgid "Friday"
 msgstr "Friday"
 
-#: src/components/search/ask/AskApproval.tsx:221
+#: src/components/search/ask/AskApproval.tsx:247
 msgid "From"
 msgstr "From"
 
@@ -4602,7 +4610,7 @@ msgstr "Guests only"
 msgid "Guests Role"
 msgstr "Guests Role"
 
-#: src/components/search/ask/AskResult.tsx:365
+#: src/components/search/ask/AskResult.tsx:380
 msgid "Guide"
 msgstr "Guide"
 
@@ -4668,7 +4676,7 @@ msgstr "Hide best time"
 msgid "Hide calendar events"
 msgstr "Hide calendar events"
 
-#: src/components/search/ask/AskPage.tsx:166
+#: src/components/search/ask/AskPage.tsx:169
 msgid "Hide chats"
 msgstr "Hide chats"
 
@@ -4729,7 +4737,7 @@ msgstr "Hours"
 msgid "Hours have been saved."
 msgstr "Hours have been saved."
 
-#: src/components/search/ask/ask-suggestions.ts:12
+#: src/components/search/ask/ask-suggestions.ts:15
 msgid "How do I get to Innopolis University from Kazan?"
 msgstr "How do I get to Innopolis University from Kazan?"
 
@@ -5145,7 +5153,7 @@ msgstr "Keep submitted logo"
 msgid "Label (Optional)"
 msgstr "Label (Optional)"
 
-#: src/components/search/ask/AskApproval.tsx:156
+#: src/components/search/ask/AskApproval.tsx:182
 msgid "Language"
 msgstr "Language"
 
@@ -5374,7 +5382,7 @@ msgstr "location"
 #: src/components/events/shared/LocationField.tsx:73
 #: src/components/schedule-assistant/timetable/MeetingInstanceMetadata.tsx:128
 #: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:938
-#: src/components/search/ask/AskApproval.tsx:233
+#: src/components/search/ask/AskApproval.tsx:259
 #: src/components/sport/SportStudentTrainingModal.tsx:271
 msgid "Location"
 msgstr "Location"
@@ -5693,7 +5701,7 @@ msgid "Missing a training session may lead to certain consequences, including te
 msgstr "Missing a training session may lead to certain consequences, including temporary restrictions on future training check-ins."
 
 #: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:659
-#: src/components/search/ask/AskApproval.tsx:162
+#: src/components/search/ask/AskApproval.tsx:188
 #: src/components/web-print/ScanPage.tsx:555
 msgid "Mode"
 msgstr "Mode"
@@ -5721,7 +5729,7 @@ msgid "Month"
 msgstr "Month"
 
 #: src/components/calendar/ConfigCalendarDialog.tsx:101
-#: src/components/search/ask/AskResult.tsx:373
+#: src/components/search/ask/AskResult.tsx:388
 msgid "Moodle"
 msgstr "Moodle"
 
@@ -5820,7 +5828,7 @@ msgstr "My upcoming trainings"
 #: src/components/clubs/EditClubPage.tsx:967
 #: src/components/events/drafts/DraftHostsSection.tsx:560
 #: src/components/schedule-assistant/timetable/InstructorDetailPanel.tsx:73
-#: src/components/search/ask/AskApproval.tsx:227
+#: src/components/search/ask/AskApproval.tsx:253
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:338
 msgid "Name"
 msgstr "Name"
@@ -5869,7 +5877,7 @@ msgstr "Networking Opportunities"
 msgid "Neutral time"
 msgstr "Neutral time"
 
-#: src/components/search/ask/AskPage.tsx:440
+#: src/components/search/ask/AskPage.tsx:443
 msgid "New"
 msgstr "New"
 
@@ -6113,7 +6121,7 @@ msgstr "No document specified"
 msgid "No drafts yet."
 msgstr "No drafts yet."
 
-#: src/components/search/ask/AskApproval.tsx:180
+#: src/components/search/ask/AskApproval.tsx:206
 msgid "no end was specified"
 msgstr "no end was specified"
 
@@ -6430,7 +6438,7 @@ msgstr "No weeks"
 msgid "None"
 msgstr "None"
 
-#: src/components/search/ask/AskApproval.tsx:170
+#: src/components/search/ask/AskApproval.tsx:196
 msgid "none (clears all)"
 msgstr "none (clears all)"
 
@@ -6451,7 +6459,7 @@ msgstr "not available for this meeting"
 msgid "Not available for this meeting"
 msgstr "Not available for this meeting"
 
-#: src/components/search/ask/AskApproval.tsx:69
+#: src/components/search/ask/AskApproval.tsx:75
 msgid "Not done: a newer question was asked."
 msgstr "Not done: a newer question was asked."
 
@@ -6559,11 +6567,11 @@ msgstr "Number of sport hours"
 msgid "Numbered list"
 msgstr "Numbered list"
 
-#: src/components/search/ask/AskResult.tsx:142
+#: src/components/search/ask/AskResult.tsx:147
 msgid "Official"
 msgstr "Official"
 
-#: src/components/search/ask/AskResult.tsx:363
+#: src/components/search/ask/AskResult.tsx:378
 msgid "Official document"
 msgstr "Official document"
 
@@ -6713,7 +6721,7 @@ msgstr "Open chat"
 msgid "Open details"
 msgstr "Open details"
 
-#: src/components/search/ask/AskResult.tsx:222
+#: src/components/search/ask/AskResult.tsx:227
 msgid "Open document: {member}"
 msgstr "Open document: {member}"
 
@@ -6722,7 +6730,7 @@ msgstr "Open document: {member}"
 msgid "Open event page"
 msgstr "Open event page"
 
-#: src/components/search/ask/AskResult.tsx:349
+#: src/components/search/ask/AskResult.tsx:364
 msgid "Open in chat ->"
 msgstr "Open in chat ->"
 
@@ -7046,7 +7054,7 @@ msgstr "Pink"
 msgid "Pl"
 msgstr "Pl"
 
-#: src/components/search/ask/AskApproval.tsx:225
+#: src/components/search/ask/AskApproval.tsx:251
 #: src/components/tabletennis/TabletennisPage.tsx:151
 msgid "Place"
 msgstr "Place"
@@ -7159,6 +7167,10 @@ msgstr "Preferred pickup time"
 #: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:26
 msgid "Preferred time"
 msgstr "Preferred time"
+
+#: src/components/search/ask/ask-mood.ts:22
+msgid "Preparing the action"
+msgstr "Preparing the action"
 
 #: src/components/clubs/EditClubPage.tsx:918
 #: src/components/search/IframePreviewCard.tsx:132
@@ -7421,11 +7433,15 @@ msgstr "Read rules and guides on how to access the Music room. Every visitor sho
 msgid "Reader"
 msgstr "Reader"
 
+#: src/components/search/ask/ask-mood.ts:20
+msgid "Reading"
+msgstr "Reading"
+
 #: src/components/dashboard/AdvWidget.tsx:44
 msgid "Receive a monthly stipend from IU alumni"
 msgstr "Receive a monthly stipend from IU alumni"
 
-#: src/components/search/ask/AskPage.tsx:358
+#: src/components/search/ask/AskPage.tsx:357
 msgid "Receiving answer"
 msgstr "Receiving answer"
 
@@ -7591,7 +7607,7 @@ msgid "Remove calendar {calendarName}?"
 msgstr "Remove calendar {calendarName}?"
 
 #. placeholder {0}: id("calendar_event_id")
-#: src/components/search/ask/AskApproval.tsx:134
+#: src/components/search/ask/AskApproval.tsx:160
 msgid "Remove event #{0} from your AI Calendar"
 msgstr "Remove event #{0} from your AI Calendar"
 
@@ -7603,7 +7619,7 @@ msgstr "Remove file"
 msgid "Remove from calendar"
 msgstr "Remove from calendar"
 
-#: src/components/search/ask/AskPage.tsx:484
+#: src/components/search/ask/AskPage.tsx:487
 msgid "Remove from the queue"
 msgstr "Remove from the queue"
 
@@ -7662,7 +7678,7 @@ msgid "Reopen tournament"
 msgstr "Reopen tournament"
 
 #. placeholder {0}: id("meeting_ref")
-#: src/components/search/ask/AskApproval.tsx:128
+#: src/components/search/ask/AskApproval.tsx:154
 msgid "Replace all your marked slots in When2Meet {0}"
 msgstr "Replace all your marked slots in When2Meet {0}"
 
@@ -7689,6 +7705,10 @@ msgstr "Report an issue"
 #: src/components/clubs/ClubLeaguePage.tsx:61
 msgid "Report form will be published to Club Leaders telegram group every month, according to which points will be credited."
 msgstr "Report form will be published to Club Leaders telegram group every month, according to which points will be credited."
+
+#: src/components/search/ask/ask-mood.ts:24
+msgid "Request declined"
+msgstr "Request declined"
 
 #: src/components/search/SourceRequests.tsx:471
 #~ msgid "Request rejected"
@@ -8042,7 +8062,7 @@ msgid "Rules of room booking in Innopolis University."
 msgstr "Rules of room booking in Innopolis University."
 
 #. placeholder {0}: action.target
-#: src/components/search/ask/AskApproval.tsx:138
+#: src/components/search/ask/AskApproval.tsx:164
 msgid "Run {0}"
 msgstr "Run {0}"
 
@@ -8308,6 +8328,10 @@ msgstr "Search..."
 msgid "Search…"
 msgstr "Search…"
 
+#: src/components/search/ask/ask-mood.ts:19
+msgid "Searching"
+msgstr "Searching"
+
 #: src/components/search/ask/AskSources.tsx:11
 msgid "Searching on request"
 msgstr "Searching on request"
@@ -8320,7 +8344,7 @@ msgstr "Seconds"
 msgid "Section"
 msgstr "Section"
 
-#: src/components/search/ask/AskResult.tsx:180
+#: src/components/search/ask/AskResult.tsx:185
 msgid "Sections:"
 msgstr "Sections:"
 
@@ -8488,11 +8512,11 @@ msgstr "Send"
 msgid "Send after the answer"
 msgstr "Send after the answer"
 
-#: src/components/search/ask/AskApproval.tsx:136
+#: src/components/search/ask/AskApproval.tsx:162
 msgid "Send feedback to the InNoHassle team"
 msgstr "Send feedback to the InNoHassle team"
 
-#: src/components/search/ask/AskPage.tsx:359
+#: src/components/search/ask/AskPage.tsx:358
 msgid "Sending request"
 msgstr "Sending request"
 
@@ -8790,8 +8814,8 @@ msgstr "Skip"
 msgid "Slot"
 msgstr "Slot"
 
-#: src/components/search/ask/AskApproval.tsx:163
-#: src/components/search/ask/AskApproval.tsx:167
+#: src/components/search/ask/AskApproval.tsx:189
+#: src/components/search/ask/AskApproval.tsx:193
 msgid "Slots"
 msgstr "Slots"
 
@@ -8844,7 +8868,7 @@ msgstr "Sorry, this site does not support preview. Please, open it directly."
 msgid "Source:"
 msgstr "Source:"
 
-#: src/components/search/ask/AskResult.tsx:117
+#: src/components/search/ask/AskResult.tsx:122
 msgid "Sources"
 msgstr "Sources"
 
@@ -9005,8 +9029,8 @@ msgid "Standings"
 msgstr "Standings"
 
 #: src/components/room-booking/timeline/BookingModal.tsx:572
-#: src/components/search/ask/AskApproval.tsx:217
-#: src/components/search/ask/AskApproval.tsx:231
+#: src/components/search/ask/AskApproval.tsx:243
+#: src/components/search/ask/AskApproval.tsx:257
 #: src/components/tabletennis/ValidationMatches.tsx:815
 #: src/components/timer/TimerPage.tsx:285
 msgid "Start"
@@ -9199,7 +9223,7 @@ msgstr "Students not found"
 msgid "Study group verification is unavailable. Common sources are still available."
 msgstr "Study group verification is unavailable. Common sources are still available."
 
-#: src/components/search/ask/AskApproval.tsx:237
+#: src/components/search/ask/AskApproval.tsx:263
 msgid "Subject"
 msgstr "Subject"
 
@@ -9294,7 +9318,7 @@ msgstr "Success!"
 msgid "Such file is not supported!"
 msgstr "Such file is not supported!"
 
-#: src/components/search/ask/AskApproval.tsx:179
+#: src/components/search/ask/AskApproval.tsx:205
 msgid "Suggested duration, minutes"
 msgstr "Suggested duration, minutes"
 
@@ -9545,7 +9569,7 @@ msgstr "Thank you!"
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 
-#: src/components/search/ask/AskPage.tsx:391
+#: src/components/search/ask/AskPage.tsx:393
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr "The action result could not be confirmed. Check the service before trying again."
 
@@ -9553,11 +9577,11 @@ msgstr "The action result could not be confirmed. Check the service before tryin
 msgid "The assistant asks for confirmation before changing data in services."
 msgstr "The assistant asks for confirmation before changing data in services."
 
-#: src/components/search/ask/AskPage.tsx:184
+#: src/components/search/ask/AskPage.tsx:187
 msgid "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 msgstr "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 
-#: src/components/search/ask/AskApproval.tsx:44
+#: src/components/search/ask/AskApproval.tsx:50
 msgid "The assistant needs your approval to do this:"
 msgstr "The assistant needs your approval to do this:"
 
@@ -9585,7 +9609,7 @@ msgstr "The club leader should connect their Telegram account to InNoHassle usin
 msgid "The club manager collects orders from the club leaders in advance, and later makes a purchase in the form of an official order"
 msgstr "The club manager collects orders from the club leaders in advance, and later makes a purchase in the form of an official order"
 
-#: src/components/search/ask/ask-session.ts:354
+#: src/components/search/ask/ask-session.ts:362
 msgid "The connection ended before the response was complete."
 msgstr "The connection ended before the response was complete."
 
@@ -9689,8 +9713,8 @@ msgstr "The series period does not overlap the study period of the selected grou
 #~ msgid "The series window does not overlap the selected groups' teaching period."
 #~ msgstr "The series window does not overlap the selected groups' teaching period."
 
-#: src/components/search/ask/ask-session.ts:270
-#: src/components/search/ask/ask-session.ts:302
+#: src/components/search/ask/ask-session.ts:272
+#: src/components/search/ask/ask-session.ts:304
 msgid "The server returned no answer stream."
 msgstr "The server returned no answer stream."
 
@@ -9758,6 +9782,10 @@ msgstr "These are configured capabilities, not a guarantee that a source is curr
 #: src/components/clubs/HowToCreateClubPage.tsx:205
 msgid "Think about your <0>aims and goals</0> to keep your club going purposefully. Consider writing mission and vision statements to clarify your club's purpose."
 msgstr "Think about your <0>aims and goals</0> to keep your club going purposefully. Consider writing mission and vision statements to clarify your club's purpose."
+
+#: src/components/search/ask/ask-mood.ts:18
+msgid "Thinking"
+msgstr "Thinking"
 
 #: src/components/debug/AppDiagnostics.tsx:116
 msgid "This App has not received a worker notification yet."
@@ -9928,7 +9956,7 @@ msgstr "Time Restrictions"
 msgid "Time you will have"
 msgstr "Time you will have"
 
-#: src/components/search/ask/AskApproval.tsx:161
+#: src/components/search/ask/AskApproval.tsx:187
 msgid "Time zone"
 msgstr "Time zone"
 
@@ -9959,7 +9987,7 @@ msgstr "Timer set to maximum (99:59:59)"
 msgid "Timer title..."
 msgstr "Timer title..."
 
-#: src/components/search/ask/AskApproval.tsx:162
+#: src/components/search/ask/AskApproval.tsx:188
 msgid "times"
 msgstr "times"
 
@@ -9990,7 +10018,7 @@ msgstr "TIP"
 #: src/components/guard/CreateSheetPage.tsx:101
 #: src/components/room-booking/tv/RoomTvPage.tsx:194
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:354
-#: src/components/search/ask/AskApproval.tsx:213
+#: src/components/search/ask/AskApproval.tsx:239
 msgid "Title"
 msgstr "Title"
 
@@ -10010,7 +10038,7 @@ msgstr "Title and Slug are required"
 msgid "Title is required"
 msgstr "Title is required"
 
-#: src/components/search/ask/AskApproval.tsx:223
+#: src/components/search/ask/AskApproval.tsx:249
 msgid "To"
 msgstr "To"
 
@@ -10338,12 +10366,12 @@ msgid "Upcoming Trainings"
 msgstr "Upcoming Trainings"
 
 #. placeholder {0}: id("calendar_event_id")
-#: src/components/search/ask/AskApproval.tsx:132
+#: src/components/search/ask/AskApproval.tsx:158
 msgid "Update event #{0} in your AI Calendar"
 msgstr "Update event #{0} in your AI Calendar"
 
 #. placeholder {0}: id("draft_id")
-#: src/components/search/ask/AskApproval.tsx:124
+#: src/components/search/ask/AskApproval.tsx:150
 msgid "Update event draft {0} (not submitted for moderation, not published)"
 msgstr "Update event draft {0} (not submitted for moderation, not published)"
 
@@ -10701,12 +10729,12 @@ msgstr "we write code and maintain products"
 msgid "Weak GPS signal (±{accuracyM}m)"
 msgstr "Weak GPS signal (±{accuracyM}m)"
 
-#: src/components/search/ask/AskResult.tsx:371
+#: src/components/search/ask/AskResult.tsx:386
 msgid "Web search"
 msgstr "Web search"
 
 #: src/components/clubs/constants.ts:89
-#: src/components/search/ask/AskResult.tsx:369
+#: src/components/search/ask/AskResult.tsx:384
 msgid "Website"
 msgstr "Website"
 
@@ -10773,7 +10801,7 @@ msgstr "Welcome to <0/><1>one-zero-eight</1> community!"
 msgid "Welcome to InNoHassle"
 msgstr "Welcome to InNoHassle"
 
-#: src/components/search/ask/ask-suggestions.ts:9
+#: src/components/search/ask/ask-suggestions.ts:12
 msgid "What are the university exam retake rules?"
 msgstr "What are the university exam retake rules?"
 
@@ -10794,11 +10822,11 @@ msgstr "What is in the attached file?"
 msgid "What is it?"
 msgstr "What is it?"
 
-#: src/components/search/ask/ask-suggestions.ts:8
+#: src/components/search/ask/ask-suggestions.ts:11
 msgid "What is on my schedule tomorrow?"
 msgstr "What is on my schedule tomorrow?"
 
-#: src/components/search/ask/ask-suggestions.ts:13
+#: src/components/search/ask/ask-suggestions.ts:16
 msgid "What is the syllabus of the course?"
 msgstr "What is the syllabus of the course?"
 
@@ -10822,7 +10850,7 @@ msgstr "What this worker knows about itself"
 msgid "What this worker knows about this page's report"
 msgstr "What this worker knows about this page's report"
 
-#: src/components/search/ask/ask-suggestions.ts:11
+#: src/components/search/ask/ask-suggestions.ts:14
 msgid "What was announced in my available chats this week?"
 msgstr "What was announced in my available chats this week?"
 
@@ -10924,6 +10952,10 @@ msgstr "Worker currently being installed."
 msgid "worker-N is a local reference within this snapshot, not a persistent browser ID. Equal script URLs alone do not identify the same worker instance."
 msgstr "worker-N is a local reference within this snapshot, not a persistent browser ID. Equal script URLs alone do not identify the same worker instance."
 
+#: src/components/search/ask/ask-mood.ts:21
+msgid "Working on it"
+msgstr "Working on it"
+
 #: src/components/clubs/ClubLeaguePage.tsx:186
 msgid "Workshops, lectures and other related services"
 msgstr "Workshops, lectures and other related services"
@@ -10936,13 +10968,17 @@ msgstr "Write caption…"
 msgid "Write something…"
 msgstr "Write something…"
 
-#: src/components/search/ask/ask-session.ts:414
+#: src/components/search/ask/ask-session.ts:422
 msgid "Write what to search for after /search."
 msgstr "Write what to search for after /search."
 
 #: src/components/guard/JoinsList.tsx:139
 msgid "Writer"
 msgstr "Writer"
+
+#: src/components/search/ask/ask-mood.ts:23
+msgid "Writing the answer"
+msgstr "Writing the answer"
 
 #: src/components/onboarding/OnboardingSteps.tsx:106
 msgid "Wrong? Reconnect"
@@ -10968,7 +11004,7 @@ msgstr "Yellow (for students)"
 msgid "Yellow access level (for students)"
 msgstr "Yellow access level (for students)"
 
-#: src/components/search/ask/AskApproval.tsx:175
+#: src/components/search/ask/AskApproval.tsx:201
 msgid "yes"
 msgstr "yes"
 
@@ -11161,7 +11197,7 @@ msgstr "Your club was invited as a host for this draft."
 msgid "Your document was sent to the printer"
 msgstr "Your document was sent to the printer"
 
-#: src/components/search/ask/AskPage.tsx:383
+#: src/components/search/ask/AskPage.tsx:384
 msgid "Your draft is below. You can edit it and send it again."
 msgstr "Your draft is below. You can edit it and send it again."
 

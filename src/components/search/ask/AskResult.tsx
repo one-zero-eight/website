@@ -11,6 +11,8 @@ import { AskFeedback } from "./AskFeedback";
 import { useId, useState } from "react";
 import { SourcePreviewModal } from "@/components/search/SourcePreviewModal";
 import { Modal } from "@/components/common/Modal";
+import { CatIcon } from "@/components/icons/CatIcon";
+import { moodOfGuardrail } from "./ask-mood";
 
 type Preview =
   | { document: searchTypes.SchemaEduwikiSource }
@@ -76,7 +78,7 @@ export function AskResult({
     ]),
   );
 
-  return (
+  const bubble = (
     <div
       tabIndex={0}
       className={cn(
@@ -268,6 +270,16 @@ export function AskResult({
           feedbackComment={response.feedback_comment}
         />
       )}
+    </div>
+  );
+
+  // The guardrail answered this question itself: the cat reacts as well as the text
+  const mood = moodOfGuardrail(response.guardrail);
+  if (!mood) return bubble;
+  return (
+    <div className="flex max-w-full min-w-0 items-end gap-2 self-start">
+      <CatIcon mood={mood} />
+      {bubble}
     </div>
   );
 }

@@ -459,11 +459,14 @@ describe("AskPage attachment history", () => {
       await act(async () =>
         controller.enqueue(
           new TextEncoder().encode(
-            'event: status\ndata: {"text":"Checking university rules"}\n\n',
+            'event: status\ndata: {"phase":"searching"}\n\n',
           ),
         ),
       );
-      expect(container.textContent).toContain("Checking university rules");
+      expect(container.textContent).toContain("Searching");
+      expect(
+        container.querySelector('img[src="/catix-cat-thinking.svg"]'),
+      ).not.toBeNull();
       expect(container.textContent).toContain(longText);
       expect(
         container.querySelector('a[href="https://example.org/rules"]')
@@ -476,7 +479,7 @@ describe("AskPage attachment history", () => {
       );
       expect(container.textContent).not.toContain(longText);
       expect(container.querySelector("strong")).toBeNull();
-      expect(container.textContent).toContain("Checking university rules");
+      expect(container.textContent).toContain("Searching");
       expect(container.querySelector('button[title="Stop"]')).not.toBeNull();
       await act(async () =>
         controller.enqueue(
@@ -496,12 +499,11 @@ describe("AskPage attachment history", () => {
         controller.close();
         await pending;
       });
-      expect(container.textContent).not.toContain("Checking university rules");
+      expect(container.textContent).not.toContain("Searching");
       expect(container.querySelector('button[title="Stop"]')).toBeNull();
       expect(container.querySelector('button[title="Send"]')).not.toBeNull();
     },
   );
-
   it("shows private history files with size and pages, downloading only on request", async () => {
     await act(async () => openChat("chat-1"));
     expect(container.textContent).toContain("private.pdf");

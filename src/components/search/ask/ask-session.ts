@@ -20,6 +20,7 @@ import {
   parseSearchCommand,
   searchInChat,
 } from "./ask-search";
+import { type AskStatus, isAskStatus } from "./ask-mood";
 import { useSyncExternalStore } from "react";
 
 export type DraftAttachment = {
@@ -75,7 +76,7 @@ type AskSession = {
   queue: string[];
   // The answer being written and what the assistant is doing meanwhile
   answerText: string;
-  status: string;
+  status: AskStatus | null;
   isPending: boolean;
   error: Error | null;
   // The language model did not answer the last question: the page says so until it does
@@ -88,7 +89,8 @@ type AskSession = {
 type AskStreamEvent =
   | { name: "chat"; data: { chat_id: string } }
   | { name: "cancelled"; data: { detail: string } }
-  | { name: "status"; data: { text: string } }
+  | { name: "status"; data: { phase: string } }
+  | { name: "guardrail"; data: { category: string } }
   | { name: "answer"; data: { text: string } }
   | { name: "done"; data: searchTypes.SchemaAskResponses }
   | { name: "error"; data: { detail: string; code?: "llm_unavailable" } };
@@ -133,7 +135,7 @@ let session: AskSession = {
   composerId: 0,
   queue: [],
   answerText: "",
-  status: "",
+  status: null,
   isPending: false,
   error: null,
   assistantUnavailable: false,
@@ -338,7 +340,13 @@ async function readAnswer(
       } else if (event?.name === "cancelled") {
         return undefined;
       } else if (event?.name === "status") {
-        updateIfShown(signal, { status: event.data.text });
+        if (isAskStatus(event.data.phase)) {
+          updateIfShown(signal, { status: event.data.phase });
+        }
+      } else if (event?.name === "guardrail") {
+        if (isAskStatus(event.data.category)) {
+          updateIfShown(signal, { status: event.data.category });
+        }
       } else if (event?.name === "answer") {
         updateIfShown(signal, { answerText: event.data.text });
       } else if (event?.name === "error") {
@@ -403,7 +411,7 @@ export async function askQuestion(
           }))
         : session.draftAttachments,
     answerText: "",
-    status: "",
+    status: null,
     error: null,
     isPending: true,
   });
@@ -494,7 +502,7 @@ export async function decideApproval(
   abortController?.abort();
   const controller = new AbortController();
   abortController = controller;
-  update({ answerText: "", status: "", error: null, isPending: true });
+  update({ answerText: "", status: null, error: null, isPending: true });
 
   try {
     const response = await streamDecision(
@@ -559,7 +567,7 @@ function leaveChat() {
   update({
     isPending: false,
     answerText: "",
-    status: "",
+    status: null,
     error: null,
   });
 }
@@ -595,7 +603,7 @@ export function startNewChat() {
     draftQuery: takeDraft(null),
     draftAttachments: [],
     answerText: "",
-    status: "",
+    status: null,
     error: null,
     isOpening: false,
     openingError: null,
@@ -631,7 +639,7 @@ export async function openChat(chatId: string) {
     draftQuery: sameChat ? session.draftQuery : takeDraft(chatId),
     draftAttachments: sameChat ? session.draftAttachments : [],
     answerText: "",
-    status: "",
+    status: null,
     error: null,
     isOpening: true,
     openingError: null,

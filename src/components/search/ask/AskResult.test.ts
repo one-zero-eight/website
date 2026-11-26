@@ -1,4 +1,7 @@
-import { AnswerSourceKind } from "@/api/search/types";
+import {
+  AnswerSourceKind,
+  AskResponsesGuardrailAnyOf0,
+} from "@/api/search/types";
 import type { searchTypes } from "@/api/search";
 import { setupI18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
@@ -161,6 +164,28 @@ describe("AskResult approval", () => {
     });
 
     expect(container.textContent).toContain("Run new_tool");
+  });
+
+  it.each([
+    ["blocked", "banned"],
+    ["paused", "banned"],
+    ["small_talk", "happy"],
+  ] as const)("shows the %s answer with the %s cat", (guardrail, mood) => {
+    render({
+      response: {
+        ...response,
+        approval: null,
+        guardrail: AskResponsesGuardrailAnyOf0[guardrail],
+      },
+    });
+    expect(
+      container.querySelector(`img[src="/catix-cat-${mood}.svg"]`),
+    ).not.toBeNull();
+  });
+
+  it("shows an ordinary answer without a cat of its own", () => {
+    render({ response: { ...response, approval: null } });
+    expect(container.querySelector("img")).toBeNull();
   });
 
   it("keeps the action visible while the decision is pending", () => {

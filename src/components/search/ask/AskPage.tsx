@@ -10,6 +10,7 @@ import { AskAttachment } from "./AskAttachment";
 import { AskInput } from "./AskInput";
 import { AskQuoteMenu } from "./AskQuoteMenu";
 import { asQuote, splitQuote } from "./ask-quote";
+import { ASK_STATUSES, moodOfStatus } from "./ask-mood";
 import { AskResult } from "./AskResult";
 import { AskAnswerBody } from "./AskAnswerBody";
 import { SearchResults } from "./SearchResults";
@@ -247,10 +248,7 @@ export function AskPage({
             <div className="mx-auto flex w-full max-w-4xl grow flex-col gap-4 p-4">
               {isEmpty && (
                 <div className="flex grow flex-col items-center justify-center gap-2 text-center">
-                  <CatIcon
-                    title="cAtIx"
-                    className="size-12 [filter:grayscale(1)_sepia(1)_saturate(4)]"
-                  />
+                  <CatIcon title="cAtIx" className="size-12" />
                   <span className="text-base-content/70">
                     <Trans>
                       I can help with your schedule, university rules,
@@ -348,15 +346,16 @@ export function AskPage({
 
               {isPending && (
                 <div className="flex max-w-full min-w-0 items-end gap-2 self-start">
-                  <CatIcon />
+                  <CatIcon mood={moodOfStatus(status)} className="size-10" />
                   <div className="border-base-300 bg-base-200 text-base-content rounded-field flex min-w-0 flex-col gap-2 border! px-4 py-2 wrap-anywhere">
                     {answerText && <AskAnswerBody text={answerText} />}
                     <div className="text-base-content/70 flex text-sm">
                       <span>
-                        {status ||
-                          (answerText
+                        {status
+                          ? i18n._(ASK_STATUSES[status].label)
+                          : answerText
                             ? t`Receiving answer`
-                            : t`Sending request`)}
+                            : t`Sending request`}
                       </span>
                       <AnimatedDots />
                     </div>
@@ -371,29 +370,33 @@ export function AskPage({
                 />
               ))}
               {!isPending && error && (
-                <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">
-                  <span>
-                    <Trans>Could not complete the request.</Trans>
-                  </span>
-                  <span className="text-base-content/60 text-sm">
-                    {formatApiErrorMessage(error)}
-                  </span>
-                  {lastMessage?.role === "user" && draftQuery.trim() && (
-                    <span className="text-sm">
-                      <Trans>
-                        Your draft is below. You can edit it and send it again.
-                      </Trans>
+                <div className="flex max-w-full min-w-0 items-end gap-2 self-start">
+                  <CatIcon mood="error" />
+                  <div className="border-base-300 bg-base-200 text-base-content rounded-field flex min-w-0 flex-col gap-2 border! px-4 py-2">
+                    <span>
+                      <Trans>Could not complete the request.</Trans>
                     </span>
-                  )}
-                  {lastMessage?.role === "assistant" &&
-                    lastMessage.response.approval && (
+                    <span className="text-base-content/60 text-sm">
+                      {formatApiErrorMessage(error)}
+                    </span>
+                    {lastMessage?.role === "user" && draftQuery.trim() && (
                       <span className="text-sm">
                         <Trans>
-                          The action result could not be confirmed. Check the
-                          service before trying again.
+                          Your draft is below. You can edit it and send it
+                          again.
                         </Trans>
                       </span>
                     )}
+                    {lastMessage?.role === "assistant" &&
+                      lastMessage.response.approval && (
+                        <span className="text-sm">
+                          <Trans>
+                            The action result could not be confirmed. Check the
+                            service before trying again.
+                          </Trans>
+                        </span>
+                      )}
+                  </div>
                 </div>
               )}
             </div>
