@@ -101,7 +101,6 @@ import { Route as With_menuClubsSlugReviewRouteImport } from "./routes/_with_men
 import { Route as With_menuClubsSlugEditRouteImport } from "./routes/_with_menu/clubs/$slug.edit";
 import { Route as With_menuBoardGamesAdminReservationsRouteImport } from "./routes/_with_menu/board-games/admin/reservations";
 import { Route as With_menuAdminUsersIdRouteImport } from "./routes/_with_menu/admin/users.$id";
-import { Route as With_menuSearchAdminMaxIndexRouteImport } from "./routes/_with_menu/search/admin/max.index";
 import { Route as GuardGoogleFilesSlugJoinRouteImport } from "./routes/guard.google.files.$slug.join";
 import { Route as With_menuSearchAdminTelegramChatIdRouteImport } from "./routes/_with_menu/search/admin/telegram.$chatId";
 import { Route as With_menuSearchAdminMaxChatIdRouteImport } from "./routes/_with_menu/search/admin/max.$chatId";
@@ -656,12 +655,6 @@ const With_menuAdminUsersIdRoute = With_menuAdminUsersIdRouteImport.update({
   path: "/admin/users/$id",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
-const With_menuSearchAdminMaxIndexRoute =
-  With_menuSearchAdminMaxIndexRouteImport.update({
-    id: "/search/admin/max/",
-    path: "/search/admin/max/",
-    getParentRoute: () => With_menuRouteRoute,
-  } as any);
 const GuardGoogleFilesSlugJoinRoute =
   GuardGoogleFilesSlugJoinRouteImport.update({
     id: "/guard/google/files/$slug/join",
@@ -779,7 +772,6 @@ export interface FileRoutesByFullPath {
   "/search/admin/max/$chatId": typeof With_menuSearchAdminMaxChatIdRoute;
   "/search/admin/telegram/$chatId": typeof With_menuSearchAdminTelegramChatIdRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
-  "/search/admin/max/": typeof With_menuSearchAdminMaxIndexRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
@@ -876,7 +868,6 @@ export interface FileRoutesByTo {
   "/search/admin/max/$chatId": typeof With_menuSearchAdminMaxChatIdRoute;
   "/search/admin/telegram/$chatId": typeof With_menuSearchAdminTelegramChatIdRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
-  "/search/admin/max": typeof With_menuSearchAdminMaxIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -978,7 +969,6 @@ export interface FileRoutesById {
   "/_with_menu/search/admin/max/$chatId": typeof With_menuSearchAdminMaxChatIdRoute;
   "/_with_menu/search/admin/telegram/$chatId": typeof With_menuSearchAdminTelegramChatIdRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
-  "/_with_menu/search/admin/max/": typeof With_menuSearchAdminMaxIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -1079,8 +1069,7 @@ export interface FileRouteTypes {
     | "/when2meet/$meetingId/"
     | "/search/admin/max/$chatId"
     | "/search/admin/telegram/$chatId"
-    | "/guard/google/files/$slug/join"
-    | "/search/admin/max/";
+    | "/guard/google/files/$slug/join";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
@@ -1176,8 +1165,7 @@ export interface FileRouteTypes {
     | "/when2meet/$meetingId"
     | "/search/admin/max/$chatId"
     | "/search/admin/telegram/$chatId"
-    | "/guard/google/files/$slug/join"
-    | "/search/admin/max";
+    | "/guard/google/files/$slug/join";
   id:
     | "__root__"
     | "/"
@@ -1277,8 +1265,7 @@ export interface FileRouteTypes {
     | "/_with_menu/when2meet/$meetingId/"
     | "/_with_menu/search/admin/max/$chatId"
     | "/_with_menu/search/admin/telegram/$chatId"
-    | "/guard/google/files/$slug/join"
-    | "/_with_menu/search/admin/max/";
+    | "/guard/google/files/$slug/join";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -1959,13 +1946,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuAdminUsersIdRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/search/admin/max/": {
-      id: "/_with_menu/search/admin/max/";
-      path: "/search/admin/max";
-      fullPath: "/search/admin/max/";
-      preLoaderRoute: typeof With_menuSearchAdminMaxIndexRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
     "/guard/google/files/$slug/join": {
       id: "/guard/google/files/$slug/join";
       path: "/guard/google/files/$slug/join";
@@ -2088,7 +2068,6 @@ interface With_menuRouteRouteChildren {
   With_menuWhen2meetMeetingIdIndexRoute: typeof With_menuWhen2meetMeetingIdIndexRoute;
   With_menuSearchAdminMaxChatIdRoute: typeof With_menuSearchAdminMaxChatIdRoute;
   With_menuSearchAdminTelegramChatIdRoute: typeof With_menuSearchAdminTelegramChatIdRoute;
-  With_menuSearchAdminMaxIndexRoute: typeof With_menuSearchAdminMaxIndexRoute;
 }
 
 const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
@@ -2174,7 +2153,6 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuSearchAdminMaxChatIdRoute: With_menuSearchAdminMaxChatIdRoute,
   With_menuSearchAdminTelegramChatIdRoute:
     With_menuSearchAdminTelegramChatIdRoute,
-  With_menuSearchAdminMaxIndexRoute: With_menuSearchAdminMaxIndexRoute,
 };
 
 const With_menuRouteRouteWithChildren = With_menuRouteRoute._addFileChildren(

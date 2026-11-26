@@ -662,23 +662,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/admin/telegram/chats": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Telegram Chats */
-    get: operations["admin_telegram_chats"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/admin/telegram/chats/{chat_id}": {
     parameters: {
       query?: never;
@@ -761,23 +744,6 @@ export interface paths {
     get?: never;
     /** Set Official */
     put: operations["admin_set_official"];
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/admin/max": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Max Sources */
-    get: operations["admin_max_sources"];
-    put?: never;
     post?: never;
     delete?: never;
     options?: never;
@@ -906,6 +872,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/admin/chats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Chats
+     * @description Telegram dialogs and MAX sources in one list; the MAX account status goes with it.
+     */
+    get: operations["admin_list_chats"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -977,6 +963,42 @@ export interface components {
       fixed: boolean;
       /** Added At */
       added_at: string | null;
+    };
+    /** ChatListItem */
+    ChatListItem: {
+      /**
+       * Platform
+       * @enum {string}
+       */
+      platform: "telegram" | "max";
+      /** Chat Id */
+      chat_id: string;
+      /** Title */
+      title: string;
+      /** Group Code */
+      group_code: string;
+      /** Official */
+      official: boolean;
+      /** Connected */
+      connected: boolean;
+      /** Forum */
+      forum: boolean;
+      /** Bot In */
+      bot_in: boolean;
+      /** Search Only */
+      search_only: boolean;
+      /** Raw Chat Id */
+      raw_chat_id: string | null;
+      /** Access */
+      access: string | null;
+      /** History Status */
+      history_status: string | null;
+    };
+    /** ChatsView */
+    ChatsView: {
+      max_account: components["schemas"]["MaxAccountView"];
+      /** Chats */
+      chats: components["schemas"]["ChatListItem"][];
     };
     /** Deleted */
     Deleted: {
@@ -1051,47 +1073,12 @@ export interface components {
       /** Generation */
       generation: number;
     };
-    /** MaxSourceView */
-    MaxSourceView: {
-      /** Chat Id */
-      chat_id: string;
-      /** Raw Chat Id */
-      raw_chat_id: string;
-      /** Title */
-      title: string;
-      /** Group Code */
-      group_code: string;
-      /** Enabled */
-      enabled: boolean;
-      /** Access */
-      access: string;
-      /** History Status */
-      history_status: string;
-      /** Catchup Status */
-      catchup_status: string;
-      /** Last Error */
-      last_error: string | null;
-      /** Legacy Chat Id */
-      legacy_chat_id: string | null;
-      /** Official */
-      official: boolean;
-      /** Config Version */
-      config_version: number;
-      /** Generation */
-      generation: number;
-    };
     /** MaxVersions */
     MaxVersions: {
       /** Config Version */
       config_version: number;
       /** Generation */
       generation: number;
-    };
-    /** MaxView */
-    MaxView: {
-      account: components["schemas"]["MaxAccountView"];
-      /** Sources */
-      sources: components["schemas"]["MaxSourceView"][];
     };
     /** OfficialIn */
     OfficialIn: {
@@ -1179,32 +1166,6 @@ export interface components {
        * @enum {string}
        */
       reader: "auto" | "userbot" | "bot";
-    };
-    /** TelegramChatView */
-    TelegramChatView: {
-      /** Chat Id */
-      chat_id: string;
-      /** Title */
-      title: string;
-      /** Username */
-      username: string | null;
-      /** Forum */
-      forum: boolean;
-      /** Bot Only */
-      bot_only: boolean;
-      /** Bot In */
-      bot_in: boolean;
-      /** Listened */
-      listened: boolean;
-      /**
-       * Reader
-       * @enum {string}
-       */
-      reader: "auto" | "userbot" | "bot" | "search";
-      /** Group Code */
-      group_code: string;
-      /** Official */
-      official: boolean;
     };
     /** TelegramTopicView */
     TelegramTopicView: {
@@ -3592,26 +3553,6 @@ export interface operations {
       };
     };
   };
-  admin_telegram_chats: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["TelegramChatView"][];
-        };
-      };
-    };
-  };
   admin_telegram_chat: {
     parameters: {
       query?: never;
@@ -3789,26 +3730,6 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  admin_max_sources: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["MaxView"];
         };
       };
     };
@@ -4080,6 +4001,26 @@ export interface operations {
       };
     };
   };
+  admin_list_chats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChatsView"];
+        };
+      };
+    };
+  };
 }
 export type SchemaAbuseDetail = components["schemas"]["AbuseDetail"];
 export type SchemaAbuseEntryView = components["schemas"]["AbuseEntryView"];
@@ -4088,15 +4029,15 @@ export type SchemaAbuseUserView = components["schemas"]["AbuseUserView"];
 export type SchemaAdminIn = components["schemas"]["AdminIn"];
 export type SchemaAdminMe = components["schemas"]["AdminMe"];
 export type SchemaAdminView = components["schemas"]["AdminView"];
+export type SchemaChatListItem = components["schemas"]["ChatListItem"];
+export type SchemaChatsView = components["schemas"]["ChatsView"];
 export type SchemaDeleted = components["schemas"]["Deleted"];
 export type SchemaMaxAccountView = components["schemas"]["MaxAccountView"];
 export type SchemaMaxLegacyCandidate =
   components["schemas"]["MaxLegacyCandidate"];
 export type SchemaMaxSourceDetail = components["schemas"]["MaxSourceDetail"];
 export type SchemaMaxSourceIn = components["schemas"]["MaxSourceIn"];
-export type SchemaMaxSourceView = components["schemas"]["MaxSourceView"];
 export type SchemaMaxVersions = components["schemas"]["MaxVersions"];
-export type SchemaMaxView = components["schemas"]["MaxView"];
 export type SchemaOfficialIn = components["schemas"]["OfficialIn"];
 export type SchemaOfficialView = components["schemas"]["OfficialView"];
 export type SchemaProposalView = components["schemas"]["ProposalView"];
@@ -4104,7 +4045,6 @@ export type SchemaProposalsView = components["schemas"]["ProposalsView"];
 export type SchemaTelegramChatDetail =
   components["schemas"]["TelegramChatDetail"];
 export type SchemaTelegramChatIn = components["schemas"]["TelegramChatIn"];
-export type SchemaTelegramChatView = components["schemas"]["TelegramChatView"];
 export type SchemaTelegramTopicView =
   components["schemas"]["TelegramTopicView"];
 export enum PathsSearchSearchGetParametersQueryResponse_types {

@@ -702,7 +702,7 @@ msgstr "About one-zero-eight"
 msgid "About us"
 msgstr "About us"
 
-#: src/components/search/admin/CatixAdminTabs.tsx:17
+#: src/components/search/admin/CatixAdminTabs.tsx:14
 msgid "Abuse"
 msgstr "Abuse"
 
@@ -776,12 +776,12 @@ msgid "Account settings"
 msgstr "Account settings"
 
 #: src/components/search/admin/MaxSourcesPage.tsx:63
-msgid "Account: offline"
-msgstr "Account: offline"
+#~ msgid "Account: offline"
+#~ msgstr "Account: offline"
 
 #: src/components/search/admin/MaxSourcesPage.tsx:61
-msgid "Account: online"
-msgstr "Account: online"
+#~ msgid "Account: online"
+#~ msgstr "Account: online"
 
 #: src/app/routes/_with_menu/search/act.tsx:28
 #: src/components/search/SearchField.tsx:52
@@ -1002,7 +1002,7 @@ msgstr "Admin user"
 msgid "Admin users"
 msgstr "Admin users"
 
-#: src/components/search/admin/CatixAdminTabs.tsx:20
+#: src/components/search/admin/CatixAdminTabs.tsx:17
 msgid "Admins"
 msgstr "Admins"
 
@@ -1064,6 +1064,10 @@ msgstr "All games"
 #: src/components/when2meet/MeetingPage.tsx:1277
 msgid "All meetings"
 msgstr "All meetings"
+
+#: src/components/search/admin/ChatsPage.tsx:63
+msgid "All platforms"
+msgstr "All platforms"
 
 #: src/components/board-games/ReservationsAdminPage.tsx:101
 msgid "All reservations"
@@ -1256,7 +1260,7 @@ msgstr "Ask questions or find answers at Innopolis University."
 msgid "Ask the assistant"
 msgstr "Ask the assistant"
 
-#: src/components/search/admin/TelegramChatsPage.tsx:29
+#: src/components/search/admin/ChatsPage.tsx:206
 msgid "Asked the userbot to refresh; it takes up to 15 seconds"
 msgstr "Asked the userbot to refresh; it takes up to 15 seconds"
 
@@ -1573,7 +1577,7 @@ msgstr "Borrower"
 msgid "Bot"
 msgstr "Bot"
 
-#: src/components/search/admin/TelegramChatsPage.tsx:101
+#: src/components/search/admin/ChatsPage.tsx:122
 msgid "Bot in chat"
 msgstr "Bot in chat"
 
@@ -1898,11 +1902,11 @@ msgstr "Capacity must be empty or at least 1."
 msgid "Cards"
 msgstr "Cards"
 
-#: src/components/search/admin/MaxSourcesPage.tsx:34
+#: src/components/search/admin/ChatsPage.tsx:217
 msgid "Catalog refresh requested"
 msgstr "Catalog refresh requested"
 
-#: src/components/search/admin/MaxSourcesPage.tsx:67
+#: src/components/search/admin/ChatsPage.tsx:243
 msgid "Catalog:"
 msgstr "Catalog:"
 
@@ -1918,7 +1922,6 @@ msgstr "Catch-up:"
 #: src/app/routes/_with_menu/search/admin/admins.tsx:23
 #: src/app/routes/_with_menu/search/admin/index.tsx:23
 #: src/app/routes/_with_menu/search/admin/max.$chatId.tsx:24
-#: src/app/routes/_with_menu/search/admin/max.index.tsx:23
 #: src/app/routes/_with_menu/search/admin/proposals.tsx:23
 #: src/app/routes/_with_menu/search/admin/telegram.$chatId.tsx:26
 msgid "cAtIx admin"
@@ -1932,9 +1935,13 @@ msgstr "cAtIx admin: abuse"
 msgid "cAtIx admin: admins"
 msgstr "cAtIx admin: admins"
 
+#: src/app/routes/_with_menu/search/admin/index.tsx:19
+msgid "cAtIx admin: chats"
+msgstr "cAtIx admin: chats"
+
 #: src/app/routes/_with_menu/search/admin/max.index.tsx:19
-msgid "cAtIx admin: MAX"
-msgstr "cAtIx admin: MAX"
+#~ msgid "cAtIx admin: MAX"
+#~ msgstr "cAtIx admin: MAX"
 
 #: src/app/routes/_with_menu/search/admin/max.$chatId.tsx:20
 msgid "cAtIx admin: MAX source"
@@ -1945,8 +1952,8 @@ msgid "cAtIx admin: proposals"
 msgstr "cAtIx admin: proposals"
 
 #: src/app/routes/_with_menu/search/admin/index.tsx:19
-msgid "cAtIx admin: Telegram"
-msgstr "cAtIx admin: Telegram"
+#~ msgid "cAtIx admin: Telegram"
+#~ msgstr "cAtIx admin: Telegram"
 
 #: src/app/routes/_with_menu/search/admin/telegram.$chatId.tsx:22
 msgid "cAtIx admin: Telegram chat"
@@ -2029,12 +2036,13 @@ msgstr "Chat name"
 msgid "Chat sources"
 msgstr "Chat sources"
 
+#: src/components/search/admin/CatixAdminTabs.tsx:8
 #: src/components/search/ask/AskPage.tsx:220
 #: src/components/search/ask/AskPage.tsx:233
 msgid "Chats"
 msgstr "Chats"
 
-#: src/components/search/admin/TelegramChatsPage.tsx:133
+#: src/components/search/admin/ChatsPage.tsx:99
 msgid "Chats proposed from Moodle courses"
 msgstr "Chats proposed from Moodle courses"
 
@@ -2595,11 +2603,11 @@ msgstr "Connect to WiFi or mobile internet."
 msgid "Connect your Telegram"
 msgstr "Connect your Telegram"
 
-#: src/components/search/admin/TelegramChatsPage.tsx:123
+#: src/components/search/admin/ChatsPage.tsx:142
 msgid "Connected"
 msgstr "Connected"
 
-#: src/components/search/admin/TelegramChatsPage.tsx:75
+#: src/components/search/admin/ChatsPage.tsx:76
 msgid "Connected only"
 msgstr "Connected only"
 
@@ -3707,8 +3715,8 @@ msgid "Empty group"
 msgstr "Empty group"
 
 #: src/components/search/admin/MaxSourcesPage.tsx:115
-msgid "enabled"
-msgstr "enabled"
+#~ msgid "enabled"
+#~ msgstr "enabled"
 
 #: src/components/room-booking/timeline/BookingModal.tsx:585
 #: src/components/search/ask/AskApproval.tsx:245
@@ -3926,14 +3934,14 @@ msgstr "Equipment"
 #: src/components/search/admin/AbusePage.tsx:88
 #: src/components/search/admin/CatixAdminsPage.tsx:35
 #: src/components/search/admin/CatixAdminsPage.tsx:48
+#: src/components/search/admin/ChatsPage.tsx:211
+#: src/components/search/admin/ChatsPage.tsx:220
 #: src/components/search/admin/MaxSourcePage.tsx:133
 #: src/components/search/admin/MaxSourcePage.tsx:277
-#: src/components/search/admin/MaxSourcesPage.tsx:37
 #: src/components/search/admin/OfficialToggle.tsx:27
 #: src/components/search/admin/TelegramChatPage.tsx:81
 #: src/components/search/admin/TelegramChatPage.tsx:245
 #: src/components/search/admin/TelegramChatPage.tsx:256
-#: src/components/search/admin/TelegramChatsPage.tsx:34
 #: src/components/sport/SportOverviewSection.tsx:308
 #: src/components/sport/SportOverviewSection.tsx:509
 #: src/components/sport/SportOverviewSection.tsx:626
@@ -4131,7 +4139,6 @@ msgid "Every week"
 msgstr "Every week"
 
 #: src/components/search/admin/MaxSourcePage.tsx:169
-#: src/components/search/admin/MaxSourcesPage.tsx:110
 msgid "Everyone"
 msgstr "Everyone"
 
@@ -4503,7 +4510,7 @@ msgstr "Forming groups"
 msgid "Forms"
 msgstr "Forms"
 
-#: src/components/search/admin/TelegramChatsPage.tsx:96
+#: src/components/search/admin/ChatsPage.tsx:117
 msgid "Forum"
 msgstr "Forum"
 
@@ -5679,8 +5686,8 @@ msgid "Lock the groups on the Validation tab first."
 msgstr "Lock the groups on the Validation tab first."
 
 #: src/components/search/admin/MaxSourcesPage.tsx:56
-msgid "Login required: run <0>catix-maxuserbot login</0> in the terminal"
-msgstr "Login required: run <0>catix-maxuserbot login</0> in the terminal"
+#~ msgid "Login required: run <0>catix-maxuserbot login</0> in the terminal"
+#~ msgstr "Login required: run <0>catix-maxuserbot login</0> in the terminal"
 
 #: src/components/search/admin/max-labels.ts:40
 msgid "Login required: run catix-maxuserbot login in the terminal."
@@ -5809,8 +5816,16 @@ msgid "Max"
 msgstr "Max"
 
 #: src/components/search/admin/CatixAdminTabs.tsx:11
-msgid "MAX"
-msgstr "MAX"
+#~ msgid "MAX"
+#~ msgstr "MAX"
+
+#: src/components/search/admin/ChatsPage.tsx:239
+msgid "MAX account: offline"
+msgstr "MAX account: offline"
+
+#: src/components/search/admin/ChatsPage.tsx:237
+msgid "MAX account: online"
+msgstr "MAX account: online"
 
 #: src/components/search/admin/max-labels.ts:47
 msgid "MAX did not report the catalog continuation; the list is incomplete."
@@ -5827,6 +5842,10 @@ msgstr "Max participants"
 #: src/components/search/admin/MaxSourcePage.tsx:70
 msgid "MAX raw ID:"
 msgstr "MAX raw ID:"
+
+#: src/components/search/admin/ChatsPage.tsx:232
+msgid "MAX: login required, run <0>catix-maxuserbot login</0> in the terminal"
+msgstr "MAX: login required, run <0>catix-maxuserbot login</0> in the terminal"
 
 #: src/components/search/SourceRequests.tsx:285
 #~ msgid "Maximum 2000 characters."
@@ -6334,9 +6353,13 @@ msgstr "No changes to save."
 msgid "No chats yet"
 msgstr "No chats yet"
 
-#: src/components/search/admin/TelegramChatsPage.tsx:80
+#: src/components/search/admin/ChatsPage.tsx:82
 msgid "No chats."
 msgstr "No chats."
+
+#: src/components/search/admin/ChatsPage.tsx:84
+msgid "No chats. For MAX, log in with the account, then refresh the catalog: the chats and channels it sees appear here."
+msgstr "No chats. For MAX, log in with the account, then refresh the catalog: the chats and channels it sees appear here."
 
 #: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:91
 #: src/components/schedule-assistant/timetable/pickerLabels.ts:30
@@ -6576,8 +6599,8 @@ msgid "No matches."
 msgstr "No matches."
 
 #: src/components/search/admin/MaxSourcesPage.tsx:85
-msgid "No MAX sources yet. Log in with the account, then refresh the catalog: the chats and channels it sees appear here."
-msgstr "No MAX sources yet. Log in with the account, then refresh the catalog: the chats and channels it sees appear here."
+#~ msgid "No MAX sources yet. Log in with the account, then refresh the catalog: the chats and channels it sees appear here."
+#~ msgstr "No MAX sources yet. Log in with the account, then refresh the catalog: the chats and channels it sees appear here."
 
 #: src/components/sport/SportProfilePage.tsx:271
 msgid "No medical group changes yet."
@@ -6791,7 +6814,7 @@ msgstr "not available for this meeting"
 msgid "Not available for this meeting"
 msgstr "Not available for this meeting"
 
-#: src/components/search/admin/TelegramChatsPage.tsx:125
+#: src/components/search/admin/ChatsPage.tsx:144
 msgid "Not connected"
 msgstr "Not connected"
 
@@ -6912,8 +6935,8 @@ msgid "Numbered list"
 msgstr "Numbered list"
 
 #: src/components/search/admin/MaxSourcesPage.tsx:115
-msgid "off"
-msgstr "off"
+#~ msgid "off"
+#~ msgstr "off"
 
 #: src/components/search/admin/admin-utils.ts:14
 #: src/components/search/admin/MaxSourcePage.tsx:195
@@ -6924,7 +6947,7 @@ msgstr "Off"
 msgid "Off: new messages are not stored and Telegram search is off. Stored messages stay until you clear the history."
 msgstr "Off: new messages are not stored and Telegram search is off. Stored messages stay until you clear the history."
 
-#: src/components/search/admin/TelegramChatsPage.tsx:111
+#: src/components/search/admin/ChatsPage.tsx:132
 #: src/components/search/ask/AskResult.tsx:147
 msgid "Official"
 msgstr "Official"
@@ -7688,7 +7711,7 @@ msgstr "Programming Languages, Robotics, Web Development, AI/ML"
 msgid "Projects"
 msgstr "Projects"
 
-#: src/components/search/admin/CatixAdminTabs.tsx:14
+#: src/components/search/admin/CatixAdminTabs.tsx:11
 msgid "Proposals"
 msgstr "Proposals"
 
@@ -7817,7 +7840,7 @@ msgstr "Rating: {chosenEmoji}"
 msgid "Raw data"
 msgstr "Raw data"
 
-#: src/components/search/admin/MaxSourcesPage.tsx:108
+#: src/components/search/admin/ChatsPage.tsx:159
 msgid "raw ID"
 msgstr "raw ID"
 
@@ -7918,12 +7941,16 @@ msgid "Redo"
 msgstr "Redo"
 
 #: src/components/search/admin/MaxSourcesPage.tsx:79
-msgid "Refresh catalog"
-msgstr "Refresh catalog"
+#~ msgid "Refresh catalog"
+#~ msgstr "Refresh catalog"
 
 #: src/components/search/admin/TelegramChatsPage.tsx:64
-msgid "Refresh list"
-msgstr "Refresh list"
+#~ msgid "Refresh list"
+#~ msgstr "Refresh list"
+
+#: src/components/search/admin/ChatsPage.tsx:264
+msgid "Refresh MAX catalog"
+msgstr "Refresh MAX catalog"
 
 #: src/components/search/SourceRequests.tsx:372
 #~ msgid "Refresh requests"
@@ -7932,6 +7959,10 @@ msgstr "Refresh list"
 #: src/components/debug/DebugPage.tsx:137
 msgid "Refresh snapshot"
 msgstr "Refresh snapshot"
+
+#: src/components/search/admin/ChatsPage.tsx:256
+msgid "Refresh Telegram list"
+msgstr "Refresh Telegram list"
 
 #: src/components/debug/DebugPage.tsx:94
 msgid "Refreshes every 5 seconds while visible. Reading a snapshot does not check for a deployment or download a build. Sources are sampled at different times."
@@ -8708,7 +8739,7 @@ msgstr "Search by name or id..."
 msgid "Search by Telegram alias"
 msgstr "Search by Telegram alias"
 
-#: src/components/search/admin/TelegramChatsPage.tsx:54
+#: src/components/search/admin/ChatsPage.tsx:54
 msgid "Search by title or id"
 msgstr "Search by title or id"
 
@@ -8744,7 +8775,7 @@ msgid "Search meeting name..."
 msgstr "Search meeting name..."
 
 #: src/components/search/admin/admin-utils.ts:13
-#: src/components/search/admin/TelegramChatsPage.tsx:106
+#: src/components/search/admin/ChatsPage.tsx:127
 msgid "Search only"
 msgstr "Search only"
 
@@ -9693,8 +9724,8 @@ msgid "Study group"
 msgstr "Study group"
 
 #: src/components/search/admin/MaxSourcesPage.tsx:112
-msgid "Study group {groupCode}"
-msgstr "Study group {groupCode}"
+#~ msgid "Study group {groupCode}"
+#~ msgstr "Study group {groupCode}"
 
 #: src/components/search/SourceRequests.tsx:169
 #~ msgid "Study group verification is not proof of chat membership."
@@ -9964,7 +9995,6 @@ msgstr "Technical"
 #: src/components/admin/AdminUserDetails.tsx:298
 #: src/components/layout/MorePage.tsx:36
 #: src/components/onboarding/OnboardingProgress.tsx:8
-#: src/components/search/admin/CatixAdminTabs.tsx:8
 msgid "Telegram"
 msgstr "Telegram"
 
@@ -10823,7 +10853,7 @@ msgstr "University event details."
 msgid "University events calendar."
 msgstr "University events calendar."
 
-#: src/components/search/admin/MaxSourcesPage.tsx:68
+#: src/components/search/admin/ChatsPage.tsx:244
 msgid "unknown"
 msgstr "unknown"
 
@@ -10897,8 +10927,8 @@ msgstr "Until exact time"
 #: src/components/guard/EditTitleButton.tsx:54
 #: src/components/guard/FileDetails.tsx:72
 #: src/components/guard/FilesList.tsx:84
+#: src/components/search/admin/ChatsPage.tsx:153
 #: src/components/search/admin/MaxSourcePage.tsx:67
-#: src/components/search/admin/MaxSourcesPage.tsx:105
 msgid "Untitled"
 msgstr "Untitled"
 

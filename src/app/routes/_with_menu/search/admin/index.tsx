@@ -1,4 +1,4 @@
-import { TelegramChatsPage } from "@/components/search/admin/TelegramChatsPage";
+import { ChatsPage } from "@/components/search/admin/ChatsPage";
 import { CatixAdminTabs } from "@/components/search/admin/CatixAdminTabs";
 import { RequireCatixAdmin } from "@/components/search/admin/RequireCatixAdmin";
 import { Topbar } from "@/components/layout/Topbar";
@@ -16,14 +16,14 @@ function RouteComponent() {
   return (
     <>
       <Helmet>
-        <title>{t`cAtIx admin: Telegram`}</title>
+        <title>{t`cAtIx admin: chats`}</title>
         <meta name="robots" content="noindex, follow" />
       </Helmet>
 
       <Topbar title={<Trans>cAtIx admin</Trans>} />
       <RequireCatixAdmin>
         <CatixAdminTabs />
-        <TelegramChatsPage />
+        <ChatsPage />
       </RequireCatixAdmin>
     </>
   );
