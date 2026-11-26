@@ -73,6 +73,10 @@ msgstr "({daysLeft, plural, one {остался # день} few {осталос�
 msgid "(current semester)"
 msgstr "(текущий семестр)"
 
+#: src/components/search/admin/MaxSourcePage.tsx:217
+msgid "(matches raw ID)"
+msgstr "(совпадает raw ID)"
+
 #: src/components/sport/SportStudentTrainingModal.tsx:220
 msgid "(no places left)"
 msgstr "(мест нет)"
@@ -334,6 +338,10 @@ msgstr "{joinsCount, plural, one {# подключение} few {# подклю�
 #: src/components/schedule-assistant/timetable/pickerLabels.ts:43
 msgid "{maximum, plural, one {{countLabel} class} other {{countLabel} classes}}"
 msgstr "{maximum, plural, one {{countLabel} занятие} few {{countLabel} занятия} many {{countLabel} занятий} other {{countLabel} занятия}}"
+
+#: src/components/search/admin/MaxSourcePage.tsx:215
+msgid "{messageCount} messages"
+msgstr "сообщений: {messageCount}"
 
 #: src/components/room-booking/utils.ts:15
 msgid "{minutes}m"
@@ -672,6 +680,10 @@ msgstr "6 страниц"
 msgid "9 pages"
 msgstr "9 страниц"
 
+#: src/components/search/admin/max-labels.ts:49
+msgid "A history page could not be fetched."
+msgstr "Не удалось получить страницу истории."
+
 #: src/components/schedule-assistant/timetable/CreateClassModal.tsx:1018
 msgid "a new series will be created"
 msgstr "будет создана новая серия"
@@ -689,6 +701,10 @@ msgstr "О one-zero-eight"
 #: src/components/layout/Sidebar.tsx:104
 msgid "About us"
 msgstr "О нас"
+
+#: src/components/search/admin/CatixAdminTabs.tsx:17
+msgid "Abuse"
+msgstr "Нарушения"
 
 #: src/app/routes/_with_menu/admin/academic-calendars.tsx:18
 #: src/components/admin/AdminTabs.tsx:20
@@ -717,7 +733,12 @@ msgstr "Принять"
 msgid "Accepted"
 msgstr "Принято"
 
+#: src/components/search/admin/max-labels.ts:5
+msgid "access confirmed"
+msgstr "доступ есть"
+
 #: src/components/admin/RequireInnohassleAdmin.tsx:20
+#: src/components/search/admin/RequireCatixAdmin.tsx:30
 #: src/components/tabletennis/CreateTournamentForm.tsx:55
 #: src/components/tabletennis/PlayerActionMenu.tsx:74
 msgid "Access denied"
@@ -728,6 +749,10 @@ msgstr "Доступ запрещён"
 #: src/components/room-booking/rooms-list/RoomsList.tsx:55
 msgid "Access Level"
 msgstr "Уровень доступа"
+
+#: src/components/search/admin/max-labels.ts:6
+msgid "access not confirmed"
+msgstr "доступ не подтверждён"
 
 #: src/components/search/ask/ask-mood.ts:25
 msgid "Access paused"
@@ -741,10 +766,22 @@ msgstr "Доступ к ассистенту приостановлен"
 msgid "Access token"
 msgstr "Токен доступа"
 
+#: src/components/search/admin/MaxSourcePage.tsx:76
+msgid "Access:"
+msgstr "Доступ:"
+
 #: src/components/board-games/BoardGamesPage.tsx:600
 #: src/components/board-games/UserReservationDetailsModal.tsx:287
 msgid "Account settings"
 msgstr "Настройки аккаунта"
+
+#: src/components/search/admin/MaxSourcesPage.tsx:63
+msgid "Account: offline"
+msgstr "Аккаунт: офлайн"
+
+#: src/components/search/admin/MaxSourcesPage.tsx:61
+msgid "Account: online"
+msgstr "Аккаунт: онлайн"
 
 #: src/app/routes/_with_menu/search/act.tsx:28
 #: src/components/search/SearchField.tsx:52
@@ -789,6 +826,10 @@ msgstr "Добавить"
 #: src/components/sport/SportTrainerTrainingModal.tsx:603
 msgid "Add {maxHours}"
 msgstr "Добавить {maxHours}"
+
+#: src/components/search/admin/CatixAdminsPage.tsx:120
+msgid "Add admin"
+msgstr "Добавить администратора"
 
 #: src/components/schedule-assistant/timetable/editableSessionEvents.ts:523
 msgid "Add at least one class."
@@ -935,11 +976,19 @@ msgstr "админ"
 msgid "Admin"
 msgstr "Админка"
 
+#: src/components/search/admin/CatixAdminsPage.tsx:28
+msgid "Admin added"
+msgstr "Администратор добавлен"
+
 #: src/components/sport/SportProfilePage.tsx:357
 #: src/components/sport/SportProfilePage.tsx:399
 #: src/components/sport/SportProfilePage.tsx:449
 msgid "Admin comment:"
 msgstr "Комментарий администратора:"
+
+#: src/components/search/admin/CatixAdminsPage.tsx:45
+msgid "Admin removed"
+msgstr "Администратор удалён"
 
 #: src/app/routes/_with_menu/admin/rooms.tsx:25
 msgid "Admin rooms"
@@ -953,10 +1002,16 @@ msgstr "Админка: пользователь"
 msgid "Admin users"
 msgstr "Админка: пользователи"
 
+#: src/components/search/admin/CatixAdminTabs.tsx:20
+msgid "Admins"
+msgstr "Администраторы"
+
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:293
 msgid "Admins only"
 msgstr "Только для админов"
 
+#: src/components/search/admin/MaxSourcePage.tsx:320
+#: src/components/search/admin/TelegramChatPage.tsx:285
 #: src/components/tabletennis/TabletennisPage.tsx:127
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:218
 #: src/components/tabletennis/TabletennisPlayersTop.tsx:389
@@ -1018,6 +1073,10 @@ msgstr "Все бронирования"
 msgid "All rooms available for booking in Innopolis University."
 msgstr "Все аудитории, доступные для бронирования в Университете Иннополис."
 
+#: src/components/search/admin/max-labels.ts:15
+msgid "all the history available to the account through the API is loaded"
+msgstr "вся история, доступная аккаунту через API, загружена"
+
 #: src/components/tabletennis/DrawTable.tsx:44
 msgid "All time"
 msgstr "За всё время"
@@ -1037,6 +1096,10 @@ msgstr "Разрешите <0>InNoHassle</0> писать вам в Telegram."
 #: src/components/onboarding/OnboardingSteps.tsx:128
 msgid "Allow InNoHassle to message you on Telegram."
 msgstr "Разрешите InNoHassle писать вам в Telegram."
+
+#: src/components/search/admin/CatixAdminsPage.tsx:32
+msgid "Already an admin"
+msgstr "Уже администратор"
 
 #: src/app/routes/_with_menu/42.tsx:39
 msgid "Amazing discovery! You've found the exclusive Ryan Gosling resource link. And the correct answer is <0>108</0>, not 42."
@@ -1193,6 +1256,10 @@ msgstr "Задавайте вопросы или ищите ответы в Ун
 msgid "Ask the assistant"
 msgstr "Спросить ИИ-ассистента"
 
+#: src/components/search/admin/TelegramChatsPage.tsx:29
+msgid "Asked the userbot to refresh; it takes up to 15 seconds"
+msgstr "Userbot получил запрос на обновление; это занимает до 15 секунд"
+
 #: src/components/web-print/FileDropzone.tsx:349
 msgid "Attach file"
 msgstr "Прикрепить файл"
@@ -1218,9 +1285,17 @@ msgstr "Не удалось загрузить список посещаемос
 msgid "Attendance updated"
 msgstr "Посещаемость обновлена"
 
+#: src/components/search/admin/MaxSourcePage.tsx:160
+msgid "Audience"
+msgstr "Аудитория"
+
 #: src/components/clubs/ClubLeaguePage.tsx:114
 msgid "August - December"
 msgstr "Август — декабрь"
+
+#: src/components/search/admin/TelegramChatPage.tsx:178
+msgid "Auto"
+msgstr "Авто"
 
 #: src/components/extension/ExtensionPage.tsx:30
 msgid "Autologin to Moodle without entering credentials"
@@ -1269,6 +1344,10 @@ msgstr "На складе"
 #: src/components/sport/SportOverviewSection.tsx:547
 msgid "Available medical groups"
 msgstr "Доступные медицинские группы"
+
+#: src/components/search/admin/max-labels.ts:25
+msgid "available messages recovered"
+msgstr "доступные сообщения восстановлены"
 
 #: src/components/search/ask/AskSources.tsx:102
 msgid "Available sources"
@@ -1489,9 +1568,14 @@ msgstr "Получатель"
 #~ msgid "Borrower name <0>*</0>"
 #~ msgstr "Имя взявшего <0>*</0>"
 
+#: src/components/search/admin/TelegramChatPage.tsx:181
 #: src/components/sport/SportTabs.tsx:34
 msgid "Bot"
 msgstr "Бот"
+
+#: src/components/search/admin/TelegramChatsPage.tsx:101
+msgid "Bot in chat"
+msgstr "Бот в чате"
 
 #: src/components/clubs/EditClubPage.tsx:892
 msgid "Brief description for cards"
@@ -1814,9 +1898,59 @@ msgstr "Оставьте вместимость пустой или укажит
 msgid "Cards"
 msgstr "Карточки"
 
+#: src/components/search/admin/MaxSourcesPage.tsx:34
+msgid "Catalog refresh requested"
+msgstr "Обновление каталога запрошено"
+
+#: src/components/search/admin/MaxSourcesPage.tsx:67
+msgid "Catalog:"
+msgstr "Каталог:"
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:942
 msgid "Catan"
 msgstr "Catan"
+
+#: src/components/search/admin/MaxSourcePage.tsx:82
+msgid "Catch-up:"
+msgstr "Восстановление разрыва:"
+
+#: src/app/routes/_with_menu/search/admin/abuse.tsx:23
+#: src/app/routes/_with_menu/search/admin/admins.tsx:23
+#: src/app/routes/_with_menu/search/admin/index.tsx:23
+#: src/app/routes/_with_menu/search/admin/max.$chatId.tsx:24
+#: src/app/routes/_with_menu/search/admin/max.index.tsx:23
+#: src/app/routes/_with_menu/search/admin/proposals.tsx:23
+#: src/app/routes/_with_menu/search/admin/telegram.$chatId.tsx:26
+msgid "cAtIx admin"
+msgstr "Администрирование cAtIx"
+
+#: src/app/routes/_with_menu/search/admin/abuse.tsx:19
+msgid "cAtIx admin: abuse"
+msgstr "Администрирование cAtIx: нарушения"
+
+#: src/app/routes/_with_menu/search/admin/admins.tsx:19
+msgid "cAtIx admin: admins"
+msgstr "Администрирование cAtIx: администраторы"
+
+#: src/app/routes/_with_menu/search/admin/max.index.tsx:19
+msgid "cAtIx admin: MAX"
+msgstr "Администрирование cAtIx: MAX"
+
+#: src/app/routes/_with_menu/search/admin/max.$chatId.tsx:20
+msgid "cAtIx admin: MAX source"
+msgstr "Администрирование cAtIx: источник MAX"
+
+#: src/app/routes/_with_menu/search/admin/proposals.tsx:19
+msgid "cAtIx admin: proposals"
+msgstr "Администрирование cAtIx: заявки на чаты"
+
+#: src/app/routes/_with_menu/search/admin/index.tsx:19
+msgid "cAtIx admin: Telegram"
+msgstr "Администрирование cAtIx: Telegram"
+
+#: src/app/routes/_with_menu/search/admin/telegram.$chatId.tsx:22
+msgid "cAtIx admin: Telegram chat"
+msgstr "Администрирование cAtIx: чат Telegram"
 
 #: src/components/search/ask/AskNotifications.tsx:66
 msgid "cAtIx is waiting for confirmation"
@@ -1899,6 +2033,10 @@ msgstr "Источники чатов"
 #: src/components/search/ask/AskPage.tsx:233
 msgid "Chats"
 msgstr "Чаты"
+
+#: src/components/search/admin/TelegramChatsPage.tsx:133
+msgid "Chats proposed from Moodle courses"
+msgstr "Заявки на чаты из курсов Moodle"
 
 #: src/components/search/ask/AskSignupOffers.tsx:372
 msgid "Check booking in the service"
@@ -2120,6 +2258,13 @@ msgstr "Сбросить фильтр игр"
 #: src/components/forms/FormUrlInput.tsx:58
 msgid "Clear input"
 msgstr "Очистить поле"
+
+#: src/components/search/admin/MaxSourcePage.tsx:306
+#: src/components/search/admin/MaxSourcePage.tsx:333
+#: src/components/search/admin/TelegramChatPage.tsx:262
+#: src/components/search/admin/TelegramChatPage.tsx:298
+msgid "Clear messages"
+msgstr "Очистить сообщения"
 
 #: src/components/clubs/EditClubPage.tsx:758
 #: src/components/schedule-assistant/timetable/EditableSessionEventsEditor.tsx:81
@@ -2450,6 +2595,14 @@ msgstr "Подключитесь к Wi‑Fi или мобильному инте
 msgid "Connect your Telegram"
 msgstr "Подключите Telegram"
 
+#: src/components/search/admin/TelegramChatsPage.tsx:123
+msgid "Connected"
+msgstr "Подключён"
+
+#: src/components/search/admin/TelegramChatsPage.tsx:75
+msgid "Connected only"
+msgstr "Только подключённые"
+
 #: src/components/search/SourceRequests.tsx:461
 #~ msgid "Connecting chat"
 #~ msgstr "Подключение чата"
@@ -2501,6 +2654,7 @@ msgstr "Копии"
 #: src/components/account/MyTokenPage.tsx:88
 #: src/components/forms/GeneratedLink.tsx:38
 #: src/components/schedule/ScheduleLinkCopy.tsx:54
+#: src/components/search/admin/RequireCatixAdmin.tsx:44
 #: src/components/search/ask/AskQuoteMenu.tsx:87
 msgid "Copy"
 msgstr "Копировать"
@@ -2723,6 +2877,7 @@ msgid "Countdown Timer"
 msgstr "Таймер"
 
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:462
+#: src/components/search/admin/ChatProposalsPage.tsx:44
 msgid "Course"
 msgstr "Предмет"
 
@@ -3090,6 +3245,11 @@ msgstr "Удалить «{gameTitle}»"
 msgid "Delete {gameTitle} from the inventory? This action cannot be undone."
 msgstr "Удалить игру «{gameTitle}» из каталога? Это действие нельзя отменить."
 
+#: src/components/search/admin/MaxSourcePage.tsx:307
+#: src/components/search/admin/TelegramChatPage.tsx:263
+msgid "Delete all {count} messages and their embeddings? This cannot be undone. The chat, its study group and its settings stay."
+msgstr "Удалить все сообщения ({count}) и их эмбеддинги? Это нельзя отменить. Чат, его учебная группа и настройки останутся."
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:534
 msgid "Delete board game"
 msgstr "Удалить настольную игру"
@@ -3137,6 +3297,11 @@ msgstr "Удалить язык <0>{0}</0>?"
 #: src/components/when2meet/MeetingPage.tsx:1157
 msgid "Delete meeting"
 msgstr "Удалить встречу"
+
+#: src/components/search/admin/MaxSourcePage.tsx:308
+#: src/components/search/admin/TelegramChatPage.tsx:264
+msgid "Delete messages"
+msgstr "Удалить сообщения"
 
 #: src/components/board-games/ReservationDetailsModal.tsx:115
 #: src/components/board-games/ReservationDetailsModal.tsx:119
@@ -3276,6 +3441,20 @@ msgstr "Отключено"
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:242
 msgid "Discard the proposed changes to \"{clubTitle}\"? The leader will need to resubmit."
 msgstr "Отклонить предложенные изменения клуба «{clubTitle}»? Лидеру придётся отправить их заново."
+
+#: src/components/search/admin/TelegramChatPage.tsx:273
+#: src/components/search/admin/TelegramChatPage.tsx:275
+#: src/components/search/admin/TelegramChatPage.tsx:308
+msgid "Disconnect"
+msgstr "Отключить"
+
+#: src/components/search/admin/TelegramChatPage.tsx:274
+msgid "Disconnect this chat? Messages stay in the database."
+msgstr "Отключить этот чат? Сохранённые сообщения останутся в базе."
+
+#: src/components/search/admin/TelegramChatPage.tsx:252
+msgid "Disconnected"
+msgstr "Отключён"
 
 #: src/components/board-games/BoardGamesPage.tsx:313
 #: src/components/guard/SetupResult.tsx:64
@@ -3527,6 +3706,10 @@ msgstr "Почта"
 msgid "Empty group"
 msgstr "Пустая группа"
 
+#: src/components/search/admin/MaxSourcesPage.tsx:115
+msgid "enabled"
+msgstr "включён"
+
 #: src/components/room-booking/timeline/BookingModal.tsx:585
 #: src/components/search/ask/AskApproval.tsx:245
 #: src/components/tabletennis/LiveTournament.tsx:222
@@ -3740,6 +3923,17 @@ msgstr "Оборудование"
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:443
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:455
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:499
+#: src/components/search/admin/AbusePage.tsx:88
+#: src/components/search/admin/CatixAdminsPage.tsx:35
+#: src/components/search/admin/CatixAdminsPage.tsx:48
+#: src/components/search/admin/MaxSourcePage.tsx:133
+#: src/components/search/admin/MaxSourcePage.tsx:277
+#: src/components/search/admin/MaxSourcesPage.tsx:37
+#: src/components/search/admin/OfficialToggle.tsx:27
+#: src/components/search/admin/TelegramChatPage.tsx:81
+#: src/components/search/admin/TelegramChatPage.tsx:245
+#: src/components/search/admin/TelegramChatPage.tsx:256
+#: src/components/search/admin/TelegramChatsPage.tsx:34
 #: src/components/sport/SportOverviewSection.tsx:308
 #: src/components/sport/SportOverviewSection.tsx:509
 #: src/components/sport/SportOverviewSection.tsx:626
@@ -3935,6 +4129,11 @@ msgstr "каждую неделю"
 #: src/components/schedule-assistant/timetable/sessionSeriesRows.tsx:605
 msgid "Every week"
 msgstr "Каждую неделю"
+
+#: src/components/search/admin/MaxSourcePage.tsx:169
+#: src/components/search/admin/MaxSourcesPage.tsx:110
+msgid "Everyone"
+msgstr "Для всех"
 
 #: src/components/when2meet/MeetingPage.tsx:1118
 msgid "Everyone can now see the final meeting time."
@@ -4245,6 +4444,10 @@ msgstr "Имя"
 msgid "First-round pairs from the same group (highlighted): {sameGroupPairs}."
 msgstr "Пар из одной группы в первом раунде (выделены): {sameGroupPairs}."
 
+#: src/components/search/admin/CatixAdminsPage.tsx:87
+msgid "Fixed"
+msgstr "Постоянный"
+
 #: src/components/onboarding/OnboardingSteps.tsx:457
 msgid "Floor"
 msgstr "Этаж"
@@ -4269,6 +4472,16 @@ msgstr "На следующие семестры — по следующей ф�
 msgid "Forbidden time"
 msgstr "Запрещённое время"
 
+#: src/components/search/admin/AbusePage.tsx:95
+#: src/components/search/admin/AbusePage.tsx:97
+#: src/components/search/admin/AbusePage.tsx:130
+msgid "Forgive"
+msgstr "Простить"
+
+#: src/components/search/admin/AbusePage.tsx:85
+msgid "Forgiven"
+msgstr "Прощён"
+
 #: src/app/routes/forms.submit.tsx:126
 #: src/app/routes/forms.submit.tsx:145
 #: src/app/routes/forms.submit.tsx:159
@@ -4289,6 +4502,14 @@ msgstr "Формирование групп"
 #: src/app/routes/_with_menu/forms.tsx:33
 msgid "Forms"
 msgstr "Формы"
+
+#: src/components/search/admin/TelegramChatsPage.tsx:96
+msgid "Forum"
+msgstr "Форум"
+
+#: src/components/search/admin/ChatProposalsPage.tsx:47
+msgid "Found"
+msgstr "Найдена"
 
 #: src/components/about/TeamMembers.tsx:106
 #~ msgid "Founder"
@@ -4717,6 +4938,14 @@ msgstr "Выделение"
 msgid "History"
 msgstr "История"
 
+#: src/components/search/admin/MaxSourcePage.tsx:298
+msgid "History reload requested"
+msgstr "Повторная загрузка истории запрошена"
+
+#: src/components/search/admin/MaxSourcePage.tsx:79
+msgid "History:"
+msgstr "История:"
+
 #: src/components/tabletennis/ValidationMatches.tsx:372
 msgid "Hold a player and drag them to another group, or tap a player and then a group. Groups can be of any size."
 msgstr "Зажмите игрока и перетащите в другую группу либо нажмите на игрока, а затем на группу. Размер групп может быть любым."
@@ -4777,6 +5006,10 @@ msgstr "ID"
 #: src/components/clubs/EditClubPage.tsx:1111
 msgid "ID from InnoSport system"
 msgstr "ID из системы InnoSport"
+
+#: src/components/search/admin/MaxSourcePage.tsx:73
+msgid "ID in the database:"
+msgstr "ID в базе:"
 
 #: src/components/clubs/ClubLeaguePage.tsx:244
 msgid "If the purchase is non-standard and doesn't correspond to the activities of the club, you have to write a justification for the purchase and send it to <0>@T_Konovalov</0>"
@@ -4881,6 +5114,10 @@ msgstr "Неактивно"
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:203
 #~ msgid "inclusive; days: {dayCount}"
 #~ msgstr "включительно; дней: {dayCount}"
+
+#: src/components/search/admin/max-labels.ts:35
+msgid "incomplete (partial)"
+msgstr "неполный (partial)"
 
 #: src/components/web-print/PrintPage.tsx:187
 msgid "Incorrect page range format."
@@ -5251,12 +5488,21 @@ msgstr "Оставьте отзыв и оцените"
 msgid "Let us know if you have ideas for our projects or run into any issues."
 msgstr "Напишите нам, если у вас есть идеи проектов или вы столкнулись с проблемой."
 
+#: src/components/search/admin/GroupCodeInput.tsx:36
+msgid "Letters, digits, dot, dash and underscore; up to 40 characters."
+msgstr "Буквы, цифры, точка, дефис и подчёркивание; до 40 символов."
+
+#: src/components/search/admin/AbusePage.tsx:96
+msgid "Lift the pause of {userKey} and forget their violations?"
+msgstr "Снять паузу {userKey} и забыть нарушения?"
+
 #: src/components/search/ask/AskResult.tsx:42
 #~ msgid "link"
 #~ msgstr "ссылка"
 
 #: src/components/clubs/constants.ts:91
 #: src/components/editor/menus/LinkButton.tsx:34
+#: src/components/search/admin/ChatProposalsPage.tsx:38
 #: src/components/sport/SportProfilePage.tsx:430
 #: src/components/tabletennis/MergeGuestModal.tsx:149
 msgid "Link"
@@ -5296,6 +5542,10 @@ msgstr "Привязать аккаунт"
 msgid "Link TV to room"
 msgstr "Привязать ТВ к комнате"
 
+#: src/components/search/admin/MaxSourcePage.tsx:87
+msgid "Linked old source:"
+msgstr "Связанный старый источник:"
+
 #: src/components/admin/AdminPage.tsx:41
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:308
 #: src/components/events/drafts/DraftLinksSection.tsx:173
@@ -5333,6 +5583,14 @@ msgstr "Открытые окна получены через Clients API вор
 msgid "Load from Baam"
 msgstr "Загрузить из Baam"
 
+#: src/components/search/admin/max-labels.ts:16
+msgid "loaded partially"
+msgstr "загружена частично"
+
+#: src/components/search/admin/max-labels.ts:14
+msgid "loading"
+msgstr "загружается"
+
 #: src/components/clubs/ClubReviewChangesPage.tsx:22
 msgid "Loading changes for review..."
 msgstr "Загрузка изменений на проверку..."
@@ -5350,6 +5608,10 @@ msgstr "Загрузка клубов..."
 #: src/components/when2meet/MeetingRoomModal.tsx:275
 msgid "Loading current booking details..."
 msgstr "Загрузка деталей текущего бронирования..."
+
+#: src/components/search/admin/max-labels.ts:17
+msgid "loading failed"
+msgstr "ошибка загрузки"
 
 #: src/components/search/SourceRequests.tsx:353
 #~ msgid "Loading requests…"
@@ -5415,6 +5677,14 @@ msgstr "Зафиксировать группы и начать"
 #: src/components/tabletennis/QualificationMatches.tsx:245
 msgid "Lock the groups on the Validation tab first."
 msgstr "Сначала зафиксируйте группы на вкладке проверки."
+
+#: src/components/search/admin/MaxSourcesPage.tsx:56
+msgid "Login required: run <0>catix-maxuserbot login</0> in the terminal"
+msgstr "Нужен вход: выполните <0>catix-maxuserbot login</0> в терминале"
+
+#: src/components/search/admin/max-labels.ts:40
+msgid "Login required: run catix-maxuserbot login in the terminal."
+msgstr "Нужен вход: выполните catix-maxuserbot login в терминале."
 
 #: src/components/clubs/ClubReviewChangeDetailPage.tsx:317
 msgid "Logo"
@@ -5538,6 +5808,14 @@ msgstr "Матч"
 msgid "Max"
 msgstr "Макс."
 
+#: src/components/search/admin/CatixAdminTabs.tsx:11
+msgid "MAX"
+msgstr "MAX"
+
+#: src/components/search/admin/max-labels.ts:47
+msgid "MAX did not report the catalog continuation; the list is incomplete."
+msgstr "MAX не сообщил продолжение каталога; список неполный."
+
 #: src/components/web-print/FileDropzone.tsx:66
 msgid "Max file size is <0>20MB</0>"
 msgstr "Максимальный размер файла — <0>20 МБ</0>"
@@ -5545,6 +5823,10 @@ msgstr "Максимальный размер файла — <0>20 МБ</0>"
 #: src/components/events/shared/EnrollmentFields.tsx:120
 msgid "Max participants"
 msgstr "Макс. участников"
+
+#: src/components/search/admin/MaxSourcePage.tsx:70
+msgid "MAX raw ID:"
+msgstr "MAX raw ID:"
 
 #: src/components/search/SourceRequests.tsx:285
 #~ msgid "Maximum 2000 characters."
@@ -5684,6 +5966,16 @@ msgstr "Мерч клуба"
 #~ msgid "Message"
 #~ msgstr "Сообщение"
 
+#: src/components/search/admin/MaxSourcePage.tsx:287
+#: src/components/search/admin/TelegramChatPage.tsx:242
+msgid "Messages deleted: {deleted}"
+msgstr "Удалено сообщений: {deleted}"
+
+#: src/components/search/admin/MaxSourcePage.tsx:325
+#: src/components/search/admin/TelegramChatPage.tsx:290
+msgid "Messages stored: {count}"
+msgstr "Сохранено сообщений: {count}"
+
 #: src/components/search/SourceRequests.tsx:198
 #~ msgid "Messages will be visible to all cAtIx users, including people who are not members of your study group or chat."
 #~ msgstr "Сообщения будут доступны всем пользователям cAtIx, в том числе тем, кто не состоит ни в вашей учебной группе, ни в чате."
@@ -5705,6 +5997,7 @@ msgid "Missing a training session may lead to certain consequences, including te
 msgstr "Пропуск тренировки может повлечь последствия, в том числе временное ограничение записи на следующие тренировки."
 
 #: src/components/schedule-assistant/courses/CourseComponentDetailsView.tsx:659
+#: src/components/search/admin/TelegramChatPage.tsx:142
 #: src/components/search/ask/AskApproval.tsx:188
 #: src/components/web-print/ScanPage.tsx:555
 msgid "Mode"
@@ -5927,6 +6220,7 @@ msgstr "Новый рейтинг"
 msgid "New Year countdown"
 msgstr "До Нового года"
 
+#: src/components/search/admin/ChatProposalsPage.tsx:99
 #: src/components/when2meet/CreationPage.tsx:461
 #: src/components/when2meet/MeetingRoomModal.tsx:374
 msgid "Next"
@@ -5962,6 +6256,10 @@ msgstr "Нет"
 #: src/components/admin/AdminPredefinedPage.tsx:131
 msgid "No academic groups."
 msgstr "Нет академических групп."
+
+#: src/components/search/admin/max-labels.ts:8
+msgid "no access to messages"
+msgstr "нет доступа к сообщениям"
 
 #: src/components/room-booking/tv/RoomTvPage.tsx:236
 msgid "No active booking now."
@@ -6035,6 +6333,10 @@ msgstr "Нет изменений для сохранения."
 #: src/components/search/ask/AskChatList.tsx:64
 msgid "No chats yet"
 msgstr "Чатов пока нет"
+
+#: src/components/search/admin/TelegramChatsPage.tsx:80
+msgid "No chats."
+msgstr "Чатов нет."
 
 #: src/components/schedule-assistant/timetable/InstructorAvailabilityStatusMark.tsx:91
 #: src/components/schedule-assistant/timetable/pickerLabels.ts:30
@@ -6163,6 +6465,11 @@ msgstr "Файлы не найдены."
 msgid "No files match your search."
 msgstr "По запросу файлы не найдены."
 
+#: src/components/search/admin/MaxSourcePage.tsx:129
+#: src/components/search/admin/MaxSourcePage.tsx:273
+msgid "No fresh access confirmation; catalog refresh requested. Try again after it."
+msgstr "Нет свежего подтверждения доступа; обновление каталога запрошено. Повторите после него."
+
 #: src/components/board-games/BoardGamesPage.tsx:318
 msgid "No games are available yet."
 msgstr "Игр пока нет."
@@ -6175,6 +6482,10 @@ msgstr "Игры ещё не добавлены."
 #: src/components/board-games/BoardGamesPage.tsx:325
 msgid "No games match \"{trimmedSearchQuery}\"."
 msgstr "По запросу «{trimmedSearchQuery}» игры не найдены."
+
+#: src/components/search/admin/max-labels.ts:22
+msgid "no gap found"
+msgstr "разрыв не обнаружен"
 
 #: src/components/maps/viewer/MapView.tsx:117
 msgid "No GPS signal"
@@ -6232,6 +6543,7 @@ msgid "No links added yet. Click \"Add Link\" to add resources."
 msgstr "Ссылок пока нет. Нажмите «Добавить ссылку», чтобы добавить ресурсы."
 
 #: src/components/events/drafts/DraftLinksSection.tsx:194
+#: src/components/search/admin/ChatProposalsPage.tsx:30
 msgid "No links yet."
 msgstr "Пока нет ссылок."
 
@@ -6263,6 +6575,10 @@ msgstr "Пока нет матчей."
 msgid "No matches."
 msgstr "Совпадений нет."
 
+#: src/components/search/admin/MaxSourcesPage.tsx:85
+msgid "No MAX sources yet. Log in with the account, then refresh the catalog: the chats and channels it sees appear here."
+msgstr "Источников MAX пока нет. Войдите в аккаунт и обновите каталог: чаты и каналы, которые он видит, появятся здесь."
+
 #: src/components/sport/SportProfilePage.tsx:271
 msgid "No medical group changes yet."
 msgstr "Изменений медицинской группы пока нет."
@@ -6275,6 +6591,14 @@ msgstr "Справок о больничном пока нет."
 #: src/components/when2meet/MeetingsLandingPage.tsx:168
 msgid "No meetings match your search."
 msgstr "Нет встреч по вашему запросу."
+
+#: src/components/search/admin/AbusePage.tsx:33
+msgid "No offenders."
+msgstr "Нарушителей нет."
+
+#: src/components/search/admin/MaxSourcePage.tsx:209
+msgid "No old source"
+msgstr "Нет старого источника"
 
 #: src/components/guard/JoinsList.tsx:38
 msgid "No one has joined yet"
@@ -6455,6 +6779,10 @@ msgstr "нет в учебном периоде"
 msgid "Not a sport club"
 msgstr "Не спортивный клуб"
 
+#: src/components/search/admin/max-labels.ts:52
+msgid "Not all the bulk deletions could be confirmed."
+msgstr "Не все массовые удаления удалось подтвердить."
+
 #: src/components/when2meet/AvailabilitySelector.tsx:1239
 msgid "not available for this meeting"
 msgstr "недоступно для этой встречи"
@@ -6462,6 +6790,10 @@ msgstr "недоступно для этой встречи"
 #: src/components/when2meet/MeetingPage.tsx:1228
 msgid "Not available for this meeting"
 msgstr "Недоступно для этой встречи"
+
+#: src/components/search/admin/TelegramChatsPage.tsx:125
+msgid "Not connected"
+msgstr "Не подключён"
 
 #: src/components/search/ask/AskApproval.tsx:75
 msgid "Not done: a newer question was asked."
@@ -6488,6 +6820,10 @@ msgstr "Не указано"
 msgid "Not removed"
 msgstr "Не удалено"
 
+#: src/components/search/admin/max-labels.ts:12
+msgid "not requested"
+msgstr "не запрошена"
+
 #: src/components/tabletennis/ValidationMatches.tsx:549
 msgid "Not saved"
 msgstr "Не сохранено"
@@ -6503,6 +6839,10 @@ msgstr "Не выбрано"
 #: src/components/board-games/ReservationsAdminPage.tsx:326
 msgid "Not set"
 msgstr "Не задано"
+
+#: src/components/search/admin/max-labels.ts:32
+msgid "not updated"
+msgstr "не обновлён"
 
 #: src/components/onboarding/OnboardingSteps.tsx:40
 msgid "Not you? Sign out"
@@ -6571,9 +6911,27 @@ msgstr "Количество спорт-часов"
 msgid "Numbered list"
 msgstr "Нумерованный список"
 
+#: src/components/search/admin/MaxSourcesPage.tsx:115
+msgid "off"
+msgstr "выключен"
+
+#: src/components/search/admin/admin-utils.ts:14
+#: src/components/search/admin/MaxSourcePage.tsx:195
+msgid "Off"
+msgstr "Выключен"
+
+#: src/components/search/admin/TelegramChatPage.tsx:187
+msgid "Off: new messages are not stored and Telegram search is off. Stored messages stay until you clear the history."
+msgstr "Выключен — новые сообщения не сохраняются, поиск Telegram отключён. Сохранённые сообщения остаются в базе знаний до явной очистки истории."
+
+#: src/components/search/admin/TelegramChatsPage.tsx:111
 #: src/components/search/ask/AskResult.tsx:147
 msgid "Official"
 msgstr "Официальный источник"
+
+#: src/components/search/admin/OfficialToggle.tsx:46
+msgid "Official chat"
+msgstr "Официальный чат"
 
 #: src/components/search/ask/AskResult.tsx:378
 msgid "Official document"
@@ -6596,6 +6954,10 @@ msgstr "ОК"
 #: src/components/sport/SportCheckinRulesModal.tsx:50
 msgid "Okay"
 msgstr "Хорошо"
+
+#: src/components/search/admin/MaxSourcePage.tsx:202
+msgid "Old source (archive)"
+msgstr "Старый источник (архив)"
 
 #: src/components/schedule-assistant/timetable/pickerLabels.ts:41
 msgid "on class days"
@@ -6630,6 +6992,10 @@ msgstr "по понедельникам"
 #: src/components/schedule-assistant/timetable/pickerLabels.ts:18
 msgid "on Saturdays"
 msgstr "по субботам"
+
+#: src/components/search/admin/MaxSourcePage.tsx:223
+msgid "On save with reading on, the old archive is hidden from search; this link cannot be changed."
+msgstr "При сохранении с включённым чтением старый архив скрывается из поиска; эту связь нельзя изменить."
 
 #: src/components/schedule-assistant/timetable/MeetingDetailPanel.tsx:174
 msgid "On specific dates"
@@ -6810,6 +7176,7 @@ msgstr "Организатор"
 msgid "Other"
 msgstr "Другой"
 
+#: src/components/search/admin/TelegramChatPage.tsx:118
 #: src/components/search/ask/AskSources.tsx:141
 msgid "Other and new topics"
 msgstr "Остальные и новые темы"
@@ -6889,6 +7256,7 @@ msgstr "переопр."
 msgid "override: {overriddenFields}"
 msgstr "переопр.: {overriddenFields}"
 
+#: src/components/search/admin/ChatProposalsPage.tsx:50
 #: src/components/when2meet/MeetingPage.tsx:1848
 msgid "Owner"
 msgstr "Владелец"
@@ -6991,6 +7359,18 @@ msgstr "Пауза"
 #: src/components/debug/DebugPage.tsx:109
 msgid "Pause automatic updates on this page"
 msgstr "Приостановить автоматические обновления этой страницы"
+
+#: src/components/search/admin/AbusePage.tsx:27
+msgid "Pause threshold: {pauseAt} in {windowHours} h"
+msgstr "Порог паузы: {pauseAt} за {windowHours} ч"
+
+#: src/components/search/admin/AbusePage.tsx:50
+msgid "Paused until"
+msgstr "Пауза до"
+
+#: src/components/search/admin/AbusePage.tsx:47
+msgid "Pauses"
+msgstr "Паузы"
 
 #: src/components/search/PdfPreview.tsx:56
 #~ msgid "PDF file is missing"
@@ -7176,6 +7556,10 @@ msgstr "Предпочтительное время"
 msgid "Preparing the action"
 msgstr "Готовлю действие"
 
+#: src/components/search/admin/ChatProposalsPage.tsx:87
+msgid "Prev"
+msgstr "Назад"
+
 #: src/components/clubs/EditClubPage.tsx:918
 #: src/components/search/IframePreviewCard.tsx:132
 #: src/components/search/IframePreviewCard.tsx:215
@@ -7304,6 +7688,10 @@ msgstr "Языки программирования, робототехника,
 msgid "Projects"
 msgstr "Проекты"
 
+#: src/components/search/admin/CatixAdminTabs.tsx:14
+msgid "Proposals"
+msgstr "Заявки"
+
 #: src/components/search/SourceRequests.tsx:50
 #~ msgid "Propose a chat"
 #~ msgstr "Предложить чат"
@@ -7429,14 +7817,23 @@ msgstr "Оценка: {chosenEmoji}"
 msgid "Raw data"
 msgstr "Исходные данные"
 
+#: src/components/search/admin/MaxSourcesPage.tsx:108
+msgid "raw ID"
+msgstr "raw ID"
+
 #: src/components/music-room/MusicRoomPage.tsx:49
 msgid "Read rules and guides on how to access the Music room. Every visitor should accept these conditions."
 msgstr "Прочитайте правила и инструкции по доступу в музкомнату. Каждый посетитель должен принять эти условия."
+
+#: src/components/search/admin/ChatProposalsPage.tsx:26
+msgid "Read-only: connect a chat on the Telegram tab."
+msgstr "Только просмотр: чат подключается на вкладке Telegram."
 
 #: src/components/guard/JoinsList.tsx:150
 msgid "Reader"
 msgstr "Читатель"
 
+#: src/components/search/admin/MaxSourcePage.tsx:187
 #: src/components/search/ask/ask-mood.ts:20
 msgid "Reading"
 msgstr "Читаю"
@@ -7465,6 +7862,18 @@ msgstr "Переподключите Telegram"
 #: src/components/dashboard/TelegramReconnectWidget.tsx:24
 msgid "Reconnect your Telegram now"
 msgstr "Подключите Telegram заново"
+
+#: src/components/search/admin/max-labels.ts:26
+msgid "recovered partially"
+msgstr "восстановлен частично"
+
+#: src/components/search/admin/max-labels.ts:24
+msgid "recovering"
+msgstr "восстанавливается"
+
+#: src/components/search/admin/max-labels.ts:27
+msgid "recovery failed"
+msgstr "ошибка восстановления"
 
 #: src/components/editor/extensions/Highlight.ts:67
 msgid "Red"
@@ -7507,6 +7916,14 @@ msgstr "Перераспределить игроков"
 #: src/components/editor/menus/EditorMenuItems.tsx:135
 msgid "Redo"
 msgstr "Повторить"
+
+#: src/components/search/admin/MaxSourcesPage.tsx:79
+msgid "Refresh catalog"
+msgstr "Обновить каталог"
+
+#: src/components/search/admin/TelegramChatsPage.tsx:64
+msgid "Refresh list"
+msgstr "Обновить список"
 
 #: src/components/search/SourceRequests.tsx:372
 #~ msgid "Refresh requests"
@@ -7581,6 +7998,8 @@ msgstr "Обновите страницу после восстановлени�
 
 #: src/components/editor/menus/LinkButton.tsx:243
 #: src/components/schedule/linked-card/RemoveButtonLinked.tsx:97
+#: src/components/search/admin/CatixAdminsPage.tsx:59
+#: src/components/search/admin/CatixAdminsPage.tsx:97
 #: src/components/tabletennis/PlayersField.tsx:414
 #: src/components/tabletennis/ValidationMatches.tsx:247
 #: src/components/web-print/ScanPage.tsx:767
@@ -7598,9 +8017,17 @@ msgstr "Удалить {0}"
 msgid "Remove {0} from the tournament?"
 msgstr "Удалить игрока {0} из турнира?"
 
+#: src/components/search/admin/CatixAdminsPage.tsx:58
+msgid "Remove {innohassleId} from the cAtIx admins?"
+msgstr "Убрать {innohassleId} из администраторов cAtIx?"
+
 #: src/components/when2meet/MeetingPage.tsx:959
 msgid "Remove {participantName} from the meeting?"
 msgstr "Удалить участника {participantName} из встречи?"
+
+#: src/components/search/admin/CatixAdminsPage.tsx:57
+msgid "Remove admin"
+msgstr "Убрать администратора"
 
 #: src/components/search/ask/AskInput.tsx:241
 msgid "Remove attachment"
@@ -7870,6 +8297,7 @@ msgstr "Пересдача"
 #: src/components/schedule-assistant/timetable/PublicTimetablePage.tsx:115
 #: src/components/schedule-assistant/timetable/TimetableSidebarMenu.tsx:790
 #: src/components/schedule/SchedulePage.tsx:124
+#: src/components/search/admin/AdminStates.tsx:27
 #: src/components/search/ask/AskChatList.tsx:47
 #: src/components/search/ask/AskPage.tsx:327
 #: src/components/search/ask/AskSources.tsx:74
@@ -7883,6 +8311,10 @@ msgstr "Пересдача"
 #: src/components/when2meet/MeetingsLandingPage.tsx:158
 msgid "Retry"
 msgstr "Повторить"
+
+#: src/components/search/admin/MaxSourcePage.tsx:348
+msgid "Retry history"
+msgstr "Повторить загрузку истории"
 
 #: src/components/board-games/ReservationsAdminPage.tsx:322
 msgid "Return by"
@@ -8097,6 +8529,8 @@ msgstr "Суббота"
 #: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:243
 #: src/components/schedule-assistant/timetable/EditClassAudienceModal.tsx:310
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:711
+#: src/components/search/admin/MaxSourcePage.tsx:238
+#: src/components/search/admin/TelegramChatPage.tsx:199
 #: src/components/tabletennis/PlayerActionMenu.tsx:310
 #: src/components/when2meet/CreationPage.tsx:477
 #: src/components/when2meet/MeetingName.tsx:117
@@ -8128,6 +8562,12 @@ msgstr "Сохранить время встречи"
 #: src/components/when2meet/MeetingPage.tsx:1427
 msgid "Save timeslots"
 msgstr "Сохранить слоты"
+
+#: src/components/search/admin/MaxSourcePage.tsx:118
+#: src/components/search/admin/OfficialToggle.tsx:24
+#: src/components/search/admin/TelegramChatPage.tsx:77
+msgid "Saved"
+msgstr "Сохранено"
 
 #: src/components/search/ask/AskSources.tsx:164
 msgid "Saved message history remains searchable even when collection is disabled."
@@ -8268,6 +8708,10 @@ msgstr "Поиск по имени или id..."
 msgid "Search by Telegram alias"
 msgstr "Поиск по Telegram-алиасу"
 
+#: src/components/search/admin/TelegramChatsPage.tsx:54
+msgid "Search by title or id"
+msgstr "Поиск по названию или id"
+
 #: src/components/guard/FilesSection.tsx:26
 msgid "Search by title, join link, or slug"
 msgstr "Поиск по названию, ссылке или slug"
@@ -8298,6 +8742,11 @@ msgstr "Поиск игр по названию"
 #: src/components/when2meet/MeetingsLandingPage.tsx:24
 msgid "Search meeting name..."
 msgstr "Поиск по названию встречи..."
+
+#: src/components/search/admin/admin-utils.ts:13
+#: src/components/search/admin/TelegramChatsPage.tsx:106
+msgid "Search only"
+msgstr "Только поиск"
 
 #: src/components/when2meet/MeetingPage.tsx:1787
 msgid "Search participants..."
@@ -8520,6 +8969,10 @@ msgstr "Отправить после ответа"
 msgid "Send feedback to the InNoHassle team"
 msgstr "Отправить отзыв команде InNoHassle"
 
+#: src/components/search/admin/RequireCatixAdmin.tsx:33
+msgid "Send your InNoHassle id to a cAtIx admin:"
+msgstr "Отправьте свой InNoHassle id администратору cAtIx:"
+
 #: src/components/search/ask/AskPage.tsx:367
 msgid "Sending request"
 msgstr "Отправляю запрос"
@@ -8593,6 +9046,11 @@ msgstr "Сеты"
 #: src/components/tabletennis/ScoreSheet.tsx:124
 msgid "Sets won"
 msgstr "Выигранные сеты"
+
+#: src/components/search/admin/MaxSourcePage.tsx:123
+#: src/components/search/admin/MaxSourcePage.tsx:267
+msgid "Settings or access changed; reloaded"
+msgstr "Настройки или доступ изменились; данные перезагружены"
 
 #: src/components/guard/SetupResult.tsx:32
 msgid "Setup complete"
@@ -9155,9 +9613,19 @@ msgstr "Стоп"
 msgid "Stop Timer"
 msgstr "Остановить таймер"
 
+#: src/components/search/admin/max-labels.ts:18
+#: src/components/search/admin/max-labels.ts:28
+msgid "stopped"
+msgstr "остановлена"
+
 #: src/components/room-booking/timeline/BookingModal.tsx:759
 msgid "Stopping booking..."
 msgstr "Остановка бронирования..."
+
+#: src/components/search/admin/admin-utils.ts:12
+#: src/components/search/admin/MaxSourcePage.tsx:194
+msgid "Store"
+msgstr "Хранить"
 
 #: src/components/debug/WorkerDiagnostics.tsx:238
 msgid "Stored manifest metadata differs from this App's BUILD_INFO."
@@ -9170,6 +9638,10 @@ msgstr "Метаданные сохранённого манифеста сов�
 #: src/components/debug/WorkerDiagnostics.tsx:66
 msgid "Stored pin only"
 msgstr "Только сохранённая привязка"
+
+#: src/components/search/admin/AbusePage.tsx:44
+msgid "Strikes"
+msgstr "Нарушения"
 
 #: src/components/editor/menus/EditorMenuItems.tsx:62
 msgid "Strikethrough"
@@ -9215,9 +9687,14 @@ msgstr "Студенты могут бронировать только не в 
 msgid "Students not found"
 msgstr "Студенты не найдены"
 
-#: src/components/search/SourceRequests.tsx:231
-#~ msgid "Study group"
-#~ msgstr "Учебная группа"
+#: src/components/search/admin/MaxSourcePage.tsx:178
+#: src/components/search/admin/TelegramChatPage.tsx:110
+msgid "Study group"
+msgstr "Учебная группа"
+
+#: src/components/search/admin/MaxSourcesPage.tsx:112
+msgid "Study group {groupCode}"
+msgstr "Учебная группа {groupCode}"
 
 #: src/components/search/SourceRequests.tsx:169
 #~ msgid "Study group verification is not proof of chat membership."
@@ -9226,6 +9703,10 @@ msgstr "Студенты не найдены"
 #: src/components/search/ask/AskSources.tsx:93
 msgid "Study group verification is unavailable. Common sources are still available."
 msgstr "Подтверждение учебной группы недоступно. Общие источники по-прежнему доступны."
+
+#: src/components/search/admin/ChatProposalsPage.tsx:41
+msgid "Study groups"
+msgstr "Учебные группы"
 
 #: src/components/search/ask/AskApproval.tsx:263
 msgid "Subject"
@@ -9483,6 +9964,7 @@ msgstr "Технические"
 #: src/components/admin/AdminUserDetails.tsx:298
 #: src/components/layout/MorePage.tsx:36
 #: src/components/onboarding/OnboardingProgress.tsx:8
+#: src/components/search/admin/CatixAdminTabs.tsx:8
 msgid "Telegram"
 msgstr "Telegram"
 
@@ -9544,6 +10026,10 @@ msgstr "Telegram не указан"
 #~ msgid "Telegram or MAX chat or channel link"
 #~ msgstr "Ссылка на чат или канал Telegram или MAX"
 
+#: src/components/search/admin/CatixAdminsPage.tsx:79
+msgid "Telegram unknown until they open this panel once"
+msgstr "Telegram неизвестен, пока администратор не откроет эту панель"
+
 #: src/components/clubs/EditClubPage.tsx:1207
 msgid "Telegram User"
 msgstr "Пользователь Telegram"
@@ -9573,6 +10059,10 @@ msgstr "Спасибо!"
 msgid "The <0>week missed</0> due to illness is <1>compensated by two sports hours.</1>"
 msgstr "<0>Пропущенная из‑за болезни неделя</0> <1>компенсируется двумя спортивными часами.</1>"
 
+#: src/components/search/admin/max-labels.ts:45
+msgid "The access information could not be updated."
+msgstr "Не удалось обновить сведения о доступе."
+
 #: src/components/search/ask/AskPage.tsx:402
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr "Результат действия не подтверждён. Проверьте его в сервисе перед повторной попыткой."
@@ -9597,6 +10087,10 @@ msgstr "Бронирование больше не существует в се�
 msgid "The bracket appears when the organiser starts qualification."
 msgstr "Сетка появляется, когда организатор начинает квалификацию."
 
+#: src/components/search/admin/max-labels.ts:48
+msgid "The catalog continuation does not advance; the list is incomplete."
+msgstr "Продолжение каталога не продвигается; список неполный."
+
 #: src/components/search/SourceRequests.tsx:306
 #~ msgid "The chat administrator agreed to indexing this chat and making its messages available to verified students of the selected study group."
 #~ msgstr "Администратор чата согласился на индексацию чата и показ его сообщений студентам, подтверждённым для выбранной учебной группы."
@@ -9604,6 +10098,14 @@ msgstr "Сетка появляется, когда организатор на�
 #: src/components/search/SourceRequests.tsx:301
 #~ msgid "The chat administrator agreed to indexing this chat and making its messages visible to all cAtIx users."
 #~ msgstr "Администратор чата согласился на индексацию чата и показ его сообщений всем пользователям cAtIx."
+
+#: src/components/search/admin/max-labels.ts:7
+msgid "the chat is unavailable to the account"
+msgstr "чат недоступен аккаунту"
+
+#: src/components/search/admin/max-labels.ts:46
+msgid "The chat status is unknown; reading is not allowed."
+msgstr "Статус чата неизвестен; чтение не разрешено."
 
 #: src/components/clubs/ClubPage.tsx:313
 msgid "The club leader should connect their Telegram account to InNoHassle using the <0>link</0>."
@@ -9645,10 +10147,18 @@ msgstr "Главный принцип соревнования — честна�
 msgid "The main goal of <0/> members is improving their skills and having fun. We pass knowledge from older generations to younger ones and stay friends within the team."
 msgstr "Главная цель участников <0/> — развивать свои навыки и получать удовольствие от общего дела. Мы передаём знания от старших поколений младшим и поддерживаем дружеские отношения в команде."
 
+#: src/components/search/admin/max-labels.ts:43
+msgid "The MAX answer does not match the expected protocol."
+msgstr "Ответ MAX не соответствует ожидаемому протоколу."
+
 #: src/components/timer/components/CustomTimeModal.tsx:89
 #: src/components/timer/lib/useTimer.ts:101
 msgid "The maximum countdown duration is 99:99:99"
 msgstr "Максимальная длительность — 99:99:99"
+
+#: src/components/search/admin/max-labels.ts:51
+msgid "The message is unavailable; its absence is not counted as a deletion."
+msgstr "Сообщение недоступно; отсутствие не считается удалением."
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:472
 msgid "The new status has been saved."
@@ -9662,6 +10172,10 @@ msgstr "Следующий матч уже начался, поэтому мож
 #: src/components/tabletennis/ValidationMatches.tsx:853
 msgid "The old result's rating change is rolled back and recalculated."
 msgstr "Изменение рейтинга по прежнему результату отменяется и рассчитывается заново."
+
+#: src/components/search/admin/max-labels.ts:56
+msgid "The operation could not be completed; refresh the data and try again."
+msgstr "Не удалось завершить операцию; обновите сведения и повторите."
 
 #: src/components/tabletennis/QualificationMatches.tsx:347
 msgid "The order was changed by hand."
@@ -9696,6 +10210,10 @@ msgstr "Бронирование удалено."
 msgid "The scanner returned nothing. Please try to scan again."
 msgstr "Сканер не вернул изображение. Попробуйте отсканировать ещё раз."
 
+#: src/components/search/admin/max-labels.ts:53
+msgid "The search index update is waiting to be sent again."
+msgstr "Обновление поискового индекса ожидает повторной отправки."
+
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:68
 #~ msgid "The selected block does not exist."
 #~ msgstr "Выбранный блок не существует."
@@ -9722,9 +10240,21 @@ msgstr "Период серии не пересекается с учебным 
 msgid "The server returned no answer stream."
 msgstr "Сервер не вернул поток ответа."
 
+#: src/components/search/admin/max-labels.ts:41
+msgid "The session belongs to another account; an operator must check it."
+msgstr "Сессия принадлежит другому аккаунту; требуется проверка оператора."
+
 #: src/app/routes/forms.submit.tsx:135
 msgid "The slug parameter is missing or invalid."
 msgstr "Параметр slug отсутствует или некорректен."
+
+#: src/components/search/admin/max-labels.ts:44
+msgid "The source data could not be processed."
+msgstr "Не удалось обработать данные источника."
+
+#: src/components/search/admin/max-labels.ts:42
+msgid "The source id is outside the supported range."
+msgstr "Идентификатор источника вне поддерживаемого диапазона."
 
 #: src/components/schedule-assistant/timetable/SessionWindowFields.tsx:57
 #~ msgid "The start date must not be after the end date."
@@ -9733,6 +10263,10 @@ msgstr "Параметр slug отсутствует или некорректе
 #: src/components/calendar/AiCalendarCard.tsx:31
 #~ msgid "The Telegram bot notifies you when events are added to AI Calendar. To receive notifications, open the bot in Telegram and press Start."
 #~ msgstr "Telegram-бот уведомляет о добавлении событий в ИИ-календарь. Чтобы получать уведомления, откройте бота в Telegram и нажмите «Запустить»."
+
+#: src/components/search/admin/max-labels.ts:50
+msgid "The time boundary does not allow to continue the history; only a part is loaded."
+msgstr "Граница времени не позволяет продолжить историю; загружена только часть."
 
 #: src/components/timer/lib/useTimer.ts:148
 msgid "The timer paused"
@@ -10103,6 +10637,14 @@ msgstr "Сворачиваемый блок…"
 msgid "Top 20 clubs earn points for higher scholarship. Top 3 can nominate 3 active members."
 msgstr "Топ-20 клубов получают баллы за повышенную стипендию. Топ-3 могут номинировать по 3 активных участника."
 
+#: src/components/search/admin/TelegramChatPage.tsx:139
+msgid "Topic"
+msgstr "Топик"
+
+#: src/components/search/admin/TelegramChatPage.tsx:136
+msgid "Topic id"
+msgstr "ID топика"
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:595
 #~ msgid "Total"
 #~ msgstr "Всего"
@@ -10281,6 +10823,10 @@ msgstr "Подробности университетского мероприя
 msgid "University events calendar."
 msgstr "Календарь университетских мероприятий."
 
+#: src/components/search/admin/MaxSourcesPage.tsx:68
+msgid "unknown"
+msgstr "неизвестно"
+
 #: src/components/room-booking/timeline/BookingModal.tsx:46
 #: src/components/tabletennis/QualificationMatches.tsx:56
 #: src/components/tabletennis/TableTennisMyMatches.tsx:119
@@ -10351,6 +10897,8 @@ msgstr "До точного времени"
 #: src/components/guard/EditTitleButton.tsx:54
 #: src/components/guard/FileDetails.tsx:72
 #: src/components/guard/FilesList.tsx:84
+#: src/components/search/admin/MaxSourcePage.tsx:67
+#: src/components/search/admin/MaxSourcesPage.tsx:105
 msgid "Untitled"
 msgstr "Без названия"
 
@@ -10379,6 +10927,10 @@ msgstr "Обновить событие #{0} в вашем AI-календаре
 msgid "Update event draft {0} (not submitted for moderation, not published)"
 msgstr "Обновить черновик мероприятия {0} (не отправлен на модерацию, не опубликован)"
 
+#: src/components/search/admin/max-labels.ts:36
+msgid "update failed"
+msgstr "ошибка обновления"
+
 #: src/components/editor/menus/LinkButton.tsx:232
 msgid "Update Link"
 msgstr "Обновить ссылку"
@@ -10393,10 +10945,18 @@ msgstr "Обновить ссылку"
 msgid "Update the club information below"
 msgstr "Обновите информацию о клубе ниже"
 
+#: src/components/search/admin/max-labels.ts:34
+msgid "updated"
+msgstr "обновлён"
+
 #: src/components/admin/AdminUserDetails.tsx:281
 #: src/components/admin/AdminUserDetails.tsx:328
 msgid "Updated at"
 msgstr "Обновлено"
+
+#: src/components/search/admin/max-labels.ts:33
+msgid "updating"
+msgstr "обновляется"
 
 #: src/components/room-booking/timeline/BookingModal.tsx:720
 msgid "Updating booking..."
@@ -10489,6 +11049,10 @@ msgstr "Войдите через аккаунт Иннополиса, чтоб�
 #: src/components/onboarding/OnboardingSteps.tsx:50
 msgid "Use your Innopolis account<0/>to access InNoHassle services."
 msgstr "Войдите через аккаунт Иннополиса,<0/>чтобы пользоваться сервисами InNoHassle."
+
+#: src/components/search/admin/AbusePage.tsx:41
+msgid "User"
+msgstr "Пользователь"
 
 #: src/components/board-games/BoardGamesAdminPage.tsx:316
 msgid "User email"
@@ -10646,6 +11210,10 @@ msgstr "Ожидание"
 msgid "Waiting for pickup"
 msgstr "Ожидает получения"
 
+#: src/components/search/admin/max-labels.ts:23
+msgid "waiting for recovery"
+msgstr "ожидает восстановления"
+
 #: src/components/clubs/ClubReviewChangesPage.tsx:70
 msgid "Waiting for review"
 msgstr "Ожидает проверки"
@@ -10653,6 +11221,10 @@ msgstr "Ожидает проверки"
 #: src/components/sport/SportOverviewSection.tsx:412
 #~ msgid "Waiting for the activity link"
 #~ msgstr "Ожидание ссылки на активность"
+
+#: src/components/search/admin/max-labels.ts:13
+msgid "waiting to be loaded"
+msgstr "ожидает загрузки"
 
 #: src/components/toast/ToastProvider.test.ts:72
 #: src/components/toast/ToastProvider.test.ts:127
@@ -10900,6 +11472,10 @@ msgstr "Кто это?"
 #~ msgid "Who picked up the game."
 #~ msgstr "Кто забрал игру."
 
+#: src/components/search/admin/TelegramChatPage.tsx:171
+msgid "Who reads the messages"
+msgstr "Кто читает сообщения"
+
 #: src/components/search/SourceRequests.tsx:172
 #~ msgid "Who should be able to see indexed messages?"
 #~ msgstr "Кто сможет видеть проиндексированные сообщения?"
@@ -10908,6 +11484,7 @@ msgstr "Кто это?"
 msgid "Who we are"
 msgstr "Кто мы"
 
+#: src/components/search/admin/TelegramChatPage.tsx:120
 #: src/components/search/ask/AskSources.tsx:143
 msgid "Whole chat"
 msgstr "Весь чат"

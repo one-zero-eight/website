@@ -593,10 +593,633 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/admin/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Me */
+    get: operations["admin_me"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/admins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Admins */
+    get: operations["admin_list_admins"];
+    put?: never;
+    /** Add Admin */
+    post: operations["admin_add_admin"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/admins/{innohassle_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Remove Admin */
+    delete: operations["admin_remove_admin"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/groups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Groups */
+    get: operations["admin_list_groups"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/telegram/chats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Telegram Chats */
+    get: operations["admin_telegram_chats"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/telegram/chats/{chat_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Telegram Chat */
+    get: operations["admin_telegram_chat"];
+    /** Save Telegram Chat */
+    put: operations["admin_save_telegram_chat"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/telegram/chats/{chat_id}/listen": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Disconnect Telegram Chat
+     * @description Messages stay.
+     */
+    delete: operations["admin_disconnect_telegram_chat"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/telegram/chats/{chat_id}/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Clear Telegram Chat */
+    delete: operations["admin_clear_telegram_chat"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/telegram/refresh": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Refresh Telegram */
+    post: operations["admin_refresh_telegram"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/chats/{chat_id}/official": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Set Official */
+    put: operations["admin_set_official"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/max": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Max Sources */
+    get: operations["admin_max_sources"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/max/{chat_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Max Source */
+    get: operations["admin_max_source"];
+    /** Save Max Source */
+    put: operations["admin_save_max_source"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/max/{chat_id}/history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Retry Max History */
+    post: operations["admin_retry_max_history"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/max/{chat_id}/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Clear Max Messages */
+    delete: operations["admin_clear_max_messages"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/max/refresh": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Refresh Max */
+    post: operations["admin_refresh_max"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/chat-proposals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Chat Proposals */
+    get: operations["admin_chat_proposals"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/abuse": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Abuse List */
+    get: operations["admin_abuse_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/abuse/{user_key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Abuse Detail */
+    get: operations["admin_abuse_detail"];
+    put?: never;
+    post?: never;
+    /** Abuse Forgive */
+    delete: operations["admin_abuse_forgive"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** AbuseDetail */
+    AbuseDetail: {
+      /** User Key */
+      user_key: string;
+      /** Paused Until */
+      paused_until: string | null;
+      /** Entries */
+      entries: components["schemas"]["AbuseEntryView"][];
+    };
+    /** AbuseEntryView */
+    AbuseEntryView: {
+      /** Category */
+      category: string;
+      /**
+       * At
+       * Format: date-time
+       */
+      at: string;
+      /** Preview */
+      preview: string;
+    };
+    /** AbuseListView */
+    AbuseListView: {
+      /** Window Hours */
+      window_hours: number;
+      /** Warn At */
+      warn_at: number;
+      /** Pause At */
+      pause_at: number;
+      /** Users */
+      users: components["schemas"]["AbuseUserView"][];
+    };
+    /** AbuseUserView */
+    AbuseUserView: {
+      /** User Key */
+      user_key: string;
+      /** Strikes */
+      strikes: number;
+      /** Pauses */
+      pauses: number;
+      /** Paused Until */
+      paused_until: string | null;
+    };
+    /** AdminIn */
+    AdminIn: {
+      /** Innohassle Id */
+      innohassle_id: string;
+    };
+    /** AdminMe */
+    AdminMe: {
+      /** Innohassle Id */
+      innohassle_id: string;
+      /** Is Admin */
+      is_admin: boolean;
+    };
+    /** AdminView */
+    AdminView: {
+      /** Innohassle Id */
+      innohassle_id: string;
+      /** Email */
+      email: string | null;
+      /** Telegram Id */
+      telegram_id: number | null;
+      /** Fixed */
+      fixed: boolean;
+      /** Added At */
+      added_at: string | null;
+    };
+    /** Deleted */
+    Deleted: {
+      /** Deleted */
+      deleted: number;
+    };
+    /** MaxAccountView */
+    MaxAccountView: {
+      /** Online */
+      online: boolean;
+      /** Catalog Status */
+      catalog_status: string;
+      /** Catalog Error */
+      catalog_error: string | null;
+    };
+    /** MaxLegacyCandidate */
+    MaxLegacyCandidate: {
+      /** Chat Id */
+      chat_id: string;
+      /** Raw Chat Id */
+      raw_chat_id: string;
+      /** Title */
+      title: string;
+      /** Message Count */
+      message_count: number;
+      /** Matches Raw Id */
+      matches_raw_id: boolean;
+    };
+    /** MaxSourceDetail */
+    MaxSourceDetail: {
+      /** Chat Id */
+      chat_id: string;
+      /** Raw Chat Id */
+      raw_chat_id: string;
+      /** Title */
+      title: string;
+      /** Group Code */
+      group_code: string;
+      /** Enabled */
+      enabled: boolean;
+      /** Access */
+      access: string;
+      /** History Status */
+      history_status: string;
+      /** Catchup Status */
+      catchup_status: string;
+      /** Last Error */
+      last_error: string | null;
+      /** Legacy Chat Id */
+      legacy_chat_id: string | null;
+      /** Official */
+      official: boolean;
+      /** Config Version */
+      config_version: number;
+      /** Generation */
+      generation: number;
+      /** Message Count */
+      message_count: number;
+      /** Legacy Candidates */
+      legacy_candidates: components["schemas"]["MaxLegacyCandidate"][];
+    };
+    /** MaxSourceIn */
+    MaxSourceIn: {
+      /** Group Code */
+      group_code: string;
+      /** Enabled */
+      enabled: boolean;
+      /** Legacy Chat Id */
+      legacy_chat_id?: string | null;
+      /** Config Version */
+      config_version: number;
+      /** Generation */
+      generation: number;
+    };
+    /** MaxSourceView */
+    MaxSourceView: {
+      /** Chat Id */
+      chat_id: string;
+      /** Raw Chat Id */
+      raw_chat_id: string;
+      /** Title */
+      title: string;
+      /** Group Code */
+      group_code: string;
+      /** Enabled */
+      enabled: boolean;
+      /** Access */
+      access: string;
+      /** History Status */
+      history_status: string;
+      /** Catchup Status */
+      catchup_status: string;
+      /** Last Error */
+      last_error: string | null;
+      /** Legacy Chat Id */
+      legacy_chat_id: string | null;
+      /** Official */
+      official: boolean;
+      /** Config Version */
+      config_version: number;
+      /** Generation */
+      generation: number;
+    };
+    /** MaxVersions */
+    MaxVersions: {
+      /** Config Version */
+      config_version: number;
+      /** Generation */
+      generation: number;
+    };
+    /** MaxView */
+    MaxView: {
+      account: components["schemas"]["MaxAccountView"];
+      /** Sources */
+      sources: components["schemas"]["MaxSourceView"][];
+    };
+    /** OfficialIn */
+    OfficialIn: {
+      /** Official */
+      official: boolean;
+    };
+    /** OfficialView */
+    OfficialView: {
+      /** Official */
+      official: boolean;
+    };
+    /** ProposalView */
+    ProposalView: {
+      /** Link */
+      link: string;
+      /** Owner */
+      owner: string;
+      /** Course */
+      course: string;
+      /**
+       * Found At
+       * Format: date-time
+       */
+      found_at: string;
+      /** Study Groups */
+      study_groups: string[];
+    };
+    /** ProposalsView */
+    ProposalsView: {
+      /** Total */
+      total: number;
+      /** Items */
+      items: components["schemas"]["ProposalView"][];
+    };
+    /** TelegramChatDetail */
+    TelegramChatDetail: {
+      /** Chat Id */
+      chat_id: string;
+      /** Title */
+      title: string;
+      /** Username */
+      username: string | null;
+      /** Forum */
+      forum: boolean;
+      /** Bot Only */
+      bot_only: boolean;
+      /** Bot In */
+      bot_in: boolean;
+      /** Listened */
+      listened: boolean;
+      /**
+       * Reader
+       * @enum {string}
+       */
+      reader: "auto" | "userbot" | "bot" | "search";
+      /** Group Code */
+      group_code: string;
+      /** Official */
+      official: boolean;
+      /**
+       * Default Mode
+       * @enum {string}
+       */
+      default_mode: "store" | "search" | "off";
+      /** Topics */
+      topics: components["schemas"]["TelegramTopicView"][];
+      /** Message Count */
+      message_count: number;
+    };
+    /** TelegramChatIn */
+    TelegramChatIn: {
+      /** Group Code */
+      group_code: string;
+      /**
+       * Default Mode
+       * @enum {string}
+       */
+      default_mode: "store" | "search" | "off";
+      /** Topic Modes */
+      topic_modes: {
+        [key: string]: "store" | "search" | "off";
+      };
+      /**
+       * Reader
+       * @enum {string}
+       */
+      reader: "auto" | "userbot" | "bot";
+    };
+    /** TelegramChatView */
+    TelegramChatView: {
+      /** Chat Id */
+      chat_id: string;
+      /** Title */
+      title: string;
+      /** Username */
+      username: string | null;
+      /** Forum */
+      forum: boolean;
+      /** Bot Only */
+      bot_only: boolean;
+      /** Bot In */
+      bot_in: boolean;
+      /** Listened */
+      listened: boolean;
+      /**
+       * Reader
+       * @enum {string}
+       */
+      reader: "auto" | "userbot" | "bot" | "search";
+      /** Group Code */
+      group_code: string;
+      /** Official */
+      official: boolean;
+    };
+    /** TelegramTopicView */
+    TelegramTopicView: {
+      /** Topic Id */
+      topic_id: number;
+      /** Title */
+      title: string;
+      /** Closed */
+      closed: boolean;
+      /**
+       * Mode
+       * @enum {string}
+       */
+      mode: "store" | "search" | "off";
+    };
     /** ActResponses */
     ActResponses: {
       /** Query */
@@ -2847,7 +3470,643 @@ export interface operations {
       };
     };
   };
+  admin_me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminMe"];
+        };
+      };
+    };
+  };
+  admin_list_admins: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminView"][];
+        };
+      };
+    };
+  };
+  admin_add_admin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AdminIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_remove_admin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        innohassle_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_list_groups: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": string[];
+        };
+      };
+    };
+  };
+  admin_telegram_chats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TelegramChatView"][];
+        };
+      };
+    };
+  };
+  admin_telegram_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TelegramChatDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_save_telegram_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TelegramChatIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TelegramChatDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_disconnect_telegram_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_clear_telegram_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Deleted"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_refresh_telegram: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+    };
+  };
+  admin_set_official: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OfficialIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OfficialView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_max_sources: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MaxView"];
+        };
+      };
+    };
+  };
+  admin_max_source: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MaxSourceDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_save_max_source: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MaxSourceIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MaxSourceDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_retry_max_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MaxVersions"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_clear_max_messages: {
+    parameters: {
+      query: {
+        config_version: number;
+        generation: number;
+      };
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Deleted"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_refresh_max: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+    };
+  };
+  admin_chat_proposals: {
+    parameters: {
+      query?: {
+        offset?: number;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProposalsView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_abuse_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AbuseListView"];
+        };
+      };
+    };
+  };
+  admin_abuse_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        user_key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AbuseDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_abuse_forgive: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        user_key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
 }
+export type SchemaAbuseDetail = components["schemas"]["AbuseDetail"];
+export type SchemaAbuseEntryView = components["schemas"]["AbuseEntryView"];
+export type SchemaAbuseListView = components["schemas"]["AbuseListView"];
+export type SchemaAbuseUserView = components["schemas"]["AbuseUserView"];
+export type SchemaAdminIn = components["schemas"]["AdminIn"];
+export type SchemaAdminMe = components["schemas"]["AdminMe"];
+export type SchemaAdminView = components["schemas"]["AdminView"];
+export type SchemaDeleted = components["schemas"]["Deleted"];
+export type SchemaMaxAccountView = components["schemas"]["MaxAccountView"];
+export type SchemaMaxLegacyCandidate =
+  components["schemas"]["MaxLegacyCandidate"];
+export type SchemaMaxSourceDetail = components["schemas"]["MaxSourceDetail"];
+export type SchemaMaxSourceIn = components["schemas"]["MaxSourceIn"];
+export type SchemaMaxSourceView = components["schemas"]["MaxSourceView"];
+export type SchemaMaxVersions = components["schemas"]["MaxVersions"];
+export type SchemaMaxView = components["schemas"]["MaxView"];
+export type SchemaOfficialIn = components["schemas"]["OfficialIn"];
+export type SchemaOfficialView = components["schemas"]["OfficialView"];
+export type SchemaProposalView = components["schemas"]["ProposalView"];
+export type SchemaProposalsView = components["schemas"]["ProposalsView"];
+export type SchemaTelegramChatDetail =
+  components["schemas"]["TelegramChatDetail"];
+export type SchemaTelegramChatIn = components["schemas"]["TelegramChatIn"];
+export type SchemaTelegramChatView = components["schemas"]["TelegramChatView"];
+export type SchemaTelegramTopicView =
+  components["schemas"]["TelegramTopicView"];
 export enum PathsSearchSearchGetParametersQueryResponse_types {
   pdf = "pdf",
   link_to_source = "link_to_source",
