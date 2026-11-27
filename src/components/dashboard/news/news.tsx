@@ -1,4 +1,5 @@
-import type { ComponentType } from "react";
+import { CatLogo } from "@/components/icons/CatIcon";
+import type { ComponentType, ReactNode } from "react";
 import BoardGamesEn from "./items/board-games.mdx";
 import BoardGamesRu from "./items/board-games.ru.mdx";
 import CatixEn from "./items/catix.mdx";
@@ -12,7 +13,7 @@ export type NewsItem = {
   /** Banner texts are not run through Lingui: write every locale here. `Body` is an MDX file from `items/`. */
   content: Record<
     "en" | "ru",
-    { title: string; summary: string; Body: ComponentType }
+    { title: ReactNode; summary: string; Body: ComponentType }
   >;
 };
 
@@ -23,13 +24,23 @@ export const NEWS: NewsItem[] = [
     date: "2026-11-25",
     content: {
       en: {
-        title: "Meet 🐱 catix, the assistant for Innopolis!",
+        title: (
+          <>
+            Meet <CatLogo className="size-[1.2em] align-text-bottom" /> catix,
+            the assistant for Innopolis!
+          </>
+        ),
         summary:
           "Ask about schedule, deadlines, clubs, events and rooms, and get answers with sources.",
         Body: CatixEn,
       },
       ru: {
-        title: "Знакомьтесь, 🐱 catix — ассистент для Иннополиса!",
+        title: (
+          <>
+            Знакомьтесь, <CatLogo className="size-[1.2em] align-text-bottom" />{" "}
+            catix — ассистент для Иннополиса!
+          </>
+        ),
         summary:
           "Спрашивайте про расписание, дедлайны, клубы, события и аудитории — ответы со ссылками на источники.",
         Body: CatixRu,

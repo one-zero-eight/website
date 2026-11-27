@@ -1,5 +1,5 @@
 import { Modal } from "@/components/common/Modal.tsx";
-import { NEWS, type NewsItem } from "@/components/dashboard/news/news.ts";
+import { NEWS, type NewsItem } from "@/components/dashboard/news/news.tsx";
 import { cn } from "@/lib/ui/cn";
 import { useAppLocale } from "@/locales/lib";
 import { Trans } from "@lingui/react/macro";

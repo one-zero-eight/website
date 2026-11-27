@@ -1089,7 +1089,7 @@ msgstr "За всё время"
 msgid "All tournaments"
 msgstr "Все турниры"
 
-#: src/components/dashboard/links/Links.tsx:122
+#: src/components/dashboard/links/Links.tsx:124
 msgid "All University Services"
 msgstr "Все сервисы университета"
 
@@ -1251,6 +1251,10 @@ msgstr "Искусство и культура"
 #: src/components/search/ask/AskInput.tsx:285
 msgid "Ask a question..."
 msgstr "Задайте вопрос..."
+
+#: src/components/dashboard/links/Links.tsx:145
+msgid "Ask catix"
+msgstr "Спросить catix"
 
 #: src/app/routes/_with_menu/search/ask.tsx:42
 msgid "Ask questions or find answers at Innopolis University."
@@ -2446,7 +2450,7 @@ msgstr "Код"
 msgid "Code from TV"
 msgstr "Код с ТВ"
 
-#: src/components/dashboard/links/Links.tsx:241
+#: src/components/dashboard/links/Links.tsx:253
 msgid "Collapse"
 msgstr "Свернуть"
 
@@ -4382,7 +4386,7 @@ msgstr "Файл слишком большой!"
 msgid "fill {fillPercent}"
 msgstr "заполн. {fillPercent}"
 
-#: src/components/dashboard/links/Links.tsx:143
+#: src/components/dashboard/links/Links.tsx:155
 msgid "Filter"
 msgstr "Фильтр"
 
@@ -6695,7 +6699,7 @@ msgstr "Для этого origin нет регистраций."
 msgid "No reservations match these filters."
 msgstr "Нет бронирований по этим фильтрам."
 
-#: src/components/dashboard/links/Links.tsx:247
+#: src/components/dashboard/links/Links.tsx:259
 msgid "No results found."
 msgstr "Ничего не найдено."
 
@@ -9152,7 +9156,7 @@ msgstr "Показать 319 на карте"
 msgid "Show all"
 msgstr "Показать всех"
 
-#: src/components/dashboard/links/Links.tsx:232
+#: src/components/dashboard/links/Links.tsx:244
 msgid "Show all ({resourceCount})"
 msgstr "Показать все ({resourceCount})"
 

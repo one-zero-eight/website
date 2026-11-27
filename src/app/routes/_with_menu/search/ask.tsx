@@ -41,6 +41,7 @@ function RouteComponent() {
           name="description"
           content={t`Ask questions or find answers at Innopolis University.`}
         />
+        <link rel="icon" href="/catix-cat.svg" type="image/svg+xml" />
       </Helmet>
 
       <Topbar

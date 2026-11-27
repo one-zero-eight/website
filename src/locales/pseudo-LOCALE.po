@@ -1089,7 +1089,7 @@ msgstr ""
 msgid "All tournaments"
 msgstr ""
 
-#: src/components/dashboard/links/Links.tsx:122
+#: src/components/dashboard/links/Links.tsx:124
 msgid "All University Services"
 msgstr ""
 
@@ -1251,6 +1251,14 @@ msgstr ""
 #: src/components/search/ask/AskInput.tsx:285
 msgid "Ask a question..."
 msgstr ""
+
+#: src/components/dashboard/links/Links.tsx:145
+msgid "Ask catix"
+msgstr ""
+
+#: src/components/dashboard/links/Links.tsx:145
+#~ msgid "Ask cAtIx"
+#~ msgstr ""
 
 #: src/app/routes/_with_menu/search/ask.tsx:42
 msgid "Ask questions or find answers at Innopolis University."
@@ -2446,7 +2454,7 @@ msgstr ""
 msgid "Code from TV"
 msgstr ""
 
-#: src/components/dashboard/links/Links.tsx:241
+#: src/components/dashboard/links/Links.tsx:253
 msgid "Collapse"
 msgstr ""
 
@@ -4382,7 +4390,7 @@ msgstr ""
 msgid "fill {fillPercent}"
 msgstr ""
 
-#: src/components/dashboard/links/Links.tsx:143
+#: src/components/dashboard/links/Links.tsx:155
 msgid "Filter"
 msgstr ""
 
@@ -6695,7 +6703,7 @@ msgstr ""
 msgid "No reservations match these filters."
 msgstr ""
 
-#: src/components/dashboard/links/Links.tsx:247
+#: src/components/dashboard/links/Links.tsx:259
 msgid "No results found."
 msgstr ""
 
@@ -9152,7 +9160,7 @@ msgstr ""
 msgid "Show all"
 msgstr ""
 
-#: src/components/dashboard/links/Links.tsx:232
+#: src/components/dashboard/links/Links.tsx:244
 msgid "Show all ({resourceCount})"
 msgstr ""
 
