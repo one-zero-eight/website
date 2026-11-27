@@ -21,15 +21,13 @@ export function CatIcon({
   );
 }
 
-// The catix logo: a white-filled silhouette used as a mask so it takes the text color;
-// filled in the light theme, outline in the dark one.
+// The catix logo: a white-filled silhouette used as a mask so it takes the text color.
 export function CatLogo({ className }: { className?: string }) {
   return (
     <span
       className={cn(
         "inline-block size-6 shrink-0 bg-current mask-size-[175%] mask-center mask-no-repeat",
         "mask-[url(/catix-logo-filled.svg)]",
-        "dark:mask-[url(/catix-logo-outline.svg)]",
         className,
       )}
     />
