@@ -3,7 +3,6 @@ import { useAskSession } from "@/components/search/ask/ask-session";
 import { useLingui } from "@lingui/react/macro";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { AskPage } from "@/components/search/ask/AskPage";
-import { AskNotificationButton } from "@/components/search/ask/AskNotificationButton";
 import { AskSources } from "@/components/search/ask/AskSources";
 import { CatixTitle } from "@/components/search/ask/CatixTitle";
 import { Topbar } from "@/components/layout/Topbar";
@@ -44,15 +43,7 @@ function RouteComponent() {
         <link rel="icon" href="/catix-cat.svg" type="image/svg+xml" />
       </Helmet>
 
-      <Topbar
-        title={<CatixTitle />}
-        titleAction={
-          <>
-            <AskSources />
-            <AskNotificationButton />
-          </>
-        }
-      />
+      <Topbar title={<CatixTitle />} titleAction={<AskSources />} />
       <RequireAuth>
         <AskPage
           askQuery={q ?? ""}

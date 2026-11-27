@@ -758,7 +758,7 @@ msgstr "доступ не подтверждён"
 msgid "Access paused"
 msgstr "Доступ приостановлен"
 
-#: src/components/search/ask/AskPage.tsx:422
+#: src/components/search/ask/AskPage.tsx:424
 msgid "Access to the assistant is paused"
 msgstr "Доступ к ассистенту приостановлен"
 
@@ -1256,7 +1256,7 @@ msgstr "Задайте вопрос..."
 msgid "Ask catix"
 msgstr "Спросить catix"
 
-#: src/app/routes/_with_menu/search/ask.tsx:42
+#: src/app/routes/_with_menu/search/ask.tsx:41
 msgid "Ask questions or find answers at Innopolis University."
 msgstr "Задавайте вопросы или ищите ответы в Университете Иннополис."
 
@@ -2041,8 +2041,8 @@ msgid "Chat sources"
 msgstr "Источники чатов"
 
 #: src/components/search/admin/CatixAdminTabs.tsx:8
-#: src/components/search/ask/AskPage.tsx:220
-#: src/components/search/ask/AskPage.tsx:233
+#: src/components/search/ask/AskPage.tsx:221
+#: src/components/search/ask/AskPage.tsx:234
 msgid "Chats"
 msgstr "Чаты"
 
@@ -2294,8 +2294,8 @@ msgstr "Нажмите, чтобы загрузить, или вставьте �
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
 #: src/components/search/ask/AskInput.tsx:195
 #: src/components/search/ask/AskInput.tsx:196
-#: src/components/search/ask/AskPage.tsx:203
 #: src/components/search/ask/AskPage.tsx:204
+#: src/components/search/ask/AskPage.tsx:205
 #: src/components/search/IframePreviewCard.tsx:111
 #: src/components/sport/SportOverviewSection.tsx:719
 #: src/components/sport/SportStudentTrainingModal.tsx:394
@@ -2740,7 +2740,7 @@ msgstr "Не удалось забронировать"
 msgid "Could not check access"
 msgstr "Не удалось проверить доступ"
 
-#: src/components/search/ask/AskPage.tsx:386
+#: src/components/search/ask/AskPage.tsx:388
 msgid "Could not complete the request."
 msgstr "Не удалось завершить запрос."
 
@@ -2821,7 +2821,7 @@ msgstr "Не удалось загрузить ваш аккаунт Telegram: {
 msgid "Could not mark attendance"
 msgstr "Не удалось отметить посещаемость"
 
-#: src/components/search/ask/AskPage.tsx:317
+#: src/components/search/ask/AskPage.tsx:318
 msgid "Could not open the chat"
 msgstr "Не удалось открыть чат"
 
@@ -2867,7 +2867,7 @@ msgstr "Не удалось обновить посещаемость"
 msgid "Could not update game"
 msgstr "Не удалось обновить игру"
 
-#: src/components/search/ask/AskNotificationButton.tsx:80
+#: src/components/search/ask/AskNotificationHint.tsx:33
 msgid "Could not update notification settings. Please try again."
 msgstr "Не удалось изменить настройки уведомлений. Попробуйте ещё раз."
 
@@ -3717,6 +3717,10 @@ msgstr "Почта"
 #: src/components/tabletennis/ValidationMatches.tsx:443
 msgid "Empty group"
 msgstr "Пустая группа"
+
+#: src/components/search/ask/AskNotificationHint.tsx:60
+msgid "Enable"
+msgstr "Включить"
 
 #: src/components/search/admin/MaxSourcesPage.tsx:115
 #~ msgid "enabled"
@@ -4660,6 +4664,10 @@ msgstr "Сгенерированная ссылка"
 msgid "Generating..."
 msgstr "Генерация..."
 
+#: src/components/search/ask/AskNotificationHint.tsx:51
+msgid "Get a notification when catix replies?"
+msgstr "Получить уведомление, когда catix ответит?"
+
 #: src/components/clubs/HowToCreateClubPage.tsx:87
 msgid "Get access passes for club members who need entry to IU main building."
 msgstr "Получайте пропуска для участников клуба, которым нужен вход в главный корпус УИ."
@@ -4912,7 +4920,7 @@ msgstr "Скрыть лучшее время"
 msgid "Hide calendar events"
 msgstr "Скрыть события календаря"
 
-#: src/components/search/ask/AskPage.tsx:178
+#: src/components/search/ask/AskPage.tsx:179
 msgid "Hide chats"
 msgstr "Скрыть чаты"
 
@@ -5001,7 +5009,7 @@ msgstr "Идентификаторы сборок HTML и App различают
 msgid "HTML and App build IDs match."
 msgstr "Идентификаторы сборок HTML и App совпадают."
 
-#: src/components/search/ask/AskPage.tsx:262
+#: src/components/search/ask/AskPage.tsx:263
 msgid "I can help with your schedule, university rules, announcements and available rooms."
 msgstr "Помогу с расписанием, правилами университета, объявлениями и свободными аудиториями."
 
@@ -6197,7 +6205,7 @@ msgstr "Возможности для нетворкинга"
 msgid "Neutral time"
 msgstr "Нейтральное время"
 
-#: src/components/search/ask/AskPage.tsx:468
+#: src/components/search/ask/AskPage.tsx:470
 msgid "New"
 msgstr "Новый"
 
@@ -6834,6 +6842,10 @@ msgstr "Без группы"
 msgid "Not in schedule"
 msgstr "Нет в расписании"
 
+#: src/components/search/ask/AskNotificationHint.tsx:67
+msgid "Not now"
+msgstr "Не сейчас"
+
 #: src/components/board-games/BoardGamesAdminPage.tsx:343
 #: src/components/board-games/BoardGamesAdminPage.tsx:347
 #: src/components/board-games/BoardGamesAdminPage.tsx:369
@@ -6913,17 +6925,17 @@ msgid "Nothing to import"
 msgstr "Нечего импортировать"
 
 #: src/components/search/ask/AskNotificationButton.tsx:49
-msgid "Notifications are blocked. Allow them in your browser settings."
-msgstr "Уведомления заблокированы. Разрешите их в настройках браузера."
+#~ msgid "Notifications are blocked. Allow them in your browser settings."
+#~ msgstr "Уведомления заблокированы. Разрешите их в настройках браузера."
 
 #: src/components/search/ask/AskNotificationButton.tsx:105
-msgid "Notifications on"
-msgstr "Уведомления включены"
+#~ msgid "Notifications on"
+#~ msgstr "Уведомления включены"
 
 #: src/components/search/ask/AskNotificationButton.tsx:97
 #: src/components/search/ask/AskNotificationButton.tsx:107
-msgid "Notify me when cAtIx replies"
-msgstr "Уведомлять об ответах cAtIx"
+#~ msgid "Notify me when cAtIx replies"
+#~ msgstr "Уведомлять об ответах cAtIx"
 
 #. placeholder {0}: getViewUserName(targetUser)
 #: src/components/admin/useImpersonation.ts:112
@@ -7869,7 +7881,7 @@ msgstr "Читаю"
 msgid "Receive a monthly stipend from IU alumni"
 msgstr "Ежемесячная стипендия от выпускников IU"
 
-#: src/components/search/ask/AskPage.tsx:366
+#: src/components/search/ask/AskPage.tsx:367
 msgid "Receiving answer"
 msgstr "Получаю ответ"
 
@@ -8085,7 +8097,7 @@ msgstr "Удалить файл"
 msgid "Remove from calendar"
 msgstr "Удалить из календаря"
 
-#: src/components/search/ask/AskPage.tsx:512
+#: src/components/search/ask/AskPage.tsx:514
 msgid "Remove from the queue"
 msgstr "Убрать из очереди"
 
@@ -8334,7 +8346,7 @@ msgstr "Пересдача"
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/search/admin/AdminStates.tsx:27
 #: src/components/search/ask/AskChatList.tsx:47
-#: src/components/search/ask/AskPage.tsx:327
+#: src/components/search/ask/AskPage.tsx:328
 #: src/components/search/ask/AskSources.tsx:74
 #: src/components/sport/SportStudentTrainingModal.tsx:445
 #: src/components/sport/SportStudentTrainingModal.tsx:494
@@ -9008,7 +9020,7 @@ msgstr "Отправить отзыв команде InNoHassle"
 msgid "Send your InNoHassle id to a cAtIx admin:"
 msgstr "Отправьте свой InNoHassle id администратору cAtIx:"
 
-#: src/components/search/ask/AskPage.tsx:367
+#: src/components/search/ask/AskPage.tsx:368
 msgid "Sending request"
 msgstr "Отправляю запрос"
 
@@ -10097,15 +10109,15 @@ msgstr "<0>Пропущенная из‑за болезни неделя</0> <1
 msgid "The access information could not be updated."
 msgstr "Не удалось обновить сведения о доступе."
 
-#: src/components/search/ask/AskPage.tsx:402
+#: src/components/search/ask/AskPage.tsx:404
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr "Результат действия не подтверждён. Проверьте его в сервисе перед повторной попыткой."
 
-#: src/components/search/ask/AskPage.tsx:299
+#: src/components/search/ask/AskPage.tsx:300
 msgid "The assistant asks for confirmation before changing data in services."
 msgstr "Перед изменениями в сервисах ассистент запросит подтверждение."
 
-#: src/components/search/ask/AskPage.tsx:196
+#: src/components/search/ask/AskPage.tsx:197
 msgid "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 msgstr "Ассистент временно недоступен. На вопросы отвечает поиск; можно также начать сообщение с /search или /поиск."
 
@@ -10638,7 +10650,7 @@ msgstr "Продвигать Университет Иннополис, разв
 msgid "To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
 msgstr "Повышать престиж студенческих клубов и продвигать их внутри и вне университета, а также подчёркивать стратегическую важность внеучебного развития в Университете Иннополис"
 
-#: src/components/search/ask/AskPage.tsx:293
+#: src/components/search/ask/AskPage.tsx:294
 msgid "To search without the assistant, start a message with /search or /поиск."
 msgstr "Чтобы искать без ассистента, начните сообщение с /search или /поиск."
 
@@ -10776,8 +10788,8 @@ msgid "Tuesday"
 msgstr "Вторник"
 
 #: src/components/search/ask/AskNotificationButton.tsx:96
-msgid "Turn off reply notifications"
-msgstr "Выключить уведомления об ответах"
+#~ msgid "Turn off reply notifications"
+#~ msgstr "Выключить уведомления об ответах"
 
 #. placeholder {0}: lastApproval.roomId
 #. placeholder {1}: new Date(lastApproval.at).toLocaleString(i18n.locale, { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", })
@@ -11696,7 +11708,7 @@ msgstr "Вы можете добавить свой календарь в InNoHa
 msgid "You can attach up to 3 files."
 msgstr "Можно прикрепить до 3 файлов."
 
-#: src/components/search/ask/AskPage.tsx:287
+#: src/components/search/ask/AskPage.tsx:288
 msgid "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
 msgstr "Можно прикрепить до 3 файлов PDF, TXT или изображений, до 10 МиБ каждый."
 
@@ -11712,7 +11724,7 @@ msgstr "Можно напечатать не более <0>50 копий</0> (и
 msgid "You can view this draft. Accept the host invitation to edit and submit."
 msgstr "Вы можете просматривать этот черновик. Примите приглашение организатора, чтобы редактировать и отправлять."
 
-#: src/components/search/ask/AskPage.tsx:425
+#: src/components/search/ask/AskPage.tsx:427
 msgid "You can write again at {resumeTime}, in {countdown}"
 msgstr "Писать снова можно в {resumeTime}, через {countdown}"
 
@@ -11820,7 +11832,7 @@ msgstr "Ваш клуб приглашён как организатор это�
 msgid "Your document was sent to the printer"
 msgstr "Документ отправлен на принтер"
 
-#: src/components/search/ask/AskPage.tsx:393
+#: src/components/search/ask/AskPage.tsx:395
 msgid "Your draft is below. You can edit it and send it again."
 msgstr "Черновик ниже. Его можно изменить и отправить снова."
 

@@ -27,6 +27,7 @@ import {
   useAskSession,
 } from "./ask-session";
 import { CatIcon } from "@/components/icons/CatIcon";
+import { AskNotificationHint } from "./AskNotificationHint";
 import {
   SEARCH_COMMANDS,
   conversationQuestions,
@@ -429,23 +430,26 @@ export function AskPage({
                 </div>
               </div>
             ) : (
-              <AskInput
-                key={composerId}
-                inputRef={inputRef}
-                text={draftQuery}
-                setText={setDraftQuery}
-                suggestions={suggestions}
-                context={context}
-                quote={quote}
-                onQuoteRemove={() => setQuote("")}
-                attachments={isPending ? [] : draftAttachments}
-                onAttachmentsChange={(attachments) =>
-                  setDraftAttachments(attachments, composerId)
-                }
-                onSend={handleSend}
-                onStop={handleStop}
-                isPending={isPending}
-              />
+              <>
+                {isPending && <AskNotificationHint />}
+                <AskInput
+                  key={composerId}
+                  inputRef={inputRef}
+                  text={draftQuery}
+                  setText={setDraftQuery}
+                  suggestions={suggestions}
+                  context={context}
+                  quote={quote}
+                  onQuoteRemove={() => setQuote("")}
+                  attachments={isPending ? [] : draftAttachments}
+                  onAttachmentsChange={(attachments) =>
+                    setDraftAttachments(attachments, composerId)
+                  }
+                  onSend={handleSend}
+                  onStop={handleStop}
+                  isPending={isPending}
+                />
+              </>
             )}
           </div>
         </>
