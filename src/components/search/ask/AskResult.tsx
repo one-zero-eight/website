@@ -50,7 +50,8 @@ function previewOf(
   if (source.kind === "chat")
     return source.text ? { message: source } : undefined;
   // An archive is opened by its member in the preview; a page of the web search is not in the knowledge base,
-  // and the search API gives only what is. Only PDFs are previewed: a web page opens on its own site
+  // nor is a Moodle file (private to the asker, the search API does not serve it). Those stay links.
+  // Only PDFs are previewed: a web page opens on its own site
   if (source.archive_document)
     return {
       document: asDocument(
