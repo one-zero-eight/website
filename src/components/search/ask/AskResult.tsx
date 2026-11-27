@@ -60,7 +60,12 @@ function previewOf(
         source.archive_document,
       ),
     };
-  if (source.kind === "web" || !isPdfUrl(source.url)) return undefined;
+  if (
+    source.kind === "web" ||
+    source.kind === "moodle" ||
+    !isPdfUrl(source.url)
+  )
+    return undefined;
   return { document: asDocument(source.title, source.url) };
 }
 
