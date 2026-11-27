@@ -49,10 +49,17 @@ function previewOf(
   // Telegram and MAX show no message in a frame of another site: the answer carries the text of the message
   if (source.kind === "chat")
     return source.text ? { message: source } : undefined;
-  // An archive is opened by its member (the button below); a page of the web search is not in the knowledge base,
+  // An archive is opened by its member in the preview; a page of the web search is not in the knowledge base,
   // and the search API gives only what is. Only PDFs are previewed: a web page opens on its own site
-  if (source.archive_document || source.kind === "web" || !isPdfUrl(source.url))
-    return undefined;
+  if (source.archive_document)
+    return {
+      document: asDocument(
+        source.title,
+        source.url ?? "",
+        source.archive_document,
+      ),
+    };
+  if (source.kind === "web" || !isPdfUrl(source.url)) return undefined;
   return { document: asDocument(source.title, source.url) };
 }
 
@@ -123,7 +130,6 @@ export function AskResult({
           </span>
           <ol className="divide-base-300 flex list-none flex-col divide-y">
             {sources.map((source) => {
-              const member = source.archive_document?.member;
               const shown = previewOf(source);
               return (
                 <li
@@ -209,23 +215,6 @@ export function AskResult({
                         );
                       })}
                     </div>
-                  )}
-                  {source.archive_document && (
-                    <button
-                      type="button"
-                      className="text-primary text-left hover:underline"
-                      onClick={() =>
-                        setPreview({
-                          document: asDocument(
-                            source.title,
-                            source.url ?? "",
-                            source.archive_document,
-                          ),
-                        })
-                      }
-                    >
-                      <Trans>Open document: {member}</Trans>
-                    </button>
                   )}
                   {!!source.images?.length && (
                     <div className="mt-1 flex flex-wrap gap-2">

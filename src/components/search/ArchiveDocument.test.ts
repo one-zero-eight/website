@@ -394,8 +394,8 @@ describe("cited archive documents", () => {
       await render(createElement(AskResult, { response }));
       const buttons = Array.from(container.querySelectorAll("button"));
       expect(buttons.map((button) => button.textContent)).toEqual([
-        "Open document: 2026/rules.pdf",
-        "Open document: 2026/solutions.pdf",
+        "Exam rules",
+        "Exam rules",
       ]);
       expect(container.querySelector("p a")?.getAttribute("href")).toBe(
         source.url,
