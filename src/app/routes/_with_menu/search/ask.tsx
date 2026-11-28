@@ -1,13 +1,18 @@
+import { $search } from "@/api/search";
+import { useAskSession } from "@/components/search/ask/ask-session";
 import { useLingui } from "@lingui/react/macro";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { AskPage } from "@/components/search/ask/AskPage";
-import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
+import { AskSources } from "@/components/search/ask/AskSources";
+import { CatixTitle } from "@/components/search/ask/CatixTitle";
+import { Topbar } from "@/components/layout/Topbar";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
 
 type AskParams = {
   q?: string;
+  chat?: string;
 };
 
 export const Route = createFileRoute("/_with_menu/search/ask")({
@@ -15,26 +20,38 @@ export const Route = createFileRoute("/_with_menu/search/ask")({
   validateSearch: (ask: Record<string, unknown>): AskParams => {
     return {
       q: (ask.q as string | undefined) ?? "",
+      chat: typeof ask.chat === "string" && ask.chat ? ask.chat : undefined,
     };
   },
 });
 
 function RouteComponent() {
   const { t } = useLingui();
-  const { q } = Route.useSearch();
+  const { q, chat } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const { chatId } = useAskSession();
+  const { data: chats } = $search.useQuery("get", "/ask/chats");
+  const chatTitle = chats?.find((chat) => chat.chat_id === chatId)?.title;
   return (
     <Suspense>
       <Helmet>
-        <title>{t`Ask`}</title>
+        <title>{chatTitle ?? "catix"}</title>
         <meta
           name="description"
           content={t`Ask questions or find answers at Innopolis University.`}
         />
+        <link rel="icon" href="/catix-cat.svg" type="image/svg+xml" />
       </Helmet>
 
-      <TopbarWithToggleGroup currentTabText={q} />
+      <Topbar title={<CatixTitle />} titleAction={<AskSources />} />
       <RequireAuth>
-        <AskPage askQuery={q ?? ""} />
+        <AskPage
+          askQuery={q ?? ""}
+          askChat={chat}
+          onChatLinkHandled={() => {
+            void navigate({ search: { q }, replace: true });
+          }}
+        />
       </RequireAuth>
     </Suspense>
   );

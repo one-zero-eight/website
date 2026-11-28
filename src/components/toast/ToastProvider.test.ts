@@ -173,6 +173,58 @@ describe("reactive toast localization", () => {
     expect(dialog.textContent).toContain("Cancel");
   });
 
+  it("renders a localized action that runs once and dismisses its toast", async () => {
+    vi.useFakeTimers();
+    const onClick = vi.fn();
+    await act(async () => {
+      toast.showToast({
+        type: "success",
+        title: "Completed",
+        message: "Your response is ready",
+        action: { label: msg`Delete`, onClick },
+        duration: 0,
+      });
+    });
+
+    const notification = document.querySelector(".alert")!;
+    const action = Array.from(notification.querySelectorAll("button")).find(
+      (button) => button.textContent === "Delete",
+    )!;
+    expect(action).toBeDefined();
+    expect(action.type).toBe("button");
+    expect(action.className).toContain("btn-ghost");
+
+    await act(async () => i18n.activate("ru"));
+
+    expect(document.querySelector(".alert")).toBe(notification);
+    expect(notification.textContent).toContain("Удалить");
+    expect(notification.textContent).not.toContain("Delete");
+
+    const translatedAction = Array.from(
+      notification.querySelectorAll("button"),
+    ).find((button) => button.textContent === "Удалить")!;
+    await act(async () => translatedAction.click());
+    expect(onClick).toHaveBeenCalledTimes(1);
+    await act(async () => vi.advanceTimersByTime(600));
+    expect(document.querySelector(".alert")).toBeNull();
+    vi.useRealTimers();
+  });
+
+  it("leaves existing toasts without actions unchanged", async () => {
+    await act(async () => {
+      toast.showToast({
+        type: "info",
+        title: "Existing title",
+        message: "Existing message",
+        duration: 0,
+      });
+    });
+
+    const notification = document.querySelector(".alert")!;
+    expect(notification.textContent).toBe("Existing titleExisting message");
+    expect(notification.querySelectorAll("button")).toHaveLength(1);
+  });
+
   it("retranslates the visible close tooltip", async () => {
     await act(async () => {
       toast.showToast({ type: "info", title: msg`Success`, duration: 0 });

@@ -3,6 +3,7 @@ import { AutoSignIn } from "@/api/accounts/sign-in.tsx";
 import { BottomNavigation } from "@/components/layout/BottomNavigation.tsx";
 import { ConnectivityNotification } from "@/components/layout/Offline.tsx";
 import Sidebar from "@/components/layout/Sidebar.tsx";
+import { AskNotifications } from "@/components/search/ask/AskNotifications";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import {
   createRootRouteWithContext,
@@ -99,6 +100,7 @@ function RouteComponent() {
       </Helmet>
 
       <ConnectivityNotification />
+      <AskNotifications />
       <AutoSignIn />
       <Outlet />
     </>

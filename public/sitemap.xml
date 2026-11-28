@@ -201,16 +201,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://innohassle.ru/search</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://innohassle.ru/search/act</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://innohassle.ru/search/ask</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

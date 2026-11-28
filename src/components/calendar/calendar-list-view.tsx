@@ -28,6 +28,11 @@ export function renderCalendarListEventContent({ event }: EventContentArg) {
   ) : (
     <div className="flex flex-wrap gap-x-1 text-left">
       {event.url ? <a href={event.url}>{event.title}</a> : event.title}
+      {!event.allDay && event.extendedProps.endUnknown && (
+        <span className="text-base-content/60">
+          · <Trans>end time not specified</Trans>
+        </span>
+      )}
       <span className="text-base-content/30 break-all">
         {event.extendedProps.location}
       </span>

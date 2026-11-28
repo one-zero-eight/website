@@ -50,6 +50,34 @@ describe("when2meet personal calendar overlay", () => {
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
   }
 
+  it("preserves unknown ends from ICS and labels only their start slot", async () => {
+    const feed = timedEventIcs
+      .replace("DTSTART:20260703T100000Z", "DTSTART:20260703T100000")
+      .replace("DTEND:20260703T110000Z\r\n", "");
+    stubCalendarFetch({
+      "https://calendar.test/unknown.ics": new Response(feed),
+    });
+    const events = await fetchPersonalCalendarEvents(
+      ["https://calendar.test/unknown.ics"],
+      new Date("2026-07-03T00:00:00"),
+      new Date("2026-07-03T23:59:59"),
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ allDay: false, end: null });
+    const overlay = buildCalendarSlotOverlay(
+      events,
+      ["2026-07-03"],
+      ["09:30", "10:00", "10:30", "11:00"],
+    );
+    expect([...overlay.entries()]).toEqual([
+      [
+        getSlotKey("2026-07-03", "10:00"),
+        ["Lecture · 10:00 · end time not specified"],
+      ],
+    ]);
+    expect(buildCalendarAllDayOverlay(events, ["2026-07-03"]).size).toBe(0);
+  });
+
   it("keeps timed events in slots and marks selected conflicts", () => {
     const slotKey = getSlotKey("2026-07-03", "10:00");
     const { start, end } = slotKeyToDateRange(slotKey);

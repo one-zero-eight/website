@@ -97,6 +97,7 @@ export function useWhen2MeetPersonalCalendarOverlay({
     [calendarEvents, busyLabel],
   );
 
+  const unknownEndLabel = t`end time not specified`;
   const slotEvents = useMemo(
     () =>
       buildCalendarSlotOverlay(
@@ -104,8 +105,15 @@ export function useWhen2MeetPersonalCalendarOverlay({
         dateIds,
         timeSlots,
         allowedSlots,
+        unknownEndLabel,
       ),
-    [localizedCalendarEvents, dateIds, timeSlots, allowedSlots],
+    [
+      localizedCalendarEvents,
+      dateIds,
+      timeSlots,
+      allowedSlots,
+      unknownEndLabel,
+    ],
   );
 
   const allDayEvents = useMemo(

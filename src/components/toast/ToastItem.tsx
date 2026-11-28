@@ -107,6 +107,20 @@ export function ToastItem({
               : i18n._(toast.message)}
           </p>
         )}
+        {toast.action && (
+          <button
+            type="button"
+            onClick={() => {
+              toast.action!.onClick();
+              handleClose();
+            }}
+            className="btn btn-ghost btn-sm mt-1"
+          >
+            {typeof toast.action.label === "string"
+              ? toast.action.label
+              : i18n._(toast.action.label)}
+          </button>
+        )}
       </div>
       <Tooltip content={t`Close notification`}>
         <button

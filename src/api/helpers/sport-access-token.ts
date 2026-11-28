@@ -8,6 +8,13 @@ export function getMySportAccessToken() {
   return localStorage.getItem(TOKEN_KEY)?.slice(1, -1) ?? null;
 }
 
+export function setMySportAccessToken(token: string) {
+  // Stored as JSON, as useLocalStorage does
+  localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
+  // Notify usehooks-ts about the change
+  window.dispatchEvent(new StorageEvent("local-storage", { key: TOKEN_KEY }));
+}
+
 export function invalidateMySportAccessToken() {
   // Check if the token is already invalid
   const prevToken = getMySportAccessToken();

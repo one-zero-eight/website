@@ -61,7 +61,6 @@ import { Route as With_menuSportProfileRouteImport } from "./routes/_with_menu/s
 import { Route as With_menuSportInfoRouteImport } from "./routes/_with_menu/sport/info";
 import { Route as With_menuSportHistoryRouteImport } from "./routes/_with_menu/sport/history";
 import { Route as With_menuSearchAskRouteImport } from "./routes/_with_menu/search/ask";
-import { Route as With_menuSearchActRouteImport } from "./routes/_with_menu/search/act";
 import { Route as With_menuScheduleCategoryRouteImport } from "./routes/_with_menu/schedule/$category";
 import { Route as With_menuRoomBookingRulesRouteImport } from "./routes/_with_menu/room-booking/rules";
 import { Route as With_menuRoomBookingListRouteImport } from "./routes/_with_menu/room-booking/list";
@@ -81,6 +80,7 @@ import { Route as With_menuAdminAcademicCalendarsRouteImport } from "./routes/_w
 import { Route as With_menuAccountTokenRouteImport } from "./routes/_with_menu/account/token";
 import { Route as With_menuAccountConnectTelegramRouteImport } from "./routes/_with_menu/account/connect-telegram";
 import { Route as With_menuWhen2meetMeetingIdIndexRouteImport } from "./routes/_with_menu/when2meet/$meetingId.index";
+import { Route as With_menuSearchAdminIndexRouteImport } from "./routes/_with_menu/search/admin/index";
 import { Route as With_menuRoomBookingRoomsIndexRouteImport } from "./routes/_with_menu/room-booking/rooms.index";
 import { Route as With_menuEventsSubmissionsIndexRouteImport } from "./routes/_with_menu/events/submissions/index";
 import { Route as With_menuEventsDraftsIndexRouteImport } from "./routes/_with_menu/events/drafts/index";
@@ -89,6 +89,9 @@ import { Route as With_menuClubsSlugIndexRouteImport } from "./routes/_with_menu
 import { Route as With_menuBoardGamesAdminIndexRouteImport } from "./routes/_with_menu/board-games/admin/index";
 import { Route as With_menuAdminUsersIndexRouteImport } from "./routes/_with_menu/admin/users.index";
 import { Route as With_menuWhen2meetMeetingIdEditRouteImport } from "./routes/_with_menu/when2meet/$meetingId.edit";
+import { Route as With_menuSearchAdminProposalsRouteImport } from "./routes/_with_menu/search/admin/proposals";
+import { Route as With_menuSearchAdminAdminsRouteImport } from "./routes/_with_menu/search/admin/admins";
+import { Route as With_menuSearchAdminAbuseRouteImport } from "./routes/_with_menu/search/admin/abuse";
 import { Route as With_menuScheduleEventGroupsAliasRouteImport } from "./routes/_with_menu/schedule/event-groups.$alias";
 import { Route as With_menuRoomBookingRoomsRoomRouteImport } from "./routes/_with_menu/room-booking/rooms.$room";
 import { Route as With_menuEventsSubmissionsIdRouteImport } from "./routes/_with_menu/events/submissions/$id";
@@ -99,6 +102,8 @@ import { Route as With_menuClubsSlugEditRouteImport } from "./routes/_with_menu/
 import { Route as With_menuBoardGamesAdminReservationsRouteImport } from "./routes/_with_menu/board-games/admin/reservations";
 import { Route as With_menuAdminUsersIdRouteImport } from "./routes/_with_menu/admin/users.$id";
 import { Route as GuardGoogleFilesSlugJoinRouteImport } from "./routes/guard.google.files.$slug.join";
+import { Route as With_menuSearchAdminTelegramChatIdRouteImport } from "./routes/_with_menu/search/admin/telegram.$chatId";
+import { Route as With_menuSearchAdminMaxChatIdRouteImport } from "./routes/_with_menu/search/admin/max.$chatId";
 
 const TvLazyRouteImport = createFileRoute("/tv")();
 const ScheduleAssistantRouteLazyRouteImport = createFileRoute(
@@ -425,11 +430,6 @@ const With_menuSearchAskRoute = With_menuSearchAskRouteImport.update({
   path: "/search/ask",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
-const With_menuSearchActRoute = With_menuSearchActRouteImport.update({
-  id: "/search/act",
-  path: "/search/act",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
 const With_menuScheduleCategoryRoute =
   With_menuScheduleCategoryRouteImport.update({
     id: "/schedule/$category",
@@ -534,6 +534,12 @@ const With_menuWhen2meetMeetingIdIndexRoute =
     path: "/when2meet/$meetingId/",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
+const With_menuSearchAdminIndexRoute =
+  With_menuSearchAdminIndexRouteImport.update({
+    id: "/search/admin/",
+    path: "/search/admin/",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
 const With_menuRoomBookingRoomsIndexRoute =
   With_menuRoomBookingRoomsIndexRouteImport.update({
     id: "/room-booking/rooms/",
@@ -579,6 +585,24 @@ const With_menuWhen2meetMeetingIdEditRoute =
   With_menuWhen2meetMeetingIdEditRouteImport.update({
     id: "/when2meet/$meetingId/edit",
     path: "/when2meet/$meetingId/edit",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
+const With_menuSearchAdminProposalsRoute =
+  With_menuSearchAdminProposalsRouteImport.update({
+    id: "/search/admin/proposals",
+    path: "/search/admin/proposals",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
+const With_menuSearchAdminAdminsRoute =
+  With_menuSearchAdminAdminsRouteImport.update({
+    id: "/search/admin/admins",
+    path: "/search/admin/admins",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
+const With_menuSearchAdminAbuseRoute =
+  With_menuSearchAdminAbuseRouteImport.update({
+    id: "/search/admin/abuse",
+    path: "/search/admin/abuse",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
 const With_menuScheduleEventGroupsAliasRoute =
@@ -637,6 +661,18 @@ const GuardGoogleFilesSlugJoinRoute =
     path: "/guard/google/files/$slug/join",
     getParentRoute: () => rootRouteImport,
   } as any);
+const With_menuSearchAdminTelegramChatIdRoute =
+  With_menuSearchAdminTelegramChatIdRouteImport.update({
+    id: "/search/admin/telegram/$chatId",
+    path: "/search/admin/telegram/$chatId",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
+const With_menuSearchAdminMaxChatIdRoute =
+  With_menuSearchAdminMaxChatIdRouteImport.update({
+    id: "/search/admin/max/$chatId",
+    path: "/search/admin/max/$chatId",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
@@ -682,7 +718,6 @@ export interface FileRoutesByFullPath {
   "/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
-  "/search/act": typeof With_menuSearchActRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
   "/sport/history": typeof With_menuSportHistoryRoute;
   "/sport/info": typeof With_menuSportInfoRoute;
@@ -721,6 +756,9 @@ export interface FileRoutesByFullPath {
   "/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
+  "/search/admin/abuse": typeof With_menuSearchAdminAbuseRoute;
+  "/search/admin/admins": typeof With_menuSearchAdminAdminsRoute;
+  "/search/admin/proposals": typeof With_menuSearchAdminProposalsRoute;
   "/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/admin/users/": typeof With_menuAdminUsersIndexRoute;
   "/board-games/admin/": typeof With_menuBoardGamesAdminIndexRoute;
@@ -729,7 +767,10 @@ export interface FileRoutesByFullPath {
   "/events/drafts/": typeof With_menuEventsDraftsIndexRoute;
   "/events/submissions/": typeof With_menuEventsSubmissionsIndexRoute;
   "/room-booking/rooms/": typeof With_menuRoomBookingRoomsIndexRoute;
+  "/search/admin/": typeof With_menuSearchAdminIndexRoute;
   "/when2meet/$meetingId/": typeof With_menuWhen2meetMeetingIdIndexRoute;
+  "/search/admin/max/$chatId": typeof With_menuSearchAdminMaxChatIdRoute;
+  "/search/admin/telegram/$chatId": typeof With_menuSearchAdminTelegramChatIdRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
 }
 export interface FileRoutesByTo {
@@ -773,7 +814,6 @@ export interface FileRoutesByTo {
   "/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
-  "/search/act": typeof With_menuSearchActRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
   "/sport/history": typeof With_menuSportHistoryRoute;
   "/sport/info": typeof With_menuSportInfoRoute;
@@ -812,6 +852,9 @@ export interface FileRoutesByTo {
   "/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
+  "/search/admin/abuse": typeof With_menuSearchAdminAbuseRoute;
+  "/search/admin/admins": typeof With_menuSearchAdminAdminsRoute;
+  "/search/admin/proposals": typeof With_menuSearchAdminProposalsRoute;
   "/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/admin/users": typeof With_menuAdminUsersIndexRoute;
   "/board-games/admin": typeof With_menuBoardGamesAdminIndexRoute;
@@ -820,7 +863,10 @@ export interface FileRoutesByTo {
   "/events/drafts": typeof With_menuEventsDraftsIndexRoute;
   "/events/submissions": typeof With_menuEventsSubmissionsIndexRoute;
   "/room-booking/rooms": typeof With_menuRoomBookingRoomsIndexRoute;
+  "/search/admin": typeof With_menuSearchAdminIndexRoute;
   "/when2meet/$meetingId": typeof With_menuWhen2meetMeetingIdIndexRoute;
+  "/search/admin/max/$chatId": typeof With_menuSearchAdminMaxChatIdRoute;
+  "/search/admin/telegram/$chatId": typeof With_menuSearchAdminTelegramChatIdRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
 }
 export interface FileRoutesById {
@@ -869,7 +915,6 @@ export interface FileRoutesById {
   "/_with_menu/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/_with_menu/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/_with_menu/schedule/$category": typeof With_menuScheduleCategoryRoute;
-  "/_with_menu/search/act": typeof With_menuSearchActRoute;
   "/_with_menu/search/ask": typeof With_menuSearchAskRoute;
   "/_with_menu/sport/history": typeof With_menuSportHistoryRoute;
   "/_with_menu/sport/info": typeof With_menuSportInfoRoute;
@@ -908,6 +953,9 @@ export interface FileRoutesById {
   "/_with_menu/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
   "/_with_menu/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/_with_menu/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
+  "/_with_menu/search/admin/abuse": typeof With_menuSearchAdminAbuseRoute;
+  "/_with_menu/search/admin/admins": typeof With_menuSearchAdminAdminsRoute;
+  "/_with_menu/search/admin/proposals": typeof With_menuSearchAdminProposalsRoute;
   "/_with_menu/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/_with_menu/admin/users/": typeof With_menuAdminUsersIndexRoute;
   "/_with_menu/board-games/admin/": typeof With_menuBoardGamesAdminIndexRoute;
@@ -916,7 +964,10 @@ export interface FileRoutesById {
   "/_with_menu/events/drafts/": typeof With_menuEventsDraftsIndexRoute;
   "/_with_menu/events/submissions/": typeof With_menuEventsSubmissionsIndexRoute;
   "/_with_menu/room-booking/rooms/": typeof With_menuRoomBookingRoomsIndexRoute;
+  "/_with_menu/search/admin/": typeof With_menuSearchAdminIndexRoute;
   "/_with_menu/when2meet/$meetingId/": typeof With_menuWhen2meetMeetingIdIndexRoute;
+  "/_with_menu/search/admin/max/$chatId": typeof With_menuSearchAdminMaxChatIdRoute;
+  "/_with_menu/search/admin/telegram/$chatId": typeof With_menuSearchAdminTelegramChatIdRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
 }
 export interface FileRouteTypes {
@@ -965,7 +1016,6 @@ export interface FileRouteTypes {
     | "/room-booking/list"
     | "/room-booking/rules"
     | "/schedule/$category"
-    | "/search/act"
     | "/search/ask"
     | "/sport/history"
     | "/sport/info"
@@ -1004,6 +1054,9 @@ export interface FileRouteTypes {
     | "/events/submissions/$id"
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
+    | "/search/admin/abuse"
+    | "/search/admin/admins"
+    | "/search/admin/proposals"
     | "/when2meet/$meetingId/edit"
     | "/admin/users/"
     | "/board-games/admin/"
@@ -1012,7 +1065,10 @@ export interface FileRouteTypes {
     | "/events/drafts/"
     | "/events/submissions/"
     | "/room-booking/rooms/"
+    | "/search/admin/"
     | "/when2meet/$meetingId/"
+    | "/search/admin/max/$chatId"
+    | "/search/admin/telegram/$chatId"
     | "/guard/google/files/$slug/join";
   fileRoutesByTo: FileRoutesByTo;
   to:
@@ -1056,7 +1112,6 @@ export interface FileRouteTypes {
     | "/room-booking/list"
     | "/room-booking/rules"
     | "/schedule/$category"
-    | "/search/act"
     | "/search/ask"
     | "/sport/history"
     | "/sport/info"
@@ -1095,6 +1150,9 @@ export interface FileRouteTypes {
     | "/events/submissions/$id"
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
+    | "/search/admin/abuse"
+    | "/search/admin/admins"
+    | "/search/admin/proposals"
     | "/when2meet/$meetingId/edit"
     | "/admin/users"
     | "/board-games/admin"
@@ -1103,7 +1161,10 @@ export interface FileRouteTypes {
     | "/events/drafts"
     | "/events/submissions"
     | "/room-booking/rooms"
+    | "/search/admin"
     | "/when2meet/$meetingId"
+    | "/search/admin/max/$chatId"
+    | "/search/admin/telegram/$chatId"
     | "/guard/google/files/$slug/join";
   id:
     | "__root__"
@@ -1151,7 +1212,6 @@ export interface FileRouteTypes {
     | "/_with_menu/room-booking/list"
     | "/_with_menu/room-booking/rules"
     | "/_with_menu/schedule/$category"
-    | "/_with_menu/search/act"
     | "/_with_menu/search/ask"
     | "/_with_menu/sport/history"
     | "/_with_menu/sport/info"
@@ -1190,6 +1250,9 @@ export interface FileRouteTypes {
     | "/_with_menu/events/submissions/$id"
     | "/_with_menu/room-booking/rooms/$room"
     | "/_with_menu/schedule/event-groups/$alias"
+    | "/_with_menu/search/admin/abuse"
+    | "/_with_menu/search/admin/admins"
+    | "/_with_menu/search/admin/proposals"
     | "/_with_menu/when2meet/$meetingId/edit"
     | "/_with_menu/admin/users/"
     | "/_with_menu/board-games/admin/"
@@ -1198,7 +1261,10 @@ export interface FileRouteTypes {
     | "/_with_menu/events/drafts/"
     | "/_with_menu/events/submissions/"
     | "/_with_menu/room-booking/rooms/"
+    | "/_with_menu/search/admin/"
     | "/_with_menu/when2meet/$meetingId/"
+    | "/_with_menu/search/admin/max/$chatId"
+    | "/_with_menu/search/admin/telegram/$chatId"
     | "/guard/google/files/$slug/join";
   fileRoutesById: FileRoutesById;
 }
@@ -1600,13 +1666,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuSearchAskRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/search/act": {
-      id: "/_with_menu/search/act";
-      path: "/search/act";
-      fullPath: "/search/act";
-      preLoaderRoute: typeof With_menuSearchActRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
     "/_with_menu/schedule/$category": {
       id: "/_with_menu/schedule/$category";
       path: "/schedule/$category";
@@ -1740,6 +1799,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuWhen2meetMeetingIdIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/search/admin/": {
+      id: "/_with_menu/search/admin/";
+      path: "/search/admin";
+      fullPath: "/search/admin/";
+      preLoaderRoute: typeof With_menuSearchAdminIndexRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/room-booking/rooms/": {
       id: "/_with_menu/room-booking/rooms/";
       path: "/room-booking/rooms";
@@ -1794,6 +1860,27 @@ declare module "@tanstack/react-router" {
       path: "/when2meet/$meetingId/edit";
       fullPath: "/when2meet/$meetingId/edit";
       preLoaderRoute: typeof With_menuWhen2meetMeetingIdEditRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/search/admin/proposals": {
+      id: "/_with_menu/search/admin/proposals";
+      path: "/search/admin/proposals";
+      fullPath: "/search/admin/proposals";
+      preLoaderRoute: typeof With_menuSearchAdminProposalsRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/search/admin/admins": {
+      id: "/_with_menu/search/admin/admins";
+      path: "/search/admin/admins";
+      fullPath: "/search/admin/admins";
+      preLoaderRoute: typeof With_menuSearchAdminAdminsRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/search/admin/abuse": {
+      id: "/_with_menu/search/admin/abuse";
+      path: "/search/admin/abuse";
+      fullPath: "/search/admin/abuse";
+      preLoaderRoute: typeof With_menuSearchAdminAbuseRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/schedule/event-groups/$alias": {
@@ -1866,6 +1953,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof GuardGoogleFilesSlugJoinRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/_with_menu/search/admin/telegram/$chatId": {
+      id: "/_with_menu/search/admin/telegram/$chatId";
+      path: "/search/admin/telegram/$chatId";
+      fullPath: "/search/admin/telegram/$chatId";
+      preLoaderRoute: typeof With_menuSearchAdminTelegramChatIdRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/search/admin/max/$chatId": {
+      id: "/_with_menu/search/admin/max/$chatId";
+      path: "/search/admin/max/$chatId";
+      fullPath: "/search/admin/max/$chatId";
+      preLoaderRoute: typeof With_menuSearchAdminMaxChatIdRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
   }
 }
 
@@ -1919,7 +2020,6 @@ interface With_menuRouteRouteChildren {
   With_menuRoomBookingListRoute: typeof With_menuRoomBookingListRoute;
   With_menuRoomBookingRulesRoute: typeof With_menuRoomBookingRulesRoute;
   With_menuScheduleCategoryRoute: typeof With_menuScheduleCategoryRoute;
-  With_menuSearchActRoute: typeof With_menuSearchActRoute;
   With_menuSearchAskRoute: typeof With_menuSearchAskRoute;
   With_menuSportHistoryRoute: typeof With_menuSportHistoryRoute;
   With_menuSportInfoRoute: typeof With_menuSportInfoRoute;
@@ -1954,6 +2054,9 @@ interface With_menuRouteRouteChildren {
   With_menuEventsSubmissionsIdRoute: typeof With_menuEventsSubmissionsIdRoute;
   With_menuRoomBookingRoomsRoomRoute: typeof With_menuRoomBookingRoomsRoomRoute;
   With_menuScheduleEventGroupsAliasRoute: typeof With_menuScheduleEventGroupsAliasRoute;
+  With_menuSearchAdminAbuseRoute: typeof With_menuSearchAdminAbuseRoute;
+  With_menuSearchAdminAdminsRoute: typeof With_menuSearchAdminAdminsRoute;
+  With_menuSearchAdminProposalsRoute: typeof With_menuSearchAdminProposalsRoute;
   With_menuWhen2meetMeetingIdEditRoute: typeof With_menuWhen2meetMeetingIdEditRoute;
   With_menuAdminUsersIndexRoute: typeof With_menuAdminUsersIndexRoute;
   With_menuClubsSlugIndexRoute: typeof With_menuClubsSlugIndexRoute;
@@ -1961,7 +2064,10 @@ interface With_menuRouteRouteChildren {
   With_menuEventsDraftsIndexRoute: typeof With_menuEventsDraftsIndexRoute;
   With_menuEventsSubmissionsIndexRoute: typeof With_menuEventsSubmissionsIndexRoute;
   With_menuRoomBookingRoomsIndexRoute: typeof With_menuRoomBookingRoomsIndexRoute;
+  With_menuSearchAdminIndexRoute: typeof With_menuSearchAdminIndexRoute;
   With_menuWhen2meetMeetingIdIndexRoute: typeof With_menuWhen2meetMeetingIdIndexRoute;
+  With_menuSearchAdminMaxChatIdRoute: typeof With_menuSearchAdminMaxChatIdRoute;
+  With_menuSearchAdminTelegramChatIdRoute: typeof With_menuSearchAdminTelegramChatIdRoute;
 }
 
 const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
@@ -1997,7 +2103,6 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuRoomBookingListRoute: With_menuRoomBookingListRoute,
   With_menuRoomBookingRulesRoute: With_menuRoomBookingRulesRoute,
   With_menuScheduleCategoryRoute: With_menuScheduleCategoryRoute,
-  With_menuSearchActRoute: With_menuSearchActRoute,
   With_menuSearchAskRoute: With_menuSearchAskRoute,
   With_menuSportHistoryRoute: With_menuSportHistoryRoute,
   With_menuSportInfoRoute: With_menuSportInfoRoute,
@@ -2033,6 +2138,9 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuRoomBookingRoomsRoomRoute: With_menuRoomBookingRoomsRoomRoute,
   With_menuScheduleEventGroupsAliasRoute:
     With_menuScheduleEventGroupsAliasRoute,
+  With_menuSearchAdminAbuseRoute: With_menuSearchAdminAbuseRoute,
+  With_menuSearchAdminAdminsRoute: With_menuSearchAdminAdminsRoute,
+  With_menuSearchAdminProposalsRoute: With_menuSearchAdminProposalsRoute,
   With_menuWhen2meetMeetingIdEditRoute: With_menuWhen2meetMeetingIdEditRoute,
   With_menuAdminUsersIndexRoute: With_menuAdminUsersIndexRoute,
   With_menuClubsSlugIndexRoute: With_menuClubsSlugIndexRoute,
@@ -2040,7 +2148,11 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuEventsDraftsIndexRoute: With_menuEventsDraftsIndexRoute,
   With_menuEventsSubmissionsIndexRoute: With_menuEventsSubmissionsIndexRoute,
   With_menuRoomBookingRoomsIndexRoute: With_menuRoomBookingRoomsIndexRoute,
+  With_menuSearchAdminIndexRoute: With_menuSearchAdminIndexRoute,
   With_menuWhen2meetMeetingIdIndexRoute: With_menuWhen2meetMeetingIdIndexRoute,
+  With_menuSearchAdminMaxChatIdRoute: With_menuSearchAdminMaxChatIdRoute,
+  With_menuSearchAdminTelegramChatIdRoute:
+    With_menuSearchAdminTelegramChatIdRoute,
 };
 
 const With_menuRouteRouteWithChildren = With_menuRouteRoute._addFileChildren(

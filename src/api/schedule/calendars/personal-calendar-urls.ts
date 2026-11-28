@@ -14,8 +14,13 @@ import {
   SCHEDULE_API_URL,
 } from "@/api/schedule/calendars/links.ts";
 import { useWhen2MeetCalendarEvents } from "@/api/schedule/calendars/useWhen2MeetCalendarEvents.ts";
+import {
+  getMyAssistantCalendarLink,
+  SEARCH_API_URL,
+} from "@/api/search/links.ts";
 import { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 import { $sport } from "@/api/sport";
+import { useAiCalendarHidden } from "@/components/calendar/ai-calendar.ts";
 import {
   filterUpcomingCheckedInSchedule,
   fromCalendarSpace,
@@ -170,6 +175,7 @@ function queryCalendar(source: CalendarSource) {
 function resolveCalendarFetchUrl(url: string) {
   if (
     url.startsWith(SCHEDULE_API_URL) ||
+    url.startsWith(SEARCH_API_URL) ||
     url.startsWith("https://api.innohassle.ru")
   ) {
     return url;
@@ -204,6 +210,7 @@ function usePersonalCalendars({
     undefined,
     { enabled },
   );
+  const [aiCalendarHidden] = useAiCalendarHidden();
 
   if (!enabled) {
     return [];
@@ -226,6 +233,7 @@ function usePersonalCalendars({
     scheduleUser.id,
     scheduleUser.music_room_hidden,
     scheduleUser.moodle_hidden,
+    aiCalendarHidden,
     Object.values(scheduleUser.linked_calendars || {}),
   );
 }
@@ -342,6 +350,7 @@ function getCalendarsToShow(
   userId: number | undefined,
   music_room_hidden: boolean,
   moodle_hidden: boolean,
+  ai_calendar_hidden: boolean,
   imported: SchemaLinkedCalendarView[],
 ): CalendarSource[] {
   const visibleAliases = new Set(
@@ -402,6 +411,16 @@ function getCalendarsToShow(
     sourceLink: "https://innohassle.ru/room-booking",
     updatedAt: new Date().toISOString(),
   });
+
+  // AI Calendar: the events added under the assistant's answers and from the schedule changes in chats.
+  // No link of the whole feed: "Go to source" of an event is its own message (X-WR-LINK) or nothing, never the assistant.
+  if (!ai_calendar_hidden) {
+    toShow.push({
+      url: getMyAssistantCalendarLink(),
+      color: "seagreen",
+      updatedAt: new Date().toISOString(),
+    });
+  }
 
   // Add imported calendars
   imported.forEach((v) => {

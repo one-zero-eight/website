@@ -1,4 +1,6 @@
 import { $events } from "@/api/events";
+import { getMyAssistantCalendarLink } from "@/api/search/links";
+import { msg } from "@lingui/core/macro";
 import {
   IcsHostsList,
   PublicHostsList,
@@ -25,6 +27,7 @@ import { EventApi } from "@fullcalendar/core";
 import { Link } from "@tanstack/react-router";
 import moment from "moment";
 import { useEffect } from "react";
+import { hasUnknownEnd } from "./CalendarEventTime";
 
 export type ScheduleDialogProps = {
   event: EventApi;
@@ -97,6 +100,14 @@ export function CalendarEventPopover({
   const showHosts = (hosts && hosts.length > 0) || icsHosts.length > 0;
   const showRawDescription =
     !!event.extendedProps?.description && !isEventFromEvents;
+  const canClarifyEnd =
+    hasUnknownEnd(event) &&
+    event.extendedProps.calendarURLs?.includes(getMyAssistantCalendarLink());
+  const title = event.title;
+  const start = event.startStr;
+  const clarifyQuery = i18n._(
+    msg`Help me specify the end time of my AI Calendar event "${title}" starting at ${start}. Ask me for the end time; do not guess it.`,
+  );
 
   return (
     <>
@@ -129,16 +140,39 @@ export function CalendarEventPopover({
                   <span className="icon-[material-symbols--today-outline] text-2xl" />
                 </div>
                 <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
-                  {!event.allDay
-                    ? moment(event.startStr)
+                  {hasUnknownEnd(event) ? (
+                    <span>
+                      {moment(event.startStr)
                         .locale(i18n.locale)
-                        .format("dddd, D MMMM; HH:mm—") +
-                      moment(event.endStr).format("HH:mm")
-                    : moment(event.startStr)
+                        .format("dddd, D MMMM; HH:mm")}
+                      {" · "}
+                      <Trans>end time not specified</Trans>
+                    </span>
+                  ) : !event.allDay ? (
+                    moment(event.startStr)
+                      .locale(i18n.locale)
+                      .format("dddd, D MMMM; HH:mm—") +
+                    moment(event.endStr).format("HH:mm")
+                  ) : (
+                    <span>
+                      {moment(event.startStr)
                         .locale(i18n.locale)
                         .format("dddd, D MMMM")}
+                      {" · "}
+                      <Trans>All day</Trans>
+                    </span>
+                  )}
                 </p>
               </div>
+
+              {canClarifyEnd && (
+                <a
+                  href={`/search/ask?${new URLSearchParams({ q: clarifyQuery })}`}
+                  className="btn btn-sm btn-outline h-auto py-2 whitespace-normal"
+                >
+                  <Trans>Clarify end time with the assistant</Trans>
+                </a>
+              )}
 
               {isEventFromEvents && (resolvedLocation || icsLocation) && (
                 <div className="flex flex-row gap-2">

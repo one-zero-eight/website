@@ -4,6 +4,43 @@
  */
 
 export interface paths {
+  "/announcements": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Announcements */
+    get: operations["announcements_list_announcements"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/announcements/{change_id}/calendar": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Apply Announcement
+     * @description Put the change in the user's calendar: a new event, or a move, room change or removal of the one they have. Twice is once.
+     */
+    post: operations["announcements_apply_announcement"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/search/search": {
     parameters: {
       query?: never;
@@ -13,6 +50,48 @@ export interface paths {
     };
     /** Search By Query */
     get: operations["search_search_by_query"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/search/pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Pdf By Url
+     * @description The original PDF of a page of the knowledge base, for a preview in a frame: the university's sites forbid showing
+     *     their files in a frame of another site (X-Frame-Options: SAMEORIGIN), this answer does not. Only documents the
+     *     knowledge base has a page of: not a proxy to anywhere.
+     */
+    get: operations["search_pdf_by_url"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/search/archive-document": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Archive Document
+     * @description Download and safely unpack the source archive on demand; cache the exact verified PDF.
+     */
+    get: operations["search_archive_document"];
     put?: never;
     post?: never;
     delete?: never;
@@ -38,6 +117,57 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/ask/attachments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Upload */
+    post: operations["ask_upload"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/attachments/{attachment_id}/content": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Content */
+    get: operations["ask_content"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/attachments/{attachment_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete */
+    delete: operations["ask_delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/ask/": {
     parameters: {
       query?: never;
@@ -49,6 +179,259 @@ export interface paths {
     put?: never;
     /** Ask By Query */
     post: operations["ask_ask_by_query"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/search": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Search In Chat
+     * @description A plain search of the knowledge base (as GET /search/search, no assistant) kept in the chat as one of its turns: the
+     *     site's search command (`query` is the message as the user wrote it, `searched_for` what follows the command) and the
+     *     search a question falls back to when the assistant is unavailable. Without `chat_id`, or with an unknown one, a new chat
+     *     starts, named by `searched_for`. The chat's next question shows these searches to the assistant.
+     */
+    post: operations["ask_search_in_chat"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/stream": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Ask By Query Stream
+     * @description The same as POST /ask/, but the work is shown while it goes on. Events: `status` ({text}: what the agent is doing: waiting in the queue, checking, asking a helper, writing, as in the Telegram bot),
+     *     `answer` ({text}: the whole answer so far), `done` (AskResponses: the final answer with its sources and the events it
+     *     offers for the calendar), `cancelled`
+     *     ({detail}: POST /ask/{chat_id}/cancel) or `error` ({detail}). A client's questions are answered one at a time, in the
+     *     order they came: while an earlier one is not done, this one waits and sends no events.
+     */
+    post: operations["ask_ask_by_query_stream"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/{chat_id}/signup/{offer_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Signup Offer
+     * @description An explicit button click, not an agent turn. Durable claim prevents retries.
+     */
+    post: operations["ask_signup_offer"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/{chat_id}/decision": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decide
+     * @description Approve or reject what the assistant is about to do for the user (the `approval` of the chat's last response): booking
+     *     the music room or a room, enrolling in an event, cancelling a booking. The agent goes on from where it paused, does it
+     *     with this request's token (approve) or not (reject), and its answer is the answer to the question that waited. Each
+     *     action is done only after this; one not decided is never done.
+     */
+    post: operations["ask_decide"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/{chat_id}/decision/stream": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decide Stream
+     * @description The same as POST /ask/{chat_id}/decision, with the work shown while it goes on: the events of POST /ask/stream.
+     */
+    post: operations["ask_decide_stream"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/{chat_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel Ask
+     * @description Cancel the work of the agent in the chat: the question being answered and the ones of this chat still waiting for
+     *     their turn. Their requests end with 409 (`/ask/stream`: a `cancelled` event). The conversation goes on as it was before
+     *     the cancelled questions; the answers already given stay in it.
+     */
+    post: operations["ask_cancel_ask"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/{ask_query_id}/feedback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add User Feedback
+     * @description A 👍 (`like`) or 👎 (`dislike`) on an answer, as under the answers of the Telegram bot: the annotation `user-feedback` on
+     *     the answer's trace in Phoenix, and the user's `comment` on what they liked or not is its explanation. A second vote of the
+     *     user (the same one with a comment, or another) replaces the first. An answer has an `ask_query_id` only when tracing is on.
+     *     The chat's history (GET /ask/chats/{chat_id}) shows the vote with its comment.
+     */
+    post: operations["ask_add_user_feedback"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/chats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Chats
+     * @description The user's chats with the assistant, the last answered first (at most 100). GET /ask/chats/{chat_id} gives the
+     *     questions and answers of one, and a question with its `chat_id` goes on with it.
+     */
+    get: operations["ask_list_chats"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/pause": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Ask Pause
+     * @description Whether the assistant is closed to the user for repeated violations of the usage rules (agent/guardrail.py, abuse.py),
+     *     and until when. The pause belongs to the user, not to a chat: the site asks it when it opens, to keep the message box closed.
+     */
+    get: operations["ask_ask_pause"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ask/chats/{chat_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Chat History
+     * @description A chat of the user: its questions and answers, the oldest first, as POST /ask/ gave them, with the user's votes. A
+     *     question that was cancelled or failed is not in it: the agent does not remember it either.
+     */
+    get: operations["ask_chat_history"];
+    put?: never;
+    post?: never;
+    /**
+     * Delete Chat
+     * @description Delete a chat of the user: its questions and answers with the user's votes, and the agent's memory of it. A question
+     *     of the chat being answered or waiting for its turn is cancelled first (its request ends as by POST /ask/{chat_id}/cancel).
+     *     A question sent with this `chat_id` afterwards starts a new chat. The answers' traces stay in Phoenix, and the events
+     *     the user added to their calendar stay there.
+     */
+    delete: operations["ask_delete_chat"];
+    options?: never;
+    head?: never;
+    /**
+     * Rename Chat
+     * @description The user's name of their chat, in place of the one the model gave it (or its first question). The model does not
+     *     name the chat again after that.
+     */
+    patch: operations["ask_rename_chat"];
+    trace?: never;
+  };
+  "/ask/chats/{chat_id}/stream": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Follow Chat
+     * @description The answer being written in the chat, for a page that lost its stream (reloaded, closed, or opened the chat from the
+     *     list): the latest `status`, `guardrail` and `answer`, then the events of POST /ask/stream as they come, ending with `done`,
+     *     `cancelled` or `error`. It follows the oldest unfinished question of the chat; when it ends, GET /ask/chats/{chat_id} has
+     *     the answer, and `answering` tells whether another question of the chat is still going.
+     */
+    get: operations["ask_follow_chat"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -72,170 +455,20 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/moodle/courses/grouped-by-semester": {
+  "/sites": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get Courses Grouped By Semester */
-    get: operations["moodle_get_courses_grouped_by_semester"];
+    /**
+     * List Sites
+     * @description Names accepted by the parser: trusted configured sites from sites.SITES.
+     */
+    get: operations["parsers_list_sites"];
     put?: never;
     post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/courses/by-course-fullname/content": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get Course Names Grouped */
-    get: operations["moodle_get_course_names_grouped"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/preview": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Preview Moodle */
-    get: operations["moodle_preview_moodle"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/files": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get Moodle Files */
-    get: operations["moodle_get_moodle_files"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/courses": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Courses */
-    get: operations["moodle_courses"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/batch-courses": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Batch Upsert Courses */
-    post: operations["moodle_batch_upsert_courses"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/courses-content": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Courses Content */
-    get: operations["moodle_courses_content"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/set-course-content": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Course Content */
-    post: operations["moodle_course_content"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/need-to-upload-contents": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Need To Upload Contents */
-    post: operations["moodle_need_to_upload_contents"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/moodle/content-uploaded": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Content Uploaded */
-    post: operations["moodle_content_uploaded"];
     delete?: never;
     options?: never;
     head?: never;
@@ -251,8 +484,431 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Run Parse Route */
+    /**
+     * Run Parse Route
+     * @description Queue an update of the source for the wiki's own run and answer at once (202) with the request; GET /parse/{id} follows it.
+     *
+     *     wiki/eduwiki: the pages of the eduwiki whose revision changed; sites/resources: the trusted sites named (all of them when
+     *     none is), their pages and the documents they link; hotel/campuslife: that site. The run (`catix-wiki autopilot`) asks the
+     *     source, builds the pages, runs its checks (lint, cards, search, answers) and commits to the `wiki` branch, or sends the
+     *     changes to a review branch when a check fails. parsing_is_needed=false asks no source: the run builds and checks the data
+     *     it already holds. The same request still waiting is queued once: asking again answers with it.
+     */
     post: operations["run_parse_route"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/parse/{request_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Parse Status
+     * @description Where a request of POST /{section}/parse is: queued, running, done (with what the run did) or failed.
+     */
+    get: operations["parsers_parse_status"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/my-calendar.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * My Calendar
+     * @description The events the user added to their calendar under the answers of the site and of the Telegram bot (all of them,
+     *     past ones too).
+     */
+    get: operations["users_my_calendar"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/my-calendar/events/{proposal_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add Calendar Event
+     * @description Add an event offered under an answer of /ask/ (`calendar_events`, its `id`) to the user's calendar. The same event
+     *     twice is one.
+     */
+    post: operations["users_add_calendar_event"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/my-calendar/export-key": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Calendar Export Key Status */
+    get: operations["users_calendar_export_key_status"];
+    put?: never;
+    /** Create Calendar Export Key */
+    post: operations["users_create_calendar_export_key"];
+    /** Revoke Calendar Export Key */
+    delete: operations["users_revoke_calendar_export_key"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/calendar-export.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Public Calendar Export */
+    get: operations["users_public_calendar_export"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/sources": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Sources */
+    get: operations["sources_list_sources"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Me */
+    get: operations["admin_me"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/admins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Admins */
+    get: operations["admin_list_admins"];
+    put?: never;
+    /** Add Admin */
+    post: operations["admin_add_admin"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/admins/{innohassle_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Remove Admin */
+    delete: operations["admin_remove_admin"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/groups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Groups */
+    get: operations["admin_list_groups"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/telegram/chats/{chat_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Telegram Chat */
+    get: operations["admin_telegram_chat"];
+    /** Save Telegram Chat */
+    put: operations["admin_save_telegram_chat"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/telegram/chats/{chat_id}/listen": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Disconnect Telegram Chat
+     * @description Messages stay.
+     */
+    delete: operations["admin_disconnect_telegram_chat"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/telegram/chats/{chat_id}/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Clear Telegram Chat */
+    delete: operations["admin_clear_telegram_chat"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/telegram/refresh": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Refresh Telegram */
+    post: operations["admin_refresh_telegram"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/chats/{chat_id}/official": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Set Official */
+    put: operations["admin_set_official"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/max/{chat_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Max Source */
+    get: operations["admin_max_source"];
+    /** Save Max Source */
+    put: operations["admin_save_max_source"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/max/{chat_id}/history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Retry Max History */
+    post: operations["admin_retry_max_history"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/max/{chat_id}/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Clear Max Messages */
+    delete: operations["admin_clear_max_messages"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/max/refresh": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Refresh Max */
+    post: operations["admin_refresh_max"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/chat-proposals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Chat Proposals */
+    get: operations["admin_chat_proposals"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/abuse": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Abuse List */
+    get: operations["admin_abuse_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/abuse/{user_key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Abuse Detail */
+    get: operations["admin_abuse_detail"];
+    put?: never;
+    post?: never;
+    /** Abuse Forgive */
+    delete: operations["admin_abuse_forgive"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/chats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Chats
+     * @description Telegram dialogs and MAX sources in one list; the MAX account status goes with it.
+     */
+    get: operations["admin_list_chats"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -263,56 +919,700 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** AbuseDetail */
+    AbuseDetail: {
+      /** User Key */
+      user_key: string;
+      /** Paused Until */
+      paused_until: string | null;
+      /** Entries */
+      entries: components["schemas"]["AbuseEntryView"][];
+    };
+    /** AbuseEntryView */
+    AbuseEntryView: {
+      /** Category */
+      category: string;
+      /**
+       * At
+       * Format: date-time
+       */
+      at: string;
+      /** Preview */
+      preview: string;
+    };
+    /** AbuseListView */
+    AbuseListView: {
+      /** Window Hours */
+      window_hours: number;
+      /** Warn At */
+      warn_at: number;
+      /** Pause At */
+      pause_at: number;
+      /** Users */
+      users: components["schemas"]["AbuseUserView"][];
+    };
+    /** AbuseUserView */
+    AbuseUserView: {
+      /** User Key */
+      user_key: string;
+      /** Strikes */
+      strikes: number;
+      /** Pauses */
+      pauses: number;
+      /** Paused Until */
+      paused_until: string | null;
+    };
+    /** AdminIn */
+    AdminIn: {
+      /** Innohassle Id */
+      innohassle_id: string;
+    };
+    /** AdminMe */
+    AdminMe: {
+      /** Innohassle Id */
+      innohassle_id: string;
+      /** Is Admin */
+      is_admin: boolean;
+    };
+    /** AdminView */
+    AdminView: {
+      /** Innohassle Id */
+      innohassle_id: string;
+      /** Email */
+      email: string | null;
+      /** Telegram Id */
+      telegram_id: number | null;
+      /** Fixed */
+      fixed: boolean;
+      /** Added At */
+      added_at: string | null;
+    };
+    /** ChatListItem */
+    ChatListItem: {
+      /**
+       * Platform
+       * @enum {string}
+       */
+      platform: "telegram" | "max";
+      /** Chat Id */
+      chat_id: string;
+      /** Title */
+      title: string;
+      /** Group Code */
+      group_code: string;
+      /** Official */
+      official: boolean;
+      /** Connected */
+      connected: boolean;
+      /** Forum */
+      forum: boolean;
+      /** Bot In */
+      bot_in: boolean;
+      /** Search Only */
+      search_only: boolean;
+      /** Raw Chat Id */
+      raw_chat_id: string | null;
+      /** Access */
+      access: string | null;
+      /** History Status */
+      history_status: string | null;
+    };
+    /** ChatsView */
+    ChatsView: {
+      max_account: components["schemas"]["MaxAccountView"];
+      /** Chats */
+      chats: components["schemas"]["ChatListItem"][];
+    };
+    /** Deleted */
+    Deleted: {
+      /** Deleted */
+      deleted: number;
+    };
+    /** MaxAccountView */
+    MaxAccountView: {
+      /** Online */
+      online: boolean;
+      /** Catalog Status */
+      catalog_status: string;
+      /** Catalog Error */
+      catalog_error: string | null;
+    };
+    /** MaxLegacyCandidate */
+    MaxLegacyCandidate: {
+      /** Chat Id */
+      chat_id: string;
+      /** Raw Chat Id */
+      raw_chat_id: string;
+      /** Title */
+      title: string;
+      /** Message Count */
+      message_count: number;
+      /** Matches Raw Id */
+      matches_raw_id: boolean;
+    };
+    /** MaxSourceDetail */
+    MaxSourceDetail: {
+      /** Chat Id */
+      chat_id: string;
+      /** Raw Chat Id */
+      raw_chat_id: string;
+      /** Title */
+      title: string;
+      /** Group Code */
+      group_code: string;
+      /** Enabled */
+      enabled: boolean;
+      /** Access */
+      access: string;
+      /** History Status */
+      history_status: string;
+      /** Catchup Status */
+      catchup_status: string;
+      /** Last Error */
+      last_error: string | null;
+      /** Legacy Chat Id */
+      legacy_chat_id: string | null;
+      /** Official */
+      official: boolean;
+      /** Config Version */
+      config_version: number;
+      /** Generation */
+      generation: number;
+      /** Message Count */
+      message_count: number;
+      /** Legacy Candidates */
+      legacy_candidates: components["schemas"]["MaxLegacyCandidate"][];
+    };
+    /** MaxSourceIn */
+    MaxSourceIn: {
+      /** Group Code */
+      group_code: string;
+      /** Enabled */
+      enabled: boolean;
+      /** Legacy Chat Id */
+      legacy_chat_id?: string | null;
+      /** Config Version */
+      config_version: number;
+      /** Generation */
+      generation: number;
+    };
+    /** MaxVersions */
+    MaxVersions: {
+      /** Config Version */
+      config_version: number;
+      /** Generation */
+      generation: number;
+    };
+    /** OfficialIn */
+    OfficialIn: {
+      /** Official */
+      official: boolean;
+    };
+    /** OfficialView */
+    OfficialView: {
+      /** Official */
+      official: boolean;
+    };
+    /** ProposalView */
+    ProposalView: {
+      /** Link */
+      link: string;
+      /** Owner */
+      owner: string;
+      /** Course */
+      course: string;
+      /**
+       * Found At
+       * Format: date-time
+       */
+      found_at: string;
+      /** Study Groups */
+      study_groups: string[];
+    };
+    /** ProposalsView */
+    ProposalsView: {
+      /** Total */
+      total: number;
+      /** Items */
+      items: components["schemas"]["ProposalView"][];
+    };
+    /** TelegramChatDetail */
+    TelegramChatDetail: {
+      /** Chat Id */
+      chat_id: string;
+      /** Title */
+      title: string;
+      /** Username */
+      username: string | null;
+      /** Forum */
+      forum: boolean;
+      /** Bot Only */
+      bot_only: boolean;
+      /** Bot In */
+      bot_in: boolean;
+      /** Listened */
+      listened: boolean;
+      /**
+       * Reader
+       * @enum {string}
+       */
+      reader: "auto" | "userbot" | "bot" | "search";
+      /** Group Code */
+      group_code: string;
+      /** Official */
+      official: boolean;
+      /**
+       * Default Mode
+       * @enum {string}
+       */
+      default_mode: "store" | "search" | "off";
+      /** Topics */
+      topics: components["schemas"]["TelegramTopicView"][];
+      /** Message Count */
+      message_count: number;
+    };
+    /** TelegramChatIn */
+    TelegramChatIn: {
+      /** Group Code */
+      group_code: string;
+      /**
+       * Default Mode
+       * @enum {string}
+       */
+      default_mode: "store" | "search" | "off";
+      /** Topic Modes */
+      topic_modes: {
+        [key: string]: "store" | "search" | "off";
+      };
+      /**
+       * Reader
+       * @enum {string}
+       */
+      reader: "auto" | "userbot" | "bot";
+    };
+    /** TelegramTopicView */
+    TelegramTopicView: {
+      /** Topic Id */
+      topic_id: number;
+      /** Title */
+      title: string;
+      /** Closed */
+      closed: boolean;
+      /**
+       * Mode
+       * @enum {string}
+       */
+      mode: "store" | "search" | "off";
+    };
     /** ActResponses */
     ActResponses: {
       /** Query */
       query: string;
       /** Answer */
       answer: string;
-      /** @description Assigned act query index */
-      act_query_id: components["schemas"]["PydanticObjectId"] | null;
-      /**
-       * Tool Calls
-       * @description Which tools were used.
-       */
+      /** Act Query Id */
+      act_query_id?: string | null;
+      /** Tool Calls */
       tool_calls: unknown[];
-      /**
-       * Messages
-       * @description Chat history for llm (do not show on frontend).
-       */
+      /** Messages */
       messages: unknown[];
+    };
+    /** AddedAnnouncement */
+    AddedAnnouncement: {
+      /** Change Id */
+      change_id: number;
+      /**
+       * Action
+       * @enum {string}
+       */
+      action: AddedAnnouncementAction;
+      /** Title */
+      title: string;
+    };
+    /** AddedCalendarEvent */
+    AddedCalendarEvent: {
+      /** Proposal Id */
+      proposal_id: string;
+      /** Title */
+      title: string;
+    };
+    /**
+     * Announcement
+     * @description A schedule change found in a chat of the user (worker/changes.py).
+     */
+    Announcement: {
+      /** Id */
+      id: number;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: AnnouncementKind;
+      /** Subject */
+      subject: string | null;
+      /** Summary */
+      summary: string;
+      /**
+       * Starts At
+       * Format: date-time
+       */
+      starts_at: string;
+      /** Ends At */
+      ends_at: string | null;
+      /** End Suggested */
+      end_suggested: boolean;
+      /** All Day */
+      all_day: boolean;
+      /** Room */
+      room: string | null;
+      /**
+       * Found At
+       * Format: date-time
+       */
+      found_at: string;
+      source: components["schemas"]["AnnouncementSource"];
+    };
+    /** AnnouncementSource */
+    AnnouncementSource: {
+      /** Chat Title */
+      chat_title: string;
+      /** Link */
+      link: string | null;
+      /**
+       * Sent At
+       * Format: date-time
+       */
+      sent_at: string;
+      /** Sender Name */
+      sender_name: string | null;
+      /** Text */
+      text: string;
+    };
+    /** AnswerSource */
+    AnswerSource: {
+      /** Number */
+      number: number;
+      /** Title */
+      title: string;
+      /** Url */
+      url?: string | null;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: AnswerSourceKind;
+      /** Clauses */
+      clauses?: string[];
+      /** Sections */
+      sections?: string[];
+      /** Based On */
+      based_on?: components["schemas"]["CitationLink"][];
+      archive_document?: components["schemas"]["ArchiveDocument"] | null;
+      /** Date */
+      date?: string | null;
+      /** Author */
+      author?: string | null;
+      /** Author Url */
+      author_url?: string | null;
+      /** Text */
+      text?: string | null;
+      /** Images */
+      images?: components["schemas"]["SourceImage"][];
+      /**
+       * Official
+       * @default false
+       */
+      official: boolean;
+    };
+    /** ArchiveDocument */
+    ArchiveDocument: {
+      /** Page */
+      page: string;
+      /** Revision */
+      revision: string;
+      /** Member */
+      member: string;
+    };
+    /** ActionEdit */
+    ActionEdit: {
+      /** Index */
+      index: number;
+      /** Values */
+      values: {
+        [key: string]: string;
+      };
+    };
+    /** AskAction */
+    AskAction: {
+      /** Name */
+      name: string;
+      /**
+       * Target
+       * @default
+       */
+      target: string;
+      /** Args */
+      args: {
+        [key: string]: unknown;
+      };
+      /** Fields */
+      fields: components["schemas"]["AskField"][];
+    };
+    /** AskField */
+    AskField: {
+      /** Name */
+      name: string;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "text" | "textarea" | "date" | "time" | "number";
+      /** Value */
+      value: string;
+      /** Required */
+      required: boolean;
+      /** Max Length */
+      max_length?: number | null;
+    };
+    /** AskApproval */
+    AskApproval: {
+      /** Id */
+      id: string;
+      /** Actions */
+      actions: components["schemas"]["AskAction"][];
+    };
+    /** AskChat */
+    AskChat: {
+      /** Chat Id */
+      chat_id: string;
+      /** Title */
+      title: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+      /**
+       * Answer Count
+       * @default 0
+       */
+      answer_count: number;
+      /**
+       * Answering
+       * @default false
+       */
+      answering: boolean;
+    };
+    /** AskChatHistory */
+    AskChatHistory: {
+      /** Chat Id */
+      chat_id: string;
+      /** Title */
+      title: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+      /**
+       * Answer Count
+       * @default 0
+       */
+      answer_count: number;
+      /**
+       * Answering
+       * @default false
+       */
+      answering: boolean;
+      /** Answers */
+      answers: components["schemas"]["AskResponses"][];
+      waiting?: components["schemas"]["AskResponses"] | null;
+      /**
+       * Asking
+       * @default []
+       */
+      asking: string[];
+    };
+    /** AskDecision */
+    AskDecision: {
+      /**
+       * Decision
+       * @enum {string}
+       */
+      decision: AskDecisionDecision;
+      /** Edits */
+      edits?: components["schemas"]["ActionEdit"][];
+      /** Approval Id */
+      approval_id?: string | null;
+    };
+    /** AskPause */
+    AskPause: {
+      /**
+       * Paused Until
+       * Format: date-time
+       */
+      paused_until?: string | null;
     };
     /** AskResponses */
     AskResponses: {
+      /**
+       * Signup Offers
+       * @default []
+       */
+      signup_offers: components["schemas"]["SignupOffer"][];
       /** Query */
       query: string;
       /** Answer */
       answer: string;
-      /** @description Assigned chat index */
-      chat_id: components["schemas"]["PydanticObjectId"] | null;
-      /** @description Assigned ask query index */
-      ask_query_id: components["schemas"]["PydanticObjectId"] | null;
       /**
-       * Search Responses
-       * @description Responses to the search query.
+       * Attachments
+       * @default []
        */
-      search_responses: components["schemas"]["SearchResponse"][];
+      attachments: components["schemas"]["AttachmentInfo"][];
+      /** Chat Id */
+      chat_id?: string | null;
+      /** Ask Query Id */
+      ask_query_id?: string | null;
       /**
-       * Messages
-       * @description Chat history for llm (do not show on frontend).
+       * Sources
+       * @default []
        */
+      sources: components["schemas"]["AnswerSource"][];
+      /**
+       * Calendar Events
+       * @default []
+       */
+      calendar_events: components["schemas"]["CalendarEventOffer"][];
+      /** Messages */
       messages: unknown[];
+      /** Feedback */
+      feedback?: AskResponsesFeedbackAnyOf0 | null;
+      /** Feedback Comment */
+      feedback_comment?: string | null;
+      approval?: components["schemas"]["AskApproval"] | null;
+      search?: components["schemas"]["SearchResponses"] | null;
+      /** Guardrail */
+      guardrail?: AskResponsesGuardrailAnyOf0 | null;
+      /**
+       * Paused Until
+       * Format: date-time
+       */
+      paused_until?: string | null;
+    };
+    /** AttachmentInfo */
+    AttachmentInfo: {
+      /** Id */
+      id: string;
+      /** Filename */
+      filename: string;
+      /** Media Type */
+      media_type: string;
+      /** Size Bytes */
+      size_bytes: number;
+      /** Pages */
+      pages: number;
     };
     /** Body_ask_act_by_query */
     Body_ask_act_by_query: {
       /** Query */
       query: string;
     };
+    /** Body_ask_add_user_feedback */
+    Body_ask_add_user_feedback: {
+      /** Comment */
+      comment?: string | null;
+    };
     /** Body_ask_ask_by_query */
     Body_ask_ask_by_query: {
       /** Query */
       query: string;
-      chat_id?: components["schemas"]["PydanticObjectId"] | null;
+      /** Chat Id */
+      chat_id?: string | null;
+      /**
+       * Attachment Ids
+       * @default []
+       */
+      attachment_ids: string[];
+    };
+    /** Body_ask_ask_by_query_stream */
+    Body_ask_ask_by_query_stream: {
+      /** Query */
+      query: string;
+      /** Chat Id */
+      chat_id?: string | null;
+      /**
+       * Attachment Ids
+       * @default []
+       */
+      attachment_ids: string[];
+    };
+    /** Body_ask_rename_chat */
+    Body_ask_rename_chat: {
+      /** Title */
+      title: string;
+    };
+    /** Body_ask_search_in_chat */
+    Body_ask_search_in_chat: {
+      /** Query */
+      query: string;
+      /** Searched For */
+      searched_for: string;
+      /** Chat Id */
+      chat_id?: string | null;
+    };
+    /** CalendarEventOffer */
+    CalendarEventOffer: {
+      /** Id */
+      id: string;
+      /** Title */
+      title: string;
+      /**
+       * Starts At
+       * Format: date-time
+       */
+      starts_at: string;
+      /** Ends At */
+      ends_at?: string | null;
+      /**
+       * End Suggested
+       * @default false
+       */
+      end_suggested: boolean;
+      /**
+       * All Day
+       * @default false
+       */
+      all_day: boolean;
+      /** Room */
+      room?: string | null;
+      /** Source Url */
+      source_url?: string | null;
+      /**
+       * Added
+       * @description The user's calendar has the event already (in a chat's history; an event removed from the calendar is offered again).
+       * @default false
+       */
+      added: boolean;
+    };
+    /** CalendarExportKeyCreated */
+    CalendarExportKeyCreated: {
+      /** Access Key */
+      access_key: string;
+    };
+    /** CalendarExportKeyStatus */
+    CalendarExportKeyStatus: {
+      /** Access Key */
+      access_key: string | null;
     };
     /** CampusLifeSource */
     CampusLifeSource: {
@@ -337,6 +1637,13 @@ export interface components {
        *     ]
        */
       breadcrumbs: string[];
+    };
+    /** CitationLink */
+    CitationLink: {
+      /** Title */
+      title: string;
+      /** Url */
+      url?: string | null;
     };
     /** ClubsSource */
     ClubsSource: {
@@ -385,16 +1692,7 @@ export interface components {
        *     ]
        */
       breadcrumbs: string[];
-    };
-    /** FlattenInContentsWithPresignedUrl */
-    FlattenInContentsWithPresignedUrl: {
-      /** Course Id */
-      course_id: number;
-      /** Module Id */
-      module_id: number;
-      content: components["schemas"]["MoodleContentSchema-Output"];
-      /** Presigned Url */
-      presigned_url: string;
+      archive_document?: components["schemas"]["ArchiveDocument"] | null;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -425,73 +1723,6 @@ export interface components {
        */
       breadcrumbs: string[];
     };
-    /** InContent */
-    InContent: {
-      /** Course Id */
-      course_id: number;
-      /** Module Id */
-      module_id: number;
-      content: components["schemas"]["MoodleContentSchema-Input"];
-    };
-    /** InContents */
-    InContents: {
-      /** Course Id */
-      course_id: number;
-      /** Module Id */
-      module_id: number;
-      /** Contents */
-      contents: components["schemas"]["MoodleContentSchema-Input"][];
-    };
-    /** InCourse */
-    InCourse: {
-      /** Id */
-      id: number;
-      /** Fullname */
-      fullname: string;
-      /** Startdate */
-      startdate: number;
-      /** Enddate */
-      enddate: number;
-      /** Coursecategory */
-      coursecategory: string;
-    };
-    /** InCourses */
-    InCourses: {
-      /** Courses */
-      courses: components["schemas"]["InCourse"][];
-    };
-    /** InModule */
-    InModule: {
-      /** Id */
-      id: number;
-      /** Name */
-      name: string;
-      /** Modname */
-      modname: string;
-      /**
-       * Contents
-       * @default []
-       */
-      contents: components["schemas"]["MoodleContentSchema-Input"][];
-    };
-    /** InSection */
-    InSection: {
-      /** Id */
-      id: number;
-      /** Summary */
-      summary: string;
-      /** Modules */
-      modules: components["schemas"]["InModule"][];
-    };
-    /** InSections */
-    InSections: {
-      /** Course Id */
-      course_id: number;
-      /** Course Fullname */
-      course_fullname: string;
-      /** Sections */
-      sections: components["schemas"]["InSection"][];
-    };
     /**
      * InfoSources
      * @enum {string}
@@ -521,140 +1752,48 @@ export interface components {
        */
       breadcrumbs: string[];
     };
-    /** MoodleContentSchema */
-    "MoodleContentSchema-Input": {
-      /** Type */
-      type: string;
-      /** Filename */
-      filename: string;
-      /** Timecreated */
-      timecreated?: number | null;
-      /** Timemodified */
-      timemodified?: number | null;
-      /**
-       * Uploaded
-       * @default false
-       */
-      uploaded: boolean;
-    };
-    /** MoodleContentSchema */
-    "MoodleContentSchema-Output": {
-      /** Type */
-      type: string;
-      /** Filename */
-      filename: string;
-      /** Timecreated */
-      timecreated: number | null;
-      /** Timemodified */
-      timemodified: number | null;
-      /**
-       * Uploaded
-       * @default false
-       */
-      uploaded: boolean;
-    };
-    /** MoodleCourse */
-    MoodleCourse: {
-      /**
-       * Format: objectid
-       * @description MongoDB document ObjectID
-       * @example 5eb7cf5a86d9755df3a6c593
-       */
-      id: string;
-      /** Course Id */
-      course_id: number;
-      /** Fullname */
-      fullname: string;
-      /** Startdate */
-      startdate: number;
-      /** Enddate */
-      enddate: number;
-      /** Coursecategory */
-      coursecategory: string;
-    };
-    /** MoodleEntry */
-    MoodleEntry: {
-      /**
-       * Format: objectid
-       * @description MongoDB document ObjectID
-       * @example 5eb7cf5a86d9755df3a6c593
-       */
-      id: string;
-      /** Course Id */
-      course_id: number;
-      /** Course Fullname */
-      course_fullname: string;
-      /** Section Id */
-      section_id: number;
-      /** Section Summary */
-      section_summary: string;
-      /** Module Id */
-      module_id: number;
-      /** Module Name */
-      module_name: string;
-      /** Module Modname */
-      module_modname: string;
-      /** Contents */
-      contents: components["schemas"]["MoodleContentSchema-Output"][];
-    };
     /** MoodleFileSource */
     MoodleFileSource: {
       /**
        * Display Name
-       * @description Display name of the resource.
        * @default -
        */
       display_name: string;
       /**
        * Breadcrumbs
-       * @description Breadcrumbs to the resource.
        * @default [
        *       "Moodle"
        *     ]
        */
       breadcrumbs: string[];
-      /**
-       * Link
-       * @description Anchor URL to the resource on Moodle.
-       */
+      /** Link */
       link: string;
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
       type: MoodleFileSourceType;
-      /**
-       * Resource Preview Url
-       * @description URL to get the preview of the resource.
-       */
-      resource_preview_url: string | null;
-      /**
-       * Resource Download Url
-       * @description URL to download the resource.
-       */
-      resource_download_url: string | null;
-      preview_location: components["schemas"]["PdfLocation"] | null;
+      /** Resource Preview Url */
+      resource_preview_url?: string | null;
+      /** Resource Download Url */
+      resource_download_url?: string | null;
+      preview_location?: components["schemas"]["PdfLocation"] | null;
     };
     /** MoodleUnknownSource */
     MoodleUnknownSource: {
       /**
        * Display Name
-       * @description Display name of the resource.
        * @default -
        */
       display_name: string;
       /**
        * Breadcrumbs
-       * @description Breadcrumbs to the resource.
        * @default [
        *       "Moodle"
        *     ]
        */
       breadcrumbs: string[];
-      /**
-       * Link
-       * @description Anchor URL to the resource on Moodle.
-       */
+      /** Link */
       link: string;
       /**
        * @description discriminator enum property added by openapi-typescript
@@ -666,44 +1805,112 @@ export interface components {
     MoodleUrlSource: {
       /**
        * Display Name
-       * @description Display name of the resource.
        * @default -
        */
       display_name: string;
       /**
        * Breadcrumbs
-       * @description Breadcrumbs to the resource.
        * @default [
        *       "Moodle"
        *     ]
        */
       breadcrumbs: string[];
-      /**
-       * Link
-       * @description Anchor URL to the resource on Moodle.
-       */
+      /** Link */
       link: string;
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
       type: MoodleUrlSourceType;
-      /**
-       * Url
-       * @description URL of the resource
-       */
+      /** Url */
       url: string;
+    };
+    /** MusicBookingWindow */
+    MusicBookingWindow: {
+      /**
+       * Starts At
+       * Format: date-time
+       */
+      starts_at: string;
+      /**
+       * Ends At
+       * Format: date-time
+       */
+      ends_at: string;
+      /**
+       * Latest Start At
+       * Format: date-time
+       */
+      latest_start_at: string;
+      /** Max Duration Minutes */
+      max_duration_minutes: number;
+      /** Duration Minutes */
+      duration_minutes?: number | null;
+      /**
+       * Step Minutes
+       * @default 30
+       * @constant
+       */
+      step_minutes: 30;
+    };
+    /** ParseRequest */
+    ParseRequest: {
+      /** Id */
+      id: string;
+      /** Section */
+      section: string;
+      /**
+       * Source
+       * @enum {string}
+       */
+      source: ParseRequestSource;
+      /**
+       * Sites
+       * @description The sites the run reads (names of GET /sites)
+       */
+      sites?: string[];
+      /**
+       * Parsing
+       * @description False: no source is asked, the run builds and checks the data it holds
+       * @default true
+       */
+      parsing: boolean;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: ParseRequestStatus;
+      /**
+       * Outcome
+       * @description done: committed to the `wiki` branch (the search has it after the server pulls it), review (the changes failed a check and wait for a person in a branch wiki-review/...) or unchanged; failed: error
+       * @default
+       * @enum {string}
+       */
+      outcome: ParseRequestOutcome;
+      /**
+       * Result
+       * @description What the wiki's run did, in its own words
+       * @default
+       */
+      result: string;
+      /** Created At */
+      created_at: string;
+      /**
+       * Started At
+       * @default
+       */
+      started_at: string;
+      /**
+       * Finished At
+       * @default
+       */
+      finished_at: string;
     };
     /** PdfLocation */
     PdfLocation: {
-      /**
-       * Page Index
-       * @description Page index in the PDF file. Starts from 1.
-       */
+      /** Page Index */
       page_index: number;
     };
-    /** @example 5eb7cf5a86d9755df3a6c593 */
-    PydanticObjectId: string;
     /** ResidentsSource */
     ResidentsSource: {
       /**
@@ -760,15 +1967,9 @@ export interface components {
     };
     /** SearchResponse */
     SearchResponse: {
-      /**
-       * Score
-       * @description Score of the search response. Multiple scores if was an aggregation of multiple chunks. Optional.
-       */
-      score: number | number[] | null;
-      /**
-       * Source
-       * @description Relevant source for the search.
-       */
+      /** Score */
+      score?: number | number[] | null;
+      /** Source */
       source:
         | components["schemas"]["EduwikiSource"]
         | components["schemas"]["CampusLifeSource"]
@@ -783,18 +1984,140 @@ export interface components {
     };
     /** SearchResponses */
     SearchResponses: {
-      /**
-       * Searched For
-       * @description Text that was searched for.
-       */
+      /** Searched For */
       searched_for: string;
-      /**
-       * Responses
-       * @description Responses to the search query.
-       */
+      /** Responses */
       responses: components["schemas"]["SearchResponse"][];
-      /** @description Assigned search query index */
-      search_query_id: components["schemas"]["PydanticObjectId"] | null;
+      /** Search Query Id */
+      search_query_id?: string | null;
+    };
+    /**
+     * SignupOffer
+     * @description A verified service target; an external URL is a link, never consent to a write.
+     */
+    SignupOffer: {
+      /** Id */
+      id: string;
+      /**
+       * Service
+       * @enum {string}
+       */
+      service: SignupOfferService;
+      /** Title */
+      title: string;
+      /** Booking Title */
+      booking_title?: string | null;
+      music_window?: components["schemas"]["MusicBookingWindow"] | null;
+      /**
+       * Personal Schedule Checked
+       * @default false
+       */
+      personal_schedule_checked: boolean;
+      /**
+       * Starts At
+       * Format: date-time
+       */
+      starts_at: string;
+      /** Ends At */
+      ends_at?: string | null;
+      /**
+       * All Day
+       * @default false
+       */
+      all_day: boolean;
+      /** Location */
+      location?: string | null;
+      /** Source Url */
+      source_url?: string | null;
+      /** External Url */
+      external_url?: string | null;
+      /**
+       * Status
+       * @default available
+       * @enum {string}
+       */
+      status: SignupOfferStatus;
+      /** Message */
+      message?: string | null;
+      /**
+       * Expires At
+       * Format: date-time
+       */
+      expires_at: string;
+    };
+    /**
+     * SignupSelection
+     * @description Only explicit user choices; target IDs and dates remain server-owned.
+     */
+    SignupSelection: {
+      /** Booking Title */
+      booking_title?: string | null;
+      /** Time From */
+      time_from?: string | null;
+      /** Time To */
+      time_to?: string | null;
+    };
+    /** SiteChoice */
+    SiteChoice: {
+      /** Name */
+      name: string;
+      /** Url */
+      url: string;
+      /** About */
+      about: string;
+    };
+    /** SourceImage */
+    SourceImage: {
+      /** Url */
+      url: string;
+      /** Alt */
+      alt?: string | null;
+    };
+    /** SourceTopicView */
+    SourceTopicView: {
+      /** Topic Id */
+      topic_id: string;
+      /** Title */
+      title: string;
+      /**
+       * Mode
+       * @enum {string}
+       */
+      mode: SourceTopicViewMode;
+    };
+    /** SourceView */
+    SourceView: {
+      /** Chat Id */
+      chat_id: string;
+      /** Title */
+      title: string;
+      /** Group Code */
+      group_code: string;
+      /**
+       * Platform
+       * @enum {string}
+       */
+      platform: SourceViewPlatform;
+      /** Link */
+      link: string | null;
+      /** Forum */
+      forum: boolean;
+      /**
+       * Default Mode
+       * @enum {string}
+       */
+      default_mode: SourceViewDefault_mode;
+      /** Topics */
+      topics: components["schemas"]["SourceTopicView"][];
+      /** Has Stored Messages */
+      has_stored_messages: boolean;
+    };
+    /** SourcesView */
+    SourcesView: {
+      /** Verified Groups */
+      verified_groups: string[];
+      /** Sources */
+      sources: components["schemas"]["SourceView"][];
     };
     /** ValidationError */
     ValidationError: {
@@ -817,46 +2140,131 @@ export interface components {
   pathItems: never;
 }
 export type SchemaActResponses = components["schemas"]["ActResponses"];
+export type SchemaAddedAnnouncement =
+  components["schemas"]["AddedAnnouncement"];
+export type SchemaAddedCalendarEvent =
+  components["schemas"]["AddedCalendarEvent"];
+export type SchemaAnnouncement = components["schemas"]["Announcement"];
+export type SchemaAnnouncementSource =
+  components["schemas"]["AnnouncementSource"];
+export type SchemaAnswerSource = components["schemas"]["AnswerSource"];
+export type SchemaArchiveDocument = components["schemas"]["ArchiveDocument"];
+export type SchemaActionEdit = components["schemas"]["ActionEdit"];
+export type SchemaAskAction = components["schemas"]["AskAction"];
+export type SchemaAskField = components["schemas"]["AskField"];
+export type SchemaAskApproval = components["schemas"]["AskApproval"];
+export type SchemaAskChat = components["schemas"]["AskChat"];
+export type SchemaAskChatHistory = components["schemas"]["AskChatHistory"];
+export type SchemaAskDecision = components["schemas"]["AskDecision"];
+export type SchemaAskPause = components["schemas"]["AskPause"];
 export type SchemaAskResponses = components["schemas"]["AskResponses"];
+export type SchemaAttachmentInfo = components["schemas"]["AttachmentInfo"];
 export type SchemaBodyAskActByQuery =
   components["schemas"]["Body_ask_act_by_query"];
+export type SchemaBodyAskAddUserFeedback =
+  components["schemas"]["Body_ask_add_user_feedback"];
 export type SchemaBodyAskAskByQuery =
   components["schemas"]["Body_ask_ask_by_query"];
+export type SchemaBodyAskAskByQueryStream =
+  components["schemas"]["Body_ask_ask_by_query_stream"];
+export type SchemaBodyAskRenameChat =
+  components["schemas"]["Body_ask_rename_chat"];
+export type SchemaBodyAskSearchInChat =
+  components["schemas"]["Body_ask_search_in_chat"];
+export type SchemaCalendarEventOffer =
+  components["schemas"]["CalendarEventOffer"];
+export type SchemaCalendarExportKeyCreated =
+  components["schemas"]["CalendarExportKeyCreated"];
+export type SchemaCalendarExportKeyStatus =
+  components["schemas"]["CalendarExportKeyStatus"];
 export type SchemaCampusLifeSource = components["schemas"]["CampusLifeSource"];
+export type SchemaCitationLink = components["schemas"]["CitationLink"];
 export type SchemaClubsSource = components["schemas"]["ClubsSource"];
 export type SchemaEduwikiSource = components["schemas"]["EduwikiSource"];
-export type SchemaFlattenInContentsWithPresignedUrl =
-  components["schemas"]["FlattenInContentsWithPresignedUrl"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaHotelSource = components["schemas"]["HotelSource"];
-export type SchemaInContent = components["schemas"]["InContent"];
-export type SchemaInContents = components["schemas"]["InContents"];
-export type SchemaInCourse = components["schemas"]["InCourse"];
-export type SchemaInCourses = components["schemas"]["InCourses"];
-export type SchemaInModule = components["schemas"]["InModule"];
-export type SchemaInSection = components["schemas"]["InSection"];
-export type SchemaInSections = components["schemas"]["InSections"];
 export type SchemaMapsSource = components["schemas"]["MapsSource"];
-export type SchemaMoodleContentSchemaInput =
-  components["schemas"]["MoodleContentSchema-Input"];
-export type SchemaMoodleContentSchemaOutput =
-  components["schemas"]["MoodleContentSchema-Output"];
-export type SchemaMoodleCourse = components["schemas"]["MoodleCourse"];
-export type SchemaMoodleEntry = components["schemas"]["MoodleEntry"];
 export type SchemaMoodleFileSource = components["schemas"]["MoodleFileSource"];
 export type SchemaMoodleUnknownSource =
   components["schemas"]["MoodleUnknownSource"];
 export type SchemaMoodleUrlSource = components["schemas"]["MoodleUrlSource"];
+export type SchemaMusicBookingWindow =
+  components["schemas"]["MusicBookingWindow"];
+export type SchemaParseRequest = components["schemas"]["ParseRequest"];
 export type SchemaPdfLocation = components["schemas"]["PdfLocation"];
-export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
 export type SchemaResidentsSource = components["schemas"]["ResidentsSource"];
 export type SchemaResourcesSource = components["schemas"]["ResourcesSource"];
 export type SchemaSearchResponse = components["schemas"]["SearchResponse"];
 export type SchemaSearchResponses = components["schemas"]["SearchResponses"];
+export type SchemaSignupOffer = components["schemas"]["SignupOffer"];
+export type SchemaSignupSelection = components["schemas"]["SignupSelection"];
+export type SchemaSiteChoice = components["schemas"]["SiteChoice"];
+export type SchemaSourceImage = components["schemas"]["SourceImage"];
+export type SchemaSourceTopicView = components["schemas"]["SourceTopicView"];
+export type SchemaSourceView = components["schemas"]["SourceView"];
+export type SchemaSourcesView = components["schemas"]["SourcesView"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
+  announcements_list_announcements: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Announcement"][];
+        };
+      };
+    };
+  };
+  announcements_apply_announcement: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        change_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AddedAnnouncement"];
+        };
+      };
+      /** @description No such announcement, or not in the user's chats */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   search_search_by_query: {
     parameters: {
       query: {
@@ -898,6 +2306,118 @@ export interface operations {
       };
     };
   };
+  search_pdf_by_url: {
+    parameters: {
+      query: {
+        url: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The PDF */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": unknown;
+        };
+      };
+      /** @description The knowledge base has no page of this document */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description The site gave no PDF */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The site did not answer in time */
+      504: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  search_archive_document: {
+    parameters: {
+      query: {
+        page: string;
+        revision: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The cited archive member */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": unknown;
+        };
+      };
+      /** @description This document revision is unavailable */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description The archive could not be downloaded or opened */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The preview cache is unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The archive download timed out */
+      504: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   search_add_user_feedback: {
     parameters: {
       query: {
@@ -932,10 +2452,109 @@ export interface operations {
       };
     };
   };
-  ask_ask_by_query: {
+  ask_upload: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description UTF-8 filename encoded once with encodeURIComponent (percent encoding). */
+        "X-Attachment-Filename": string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/octet-stream": string;
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AttachmentInfo"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_content: {
     parameters: {
       query?: never;
       header?: never;
+      path: {
+        attachment_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Private attachment original */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/octet-stream": string;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        attachment_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_ask_by_query: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description The user's InNoHassle Sport token ([InNoHassle Accounts](https://api.innohassle.ru/accounts/v0/tokens/generate-my-sport-token), as the site keeps it): the assistant reads their sport hours and trainings and checks them in to a training (after they approve it) with it. Without it, or with one of another user or expired, the assistant has no access to their sport. */
+        "X-Sport-Token"?: string | null;
+      };
       path?: never;
       cookie?: never;
     };
@@ -976,6 +2595,539 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description The language model cannot be reached; the detail says the assistant is not working now */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ask_ask_by_query_stream: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description The user's InNoHassle Sport token ([InNoHassle Accounts](https://api.innohassle.ru/accounts/v0/tokens/generate-my-sport-token), as the site keeps it): the assistant reads their sport hours and trainings and checks them in to a training (after they approve it) with it. Without it, or with one of another user or expired, the assistant has no access to their sport. */
+        "X-Sport-Token"?: string | null;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Body_ask_ask_by_query_stream"];
+      };
+    };
+    responses: {
+      /** @description Server-sent events: `status`, `answer`, then `done` (AskResponses) or `error` */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_search_in_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Body_ask_search_in_chat"];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskResponses"];
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_signup_offer: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description The user's InNoHassle Sport token ([InNoHassle Accounts](https://api.innohassle.ru/accounts/v0/tokens/generate-my-sport-token), as the site keeps it): the assistant reads their sport hours and trainings and checks them in to a training (after they approve it) with it. Without it, or with one of another user or expired, the assistant has no access to their sport. */
+        "X-Sport-Token"?: string | null;
+      };
+      path: {
+        chat_id: string;
+        offer_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SignupSelection"] | null;
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignupOffer"];
+        };
+      };
+      /** @description Offer not found or chat is not owned by this user */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_decide: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description The user's InNoHassle Sport token ([InNoHassle Accounts](https://api.innohassle.ru/accounts/v0/tokens/generate-my-sport-token), as the site keeps it): the assistant reads their sport hours and trainings and checks them in to a training (after they approve it) with it. Without it, or with one of another user or expired, the assistant has no access to their sport. */
+        "X-Sport-Token"?: string | null;
+      };
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AskDecision"];
+      };
+    };
+    responses: {
+      /** @description The answer to the question that waited, or another approval */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskResponses"];
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Nothing waits for a decision in the chat, or the question was cancelled */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description ML service error */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The language model cannot be reached; the detail says the assistant is not working now */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ask_decide_stream: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description The user's InNoHassle Sport token ([InNoHassle Accounts](https://api.innohassle.ru/accounts/v0/tokens/generate-my-sport-token), as the site keeps it): the assistant reads their sport hours and trainings and checks them in to a training (after they approve it) with it. Without it, or with one of another user or expired, the assistant has no access to their sport. */
+        "X-Sport-Token"?: string | null;
+      };
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AskDecision"];
+      };
+    };
+    responses: {
+      /** @description Server-sent events, as of POST /ask/stream */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Nothing waits for a decision in the chat */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_cancel_ask: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_add_user_feedback: {
+    parameters: {
+      query: {
+        feedback: PathsAskAsk_query_idFeedbackPostParametersQueryFeedback;
+      };
+      header?: never;
+      path: {
+        ask_query_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["Body_ask_add_user_feedback"];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Ask query not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description The feedback could not be saved */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ask_list_chats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskChat"][];
+        };
+      };
+    };
+  };
+  ask_ask_pause: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskPause"];
+        };
+      };
+    };
+  };
+  ask_chat_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskChatHistory"];
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_delete_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_rename_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Body_ask_rename_chat"];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskChat"];
+        };
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_follow_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Server-sent events, as of POST /ask/stream without `chat` */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No question of the chat is being answered with a stream */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
       };
     };
   };
@@ -1026,47 +3178,9 @@ export interface operations {
       };
     };
   };
-  moodle_get_courses_grouped_by_semester: {
+  parsers_list_sites: {
     parameters: {
       query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Courses grouped by semester */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          /**
-           * @example {
-           *       "S25": [
-           *         "[S25] Mathematical Analysis II / Математический анализ II"
-           *       ],
-           *       "F20": [
-           *         "[F20] Discrete Mathematics"
-           *       ],
-           *       "F22": [
-           *         "[F22]  Philosophy II (Languages and Perceptions)"
-           *       ]
-           *     }
-           */
-          "application/json": {
-            [key: string]: string[];
-          };
-        };
-      };
-    };
-  };
-  moodle_get_course_names_grouped: {
-    parameters: {
-      query: {
-        /** @example [S25] Mathematical Analysis II / Математический анализ II */
-        course_fullname: string;
-      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -1079,19 +3193,62 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": (
-            | components["schemas"]["EduwikiSource"]
-            | components["schemas"]["CampusLifeSource"]
-            | components["schemas"]["HotelSource"]
-            | components["schemas"]["ClubsSource"]
-            | components["schemas"]["MapsSource"]
-            | components["schemas"]["MoodleFileSource"]
-            | components["schemas"]["MoodleUrlSource"]
-            | components["schemas"]["MoodleUnknownSource"]
-            | components["schemas"]["ResidentsSource"]
-            | components["schemas"]["ResourcesSource"]
-          )[];
+          "application/json": components["schemas"]["SiteChoice"][];
         };
+      };
+    };
+  };
+  run_parse_route: {
+    parameters: {
+      query?: {
+        /**
+         * @deprecated
+         * @description Ignored: the wiki's run always checks and indexes what it commits, and the server's index follows the `wiki` branch
+         */
+        indexing_is_needed?: boolean;
+        parsing_is_needed?: boolean;
+        /** @description Names from GET /sites; repeat to select several. Omit for all sites. */
+        sites?: string[] | null;
+      };
+      header?: never;
+      path: {
+        section:
+          | components["schemas"]["InfoSources"]
+          | PathsSectionParsePostParametersPathSectionAnyOf1;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ParseRequest"];
+        };
+      };
+      /** @description Invalid site selection or flags */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Source has no parser */
+      410: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {
@@ -1102,17 +3259,22 @@ export interface operations {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
+      /** @description The queue of the wiki's run (Redis) is not configured or does not answer */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
-  moodle_preview_moodle: {
+  parsers_parse_status: {
     parameters: {
-      query: {
-        course_id: number;
-        module_id: number;
-        filename: string;
-      };
+      query?: never;
       header?: never;
-      path?: never;
+      path: {
+        request_id: string;
+      };
       cookie?: never;
     };
     requestBody?: never;
@@ -1123,17 +3285,89 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["ParseRequest"];
         };
       };
-      /** @description Redirect to the file */
-      307: {
+      /** @description No such request (or finished long ago) */
+      404: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description File not found */
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description The queue (Redis) does not answer */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  users_my_calendar: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The user's events as iCalendar */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/calendar": unknown;
+        };
+      };
+      /** @description No token or a bad one */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  users_add_calendar_event: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        proposal_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The event is in the user's calendar */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AddedCalendarEvent"];
+        };
+      };
+      /** @description No token or a bad one */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The offer expired (it lives 48 hours) or there is no such offer */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1151,7 +3385,7 @@ export interface operations {
       };
     };
   };
-  moodle_get_moodle_files: {
+  users_calendar_export_key_status: {
     parameters: {
       query?: never;
       header?: never;
@@ -1160,20 +3394,25 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Success */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            [key: string]: unknown;
-          }[];
+          "application/json": components["schemas"]["CalendarExportKeyStatus"];
         };
+      };
+      /** @description No token or a bad one */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
-  moodle_courses: {
+  users_create_calendar_export_key: {
     parameters: {
       query?: never;
       header?: never;
@@ -1182,51 +3421,25 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Success */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["MoodleCourse"][];
+          "application/json": components["schemas"]["CalendarExportKeyCreated"];
         };
       };
-    };
-  };
-  moodle_batch_upsert_courses: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["InCourses"];
-      };
-    };
-    responses: {
-      /** @description Success */
-      200: {
+      /** @description No token or a bad one */
+      401: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
+        content?: never;
       };
     };
   };
-  moodle_courses_content: {
+  users_revoke_calendar_export_key: {
     parameters: {
       query?: never;
       header?: never;
@@ -1235,125 +3448,208 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Success */
-      200: {
+      /** @description Successful Response */
+      204: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["MoodleEntry"][];
+        content?: never;
+      };
+      /** @description No token or a bad one */
+      401: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
       };
     };
   };
-  moodle_course_content: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["InSections"][];
-      };
-    };
-    responses: {
-      /** @description Success */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  moodle_need_to_upload_contents: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["InContents"][];
-      };
-    };
-    responses: {
-      /** @description Success */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["FlattenInContentsWithPresignedUrl"][];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  moodle_content_uploaded: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["InContent"];
-      };
-    };
-    responses: {
-      /** @description Success */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  run_parse_route: {
+  users_public_calendar_export: {
     parameters: {
       query?: {
-        indexing_is_needed?: boolean;
-        parsing_is_needed?: boolean;
+        access_key?: string | null;
       };
       header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description AI Calendar events without source-message provenance */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/calendar": unknown;
+        };
+      };
+      /** @description Missing, invalid or revoked subscription key */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  sources_list_sources: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SourcesView"];
+        };
+      };
+    };
+  };
+  admin_me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminMe"];
+        };
+      };
+    };
+  };
+  admin_list_admins: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminView"][];
+        };
+      };
+    };
+  };
+  admin_add_admin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AdminIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_remove_admin: {
+    parameters: {
+      query?: never;
+      header?: never;
       path: {
-        section: components["schemas"]["InfoSources"];
+        innohassle_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_list_groups: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": string[];
+        };
+      };
+    };
+  };
+  admin_telegram_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
       };
       cookie?: never;
     };
@@ -1365,18 +3661,68 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["TelegramChatDetail"];
         };
       };
-      /** @description Bad Request */
-      400: {
+      /** @description Validation Error */
+      422: {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
       };
-      /** @description Unauthorized */
-      403: {
+    };
+  };
+  admin_save_telegram_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TelegramChatIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TelegramChatDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_disconnect_telegram_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -1393,7 +3739,405 @@ export interface operations {
       };
     };
   };
+  admin_clear_telegram_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Deleted"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_refresh_telegram: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+    };
+  };
+  admin_set_official: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OfficialIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OfficialView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_max_source: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MaxSourceDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_save_max_source: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MaxSourceIn"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MaxSourceDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_retry_max_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MaxVersions"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_clear_max_messages: {
+    parameters: {
+      query: {
+        config_version: number;
+        generation: number;
+      };
+      header?: never;
+      path: {
+        chat_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Deleted"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_refresh_max: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+    };
+  };
+  admin_chat_proposals: {
+    parameters: {
+      query?: {
+        offset?: number;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProposalsView"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_abuse_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AbuseListView"];
+        };
+      };
+    };
+  };
+  admin_abuse_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        user_key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AbuseDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_abuse_forgive: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        user_key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  admin_list_chats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChatsView"];
+        };
+      };
+    };
+  };
 }
+export type SchemaAbuseDetail = components["schemas"]["AbuseDetail"];
+export type SchemaAbuseEntryView = components["schemas"]["AbuseEntryView"];
+export type SchemaAbuseListView = components["schemas"]["AbuseListView"];
+export type SchemaAbuseUserView = components["schemas"]["AbuseUserView"];
+export type SchemaAdminIn = components["schemas"]["AdminIn"];
+export type SchemaAdminMe = components["schemas"]["AdminMe"];
+export type SchemaAdminView = components["schemas"]["AdminView"];
+export type SchemaChatListItem = components["schemas"]["ChatListItem"];
+export type SchemaChatsView = components["schemas"]["ChatsView"];
+export type SchemaDeleted = components["schemas"]["Deleted"];
+export type SchemaMaxAccountView = components["schemas"]["MaxAccountView"];
+export type SchemaMaxLegacyCandidate =
+  components["schemas"]["MaxLegacyCandidate"];
+export type SchemaMaxSourceDetail = components["schemas"]["MaxSourceDetail"];
+export type SchemaMaxSourceIn = components["schemas"]["MaxSourceIn"];
+export type SchemaMaxVersions = components["schemas"]["MaxVersions"];
+export type SchemaOfficialIn = components["schemas"]["OfficialIn"];
+export type SchemaOfficialView = components["schemas"]["OfficialView"];
+export type SchemaProposalView = components["schemas"]["ProposalView"];
+export type SchemaProposalsView = components["schemas"]["ProposalsView"];
+export type SchemaTelegramChatDetail =
+  components["schemas"]["TelegramChatDetail"];
+export type SchemaTelegramChatIn = components["schemas"]["TelegramChatIn"];
+export type SchemaTelegramTopicView =
+  components["schemas"]["TelegramTopicView"];
 export enum PathsSearchSearchGetParametersQueryResponse_types {
   pdf = "pdf",
   link_to_source = "link_to_source",
@@ -1401,6 +4145,36 @@ export enum PathsSearchSearchGetParametersQueryResponse_types {
 export enum PathsSearchSearchSearch_query_idFeedbackPostParametersQueryFeedback {
   like = "like",
   dislike = "dislike",
+}
+export enum PathsAskAsk_query_idFeedbackPostParametersQueryFeedback {
+  like = "like",
+  dislike = "dislike",
+}
+export enum PathsSectionParsePostParametersPathSectionAnyOf1 {
+  wiki = "wiki",
+  sites = "sites",
+}
+export enum AnswerSourceKind {
+  official_document = "official_document",
+  guide = "guide",
+  eduwiki = "eduwiki",
+  website = "website",
+  web = "web",
+  moodle = "moodle",
+  chat = "chat",
+}
+export enum AskDecisionDecision {
+  approve = "approve",
+  reject = "reject",
+}
+export enum AskResponsesFeedbackAnyOf0 {
+  like = "like",
+  dislike = "dislike",
+}
+export enum AskResponsesGuardrailAnyOf0 {
+  small_talk = "small_talk",
+  blocked = "blocked",
+  paused = "paused",
 }
 export enum CampusLifeSourceType {
   campuslife = "campuslife",
@@ -1436,6 +4210,23 @@ export enum MoodleUnknownSourceType {
 export enum MoodleUrlSourceType {
   moodle_url = "moodle-url",
 }
+export enum ParseRequestSource {
+  eduwiki = "eduwiki",
+  sites = "sites",
+}
+export enum ParseRequestStatus {
+  queued = "queued",
+  running = "running",
+  done = "done",
+  failed = "failed",
+}
+export enum ParseRequestOutcome {
+  none = "",
+  committed = "committed",
+  review = "review",
+  unchanged = "unchanged",
+  error = "error",
+}
 export enum ResidentsSourceType {
   residents = "residents",
 }
@@ -1450,4 +4241,43 @@ export enum Resources {
 }
 export enum ResourcesSourceType {
   resources = "resources",
+}
+export enum SignupOfferService {
+  events = "events",
+  sport = "sport",
+  rooms = "rooms",
+  music = "music",
+}
+export enum SignupOfferStatus {
+  available = "available",
+  confirmed = "confirmed",
+  refused = "refused",
+  unknown = "unknown",
+}
+export enum SourceTopicViewMode {
+  store = "store",
+  search = "search",
+  off = "off",
+}
+export enum SourceViewPlatform {
+  telegram = "telegram",
+  max = "max",
+}
+export enum SourceViewDefault_mode {
+  store = "store",
+  search = "search",
+  off = "off",
+}
+
+export enum AddedAnnouncementAction {
+  added = "added",
+  moved = "moved",
+  room_changed = "room_changed",
+  removed = "removed",
+}
+export enum AnnouncementKind {
+  reschedule = "reschedule",
+  room_change = "room_change",
+  cancel = "cancel",
+  announcement = "announcement",
 }

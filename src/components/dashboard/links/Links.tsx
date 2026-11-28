@@ -9,10 +9,12 @@ import {
   createFuseInstance,
   getFilteredResources,
 } from "@/components/dashboard/links/searchUtils.ts";
+import { CatLogo } from "@/components/icons/CatIcon";
 import { cn } from "@/lib/ui/cn";
 import { useAppLocale } from "@/locales/lib";
 import { useAutoUpdateBlocker } from "@/service-worker/page/auto-update.ts";
 import { Trans } from "@lingui/react/macro";
+import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const Links = () => {
@@ -133,6 +135,16 @@ const Links = () => {
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
           />
+          {!import.meta.env.VITE_PRODUCTION && (
+            <Link
+              to="/search/ask"
+              search={{ q: searchQuery }}
+              className="btn btn-primary btn-outline shrink-0"
+            >
+              <CatLogo />
+              <Trans>Ask catix</Trans>
+            </Link>
+          )}
         </div>
       </div>
 
