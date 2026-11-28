@@ -10,6 +10,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { forgetChat, openChat, useAskSession } from "./ask-session";
+import { useUnreadAnswers } from "./ask-unread";
 
 // The API takes at most this many characters in a chat's name
 const TITLE_MAX_LENGTH = 200;
@@ -24,7 +25,12 @@ export function AskChatList({ onSelect }: { onSelect?: () => void }) {
     error,
     refetch,
     isFetching,
-  } = $search.useQuery("get", "/ask/chats");
+  } = $search.useQuery("get", "/ask/chats", undefined, {
+    // A chat being answered gets its answer meanwhile: the list shows it as unread when it is not the open one
+    refetchInterval: (query) =>
+      query.state.data?.some((chat) => chat.answering) ? 5000 : false,
+  });
+  const unreadAnswers = useUnreadAnswers(chats, chatId);
 
   if (error || retryError) {
     return (
@@ -73,6 +79,7 @@ export function AskChatList({ onSelect }: { onSelect?: () => void }) {
           key={chat.chat_id}
           chat={chat}
           isOpen={chat.chat_id === chatId}
+          unread={unreadAnswers[chat.chat_id] ?? 0}
           onSelect={onSelect}
         />
       ))}
@@ -85,10 +92,12 @@ export function AskChatList({ onSelect }: { onSelect?: () => void }) {
 function AskChatItem({
   chat,
   isOpen,
+  unread,
   onSelect,
 }: {
   chat: searchTypes.SchemaAskChat;
   isOpen: boolean;
+  unread: number;
   onSelect?: () => void;
 }) {
   const { t } = useLingui();
@@ -196,6 +205,14 @@ function AskChatItem({
       >
         {rename.isPending ? rename.variables.body.title : chat.title}
       </button>
+      {chat.answering && (
+        <span className="loading loading-dots loading-xs mx-1 shrink-0" />
+      )}
+      {unread > 0 && (
+        <span className="badge badge-primary badge-sm mx-1 shrink-0">
+          {unread}
+        </span>
+      )}
       {rename.isPending || remove.isPending ? (
         <span className="loading loading-spinner loading-xs mx-2 shrink-0" />
       ) : (

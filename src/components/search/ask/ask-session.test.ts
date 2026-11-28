@@ -507,7 +507,11 @@ describe("ask session attachments", () => {
     root = createRoot(container);
     act(() => root.render(createElement(Probe)));
     api.history
-      .mockResolvedValueOnce({ answers: [], answering: true })
+      .mockResolvedValueOnce({
+        answers: [],
+        asking: ["Read it"],
+        answering: true,
+      })
       .mockResolvedValueOnce({ answers: [answer], answering: false });
     await act(async () => session.resumeAnswer());
     expect(snapshot.isPending).toBe(true);
@@ -521,6 +525,38 @@ describe("ask session attachments", () => {
       { role: "user", content: "Read it", attachments: [info] },
       { role: "assistant", response: answer },
     ]);
+  });
+  it("shows the question that is still being answered when a chat is opened from the list", async () => {
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    const running = {
+      answers: [answer],
+      asking: ["What next?"],
+      answering: true,
+    };
+    api.history
+      .mockResolvedValueOnce(running)
+      .mockResolvedValueOnce(running)
+      .mockResolvedValueOnce({
+        answers: [answer, { ...answer, query: "What next?" }],
+        asking: [],
+        answering: false,
+      });
+    await act(async () => session.openChat("chat-1"));
+    expect(snapshot.isPending).toBe(true);
+    expect(snapshot.status).toBe("still_answering");
+    expect(snapshot.messages.map((message) => message.role)).toEqual([
+      "user",
+      "assistant",
+      "user",
+    ]);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    expect(snapshot.isPending).toBe(false);
+    expect(snapshot.messages).toHaveLength(4);
   });
   it("lets an answer finish in the background after switching to a new chat, without touching the new chat", async () => {
     let controller!: ReadableStreamDefaultController<Uint8Array>;

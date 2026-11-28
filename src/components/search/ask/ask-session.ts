@@ -700,13 +700,13 @@ export async function openChat(chatId: string) {
   }
 }
 
-// The messages of a chat as the server keeps them. The question that waits for the user's decision comes last, with what
-// it waits for
+// The messages of a chat as the server keeps them. The question that waits for the user's decision comes after the answers,
+// with what it waits for, and the questions still being answered (no answer yet) come last
 function historyMessages(
   chatId: string,
   history: searchTypes.SchemaAskChatHistory,
 ): AskMessage[] {
-  return [
+  const answered = [
     ...history.answers,
     ...(history.waiting ? [history.waiting] : []),
   ].flatMap((response): AskMessage[] => [
@@ -722,6 +722,10 @@ function historyMessages(
           response: restoreSignupReceipts(chatId, response),
         },
   ]);
+  const asking = (history.asking ?? []).map(
+    (content): AskMessage => ({ role: "user", content, attachments: [] }),
+  );
+  return [...answered, ...asking];
 }
 
 // Stops the questions of the chat on the server; the page has already given the question back
@@ -770,6 +774,7 @@ async function followAnswer(chatId: string) {
         });
         return;
       }
+      update({ messages: historyMessages(chatId, history) });
       const { promise, resolve } = Promise.withResolvers<void>();
       setTimeout(resolve, FOLLOW_INTERVAL_MS);
       await promise;

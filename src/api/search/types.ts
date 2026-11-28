@@ -1374,6 +1374,16 @@ export interface components {
        * Format: date-time
        */
       updated_at: string;
+      /**
+       * Answer Count
+       * @default 0
+       */
+      answer_count: number;
+      /**
+       * Answering
+       * @default false
+       */
+      answering: boolean;
     };
     /** AskChatHistory */
     AskChatHistory: {
@@ -1391,14 +1401,24 @@ export interface components {
        * Format: date-time
        */
       updated_at: string;
-      /** Answers */
-      answers: components["schemas"]["AskResponses"][];
-      waiting?: components["schemas"]["AskResponses"] | null;
+      /**
+       * Answer Count
+       * @default 0
+       */
+      answer_count: number;
       /**
        * Answering
        * @default false
        */
       answering: boolean;
+      /** Answers */
+      answers: components["schemas"]["AskResponses"][];
+      waiting?: components["schemas"]["AskResponses"] | null;
+      /**
+       * Asking
+       * @default []
+       */
+      asking: string[];
     };
     /** AskDecision */
     AskDecision: {
