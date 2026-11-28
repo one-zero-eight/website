@@ -13,6 +13,7 @@ import {
 
 const api = vi.hoisted(() => ({
   post: vi.fn(),
+  get: vi.fn(),
   history: vi.fn(),
   invalidate: vi.fn(),
   cached: vi.fn(),
@@ -24,7 +25,7 @@ vi.mock("@/api/helpers/sport-access-token.ts", () => ({
   setMySportAccessToken: vi.fn(),
 }));
 vi.mock("@/api/search", () => ({
-  searchFetch: { POST: api.post },
+  searchFetch: { POST: api.post, GET: api.get },
   $search: { queryOptions: (...args: unknown[]) => ({ queryKey: args }) },
 }));
 vi.mock("@/app/query-client", () => ({
@@ -90,6 +91,7 @@ describe("ask session attachments", () => {
     api.invalidate.mockReset();
     api.cached.mockReset();
     api.setCached.mockReset();
+    api.get.mockReset();
     session = await import("./ask-session");
     function Probe() {
       snapshot = session.useAskSession();
@@ -485,15 +487,11 @@ describe("ask session attachments", () => {
     expect(snapshot.draftQuery).toBe("Read it");
     expect(completed).not.toHaveBeenCalled();
   });
-  it("follows the answer of a chat after a reload until the chat has it", async () => {
-    vi.useFakeTimers();
-    onTestFinished(() => {
-      vi.useRealTimers();
-    });
+  async function reloadWith(question: string) {
     sessionStorage.setItem(
       "search-ask-session",
       JSON.stringify({
-        messages: [{ role: "user", content: "Read it", attachments: [] }],
+        messages: [{ role: "user", content: question, attachments: [] }],
         chatId: "chat-1",
       }),
     );
@@ -506,31 +504,67 @@ describe("ask session attachments", () => {
     }
     root = createRoot(container);
     act(() => root.render(createElement(Probe)));
+  }
+  function pendingStream() {
+    let controller!: ReadableStreamDefaultController<Uint8Array>;
+    const send = (name: string, data: unknown) =>
+      controller.enqueue(
+        new TextEncoder().encode(
+          `event: ${name}\ndata: ${JSON.stringify(data)}\n\n`,
+        ),
+      );
+    const data = new ReadableStream<Uint8Array>({
+      start(c) {
+        controller = c;
+        send("status", { phase: "searching" });
+        send("answer", { text: "Half" });
+      },
+    });
+    return { data, send, close: () => controller.close() };
+  }
+  it("follows the answer of a chat with its stream after a reload until the chat has it", async () => {
+    await reloadWith("Read it");
     api.history
       .mockResolvedValueOnce({
         answers: [],
         asking: ["Read it"],
         answering: true,
       })
-      .mockResolvedValueOnce({ answers: [answer], answering: false });
-    await act(async () => session.resumeAnswer());
-    expect(snapshot.isPending).toBe(true);
-    expect(snapshot.status).toBe("still_answering");
-    expect(snapshot.messages).toHaveLength(1);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(3000);
+      .mockResolvedValueOnce({
+        answers: [answer],
+        asking: [],
+        answering: false,
+      });
+    const pending = pendingStream();
+    api.get.mockResolvedValueOnce({
+      response: new Response(),
+      data: pending.data,
     });
+    await act(async () => session.resumeAnswer());
+    await act(async () => {});
+    expect(api.get).toHaveBeenCalledWith(
+      "/ask/chats/{chat_id}/stream",
+      expect.objectContaining({ params: { path: { chat_id: "chat-1" } } }),
+    );
+    expect(snapshot.status).toBe("searching");
+    expect(snapshot.answerText).toBe("Half");
+    expect(snapshot.isPending).toBe(true);
+    expect(snapshot.messages).toEqual([
+      { role: "user", content: "Read it", attachments: [] },
+    ]);
+    await act(async () => {
+      pending.send("done", answer);
+      pending.close();
+    });
+    await act(async () => {});
     expect(snapshot.isPending).toBe(false);
+    expect(snapshot.answerText).toBe("");
     expect(snapshot.messages).toEqual([
       { role: "user", content: "Read it", attachments: [info] },
       { role: "assistant", response: answer },
     ]);
   });
   it("shows the question that is still being answered when a chat is opened from the list", async () => {
-    vi.useFakeTimers();
-    onTestFinished(() => {
-      vi.useRealTimers();
-    });
     const running = {
       answers: [answer],
       asking: ["What next?"],
@@ -544,19 +578,78 @@ describe("ask session attachments", () => {
         asking: [],
         answering: false,
       });
+    let release!: () => void;
+    api.get.mockReturnValueOnce(
+      new Promise((resolve) => {
+        release = () =>
+          resolve({
+            response: new Response(),
+            data: stream([["done", answer]]),
+          });
+      }),
+    );
     await act(async () => session.openChat("chat-1"));
     expect(snapshot.isPending).toBe(true);
-    expect(snapshot.status).toBe("still_answering");
     expect(snapshot.messages.map((message) => message.role)).toEqual([
       "user",
       "assistant",
       "user",
     ]);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(3000);
-    });
+    await act(async () => release());
+    await act(async () => {});
     expect(snapshot.isPending).toBe(false);
     expect(snapshot.messages).toHaveLength(4);
+  });
+  it("reads the chat again after a pause when it has nothing to stream", async () => {
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    api.history
+      .mockResolvedValueOnce({
+        answers: [],
+        asking: ["Read it"],
+        answering: true,
+      })
+      .mockResolvedValueOnce({
+        answers: [answer],
+        asking: [],
+        answering: false,
+      });
+    api.get.mockResolvedValue({
+      response: new Response(null, { status: 409 }),
+      data: undefined,
+    });
+    await reloadWith("Read it");
+    await act(async () => session.resumeAnswer());
+    expect(api.history).toHaveBeenCalledTimes(1);
+    expect(snapshot.isPending).toBe(true);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
+    expect(api.history).toHaveBeenCalledTimes(2);
+    expect(snapshot.isPending).toBe(false);
+  });
+  it("stopping a followed answer closes its stream", async () => {
+    await reloadWith("Read it");
+    api.history.mockResolvedValue({
+      answers: [],
+      asking: ["Read it"],
+      answering: true,
+    });
+    api.get.mockResolvedValueOnce({
+      response: new Response(),
+      data: pendingStream().data,
+    });
+    api.post.mockResolvedValue({ response: new Response(), data: {} });
+    await act(async () => session.resumeAnswer());
+    await act(async () => {});
+    act(() => session.cancelQuestion());
+    expect(api.get.mock.calls[0][1].signal.aborted).toBe(true);
+    expect(api.post).toHaveBeenCalledWith(
+      "/ask/{chat_id}/cancel",
+      expect.anything(),
+    );
   });
   it("lets an answer finish in the background after switching to a new chat, without touching the new chat", async () => {
     let controller!: ReadableStreamDefaultController<Uint8Array>;

@@ -147,10 +147,10 @@ let session: AskSession = {
 };
 let abortController: AbortController | null = null;
 // The chat whose answer the page waits for without its stream (the page was reloaded, or the chat was opened from the list)
-let following: string | null = null;
+let following: { chatId: string; controller: AbortController } | null = null;
 // Questions stopped before the server named their chat: stopped on the server once the `chat` event names it
 const stopOnChat = new WeakMap<AbortSignal, AbortController>();
-const FOLLOW_INTERVAL_MS = 3000;
+const FOLLOW_RETRY_MS = 2000; // the pause before the chat is read again when it has nothing to stream
 // The answers of the chats the user left meanwhile: they are written on the server (the chat list shows them), the page
 // does not follow them any more
 const detached = new WeakSet<AbortSignal>();
@@ -309,6 +309,36 @@ async function streamDecision(
     parseAs: "stream",
     signal,
   });
+  if (!response.ok) {
+    throw new Error(
+      formatApiErrorMessage({
+        body: requestError,
+        httpCode: response.status,
+        response,
+      }),
+    );
+  }
+  if (!stream) {
+    throw new Error(i18n._(msg`The server returned no answer stream.`));
+  }
+  return readAnswer(stream, signal);
+}
+// The answer being written in the chat, followed again after the page lost its stream; undefined when it was cancelled.
+// "nothing" when the chat has no question streaming now (it has just ended, or it was asked without a stream)
+async function streamFollowed(
+  chatId: string,
+  signal: AbortSignal,
+): Promise<searchTypes.SchemaAskResponses | undefined | "nothing"> {
+  const {
+    data: stream,
+    error: requestError,
+    response,
+  } = await searchFetch.GET("/ask/chats/{chat_id}/stream", {
+    params: { path: { chat_id: chatId } },
+    parseAs: "stream",
+    signal,
+  });
+  if (response.status === 409) return "nothing";
   if (!response.ok) {
     throw new Error(
       formatApiErrorMessage({
@@ -579,6 +609,7 @@ export function cancelQuestion(): string {
   const controller = abortController;
   const chatId = session.chatId;
   abortController = null;
+  following?.controller.abort();
   following = null;
   if (session.isPending && chatId) void stopOnServer(chatId);
   if (controller && chatId) controller.abort();
@@ -599,6 +630,7 @@ function leaveChat() {
   if (!abortController && !following) return;
   if (abortController) detached.add(abortController.signal);
   abortController = null;
+  following?.controller.abort();
   following = null;
   update({
     isPending: false,
@@ -749,9 +781,11 @@ async function stopOnServer(chatId: string) {
   }
 }
 
-// The page waits for the answer of the chat by reading the chat again, without a stream
+// The page follows the answer of the chat with its stream, read again after the page lost its own
 async function followAnswer(chatId: string) {
-  following = chatId;
+  const controller = new AbortController();
+  following = { chatId, controller };
+  const isFollowed = () => following?.controller === controller;
   update({
     isPending: true,
     answerText: "",
@@ -765,29 +799,34 @@ async function followAnswer(chatId: string) {
           params: { path: { chat_id: chatId } },
         }),
       );
-      if (following !== chatId) return;
+      if (!isFollowed()) return;
+      update({ messages: historyMessages(chatId, history), answerText: "" });
       if (!history.answering) {
         rememberPause(history.answers.at(-1)?.paused_until);
-        update({ messages: historyMessages(chatId, history) });
         queryClient.invalidateQueries({
           queryKey: $search.queryOptions("get", "/ask/chats").queryKey,
         });
         return;
       }
-      update({ messages: historyMessages(chatId, history) });
-      const { promise, resolve } = Promise.withResolvers<void>();
-      setTimeout(resolve, FOLLOW_INTERVAL_MS);
-      await promise;
-      if (following !== chatId) return;
+      update({ status: "still_answering" });
+      const outcome = await streamFollowed(chatId, controller.signal);
+      if (!isFollowed()) return;
+      if (outcome === "nothing") {
+        const { promise, resolve } = Promise.withResolvers<void>();
+        setTimeout(resolve, FOLLOW_RETRY_MS);
+        await promise;
+        if (!isFollowed()) return;
+      }
+      // The answer is in the chat now (or it was cancelled); the chat may have another question going
     }
   } catch (e) {
-    if (following === chatId) {
+    if (isFollowed()) {
       update({ error: e instanceof Error ? e : new Error(String(e)) });
     }
   } finally {
-    if (following === chatId) {
+    if (isFollowed()) {
       following = null;
-      update({ isPending: false, status: null });
+      update({ isPending: false, status: null, answerText: "" });
       askNextQueued();
     }
   }

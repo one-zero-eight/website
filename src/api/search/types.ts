@@ -415,6 +415,29 @@ export interface paths {
     patch: operations["ask_rename_chat"];
     trace?: never;
   };
+  "/ask/chats/{chat_id}/stream": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Follow Chat
+     * @description The answer being written in the chat, for a page that lost its stream (reloaded, closed, or opened the chat from the
+     *     list): the latest `status`, `guardrail` and `answer`, then the events of POST /ask/stream as they come, ending with `done`,
+     *     `cancelled` or `error`. It follows the oldest unfinished question of the chat; when it ends, GET /ask/chats/{chat_id} has
+     *     the answer, and `answering` tells whether another question of the chat is still going.
+     */
+    get: operations["ask_follow_chat"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/act/": {
     parameters: {
       query?: never;
@@ -3049,6 +3072,49 @@ export interface operations {
       };
       /** @description Chat not found or user has no access to it */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ask_follow_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chat_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Server-sent events, as of POST /ask/stream without `chat` */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Chat not found or user has no access to it */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No question of the chat is being answered with a stream */
+      409: {
         headers: {
           [name: string]: unknown;
         };

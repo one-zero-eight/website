@@ -205,9 +205,6 @@ function AskChatItem({
       >
         {rename.isPending ? rename.variables.body.title : chat.title}
       </button>
-      {chat.answering && (
-        <span className="loading loading-dots loading-xs mx-1 shrink-0" />
-      )}
       {unread > 0 && (
         <span className="badge badge-primary badge-sm mx-1 shrink-0">
           {unread}

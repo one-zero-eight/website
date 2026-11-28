@@ -2,7 +2,6 @@ import type { searchTypes } from "@/api/search";
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useUnreadAnswers } from "./ask-unread";
 
 function chat(chat_id: string, answer_count: number) {
   return {
@@ -18,6 +17,13 @@ function chat(chat_id: string, answer_count: number) {
 describe("unread answers", () => {
   let root: Root;
   let unread: Record<string, number>;
+  let useUnreadAnswers: typeof import("./ask-unread").useUnreadAnswers;
+  // The module keeps what the user has seen in memory: a reload is a fresh import
+  async function load() {
+    vi.resetModules();
+    ({ useUnreadAnswers } = await import("./ask-unread"));
+    root = createRoot(document.createElement("div"));
+  }
   function render(
     chats: searchTypes.SchemaAskChat[],
     openChatId: string | null,
@@ -28,10 +34,10 @@ describe("unread answers", () => {
     }
     act(() => root.render(createElement(Probe)));
   }
-  beforeEach(() => {
+  beforeEach(async () => {
     localStorage.clear();
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
-    root = createRoot(document.createElement("div"));
+    await load();
   });
   afterEach(() => act(() => root.unmount()));
 
@@ -46,11 +52,27 @@ describe("unread answers", () => {
     expect(unread).toEqual({});
   });
 
-  it("keeps the count after a reload, which is how an answer given with the window closed shows up", () => {
+  it("keeps the count after a reload, which is how an answer given with the window closed shows up", async () => {
     render([chat("a", 0)], "a");
     act(() => root.unmount());
-    root = createRoot(document.createElement("div"));
+    await load();
     render([chat("a", 1)], null);
     expect(unread).toEqual({ a: 1 });
+  });
+
+  it("shows the same unread answers to every place that asks, as the list and the menu do", () => {
+    let menu: Record<string, number> = {};
+    function Menu() {
+      menu = useUnreadAnswers([chat("a", 1)], null);
+      return null;
+    }
+    render([chat("a", 0)], "a");
+    const menuRoot = createRoot(document.createElement("div"));
+    act(() => menuRoot.render(createElement(Menu)));
+    expect(menu).toEqual({ a: 1 });
+    render([chat("a", 1)], "a"); // the list shows the chat: it is read
+    act(() => menuRoot.render(createElement(Menu)));
+    expect(menu).toEqual({});
+    act(() => menuRoot.unmount());
   });
 });

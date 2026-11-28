@@ -27,6 +27,7 @@
  */
 import { accountsTypes } from "@/api/accounts";
 import { CatLogo } from "@/components/icons/CatIcon";
+import { AskUnreadBadge } from "@/components/search/ask/AskUnreadBadge";
 import { ValidateLinkOptions } from "@tanstack/react-router";
 
 export type LocalLink = {
@@ -91,9 +92,12 @@ export const items: ItemType[] = [
       to: "/search/ask",
       activeOptions: { exact: true, includeSearch: false },
       badge: (
-        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
-          DEV
-        </span>
+        <>
+          <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
+            DEV
+          </span>
+          <AskUnreadBadge />
+        </>
       ),
       icon: <CatLogo />,
     },
