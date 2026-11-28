@@ -100,7 +100,7 @@ type AskStreamEvent =
 
 // The conversation with the assistant lives outside the page: going to another page and back keeps the questions and the
 // answers, and an answer being written goes on meanwhile. The questions and the answers are kept in this tab
-// (sessionStorage), so a reload keeps them too; an answer that was being written is lost with the page. The server keeps
+// (sessionStorage), so a reload keeps them too; an answer that was being written is finished on the server, and the reloaded page follows it (`resumeAnswer`). The server keeps
 // every chat of the user as well: one of them opens again from the list of chats (`openChat`)
 const STORAGE_KEY = "search-ask-session";
 
@@ -146,6 +146,11 @@ let session: AskSession = {
   openingError: null,
 };
 let abortController: AbortController | null = null;
+// The chat whose answer the page waits for without its stream (the page was reloaded, or the chat was opened from the list)
+let following: string | null = null;
+// Questions stopped before the server named their chat: stopped on the server once the `chat` event names it
+const stopOnChat = new WeakMap<AbortSignal, AbortController>();
+const FOLLOW_INTERVAL_MS = 3000;
 // The answers of the chats the user left meanwhile: they are written on the server (the chat list shows them), the page
 // does not follow them any more
 const detached = new WeakSet<AbortSignal>();
@@ -336,6 +341,12 @@ async function readAnswer(
     for (const block of blocks) {
       const event = parseEvent(block);
       if (event?.name === "chat") {
+        const stopping = stopOnChat.get(signal);
+        if (stopping) {
+          void stopOnServer(event.data.chat_id);
+          stopping.abort();
+          return undefined;
+        }
         updateIfShown(signal, {
           chatId: event.data.chat_id,
           draftAttachments:
@@ -468,6 +479,7 @@ export async function askQuestion(
       }
       return;
     }
+    if (stopOnChat.has(controller.signal)) return;
     if (!controller.signal.aborted && !response) {
       if (!detached.has(controller.signal)) cancelQuestion();
       return;
@@ -557,14 +569,23 @@ export async function decideApproval(
   }
 }
 
-// Closing the stream cancels the question on the server, even if it is still waiting in the queue. The question is not in
-// the chat then (the assistant does not remember it either): it is given back, to be asked again or changed
+// The question is stopped on the server (POST /ask/{chat_id}/cancel; closing the stream does not stop it), even if it is
+// still waiting in the queue. It is not in the chat then (the assistant does not remember it either): it is given back, to
+// be asked again or changed. A new chat not named yet is stopped as soon as the server names it
 export function cancelQuestion(): string {
   const last = session.messages.at(-1);
   const question =
     session.isPending && last?.role === "user" ? last.content : "";
-  abortController?.abort();
+  const controller = abortController;
+  const chatId = session.chatId;
   abortController = null;
+  following = null;
+  if (session.isPending && chatId) void stopOnServer(chatId);
+  if (controller && chatId) controller.abort();
+  if (controller && !chatId) {
+    detached.add(controller.signal);
+    stopOnChat.set(controller.signal, controller);
+  }
   update({
     isPending: false,
     messages: question ? session.messages.slice(0, -1) : session.messages,
@@ -575,9 +596,10 @@ export function cancelQuestion(): string {
 
 // Leaving the chat does not stop the answer: it is finished on the server and announced, the page shows another chat
 function leaveChat() {
-  if (!abortController) return;
-  detached.add(abortController.signal);
+  if (!abortController && !following) return;
+  if (abortController) detached.add(abortController.signal);
   abortController = null;
+  following = null;
   update({
     isPending: false,
     answerText: "",
@@ -669,28 +691,115 @@ export async function openChat(chatId: string) {
     rememberPause(history.answers.at(-1)?.paused_until);
     update({
       isOpening: false,
-      // The question that waits for the user's decision comes last, with what it waits for
-      messages: [
-        ...history.answers,
-        ...(history.waiting ? [history.waiting] : []),
-      ].flatMap((response): AskMessage[] => [
-        {
-          role: "user",
-          content: response.query,
-          attachments: response.attachments ?? [],
-        },
-        response.search
-          ? searchMessage(response)
-          : {
-              role: "assistant",
-              response: restoreSignupReceipts(chatId, response),
-            },
-      ]),
+      messages: historyMessages(chatId, history),
     });
+    if (history.answering) void followAnswer(chatId);
   } catch (e) {
     if (session.chatId !== chatId) return;
     update({ isOpening: false, openingError: e });
   }
+}
+
+// The messages of a chat as the server keeps them. The question that waits for the user's decision comes last, with what
+// it waits for
+function historyMessages(
+  chatId: string,
+  history: searchTypes.SchemaAskChatHistory,
+): AskMessage[] {
+  return [
+    ...history.answers,
+    ...(history.waiting ? [history.waiting] : []),
+  ].flatMap((response): AskMessage[] => [
+    {
+      role: "user",
+      content: response.query,
+      attachments: response.attachments ?? [],
+    },
+    response.search
+      ? searchMessage(response)
+      : {
+          role: "assistant",
+          response: restoreSignupReceipts(chatId, response),
+        },
+  ]);
+}
+
+// Stops the questions of the chat on the server; the page has already given the question back
+async function stopOnServer(chatId: string) {
+  try {
+    const result = await searchFetch.POST("/ask/{chat_id}/cancel", {
+      params: { path: { chat_id: chatId } },
+    });
+    if (result && !result.response.ok) {
+      throw new Error(
+        formatApiErrorMessage({
+          httpCode: result.response.status,
+          response: result.response,
+        }),
+      );
+    }
+  } catch (e) {
+    if (session.chatId === chatId) {
+      update({ error: e instanceof Error ? e : new Error(String(e)) });
+    }
+  }
+}
+
+// The page waits for the answer of the chat by reading the chat again, without a stream
+async function followAnswer(chatId: string) {
+  following = chatId;
+  update({
+    isPending: true,
+    answerText: "",
+    status: "still_answering",
+    error: null,
+  });
+  try {
+    while (true) {
+      const history = await queryClient.fetchQuery(
+        $search.queryOptions("get", "/ask/chats/{chat_id}", {
+          params: { path: { chat_id: chatId } },
+        }),
+      );
+      if (following !== chatId) return;
+      if (!history.answering) {
+        rememberPause(history.answers.at(-1)?.paused_until);
+        update({ messages: historyMessages(chatId, history) });
+        queryClient.invalidateQueries({
+          queryKey: $search.queryOptions("get", "/ask/chats").queryKey,
+        });
+        return;
+      }
+      const { promise, resolve } = Promise.withResolvers<void>();
+      setTimeout(resolve, FOLLOW_INTERVAL_MS);
+      await promise;
+      if (following !== chatId) return;
+    }
+  } catch (e) {
+    if (following === chatId) {
+      update({ error: e instanceof Error ? e : new Error(String(e)) });
+    }
+  } finally {
+    if (following === chatId) {
+      following = null;
+      update({ isPending: false, status: null });
+      askNextQueued();
+    }
+  }
+}
+
+// After a reload the server still answers the question the page waited for: the page follows the chat until it is answered
+export function resumeAnswer() {
+  const chatId = session.chatId;
+  if (
+    !chatId ||
+    session.isPending ||
+    following ||
+    session.messages.at(-1)?.role !== "user"
+  ) {
+    return;
+  }
+  void followAnswer(chatId);
 }
 
 function restoreSignupReceipts(

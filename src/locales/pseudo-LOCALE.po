@@ -40,7 +40,7 @@ msgstr ""
 #~ msgid "- Executing"
 #~ msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:99
+#: src/components/search/ask/AskResult.tsx:112
 msgid "- Sorry, I can't help you with this question."
 msgstr ""
 
@@ -754,11 +754,11 @@ msgstr ""
 msgid "access not confirmed"
 msgstr ""
 
-#: src/components/search/ask/ask-mood.ts:25
+#: src/components/search/ask/ask-mood.ts:27
 msgid "Access paused"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:424
+#: src/components/search/ask/AskPage.tsx:427
 msgid "Access to the assistant is paused"
 msgstr ""
 
@@ -1436,7 +1436,7 @@ msgstr ""
 msgid "banned {bannedAt}"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:190
+#: src/components/search/ask/AskResult.tsx:202
 msgid "Based on:"
 msgstr ""
 
@@ -2023,7 +2023,7 @@ msgid "Channel"
 msgstr ""
 
 #: src/components/clubs/constants.ts:85
-#: src/components/search/ask/AskResult.tsx:390
+#: src/components/search/ask/AskResult.tsx:385
 msgid "Chat"
 msgstr ""
 
@@ -2045,8 +2045,8 @@ msgid "Chat sources"
 msgstr ""
 
 #: src/components/search/admin/CatixAdminTabs.tsx:8
-#: src/components/search/ask/AskPage.tsx:221
-#: src/components/search/ask/AskPage.tsx:234
+#: src/components/search/ask/AskPage.tsx:225
+#: src/components/search/ask/AskPage.tsx:238
 msgid "Chats"
 msgstr ""
 
@@ -2250,7 +2250,7 @@ msgstr ""
 msgid "Classes this semester"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:180
+#: src/components/search/ask/AskResult.tsx:192
 msgid "Clauses:"
 msgstr ""
 
@@ -2298,8 +2298,8 @@ msgstr ""
 #: src/components/schedule-assistant/timetable/EditClassModal.tsx:702
 #: src/components/search/ask/AskInput.tsx:195
 #: src/components/search/ask/AskInput.tsx:196
-#: src/components/search/ask/AskPage.tsx:204
-#: src/components/search/ask/AskPage.tsx:205
+#: src/components/search/ask/AskPage.tsx:208
+#: src/components/search/ask/AskPage.tsx:209
 #: src/components/search/IframePreviewCard.tsx:111
 #: src/components/sport/SportOverviewSection.tsx:719
 #: src/components/sport/SportStudentTrainingModal.tsx:394
@@ -2744,7 +2744,7 @@ msgstr ""
 msgid "Could not check access"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:388
+#: src/components/search/ask/AskPage.tsx:391
 msgid "Could not complete the request."
 msgstr ""
 
@@ -2825,7 +2825,7 @@ msgstr ""
 msgid "Could not mark attendance"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:318
+#: src/components/search/ask/AskPage.tsx:322
 msgid "Could not open the chat"
 msgstr ""
 
@@ -3704,7 +3704,7 @@ msgstr ""
 msgid "Edit: {prefix}"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:382
+#: src/components/search/ask/AskResult.tsx:377
 msgid "EduWiki"
 msgstr ""
 
@@ -3722,7 +3722,7 @@ msgstr ""
 msgid "Empty group"
 msgstr ""
 
-#: src/components/search/ask/AskNotificationHint.tsx:60
+#: src/components/search/ask/AskNotificationHint.tsx:63
 msgid "Enable"
 msgstr ""
 
@@ -4668,7 +4668,7 @@ msgstr ""
 msgid "Generating..."
 msgstr ""
 
-#: src/components/search/ask/AskNotificationHint.tsx:51
+#: src/components/search/ask/AskNotificationHint.tsx:54
 msgid "Get a notification when catix replies?"
 msgstr ""
 
@@ -4858,7 +4858,7 @@ msgstr ""
 msgid "Guests Role"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:380
+#: src/components/search/ask/AskResult.tsx:375
 msgid "Guide"
 msgstr ""
 
@@ -4924,7 +4924,7 @@ msgstr ""
 msgid "Hide calendar events"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:179
+#: src/components/search/ask/AskPage.tsx:183
 msgid "Hide chats"
 msgstr ""
 
@@ -5013,7 +5013,7 @@ msgstr ""
 msgid "HTML and App build IDs match."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:263
+#: src/components/search/ask/AskPage.tsx:267
 msgid "I can help with your schedule, university rules, announcements and available rooms."
 msgstr ""
 
@@ -6061,7 +6061,7 @@ msgid "Month"
 msgstr ""
 
 #: src/components/calendar/ConfigCalendarDialog.tsx:101
-#: src/components/search/ask/AskResult.tsx:388
+#: src/components/search/ask/AskResult.tsx:383
 msgid "Moodle"
 msgstr ""
 
@@ -6209,7 +6209,7 @@ msgstr ""
 msgid "Neutral time"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:470
+#: src/components/search/ask/AskPage.tsx:476
 msgid "New"
 msgstr ""
 
@@ -6846,7 +6846,7 @@ msgstr ""
 msgid "Not in schedule"
 msgstr ""
 
-#: src/components/search/ask/AskNotificationHint.tsx:67
+#: src/components/search/ask/AskNotificationHint.tsx:70
 msgid "Not now"
 msgstr ""
 
@@ -6968,7 +6968,7 @@ msgid "Off: new messages are not stored and Telegram search is off. Stored messa
 msgstr ""
 
 #: src/components/search/admin/ChatsPage.tsx:132
-#: src/components/search/ask/AskResult.tsx:147
+#: src/components/search/ask/AskResult.tsx:159
 msgid "Official"
 msgstr ""
 
@@ -6976,7 +6976,7 @@ msgstr ""
 msgid "Official chat"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:378
+#: src/components/search/ask/AskResult.tsx:373
 msgid "Official document"
 msgstr ""
 
@@ -7135,15 +7135,15 @@ msgid "Open details"
 msgstr ""
 
 #: src/components/search/ask/AskResult.tsx:227
-msgid "Open document: {member}"
-msgstr ""
+#~ msgid "Open document: {member}"
+#~ msgstr ""
 
 #: src/components/calendar/CalendarEventPopover.tsx:285
 #: src/components/events/calendar/EventsCalendarPopover.tsx:182
 msgid "Open event page"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:364
+#: src/components/search/ask/AskResult.tsx:359
 msgid "Open in chat ->"
 msgstr ""
 
@@ -7885,7 +7885,7 @@ msgstr ""
 msgid "Receive a monthly stipend from IU alumni"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:367
+#: src/components/search/ask/AskPage.tsx:371
 msgid "Receiving answer"
 msgstr ""
 
@@ -8101,7 +8101,7 @@ msgstr ""
 msgid "Remove from calendar"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:514
+#: src/components/search/ask/AskPage.tsx:520
 msgid "Remove from the queue"
 msgstr ""
 
@@ -8188,7 +8188,7 @@ msgstr ""
 msgid "Report form will be published to Club Leaders telegram group every month, according to which points will be credited."
 msgstr ""
 
-#: src/components/search/ask/ask-mood.ts:24
+#: src/components/search/ask/ask-mood.ts:26
 msgid "Request declined"
 msgstr ""
 
@@ -8350,7 +8350,7 @@ msgstr ""
 #: src/components/schedule/SchedulePage.tsx:124
 #: src/components/search/admin/AdminStates.tsx:27
 #: src/components/search/ask/AskChatList.tsx:47
-#: src/components/search/ask/AskPage.tsx:328
+#: src/components/search/ask/AskPage.tsx:332
 #: src/components/search/ask/AskSources.tsx:74
 #: src/components/sport/SportStudentTrainingModal.tsx:445
 #: src/components/sport/SportStudentTrainingModal.tsx:494
@@ -8848,7 +8848,7 @@ msgstr ""
 msgid "Section"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:185
+#: src/components/search/ask/AskResult.tsx:197
 msgid "Sections:"
 msgstr ""
 
@@ -9024,7 +9024,7 @@ msgstr ""
 msgid "Send your InNoHassle id to a cAtIx admin:"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:368
+#: src/components/search/ask/AskPage.tsx:372
 msgid "Sending request"
 msgstr ""
 
@@ -9381,7 +9381,7 @@ msgstr ""
 msgid "Source:"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:122
+#: src/components/search/ask/AskResult.tsx:135
 msgid "Sources"
 msgstr ""
 
@@ -9652,6 +9652,10 @@ msgstr ""
 
 #: src/components/clubs/HowToCreateClubPage.tsx:242
 msgid "Step 5: Fill Registration Form"
+msgstr ""
+
+#: src/components/search/ask/ask-mood.ts:25
+msgid "Still answering"
 msgstr ""
 
 #: src/components/search/ask/AskInput.tsx:327
@@ -10113,15 +10117,15 @@ msgstr ""
 msgid "The access information could not be updated."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:404
+#: src/components/search/ask/AskPage.tsx:407
 msgid "The action result could not be confirmed. Check the service before trying again."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:300
+#: src/components/search/ask/AskPage.tsx:304
 msgid "The assistant asks for confirmation before changing data in services."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:197
+#: src/components/search/ask/AskPage.tsx:201
 msgid "The assistant is temporarily unavailable. Questions are answered by search: you can also start a message with /search or /поиск."
 msgstr ""
 
@@ -10165,7 +10169,7 @@ msgstr ""
 msgid "The club manager collects orders from the club leaders in advance, and later makes a purchase in the form of an official order"
 msgstr ""
 
-#: src/components/search/ask/ask-session.ts:376
+#: src/components/search/ask/ask-session.ts:387
 msgid "The connection ended before the response was complete."
 msgstr ""
 
@@ -10285,8 +10289,8 @@ msgstr ""
 #~ msgid "The series window does not overlap the selected groups' teaching period."
 #~ msgstr ""
 
-#: src/components/search/ask/ask-session.ts:285
-#: src/components/search/ask/ask-session.ts:317
+#: src/components/search/ask/ask-session.ts:290
+#: src/components/search/ask/ask-session.ts:322
 msgid "The server returned no answer stream."
 msgstr ""
 
@@ -10654,7 +10658,7 @@ msgstr ""
 msgid "To raise student clubs' prestige and promote them within student contingent and in outer environment, as well as to address strategic importance of non-formal education at Innopolis University"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:294
+#: src/components/search/ask/AskPage.tsx:298
 msgid "To search without the assistant, start a message with /search or /поиск."
 msgstr ""
 
@@ -11355,12 +11359,12 @@ msgstr ""
 msgid "Weak GPS signal (±{accuracyM}m)"
 msgstr ""
 
-#: src/components/search/ask/AskResult.tsx:386
+#: src/components/search/ask/AskResult.tsx:381
 msgid "Web search"
 msgstr ""
 
 #: src/components/clubs/constants.ts:89
-#: src/components/search/ask/AskResult.tsx:384
+#: src/components/search/ask/AskResult.tsx:379
 msgid "Website"
 msgstr ""
 
@@ -11599,7 +11603,7 @@ msgstr ""
 msgid "Write something…"
 msgstr ""
 
-#: src/components/search/ask/ask-session.ts:436
+#: src/components/search/ask/ask-session.ts:447
 msgid "Write what to search for after /search."
 msgstr ""
 
@@ -11712,7 +11716,7 @@ msgstr ""
 msgid "You can attach up to 3 files."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:288
+#: src/components/search/ask/AskPage.tsx:292
 msgid "You can attach up to 3 PDF, TXT or image files, up to 10 MiB each."
 msgstr ""
 
@@ -11728,7 +11732,7 @@ msgstr ""
 msgid "You can view this draft. Accept the host invitation to edit and submit."
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:427
+#: src/components/search/ask/AskPage.tsx:430
 msgid "You can write again at {resumeTime}, in {countdown}"
 msgstr ""
 
@@ -11836,7 +11840,7 @@ msgstr ""
 msgid "Your document was sent to the printer"
 msgstr ""
 
-#: src/components/search/ask/AskPage.tsx:395
+#: src/components/search/ask/AskPage.tsx:398
 msgid "Your draft is below. You can edit it and send it again."
 msgstr ""
 

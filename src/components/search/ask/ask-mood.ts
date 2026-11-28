@@ -21,6 +21,8 @@ export const ASK_STATUSES = {
   working: { mood: "thinking", label: msg`Working on it` },
   preparing_action: { mood: "thinking", label: msg`Preparing the action` },
   writing: { mood: "writing", label: msg`Writing the answer` },
+  // The site's own status, not a server code: the page follows the chat's history, not its stream
+  still_answering: { mood: "thinking", label: msg`Still answering` },
   blocked: { mood: "banned", label: msg`Request declined` },
   paused: { mood: "banned", label: msg`Access paused` },
 } satisfies Record<string, { mood: CatMood; label: MessageDescriptor }>;

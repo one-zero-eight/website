@@ -25,6 +25,7 @@ import {
   setDraftAttachments,
   startNewChat,
   useAskSession,
+  resumeAnswer,
 } from "./ask-session";
 import { CatIcon } from "@/components/icons/CatIcon";
 import { AskNotificationHint } from "./AskNotificationHint";
@@ -106,6 +107,9 @@ export function AskPage({
 
   // A quote belongs to the chat it was taken from
   useEffect(() => setQuote(""), [composerId]);
+
+  // After a reload the server may still be answering the last question
+  useEffect(() => resumeAnswer(), []);
 
   // A dismissed notice comes back with the next outage
   useEffect(() => {

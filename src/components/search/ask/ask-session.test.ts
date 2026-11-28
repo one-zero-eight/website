@@ -423,8 +423,104 @@ describe("ask session attachments", () => {
       data: stream([["done", answer]]),
     });
     await act(async () => session.askQuestion(snapshot.draftQuery));
-    expect(api.post.mock.calls[1][1].body.chat_id).toBe("chat-1");
-    expect(api.post.mock.calls[1][1].body.attachment_ids).toEqual([info.id]);
+    expect(api.post.mock.calls[1][0]).toBe("/ask/{chat_id}/cancel");
+    expect(api.post.mock.calls[2][1].body.chat_id).toBe("chat-1");
+    expect(api.post.mock.calls[2][1].body.attachment_ids).toEqual([info.id]);
+  });
+  it("stops a question on the server by its chat, and closes the stream", async () => {
+    const pending = new ReadableStream<Uint8Array>({
+      start(value) {
+        value.enqueue(
+          new TextEncoder().encode(
+            'event: chat\ndata: {"chat_id":"chat-1"}\n\n',
+          ),
+        );
+      },
+    });
+    api.post.mockResolvedValueOnce({ response: new Response(), data: pending });
+    await act(async () => {
+      void session.askQuestion("Read it", []);
+    });
+    const signal: AbortSignal = api.post.mock.calls[0][1].signal;
+    act(() => session.cancelQuestion());
+    expect(api.post).toHaveBeenCalledWith("/ask/{chat_id}/cancel", {
+      params: { path: { chat_id: "chat-1" } },
+    });
+    expect(signal.aborted).toBe(true);
+  });
+  it("stops a question stopped before its chat is named as soon as the server names it", async () => {
+    const completed = vi.fn();
+    window.addEventListener("catix-answer-ready", completed);
+    onTestFinished(() =>
+      window.removeEventListener("catix-answer-ready", completed),
+    );
+    let finish!: (value: {
+      data: ReadableStream<Uint8Array>;
+      response: Response;
+    }) => void;
+    api.post.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    let request!: Promise<void>;
+    await act(async () => {
+      request = session.askQuestion("Read it", []);
+    });
+    act(() => session.cancelQuestion());
+    expect(api.post).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      finish({
+        data: stream([
+          ["chat", { chat_id: "chat-9" }],
+          ["done", answer],
+        ]),
+        response: new Response(),
+      });
+      await request;
+    });
+    expect(api.post).toHaveBeenCalledWith("/ask/{chat_id}/cancel", {
+      params: { path: { chat_id: "chat-9" } },
+    });
+    expect(snapshot.draftQuery).toBe("Read it");
+    expect(completed).not.toHaveBeenCalled();
+  });
+  it("follows the answer of a chat after a reload until the chat has it", async () => {
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    sessionStorage.setItem(
+      "search-ask-session",
+      JSON.stringify({
+        messages: [{ role: "user", content: "Read it", attachments: [] }],
+        chatId: "chat-1",
+      }),
+    );
+    act(() => root.unmount());
+    vi.resetModules();
+    session = await import("./ask-session");
+    function Probe() {
+      snapshot = session.useAskSession();
+      return null;
+    }
+    root = createRoot(container);
+    act(() => root.render(createElement(Probe)));
+    api.history
+      .mockResolvedValueOnce({ answers: [], answering: true })
+      .mockResolvedValueOnce({ answers: [answer], answering: false });
+    await act(async () => session.resumeAnswer());
+    expect(snapshot.isPending).toBe(true);
+    expect(snapshot.status).toBe("still_answering");
+    expect(snapshot.messages).toHaveLength(1);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    expect(snapshot.isPending).toBe(false);
+    expect(snapshot.messages).toEqual([
+      { role: "user", content: "Read it", attachments: [info] },
+      { role: "assistant", response: answer },
+    ]);
   });
   it("lets an answer finish in the background after switching to a new chat, without touching the new chat", async () => {
     let controller!: ReadableStreamDefaultController<Uint8Array>;

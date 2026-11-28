@@ -1394,6 +1394,11 @@ export interface components {
       /** Answers */
       answers: components["schemas"]["AskResponses"][];
       waiting?: components["schemas"]["AskResponses"] | null;
+      /**
+       * Answering
+       * @default false
+       */
+      answering: boolean;
     };
     /** AskDecision */
     AskDecision: {
